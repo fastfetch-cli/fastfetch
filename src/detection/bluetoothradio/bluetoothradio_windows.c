@@ -1,6 +1,6 @@
 #include "bluetoothradio.h"
-#include "common/library.h"
-#include "common/io/io.h"
+#include "util/library.h"
+#include "util/io/io.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>

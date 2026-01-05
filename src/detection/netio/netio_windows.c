@@ -1,6 +1,6 @@
 #include "netio.h"
 
-#include "common/netif/netif.h"
+#include "util/netif/netif.h"
 #include "util/mallocHelper.h"
 #include "util/windows/unicode.h"
 

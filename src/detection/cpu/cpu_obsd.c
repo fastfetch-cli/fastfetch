@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/stringUtils.h"
 
 #include <errno.h>

@@ -1,6 +1,6 @@
 #include "os.h"
-#include "common/io/io.h"
-#include "common/sysctl.h"
+#include "util/io/io.h"
+#include "util/sysctl.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 

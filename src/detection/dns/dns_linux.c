@@ -1,6 +1,6 @@
 #include "detection/dns/dns.h"
 
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"

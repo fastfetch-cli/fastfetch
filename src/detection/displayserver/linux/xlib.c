@@ -2,8 +2,8 @@
 
 #ifdef FF_HAVE_XRANDR
 
-#include "common/library.h"
-#include "common/properties.h"
+#include "util/library.h"
+#include "util/properties.h"
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
 

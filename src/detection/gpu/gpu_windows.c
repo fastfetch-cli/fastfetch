@@ -1,6 +1,6 @@
 #include "gpu.h"
-#include "common/library.h"
 #include "detection/gpu/gpu_driver_specific.h"
+#include "util/library.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"

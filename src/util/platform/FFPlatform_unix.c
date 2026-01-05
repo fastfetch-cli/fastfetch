@@ -1,8 +1,8 @@
 #include "FFPlatform_private.h"
 #include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
+#include "util/io/io.h"
 #include "fastfetch_config.h"
-#include "common/io/io.h"
 
 #include <unistd.h>
 #include <pwd.h>

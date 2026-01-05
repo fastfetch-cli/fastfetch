@@ -2,7 +2,7 @@ extern "C"
 {
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
-#include "common/library.h"
+#include "util/library.h"
 }
 #include "util/windows/wmi.hpp"
 #include "util/windows/unicode.hpp"

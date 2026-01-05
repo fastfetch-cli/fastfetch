@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/size.h"
-#include "modules/kernel/kernel.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/size.h"
 #include "util/stringUtils.h"
+#include "modules/kernel/kernel.h"
 
 bool ffPrintKernel(FFKernelOptions* options)
 {

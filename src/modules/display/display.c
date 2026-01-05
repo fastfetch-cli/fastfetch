@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/size.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/size.h"
+#include "util/stringUtils.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
-#include "util/stringUtils.h"
 
 #include <math.h>
 

@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/libc/libc.h"
 #include "detection/editor/editor.h"
 #include "modules/editor/editor.h"
-#include "util/stringUtils.h"
 
 bool ffPrintEditor(FFEditorOptions* options)
 {

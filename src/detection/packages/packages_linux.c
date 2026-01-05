@@ -1,10 +1,10 @@
 #include "packages.h"
-#include "common/io/io.h"
-#include "common/parsing.h"
-#include "common/properties.h"
-#include "common/settings.h"
-#include "detection/os/os.h"
+#include "util/io/io.h"
+#include "util/parsing.h"
+#include "util/properties.h"
+#include "util/settings.h"
 #include "util/stringUtils.h"
+#include "detection/os/os.h"
 
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir)
 {
@@ -168,7 +168,7 @@ static uint32_t getSnap(FFstrbuf* baseDir)
 }
 
 #ifdef FF_HAVE_RPM
-#include "common/library.h"
+#include "util/library.h"
 #include <rpm/rpmlib.h>
 #include <rpm/rpmts.h>
 #include <rpm/rpmdb.h>

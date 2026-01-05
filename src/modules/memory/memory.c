@@ -1,10 +1,10 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/percent.h"
-#include "common/size.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/percent.h"
+#include "util/size.h"
+#include "util/stringUtils.h"
 #include "detection/memory/memory.h"
 #include "modules/memory/memory.h"
-#include "util/stringUtils.h"
 
 bool ffPrintMemory(FFMemoryOptions* options)
 {

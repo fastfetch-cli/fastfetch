@@ -1,7 +1,7 @@
 #include "gpu_driver_specific.h"
 
 #include "adl.h"
-#include "common/library.h"
+#include "util/library.h"
 #include "util/mallocHelper.h"
 #include "util/debug.h"
 

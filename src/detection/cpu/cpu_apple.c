@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/apple/smc_temps.h"
 #include "util/stringUtils.h"
 

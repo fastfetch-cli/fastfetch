@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/lm/lm.h"
 #include "modules/lm/lm.h"
-#include "util/stringUtils.h"
 
 bool ffPrintLM(FFLMOptions* options)
 {

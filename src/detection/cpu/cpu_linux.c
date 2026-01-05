@@ -1,7 +1,7 @@
 #include "cpu.h"
-#include "common/io/io.h"
-#include "common/processing.h"
-#include "common/properties.h"
+#include "util/io/io.h"
+#include "util/processing.h"
+#include "util/properties.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 #include "util/path.h"
@@ -200,7 +200,7 @@ static void detectNumaNodes(FFCPUResult* cpu)
 }
 
 #ifdef __ANDROID__
-#include "common/settings.h"
+#include "util/settings.h"
 
 static void detectQualcomm(FFCPUResult* cpu)
 {

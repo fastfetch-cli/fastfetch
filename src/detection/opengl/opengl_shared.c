@@ -1,5 +1,5 @@
 #include "opengl.h"
-#include "common/library.h"
+#include "util/library.h"
 
 #if __has_include(<GL/gl.h>)
 #include <GL/gl.h>
@@ -25,7 +25,7 @@ void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglG
 }
 
 #if defined(FF_HAVE_EGL) || __has_include(<EGL/egl.h>)
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 #define EGL_EGL_PROTOTYPES 1
 #define EGL_EGLEXT_PROTOTYPES 1

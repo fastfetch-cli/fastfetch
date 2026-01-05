@@ -1,10 +1,10 @@
 #include "cursor.h"
 
-#include "common/properties.h"
-#include "common/parsing.h"
-#include "common/settings.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/properties.h"
+#include "util/parsing.h"
+#include "util/settings.h"
 #include "util/stringUtils.h"
 
 #include <stdlib.h>

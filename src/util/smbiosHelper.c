@@ -1,5 +1,5 @@
 #include "smbiosHelper.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/unused.h"
 #include "util/mallocHelper.h"
 #include "util/debug.h"
@@ -60,14 +60,14 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
 #include <stddef.h>
 
 #ifdef __linux__
-    #include "common/properties.h"
+    #include "util/properties.h"
 #elif defined(__FreeBSD__)
-    #include "common/settings.h"
+    #include "util/settings.h"
     #define loff_t off_t // FreeBSD doesn't have loff_t
 #elif defined(__sun)
     #define loff_t off_t
 #elif defined(__NetBSD__)
-    #include "common/sysctl.h"
+    #include "util/sysctl.h"
     #define loff_t off_t
 #endif
 

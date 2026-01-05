@@ -1,5 +1,5 @@
 #include "gamepad.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/stringUtils.h"
 
 static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path)

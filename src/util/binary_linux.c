@@ -2,8 +2,8 @@
 
 #if defined(FF_HAVE_ELF) || defined(__sun) || (defined(__FreeBSD__) && !defined(__DragonFly__)) || defined(__OpenBSD__) || defined(__NetBSD__)
 
-#include "common/io/io.h"
-#include "common/library.h"
+#include "util/io/io.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 
 #include <libelf.h> // #1254

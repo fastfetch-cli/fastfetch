@@ -1,5 +1,5 @@
-#include "common/font.h"
-#include "common/parsing.h"
+#include "util/font.h"
+#include "util/parsing.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "font.h"

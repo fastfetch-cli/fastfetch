@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/wm/wm.h"
 #include "modules/wm/wm.h"
-#include "util/stringUtils.h"
 
 bool ffPrintWM(FFWMOptions* options)
 {

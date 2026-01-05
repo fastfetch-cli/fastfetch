@@ -1,6 +1,6 @@
 #include "gpu_driver_specific.h"
 
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/mallocHelper.h"
 
 #include <sys/pciio.h>
@@ -36,7 +36,7 @@ static void fillGPUTypeGeneric(FFGPUResult* gpu)
 }
 
 #if FF_HAVE_DRM
-#include "common/library.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 
 #include <xf86drm.h>

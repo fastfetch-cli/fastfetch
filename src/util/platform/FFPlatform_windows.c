@@ -1,6 +1,6 @@
 #include "FFPlatform_private.h"
-#include "common/io/io.h"
-#include "common/library.h"
+#include "util/io/io.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"

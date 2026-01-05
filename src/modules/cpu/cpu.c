@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/parsing.h"
-#include "common/temps.h"
-#include "common/frequency.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/parsing.h"
+#include "util/temps.h"
+#include "util/frequency.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 

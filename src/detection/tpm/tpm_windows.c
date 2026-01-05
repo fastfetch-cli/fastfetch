@@ -1,5 +1,5 @@
 #include "tpm.h"
-#include "common/library.h"
+#include "util/library.h"
 
 #include <tbs.h>
 #include <winerror.h>

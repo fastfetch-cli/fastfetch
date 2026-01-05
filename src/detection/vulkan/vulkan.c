@@ -3,9 +3,9 @@
 #include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_VULKAN
-#include "common/library.h"
-#include "common/io/io.h"
-#include "common/parsing.h"
+#include "util/library.h"
+#include "util/io/io.h"
+#include "util/parsing.h"
 #include "util/stringUtils.h"
 
 #include <stdlib.h>

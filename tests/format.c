@@ -1,4 +1,4 @@
-#include "common/format.h"
+#include "util/format.h"
 #include "util/textModifier.h"
 #include "fastfetch.h"
 

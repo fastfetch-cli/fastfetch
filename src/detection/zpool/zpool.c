@@ -10,7 +10,7 @@
 #include "libzfs_simplified.h"
 #endif
 
-#include "common/library.h"
+#include "util/library.h"
 
 typedef struct FFZfsData
 {

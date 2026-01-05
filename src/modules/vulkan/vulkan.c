@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
 #include "modules/vulkan/vulkan.h"
-#include "util/stringUtils.h"
 
 bool ffPrintVulkan(FFVulkanOptions* options)
 {

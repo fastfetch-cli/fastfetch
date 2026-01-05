@@ -364,26 +364,6 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/commandoption.c
-    src/common/duration.c
-    src/common/font.c
-    src/common/format.c
-    src/common/frequency.c
-    src/common/init.c
-    src/common/jsonconfig.c
-    src/common/library.c
-    src/common/modules.c
-    src/common/netif/netif.c
-    src/common/networking/networking_common.c
-    src/common/option.c
-    src/common/parsing.c
-    src/common/percent.c
-    src/common/printing.c
-    src/common/properties.c
-    src/common/settings.c
-    src/common/size.c
-    src/common/temps.c
-    src/common/time.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -492,6 +472,26 @@ set(LIBFASTFETCH_SRC
     src/options/display.c
     src/options/logo.c
     src/options/general.c
+    src/util/commandoption.c
+    src/util/duration.c
+    src/util/font.c
+    src/util/format.c
+    src/util/frequency.c
+    src/util/init.c
+    src/util/jsonconfig.c
+    src/util/library.c
+    src/util/modules.c
+    src/util/netif/netif.c
+    src/util/networking/networking_common.c
+    src/util/option.c
+    src/util/parsing.c
+    src/util/percent.c
+    src/util/printing.c
+    src/util/properties.c
+    src/util/settings.c
+    src/util/size.c
+    src/util/temps.c
+    src/util/time.c
     src/util/edidHelper.c
     src/util/base64.c
     src/util/FFlist.c
@@ -504,11 +504,6 @@ set(LIBFASTFETCH_SRC
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_linux.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -583,16 +578,16 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_linux.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_linux.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -656,17 +651,16 @@ elseif(ANDROID)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_linux.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(FreeBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
@@ -738,6 +732,12 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -754,12 +754,6 @@ elseif(FreeBSD)
     endif()
 elseif(NetBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
         src/detection/bluetooth/bluetooth_bsd.c
@@ -831,17 +825,17 @@ elseif(NetBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(OpenBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -913,17 +907,18 @@ elseif(OpenBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/io/io_unix.c
-        src/common/netif/netif_apple.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
@@ -982,6 +977,11 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
+        src/util/io/io_unix.c
+        src/util/netif/netif_apple.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
@@ -990,10 +990,6 @@ elseif(APPLE)
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/io/io_windows.c
-        src/common/netif/netif_windows.c
-        src/common/networking/networking_windows.c
-        src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
@@ -1051,6 +1047,10 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
+        src/util/io/io_windows.c
+        src/util/netif/netif_windows.c
+        src/util/networking/networking_windows.c
+        src/util/processing_windows.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -1063,11 +1063,6 @@ elseif(WIN32)
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_apple.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1139,16 +1134,16 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_apple.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(Haiku)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_haiku.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1207,17 +1202,17 @@ elseif(Haiku)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_haiku.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
     )
 elseif(GNU)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_gnu.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
@@ -1286,6 +1281,11 @@ elseif(GNU)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_gnu.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
    )

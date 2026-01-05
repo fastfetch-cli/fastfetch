@@ -1,5 +1,5 @@
 #include "chassis.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/smbiosHelper.h"
 
 #include <stdlib.h>

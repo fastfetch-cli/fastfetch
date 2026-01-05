@@ -1,10 +1,10 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/percent.h"
-#include "common/size.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/percent.h"
+#include "util/size.h"
+#include "util/stringUtils.h"
 #include "detection/btrfs/btrfs.h"
 #include "modules/btrfs/btrfs.h"
-#include "util/stringUtils.h"
 
 static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t index)
 {

@@ -1,12 +1,12 @@
 #include "logo/logo.h"
-#include "common/io/io.h"
-#include "common/printing.h"
-#include "common/processing.h"
+#include "util/io/io.h"
+#include "util/printing.h"
+#include "util/processing.h"
+#include "util/textModifier.h"
+#include "util/stringUtils.h"
 #include "detection/media/media.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "util/textModifier.h"
-#include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <stdlib.h>

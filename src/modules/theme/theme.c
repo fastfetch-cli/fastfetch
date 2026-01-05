@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/theme/theme.h"
 #include "modules/theme/theme.h"
-#include "util/stringUtils.h"
 
 bool ffPrintTheme(FFThemeOptions* options)
 {

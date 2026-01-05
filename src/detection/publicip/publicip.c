@@ -1,5 +1,5 @@
 #include "publicip.h"
-#include "common/networking/networking.h"
+#include "util/networking/networking.h"
 
 #define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState states[2];

@@ -1,7 +1,7 @@
 #include "fastfetch.h"
-#include "common/color.h"
-#include "common/jsonconfig.h"
-#include "common/percent.h"
+#include "util/color.h"
+#include "util/jsonconfig.h"
+#include "util/percent.h"
 #include "util/stringUtils.h"
 #include "options/display.h"
 

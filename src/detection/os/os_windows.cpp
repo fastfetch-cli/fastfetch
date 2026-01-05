@@ -1,6 +1,6 @@
 extern "C" {
 #include "os.h"
-#include "common/library.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 #include "util/windows/registry.h"
 }

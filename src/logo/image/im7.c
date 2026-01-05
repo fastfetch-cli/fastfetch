@@ -1,7 +1,7 @@
 #ifdef FF_HAVE_IMAGEMAGICK7
 
 #include "image.h"
-#include "common/library.h"
+#include "util/library.h"
 
 #include <MagickCore/MagickCore.h>
 

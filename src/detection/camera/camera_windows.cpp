@@ -1,6 +1,6 @@
 extern "C" {
 #include "camera.h"
-#include "common/library.h"
+#include "util/library.h"
 }
 #include "util/windows/com.hpp"
 #include "util/windows/unicode.hpp"

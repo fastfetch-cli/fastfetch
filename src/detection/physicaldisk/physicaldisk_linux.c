@@ -1,6 +1,6 @@
 #include "physicaldisk.h"
-#include "common/io/io.h"
-#include "common/properties.h"
+#include "util/io/io.h"
+#include "util/properties.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>

@@ -1,5 +1,5 @@
-#include "common/io/io.h"
-#include "common/properties.h"
+#include "util/io/io.h"
+#include "util/properties.h"
 #include "fastfetch.h"
 #include "users.h"
 

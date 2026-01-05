@@ -1,10 +1,10 @@
 #include "fastfetch.h"
 #include "terminalfont.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 #ifdef FF_HAVE_FREETYPE
-    #include "common/library.h"
+    #include "util/library.h"
     #include <ft2build.h>
     #include FT_FREETYPE_H
 #endif

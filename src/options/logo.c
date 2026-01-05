@@ -1,6 +1,6 @@
 #include "logo/logo.h"
 
-#include "common/jsonconfig.h"
+#include "util/jsonconfig.h"
 #include "util/stringUtils.h"
 
 void ffOptionsInitLogo(FFOptionsLogo* options)

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/option.h"
-#include "common/percent.h"
+#include "util/option.h"
+#include "util/percent.h"
 
 typedef enum __attribute__((__packed__)) FFGPUType
 {

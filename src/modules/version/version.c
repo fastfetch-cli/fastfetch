@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/libc/libc.h"
 #include "detection/version/version.h"
 #include "modules/version/version.h"
-#include "util/stringUtils.h"
 
 bool ffPrintVersion(FFVersionOptions* options)
 {

@@ -1,6 +1,6 @@
 #include "gpu_driver_specific.h"
 
-#include "common/library.h"
+#include "util/library.h"
 #include "nvml.h"
 
 struct FFNvmlData {

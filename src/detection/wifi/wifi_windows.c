@@ -1,5 +1,5 @@
 #include "wifi.h"
-#include "common/library.h"
+#include "util/library.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>

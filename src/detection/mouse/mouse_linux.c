@@ -1,5 +1,5 @@
 #include "mouse.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/stringUtils.h"
 
 const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)

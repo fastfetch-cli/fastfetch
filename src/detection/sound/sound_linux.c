@@ -1,7 +1,7 @@
 #include "sound.h"
 
 #ifdef FF_HAVE_PULSE
-#include <common/library.h>
+#include "util/library.h"
 #include <pulse/pulseaudio.h>
 
 static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, void *userdata)

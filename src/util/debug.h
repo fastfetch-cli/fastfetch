@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "common/time.h"
+#include "util/time.h"
 
 static inline const char* ffFindFileName(const char* file)
 {

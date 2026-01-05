@@ -1,10 +1,10 @@
 #include "packages.h"
-#include "common/processing.h"
+#include "util/processing.h"
 #include "util/stringUtils.h"
 #include "util/path.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 #include <windows.h>
 #include "util/windows/nt.h"

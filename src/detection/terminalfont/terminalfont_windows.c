@@ -1,11 +1,11 @@
-#include "common/library.h"
-#include "common/io/io.h"
-#include "common/processing.h"
-#include "common/properties.h"
-#include "detection/terminalshell/terminalshell.h"
+#include "util/library.h"
+#include "util/io/io.h"
+#include "util/processing.h"
+#include "util/properties.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 #include "util/stringUtils.h"
+#include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
 
 #include <shlobj.h>

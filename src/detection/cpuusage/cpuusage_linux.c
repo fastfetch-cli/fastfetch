@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 #include <stdio.h>
 #include <inttypes.h>

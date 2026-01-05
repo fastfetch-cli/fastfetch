@@ -7,8 +7,8 @@
 
 #ifdef FF_HAVE_OPENCL
 
-#include "common/library.h"
-#include "common/parsing.h"
+#include "util/library.h"
+#include "util/parsing.h"
 #include "util/stringUtils.h"
 #include <string.h>
 

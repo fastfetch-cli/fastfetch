@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
-#include "common/time.h"
+#include "util/time.h"
 
 #include <stdint.h>
 

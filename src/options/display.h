@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/percent.h"
+#include "util/percent.h"
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 

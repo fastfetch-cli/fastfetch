@@ -1,9 +1,9 @@
 extern "C"
 {
 #include "wm.h"
-#include "common/io/io.h"
-#include "detection/terminalshell/terminalshell.h"
+#include "util/io/io.h"
 #include "util/windows/version.h"
+#include "detection/terminalshell/terminalshell.h"
 }
 
 #include "util/windows/com.hpp"

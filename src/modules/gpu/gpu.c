@@ -1,13 +1,13 @@
-#include "common/percent.h"
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/temps.h"
-#include "common/size.h"
-#include "common/frequency.h"
+#include "util/percent.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/temps.h"
+#include "util/size.h"
+#include "util/frequency.h"
+#include "util/stringUtils.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
-#include "util/stringUtils.h"
 
 #include <stdlib.h>
 

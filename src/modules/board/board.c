@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/board/board.h"
 #include "modules/board/board.h"
-#include "util/stringUtils.h"
 
 bool ffPrintBoard(FFBoardOptions* options)
 {

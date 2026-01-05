@@ -1,12 +1,12 @@
 #include "wm.h"
 
-#include "common/processing.h"
-#include "common/io/io.h"
-#include "detection/displayserver/displayserver.h"
+#include "util/processing.h"
+#include "util/io/io.h"
 #include "util/binary.h"
 #include "util/path.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"
+#include "detection/displayserver/displayserver.h"
 
 const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
 {

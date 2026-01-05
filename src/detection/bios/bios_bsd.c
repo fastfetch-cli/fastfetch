@@ -1,8 +1,8 @@
 #include "bios.h"
 
-#include "common/settings.h"
-#include "common/sysctl.h"
-#include "common/io/io.h"
+#include "util/settings.h"
+#include "util/sysctl.h"
+#include "util/io/io.h"
 #include "util/smbiosHelper.h"
 
 const char* ffDetectBios(FFBiosResult* result)

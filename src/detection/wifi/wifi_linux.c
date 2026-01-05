@@ -1,8 +1,8 @@
 #include "wifi.h"
-#include "common/dbus.h"
-#include "common/io/io.h"
-#include "common/processing.h"
-#include "common/properties.h"
+#include "util/dbus.h"
+#include "util/io/io.h"
+#include "util/processing.h"
+#include "util/properties.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"
 

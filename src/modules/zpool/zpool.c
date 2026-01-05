@@ -1,11 +1,11 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/percent.h"
-#include "common/size.h"
-#include "detection/zpool/zpool.h"
-#include "modules/zpool/zpool.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/percent.h"
+#include "util/size.h"
 #include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
+#include "detection/zpool/zpool.h"
+#include "modules/zpool/zpool.h"
 
 static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t index)
 {

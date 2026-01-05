@@ -1,15 +1,15 @@
-#include "common/font.h"
+#include "util/font.h"
 #include "terminalfont.h"
-#include "common/settings.h"
-#include "common/properties.h"
-#include "common/parsing.h"
-#include "common/io/io.h"
-#include "common/processing.h"
-#include "detection/terminalshell/terminalshell.h"
-#include "detection/displayserver/displayserver.h"
+#include "util/settings.h"
+#include "util/properties.h"
+#include "util/parsing.h"
+#include "util/io/io.h"
+#include "util/processing.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 #include "util/binary.h"
+#include "detection/terminalshell/terminalshell.h"
+#include "detection/displayserver/displayserver.h"
 
 static const char* getSystemMonospaceFont(void)
 {

@@ -1,5 +1,5 @@
 #include "host.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>

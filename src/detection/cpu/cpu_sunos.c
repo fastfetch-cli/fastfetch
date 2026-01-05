@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "common/processing.h"
+#include "util/processing.h"
 #include "util/stringUtils.h"
 #include <kstat.h>
 

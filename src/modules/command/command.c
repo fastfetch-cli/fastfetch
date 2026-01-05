@@ -1,5 +1,5 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
 #include "modules/command/command.h"
 #include "detection/command/command.h"
 
