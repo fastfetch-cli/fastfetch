@@ -1410,9 +1410,8 @@ elseif(NetBSD)
 elseif(Haiku)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 elseif(GNU)
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
     # On Hurd PATH_MAX is not defined. Set an arbitrary limit as workaround.
-    target_compile_definitions(libfastfetch PUBLIC PATH_MAX=4096)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE PATH_MAX=4096 O_PATH=0)
 endif()
 
 if(WIN32)
