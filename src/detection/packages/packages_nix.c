@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "util/stringUtils.h"
+#include <stdint.h>
 
 static bool isValidNixPkg(FFstrbuf* pkg)
 {
@@ -49,6 +50,53 @@ static bool isValidNixPkg(FFstrbuf* pkg)
     }
 
     return state == MATCH;
+}
+
+void getNixPackagesMultiImpl(char* paths[], uint32_t counts[], FFProcessHandle handle[], uint8_t length)
+{
+    //Implementation based on bash script from here:
+    //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
+    // no need to use hash, it is not faster
+    for (uint8_t i = 0; i < length; i++){
+        handle[i].pid = 0;
+        //  Nix detection is kinda slow, so we only do it if the dir exists
+        if(ffPathExists(paths[i], FF_PATHTYPE_DIRECTORY)){
+            ffProcessSpawn((char* const[]) {
+                "nix-store",
+                "--query",
+                "--requisites",
+                paths[i],
+                NULL
+            }, false, &handle[i]);
+        }
+    }
+    for (uint8_t i = 0; i < length; i++){
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(1024);
+        if (!handle[i].pid){
+            counts[i] = 0;
+            continue;
+        }
+        ffProcessReadOutput(&handle[i], &output);
+        uint32_t lineLength = 0;
+        for (uint32_t j = 0; j < output.length; j++)
+        {
+            if (output.chars[j] != '\n')
+            {
+                lineLength++;
+                continue;
+            }
+
+            output.chars[j] = '\0';
+            FFstrbuf line = {
+                .allocated = 0,
+                .length = lineLength,
+                .chars = output.chars + j - lineLength
+            };
+            if (isValidNixPkg(&line))
+                counts[i] += 1;
+            lineLength = 0;
+        }
+    }
 }
 
 static bool checkNixCache(FFstrbuf* cacheDir, FFstrbuf* hash, uint32_t* count)

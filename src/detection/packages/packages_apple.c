@@ -2,7 +2,9 @@
 #include "common/io/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
+#include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
+#include <stdint.h>
 
 static void countBrewPackages(FFstrbuf* baseDir, FFPackagesResult* result)
 {
@@ -61,9 +63,19 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
         ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
-        result->nixDefault += ffPackagesGetNix(&baseDir, "/nix/var/nix/profiles/default");
-        result->nixSystem += ffPackagesGetNix(&baseDir, "/run/current-system");
-        ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-        result->nixUser = ffPackagesGetNix(&baseDir, "/.nix-profile");
+        ffStrbufAppendS(&baseDir, "/nix/var/nix/profiles/default");
+
+        FF_STRBUF_AUTO_DESTROY dir2 = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
+        ffStrbufAppendS(&dir2, "/run/current-system");
+
+        FF_STRBUF_AUTO_DESTROY dir3 = ffStrbufCreateCopy(&instance.state.platform.homeDir);
+        ffStrbufAppendS(&dir3, "/.nix-profile");
+
+        FFstrbuf* dirs[] = {&baseDir, &dir2, &dir3};
+        uint32_t counts[3] = {0};
+        ffPackagesGetNixMulti(dirs, counts, 3);
+        result->nixDefault = counts[0];
+        result->nixSystem = counts[1];
+        result->nixUser = counts[2];
     }
 }
