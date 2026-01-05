@@ -412,6 +412,59 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     return num_elements;
 }
 
+static uint32_t getLinyapsPackages(FFstrbuf* baseDir, const char* filename)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, filename);
+
+    FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
+
+    uint32_t num_elements;
+    if (ffPackagesReadCache(&cacheDir, &cacheContent, baseDir->chars, "linglong", &num_elements))
+    {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        return num_elements;
+    }
+
+    yyjson_doc* doc = yyjson_read_file(baseDir->chars, YYJSON_READ_NOFLAG, NULL, NULL);
+    if (!doc)
+    {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        ffPackagesWriteCache(&cacheDir, &cacheContent, 0);
+        return 0;
+    }
+
+    uint32_t count = 0;
+    yyjson_val* root = yyjson_doc_get_root(doc);
+    if (root && yyjson_is_obj(root))
+    {
+        yyjson_val* layers = yyjson_obj_get(root, "layers");
+        if (layers && yyjson_is_arr(layers))
+        {
+            yyjson_arr_iter iter;
+            yyjson_arr_iter_init(layers, &iter);
+            yyjson_val* layer;
+            while ((layer = yyjson_arr_iter_next(&iter)))
+            {
+                if (!yyjson_is_obj(layer)) continue;
+                yyjson_val* info = yyjson_obj_get(layer, "info");
+                if (!info || !yyjson_is_obj(info)) continue;
+                yyjson_val* kind = yyjson_obj_get(info, "kind");
+                if (kind && yyjson_is_str(kind) && strcmp(yyjson_get_str(kind), "app") == 0)
+                    ++count;
+            }
+        }
+    }
+
+    yyjson_doc_free(doc);
+
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    ffPackagesWriteCache(&cacheDir, &cacheContent, count);
+
+    return count;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
@@ -449,7 +502,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     {
       packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/layers", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getLinyapsPackages(baseDir, "/var/lib/linglong/states.json");
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
