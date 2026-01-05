@@ -46,7 +46,7 @@ static void paServerInfoCallback(FF_MAYBE_UNUSED pa_context *c, const pa_server_
 
 static const char* detectSound(FFlist* devices)
 {
-    FF_LIBRARY_LOAD(pulse, "Failed to load libpulse" FF_LIBRARY_EXTENSION, "libpulse" FF_LIBRARY_EXTENSION, 0)
+    FF_LIBRARY_LOAD_MESSAGE(pulse, "libpulse" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_new)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_get_api)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_iterate)

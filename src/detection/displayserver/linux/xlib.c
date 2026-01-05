@@ -298,7 +298,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
 const char* ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, "dlopen libXrandr failed", "libXrandr" FF_LIBRARY_EXTENSION, 3)
+    FF_LIBRARY_LOAD_MESSAGE(xrandr, "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XOpenDisplay)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XCloseDisplay)

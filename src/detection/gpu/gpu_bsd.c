@@ -43,7 +43,7 @@ static void fillGPUTypeGeneric(FFGPUResult* gpu)
 
 static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
 

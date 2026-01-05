@@ -40,7 +40,7 @@ static const char* detectWithWmi(FFlist* result)
 
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
 {
-    FF_LIBRARY_LOAD(dxva2, "dlopen dxva2" FF_LIBRARY_EXTENSION " failed", "dxva2" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(dxva2, "dxva2" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetPhysicalMonitorsFromHMONITOR)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetMonitorBrightness)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, DestroyPhysicalMonitor)

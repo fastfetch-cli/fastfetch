@@ -39,7 +39,7 @@ static void applyDriverName(VkPhysicalDeviceDriverPropertiesKHR* properties, FFs
 
 static const char* detectVulkan(FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, "dlopen libvulkan" FF_LIBRARY_EXTENSION " failed",
+    FF_LIBRARY_LOAD_MESSAGE(vulkan,
         #if __APPLE__
             "libMoltenVK" FF_LIBRARY_EXTENSION, -1
         #elif _WIN32

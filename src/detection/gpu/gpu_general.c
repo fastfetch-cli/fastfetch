@@ -9,7 +9,7 @@
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_LIBRARY_LOAD(pciaccess, "Failed to load libpciaccess" FF_LIBRARY_EXTENSION, "libpciaccess" FF_LIBRARY_EXTENSION, 0)
+    FF_LIBRARY_LOAD_MESSAGE(pciaccess, "libpciaccess" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_system_init)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_slot_match_iterator_create)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_device_next)

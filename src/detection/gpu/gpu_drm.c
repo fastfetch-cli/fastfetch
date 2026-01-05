@@ -79,7 +79,7 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
 {
 #if FF_HAVE_DRM_AMDGPU
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_gpu_info)

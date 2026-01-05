@@ -167,11 +167,11 @@ static const char* detectOpenCL(FFOpenCLResult* result)
 
     #ifndef __APPLE__
 
-    FF_LIBRARY_LOAD(opencl, "dlopen libOpenCL" FF_LIBRARY_EXTENSION" failed",
-    #ifdef _WIN32
-        "OpenCL"FF_LIBRARY_EXTENSION, -1,
-    #endif
-        "libOpenCL"FF_LIBRARY_EXTENSION, 1
+    FF_LIBRARY_LOAD_MESSAGE(opencl,
+        #ifdef _WIN32
+            "OpenCL" FF_LIBRARY_EXTENSION, -1,
+        #endif
+        "libOpenCL" FF_LIBRARY_EXTENSION, 1
     );
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformInfo);
