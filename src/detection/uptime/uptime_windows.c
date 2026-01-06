@@ -7,6 +7,7 @@
 
 const char* ffDetectUptime(FFUptimeResult* result)
 {
+    #ifndef __aarch64__
     HMODULE hKernelBase = GetModuleHandleW(L"KernelBase.dll");
     if (__builtin_expect(!!hKernelBase, true))
     {
@@ -21,6 +22,11 @@ const char* ffDetectUptime(FFUptimeResult* result)
     }
 
     result->uptime = GetTickCount64();
+    #else
+    uint64_t uptime;
+    QueryInterruptTime(&uptime);
+    result->uptime = uptime / 10000; // Convert from 100-nanosecond intervals to milliseconds
+    #endif
 
 ok:
     result->bootTime = ffTimeGetNow() - result->uptime;
