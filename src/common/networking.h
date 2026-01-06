@@ -15,7 +15,6 @@ typedef struct FFNetworkingState {
         OVERLAPPED overlapped;
     #else
         int sockfd;
-        FFstrbuf command;
         struct addrinfo* addr;
 
         #ifdef FF_HAVE_THREADS
@@ -23,6 +22,7 @@ typedef struct FFNetworkingState {
         #endif
     #endif
 
+    FFstrbuf command;
     uint32_t timeout;
     bool ipv6;
     bool compression; // if true, HTTP content compression will be enabled if supported

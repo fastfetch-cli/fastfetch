@@ -34,11 +34,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
 
             #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
             // Set TCP Fast Open
-            #if __linux__ || __GNU__
-            int flag = 5; // the queue length of pending packets
-            #else
-            int flag = 1; // enable TCP Fast Open
-            #endif
+            int flag = 1;
             if (setsockopt(state->sockfd, IPPROTO_TCP,
                 #ifdef __APPLE__
                 // https://github.com/rust-lang/libc/pull/3135
@@ -186,15 +182,12 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     FF_DEBUG("Initializing network connection state: host=%s, path=%s", host, path);
 
     // Initialize command and host information
-    ffStrbufInitA(&state->command, 64);
+    ffStrbufInitA(&state->command, 128);
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
-    ffStrbufAppendS(&state->command, " HTTP/1.0\nHost: ");
+    ffStrbufAppendS(&state->command, " HTTP/1.0\r\nHost: ");
     ffStrbufAppendS(&state->command, host);
-    ffStrbufAppendS(&state->command, "\r\n");
-
-    // Add extra optimized HTTP headers
-    ffStrbufAppendS(&state->command, "Connection: close\r\n"); // Explicitly tell the server we don't need to keep the connection
+    ffStrbufAppendS(&state->command, "\r\nConnection: close\r\n"); // Explicitly tell the server we don't need to keep the connection
 
     // If compression needs to be enabled
     if (state->compression) {
@@ -221,9 +214,10 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
     // Use AI_NUMERICSERV flag to indicate the service is a numeric port, reducing parsing time
 
-    if(getaddrinfo(host, "80", &hints, &state->addr) != 0)
+    int gaiRes = getaddrinfo(host, "80", &hints, &state->addr);
+    if(gaiRes != 0)
     {
-        FF_DEBUG("getaddrinfo() failed: %s", gai_strerror(errno));
+        FF_DEBUG("getaddrinfo() failed: %s (res=%d)", gai_strerror(gaiRes), gaiRes);
         ret = "getaddrinfo() failed";
         goto error;
     }
@@ -360,6 +354,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 
 const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer)
 {
+    assert(buffer->allocated > 0);
     FF_DEBUG("Preparing to receive HTTP response");
     uint32_t timeout = state->timeout;
 
@@ -390,15 +385,25 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     // poll for the socket to be readable.
     // Because of the non-blocking connectx() call, the connection might not be established yet
     FF_DEBUG("Using poll() to check if socket is readable");
-    if (poll(&(struct pollfd) {
-        .fd = state->sockfd,
-        .events = POLLIN
-    }, 1, timeout > 0 ? (int) timeout : -1) == -1)
     {
-        FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
-        close(state->sockfd);
-        state->sockfd = -1;
-        return "poll() failed";
+        int pollRes = poll(&(struct pollfd) {
+            .fd = state->sockfd,
+            .events = POLLIN
+        }, 1, timeout > 0 ? (int) timeout : -1);
+        if (pollRes == 0)
+        {
+            FF_DEBUG("poll() timed out after %u ms", timeout);
+            close(state->sockfd);
+            state->sockfd = -1;
+            return "poll() timeout";
+        }
+        else if (pollRes == -1)
+        {
+            FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
+            close(state->sockfd);
+            state->sockfd = -1;
+            return "poll() failed";
+        }
     }
     FF_DEBUG("Socket is readable, proceeding to receive data");
     #else
@@ -415,12 +420,14 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
     uint32_t contentLength = 0;
-    char* headerEnd = NULL;
+    uint32_t headerEnd = 0;
 
     do {
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
                  ++recvCount, buffer->length, ffStrbufGetFree(buffer));
 
+        // We set `Connection: close`, so the server will close the connection when done.
+        // Thus we can use MSG_WAITALL to wait until the buffer is full or the connection is closed.
         ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), MSG_WAITALL);
 
         if (received <= 0) {
@@ -438,10 +445,11 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Successfully received %zd bytes of data, total: %u bytes", received, buffer->length);
 
         // Check if HTTP header end marker is found
-        if (headerEnd == NULL) {
-            headerEnd = memmem(buffer->chars, buffer->length, "\r\n\r\n", 4);
-            if (headerEnd != NULL) {
-                FF_DEBUG("Found HTTP header end marker, position: %ld", (long)(headerEnd - buffer->chars));
+        if (headerEnd == 0) {
+            char* pHeaderEnd = memmem(buffer->chars, buffer->length, "\r\n\r\n", 4);
+            if (pHeaderEnd) {
+                headerEnd = (uint32_t)(pHeaderEnd - buffer->chars);
+                FF_DEBUG("Found HTTP header end marker, position: %u", headerEnd);
 
                 // Check for Content-Length header to pre-allocate enough memory
                 const char* clHeader = strcasestr(buffer->chars, "Content-Length:");
@@ -451,7 +459,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                         FF_DEBUG("Detected Content-Length: %u, pre-allocating buffer", contentLength);
                         // Ensure buffer is large enough, adding header size and some margin
                         ffStrbufEnsureFree(buffer, contentLength + 16);
-                        FF_DEBUG("Extended receive buffer to %u bytes", buffer->length);
+                        FF_DEBUG("Extended receive buffer to %u bytes", buffer->allocated);
                     }
                 }
             }
@@ -467,12 +475,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "Empty server response received";
     }
 
-    if (headerEnd == NULL) {
+    if (headerEnd == 0) {
         FF_DEBUG("No HTTP header end marker found");
         return "No HTTP header end found";
     }
-    if (contentLength > 0 && buffer->length != contentLength + (uint32_t)(headerEnd - buffer->chars) + 4) {
-        FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + (uint32_t)(headerEnd - buffer->chars) + 4);
+    if (contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
+        FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
         return "Content length mismatch";
     }
 
@@ -487,7 +495,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     #ifdef FF_HAVE_ZLIB
     if (state->compression) {
         FF_DEBUG("Content received, checking if compressed");
-        if (!ffNetworkingDecompressGzip(buffer, headerEnd)) {
+        if (!ffNetworkingDecompressGzip(buffer, buffer->chars + headerEnd)) {
             FF_DEBUG("Decompression failed or invalid compression format");
             return "Failed to decompress or invalid format";
         } else {

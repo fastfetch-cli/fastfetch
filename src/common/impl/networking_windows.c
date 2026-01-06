@@ -19,6 +19,7 @@ static const char* initWsaData(WSADATA* wsaData)
 
     if(LOBYTE(wsaData->wVersion) != 2 || HIBYTE(wsaData->wVersion) != 2) {
         FF_DEBUG("Invalid wsaData version found: %d.%d", LOBYTE(wsaData->wVersion), HIBYTE(wsaData->wVersion));
+        WSACleanup();
         return "Invalid wsaData version found";
     }
 
@@ -26,6 +27,7 @@ static const char* initWsaData(WSADATA* wsaData)
     SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd == INVALID_SOCKET) {
         FF_DEBUG("socket(AF_INET, SOCK_STREAM) failed");
+        WSACleanup();
         return "socket(AF_INET, SOCK_STREAM) failed";
     }
 
@@ -36,6 +38,8 @@ static const char* initWsaData(WSADATA* wsaData)
                     &ConnectEx, sizeof(ConnectEx),
                     &dwBytes, NULL, NULL) != 0) {
         FF_DEBUG("WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed");
+        closesocket(sockfd);
+        WSACleanup();
         return "WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed";
     }
 
@@ -145,25 +149,26 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
 
     // Initialize overlapped structure for asynchronous I/O
-    memset(&state->overlapped, 0, sizeof(OVERLAPPED));
+    state->overlapped = (OVERLAPPED){
+        .hEvent = CreateEventW(NULL, FALSE, FALSE, NULL)
+    };
 
     // Build HTTP command
-    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(64);
-    ffStrbufAppendS(&command, "GET ");
-    ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, " HTTP/1.0\nHost: ");
-    ffStrbufAppendS(&command, host);
-    ffStrbufAppendS(&command, "\r\n");
-    ffStrbufAppendS(&command, "Connection: close\r\n"); // Explicitly request connection closure
+    ffStrbufInitA(&state->command, 128);
+    ffStrbufAppendS(&state->command, "GET ");
+    ffStrbufAppendS(&state->command, path);
+    ffStrbufAppendS(&state->command, " HTTP/1.0\r\nHost: ");
+    ffStrbufAppendS(&state->command, host);
+    ffStrbufAppendS(&state->command, "\r\nConnection: close\r\n"); // Explicitly request connection closure
 
     // Add compression support if enabled
     if (state->compression) {
         FF_DEBUG("Enabling HTTP content compression");
-        ffStrbufAppendS(&command, "Accept-Encoding: gzip\r\n");
+        ffStrbufAppendS(&state->command, "Accept-Encoding: gzip\r\n");
     }
 
-    ffStrbufAppendS(&command, headers);
-    ffStrbufAppendS(&command, "\r\n");
+    ffStrbufAppendS(&state->command, headers);
+    ffStrbufAppendS(&state->command, "\r\n");
 
     #ifdef TCP_FASTOPEN
     if (state->tfo)
@@ -182,10 +187,10 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
     #endif
 
-    FF_DEBUG("Using ConnectEx to send %u bytes of data", command.length);
+    FF_DEBUG("Using ConnectEx to send %u bytes of data", state->command.length);
     DWORD sent = 0;
     BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int)addr->ai_addrlen,
-                          command.chars, command.length, &sent, &state->overlapped);
+                          state->command.chars, state->command.length, &sent, &state->overlapped);
 
     freeaddrinfo(addr);
     addr = NULL;
@@ -195,8 +200,10 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         if (WSAGetLastError() != WSA_IO_PENDING)
         {
             FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+            CloseHandle(state->overlapped.hEvent);
             closesocket(state->sockfd);
             state->sockfd = INVALID_SOCKET;
+            ffStrbufDestroy(&state->command);
             return "ConnectEx() failed";
         }
         else
@@ -215,6 +222,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 
 const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer)
 {
+    assert(buffer->allocated > 0);
     FF_DEBUG("Preparing to receive HTTP response");
 
     if (state->sockfd == INVALID_SOCKET)
@@ -227,11 +235,13 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     if (timeout > 0)
     {
         FF_DEBUG("WaitForSingleObject with timeout: %u ms", timeout);
-        if (WaitForSingleObject((HANDLE)state->sockfd, timeout) != WAIT_OBJECT_0)
+        if (WaitForSingleObject(state->overlapped.hEvent, timeout) != WAIT_OBJECT_0)
         {
             FF_DEBUG("WaitForSingleObject failed or timed out");
             CancelIo((HANDLE) state->sockfd);
+            CloseHandle(state->overlapped.hEvent);
             closesocket(state->sockfd);
+            ffStrbufDestroy(&state->command);
             return "WaitForSingleObject(state->sockfd) failed or timeout";
         }
     }
@@ -241,7 +251,19 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     {
         FF_DEBUG("WSAGetOverlappedResult failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
+        CloseHandle(state->overlapped.hEvent);
+        ffStrbufDestroy(&state->command);
         return "WSAGetOverlappedResult() failed";
+    }
+    FF_DEBUG("WSAGetOverlappedResult succeeded, %u bytes sent", (unsigned) transfer);
+    ffStrbufDestroy(&state->command);
+    CloseHandle(state->overlapped.hEvent);
+    state->overlapped.hEvent = NULL;
+
+    if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) != 0)
+    {
+        FF_DEBUG("Failed to update connect context: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        // Not a critical error, continue anyway
     }
 
     if(timeout > 0)
@@ -252,12 +274,16 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
 
     // Set larger receive buffer for better performance
     int rcvbuf = 65536; // 64KB
-    setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, (const char*)&rcvbuf, sizeof(rcvbuf));
+    if (setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, (const char*)&rcvbuf, sizeof(rcvbuf)))
+    {
+        FF_DEBUG("Failed to set SO_RCVBUF: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        // Not a critical error, continue anyway
+    }
 
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
     uint32_t contentLength = 0;
-    char* headerEnd = NULL;
+    uint32_t headerEnd = 0;
 
     do {
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
@@ -280,10 +306,11 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Successfully received %zd bytes of data, total: %u bytes", received, buffer->length);
 
         // Check if HTTP header end marker is found
-        if (headerEnd == NULL) {
-            headerEnd = strstr(buffer->chars, "\r\n\r\n");
-            if (headerEnd != NULL) {
-                FF_DEBUG("Found HTTP header end marker, position: %ld", (long)(headerEnd - buffer->chars));
+        if (headerEnd == 0) {
+            char* pHeaderEnd = strstr(buffer->chars, "\r\n\r\n");
+            if (pHeaderEnd) {
+                headerEnd = (uint32_t)(pHeaderEnd - buffer->chars);
+                FF_DEBUG("Found HTTP header end marker, position: %u", headerEnd);
 
                 // Check for Content-Length header to pre-allocate enough memory
                 const char* clHeader = strcasestr(buffer->chars, "Content-Length:");
@@ -309,9 +336,13 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "Empty server response received";
     }
 
-    if (headerEnd == NULL) {
+    if (headerEnd == 0) {
         FF_DEBUG("No HTTP header end marker found");
         return "No HTTP header end found";
+    }
+    if (contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
+        FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
+        return "Content length mismatch";
     }
 
     if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
@@ -326,7 +357,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     #ifdef FF_HAVE_ZLIB
     if (state->compression) {
         FF_DEBUG("Content received, checking if compressed");
-        if (!ffNetworkingDecompressGzip(buffer, headerEnd)) {
+        if (!ffNetworkingDecompressGzip(buffer, buffer->chars + headerEnd)) {
             FF_DEBUG("Decompression failed or invalid compression format");
             return "Failed to decompress or invalid format";
         } else {
