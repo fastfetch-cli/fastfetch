@@ -1,4 +1,4 @@
-#include "wcwidth.h"
+#include "common/wcwidth.h"
 #include "3rdparty/widecharwidth/widechar_width_c.h"
 
 int mk_wcwidth(uint32_t wc)

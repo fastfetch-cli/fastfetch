@@ -342,7 +342,7 @@ fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
-    configure_file(src/common/impl/apple/Info.plist.in Info.plist @ONLY)
+    configure_file(src/common/apple/Info.plist.in Info.plist @ONLY)
 endif()
 
 ####################
@@ -924,11 +924,11 @@ elseif(APPLE)
         src/common/impl/networking_linux.c
         src/common/impl/processing_linux.c
         src/common/impl/sysctl.c
-        src/common/impl/apple/cf_helpers.c
-        src/common/impl/apple/osascript.m
-        src/common/impl/apple/smc_temps.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_apple.c
+        src/common/apple/cf_helpers.c
+        src/common/apple/osascript.m
+        src/common/apple/smc_temps.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
@@ -994,15 +994,15 @@ elseif(WIN32)
         src/common/impl/netif_windows.c
         src/common/impl/networking_windows.c
         src/common/impl/processing_windows.c
-        src/common/impl/windows/getline.c
-        src/common/impl/windows/com.cpp
-        src/common/impl/windows/registry.c
-        src/common/impl/windows/unicode.c
-        src/common/impl/windows/wmi.cpp
-        src/common/impl/windows/version.c
         src/common/impl/FFPlatform_windows.c
         src/common/impl/binary_windows.c
         src/common/impl/debug_windows.c
+        src/common/windows/getline.c
+        src/common/windows/com.cpp
+        src/common/windows/registry.c
+        src/common/windows/unicode.c
+        src/common/windows/wmi.cpp
+        src/common/windows/version.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
@@ -1151,7 +1151,7 @@ elseif(Haiku)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
-        src/common/impl/haiku/version.cpp
+        src/common/haiku/version.cpp
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1881,7 +1881,7 @@ set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
     target_sources(fastfetch
-        PRIVATE src/common/impl/windows/version.rc
+        PRIVATE src/common/windows/version.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
@@ -1909,7 +1909,7 @@ if (BUILD_FLASHFETCH)
 
     if(WIN32)
         target_sources(flashfetch
-            PRIVATE src/common/impl/windows/version.rc
+            PRIVATE src/common/windows/version.rc
         )
     elseif(APPLE)
         target_link_options(flashfetch
