@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/stringUtils.h"
 #include "detection/media/media.h"
 

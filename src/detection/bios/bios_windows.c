@@ -28,7 +28,7 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
 #elif __OpenBSD__
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <fcntl.h>
 #include <unistd.h>

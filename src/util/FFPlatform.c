@@ -1,6 +1,6 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "detection/version/version.h"
 
 void ffPlatformInit(FFPlatform* platform)

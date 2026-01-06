@@ -3,7 +3,7 @@
 
 #ifdef FF_HAVE_DBUS
 #include "util/dbus.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 /* Example dbus reply:
 array [

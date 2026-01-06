@@ -1,5 +1,5 @@
 #include "gpu.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/properties.h"
 
 #include <stdlib.h>

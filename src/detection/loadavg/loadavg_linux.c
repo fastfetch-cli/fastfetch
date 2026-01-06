@@ -1,5 +1,5 @@
 #include "detection/loadavg/loadavg.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <sys/sysinfo.h>
 

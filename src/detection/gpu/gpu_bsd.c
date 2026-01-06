@@ -1,6 +1,6 @@
 #include "gpu_driver_specific.h"
 
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/mallocHelper.h"
 
 #include <sys/pciio.h>

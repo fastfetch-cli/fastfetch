@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "util/library.h"
-#include "util/networking/networking.h"
+#include "util/networking.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"
 

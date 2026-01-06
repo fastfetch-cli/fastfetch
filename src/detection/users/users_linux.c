@@ -1,4 +1,4 @@
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/properties.h"
 #include "fastfetch.h"
 #include "users.h"

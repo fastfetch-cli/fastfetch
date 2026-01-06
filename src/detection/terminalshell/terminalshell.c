@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/processing.h"
 #include "util/properties.h"
 #include "util/path.h"

@@ -4,7 +4,7 @@
 #include "util/path.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <windows.h>
 #include "util/windows/nt.h"

@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <stdio.h>
 #include <fcntl.h>

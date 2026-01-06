@@ -1,6 +1,6 @@
 #include "processes.h"
 
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/stringUtils.h"
 
 const char* ffDetectProcesses(uint32_t* result)

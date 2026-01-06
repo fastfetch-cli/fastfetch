@@ -2,7 +2,7 @@
 
 #include "util/settings.h"
 #include "util/sysctl.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/smbiosHelper.h"
 
 const char* ffDetectBios(FFBiosResult* result)

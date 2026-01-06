@@ -1,6 +1,6 @@
 #include "btrfs.h"
 
-#include "util/io/io.h"
+#include "util/io.h"
 #include <fcntl.h>
 
 enum { uuidLen = (uint32_t) __builtin_strlen("00000000-0000-0000-0000-000000000000") };

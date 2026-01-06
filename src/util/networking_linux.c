@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "util/networking/networking.h"
+#include "util/networking.h"
 #include "util/time.h"
 #include "util/library.h"
 #include "util/stringUtils.h"

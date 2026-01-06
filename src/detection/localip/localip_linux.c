@@ -1,6 +1,6 @@
 #include "localip.h"
-#include "util/io/io.h"
-#include "util/netif/netif.h"
+#include "util/io.h"
+#include "util/netif.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"
 

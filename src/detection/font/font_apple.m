@@ -1,5 +1,5 @@
 #include "util/font.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "font.h"
 
 #import <AppKit/NSFont.h>

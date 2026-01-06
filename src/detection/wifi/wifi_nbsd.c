@@ -1,5 +1,5 @@
 #include "wifi.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/stringUtils.h"
 
 #define COMPAT_FREEBSD_NET80211 1

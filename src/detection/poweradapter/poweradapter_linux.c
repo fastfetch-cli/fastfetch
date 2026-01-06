@@ -1,5 +1,5 @@
 #include "poweradapter.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>

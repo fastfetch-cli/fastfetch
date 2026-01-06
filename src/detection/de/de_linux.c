@@ -1,7 +1,7 @@
 #include "de.h"
 
 #include "util/dbus.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/library.h"
 #include "util/parsing.h"
 #include "util/properties.h"

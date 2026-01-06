@@ -1,5 +1,5 @@
 #include "image.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/printing.h"
 #include "util/processing.h"
 #include "util/stringUtils.h"

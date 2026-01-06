@@ -1,7 +1,7 @@
 #define INITGUID
 
 #include "keyboard.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/mallocHelper.h"
 #include "util/windows/unicode.h"
 

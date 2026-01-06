@@ -2,7 +2,7 @@
 
 #ifdef FF_HAVE_PCIACCESS
 
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/library.h"
 
 #include <pciaccess.h>

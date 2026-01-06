@@ -1,7 +1,7 @@
 #include "wm.h"
 
 #include "util/processing.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/binary.h"
 #include "util/path.h"
 #include "util/stringUtils.h"

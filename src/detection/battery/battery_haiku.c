@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "battery.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <private/device/power_managment.h>
 #include <sys/ioctl.h>

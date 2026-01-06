@@ -1,6 +1,6 @@
 #include "uptime.h"
 #include "util/time.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <inttypes.h>
 

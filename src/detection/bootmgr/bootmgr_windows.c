@@ -1,6 +1,6 @@
 #include "bootmgr.h"
 #include "efi_helper.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <windows.h>
 

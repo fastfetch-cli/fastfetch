@@ -18,7 +18,7 @@
 #include "util/arrayUtils.h"
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
-#include "util/platform/FFPlatform.h"
+#include "util/FFPlatform.h"
 #include "util/unused.h"
 
 #include "options/logo.h"

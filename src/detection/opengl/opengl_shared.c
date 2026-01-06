@@ -25,7 +25,7 @@ void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglG
 }
 
 #if defined(FF_HAVE_EGL) || __has_include(<EGL/egl.h>)
-#include "util/io/io.h"
+#include "util/io.h"
 
 #define EGL_EGL_PROTOTYPES 1
 #define EGL_EGLEXT_PROTOTYPES 1

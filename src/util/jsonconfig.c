@@ -2,7 +2,7 @@
 #include "util/color.h"
 #include "util/jsonconfig.h"
 #include "util/printing.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/time.h"
 #include "util/stringUtils.h"
 #include "detection/version/version.h"

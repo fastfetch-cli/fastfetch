@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "opengl.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <string.h>
 

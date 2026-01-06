@@ -3,7 +3,7 @@
 
 //Must be included after <mswsock.h>
 #include "fastfetch.h"
-#include "util/networking/networking.h"
+#include "util/networking.h"
 #include "util/stringUtils.h"
 #include "util/debug.h"
 

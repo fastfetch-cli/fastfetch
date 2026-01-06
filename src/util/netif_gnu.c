@@ -1,5 +1,5 @@
 #include "netif.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <net/if.h>
 #include <stdio.h>

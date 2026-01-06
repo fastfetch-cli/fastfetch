@@ -1,5 +1,5 @@
 #include "smbiosHelper.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/unused.h"
 #include "util/mallocHelper.h"
 #include "util/debug.h"

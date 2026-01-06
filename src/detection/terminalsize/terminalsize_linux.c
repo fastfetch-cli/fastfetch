@@ -1,5 +1,5 @@
 #include "terminalsize.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <sys/ioctl.h>
 #include <fcntl.h>

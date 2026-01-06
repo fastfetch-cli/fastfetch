@@ -2,7 +2,7 @@
 #include "util/settings.h"
 #include "util/library.h"
 #include "util/thread.h"
-#include "util/io/io.h"
+#include "util/io.h"
 
 #include <string.h>
 

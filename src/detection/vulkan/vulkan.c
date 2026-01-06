@@ -4,7 +4,7 @@
 
 #ifdef FF_HAVE_VULKAN
 #include "util/library.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/parsing.h"
 #include "util/stringUtils.h"
 

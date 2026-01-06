@@ -1,5 +1,5 @@
 #include "terminalfont.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/properties.h"
 #include "util/processing.h"
 #include "util/debug.h"

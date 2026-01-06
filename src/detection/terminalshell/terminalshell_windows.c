@@ -1,5 +1,5 @@
 #include "terminalshell.h"
-#include "util/io/io.h"
+#include "util/io.h"
 #include "util/processing.h"
 #include "util/thread.h"
 #include "util/mallocHelper.h"

@@ -469,6 +469,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
     src/modules/zpool/zpool.c
+    src/modules/modules.c
     src/options/display.c
     src/options/logo.c
     src/options/general.c
@@ -480,9 +481,8 @@ set(LIBFASTFETCH_SRC
     src/util/init.c
     src/util/jsonconfig.c
     src/util/library.c
-    src/util/modules.c
-    src/util/netif/netif.c
-    src/util/networking/networking_common.c
+    src/util/netif.c
+    src/util/networking_common.c
     src/util/option.c
     src/util/parsing.c
     src/util/percent.c
@@ -498,7 +498,7 @@ set(LIBFASTFETCH_SRC
     src/util/FFstrbuf.c
     src/util/kmod.c
     src/util/path.c
-    src/util/platform/FFPlatform.c
+    src/util/FFPlatform.c
     src/util/smbiosHelper.c
 )
 
@@ -579,11 +579,11 @@ if(LINUX)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_linux.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_linux.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(ANDROID)
@@ -652,11 +652,11 @@ elseif(ANDROID)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_linux.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_linux.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(FreeBSD)
@@ -733,12 +733,12 @@ elseif(FreeBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_bsd.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_bsd.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
         src/util/sysctl.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
     )
     if(DragonFly)
@@ -826,12 +826,12 @@ elseif(NetBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_bsd.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_bsd.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
         src/util/sysctl.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(OpenBSD)
@@ -908,12 +908,12 @@ elseif(OpenBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_bsd.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_bsd.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
         src/util/sysctl.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
     )
@@ -977,15 +977,15 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
-        src/util/io/io_unix.c
-        src/util/netif/netif_apple.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_apple.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
         src/util/sysctl.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_apple.c
     )
 elseif(WIN32)
@@ -1047,9 +1047,9 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/util/io/io_windows.c
-        src/util/netif/netif_windows.c
-        src/util/networking/networking_windows.c
+        src/util/io_windows.c
+        src/util/netif_windows.c
+        src/util/networking_windows.c
         src/util/processing_windows.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
@@ -1057,7 +1057,7 @@ elseif(WIN32)
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
         src/util/windows/version.c
-        src/util/platform/FFPlatform_windows.c
+        src/util/FFPlatform_windows.c
         src/util/binary_windows.c
         src/util/debug_windows.c
     )
@@ -1135,11 +1135,11 @@ elseif(SunOS)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_apple.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_apple.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(Haiku)
@@ -1203,11 +1203,11 @@ elseif(Haiku)
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_haiku.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_haiku.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
     )
@@ -1282,11 +1282,11 @@ elseif(GNU)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
         src/util/dbus.c
-        src/util/io/io_unix.c
-        src/util/netif/netif_gnu.c
-        src/util/networking/networking_linux.c
+        src/util/io_unix.c
+        src/util/netif_gnu.c
+        src/util/networking_linux.c
         src/util/processing_linux.c
-        src/util/platform/FFPlatform_unix.c
+        src/util/FFPlatform_unix.c
         src/util/binary_linux.c
    )
 endif()
