@@ -1,5 +1,5 @@
-#include "util/format.h"
-#include "util/textModifier.h"
+#include "common/format.h"
+#include "common/textModifier.h"
 #include "fastfetch.h"
 
 #include <stdlib.h>

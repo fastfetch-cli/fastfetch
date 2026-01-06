@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "poweradapter.h"
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/ps/IOPowerSources.h>
 #include <IOKit/ps/IOPSKeys.h>

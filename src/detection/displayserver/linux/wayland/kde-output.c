@@ -3,8 +3,8 @@
 #include "wayland.h"
 #include "kde-output-device-v2-client-protocol.h"
 #include "kde-output-order-v1-client-protocol.h"
-#include "util/edidHelper.h"
-#include "util/base64.h"
+#include "common/edidHelper.h"
+#include "common/base64.h"
 
 typedef struct WaylandKdeMode
 {

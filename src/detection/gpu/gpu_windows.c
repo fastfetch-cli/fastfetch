@@ -1,11 +1,11 @@
 #include "gpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
-#include "util/library.h"
-#include "util/windows/unicode.h"
-#include "util/windows/registry.h"
-#include "util/mallocHelper.h"
-#include "util/debug.h"
-#include "util/windows/nt.h"
+#include "common/library.h"
+#include "common/windows/unicode.h"
+#include "common/windows/registry.h"
+#include "common/mallocHelper.h"
+#include "common/debug.h"
+#include "common/windows/nt.h"
 
 #include <cfgmgr32.h>
 

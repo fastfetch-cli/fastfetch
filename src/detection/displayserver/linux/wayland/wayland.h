@@ -2,8 +2,8 @@
 
 #ifdef FF_HAVE_WAYLAND
 
-#include "util/library.h"
-#include "util/stringUtils.h"
+#include "common/library.h"
+#include "common/stringUtils.h"
 
 #include <wayland-client.h>
 

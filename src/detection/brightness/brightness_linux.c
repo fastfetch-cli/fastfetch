@@ -1,7 +1,7 @@
 #include "brightness.h"
-#include "util/io.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #include <dirent.h>
 #include <limits.h>
@@ -87,8 +87,8 @@ static const char* detectWithBacklight(FFlist* result)
 
 #ifdef FF_HAVE_DDCUTIL
 #include "detection/displayserver/displayserver.h"
-#include "util/library.h"
-#include "util/mallocHelper.h"
+#include "common/library.h"
+#include "common/mallocHelper.h"
 
 #include <ddcutil_macros.h>
 #include <ddcutil_c_api.h>

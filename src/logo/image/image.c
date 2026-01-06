@@ -1,9 +1,9 @@
 #include "image.h"
-#include "util/io.h"
-#include "util/printing.h"
-#include "util/processing.h"
-#include "util/stringUtils.h"
-#include "util/base64.h"
+#include "common/io.h"
+#include "common/printing.h"
+#include "common/processing.h"
+#include "common/stringUtils.h"
+#include "common/base64.h"
 #include "detection/terminalsize/terminalsize.h"
 
 #include <limits.h>
@@ -421,7 +421,7 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
 #endif
 
 #ifdef FF_HAVE_ZLIB
-#include "util/library.h"
+#include "common/library.h"
 #include <stdlib.h>
 #include <zlib.h>
 

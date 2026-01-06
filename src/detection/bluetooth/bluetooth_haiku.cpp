@@ -1,6 +1,6 @@
 extern "C" {
 #include "bluetooth.h"
-#include "util/io.h"
+#include "common/io.h"
 }
 
 #include <bluetooth/LocalDevice.h>

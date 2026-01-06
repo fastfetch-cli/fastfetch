@@ -1,11 +1,11 @@
 #include "cpu.h"
-#include "util/windows/registry.h"
-#include "util/windows/nt.h"
-#include "util/mallocHelper.h"
-#include "util/smbiosHelper.h"
+#include "common/windows/registry.h"
+#include "common/windows/nt.h"
+#include "common/mallocHelper.h"
+#include "common/smbiosHelper.h"
 
 #include <windows.h>
-#include "util/windows/perflib_.h"
+#include "common/windows/perflib_.h"
 #include <wchar.h>
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)

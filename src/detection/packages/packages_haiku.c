@@ -1,6 +1,6 @@
 #include "packages.h"
 
-#include "util/io.h"
+#include "common/io.h"
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {

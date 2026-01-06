@@ -1,6 +1,6 @@
 #include "cpu.h"
-#include "util/sysctl.h"
-#include "util/io.h"
+#include "common/sysctl.h"
+#include "common/io.h"
 
 #include <sys/envsys.h>
 #include <prop/proplib.h>

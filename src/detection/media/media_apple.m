@@ -1,6 +1,6 @@
 #include "fastfetch.h"
-#include "util/processing.h"
-#include "util/apple/cf_helpers.h"
+#include "common/processing.h"
+#include "common/apple/cf_helpers.h"
 #include "detection/media/media.h"
 
 #import <Foundation/Foundation.h>

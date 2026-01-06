@@ -1,5 +1,5 @@
 #include "displayserver_linux.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 FFDisplayType ffdsGetDisplayType(const char* name)
 {

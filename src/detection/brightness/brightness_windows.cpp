@@ -2,10 +2,10 @@ extern "C"
 {
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
-#include "util/library.h"
+#include "common/library.h"
 }
-#include "util/windows/wmi.hpp"
-#include "util/windows/unicode.hpp"
+#include "common/windows/wmi.hpp"
+#include "common/windows/unicode.hpp"
 
 #include <highlevelmonitorconfigurationapi.h>
 #include <physicalmonitorenumerationapi.h>

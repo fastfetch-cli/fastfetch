@@ -1,5 +1,5 @@
 #include "physicaldisk.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 #include "sys/scsi/generic/inquiry.h"
 
 #include <libdevinfo.h>

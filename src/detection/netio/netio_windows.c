@@ -1,8 +1,8 @@
 #include "netio.h"
 
-#include "util/netif.h"
-#include "util/mallocHelper.h"
-#include "util/windows/unicode.h"
+#include "common/netif.h"
+#include "common/mallocHelper.h"
+#include "common/windows/unicode.h"
 
 #include <ws2tcpip.h>
 #include <iphlpapi.h>

@@ -1,13 +1,13 @@
 #include "de.h"
 
-#include "util/dbus.h"
-#include "util/io.h"
-#include "util/library.h"
-#include "util/parsing.h"
-#include "util/properties.h"
-#include "util/processing.h"
-#include "util/binary.h"
-#include "util/path.h"
+#include "common/dbus.h"
+#include "common/io.h"
+#include "common/library.h"
+#include "common/parsing.h"
+#include "common/properties.h"
+#include "common/processing.h"
+#include "common/binary.h"
+#include "common/path.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <ctype.h>

@@ -1,5 +1,5 @@
 #include "wallpaper.h"
-#include "util/settings.h"
+#include "common/settings.h"
 #include "detection/gtk_qt/gtk_qt.h"
 
 const char* ffDetectWallpaper(FFstrbuf* result)

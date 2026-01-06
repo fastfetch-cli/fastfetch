@@ -1,6 +1,6 @@
 #include "bootmgr.h"
-#include "util/io.h"
-#include "util/apple/cf_helpers.h"
+#include "common/io.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
 

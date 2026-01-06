@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "util/sysctl.h"
+#include "common/sysctl.h"
 
 #include <sys/param.h>
 #include <uvm/uvm_extern.h>

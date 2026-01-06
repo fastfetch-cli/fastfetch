@@ -1,7 +1,7 @@
 #include "disk.h"
-#include "util/io.h"
-#include "util/thread.h"
-#include "util/windows/unicode.h"
+#include "common/io.h"
+#include "common/thread.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 #include <winioctl.h>

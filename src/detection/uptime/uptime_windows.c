@@ -1,5 +1,5 @@
 #include "uptime.h"
-#include "util/time.h"
+#include "common/time.h"
 
 #include <sysinfoapi.h>
 

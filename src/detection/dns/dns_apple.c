@@ -1,10 +1,10 @@
 #include "detection/dns/dns.h"
 
-#include "util/io.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
-#include "util/apple/cf_helpers.h"
-#include "util/debug.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 
 #include <SystemConfiguration/SystemConfiguration.h>
 

@@ -1,9 +1,9 @@
 #include "terminalshell.h"
-#include "util/io.h"
-#include "util/parsing.h"
-#include "util/processing.h"
-#include "util/thread.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/parsing.h"
+#include "common/processing.h"
+#include "common/thread.h"
+#include "common/stringUtils.h"
 
 #include <string.h>
 #include <stdlib.h>

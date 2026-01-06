@@ -1,7 +1,7 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/textModifier.h"
-#include "util/stringUtils.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/textModifier.h"
+#include "common/stringUtils.h"
 #include "logo/logo.h"
 #include "modules/colors/colors.h"
 

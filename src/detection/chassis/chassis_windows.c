@@ -1,5 +1,5 @@
 #include "chassis.h"
-#include "util/smbiosHelper.h"
+#include "common/smbiosHelper.h"
 
 // 7.4
 typedef struct FFSmbiosSystemEnclosure

@@ -1,10 +1,10 @@
 #include "fastfetch.h"
-#include "util/io.h"
-#include "util/processing.h"
-#include "util/properties.h"
-#include "util/path.h"
-#include "util/stringUtils.h"
-#include "util/binary.h"
+#include "common/io.h"
+#include "common/processing.h"
+#include "common/properties.h"
+#include "common/path.h"
+#include "common/stringUtils.h"
+#include "common/binary.h"
 
 #include <ctype.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@
     #define _PATH_LOCALBASE "/usr/pkg"
 #elif _WIN32
 
-#include "util/windows/version.h"
+#include "common/windows/version.h"
 #include <windows.h>
 
 static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, FFstrbuf* version)
@@ -33,7 +33,7 @@ static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, F
 }
 
 #elif __HAIKU__
-    #include "util/haiku/version.h"
+    #include "common/haiku/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)

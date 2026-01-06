@@ -1,6 +1,6 @@
 #include "fastfetch.h"
-#include "util/sysctl.h"
-#include "util/io.h"
+#include "common/sysctl.h"
+#include "common/io.h"
 #include "battery.h"
 
 #include <dev/acpica/acpiio.h>

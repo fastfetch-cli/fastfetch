@@ -1,5 +1,5 @@
 #include "board.h"
-#include "util/settings.h"
+#include "common/settings.h"
 
 const char* ffDetectBoard(FFBoardResult* board)
 {

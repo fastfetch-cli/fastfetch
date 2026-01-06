@@ -1,13 +1,13 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
 
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <ntstatus.h>
 #include <winternl.h>
 #include <windows.h>
 #include <wchar.h>
-#include "util/windows/perflib_.h"
+#include "common/windows/perflib_.h"
 
 static const char* getInfoByNqsi(FFlist* cpuTimes)
 {

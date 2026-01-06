@@ -1,5 +1,5 @@
 #include "bios.h"
-#include "util/settings.h"
+#include "common/settings.h"
 
 const char* ffDetectBios(FFBiosResult* bios)
 {

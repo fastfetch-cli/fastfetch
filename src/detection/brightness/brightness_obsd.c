@@ -1,5 +1,5 @@
 #include "brightness.h"
-#include "util/io.h"
+#include "common/io.h"
 
 #include <dev/wscons/wsconsio.h>
 #include <sys/ioctl.h>

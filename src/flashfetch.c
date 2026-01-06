@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 
-#include "util/init.h"
+#include "common/init.h"
 #include "logo/logo.h"
 #include "modules/modules.h"
 

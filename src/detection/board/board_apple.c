@@ -1,6 +1,6 @@
 #include "board.h"
 
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 const char* ffDetectBoard(FFBoardResult* result)
 {

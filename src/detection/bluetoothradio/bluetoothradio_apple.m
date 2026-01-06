@@ -1,5 +1,5 @@
 #include "bluetoothradio.h"
-#include "util/processing.h"
+#include "common/processing.h"
 
 #import <IOBluetooth/IOBluetooth.h>
 

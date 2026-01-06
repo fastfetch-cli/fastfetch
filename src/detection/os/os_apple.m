@@ -1,8 +1,8 @@
 #include "os.h"
-#include "util/io.h"
-#include "util/sysctl.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
+#include "common/io.h"
+#include "common/sysctl.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
 
 #include <stdlib.h>
 #include <string.h>

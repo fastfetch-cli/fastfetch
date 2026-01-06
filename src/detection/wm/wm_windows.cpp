@@ -1,12 +1,12 @@
 extern "C"
 {
 #include "wm.h"
-#include "util/io.h"
-#include "util/windows/version.h"
+#include "common/io.h"
+#include "common/windows/version.h"
 #include "detection/terminalshell/terminalshell.h"
 }
 
-#include "util/windows/com.hpp"
+#include "common/windows/com.hpp"
 
 #include <utility>
 #include <windows.h>

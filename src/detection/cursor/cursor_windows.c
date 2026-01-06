@@ -1,6 +1,6 @@
 #include "cursor.h"
 
-#include "util/windows/registry.h"
+#include "common/windows/registry.h"
 
 void ffDetectCursor(FFCursorResult* result)
 {

@@ -1,7 +1,7 @@
-#include "util/percent.h"
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/stringUtils.h"
+#include "common/percent.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/gamepad/gamepad.h"
 #include "modules/gamepad/gamepad.h"
 

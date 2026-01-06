@@ -1,6 +1,6 @@
 #include "keyboard.h"
-#include "util/apple/cf_helpers.h"
-#include "util/mallocHelper.h"
+#include "common/apple/cf_helpers.h"
+#include "common/mallocHelper.h"
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDLib.h>

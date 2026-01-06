@@ -1,5 +1,5 @@
 #include "theme.h"
-#include "util/parsing.h"
+#include "common/parsing.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 

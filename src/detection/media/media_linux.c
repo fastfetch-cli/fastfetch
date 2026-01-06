@@ -1,6 +1,6 @@
 #include "fastfetch.h"
-#include "util/io.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/stringUtils.h"
 #include "detection/media/media.h"
 
 #include <string.h>
@@ -8,7 +8,7 @@
 #define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
 
 #ifdef FF_HAVE_DBUS
-#include "util/dbus.h"
+#include "common/dbus.h"
 
 #define FF_DBUS_ITER_CONTINUE(dbus, iterator) \
     { \

@@ -1,6 +1,6 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/stringUtils.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/initsystem/initsystem.h"
 #include "modules/initsystem/initsystem.h"
 

@@ -1,5 +1,5 @@
 #include "host.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
 {

@@ -2,8 +2,8 @@
 
 #ifdef FF_HAVE_PCIACCESS
 
-#include "util/io.h"
-#include "util/library.h"
+#include "common/io.h"
+#include "common/library.h"
 
 #include <pciaccess.h>
 

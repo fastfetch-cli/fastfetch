@@ -7,9 +7,9 @@
 
 #ifdef FF_HAVE_OPENCL
 
-#include "util/library.h"
-#include "util/parsing.h"
-#include "util/stringUtils.h"
+#include "common/library.h"
+#include "common/parsing.h"
+#include "common/stringUtils.h"
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 110

@@ -1,7 +1,7 @@
 #include "camera.h"
 
-#include "util/processing.h"
-#include "util/properties.h"
+#include "common/processing.h"
+#include "common/properties.h"
 
 #define FF_TERMUX_API_PATH FASTFETCH_TARGET_DIR_ROOT "/libexec/termux-api"
 #define FF_TERMUX_API_PARAM "CameraInfo"

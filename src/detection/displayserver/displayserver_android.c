@@ -1,6 +1,6 @@
 #include "displayserver.h"
-#include "util/settings.h"
-#include "util/processing.h"
+#include "common/settings.h"
+#include "common/processing.h"
 #include "linux/displayserver_linux.h"
 
 #include <math.h>

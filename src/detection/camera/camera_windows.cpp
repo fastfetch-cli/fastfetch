@@ -1,9 +1,9 @@
 extern "C" {
 #include "camera.h"
-#include "util/library.h"
+#include "common/library.h"
 }
-#include "util/windows/com.hpp"
-#include "util/windows/unicode.hpp"
+#include "common/windows/com.hpp"
+#include "common/windows/unicode.hpp"
 
 #include <initguid.h>
 #include <mfapi.h>

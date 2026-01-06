@@ -1,6 +1,6 @@
 #include "memory.h"
-#include "util/io.h"
-#include "util/mallocHelper.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
 
 #include <inttypes.h>
 

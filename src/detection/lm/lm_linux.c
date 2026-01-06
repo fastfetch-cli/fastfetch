@@ -1,7 +1,7 @@
 #include "lm.h"
-#include "util/properties.h"
-#include "util/dbus.h"
-#include "util/processing.h"
+#include "common/properties.h"
+#include "common/dbus.h"
+#include "common/processing.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <unistd.h>
@@ -48,7 +48,7 @@ static const char* getSshdVersion(FFstrbuf* version)
 }
 
 #ifdef FF_HAVE_ZLIB
-#include "util/library.h"
+#include "common/library.h"
 #include <stdlib.h>
 #include <zlib.h>
 

@@ -1,6 +1,6 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/textModifier.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/textModifier.h"
 #include "modules/title/title.h"
 
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)

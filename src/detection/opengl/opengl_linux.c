@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "opengl.h"
-#include "util/io.h"
+#include "common/io.h"
 
 #include <string.h>
 
@@ -14,7 +14,7 @@
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX)
 #define FF_HAVE_GL 1
 
-#include "util/library.h"
+#include "common/library.h"
 
 #include <GL/gl.h>
 

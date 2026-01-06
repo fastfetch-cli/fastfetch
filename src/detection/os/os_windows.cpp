@@ -1,11 +1,11 @@
 extern "C" {
 #include "os.h"
-#include "util/library.h"
-#include "util/stringUtils.h"
-#include "util/windows/registry.h"
+#include "common/library.h"
+#include "common/stringUtils.h"
+#include "common/windows/registry.h"
 }
-#include "util/windows/unicode.hpp"
-#include "util/windows/wmi.hpp"
+#include "common/windows/unicode.hpp"
+#include "common/windows/wmi.hpp"
 
 static const char* getOsNameByWmi(FFstrbuf* osName)
 {

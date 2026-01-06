@@ -1,9 +1,9 @@
 #include "detection/dns/dns.h"
 
-#include "util/io.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
-#include "util/debug.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/debug.h"
 
 #ifdef __HAIKU__
 #define RESOLV_CONF "/system/settings/network/resolv.conf"

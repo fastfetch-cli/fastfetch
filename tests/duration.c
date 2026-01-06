@@ -1,5 +1,5 @@
-#include "util/duration.h"
-#include "util/textModifier.h"
+#include "common/duration.h"
+#include "common/textModifier.h"
 #include "fastfetch.h"
 
 #include <stdlib.h>

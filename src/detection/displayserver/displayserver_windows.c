@@ -1,6 +1,6 @@
 #include "displayserver.h"
-#include "util/windows/unicode.h"
-#include "util/edidHelper.h"
+#include "common/windows/unicode.h"
+#include "common/edidHelper.h"
 
 #include <dwmapi.h>
 #include <winuser.h>

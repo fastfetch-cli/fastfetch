@@ -3,10 +3,10 @@
 #include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_VULKAN
-#include "util/library.h"
-#include "util/io.h"
-#include "util/parsing.h"
-#include "util/stringUtils.h"
+#include "common/library.h"
+#include "common/io.h"
+#include "common/parsing.h"
+#include "common/stringUtils.h"
 
 #include <stdlib.h>
 #include <vulkan/vulkan.h>

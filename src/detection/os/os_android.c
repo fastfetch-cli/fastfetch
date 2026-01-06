@@ -1,5 +1,5 @@
 #include "os.h"
-#include "util/settings.h"
+#include "common/settings.h"
 
 void ffDetectOSImpl(FFOSResult* os)
 {

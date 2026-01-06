@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/option.h"
-#include "util/percent.h"
+#include "common/option.h"
+#include "common/percent.h"
 
 typedef struct FFBluetoothOptions
 {

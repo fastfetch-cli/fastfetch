@@ -1,8 +1,8 @@
 #include "packages.h"
-#include "util/io.h"
-#include "util/parsing.h"
-#include "util/processing.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/parsing.h"
+#include "common/processing.h"
+#include "common/stringUtils.h"
 
 static void countBrewPackages(FFstrbuf* baseDir, FFPackagesResult* result)
 {

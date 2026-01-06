@@ -1,7 +1,7 @@
 #include "netio.h"
 
-#include "util/netif.h"
-#include "util/mallocHelper.h"
+#include "common/netif.h"
+#include "common/mallocHelper.h"
 
 #include <net/if.h>
 #include <net/if_mib.h>

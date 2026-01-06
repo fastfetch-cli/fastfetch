@@ -1,9 +1,9 @@
 #include "os.h"
-#include "util/properties.h"
-#include "util/parsing.h"
-#include "util/io.h"
-#include "util/processing.h"
-#include "util/stringUtils.h"
+#include "common/properties.h"
+#include "common/parsing.h"
+#include "common/io.h"
+#include "common/processing.h"
+#include "common/stringUtils.h"
 
 #include <string.h>
 #include <stdlib.h>

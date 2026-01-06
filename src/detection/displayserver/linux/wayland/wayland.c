@@ -1,7 +1,7 @@
 #include "../displayserver_linux.h"
-#include "util/io.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +10,7 @@
 
 #include <sys/socket.h>
 
-#include "util/properties.h"
+#include "common/properties.h"
 
 #include "wayland.h"
 #include "wlr-output-management-unstable-v1-client-protocol.h"

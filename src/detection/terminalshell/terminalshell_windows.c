@@ -1,12 +1,12 @@
 #include "terminalshell.h"
-#include "util/io.h"
-#include "util/processing.h"
-#include "util/thread.h"
-#include "util/mallocHelper.h"
-#include "util/windows/registry.h"
-#include "util/windows/unicode.h"
-#include "util/windows/version.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/processing.h"
+#include "common/thread.h"
+#include "common/mallocHelper.h"
+#include "common/windows/registry.h"
+#include "common/windows/unicode.h"
+#include "common/windows/version.h"
+#include "common/stringUtils.h"
 
 #include <windows.h>
 #include <wchar.h>

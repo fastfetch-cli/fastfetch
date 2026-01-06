@@ -1,8 +1,8 @@
 #include "localip.h"
-#include "util/io.h"
-#include "util/netif.h"
-#include "util/stringUtils.h"
-#include "util/debug.h"
+#include "common/io.h"
+#include "common/netif.h"
+#include "common/stringUtils.h"
+#include "common/debug.h"
 
 #include <string.h>
 #include <ctype.h>

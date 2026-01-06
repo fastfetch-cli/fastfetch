@@ -1,9 +1,9 @@
 #include "displayserver_linux.h"
-#include "util/io.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/stringUtils.h"
 
 #ifdef __FreeBSD__
-    #include "util/settings.h"
+    #include "common/settings.h"
 #endif
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)

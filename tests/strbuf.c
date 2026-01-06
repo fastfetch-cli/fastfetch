@@ -1,5 +1,5 @@
-#include "util/FFstrbuf.h"
-#include "util/textModifier.h"
+#include "common/FFstrbuf.h"
+#include "common/textModifier.h"
 
 #include <string.h>
 #include <stdlib.h>

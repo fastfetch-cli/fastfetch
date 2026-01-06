@@ -1,6 +1,6 @@
 #include "packages.h"
 
-#include "util/settings.h"
+#include "common/settings.h"
 
 static uint32_t getSQLite3Int(const char* dbPath, const char* query, const char* packageId)
 {

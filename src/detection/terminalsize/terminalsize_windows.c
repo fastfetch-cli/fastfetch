@@ -1,5 +1,5 @@
 #include "terminalsize.h"
-#include "util/io.h"
+#include "common/io.h"
 
 #include <windows.h>
 

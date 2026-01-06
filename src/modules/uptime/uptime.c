@@ -1,8 +1,8 @@
-#include "util/duration.h"
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/time.h"
-#include "util/stringUtils.h"
+#include "common/duration.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/time.h"
+#include "common/stringUtils.h"
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
 

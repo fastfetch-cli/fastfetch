@@ -1,5 +1,5 @@
-#include "util/library.h"
-#include "util/windows/unicode.h"
+#include "common/library.h"
+#include "common/windows/unicode.h"
 #include "media.h"
 #include "media_windows.dll.h"
 

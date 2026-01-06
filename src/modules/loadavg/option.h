@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/option.h"
+#include "common/option.h"
 
 typedef struct FFLoadavgOptions
 {

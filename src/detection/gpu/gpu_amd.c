@@ -1,9 +1,9 @@
 #include "gpu_driver_specific.h"
 
 #include "adl.h"
-#include "util/library.h"
-#include "util/mallocHelper.h"
-#include "util/debug.h"
+#include "common/library.h"
+#include "common/mallocHelper.h"
+#include "common/debug.h"
 
 // Helper function to convert ADL status code to string
 FF_MAYBE_UNUSED static const char* ffAdlStatusToString(int status) {

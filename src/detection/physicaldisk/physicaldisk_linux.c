@@ -1,7 +1,7 @@
 #include "physicaldisk.h"
-#include "util/io.h"
-#include "util/properties.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/properties.h"
+#include "common/stringUtils.h"
 
 #include <ctype.h>
 #include <limits.h>

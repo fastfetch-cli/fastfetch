@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "users.h"
-#include "util/io.h"
+#include "common/io.h"
 
 #include <utmp.h>
 

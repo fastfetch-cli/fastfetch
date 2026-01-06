@@ -2,7 +2,7 @@
 
 #if FF_HAVE_LIBZFS
 
-#include "util/kmod.h"
+#include "common/kmod.h"
 
 #ifdef __sun
 #include <libzfs.h>
@@ -10,7 +10,7 @@
 #include "libzfs_simplified.h"
 #endif
 
-#include "util/library.h"
+#include "common/library.h"
 
 typedef struct FFZfsData
 {

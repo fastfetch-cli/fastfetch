@@ -2,10 +2,10 @@
 
 #ifdef FF_HAVE_XRANDR
 
-#include "util/library.h"
-#include "util/properties.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/library.h"
+#include "common/properties.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>

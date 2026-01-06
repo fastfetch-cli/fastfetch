@@ -1,7 +1,7 @@
 #include "displayserver_linux.h"
-#include "util/io.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #ifdef __linux__
 #include <dirent.h>
@@ -110,7 +110,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
 
 #ifdef FF_HAVE_DRM
 
-#include "util/library.h"
+#include "common/library.h"
 
 #include <xf86drm.h>
 #include <xf86drmMode.h>

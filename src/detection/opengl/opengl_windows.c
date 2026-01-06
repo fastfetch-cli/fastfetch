@@ -1,6 +1,6 @@
 #include "opengl.h"
-#include "util/library.h"
-#include "util/printing.h"
+#include "common/library.h"
+#include "common/printing.h"
 
 #include <windows.h>
 #include <GL/gl.h>

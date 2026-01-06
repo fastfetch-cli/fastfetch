@@ -1,10 +1,10 @@
 #include "cpu.h"
-#include "util/io.h"
-#include "util/processing.h"
-#include "util/properties.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
-#include "util/path.h"
+#include "common/io.h"
+#include "common/processing.h"
+#include "common/properties.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/path.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -200,7 +200,7 @@ static void detectNumaNodes(FFCPUResult* cpu)
 }
 
 #ifdef __ANDROID__
-#include "util/settings.h"
+#include "common/settings.h"
 
 static void detectQualcomm(FFCPUResult* cpu)
 {

@@ -1,6 +1,6 @@
 #include "logo.h"
 #include "logo_builtin.h"
-#include "util/color.h"
+#include "common/color.h"
 
 const FFlogo ffLogoUnknown = {
     .names = {"unknown"},

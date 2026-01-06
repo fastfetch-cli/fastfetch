@@ -1,7 +1,7 @@
 #include "gpu_driver_specific.h"
 
-#include "util/library.h"
-#include "util/mallocHelper.h"
+#include "common/library.h"
+#include "common/mallocHelper.h"
 #include "igcl.h"
 
 struct FFIgclData {

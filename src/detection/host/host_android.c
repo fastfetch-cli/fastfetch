@@ -1,5 +1,5 @@
 #include "host.h"
-#include "util/settings.h"
+#include "common/settings.h"
 
 #include <ctype.h>
 

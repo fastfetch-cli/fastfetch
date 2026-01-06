@@ -1,7 +1,7 @@
 extern "C"
 {
 #include "disk.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 }
 #include <fs_info.h>
 #include <Directory.h>

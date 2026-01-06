@@ -1,6 +1,6 @@
 #include "sound.h"
-#include "util/io.h"
-#include "util/sysctl.h"
+#include "common/io.h"
+#include "common/sysctl.h"
 
 #include <fcntl.h>
 #include <sys/soundcard.h>

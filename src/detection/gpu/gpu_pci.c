@@ -1,6 +1,6 @@
 #include "gpu.h"
-#include "util/io.h"
-#include "util/properties.h"
+#include "common/io.h"
+#include "common/properties.h"
 
 #include <stdlib.h>
 #ifdef __FreeBSD__

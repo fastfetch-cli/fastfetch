@@ -1,6 +1,6 @@
 #include "host.h"
-#include "util/sysctl.h"
-#include "util/smbiosHelper.h"
+#include "common/sysctl.h"
+#include "common/smbiosHelper.h"
 
 const char* ffDetectHost(FFHostResult* host)
 {

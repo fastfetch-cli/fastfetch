@@ -1,8 +1,8 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/percent.h"
-#include "util/size.h"
-#include "util/time.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/percent.h"
+#include "common/size.h"
+#include "common/time.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
 

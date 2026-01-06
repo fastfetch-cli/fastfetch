@@ -1,6 +1,6 @@
 #include "bootmgr.h"
 #include "efi_helper.h"
-#include "util/io.h"
+#include "common/io.h"
 
 #ifdef __OpenBSD__
     #include <dev/efi/efiio.h>

@@ -1,6 +1,6 @@
 #include "poweradapter.h"
-#include "util/io.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/stringUtils.h"
 
 #include <dirent.h>
 #include <unistd.h>

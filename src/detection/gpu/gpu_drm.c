@@ -5,10 +5,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "util/io.h"
-#include "util/library.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/library.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include "intel_drm.h"
 #include "asahi_drm.h"

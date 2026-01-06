@@ -2,7 +2,7 @@
 
 extern "C" {
 #include "opengl.h"
-#include "util/io.h"
+#include "common/io.h"
 #if FF_HAVE_EGL
 const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
 #endif

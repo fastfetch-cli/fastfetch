@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "util/font.h"
+#include "common/font.h"
 #include "modules/font/option.h"
 
 typedef struct FFTerminalFontResult

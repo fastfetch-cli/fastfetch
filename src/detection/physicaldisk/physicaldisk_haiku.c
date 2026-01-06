@@ -1,7 +1,7 @@
 #include "physicaldisk.h"
 
-#include "util/io.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/stringUtils.h"
 
 #include <OS.h>
 #include <StorageDefs.h>

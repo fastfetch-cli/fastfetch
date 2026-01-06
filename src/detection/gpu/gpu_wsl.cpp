@@ -2,7 +2,7 @@
 
 #define INITGUID
 extern "C" {
-#include "util/library.h"
+#include "common/library.h"
 #include "detection/gpu/gpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
 }

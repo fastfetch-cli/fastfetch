@@ -1,5 +1,5 @@
 #include "wallpaper.h"
-#include "util/windows/registry.h"
+#include "common/windows/registry.h"
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {

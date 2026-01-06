@@ -1,6 +1,6 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/stringUtils.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/localip/localip.h"
 #include "modules/localip/localip.h"
 

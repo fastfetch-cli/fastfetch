@@ -1,8 +1,8 @@
-#include "util/printing.h"
-#include "util/jsonconfig.h"
-#include "util/percent.h"
-#include "util/size.h"
-#include "util/stringUtils.h"
+#include "common/printing.h"
+#include "common/jsonconfig.h"
+#include "common/percent.h"
+#include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/physicalmemory/physicalmemory.h"
 #include "modules/physicalmemory/physicalmemory.h"
 

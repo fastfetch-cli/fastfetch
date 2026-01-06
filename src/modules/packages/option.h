@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/option.h"
+#include "common/option.h"
 
 typedef enum __attribute__((__packed__)) FFPackagesFlags
 {

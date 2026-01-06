@@ -1,8 +1,8 @@
 #include "physicalmemory.h"
-#include "util/processing.h"
-#include "util/smbiosHelper.h"
-#include "util/stringUtils.h"
-#include "util/apple/cf_helpers.h"
+#include "common/processing.h"
+#include "common/smbiosHelper.h"
+#include "common/stringUtils.h"
+#include "common/apple/cf_helpers.h"
 
 #import <Foundation/Foundation.h>
 

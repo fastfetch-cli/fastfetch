@@ -1,13 +1,13 @@
 #include "fastfetch.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
-#include "util/commandoption.h"
-#include "util/init.h"
-#include "util/io.h"
-#include "util/jsonconfig.h"
-#include "util/time.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
+#include "common/commandoption.h"
+#include "common/init.h"
+#include "common/io.h"
+#include "common/jsonconfig.h"
+#include "common/time.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
 #include "fastfetch_datatext.h"
 
 #include <stdlib.h>
@@ -15,7 +15,7 @@
 #include <string.h>
 
 #ifdef _WIN32
-    #include "util/windows/getline.h"
+    #include "common/windows/getline.h"
 #endif
 
 static void printCommandFormatHelpJson(void)

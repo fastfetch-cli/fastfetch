@@ -1,6 +1,6 @@
 #include "cpucache.h"
-#include "util/smbiosHelper.h"
-#include "util/stringUtils.h"
+#include "common/smbiosHelper.h"
+#include "common/stringUtils.h"
 
 typedef struct FFSmbiosCacheInfo
 {

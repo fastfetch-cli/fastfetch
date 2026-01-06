@@ -1,6 +1,6 @@
 #include "disk.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include <sys/mount.h>
 #include <sys/stat.h>
@@ -76,7 +76,7 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
     detectFsLabel(fs, disk);
 }
 #elif __APPLE__
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <sys/attr.h>
 #include <unistd.h>
