@@ -223,5 +223,6 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         {"Size used percentage bar", "used-percentage-bar"},
         {"Size allocated percentage bar", "allocated-percentage-bar"},
         {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
+        {"Is read-only", "is-readonly"},
     }))
 };
