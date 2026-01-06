@@ -1,4 +1,4 @@
-#include "frequency.h"
+#include "util/frequency.h"
 
 bool ffFreqAppendNum(uint32_t mhz, FFstrbuf* result)
 {

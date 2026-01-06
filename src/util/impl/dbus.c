@@ -1,4 +1,4 @@
-#include "dbus.h"
+#include "util/dbus.h"
 
 #ifdef FF_HAVE_DBUS
 

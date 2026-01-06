@@ -1,4 +1,4 @@
-#include "netif.h"
+#include "util/netif.h"
 #include "util/mallocHelper.h"
 
 #include <ws2tcpip.h> // AF_INET6, IN6_IS_ADDR_UNSPECIFIED

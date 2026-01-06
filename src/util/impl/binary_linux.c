@@ -1,4 +1,4 @@
-#include "binary.h"
+#include "util/binary.h"
 
 #if defined(FF_HAVE_ELF) || defined(__sun) || (defined(__FreeBSD__) && !defined(__DragonFly__)) || defined(__OpenBSD__) || defined(__NetBSD__)
 

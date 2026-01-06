@@ -1,4 +1,4 @@
-#include "kmod.h"
+#include "util/kmod.h"
 
 #if __linux__
 #include "util/io.h"

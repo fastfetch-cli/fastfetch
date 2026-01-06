@@ -1,4 +1,4 @@
-#include "edidHelper.h"
+#include "util/edidHelper.h"
 
 void ffEdidGetPhysicalResolution(const uint8_t edid[128], uint32_t* width, uint32_t* height)
 {

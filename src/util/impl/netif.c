@@ -1,4 +1,4 @@
-#include "netif.h"
+#include "util/netif.h"
 
 #ifndef _WIN32
     #include <net/if.h>

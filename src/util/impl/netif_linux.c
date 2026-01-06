@@ -1,4 +1,4 @@
-#include "netif.h"
+#include "util/netif.h"
 #include "util/io.h"
 #include "util/mallocHelper.h"
 #include "util/debug.h"

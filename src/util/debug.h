@@ -28,4 +28,6 @@ static inline const char* ffFindFileName(const char* file)
 
 #define FF_DEBUG(format, ...) FF_DEBUG_PRINT(__FILE__, __LINE__, format, ##__VA_ARGS__)
 
+#if _WIN32
 const char* ffDebugWin32Error(unsigned long errorCode);
+#endif

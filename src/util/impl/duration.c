@@ -1,4 +1,4 @@
-#include "duration.h"
+#include "util/duration.h"
 
 void ffDurationAppendNum(uint64_t totalSeconds, FFstrbuf* result)
 {
