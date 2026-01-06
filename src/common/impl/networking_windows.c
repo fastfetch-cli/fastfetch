@@ -148,10 +148,18 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         return "bind() failed";
     }
 
-    // Initialize overlapped structure for asynchronous I/O
+    // Initialize overlapped structure with WSA event for asynchronous I/O
     state->overlapped = (OVERLAPPED){
-        .hEvent = CreateEventW(NULL, FALSE, FALSE, NULL)
+        .hEvent = WSACreateEvent()
     };
+
+    if (state->overlapped.hEvent == WSA_INVALID_EVENT) {
+        FF_DEBUG("WSACreateEvent() failed");
+        closesocket(state->sockfd);
+        freeaddrinfo(addr);
+        state->sockfd = INVALID_SOCKET;
+        return "WSACreateEvent() failed";
+    }
 
     // Build HTTP command
     ffStrbufInitA(&state->command, 128);
@@ -200,7 +208,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         if (WSAGetLastError() != WSA_IO_PENDING)
         {
             FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-            CloseHandle(state->overlapped.hEvent);
+            WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             state->sockfd = INVALID_SOCKET;
             ffStrbufDestroy(&state->command);
@@ -234,15 +242,20 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     uint32_t timeout = state->timeout;
     if (timeout > 0)
     {
-        FF_DEBUG("WaitForSingleObject with timeout: %u ms", timeout);
-        if (WaitForSingleObject(state->overlapped.hEvent, timeout) != WAIT_OBJECT_0)
+        FF_DEBUG("WSAWaitForMultipleEvents with timeout: %u ms", timeout);
+        DWORD result = WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, timeout, FALSE);
+        if (result != WSA_WAIT_EVENT_0)
         {
-            FF_DEBUG("WaitForSingleObject failed or timed out");
+            if (result == WSA_WAIT_TIMEOUT) {
+                FF_DEBUG("WSAWaitForMultipleEvents timed out");
+            } else {
+                FF_DEBUG("WSAWaitForMultipleEvents failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+            }
             CancelIo((HANDLE) state->sockfd);
-            CloseHandle(state->overlapped.hEvent);
+            WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             ffStrbufDestroy(&state->command);
-            return "WaitForSingleObject(state->sockfd) failed or timeout";
+            return "WSAWaitForMultipleEvents() failed or timeout";
         }
     }
 
@@ -251,13 +264,13 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     {
         FF_DEBUG("WSAGetOverlappedResult failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
-        CloseHandle(state->overlapped.hEvent);
+        WSACloseEvent(state->overlapped.hEvent);
         ffStrbufDestroy(&state->command);
         return "WSAGetOverlappedResult() failed";
     }
     FF_DEBUG("WSAGetOverlappedResult succeeded, %u bytes sent", (unsigned) transfer);
     ffStrbufDestroy(&state->command);
-    CloseHandle(state->overlapped.hEvent);
+    WSACloseEvent(state->overlapped.hEvent);
     state->overlapped.hEvent = NULL;
 
     if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) != 0)
