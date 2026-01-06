@@ -1,6 +1,6 @@
 #include "opengl.h"
-#include "common/library.h"
-#include "common/printing.h"
+#include "util/library.h"
+#include "util/printing.h"
 
 #include <windows.h>
 #include <GL/gl.h>
@@ -72,7 +72,7 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
 
 static const char* wglDetectOpenGL(FFOpenGLResult* result)
 {
-    FF_LIBRARY_LOAD(opengl32, "dlopen opengl32" FF_LIBRARY_EXTENSION " failed", "opengl32" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_MESSAGE(opengl32, "opengl32" FF_LIBRARY_EXTENSION, 1);
 
     WGLData data = {};
 

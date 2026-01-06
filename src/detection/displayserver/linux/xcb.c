@@ -2,8 +2,8 @@
 
 #ifdef FF_HAVE_XCB_RANDR
 
-#include "common/library.h"
-#include "common/properties.h"
+#include "util/library.h"
+#include "util/properties.h"
 #include "util/edidHelper.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
@@ -357,7 +357,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
 
 const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcbRandr, "dlopen libxcb-randr failed", "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(xcbRandr, "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connect)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connection_has_error)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_get_setup)

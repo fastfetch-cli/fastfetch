@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 
 const char* ffDetectMemory(FFMemoryResult* ram)
 {

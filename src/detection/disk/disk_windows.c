@@ -1,6 +1,6 @@
 #include "disk.h"
-#include "common/io/io.h"
-#include "common/thread.h"
+#include "util/io/io.h"
+#include "util/thread.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>
@@ -53,6 +53,29 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         else if(driveType == DRIVE_NO_ROOT_DIR)
             continue;
 
+        if (options->hideFolders.length && ffStrbufSeparatedContain(&options->hideFolders, &buffer, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        wchar_t diskName[MAX_PATH + 1], diskFileSystem[MAX_PATH + 1];
+
+        DWORD diskFlags;
+        BOOL volumeInfoAvailable = GetVolumeInformationW(mountpoint,
+            diskName, ARRAY_SIZE(diskName), //Volume name
+            NULL, //Serial number
+            NULL, //Max component length
+            &diskFlags, //File system flags
+            diskFileSystem, ARRAY_SIZE(diskFileSystem)
+        );
+
+        FF_STRBUF_AUTO_DESTROY diskFileSystemBuf = ffStrbufCreate();
+
+        if (volumeInfoAvailable)
+        {
+            ffStrbufSetWS(&diskFileSystemBuf, diskFileSystem);
+            if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &diskFileSystemBuf, ':'))
+                continue;
+        }
+
         FFDisk* disk = ffListAdd(disks);
 
         disk->filesUsed = 0;
@@ -97,20 +120,9 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             (PULARGE_INTEGER)&disk->bytesFree
         );
 
-        wchar_t diskName[MAX_PATH + 1], diskFileSystem[MAX_PATH + 1];
-
-        DWORD diskFlags;
-        BOOL result = GetVolumeInformationW(mountpoint,
-            diskName, ARRAY_SIZE(diskName), //Volume name
-            NULL, //Serial number
-            NULL, //Max component length
-            &diskFlags, //File system flags
-            diskFileSystem, ARRAY_SIZE(diskFileSystem)
-        );
-
-        if(result)
+        if(volumeInfoAvailable)
         {
-            ffStrbufSetWS(&disk->filesystem, diskFileSystem);
+            ffStrbufInitMove(&disk->filesystem, &diskFileSystemBuf);
             ffStrbufSetWS(&disk->name, diskName);
             if(diskFlags & FILE_READ_ONLY_VOLUME)
                 disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;

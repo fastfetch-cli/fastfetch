@@ -1,6 +1,6 @@
 #include "disk.h"
 
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/stringUtils.h"
 
 #include <limits.h>
@@ -295,6 +295,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
                 continue;
         }
         else if(!isPhysicalDevice(device))
+            continue;
+
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, device->mnt_dir, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, device->mnt_type, ':'))
             continue;
 
         //We have a valid device, add it to the list

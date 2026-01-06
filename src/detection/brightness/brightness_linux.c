@@ -1,5 +1,5 @@
 #include "brightness.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
@@ -41,7 +41,7 @@ static const char* detectWithBacklight(FFlist* result)
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
                 ffStrbufSubstrBeforeLastC(&backlightDir, '/');
                 ffStrbufAppendS(&backlightDir, "/device");
-                ffStrbufInitA(&brightness->name, PATH_MAX + 1);
+                ffStrbufInitA(&brightness->name, PATH_MAX);
                 if(realpath(backlightDir.chars, brightness->name.chars))
                 {
                     ffStrbufRecalculateLength(&brightness->name);
@@ -87,7 +87,7 @@ static const char* detectWithBacklight(FFlist* result)
 
 #ifdef FF_HAVE_DDCUTIL
 #include "detection/displayserver/displayserver.h"
-#include "common/library.h"
+#include "util/library.h"
 #include "util/mallocHelper.h"
 
 #include <ddcutil_macros.h>
@@ -102,7 +102,7 @@ DDCA_Status ddca_init(const char *libopts, int syslog_level, int opts);
 
 static const char* detectWithDdcci(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
 {
-    FF_LIBRARY_LOAD(libddcutil, "dlopen ddcutil failed", "libddcutil" FF_LIBRARY_EXTENSION, 5);
+    FF_LIBRARY_LOAD_MESSAGE(libddcutil, "libddcutil" FF_LIBRARY_EXTENSION, 5);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_display_info_list2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_open_display2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)

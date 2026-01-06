@@ -25,65 +25,24 @@
  * CDDL HEADER END
  */
 
-typedef enum {
-    ZPOOL_PROP_INVAL = -1,
-    ZPOOL_PROP_NAME,
-    ZPOOL_PROP_SIZE,
-    ZPOOL_PROP_CAPACITY,
-    ZPOOL_PROP_ALTROOT,
-    ZPOOL_PROP_HEALTH,
-    ZPOOL_PROP_GUID,
-    ZPOOL_PROP_VERSION,
-    ZPOOL_PROP_BOOTFS,
-    ZPOOL_PROP_DELEGATION,
-    ZPOOL_PROP_AUTOREPLACE,
-    ZPOOL_PROP_CACHEFILE,
-    ZPOOL_PROP_FAILUREMODE,
-    ZPOOL_PROP_LISTSNAPS,
-    ZPOOL_PROP_AUTOEXPAND,
-    ZPOOL_PROP_DEDUPDITTO,
-    ZPOOL_PROP_DEDUPRATIO,
-    ZPOOL_PROP_FREE,
-    ZPOOL_PROP_ALLOCATED,
-    ZPOOL_PROP_READONLY,
-    ZPOOL_PROP_ASHIFT,
-    ZPOOL_PROP_COMMENT,
-    ZPOOL_PROP_EXPANDSZ,
-    ZPOOL_PROP_FREEING,
-    ZPOOL_PROP_FRAGMENTATION,
-    ZPOOL_PROP_LEAKED,
-    ZPOOL_PROP_MAXBLOCKSIZE,
-    ZPOOL_PROP_TNAME,
-    ZPOOL_PROP_MAXDNODESIZE,
-    ZPOOL_PROP_MULTIHOST,
-    ZPOOL_PROP_CHECKPOINT,
-    ZPOOL_PROP_LOAD_GUID,
-    ZPOOL_PROP_AUTOTRIM,
-    ZPOOL_PROP_COMPATIBILITY,
-    ZPOOL_PROP_BCLONEUSED,
-    ZPOOL_PROP_BCLONESAVED,
-    ZPOOL_PROP_BCLONERATIO,
-    ZPOOL_NUM_PROPS
-} zpool_prop_t;
-
-typedef enum {
-    ZPROP_SRC_NONE = 0x1,
-    ZPROP_SRC_DEFAULT = 0x2,
-    ZPROP_SRC_TEMPORARY = 0x4,
-    ZPROP_SRC_LOCAL = 0x8,
-    ZPROP_SRC_INHERITED = 0x10,
-    ZPROP_SRC_RECEIVED = 0x20
-} zprop_source_t;
-
-typedef bool boolean_t;
+// zpool_prop_t and zprop_source_t were previously enums in upstream OpenZFS.
+// However, the enum values for these types vary greatly between different platforms,
+// making it unsafe to use the enum values directly. To ensure portability,
+// we define them as simple int typedefs and use zpool_name_to_prop to look up
+// the correct value for a property at runtime.
+typedef int zpool_prop_t;
+typedef int zprop_source_t;
+typedef int boolean_t;
 
 typedef struct libzfs_handle libzfs_handle_t;
 typedef struct zpool_handle zpool_handle_t;
 typedef int (*zpool_iter_f)(zpool_handle_t *, void *);
-extern int zpool_iter(libzfs_handle_t *, zpool_iter_f, void *);
 
 extern libzfs_handle_t *libzfs_init(void);
 extern void libzfs_fini(libzfs_handle_t *);
-extern uint64_t zpool_get_prop_int(zpool_handle_t *, zpool_prop_t, zprop_source_t *);
-extern const char *zpool_get_name(zpool_handle_t *);
-extern const char *zpool_get_state_str(zpool_handle_t *);
+extern int zpool_iter(libzfs_handle_t *, zpool_iter_f, void *);
+extern zpool_prop_t zpool_name_to_prop(const char *);
+// https://github.com/openzfs/zfs/blob/06c73cffabc30b61a695988ec8e290f43cb3768d/lib/libzfs/libzfs_pool.c#L300
+extern uint64_t zpool_get_prop_int(zpool_handle_t *zhp, zpool_prop_t prop, zprop_source_t *srctype);
+extern int zpool_get_prop(zpool_handle_t *zhp, zpool_prop_t prop, char *buf, size_t len, zprop_source_t *srctype, boolean_t literal);
+extern void zpool_close(zpool_handle_t *);

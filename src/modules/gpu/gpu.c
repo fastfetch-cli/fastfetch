@@ -1,13 +1,13 @@
-#include "common/percent.h"
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/temps.h"
-#include "common/size.h"
-#include "common/frequency.h"
+#include "util/percent.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/temps.h"
+#include "util/size.h"
+#include "util/frequency.h"
+#include "util/stringUtils.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
-#include "util/stringUtils.h"
 
 #include <stdlib.h>
 
@@ -386,9 +386,12 @@ bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         {
             case FF_GPU_TYPE_INTEGRATED: type = "Integrated"; break;
             case FF_GPU_TYPE_DISCRETE: type = "Discrete"; break;
-            default: type = "Unknown"; break;
+            default: type = NULL; break;
         }
-        yyjson_mut_obj_add_str(doc, obj, "type", type);
+        if (type)
+            yyjson_mut_obj_add_str(doc, obj, "type", type);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "type");
 
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &gpu->vendor);
 

@@ -1,5 +1,5 @@
 #include "initsystem.h"
-#include "common/processing.h"
+#include "util/processing.h"
 #include "util/binary.h"
 #include "util/stringUtils.h"
 

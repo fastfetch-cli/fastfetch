@@ -1,5 +1,5 @@
 #include "uptime.h"
-#include "common/time.h"
+#include "util/time.h"
 
 const char* ffDetectUptime(FFUptimeResult* result)
 {

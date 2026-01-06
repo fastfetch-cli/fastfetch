@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "opengl.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 #include <string.h>
 
@@ -14,7 +14,7 @@
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX)
 #define FF_HAVE_GL 1
 
-#include "common/library.h"
+#include "util/library.h"
 
 #include <GL/gl.h>
 
@@ -127,7 +127,7 @@ static const char* detectByGlx(FFOpenGLResult* result)
 {
     GLXData data;
 
-    FF_LIBRARY_LOAD(glx, "dlopen glx failed",
+    FF_LIBRARY_LOAD_MESSAGE(glx,
         #if !__OpenBSD__ && !__NetBSD__
             "libGLX"
         #else

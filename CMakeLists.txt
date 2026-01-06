@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.54.0
+    VERSION 2.56.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -92,8 +92,7 @@ cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -107,6 +106,7 @@ option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_LIBZFS "Enable libzfs" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -364,31 +364,12 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/commandoption.c
-    src/common/duration.c
-    src/common/font.c
-    src/common/format.c
-    src/common/frequency.c
-    src/common/init.c
-    src/common/jsonconfig.c
-    src/common/library.c
-    src/common/modules.c
-    src/common/netif/netif.c
-    src/common/networking/networking_common.c
-    src/common/option.c
-    src/common/parsing.c
-    src/common/percent.c
-    src/common/printing.c
-    src/common/properties.c
-    src/common/settings.c
-    src/common/size.c
-    src/common/temps.c
-    src/common/time.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
+    src/detection/command/command.c
     src/detection/disk/disk.c
     src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
@@ -409,6 +390,7 @@ set(LIBFASTFETCH_SRC
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/detection/weather/weather.c
+    src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
@@ -490,6 +472,26 @@ set(LIBFASTFETCH_SRC
     src/options/display.c
     src/options/logo.c
     src/options/general.c
+    src/util/commandoption.c
+    src/util/duration.c
+    src/util/font.c
+    src/util/format.c
+    src/util/frequency.c
+    src/util/init.c
+    src/util/jsonconfig.c
+    src/util/library.c
+    src/util/modules.c
+    src/util/netif/netif.c
+    src/util/networking/networking_common.c
+    src/util/option.c
+    src/util/parsing.c
+    src/util/percent.c
+    src/util/printing.c
+    src/util/properties.c
+    src/util/settings.c
+    src/util/size.c
+    src/util/temps.c
+    src/util/time.c
     src/util/edidHelper.c
     src/util/base64.c
     src/util/FFlist.c
@@ -502,11 +504,6 @@ set(LIBFASTFETCH_SRC
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_linux.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -581,17 +578,16 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_linux.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_linux.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -655,18 +651,16 @@ elseif(ANDROID)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
-        src/detection/zpool/zpool_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_linux.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(FreeBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
@@ -738,7 +732,12 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -755,12 +754,6 @@ elseif(FreeBSD)
     endif()
 elseif(NetBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
         src/detection/bluetooth/bluetooth_bsd.c
@@ -794,7 +787,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_nbsd.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nbsd.c
@@ -832,18 +825,17 @@ elseif(NetBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(OpenBSD)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -878,7 +870,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_obsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
@@ -915,18 +907,18 @@ elseif(OpenBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_bsd.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/io/io_unix.c
-        src/common/netif/netif_apple.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
-        src/common/sysctl.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
@@ -985,7 +977,11 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
-        src/detection/zpool/zpool_nosupport.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_apple.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
+        src/util/sysctl.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
@@ -994,10 +990,6 @@ elseif(APPLE)
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/io/io_windows.c
-        src/common/netif/netif_windows.c
-        src/common/networking/networking_windows.c
-        src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
@@ -1055,7 +1047,10 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/detection/zpool/zpool_nosupport.c
+        src/util/io/io_windows.c
+        src/util/netif/netif_windows.c
+        src/util/networking/networking_windows.c
+        src/util/processing_windows.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -1068,11 +1063,6 @@ elseif(WIN32)
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_apple.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1144,17 +1134,16 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_linux.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_apple.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(Haiku)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_haiku.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1213,18 +1202,17 @@ elseif(Haiku)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_haiku.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
     )
 elseif(GNU)
     list(APPEND LIBFASTFETCH_SRC
-        src/common/dbus.c
-        src/common/io/io_unix.c
-        src/common/netif/netif_gnu.c
-        src/common/networking/networking_linux.c
-        src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
@@ -1254,7 +1242,7 @@ elseif(GNU)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_general.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nosupport.c
@@ -1293,7 +1281,11 @@ elseif(GNU)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
+        src/util/dbus.c
+        src/util/io/io_unix.c
+        src/util/netif/netif_gnu.c
+        src/util/networking/networking_linux.c
+        src/util/processing_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
    )
@@ -1340,15 +1332,15 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
-else()
-    # Used for dlopen finding dylibs installed by homebrew
-    # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
-    endif()
+endif()
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
+if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
 if(ANDROID)
@@ -1418,9 +1410,25 @@ elseif(NetBSD)
 elseif(Haiku)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 elseif(GNU)
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
     # On Hurd PATH_MAX is not defined. Set an arbitrary limit as workaround.
-    target_compile_definitions(libfastfetch PUBLIC PATH_MAX=4096)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE PATH_MAX=4096 O_PATH=0)
+endif()
+
+if(WIN32)
+    check_function_exists(_msize HAVE_MSVC_MSIZE)
+    if(HAVE_MSVC_MSIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MSVC_MSIZE=1)
+    endif()
+else()
+    check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
+    if(HAVE_MALLOC_USABLE_SIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_USABLE_SIZE=1)
+    else()
+        check_function_exists(malloc_size HAVE_MALLOC_SIZE)
+        if(HAVE_MALLOC_SIZE)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_SIZE=1)
+        endif()
+    endif()
 endif()
 
 if(FreeBSD OR OpenBSD OR NetBSD)
@@ -1610,24 +1618,6 @@ ff_lib_enable(PCIACCESS
     "pciaccess"
     "pciaccess"
 )
-# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
-if(ENABLE_LIBZFS)
-    if(BINARY_LINK_TYPE STREQUAL "dlopen")
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-    else()
-        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
-        check_function_exists("libzfs_init" LIBZFS_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
-        if(NOT LIBZFS_FOUND)
-            message(STATUS "Library: missing: LIBZFS")
-        else()
-            message(STATUS "Library: found LIBZFS")
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-            target_link_libraries(libfastfetch PRIVATE zfs)
-        endif()
-    endif()
-endif()
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
@@ -1641,6 +1631,15 @@ if(ENABLE_EMBEDDED_PCIIDS)
 endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
+endif()
+if(ENABLE_LIBZFS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch
+            PRIVATE "zfs"
+        )
+    endif()
 endif()
 
 if(LINUX)
@@ -1732,8 +1731,6 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "zfs"
-        PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
 elseif(GNU)
@@ -1823,7 +1820,13 @@ if(NOT WIN32)
         CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
         if(HAVE_WORDEXP)
             target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+            message(STATUS "wordexp.h found, wordexp support enabled")
+        else()
+            set(ENABLE_WORDEXP OFF)
         endif()
+    endif()
+    if(NOT ENABLE_WORDEXP)
+        message(STATUS "wordexp.h not found or disabled, glob used instead")
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

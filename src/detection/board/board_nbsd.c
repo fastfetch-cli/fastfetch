@@ -1,5 +1,5 @@
 #include "board.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/smbiosHelper.h"
 
 const char* ffDetectBoard(FFBoardResult* board)

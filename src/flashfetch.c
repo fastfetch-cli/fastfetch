@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 
-#include "common/init.h"
+#include "util/init.h"
+#include "logo/logo.h"
 #include "modules/modules.h"
 
 // A dirty replicate of neofetch
@@ -136,6 +137,7 @@ int main(void)
         ffPrintColors(&options);
     }
 
+    ffLogoPrintRemaining();
     ffFinish();
     ffDestroyInstance();
     return 0;

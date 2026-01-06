@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/option.h"
+#include "util/option.h"
 
 typedef struct FFWMThemeOptions
 {

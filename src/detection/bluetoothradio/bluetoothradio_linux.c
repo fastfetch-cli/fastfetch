@@ -2,8 +2,8 @@
 #include "util/stringUtils.h"
 
 #ifdef FF_HAVE_DBUS
-#include "common/dbus.h"
-#include "common/io/io.h"
+#include "util/dbus.h"
+#include "util/io/io.h"
 
 /* Example dbus reply:
 array [

@@ -1,12 +1,12 @@
 #include "tpm.h"
-#include "common/library.h"
+#include "util/library.h"
 
 #include <tbs.h>
 #include <winerror.h>
 
 const char* ffDetectTPM(FFTPMResult* result)
 {
-    FF_LIBRARY_LOAD(tbs, "dlopen TBS" FF_LIBRARY_EXTENSION " failed", "TBS" FF_LIBRARY_EXTENSION, -1)
+    FF_LIBRARY_LOAD_MESSAGE(tbs, "TBS" FF_LIBRARY_EXTENSION, -1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(tbs, Tbsi_GetDeviceInfo)
 
     TPM_DEVICE_INFO deviceInfo = {};

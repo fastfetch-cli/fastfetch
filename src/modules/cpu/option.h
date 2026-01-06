@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common/option.h"
+#include "util/option.h"
 
 typedef struct FFCPUOptions
 {
     FFModuleArgs moduleArgs;
 
+    FFstrbuf tempSensor;
     bool temp;
     FFColorRangeConfig tempConfig;
     bool showPeCoreCount;

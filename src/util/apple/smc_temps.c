@@ -156,113 +156,108 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
     if (val.dataSize == 0)
         return "Empty SMC result";
 
-    if (ffStrEquals(val.dataType, "ui8 ") ||
-        ffStrEquals(val.dataType, "ui16") ||
-        ffStrEquals(val.dataType, "ui32") ||
-        ffStrEquals(val.dataType, "ui64"))
+    switch (val.dataType[0])
     {
-        uint64_t tmp = 0;
-        for (uint32_t i = 0; i < val.dataSize; i++)
-            tmp += (uint64_t)((uint8_t)(val.bytes[i]) * pow(256, val.dataSize - 1 - i));
-        *value = (double)tmp;
+        case 'u': // unsigned integer types
+            if (val.dataType[1] == 'i')
+            {
+                switch (val.dataSize)
+                {
+                    case 1: *value = *(uint8_t *)(val.bytes); break;
+                    case 2: *value = ntohs(*(uint16_t *)(val.bytes)); break;
+                    case 4: *value = ntohl(*(uint32_t *)(val.bytes)); break;
+                    case 8: *value = ntohll(*(uint64_t *)(val.bytes)); break;
+                    default:
+                        return "Unsupported SMC unsigned integer data size";
+                }
+            }
+            else
+                return "Unsupported SMC unsigned data type";
+            break;
+
+        case 'f': // floating point types
+            if (ffStrEquals(val.dataType, "flt ") && val.dataSize == 4)
+                *value = *(float *)(val.bytes);
+            else if (val.dataType[1] == 'p' && val.dataSize == 2) // fixed point types
+            {
+                if (ffStrEquals(val.dataType, "fp1f"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 32768.0;
+                else if (ffStrEquals(val.dataType, "fp4c"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
+                else if (ffStrEquals(val.dataType, "fp5b"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 2048.0;
+                else if (ffStrEquals(val.dataType, "fp6a"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 1024.0;
+                else if (ffStrEquals(val.dataType, "fp79"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 512.0;
+                else if (ffStrEquals(val.dataType, "fp88"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 256.0;
+                else if (ffStrEquals(val.dataType, "fpa6"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 64.0;
+                else if (ffStrEquals(val.dataType, "fpc4"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 16.0;
+                else if (ffStrEquals(val.dataType, "fpe2"))
+                    *value = ntohs(*(uint16_t *)(val.bytes)) / 4.0;
+                else
+                    return "Unsupported SMC floating point data type";
+            }
+            else
+                return "Unsupported SMC floating point data type";
+            break;
+
+        case 's': // signed integer types
+            if (val.dataType[1] == 'i')
+            {
+                switch (val.dataSize)
+                {
+                    case 1: *value = *(int8_t *)(val.bytes); break;
+                    case 2: *value = ntohs(*(int16_t *)(val.bytes)); break;
+                    case 4: *value = ntohl(*(int32_t *)(val.bytes)); break;
+                    case 8: *value = ntohll(*(int64_t *)(val.bytes)); break;
+                    default: return "Unsupported SMC signed integer data size";
+                }
+            }
+            else if (val.dataType[1] == 'p' && val.dataSize == 2) // signed fixed point types
+            {
+                if (ffStrEquals(val.dataType, "sp1e"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 16384.0;
+                else if (ffStrEquals(val.dataType, "sp3c"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 4096.0;
+                else if (ffStrEquals(val.dataType, "sp4b"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 2048.0;
+                else if (ffStrEquals(val.dataType, "sp5a"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 1024.0;
+                else if (ffStrEquals(val.dataType, "sp69"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 512.0;
+                else if (ffStrEquals(val.dataType, "sp78"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 256.0;
+                else if (ffStrEquals(val.dataType, "sp87"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 128.0;
+                else if (ffStrEquals(val.dataType, "sp96"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 64.0;
+                else if (ffStrEquals(val.dataType, "spb4"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 16.0;
+                else if (ffStrEquals(val.dataType, "spf0"))
+                    *value = (int16_t)ntohs(*(int16_t *)(val.bytes)) / 1.0;
+                else
+                    return "Unsupported SMC signed integer data type";
+            }
+            else
+                return "Unsupported SMC signed data type";
+            break;
+
+        case '{': // special types like pwm
+            if (ffStrEquals(val.dataType, "{pwm") && val.dataSize == 2)
+            {
+                *value = (double)ntohs(*(uint16_t *)(val.bytes)) * 100 / 65536.0;
+            }
+            else
+                return "Unsupported SMC special data type";
+            break;
+
+        default:
+            return "Unsupported SMC data type";
     }
-    else if (ffStrEquals(val.dataType, "flt "))
-    {
-        *value = *(float *)(val.bytes);
-    }
-    else if (ffStrEquals(val.dataType, "fp1f") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 32768.0;
-    }
-    else if (ffStrEquals(val.dataType, "fp4c") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
-    }
-    else if (ffStrEquals(val.dataType, "fp5b") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 2048.0;
-    }
-    else if (ffStrEquals(val.dataType, "fp6a") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 1024.0;
-    }
-    else if (ffStrEquals(val.dataType, "fp79") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 512.0;
-    }
-    else if (ffStrEquals(val.dataType, "fp88") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 256.0;
-    }
-    else if (ffStrEquals(val.dataType, "fpa6") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 64.0;
-    }
-    else if (ffStrEquals(val.dataType, "fpc4") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 16.0;
-    }
-    else if (ffStrEquals(val.dataType, "fpe2") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 4.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp1e") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 16384.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp3c") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 4096.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp4b") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 2048.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp5a") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 1024.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp69") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 512.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp78") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 256.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp87") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 128.0;
-    }
-    else if (ffStrEquals(val.dataType, "sp96") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 64.0;
-    }
-    else if (ffStrEquals(val.dataType, "spb4") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 16.0;
-    }
-    else if (ffStrEquals(val.dataType, "spf0") && val.dataSize == 2)
-    {
-        *value = ntohs(*(uint16_t *)(val.bytes)) / 1.0;
-    }
-    else if (ffStrEquals(val.dataType, "si8 ") && val.dataSize == 1)
-    {
-        signed char *bytes = (signed char *)val.bytes;
-        int16_t temp = 0;
-        temp += (int8_t)(bytes[0]);
-        *value = temp;
-    }
-    else if (ffStrEquals(val.dataType, "si16") && val.dataSize == 2)
-    {
-        *value = ntohs(*(int16_t *)(val.bytes));
-    }
-    else if (ffStrEquals(val.dataType, "{pwm") && val.dataSize == 2)
-    {
-        *value = (double)ntohs(*(uint16_t *)(val.bytes)) * 100 / 65536.0;
-    }
-    else
-        return "Unknown SMC data type";
     return NULL;
 }
 
@@ -277,15 +272,32 @@ static bool detectTemp(io_connect_t conn, const char* sensor, double* sum)
     return true;
 }
 
-const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+static io_connect_t conn;
+
+const char* ffDetectSmcSpecificTemp(const char* sensor, double* result)
 {
-    static io_connect_t conn;
     if (!conn)
     {
         if (smcOpen(&conn) != NULL)
             conn = (io_connect_t) -1;
     }
-    else if (conn == (io_connect_t) -1)
+    if (conn == (io_connect_t) -1)
+        return "Could not open SMC connection";
+
+    if (!detectTemp(conn, sensor, result))
+        return "Could not read SMC temperature";
+
+    return NULL;
+}
+
+const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+{
+    if (!conn)
+    {
+        if (smcOpen(&conn) != NULL)
+            conn = (io_connect_t) -1;
+    }
+    if (conn == (io_connect_t) -1)
         return "Could not open SMC connection";
 
     uint32_t count = 0;

@@ -1,5 +1,5 @@
 #include "cpucache.h"
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/stringUtils.h"
 
 static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, FFstrbuf* buffer, FFstrbuf* added)

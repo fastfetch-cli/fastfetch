@@ -1,3 +1,27 @@
+fastfetch (2.56.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.56.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 18 Dec 2025 14:57:36 +0800
+
+fastfetch (2.56.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.56.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 08 Dec 2025 09:21:58 +0800
+
+fastfetch (2.55.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 17 Nov 2025 10:15:44 +0800
+
+fastfetch (2.55.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 12 Nov 2025 09:15:24 +0800
+
 fastfetch (2.54.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
 
   * Fix building on plucky

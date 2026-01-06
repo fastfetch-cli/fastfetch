@@ -1,7 +1,7 @@
 #include "netio.h"
 
-#include "common/io/io.h"
-#include "common/netif/netif.h"
+#include "util/io/io.h"
+#include "util/netif/netif.h"
 #include "util/stringUtils.h"
 
 #include <fcntl.h>

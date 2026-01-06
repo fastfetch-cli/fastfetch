@@ -1,6 +1,6 @@
 #include "wm.h"
 
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 

@@ -1,7 +1,7 @@
 #include "kmod.h"
 
 #if __linux__
-#include "common/io/io.h"
+#include "util/io/io.h"
 
 bool ffKmodLoaded(const char* modName)
 {

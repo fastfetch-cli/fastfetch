@@ -1,6 +1,6 @@
 #include "battery.h"
 
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/windows/nt.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"

@@ -1,4 +1,4 @@
-#include "common/duration.h"
+#include "util/duration.h"
 #include "util/textModifier.h"
 #include "fastfetch.h"
 

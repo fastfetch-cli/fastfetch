@@ -2,7 +2,7 @@
 
 #define INITGUID
 extern "C" {
-#include "common/library.h"
+#include "util/library.h"
 #include "detection/gpu/gpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
 }
@@ -28,7 +28,7 @@ private:
 extern "C"
 const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_LIBRARY_LOAD(libdxcore, "dlopen libdxcore.so failed", "/usr/lib/wsl/lib/libdxcore" FF_LIBRARY_EXTENSION, 4)
+    FF_LIBRARY_LOAD_MESSAGE(libdxcore, "/usr/lib/wsl/lib/libdxcore" FF_LIBRARY_EXTENSION, 4)
     // DXCoreCreateAdapterFactory is a reloaded function, so we can't use FF_LIBRARY_LOAD_SYMBOL_MESSAGE here
     typedef HRESULT (*DXCoreCreateAdapterFactory_t)(REFIID riid, void** ppvFactory);
 
@@ -78,6 +78,13 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         gpu->deviceId = 0;
         ffStrbufInitStatic(&gpu->platformApi, "DXCore");
+
+        LUID luid;
+        if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::InstanceLuid, sizeof(luid), &luid)))
+        {
+            static_assert(sizeof(luid) == sizeof(uint64_t), "LUID size mismatch");
+            gpu->deviceId = ffGPUGeneral2Id((uint64_t) luid.HighPart << 32 | (uint64_t) luid.LowPart);
+        }
 
         ffStrbufInit(&gpu->driver);
         uint64_t value = 0;

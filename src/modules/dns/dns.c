@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/dns/dns.h"
 #include "modules/dns/dns.h"
-#include "util/stringUtils.h"
 
 bool ffPrintDNS(FFDNSOptions* options)
 {

@@ -27,6 +27,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
                 continue;
         }
 
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, path.Path(), FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, fs.fsh_name, ':'))
+            continue;
+
         FFDisk* disk = (FFDisk*) ffListAdd(disks);
 
         disk->bytesTotal = (uint64_t)fs.total_blocks * (uint64_t) fs.block_size;

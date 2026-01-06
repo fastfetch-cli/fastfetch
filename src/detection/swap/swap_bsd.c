@@ -1,5 +1,5 @@
 #include "swap.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 
 #include <vm/vm_param.h>
 #include <sys/stat.h>

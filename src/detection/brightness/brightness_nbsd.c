@@ -1,6 +1,6 @@
 #include "brightness.h"
 
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 
 const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
 {

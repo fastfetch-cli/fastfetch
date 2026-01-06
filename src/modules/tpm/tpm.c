@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/tpm/tpm.h"
 #include "modules/tpm/tpm.h"
-#include "util/stringUtils.h"
 
 bool ffPrintTPM(FFTPMOptions* options)
 {

@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/wifi/wifi.h"
 #include "modules/wifi/wifi.h"
-#include "util/stringUtils.h"
 
 bool ffPrintWifi(FFWifiOptions* options)
 {

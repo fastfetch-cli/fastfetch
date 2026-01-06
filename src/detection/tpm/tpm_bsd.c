@@ -1,5 +1,5 @@
 #include "tpm.h"
-#include "common/sysctl.h"
+#include "util/sysctl.h"
 #include "util/kmod.h"
 
 const char* ffDetectTPM(FFTPMResult* result)

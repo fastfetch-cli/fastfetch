@@ -17,7 +17,7 @@ static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)
     }
 }
 
-const char* detectThermalTemp(double* result)
+const char* detectThermalTemp(const FFCPUOptions* options, double* result)
 {
     struct FFPerfQuerySpec
     {
@@ -34,6 +34,14 @@ const char* detectThermalTemp(double* result)
         },
         .Name = L"\\_TZ.CPUZ", // The standard(?) instance name for CPU temperature in the thermal provider
     };
+
+    if (options->tempSensor.length > 0)
+    {
+        int written = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, options->tempSensor.chars, (int) options->tempSensor.length, querySpec.Name, (int)(ARRAY_SIZE(querySpec.Name) - 1));
+        if (written == 0)
+            return "Invalid temp sensor string";
+        querySpec.Name[written] = L'\0';
+    }
 
     DWORD dataSize = 0;
     if (PerfEnumerateCounterSetInstances(NULL, &querySpec.Identifier.CounterSetGuid, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY)
@@ -62,6 +70,9 @@ const char* detectThermalTemp(double* result)
 
         if (dataSize == 0)
         {
+            if (options->tempSensor.length > 0)
+                return "Unable to find CPU sensor";
+
             const wchar_t* instanceName = (const wchar_t*)((BYTE*)pHead + sizeof(*pHead));
             wcscpy(querySpec.Name, instanceName); // Use the first instance name if the specific one is not found
         }
@@ -230,6 +241,8 @@ static const char* detectNCores(FFCPUResult* cpu)
             ++cpu->coresPhysical;
         else if (ptr->Relationship == RelationProcessorPackage)
             ++cpu->packages;
+        else if (ptr->Relationship == RelationNumaNode)
+            ++cpu->numaNodes;
     }
 
     return NULL;
@@ -299,7 +312,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)
-        detectThermalTemp(&cpu->temperature);
+        detectThermalTemp(options, &cpu->temperature);
 
     return NULL;
 }

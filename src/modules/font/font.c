@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/font/font.h"
 #include "modules/font/font.h"
-#include "util/stringUtils.h"
 
 bool ffPrintFont(FFFontOptions* options)
 {

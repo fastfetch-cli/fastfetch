@@ -57,7 +57,7 @@ static const char* detectFrequency(FFGPUResult* gpu)
     if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states9-sram\" in \"pmgr\" is not found";
 
-    // voltage-states5-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
+    // voltage-states9-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
     CFIndex propLength = CFDataGetLength(freqProperty);
     if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0)
         return "Invalid \"voltage-states9-sram\" length";

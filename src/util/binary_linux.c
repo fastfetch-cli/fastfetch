@@ -2,8 +2,8 @@
 
 #if defined(FF_HAVE_ELF) || defined(__sun) || (defined(__FreeBSD__) && !defined(__DragonFly__)) || defined(__OpenBSD__) || defined(__NetBSD__)
 
-#include "common/io/io.h"
-#include "common/library.h"
+#include "util/io/io.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 
 #include <libelf.h> // #1254
@@ -42,7 +42,7 @@ const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* s
     if (!elfData.inited)
     {
         elfData.inited = true;
-        FF_LIBRARY_LOAD(libelf, "dlopen libelf" FF_LIBRARY_EXTENSION " failed", "libelf" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD_MESSAGE(libelf, "libelf" FF_LIBRARY_EXTENSION, 1);
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libelf, elfData, elf_version)
         if (elfData.ffelf_version(EV_CURRENT) == EV_NONE) return "elf_version() failed";
 

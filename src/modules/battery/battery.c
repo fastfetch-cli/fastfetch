@@ -1,11 +1,11 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "common/percent.h"
-#include "common/duration.h"
-#include "common/temps.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/percent.h"
+#include "util/duration.h"
+#include "util/temps.h"
+#include "util/stringUtils.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
-#include "util/stringUtils.h"
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {

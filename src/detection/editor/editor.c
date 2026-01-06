@@ -1,6 +1,6 @@
 #include "editor.h"
-#include "common/processing.h"
-#include "common/library.h"
+#include "util/processing.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 #include "util/path.h"
 #include "util/binary.h"

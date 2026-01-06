@@ -1,11 +1,21 @@
 #include "media.h"
+#include "util/io/io.h"
 
 void ffDetectMediaImpl(FFMediaResult* media, bool saveCover);
 
+static FFMediaResult result;
+
+static void removeMediaCoverFile(void)
+{
+    if (result.cover.length > 0)
+    {
+        ffRemoveFile(result.cover.chars);
+        ffStrbufDestroy(&result.cover);
+    }
+}
+
 const FFMediaResult* ffDetectMedia(bool saveCover)
 {
-    static FFMediaResult result;
-
     if (result.error.chars == NULL)
     {
         ffStrbufInit(&result.error);
@@ -26,6 +36,9 @@ const FFMediaResult* ffDetectMedia(bool saveCover)
         ffStrbufTrimRightSpace(&result.artist);
         ffStrbufTrimRightSpace(&result.album);
         ffStrbufTrimRightSpace(&result.player);
+
+        if (saveCover && result.removeCoverAfterUse)
+            atexit(removeMediaCoverFile);
     }
 
     return &result;

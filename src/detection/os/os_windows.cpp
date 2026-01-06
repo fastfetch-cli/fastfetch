@@ -1,6 +1,6 @@
 extern "C" {
 #include "os.h"
-#include "common/library.h"
+#include "util/library.h"
 #include "util/stringUtils.h"
 #include "util/windows/registry.h"
 }
@@ -48,7 +48,7 @@ static bool getCodeName(FFOSResult* os)
 static const char* getOsNameByWinbrand(FFstrbuf* osName)
 {
     //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
-    FF_LIBRARY_LOAD(winbrand, "dlopen winbrand" FF_LIBRARY_EXTENSION " failed", "winbrand" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_MESSAGE(winbrand, "winbrand" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
 
     const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");

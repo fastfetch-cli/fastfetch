@@ -1,9 +1,9 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
-#include "logo/logo.h"
-#include "modules/colors/colors.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
+#include "logo/logo.h"
+#include "modules/colors/colors.h"
 
 static inline uint8_t min(uint8_t a, uint8_t b)
 {

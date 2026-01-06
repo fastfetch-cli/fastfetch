@@ -3,9 +3,9 @@
 #include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_VULKAN
-#include "common/library.h"
-#include "common/io/io.h"
-#include "common/parsing.h"
+#include "util/library.h"
+#include "util/io/io.h"
+#include "util/parsing.h"
 #include "util/stringUtils.h"
 
 #include <stdlib.h>
@@ -39,7 +39,7 @@ static void applyDriverName(VkPhysicalDeviceDriverPropertiesKHR* properties, FFs
 
 static const char* detectVulkan(FFVulkanResult* result)
 {
-    FF_LIBRARY_LOAD(vulkan, "dlopen libvulkan" FF_LIBRARY_EXTENSION " failed",
+    FF_LIBRARY_LOAD_MESSAGE(vulkan,
         #if __APPLE__
             "libMoltenVK" FF_LIBRARY_EXTENSION, -1
         #elif _WIN32

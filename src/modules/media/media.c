@@ -1,8 +1,8 @@
-#include "common/printing.h"
-#include "common/jsonconfig.h"
+#include "util/printing.h"
+#include "util/jsonconfig.h"
+#include "util/stringUtils.h"
 #include "detection/media/media.h"
 #include "modules/media/media.h"
-#include "util/stringUtils.h"
 
 #include <ctype.h>
 
@@ -144,7 +144,7 @@ bool ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
     if (media->cover.length > 0)
-        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->status);
+        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->cover);
     else
         yyjson_mut_obj_add_null(doc, song, "cover");
 

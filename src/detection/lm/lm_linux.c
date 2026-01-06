@@ -1,7 +1,7 @@
 #include "lm.h"
-#include "common/properties.h"
-#include "common/dbus.h"
-#include "common/processing.h"
+#include "util/properties.h"
+#include "util/dbus.h"
+#include "util/processing.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <unistd.h>
@@ -48,13 +48,13 @@ static const char* getSshdVersion(FFstrbuf* version)
 }
 
 #ifdef FF_HAVE_ZLIB
-#include "common/library.h"
+#include "util/library.h"
 #include <stdlib.h>
 #include <zlib.h>
 
 static const char* getSddmVersion(FFstrbuf* version)
 {
-    FF_LIBRARY_LOAD(zlib, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_MESSAGE(zlib, "libz" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror)

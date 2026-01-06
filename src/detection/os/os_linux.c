@@ -1,8 +1,8 @@
 #include "os.h"
-#include "common/properties.h"
-#include "common/parsing.h"
-#include "common/io/io.h"
-#include "common/processing.h"
+#include "util/properties.h"
+#include "util/parsing.h"
+#include "util/io/io.h"
+#include "util/processing.h"
 #include "util/stringUtils.h"
 
 #include <string.h>
@@ -240,7 +240,7 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetStatic(&result->id, "raspbian");
         ffStrbufSetStatic(&result->idLike, "debian");
         ffStrbufSetStatic(&result->name, "Raspberry Pi OS");
-        ffStrbufSetStatic(&result->prettyName, "Raspberry Pi OS");
+        getDebianVersion(result);
         return true;
     }
     else if (ffPathExists("/boot/dietpi/.version", FF_PATHTYPE_FILE))

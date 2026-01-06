@@ -1,6 +1,6 @@
 #include "path.h"
 
-#include "common/io/io.h"
+#include "util/io/io.h"
 #include "util/stringUtils.h"
 
 #if !_WIN32
@@ -64,13 +64,3 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
     return NULL;
 }
 #endif
-
-bool ffIsAbsolutePath(const char* path)
-{
-    #ifdef _WIN32
-    return (ffCharIsEnglishAlphabet(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) // drive letter path
-        || (path[0] == '\\' && path[1] == '\\'); // UNC path
-    #else
-    return path[0] == '/';
-    #endif
-}
