@@ -48,6 +48,7 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
         }
         return false;
     }
+    assert(bufSize >= sizeof(wchar_t));
     wchar_t* FF_AUTO_FREE resultW = (wchar_t*)malloc(bufSize);
     if(RegGetValueW(hKey, NULL, valueNameW, RRF_RT_REG_SZ, NULL, resultW, &bufSize) != ERROR_SUCCESS)
     {
@@ -60,7 +61,7 @@ bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFs
         }
         return false;
     }
-    ffStrbufSetWS(result, resultW);
+    ffStrbufSetNWS(result, (uint32_t) (bufSize / sizeof(*resultW) - 1), resultW);
     return true;
 }
 
