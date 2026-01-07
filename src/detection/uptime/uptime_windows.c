@@ -22,13 +22,13 @@ const char* ffDetectUptime(FFUptimeResult* result)
     }
 
     result->uptime = GetTickCount64();
+ok:
+
     #else
     uint64_t uptime;
     QueryInterruptTime(&uptime);
     result->uptime = uptime / 10000; // Convert from 100-nanosecond intervals to milliseconds
     #endif
-
-ok:
     result->bootTime = ffTimeGetNow() - result->uptime;
     return NULL;
 }
