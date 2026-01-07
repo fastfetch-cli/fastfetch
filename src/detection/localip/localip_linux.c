@@ -339,8 +339,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
         }
 
-        FF_DEBUG("Processing interface %s (family=%d, flags=0x%x)",
-                 ifa->ifa_name, ifa->ifa_addr->sa_family, ifa->ifa_flags);
+        FF_DEBUG("Processing interface %s (family=%d, flags=0x%lx)",
+                 ifa->ifa_name, ifa->ifa_addr->sa_family, (unsigned long) ifa->ifa_flags);
 
         FFAdapter* adapter = NULL;
         FF_LIST_FOR_EACH(FFAdapter, x, adapters)
