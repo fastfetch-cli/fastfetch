@@ -152,7 +152,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
             switch (GetLastError())
             {
             case ERROR_IO_PENDING:
-                #if __aarch64__
+                #if !FF_WIN7_COMPAT
                 if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, timeout < 0 ? INFINITE : (DWORD) timeout, FALSE))
                 #else
                 // To support Windows 7
@@ -172,7 +172,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
                     return "GetOverlappedResult"
-                        #if __aarch64__
+                        #if !FF_WIN7_COMPAT
                         "Ex"
                         #endif
                         "(hChildPipeRead) failed";

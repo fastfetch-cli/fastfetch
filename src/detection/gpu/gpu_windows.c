@@ -330,7 +330,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (gpu->type == FF_GPU_TYPE_UNKNOWN && adapterLuid > 0)
         {
             FF_DEBUG("Trying to determine GPU type using D3DKMT APIs");
-            #if __aarch64__
+            #if !FF_WIN7_COMPAT
             D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = { .AdapterLuid = *(LUID*)&adapterLuid };
             if (NT_SUCCESS(D3DKMTOpenAdapterFromLuid(&openAdapterFromLuid)))
             #else
@@ -438,7 +438,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             FF_DEBUG("Failed to get GPU temperature or temperature is 0");
                         }
                     }
-            #if !__aarch64__
+            #if FF_WIN7_COMPAT
                 }
                 else
                 {

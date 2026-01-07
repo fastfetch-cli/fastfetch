@@ -7,7 +7,7 @@
 
 const char* ffDetectUptime(FFUptimeResult* result)
 {
-    #ifndef __aarch64__
+    #if FF_WIN7_COMPAT
     HMODULE hKernelBase = GetModuleHandleW(L"KernelBase.dll");
     if (__builtin_expect(!!hKernelBase, true))
     {

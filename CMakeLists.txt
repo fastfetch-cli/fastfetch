@@ -94,6 +94,13 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
+if(WIN32)
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+        set(WIN32_WOA ON)
+    endif()
+    cmake_dependent_option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" OFF "WIN32_WOA" ON)
+endif()
+
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -1419,6 +1426,13 @@ if(WIN32)
     if(HAVE_MSVC_MSIZE)
         target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MSVC_MSIZE=1)
     endif()
+
+    if(ENABLE_WIN7_COMPAT)
+        message(STATUS "Enabling Windows 7 compatibility mode")
+        target_compile_definitions(libfastfetch PUBLIC FF_WIN7_COMPAT=1)
+    else()
+        target_compile_definitions(libfastfetch PUBLIC FF_WIN7_COMPAT=0)
+    endif()
 else()
     check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
     if(HAVE_MALLOC_USABLE_SIZE)
@@ -1692,8 +1706,7 @@ elseif(WIN32)
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-        # WoA only works on Windows 10 or higher
+    if(NOT ENABLE_WIN7_COMPAT)
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
         )
