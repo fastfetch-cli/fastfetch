@@ -33,6 +33,7 @@ static inline size_t ffMallocUsableSize(const void* ptr)
     #elif FF_HAVE_MSVC_MSIZE
         return _msize((void*) ptr);
     #else
+        (void) ptr;
         return 0; // Not supported
     #endif
 }
