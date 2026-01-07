@@ -69,6 +69,17 @@ void ffDetectOSImpl(FFOSResult* os)
     if(ffStrbufStartsWithS(&os->variant, "Microsoft "))
         ffStrbufSubstrAfter(&os->variant, strlen("Microsoft ") - 1);
 
+    if(os->variant.length == 0) // Windows PE?
+    {
+        wchar_t buf[128];
+        DWORD bufSize = (DWORD) sizeof(buf); // with trailing '\0'
+        if(RegGetValueW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", RRF_RT_REG_SZ, NULL, buf, &bufSize) == ERROR_SUCCESS)
+        {
+            assert(bufSize >= sizeof(wchar_t));
+            ffStrbufSetNWS(&os->variant, bufSize / sizeof(wchar_t) - 1, buf);
+        }
+    }
+
     ffStrbufSet(&os->prettyName, &os->variant);
 
     if(ffStrbufStartsWithS(&os->variant, "Windows "))
@@ -82,6 +93,9 @@ void ffDetectOSImpl(FFOSResult* os)
             ffStrbufAppendS(&os->name, " Server");
             ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
         }
+
+        if(ffStrbufStartsWithIgnCaseS(&os->variant, "(TM) "))
+            ffStrbufSubstrAfter(&os->variant, strlen(" (TM)") - 1);
 
         uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
         ffStrbufAppendNS(&os->version, index, os->variant.chars);
