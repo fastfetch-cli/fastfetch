@@ -524,8 +524,8 @@ jobs:
           run: |
             uname -a
             sudo pkg_add -u
-            sudo pkg_add -r llvm-19.1.7p3 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
-            CC=clang-19 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            sudo pkg_add -r llvm-21.1.2p0 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
+            CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
