@@ -5500,6 +5500,15 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "16",
         }
     },
+    // Xinux
+    {
+        .names = {"Xinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XINUX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+        }
+    },
     // LAST
     {},
 };
