@@ -520,7 +520,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.7'
+          version: '7.8'
           run: |
             uname -a
             sudo pkg_add -u
