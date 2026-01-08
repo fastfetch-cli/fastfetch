@@ -1,3 +1,33 @@
+# 2.57.0
+
+Deprecation Notice:
+* Windows 7 (and 8.x) support is deprecated and will be removed in a future release. Extended support for Windows 7 (and 8.1) ended on January 10, 2023 (3 years ago). These versions lack official support for ANSI escape codes (running fastfetch on them requires a 3rd party terminal like ConEmu). In addition, Windows 7 lacks some APIs used by fastfetch. Currently, fastfetch loads these APIs dynamically at runtime to maintain compatibility, but this adds complexity to the codebase and increases the maintenance burden.
+    * A CMake flag `ENABLE_WIN7_COMPAT:BOOLEAN` has been introduced (defaults to `ON` for now). If set to `OFF`, Windows 7 compatibility code is excluded, and target binaries will support only Windows 10 (version 1607 and later) and Windows 11.
+    * The main prebuilt Windows binaries on the Release page (`fastfetch-windows-amd64.*`) are built with `ENABLE_WIN7_COMPAT=OFF`, which are used by `scoop` and `winget`. Users who need Windows 7 (or 8.x) support may download the `-win7` variant.
+    * The `ENABLE_WIN7_COMPAT` cmake option and `-win7` variant binaries are planned for removal in 2.60.0.
+
+Features:
+* Supports COSMIC DE version detection (DE, Linux)
+* Supports niri version detection (#2121, WM, Linux)
+* Supports cosmic-term version and term font detection (Terminal / TerminalFont, Linux)
+* Supports urxvt font detection (TerminalFont, Linux) (#2105)
+* Improves xterm font detection by checking `xterm.vt100.faceName` (TerminalFont, Linux)
+* Supports secure boot detection (Bootmgr, macOS)
+* Supports DPI scale factor detection on Windows 7 (Display, Windows)
+* Improves uptime accuracy on Windows 10+ (Uptime, Windows)
+
+Bugfixes:
+* Skips local / loopback routes when detecting network interfaces (LocalIP, Linux) (#2127)
+* Fixes CPU speed detection on s390x (CPU, Linux) (#2129)
+* Fixes GPU detection error handling and supports case-insensitive PCI ID parsing (GPU, Windows)
+* Fixes some networking issues and memory leaks (Networking)
+
+Logos:
+* Adds openSUSE Tumbleweed braille logo
+* Renames HydraPWK to NetHydra
+* Fixes colors of deepin
+* Fixes colors of UOS
+
 # 2.56.1
 
 Features:
