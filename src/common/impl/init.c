@@ -262,6 +262,9 @@ void ffListFeatures(void)
         #if FF_HAVE_EMBEDDED_PCIIDS
             "Embedded pciids\n"
         #endif
+        #if FF_WIN7_COMPAT
+            "Windows 7 Compatibility\n"
+        #endif
         ""
     , stdout);
 }
