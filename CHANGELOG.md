@@ -14,6 +14,9 @@ Features:
 * Improves xterm font detection by checking `xterm.vt100.faceName` (TerminalFont, Linux)
 * Supports secure boot detection (Bootmgr, macOS)
 * Supports DPI scale factor detection on Windows 7 (Display, Windows)
+* Supports xterm 256 color codes in color configuration
+    * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
+    * In `format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
 * Improves uptime accuracy on Windows 10+ (Uptime, Windows)
 
 Bugfixes:

@@ -166,6 +166,22 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
                 exit(479);
             }
         }
+        else if (value[0] == '@')
+        {
+            // Xterm 256 color
+            ++value;
+            char* pend = NULL;
+            uint32_t color = (uint32_t) strtoul(value, &pend, 10);
+            if (pend == value || color > 255) {
+                fprintf(stderr, "Error: invalid 256 color code found: %s\n", value);
+                exit(479);
+            }
+
+            ffStrbufAppendS(buffer, FF_COLOR_FG_256);
+            ffStrbufAppendUInt(buffer, color);
+            value = pend;
+            continue;
+        }
         else if (value[0] == '#')
         {
             // RGB color
