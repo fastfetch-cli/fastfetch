@@ -12,13 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum __attribute__((__packed__)) FFLogoSize
-{
-    FF_LOGO_SIZE_UNKNOWN,
-    FF_LOGO_SIZE_NORMAL,
-    FF_LOGO_SIZE_SMALL,
-} FFLogoSize;
-
 static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError)
 {
     FFOptionsLogo* options = &instance.config.logo;
@@ -451,7 +444,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
         return true;
     }
 
-    const FFlogo* logo = ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
+    const FFlogo* logo = ffLogoGetBuiltinForName(name, size);
     if(logo == NULL)
         return false;
 
@@ -783,4 +776,14 @@ void ffLogoBuiltinListAutocompletion(void)
         for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
             printf("%s\n", logo->names[0]);
     }
+}
+
+const FFlogo* ffLogoGetBuiltinForName(const FFstrbuf* name, FFLogoSize size)
+{
+    return ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
+}
+
+const FFlogo* ffLogoGetBuiltinDetected(FFLogoSize size)
+{
+    return logoGetBuiltinDetected(size);
 }
