@@ -18,6 +18,8 @@ Features:
     * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
     * In `format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
 * Improves uptime accuracy on Windows 10+ (Uptime, Windows)
+* Adds a new module `Logo` to query built-in logo raw data in JSON output (Logo)
+    * Usage: `fastfetch -s logo -l <logo-name> -j # Supported in JSON format only`
 
 Bugfixes:
 * Skips local / loopback routes when detecting network interfaces (LocalIP, Linux) (#2127)

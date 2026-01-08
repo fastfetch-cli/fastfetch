@@ -82,6 +82,7 @@ static FFModuleBaseInfo* L[] = {
     &ffLoadavgModuleInfo,
     &ffLocaleModuleInfo,
     &ffLocalIPModuleInfo,
+    &ffLogoModuleInfo,
     NULL,
 };
 

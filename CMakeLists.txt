@@ -468,6 +468,7 @@ set(LIBFASTFETCH_SRC
     src/modules/loadavg/loadavg.c
     src/modules/locale/locale.c
     src/modules/localip/localip.c
+    src/modules/logo/logo.c
     src/modules/memory/memory.c
     src/modules/monitor/monitor.c
     src/modules/netio/netio.c
