@@ -222,6 +222,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 {
     assert(processName->length > 0);
     ffStrbufClear(exe);
+    if (exePath) ffStrbufClear(exePath);
 
     #if defined(__linux__) || defined(__GNU__)
 
@@ -270,13 +271,14 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
-            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
+            // When the process is a deleted executable, the resolved path is like `/usr/bin/app (deleted)`
+            // But we can still access the binary via `/proc/pid/exe`. See #2136
+            if (ffPathExists(buf, FF_PATHTYPE_ANY))
+                ffStrbufSetNS(exePath, (uint32_t)length, buf);
         }
-        else
-        {
+
+        if (exePath->length == 0)
             ffStrbufSetS(exePath, filePath);
-        }
     }
 
     #elif defined(__APPLE__)
