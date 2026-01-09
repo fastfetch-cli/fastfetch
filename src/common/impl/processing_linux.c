@@ -410,8 +410,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
-            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
+            ffStrbufSetNS(exePath, (uint32_t)length, buf);
         }
     }
 
