@@ -442,7 +442,9 @@ static void generateConfigFile(bool force, const char* filePath, bool fullConfig
             exit(477);
         }
 
-        ffStrbufSet(&instance.state.genConfigPath, FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0));
+        FFstrbuf* configDir = FF_LIST_FIRST(FFstrbuf, instance.state.platform.configDirs);
+        ffStrbufEnsureFixedLengthFree(&instance.state.genConfigPath, configDir->length + strlen("fastfetch/config.jsonc"));
+        ffStrbufSet(&instance.state.genConfigPath, configDir);
         ffStrbufAppendS(&instance.state.genConfigPath, "fastfetch/config.jsonc");
     }
     else
@@ -486,7 +488,8 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     //Try to load as an absolute path
 
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateS(value);
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
+    ffStrbufSetS(&absolutePath, value);
     bool strictJson = ffStrbufEndsWithIgnCaseS(&absolutePath, ".json");
     bool jsonc = !strictJson && ffStrbufEndsWithIgnCaseS(&absolutePath, ".jsonc");
     bool json5 = !strictJson && !jsonc && ffStrbufEndsWithIgnCaseS(&absolutePath, ".json5");

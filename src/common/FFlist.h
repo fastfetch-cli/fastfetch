@@ -126,3 +126,10 @@ static inline void ffListClear(FFlist* list)
         assert(sizeof(itemType) == (listVar).elementSize); \
         (itemType*) ffListAdd(&(listVar)); \
     })
+
+#define FF_LIST_FIRST(itemType, listVar) FF_LIST_GET(itemType, listVar, 0)
+#define FF_LIST_LAST(itemType, listVar) \
+    ({ \
+        assert((listVar).length > 0); \
+        FF_LIST_GET(itemType, listVar, ((listVar).length - 1)); \
+    })
