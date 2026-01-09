@@ -354,6 +354,7 @@ static const FFlogo A[] = {
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_BLUE,
@@ -2879,6 +2880,7 @@ static const FFlogo M[] = {
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_BLUE,
@@ -3739,6 +3741,7 @@ static const FFlogo O[] = {
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_BLUE,
