@@ -75,7 +75,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
     // Handle different DNS management services
     if (results->length == 1)
     {
-        const FFstrbuf* firstEntry = FF_LIST_GET(FFstrbuf, *results, 0);
+        const FFstrbuf* firstEntry = FF_LIST_FIRST(FFstrbuf, *results);
 
         if (ffStrbufEqualS(firstEntry, "127.0.0.53"))
         {

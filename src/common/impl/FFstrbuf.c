@@ -72,6 +72,7 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
     strbuf->allocated = allocate;
 }
 
+// Ensure that at least `free` bytes are available in the buffer besides the current length
 // for an empty buffer, free + 1 length memory will be allocated(+1 for the NUL)
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
 {
@@ -165,7 +166,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments)
     uint32_t free = ffStrbufGetFree(strbuf);
     int written = vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated > 0 ? free + 1 : 0, format, arguments);
 
-    if(written > 0 && strbuf->length + (uint32_t) written > free)
+    if(written > 0 && (uint32_t) written > free)
     {
         ffStrbufEnsureFree(strbuf, (uint32_t) written);
         written = vsnprintf(strbuf->chars + strbuf->length, (uint32_t) written + 1, format, copy);
@@ -235,6 +236,55 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c)
     memmove(strbuf->chars + 1, strbuf->chars, strbuf->length + 1); // + 1 for the null byte
     strbuf->chars[0] = c;
     strbuf->length += 1;
+}
+
+void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
+{
+    assert(strbuf != NULL);
+
+    if (length == 0)
+    {
+        ffStrbufClear(strbuf);
+        return;
+    }
+
+    assert(value != NULL);
+
+    if (strbuf->allocated < length + 1)
+    {
+        if (strbuf->allocated > 0)
+            free(strbuf->chars);
+        strbuf->allocated = length + 1;
+        strbuf->chars = malloc(sizeof(char) * strbuf->allocated);
+    }
+
+    memcpy(strbuf->chars, value, length);
+    strbuf->length = length;
+    strbuf->chars[length] = '\0';
+}
+
+void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
+{
+    assert(value && value != strbuf);
+
+    if (value->length == 0)
+    {
+        ffStrbufClear(strbuf);
+        return;
+    }
+
+    if (value->allocated == 0) // static string
+    {
+        if (strbuf->allocated != 0)
+        {
+            free(strbuf->chars);
+            strbuf->allocated = 0;
+        }
+        strbuf->chars = value->chars;
+        strbuf->length = value->length;
+        return;
+    }
+    ffStrbufSetNS(strbuf, value->length, value->chars);
 }
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
@@ -398,7 +448,15 @@ void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace)
         return;
 
     ffStrbufEnsureFree(strbuf, 0);
-    for (char *current_pos = strchr(strbuf->chars, find); current_pos; current_pos = strchr(current_pos + 1, find))
+    for (
+        char *current_pos = memchr(strbuf->chars, find, strbuf->length);
+        current_pos;
+        current_pos = memchr(
+            current_pos + 1,
+            find,
+            strbuf->length - (uint32_t)(current_pos + 1 - strbuf->chars)
+        )
+    )
         *current_pos = replace;
 }
 

@@ -487,7 +487,7 @@ static bool updateLogoPath(void)
         return true;
     }
 
-    FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreateA(128);
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {
         ffStrbufDestroy(&options->source);
