@@ -197,12 +197,6 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
 {
     if (detectArmbianVersion(result))
         return true;
-    else if (ffStrbufEqualS(&result->id, "limeos"))
-    {
-        // LimeOS - Debian-based
-        ffStrbufSetStatic(&result->idLike, "debian");
-        return true;
-    }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
     {
         ffStrbufSetStatic(&result->id, "locos");

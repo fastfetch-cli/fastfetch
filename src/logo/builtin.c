@@ -2688,8 +2688,8 @@ static const FFlogo L[] = {
     },
     // LimeOS
     {
-        .names = {"limeos"},
-        .lines = FASTFETCH_DATATEXT_LOGO_LIME,
+        .names = {"LimeOS", "limeos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LIMEOS,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
