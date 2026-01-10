@@ -462,7 +462,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     appendIpv4(options, &item->ipv4, ifa);
                 else if (adapter->ipv4.length > 0)
                 {
-                    appendIpv4(options, &item->ipv4, *FF_LIST_GET(struct ifaddrs*, adapter->ipv4, 0));
+                    appendIpv4(options, &item->ipv4, *FF_LIST_FIRST(struct ifaddrs*, adapter->ipv4));
                     FF_DEBUG("Using first IPv4 address for interface %s", adapter->mac->ifa_name);
                 }
             }
@@ -527,7 +527,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                         appendIpv6(options, &item->ipv6, selected);
                     else if (adapter->ipv6.length > 0)
                     {
-                        appendIpv6(options, &item->ipv6, *FF_LIST_GET(struct ifaddrs*, adapter->ipv6, 0));
+                        appendIpv6(options, &item->ipv6, *FF_LIST_FIRST(struct ifaddrs*, adapter->ipv6));
                         FF_DEBUG("Using first IPv6 address for interface %s", adapter->mac->ifa_name);
                     }
                 }

@@ -204,13 +204,14 @@ static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
-static bool getShellVersionXonsh(FFstrbuf* exe, FFstrbuf* version)
+static bool getShellVersionXonsh(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     ffStrbufSetS(version, getenv("XONSH_VERSION"));
     if (version->length) return true;
 
+    // exe is python here
     if(ffProcessAppendStdErr(version, (char* const[]) {
-        exe->chars,
+        "xonsh",
         "--version",
         NULL
     }) != NULL)

@@ -24,6 +24,8 @@
 
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
+// static string (allocated == 0), chars points to a string literal
+// dynamic string (allocated > 0), chars points to a heap allocated buffer
 typedef struct FFstrbuf
 {
     uint32_t allocated;
@@ -55,6 +57,10 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c);
 
 void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c);
 
+// Clear the content of strbuf and set new value
+// NOTE: Unlike ffStrbufAppend*, ffStrbufSet* functions may NOT reserve extra space
+void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
+void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 FF_C_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
@@ -148,7 +154,7 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 static inline void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src)
 {
     if (src->allocated == 0) // static string
-        memcpy(strbuf, src, sizeof(FFstrbuf));
+        *strbuf = *src;
     else
     {
         ffStrbufInitA(strbuf, src->allocated);
@@ -168,9 +174,7 @@ static inline void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src)
 {
     if (src)
     {
-        strbuf->allocated = src->allocated;
-        strbuf->chars = src->chars;
-        strbuf->length = src->length;
+        *strbuf = *src;
         ffStrbufInit(src);
     }
     else
@@ -220,19 +224,10 @@ static inline void ffStrbufInitMoveS(FFstrbuf* strbuf, char* heapStr)
 
 static inline void ffStrbufDestroy(FFstrbuf* strbuf)
 {
-    extern char* CHAR_NULL_PTR;
+    if(strbuf->allocated > 0)
+        free(strbuf->chars);
 
-    if(strbuf->allocated == 0)
-    {
-        strbuf->length = 0;
-        strbuf->chars = CHAR_NULL_PTR;
-        return;
-    }
-
-    //Avoid free-after-use. These 3 assignments are cheap so don't remove them
-    strbuf->allocated = strbuf->length = 0;
-    free(strbuf->chars);
-    strbuf->chars = CHAR_NULL_PTR;
+    ffStrbufInit(strbuf);
 }
 
 FF_C_NODISCARD static inline uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
@@ -247,6 +242,30 @@ FF_C_NODISCARD static inline uint32_t ffStrbufGetFree(const FFstrbuf* strbuf)
 static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf)
 {
     strbuf->length = (uint32_t) strlen(strbuf->chars);
+}
+
+static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
+{
+    assert(strbuf != NULL);
+
+    if (value == NULL)
+        ffStrbufClear(strbuf);
+    else
+        ffStrbufSetNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+static inline bool ffStrbufSetJsonVal(FFstrbuf* strbuf, yyjson_val* jsonVal)
+{
+    assert(strbuf != NULL);
+
+    if (yyjson_is_str(jsonVal))
+    {
+        ffStrbufSetNS(strbuf, (uint32_t) unsafe_yyjson_get_len(jsonVal), unsafe_yyjson_get_str(jsonVal));
+        return true;
+    }
+
+    ffStrbufClear(strbuf);
+    return false;
 }
 
 static inline void ffStrbufAppendS(FFstrbuf* strbuf, const char* value)
@@ -266,42 +285,10 @@ static inline bool ffStrbufAppendJsonVal(FFstrbuf* strbuf, yyjson_val* jsonVal)
     return false;
 }
 
-static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
-{
-    ffStrbufClear(strbuf);
-
-    if(value != NULL)
-        ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
-}
-
-static inline void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, length, value);
-}
-
-static inline void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
-{
-    assert(value && value != strbuf);
-    if (strbuf->allocated == 0 && value->allocated == 0)
-    {
-        memcpy(strbuf, value, sizeof(FFstrbuf));
-        return;
-    }
-    ffStrbufSetNS(strbuf, value->length, value->chars);
-}
-
-static inline bool ffStrbufSetJsonVal(FFstrbuf* strbuf, yyjson_val* jsonVal)
-{
-    ffStrbufClear(strbuf);
-    return ffStrbufAppendJsonVal(strbuf, jsonVal);
-}
-
 static inline void ffStrbufInit(FFstrbuf* strbuf)
 {
     extern char* CHAR_NULL_PTR;
-    strbuf->allocated = 0;
-    strbuf->length = 0;
+    strbuf->allocated = strbuf->length = 0;
     strbuf->chars = CHAR_NULL_PTR;
 }
 
@@ -332,10 +319,12 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateStatic(const char* str)
 static inline void ffStrbufSetStatic(FFstrbuf* strbuf, const char* value)
 {
     if(strbuf->allocated > 0)
-        ffStrbufDestroy(strbuf);
+        free(strbuf->chars);
 
     if(value != NULL)
         ffStrbufInitStatic(strbuf, value);
+    else
+        ffStrbufInit(strbuf);
 }
 
 static inline void ffStrbufInitNS(FFstrbuf* strbuf, uint32_t length, const char* str)
@@ -392,7 +381,7 @@ static inline void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
     ffStrbufPrependNS(strbuf, (uint32_t) strlen(value), value);
 }
 
-static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
+static inline FF_C_NODISCARD int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     uint32_t length = strbuf->length > comp->length ? comp->length : strbuf->length;
     return memcmp(strbuf->chars, comp->chars, length + 1);

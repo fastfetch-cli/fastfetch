@@ -222,6 +222,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 {
     assert(processName->length > 0);
     ffStrbufClear(exe);
+    if (exePath) ffStrbufClear(exePath);
 
     #if defined(__linux__) || defined(__GNU__)
 
@@ -270,13 +271,14 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
-            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
+            // When the process is a deleted executable, the resolved path is like `/usr/bin/app (deleted)`
+            // But we can still access the binary via `/proc/pid/exe`. See #2136
+            if (ffPathExists(buf, FF_PATHTYPE_ANY))
+                ffStrbufSetNS(exePath, (uint32_t)length, buf);
         }
-        else
-        {
+
+        if (exePath->length == 0)
             ffStrbufSetS(exePath, filePath);
-        }
     }
 
     #elif defined(__APPLE__)
@@ -318,16 +320,21 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             ffStrbufSetS(exe, arg0);
         }
     }
-    else
+
+    if (exePath || exe->length == 0)
     {
         char buf[PROC_PIDPATHINFO_MAXSIZE];
         int length = proc_pidpath(pid, buf, ARRAY_SIZE(buf));
         if (length > 0)
         {
-            ffStrbufEnsureFixedLengthFree(exe, (uint32_t) length);
-            ffStrbufAppendNS(exe, (uint32_t) length, buf);
+            if (exe->length == 0)
+                ffStrbufSetNS(exe, (uint32_t) length, buf);
             if (exePath)
-                ffStrbufSet(exePath, exe);
+            {
+                // We don't use exec_path above as exePath because it's a relative path and can be different
+                // from the actual executable being run (for example, when the original file is moved)
+                ffStrbufSetNS(exePath, (uint32_t) length, buf);
+            }
         }
     }
 
@@ -403,8 +410,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
-            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
+            ffStrbufSetNS(exePath, (uint32_t)length, buf);
         }
     }
 
