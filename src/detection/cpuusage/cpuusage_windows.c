@@ -1,13 +1,13 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
 
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <ntstatus.h>
 #include <winternl.h>
 #include <windows.h>
 #include <wchar.h>
-#include "util/windows/perflib_.h"
+#include "common/windows/perflib_.h"
 
 static const char* getInfoByNqsi(FFlist* cpuTimes)
 {
@@ -155,7 +155,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes)
 
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
-    #if __aarch64__
+    #if !FF_WIN7_COMPAT
     static uint8_t winver = 10; // Assume Windows 10 or later for WoA
     #else
     static uint8_t winver = 0;

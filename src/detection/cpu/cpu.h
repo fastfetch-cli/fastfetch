@@ -21,6 +21,7 @@ typedef struct FFCPUResult
     uint16_t coresPhysical;
     uint16_t coresLogical;
     uint16_t coresOnline;
+    uint16_t numaNodes;
 
     uint32_t frequencyBase; // GHz
     uint32_t frequencyMax; // GHz

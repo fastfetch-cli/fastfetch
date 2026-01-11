@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <OS.h>
 

@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/bios/bios.h"
 #include "modules/bios/bios.h"
-#include "util/stringUtils.h"
 
 bool ffPrintBios(FFBiosOptions* options)
 {

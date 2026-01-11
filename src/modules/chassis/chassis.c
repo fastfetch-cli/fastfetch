@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/chassis/chassis.h"
 #include "modules/chassis/chassis.h"
-#include "util/stringUtils.h"
 
 bool ffPrintChassis(FFChassisOptions* options)
 {

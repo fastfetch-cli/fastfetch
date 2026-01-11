@@ -1,18 +1,18 @@
 #include "terminalshell.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/processing.h"
 #include "common/thread.h"
-#include "util/mallocHelper.h"
-#include "util/windows/registry.h"
-#include "util/windows/unicode.h"
-#include "util/windows/version.h"
-#include "util/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/windows/registry.h"
+#include "common/windows/unicode.h"
+#include "common/windows/version.h"
+#include "common/stringUtils.h"
 
 #include <windows.h>
 #include <wchar.h>
 #include <tlhelp32.h>
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, const FFstrbuf* exePath, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
@@ -332,7 +332,7 @@ const FFShellResult* ffDetectShell(void)
         strcpy(tmp, result.exeName);
         char* ext = strrchr(tmp, '.');
         if (ext) *ext = '\0';
-        fftsGetShellVersion(&result.exe, tmp, &result.exePath, &result.version);
+        fftsGetShellVersion(result.exePath.length > 0 ? &result.exePath : &result.exe, tmp, &result.version);
     }
 
     return &result;
@@ -368,7 +368,7 @@ const FFTerminalResult* ffDetectTerminal(void)
     if(result.processName.length > 0)
     {
         setTerminalInfoDetails(&result);
-        fftsGetTerminalVersion(&result.processName, &result.exe, &result.version);
+        fftsGetTerminalVersion(&result.processName, result.exePath.length > 0 ? &result.exePath : &result.exe, &result.version);
     }
 
     return &result;

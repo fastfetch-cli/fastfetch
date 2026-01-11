@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/packages/packages.h"
 #include "modules/packages/packages.h"
-#include "util/stringUtils.h"
 
 bool ffPrintPackages(FFPackagesOptions* options)
 {
@@ -76,6 +76,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(pkg)
         FF_PRINT_PACKAGE(pkgsrc)
+        FF_PRINT_PACKAGE(kiss)
         if (options->combined)
         {
             FF_PRINT_PACKAGE_ALL(hpkg)
@@ -195,6 +196,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
             FF_FORMAT_ARG(counts.pisi, "pisi"),
             FF_FORMAT_ARG(counts.soar, "soar"),
+            FF_FORMAT_ARG(counts.kiss, "kiss"),
             FF_FORMAT_ARG(counts.sdkman, "sdk"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
@@ -269,6 +271,9 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             break;
                         case 'H': if (false);
                             FF_TEST_PACKAGE_NAME(HPKG)
+                            break;
+                        case 'K': if (false);
+                            FF_TEST_PACKAGE_NAME(KISS)
                             break;
                         case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
@@ -349,6 +354,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(FLATPAK)
     FF_TEST_PACKAGE_NAME(GUIX)
     FF_TEST_PACKAGE_NAME(HPKG)
+    FF_TEST_PACKAGE_NAME(KISS)
     FF_TEST_PACKAGE_NAME(LINGLONG)
     FF_TEST_PACKAGE_NAME(LPKG)
     FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -430,6 +436,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(sdkman)
     FF_APPEND_PACKAGE_COUNT(snap)
     FF_APPEND_PACKAGE_COUNT(soar)
+    FF_APPEND_PACKAGE_COUNT(kiss)
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
@@ -503,7 +510,8 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of hpkg-user packages", "hpkg-user"},
         {"Number of pisi packages", "pisi"},
         {"Number of soar packages", "soar"},
-        {"Number of SDKMAN! SDK packages", "sdk"},
+        {"Number of kiss packages", "kiss"},
+        {"Number of SDKMAN! packages", "sdk"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},

@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/wallpaper/wallpaper.h"
 #include "modules/wallpaper/wallpaper.h"
-#include "util/stringUtils.h"
 
 bool ffPrintWallpaper(FFWallpaperOptions* options)
 {

@@ -1,5 +1,5 @@
 #include "icons.h"
-#include "util/windows/registry.h"
+#include "common/windows/registry.h"
 
 const char* ffDetectIcons(FFIconsResult* result)
 {

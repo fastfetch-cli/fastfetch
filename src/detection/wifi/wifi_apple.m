@@ -1,6 +1,6 @@
 #include "wifi.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #import <CoreWLAN/CoreWLAN.h>
 

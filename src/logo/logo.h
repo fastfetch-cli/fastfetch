@@ -10,6 +10,13 @@ typedef enum __attribute__((__packed__)) FFLogoLineType
     FF_LOGO_LINE_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFLogoLineType;
 
+typedef enum __attribute__((__packed__)) FFLogoSize
+{
+    FF_LOGO_SIZE_UNKNOWN,
+    FF_LOGO_SIZE_NORMAL,
+    FF_LOGO_SIZE_SMALL,
+} FFLogoSize;
+
 typedef struct FFlogo
 {
     const char* lines;
@@ -28,6 +35,8 @@ void ffLogoPrintRemaining(void);
 void ffLogoBuiltinPrint(void);
 void ffLogoBuiltinList(void);
 void ffLogoBuiltinListAutocompletion(void);
+const FFlogo* ffLogoGetBuiltinForName(const FFstrbuf* name, FFLogoSize size);
+const FFlogo* ffLogoGetBuiltinDetected(FFLogoSize size);
 
 //builtin.c
 extern const FFlogo* ffLogoBuiltins[];

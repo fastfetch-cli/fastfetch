@@ -1,5 +1,5 @@
-#include "util/FFstrbuf.h"
-#include "util/textModifier.h"
+#include "common/FFstrbuf.h"
+#include "common/textModifier.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -229,9 +229,18 @@ int main(void)
 
     ffStrbufDestroy(&strbuf);
 
+    //initMoveS
+    {
+        char* heapStr = strdup("1234567890");
+        ffStrbufInitMoveS(&strbuf, heapStr);
+        VERIFY(ffStrbufEqualS(&strbuf, "1234567890"));
+        VERIFY(strbuf.allocated >= 11);
+        ffStrbufDestroy(&strbuf);
+    }
+
     //initF
     ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
-    VERIFY(strbuf.allocated == 32);
+    VERIFY(strbuf.allocated >= 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
     //containC
@@ -620,17 +629,28 @@ int main(void)
         ffStrbufSetStatic(&strbuf, "abcdef");
         FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
         ffStrbufSet(&newStr, &strbuf);
-        VERIFY(newStr.allocated > 0);
-        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(newStr.allocated == 0);
+        VERIFY(newStr.chars == strbuf.chars);
         VERIFY(ffStrbufEqualS(&newStr, "abcdef"));
+    }
+
+    {
+        ffStrbufClear(&strbuf);
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
+        uint32_t oldAlloc = newStr.allocated;
+        VERIFY(oldAlloc > newStr.length);
+        ffStrbufSet(&newStr, &strbuf);
+        VERIFY(newStr.allocated == oldAlloc);
+        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(ffStrbufEqualS(&newStr, ""));
     }
 
     {
         ffStrbufSetStatic(&strbuf, "abcdefghijkl");
         FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
         ffStrbufSet(&newStr, &strbuf);
-        VERIFY(newStr.allocated > 0);
-        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(newStr.allocated == 0);
+        VERIFY(newStr.chars == strbuf.chars);
         VERIFY(ffStrbufEqualS(&newStr, "abcdefghijkl"));
     }
 
@@ -1014,6 +1034,95 @@ int main(void)
 
         ffStrbufDestroy(&strbuf);
     }
+
+    //setS
+    ffStrbufInitStatic(&strbuf, "STATIC");
+    ffStrbufSetS(&strbuf, "DYNAMIC");
+    VERIFY(ffStrbufEqualS(&strbuf, "DYNAMIC"));
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInit(&strbuf);
+    ffStrbufSetS(&strbuf, "");
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitStatic(&strbuf, "STATIC");
+    ffStrbufSetS(&strbuf, "");
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitStatic(&strbuf, "STATIC");
+    ffStrbufSetStatic(&strbuf, "");
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitS(&strbuf, "DYNAMIC");
+    ffStrbufSetStatic(&strbuf, "");
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitS(&strbuf, "DYNAMIC");
+    ffStrbufSetS(&strbuf, "ANOTHER DYNAMIC");
+    VERIFY(ffStrbufEqualS(&strbuf, "ANOTHER DYNAMIC"));
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInit(&strbuf);
+    ffStrbufSetStatic(&strbuf, "");
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //set
+    ffStrbufInitStatic(&strbuf, "STATIC");
+    {
+        FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateS("DYNAMIC");
+        ffStrbufSet(&strbuf, &other);
+    }
+    VERIFY(ffStrbufEqualS(&strbuf, "DYNAMIC"));
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInit(&strbuf);
+    {
+        FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateS("");
+        ffStrbufSet(&strbuf, &other);
+    }
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitStatic(&strbuf, "STATIC");
+    {
+        FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateS("");
+        ffStrbufSet(&strbuf, &other);
+    }
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitS(&strbuf, "DYNAMIC");
+    {
+        FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateS("");
+        ffStrbufSet(&strbuf, &other);
+    }
+    VERIFY(ffStrbufEqualS(&strbuf, ""));
+    VERIFY(strbuf.allocated > 0);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufInitS(&strbuf, "DYNAMIC");
+    {
+        FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateStatic("STATIC");
+        ffStrbufSet(&strbuf, &other);
+    }
+    VERIFY(ffStrbufEqualS(&strbuf, "STATIC"));
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
 
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);

@@ -1,6 +1,6 @@
 #include "disk.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include <sys/mount.h>
 #include <sys/stat.h>
@@ -76,7 +76,7 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
     detectFsLabel(fs, disk);
 }
 #elif __APPLE__
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <sys/attr.h>
 #include <unistd.h>
@@ -149,6 +149,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
                 continue;
         }
         else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs") && !ffStrEquals(fs->f_fstypename, "fusefs.sshfs"))
+            continue;
+
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, fs->f_mntonname, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, fs->f_fstypename, ':'))
             continue;
 
         #ifdef __FreeBSD__

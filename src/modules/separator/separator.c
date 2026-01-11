@@ -1,11 +1,11 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/wcwidth.h"
+#include "common/textModifier.h"
 #include "logo/logo.h"
 #include "modules/separator/separator.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
-#include "util/wcwidth.h"
-#include "util/textModifier.h"
 
 #include <locale.h>
 

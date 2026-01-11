@@ -1,7 +1,7 @@
 #include "tpm.h"
 
 #ifndef __aarch64__
-    #include "util/apple/cf_helpers.h"
+    #include "common/apple/cf_helpers.h"
     #include <IOKit/IOKitLib.h>
 #endif
 

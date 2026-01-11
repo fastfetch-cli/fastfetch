@@ -25,7 +25,7 @@ void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglG
 }
 
 #if defined(FF_HAVE_EGL) || __has_include(<EGL/egl.h>)
-#include "common/io/io.h"
+#include "common/io.h"
 
 #define EGL_EGL_PROTOTYPES 1
 #define EGL_EGLEXT_PROTOTYPES 1
@@ -140,7 +140,7 @@ const char* ffOpenGLDetectByEGL(FFOpenGLResult* result)
 {
     EGLData eglData;
 
-    FF_LIBRARY_LOAD(egl, "dlopen libEGL" FF_LIBRARY_EXTENSION " failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_MESSAGE(egl, "libEGL" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglQueryString);

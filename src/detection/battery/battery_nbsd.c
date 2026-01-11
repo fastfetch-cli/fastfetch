@@ -1,7 +1,7 @@
 #include "battery.h"
-#include "common/io/io.h"
-#include "util/FFstrbuf.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/FFstrbuf.h"
+#include "common/stringUtils.h"
 
 #include <prop/prop_array.h>
 #include <prop/prop_bool.h>

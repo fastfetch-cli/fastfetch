@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/localip/localip.h"
 #include "modules/localip/localip.h"
-#include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
 #pragma GCC diagnostic ignored "-Wsign-conversion"

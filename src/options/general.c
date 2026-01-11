@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "common/jsonconfig.h"
 #include "common/processing.h"
+#include "common/stringUtils.h"
 #include "options/general.h"
-#include "util/stringUtils.h"
 
 #include <unistd.h>
 

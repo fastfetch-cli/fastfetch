@@ -1,6 +1,6 @@
 #include "chassis.h"
 #include "common/settings.h"
-#include "util/smbiosHelper.h"
+#include "common/smbiosHelper.h"
 
 const char* ffDetectChassis(FFChassisResult* result)
 {

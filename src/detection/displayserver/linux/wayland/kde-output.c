@@ -3,8 +3,8 @@
 #include "wayland.h"
 #include "kde-output-device-v2-client-protocol.h"
 #include "kde-output-order-v1-client-protocol.h"
-#include "util/edidHelper.h"
-#include "util/base64.h"
+#include "common/edidHelper.h"
+#include "common/base64.h"
 
 typedef struct WaylandKdeMode
 {
@@ -178,6 +178,8 @@ static struct kde_output_device_v2_listener outputListener = {
     .automatic_max_bits_per_color_limit = (void*) stubListener,
     .edr_policy = (void*) stubListener,
     .sharpness = (void*) stubListener,
+    .priority = (void*) stubListener,
+    .auto_brightness = (void*) stubListener,
 };
 
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)

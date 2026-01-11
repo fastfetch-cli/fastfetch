@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/keyboard/keyboard.h"
 #include "modules/keyboard/keyboard.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFKeyboardOptions* options, const FFKeyboardDevice* device, uint8_t index)
 {

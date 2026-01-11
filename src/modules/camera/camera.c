@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/libc/libc.h"
 #include "detection/camera/camera.h"
 #include "modules/camera/camera.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFCameraOptions* options, const FFCameraResult* device, uint8_t index)
 {

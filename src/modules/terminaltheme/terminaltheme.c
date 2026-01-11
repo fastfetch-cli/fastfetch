@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/terminaltheme/terminaltheme.h"
 #include "modules/terminaltheme/terminaltheme.h"
-#include "util/stringUtils.h"
 
 #include <inttypes.h>
 

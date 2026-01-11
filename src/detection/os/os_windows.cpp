@@ -1,11 +1,11 @@
 extern "C" {
 #include "os.h"
 #include "common/library.h"
-#include "util/stringUtils.h"
-#include "util/windows/registry.h"
+#include "common/stringUtils.h"
+#include "common/windows/registry.h"
 }
-#include "util/windows/unicode.hpp"
-#include "util/windows/wmi.hpp"
+#include "common/windows/unicode.hpp"
+#include "common/windows/wmi.hpp"
 
 static const char* getOsNameByWmi(FFstrbuf* osName)
 {
@@ -48,7 +48,7 @@ static bool getCodeName(FFOSResult* os)
 static const char* getOsNameByWinbrand(FFstrbuf* osName)
 {
     //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
-    FF_LIBRARY_LOAD(winbrand, "dlopen winbrand" FF_LIBRARY_EXTENSION " failed", "winbrand" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_MESSAGE(winbrand, "winbrand" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
 
     const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");
@@ -69,6 +69,17 @@ void ffDetectOSImpl(FFOSResult* os)
     if(ffStrbufStartsWithS(&os->variant, "Microsoft "))
         ffStrbufSubstrAfter(&os->variant, strlen("Microsoft ") - 1);
 
+    if(os->variant.length == 0) // Windows PE?
+    {
+        wchar_t buf[128];
+        DWORD bufSize = (DWORD) sizeof(buf); // with trailing '\0'
+        if(RegGetValueW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", RRF_RT_REG_SZ, NULL, buf, &bufSize) == ERROR_SUCCESS)
+        {
+            assert(bufSize >= sizeof(wchar_t));
+            ffStrbufSetNWS(&os->variant, bufSize / sizeof(wchar_t) - 1, buf);
+        }
+    }
+
     ffStrbufSet(&os->prettyName, &os->variant);
 
     if(ffStrbufStartsWithS(&os->variant, "Windows "))
@@ -82,6 +93,9 @@ void ffDetectOSImpl(FFOSResult* os)
             ffStrbufAppendS(&os->name, " Server");
             ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
         }
+
+        if(ffStrbufStartsWithIgnCaseS(&os->variant, "(TM) "))
+            ffStrbufSubstrAfter(&os->variant, strlen(" (TM)") - 1);
 
         uint32_t index = ffStrbufFirstIndexC(&os->variant, ' ');
         ffStrbufAppendNS(&os->version, index, os->variant.chars);

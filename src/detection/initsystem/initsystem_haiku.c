@@ -1,7 +1,7 @@
 #include "initsystem.h"
-#include "util/stringUtils.h"
-#include "util/haiku/version.h"
-#include "common/io/io.h"
+#include "common/stringUtils.h"
+#include "common/haiku/version.h"
+#include "common/io.h"
 
 #include <OS.h>
 #include <unistd.h>

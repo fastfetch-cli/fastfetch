@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/bluetooth/bluetooth.h"
 #include "modules/bluetooth/bluetooth.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* device, uint8_t index)
 {

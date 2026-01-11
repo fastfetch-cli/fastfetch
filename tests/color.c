@@ -1,5 +1,5 @@
 #include "common/format.h"
-#include "util/textModifier.h"
+#include "common/textModifier.h"
 #include "fastfetch.h"
 
 #include <stdlib.h>
@@ -43,6 +43,11 @@ int main(void)
         VERIFY("#0f0", "38;2;0;255;0");     // RGB
         VERIFY("#123456", "38;2;18;52;86");
         VERIFY("#abc", "38;2;170;187;204");
+
+        // xterm 256 color codes
+        VERIFY("@0", "38;5;0");
+        VERIFY("@1", "38;5;1");
+        VERIFY("@255", "38;5;255");
 
         VERIFY("bold_#ff00ff", "1;38;2;255;0;255");
         VERIFY("underline_#123", "4;38;2;17;34;51");

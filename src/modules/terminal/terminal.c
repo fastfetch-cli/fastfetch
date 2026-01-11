@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/terminal/terminal.h"
-#include "util/stringUtils.h"
 
 bool ffPrintTerminal(FFTerminalOptions* options)
 {

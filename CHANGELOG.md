@@ -1,6 +1,154 @@
+# 2.57.0
+
+Deprecation notice:
+* Support for Windows 7 (and 8.x) is deprecated and will be removed in a future release. Extended support for Windows 7 (and 8.1) ended on January 10, 2023. These versions do not officially support ANSI escape codes (running fastfetch on them requires a third-party terminal such as ConEmu). In addition, Windows 7 lacks some APIs used by fastfetch. Fastfetch currently loads these APIs dynamically at runtime to maintain compatibility, but this adds complexity to the codebase and increases the maintenance burden.
+    * A CMake flag `ENABLE_WIN7_COMPAT:BOOLEAN` has been introduced (defaults to `ON` for now). If set to `OFF`, Windows 7 compatibility code is excluded, and the resulting binaries will support only Windows 10 (version 1607 and later) and Windows 11.
+    * The main prebuilt Windows binaries on the Release page (`fastfetch-windows-amd64.*`) are built with `ENABLE_WIN7_COMPAT=OFF`. These are the binaries used by `scoop` and `winget`. Users who need Windows 7 (or 8.x) support can download the `-win7` variant instead.
+    * The `ENABLE_WIN7_COMPAT` CMake option and the `-win7` variant binaries are planned to be removed in 2.60.0.
+
+Features:
+* Supports COSMIC DE version detection (DE, Linux)
+* Supports niri version detection (#2121, WM, Linux)
+* Supports cosmic-term version and terminal font detection (Terminal / TerminalFont, Linux)
+* Supports urxvt font detection (TerminalFont, Linux) (#2105)
+* Improves xterm font detection by checking `xterm.vt100.faceName` (TerminalFont, Linux)
+* Supports Secure Boot detection (Bootmgr, macOS)
+* Supports DPI scale factor detection on Windows 7 (Display, Windows)
+* Supports xterm 256-color codes in color configuration
+    * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
+    * In `format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
+* Improves uptime accuracy on Windows 10+ (Uptime, Windows)
+* Adds a new module `Logo` to query built-in logo raw data in JSON output (Logo)
+    * Usage: `fastfetch -s logo -l <logo-name> -j # Supported in JSON format only`
+* Supports shell version detection even if the binary has been deleted (#2136, Shell, Linux)
+* Overall code refinements and optimizations
+
+Bugfixes:
+* Skips local / loopback routes when detecting network interfaces (LocalIP, Linux) (#2127)
+* Fixes CPU speed detection on s390x (CPU, Linux) (#2129)
+* Fixes GPU detection error handling and supports case-insensitive PCI ID parsing (GPU, Windows)
+* Fixes some networking issues and memory leaks (Networking)
+* Fixes `exePath` reporting relative paths on macOS (Shell, macOS)
+
+Logos:
+* Adds openSUSE Tumbleweed braille logo
+* Renames HydraPWK to NetHydra
+* Fixes colors of deepin
+* Fixes colors of UOS
+
+# 2.56.1
+
+Features:
+* Improves compatibility with KDE Plasma 6.5 (#2093, Display)
+* Adds a `tempSensor` option to specify the sensor name used for CPU temperature detection (CPU)
+    * Example: `{ "type": "cpu", "tempSensor": "hwmon0" /* Use /sys/class/hwmon/hwmon0 for temperature detection */ }`
+* Refines Memory usage detection on macOS to match Activity Monitor more closely (Memory, macOS)
+* Minor optimizations
+
+Bugfixes:
+* Fixes cache line size detection (CPU, macOS)
+
+Logos:
+* Removes Opak
+* Updates GXDE
+
+# 2.56.0
+
+Features:
+* Enhances config file loading. `--config` and `-c` with relative path now also searches paths defined in `fastfetch --list-config-paths` (typically `~/.config/fastfetch/`)
+    * This allows users to use `fastfetch -c my-config` without needing to specify the full path.
+* Adds NUMA node count detection (CPU)
+    * Exposed via `{numa-nodes}` in custom format
+    * Supported on Linux, FreeBSD and Windows
+* Supports the newest Alacritty config format (#2070, TerminalFont)
+* Detects driver specific info for Zhaoxin GPUs (GPU, Linux)
+* Detects Android OEM UI for certain OSes (DE, Android)
+* Improves users detection on Linux (#2064, Users, Linux)
+    * Adds systemd fallback when utmp is unavailable
+    * Fixes resource leaks
+    * Always reports the newest session info
+* Adds kiss package manager support (#2072, Packages, Linux)
+* Reports `sshd` if `$SSH_TTY` is not available (Terminal)
+* Zpool module rewrite (#2051, Zpool)
+    * Adds new Zpool properties: allocated, guid, readOnly
+    * Zpool module now uses runtime lookup for properties to ensure portability
+    * Adds NetBSD (requires `sudo`) and macOS support
+* Adds `splitLines` option for Command module, which splits the output into sub modules, each containing one line of the output (Command)
+```
+* Command output:
+Line 1
+Line 2
+Line 3
+
+* Old behavior:
+Command: Line 1
+Line 2
+Line 3
+
+* With `"splitLines": true`:
+Command 1: Line 1
+Command 2: Line 2
+Command 3: Line 3
+```
+
+Bugfixes:
+* Fixes {m,o}ksh version detection on Linux (Shell)
+* Fixes Alacritty config parsing for TOML format (#2070, TerminalFont)
+* Improves builtin logo printing for piping and buffering (#2065, Logo)
+* Uses absolute path when detecting shell and terminal version if available (#2067, TerminalShell)
+
+Logos:
+* Updates Codex Linux logo (#2071)
+* Adds OS/2 Warp logo (#2062)
+* Adds Amiga logo (#2061)
+
+# 2.55.1
+
+Bugfixes:
+* Fix parallel command execution breaks randomly (#2056 / #2058, Command)
+    * Regression from v2.55.0
+* Fix `dylib` searching path on macOS (macOS)
+    * Regression from v2.55.0
+* Fix an uninitialized field (#2057, Display)
+
+# 2.55.0
+
+Changes:
+* Commands are now executed in parallel by default to improve performance (#2045, Command)
+    * This behavior can be disabled in the config file with `"parallel": false` if it causes problems with certain scripts
+* Folder/filesystem hiding is moved to the detection stage; hidden entries are no longer probed, improving performance (#2043, Disk)
+
+Features:
+* Adds `command.parallel` and `command.useStdErr` config options (Command)
+    * `parallel`: set to `false` to disable parallel execution (see Changes above)
+    * `useStdErr`: set to `true` to use stderr output instead of stdout
+* Adds the command-line flag `--dynamic-interval <interval-in-ms>` to enable dynamic output auto-refresh (#2041)
+    * Due to internal limitations, some modules do not support dynamic updates (notably Display and Media)
+* Adds support for using the current playing media's cover art as a logo source (Media / Logo)
+    * Usage: `"logo": { "type": "<image-protocol>", "source": "media-cover" }` in JSON config; or `--<image-protocol> media-cover` in command line
+    * Supports local sources only
+* Adds native GPU detection support on OpenBSD and NetBSD (instead of depending on `libpciaccess`) (GPU)
+    * No functional changes
+    * Root privileges are required to access PCI config space on OpenBSD (as always)
+* Adds GPU detection support on GNU/Hurd (GPU)
+    * Requires building with `libpciaccess`
+* Shows Debian point release on Raspberry Pi OS (#2032, OS, Linux)
+* Adds `Brush` shell version detection (Shell)
+* Improves Mac family detection via prefix matching (Host)
+
+Bugfixes:
+* Ignores `run-parts` during terminal/shell detection (#2048, Terminal / Shell, Linux)
+* Fixes fish version detection when `LC_ALL` is set (#2014, Shell, Linux)
+* Hides the module when no desktop icons are found (#2023, Icons, Windows)
+* Skips auxiliary display controllers to prevent the module from reporting duplicate entries (#2034, GPU, Linux)
+* Refines Apple rpath handling; fixes building for the Homebrew version on macOS (#1998, CMake)
+
+Logos:
+* Adds Vincent OS and MacaroniOS
+
 # 2.54.0
 
-Windows binaries in Release page are now signed using SignPath.
+Windows binaries in Release page are now signed by SignPath.
 
 Changes:
 * Moves macOS and Windows design language detection from the DE module to the Theme module

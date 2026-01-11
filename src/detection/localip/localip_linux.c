@@ -1,8 +1,8 @@
 #include "localip.h"
-#include "common/io/io.h"
-#include "common/netif/netif.h"
-#include "util/stringUtils.h"
-#include "util/debug.h"
+#include "common/io.h"
+#include "common/netif.h"
+#include "common/stringUtils.h"
+#include "common/debug.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -339,8 +339,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
         }
 
-        FF_DEBUG("Processing interface %s (family=%d, flags=0x%x)",
-                 ifa->ifa_name, ifa->ifa_addr->sa_family, ifa->ifa_flags);
+        FF_DEBUG("Processing interface %s (family=%d, flags=0x%lx)",
+                 ifa->ifa_name, ifa->ifa_addr->sa_family, (unsigned long) ifa->ifa_flags);
 
         FFAdapter* adapter = NULL;
         FF_LIST_FOR_EACH(FFAdapter, x, adapters)
@@ -462,7 +462,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     appendIpv4(options, &item->ipv4, ifa);
                 else if (adapter->ipv4.length > 0)
                 {
-                    appendIpv4(options, &item->ipv4, *FF_LIST_GET(struct ifaddrs*, adapter->ipv4, 0));
+                    appendIpv4(options, &item->ipv4, *FF_LIST_FIRST(struct ifaddrs*, adapter->ipv4));
                     FF_DEBUG("Using first IPv4 address for interface %s", adapter->mac->ifa_name);
                 }
             }
@@ -527,7 +527,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                         appendIpv6(options, &item->ipv6, selected);
                     else if (adapter->ipv6.length > 0)
                     {
-                        appendIpv6(options, &item->ipv6, *FF_LIST_GET(struct ifaddrs*, adapter->ipv6, 0));
+                        appendIpv6(options, &item->ipv6, *FF_LIST_FIRST(struct ifaddrs*, adapter->ipv6));
                         FF_DEBUG("Using first IPv6 address for interface %s", adapter->mac->ifa_name);
                     }
                 }

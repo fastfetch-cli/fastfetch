@@ -1,5 +1,6 @@
 #include "uptime.h"
 #include "common/time.h"
+
 #include <utmpx.h>
 
 const char* ffDetectUptime(FFUptimeResult* result)

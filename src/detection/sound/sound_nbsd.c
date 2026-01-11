@@ -1,5 +1,5 @@
 #include "sound.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <fcntl.h>
 #include <stdint.h>

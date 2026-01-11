@@ -2,9 +2,9 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/physicalmemory/physicalmemory.h"
 #include "modules/physicalmemory/physicalmemory.h"
-#include "util/stringUtils.h"
 
 #define FF_PHYSICALMEMORY_DISPLAY_NAME "Physical Memory"
 

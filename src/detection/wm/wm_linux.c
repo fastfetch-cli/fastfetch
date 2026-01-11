@@ -1,12 +1,12 @@
 #include "wm.h"
 
 #include "common/processing.h"
-#include "common/io/io.h"
+#include "common/io.h"
+#include "common/binary.h"
+#include "common/path.h"
+#include "common/stringUtils.h"
+#include "common/debug.h"
 #include "detection/displayserver/displayserver.h"
-#include "util/binary.h"
-#include "util/path.h"
-#include "util/stringUtils.h"
-#include "util/debug.h"
 
 const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
 {
@@ -162,6 +162,22 @@ static const char* getLabwc(FFstrbuf* result)
     return "Failed to run command `labwc --version`";
 }
 
+static const char* getNiri(FFstrbuf* result)
+{
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        "niri",
+        "--version",
+        NULL
+    }) == NULL)
+    { // niri 25.11 (b35bcae)
+        ffStrbufSubstrBeforeLastC(result, ' ');
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `niri --version`";
+}
+
 #ifdef __linux__
 static const char* getWslg(FFstrbuf* result)
 {
@@ -298,6 +314,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "labwc"))
         return getLabwc(result);
+
+    if (ffStrbufEqualS(wmName, "niri"))
+        return getNiri(result);
 
     #if __linux__
     if (ffStrbufEqualS(wmName, "WSLg"))

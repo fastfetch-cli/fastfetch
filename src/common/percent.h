@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/FFstrbuf.h"
+#include "common/FFstrbuf.h"
 #include "common/parsing.h"
 #include "common/option.h"
 

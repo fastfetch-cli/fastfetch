@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
-#include "util/stringUtils.h"
 
 #include <math.h>
 
@@ -436,6 +436,7 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
+    options->order = FF_DISPLAY_ORDER_NONE;
 }
 
 void ffDestroyDisplayOptions(FFDisplayOptions* options)

@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/gamepad/gamepad.h"
 #include "modules/gamepad/gamepad.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device, uint8_t index)
 {

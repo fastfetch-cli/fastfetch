@@ -1,8 +1,8 @@
 #include "netio.h"
 
-#include "common/io/io.h"
-#include "common/netif/netif.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/netif.h"
+#include "common/stringUtils.h"
 
 #include <fcntl.h>
 #include <net/if.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "util/FFcheckmacros.h"
+#include "common/FFcheckmacros.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
