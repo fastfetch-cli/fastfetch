@@ -1,11 +1,20 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 #ifdef _WIN32
-    #include <synchapi.h>
+    #include <ntdef.h>
+    #include <ntstatus.h>
     #include <profileapi.h>
     #include <sysinfoapi.h>
+
+    NTSYSCALLAPI
+    NTSTATUS
+    NTAPI
+    NtDelayExecution(
+        _In_ BOOLEAN Alertable,
+        _In_ PLARGE_INTEGER DelayInterval);
 #elif defined(__HAIKU__)
     #include <OS.h>
 #endif
@@ -49,12 +58,15 @@ static inline uint64_t ffTimeGetNow(void)
     #endif
 }
 
-static inline void ffTimeSleep(uint32_t msec)
+// Returns true if not interrupted
+static inline bool ffTimeSleep(uint32_t msec)
 {
     #ifdef _WIN32
-        SleepEx(msec, TRUE);
+        LARGE_INTEGER interval;
+        interval.QuadPart = -(int64_t) msec * 10000; // Relative time in 100-nanosecond intervals
+        return NtDelayExecution(TRUE, &interval) == STATUS_SUCCESS;
     #else
-        nanosleep(&(struct timespec){ msec / 1000, (long) (msec % 1000) * 1000000 }, NULL);
+        return nanosleep(&(struct timespec){ msec / 1000, (long) (msec % 1000) * 1000000 }, NULL) == 0;
     #endif
 }
 
