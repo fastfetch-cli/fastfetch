@@ -15,11 +15,16 @@
 static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
+        extern double ffQpcMultiplier;
+        if (ffQpcMultiplier == 0)
+        {
+            LARGE_INTEGER frequency;
+            QueryPerformanceFrequency(&frequency);
+            ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
+        }
         LARGE_INTEGER start;
         QueryPerformanceCounter(&start);
-        return (double) start.QuadPart * 1000 / (double) frequency.QuadPart;
+        return (double) start.QuadPart * ffQpcMultiplier;
     #elif defined(__HAIKU__)
         return (double) system_time() / 1000.;
     #else

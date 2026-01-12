@@ -81,3 +81,7 @@ FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
 
     return result;
 }
+
+#ifdef _WIN32
+    double ffQpcMultiplier;
+#endif
