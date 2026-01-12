@@ -16,7 +16,7 @@ Features:
 * Supports DPI scale factor detection on Windows 7 (Display, Windows)
 * Supports xterm 256-color codes in color configuration
     * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
-    * In `format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
+    * In `*.format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
 * Improves uptime accuracy on Windows 10+ (Uptime, Windows)
 * Adds a new module `Logo` to query built-in logo raw data in JSON output (Logo)
     * Usage: `fastfetch -s logo -l <logo-name> -j # Supported in JSON format only`
@@ -32,9 +32,10 @@ Bugfixes:
 
 Logos:
 * Adds openSUSE Tumbleweed braille logo
+* Adds Xinux
 * Renames HydraPWK to NetHydra
-* Fixes colors of deepin
-* Fixes colors of UOS
+* Fixes colors of deepin and UOS
+* Fixes colors of macOS and variants
 
 # 2.56.1
 
