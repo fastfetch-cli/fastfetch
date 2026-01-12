@@ -5,7 +5,10 @@
 #include "common/time.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
-#include "util/stringUtils.h"
+
+#ifndef _WIN32
+    #include <fnmatch.h>
+#endif
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
@@ -197,16 +200,16 @@ bool ffPrintDisk(FFDiskOptions* options)
         return false;
     }
 
+    if(disks.length == 0)
+    {
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disks found");
+        return false;
+    }
+
     uint32_t index = 0;
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
     {
         if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
-            continue;
-
-        if (options->hideFolders.length && ffStrbufSeparatedContain(&options->hideFolders, &disk->mountpoint, FF_DISK_FOLDER_SEPARATOR))
-            continue;
-
-        if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &disk->filesystem, ':'))
             continue;
 
         printDisk(options, disk, ++index);
@@ -380,7 +383,7 @@ bool ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 
     if(error)
     {
-        yyjson_mut_obj_add_str(doc, module, "result", error);
+        yyjson_mut_obj_add_str(doc, module, "error", error);
         return false;
     }
 
@@ -452,7 +455,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     #if _WIN32 || __APPLE__ || __ANDROID__
     ffStrbufInit(&options->hideFolders);
     #else
-    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
+    ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
     #endif
     ffStrbufInit(&options->hideFS);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;

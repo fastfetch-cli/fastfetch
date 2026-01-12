@@ -1,5 +1,5 @@
 #include "gpu.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <private/drivers/poke.h>
 
@@ -19,6 +19,9 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (dev.class_base != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
             continue;
 
+        if (dev.function > 0 && dev.class_sub == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+            continue; // Likely an auxiliary display controller (#2034)
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev.vendor_id));
         ffStrbufInit(&gpu->name);
@@ -30,7 +33,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = ((uint64_t) dev.bus << 4) | ((uint64_t) dev.device << 2) | (uint64_t) dev.function;
+        gpu->deviceId = ffGPUPciAddr2Id(0, dev.bus, dev.device, dev.function);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)

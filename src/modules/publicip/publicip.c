@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "modules/publicip/publicip.h"
 #include "detection/publicip/publicip.h"
-#include "util/stringUtils.h"
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
 

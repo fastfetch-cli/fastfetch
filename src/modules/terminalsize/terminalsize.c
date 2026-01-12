@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/terminalsize/terminalsize.h"
 #include "modules/terminalsize/terminalsize.h"
-#include "util/stringUtils.h"
 
 #define FF_TERMINALSIZE_DISPLAY_NAME "Terminal Size"
 

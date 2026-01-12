@@ -1,9 +1,9 @@
 #include "terminalshell.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
 #include "common/thread.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -57,6 +57,9 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufEqualS(&result->processName, "proot")               ||
                 ffStrbufEqualS(&result->processName, "script")              ||
+                #ifdef __linux__
+                ffStrbufEqualS(&result->processName, "run-parts")           ||
+                #endif
                 ffStrbufContainS(&result->processName, "debug")             ||
                 ffStrbufContainS(&result->processName, "command-not-")      ||
                 ffStrbufEndsWithS(&result->processName, ".sh")
@@ -113,6 +116,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "Relay(")   || // Unknown process in WSL2
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
+            ffStrbufEqualS(&result->processName, "run-parts")  || // #2048
             #endif
             ffStrbufEndsWithS(&result->processName, ".sh")
         )
@@ -288,14 +292,14 @@ static void getUserShellFromEnv(FFShellResult* result)
     }
 }
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
 static void setShellInfoDetails(FFShellResult* result)
 {
     ffStrbufClear(&result->version);
-    fftsGetShellVersion(&result->exe, result->exeName, &result->exePath, &result->version);
+    fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
 
     if(ffStrbufEqualS(&result->processName, "pwsh"))
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
@@ -327,7 +331,12 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufStartsWithS(&result->processName, "screen-"))
         ffStrbufInitStatic(&result->prettyName, "screen");
     else if(ffStrbufEqualS(&result->processName, "sshd") || ffStrbufStartsWithS(&result->processName, "sshd-"))
-        ffStrbufInitCopy(&result->prettyName, &result->tty);
+    {
+        if (result->tty.length)
+            ffStrbufInitCopy(&result->prettyName, &result->tty);
+        else
+            ffStrbufSetStatic(&result->prettyName, "sshd");
+    }
 
     #if defined(__ANDROID__)
 
@@ -379,7 +388,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
+    fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
 }
 
 #if defined(MAXPATH)

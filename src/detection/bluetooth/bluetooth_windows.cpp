@@ -2,8 +2,8 @@ extern "C"
 {
 #include "bluetooth.h"
 }
-#include "util/windows/wmi.hpp"
-#include "util/windows/unicode.hpp"
+#include "common/windows/wmi.hpp"
+#include "common/windows/unicode.hpp"
 
 STDAPI InitVariantFromStringArray(_In_reads_(cElems) PCWSTR *prgsz, _In_ ULONG cElems, _Out_ VARIANT *pvar);
 

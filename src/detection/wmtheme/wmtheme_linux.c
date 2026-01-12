@@ -1,12 +1,12 @@
 #include "wmtheme.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
 
 static bool detectWMThemeFromConfigFile(const char* configFile, const char* themeRegex, const char* defaultValue, FFstrbuf* themeOrError)
 {

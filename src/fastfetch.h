@@ -15,11 +15,11 @@
     #define __attribute__(x)
 #endif
 
-#include "util/arrayUtils.h"
-#include "util/FFstrbuf.h"
-#include "util/FFlist.h"
-#include "util/platform/FFPlatform.h"
-#include "util/unused.h"
+#include "common/arrayUtils.h"
+#include "common/FFstrbuf.h"
+#include "common/FFlist.h"
+#include "common/FFPlatform.h"
+#include "common/unused.h"
 
 #include "options/logo.h"
 #include "options/display.h"
@@ -46,6 +46,7 @@ typedef struct FFstate
     yyjson_mut_doc* resultDoc;
     FFstrbuf genConfigPath;
     bool fullConfig;
+    uint32_t dynamicInterval;
 } FFstate;
 
 typedef struct FFinstance

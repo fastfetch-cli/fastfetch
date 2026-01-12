@@ -1,9 +1,9 @@
 #include "bluetooth.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 /* Example dbus reply, striped to only the relevant parts:
 array [                                                     //root

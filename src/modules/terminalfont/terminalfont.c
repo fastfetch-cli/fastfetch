@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/terminalfont/terminalfont.h"
 #include "modules/terminalfont/terminalfont.h"
-#include "util/stringUtils.h"
 
 #define FF_TERMINALFONT_DISPLAY_NAME "Terminal Font"
 

@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "terminalfont.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #ifdef FF_HAVE_FREETYPE
     #include "common/library.h"
@@ -21,7 +21,7 @@ const char* detectTermux(FFTerminalFontResult* terminalFont)
 
     #ifdef FF_HAVE_FREETYPE
 
-    FF_LIBRARY_LOAD(freetype, "dlopen libfreetype"FF_LIBRARY_EXTENSION " failed", "libfreetype"FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_MESSAGE(freetype, "libfreetype" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_Init_FreeType);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_New_Face);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_Done_Face);

@@ -1,7 +1,7 @@
 #ifdef FF_HAVE_WAYLAND
 
 #include "wayland.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
 static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)

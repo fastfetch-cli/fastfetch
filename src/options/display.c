@@ -2,7 +2,7 @@
 #include "common/color.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 #include "options/display.h"
 
 #include <unistd.h>
@@ -451,6 +451,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         { "string", FF_MODULE_KEY_TYPE_STRING },
                         { "icon", FF_MODULE_KEY_TYPE_ICON },
                         { "both", FF_MODULE_KEY_TYPE_BOTH },
+                        { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 },
+                        { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 },
+                        { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 },
+                        { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 },
+                        { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 },
                         {}
                     });
                     if (error) return error;
@@ -612,6 +617,11 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                 { "string", FF_MODULE_KEY_TYPE_STRING },
                 { "icon", FF_MODULE_KEY_TYPE_ICON },
                 { "both", FF_MODULE_KEY_TYPE_BOTH },
+                { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 },
+                { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 },
+                { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 },
+                { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 },
+                { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 },
                 {}
             });
         }

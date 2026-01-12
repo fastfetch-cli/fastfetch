@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #import <AVFoundation/AVCaptureDevice.h>
 

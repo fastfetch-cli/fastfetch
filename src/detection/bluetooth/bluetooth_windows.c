@@ -1,6 +1,6 @@
 #include "bluetooth.h"
 #include "common/library.h"
-#include "util/windows/unicode.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 #include <bluetoothapis.h>
@@ -10,7 +10,7 @@
 const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
 {
     // Actually bluetoothapis.dll, but it's missing on Windows 7
-    FF_LIBRARY_LOAD(bluetoothapis, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
+    FF_LIBRARY_LOAD_MESSAGE(bluetoothapis, "bthprops.cpl", 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindDeviceClose)

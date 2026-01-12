@@ -1,0 +1,480 @@
+fastfetch (2.57.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.57.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 12 Jan 2026 10:11:21 +0800
+
+fastfetch (2.56.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.56.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 18 Dec 2025 14:57:36 +0800
+
+fastfetch (2.56.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.56.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 08 Dec 2025 09:21:58 +0800
+
+fastfetch (2.55.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 17 Nov 2025 10:15:44 +0800
+
+fastfetch (2.55.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 12 Nov 2025 09:15:24 +0800
+
+fastfetch (2.54.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Fix building on plucky
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 14:27:02 +0800
+
+fastfetch (2.54.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.54.0
+  * Test independent changelog entries for different Ubuntu releases
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 10:47:02 +0800
+
+fastfetch (2.53.0) jammy; urgency=medium
+
+  * Update to 2.53.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 23 Sep 2025 09:58:48 +0800
+
+fastfetch (2.52.0) jammy; urgency=medium
+
+  * Update to 2.52.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 05 Sep 2025 14:59:44 +0800
+
+fastfetch (2.51.0) jammy; urgency=medium
+
+  * Update to 2.51.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 29 Aug 2025 08:55:03 +0800
+
+fastfetch (2.50.2) jammy; urgency=medium
+
+  * Update to 2.50.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 21 Aug 2025 10:33:07 +0800
+
+fastfetch (2.49.0) jammy; urgency=medium
+
+  * Update to 2.49.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 31 Jul 2025 14:32:59 +0800
+
+fastfetch (2.48.0) jammy; urgency=medium
+
+  * Update to 2.48.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 17 Jul 2025 16:16:52 +0800
+
+fastfetch (2.47.0) jammy; urgency=medium
+
+  * Update to 2.47.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 03 Jul 2025 14:51:45 +0800
+
+fastfetch (2.46.0) jammy; urgency=medium
+
+  * Update to 2.46.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 20 Jun 2025 15:01:21 +0800
+
+fastfetch (2.45.0) jammy; urgency=medium
+
+  * Update to 2.45.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 05 Jun 2025 10:56:38 +0800
+
+fastfetch (2.44.0) jammy; urgency=medium
+
+  * Update to 2.44.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 26 May 2025 14:59:01 +0800
+
+fastfetch (2.43.0) jammy; urgency=medium
+
+  * Update to 2.43.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 14 May 2025 09:49:50 +0800
+
+fastfetch (2.42.0) jammy; urgency=medium
+
+  * Update to 2.42.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 30 Apr 2025 14:08:57 +0800
+
+fastfetch (2.41.0) jammy; urgency=medium
+
+  * Update to 2.41.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 16 Apr 2025 13:42:58 +0800
+
+fastfetch (2.40.4) jammy; urgency=medium
+
+  * Update to 2.40.4
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 10 Apr 2025 15:38:21 +0800
+
+fastfetch (2.40.3) jammy; urgency=medium
+
+  * Update to 2.40.3
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 07 Apr 2025 09:29:27 +0800
+
+fastfetch (2.40.0) jammy; urgency=medium
+
+  * Update to 2.40.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 03 Apr 2025 08:46:54 +0800
+
+fastfetch (2.39.1) jammy; urgency=medium
+
+  * Update to 2.39.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 21 Mar 2025 11:02:19 +0800
+
+fastfetch (2.39.0ubuntu1) jammy; urgency=medium
+
+  * Remove unwanted debugging code
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 20 Mar 2025 10:39:22 +0800
+
+fastfetch (2.39.0) jammy; urgency=medium
+
+  * Update to 2.39.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 20 Mar 2025 10:35:18 +0800
+
+fastfetch (2.38.0) jammy; urgency=medium
+
+  * Update to 2.38.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 05 Mar 2025 14:56:24 +0800
+
+fastfetch (2.37.0) jammy; urgency=medium
+
+  * Update to 2.37.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 19 Feb 2025 15:43:42 +0800
+
+fastfetch (2.36.1) jammy; urgency=medium
+
+  * Update to 2.36.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 11 Feb 2025 13:39:55 +0800
+
+fastfetch (2.36.0) jammy; urgency=medium
+
+  * Update to 2.36.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 10 Feb 2025 10:13:53 +0800
+
+fastfetch (2.35.0) jammy; urgency=medium
+
+  * Update to 2.35.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Sun, 26 Jan 2025 10:15:22 +0800
+
+fastfetch (2.34.1) jammy; urgency=medium
+
+  * Update to 2.34.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 13 Jan 2025 16:06:22 +0800
+
+fastfetch (2.34.0) jammy; urgency=medium
+
+  * Update to 2.34.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 09 Jan 2025 09:03:17 +0800
+
+fastfetch (2.33.0) jammy; urgency=medium
+
+  * Update to 2.33.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 26 Dec 2024 09:42:27 +0800
+
+fastfetch (2.32.0) jammy; urgency=medium
+
+  * Update to 2.32.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 18 Dec 2024 10:39:06 +0800
+
+fastfetch (2.31.0) jammy; urgency=medium
+
+  * Update to 2.31.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 04 Dec 2024 08:41:40 +0800
+
+fastfetch (2.30.1) jammy; urgency=medium
+
+  * Update to 2.30.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 18 Nov 2024 15:40:48 +0800
+
+fastfetch (2.30.0) jammy; urgency=medium
+
+  * Update to 2.30.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 18 Nov 2024 09:30:58 +0800
+
+fastfetch (2.29.0) jammy; urgency=medium
+
+  * Update to 2.29.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 04 Nov 2024 15:05:02 +0800
+
+fastfetch (2.28.0) jammy; urgency=medium
+
+  * Update to 2.28.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 23 Oct 2024 10:18:59 +0800
+
+fastfetch (2.27.1) jammy; urgency=medium
+
+  * Update to 2.27.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Sun, 06 Oct 2024 12:55:18 +0800
+
+fastfetch (2.26.1ubuntu1) jammy; urgency=medium
+
+  * Update correct code
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 30 Sep 2024 00:21:20 +0800
+
+fastfetch (2.26.1) jammy; urgency=medium
+
+  * Update to 2.26.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Sun, 29 Sep 2024 16:15:31 +0800
+
+fastfetch (2.26.0) jammy; urgency=medium
+
+  * Update to 2.26.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Sun, 29 Sep 2024 13:31:25 +0800
+
+fastfetch (2.25.0) jammy; urgency=medium
+
+  * Update to 2.25.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 19 Sep 2024 10:28:38 +0800
+
+fastfetch (2.24.0) jammy; urgency=medium
+
+  * Update to 2.24.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 11 Sep 2024 13:50:02 +0800
+
+fastfetch (2.23.0) jammy; urgency=medium
+
+  * Update to 2.23.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 03 Sep 2024 18:44:11 +0800
+
+fastfetch (2.22.0) jammy; urgency=medium
+
+  * Update to 2.22.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 26 Aug 2024 18:53:35 +0800
+
+fastfetch (2.21.3) jammy; urgency=medium
+
+  * Update to 2.21.3
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 15 Aug 2024 16:14:52 +0800
+
+fastfetch (2.21.2) jammy; urgency=medium
+
+  * Update to 2.21.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 14 Aug 2024 14:42:07 +0800
+
+fastfetch (2.21.1) jammy; urgency=medium
+
+  * Update to 2.21.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 09 Aug 2024 14:27:10 +0800
+
+fastfetch (2.21.0) jammy; urgency=medium
+
+  * Update to 2.21.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 05 Aug 2024 14:35:43 +0800
+
+fastfetch (2.20.0) jammy; urgency=medium
+
+  * Update to 2.20.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 26 Jul 2024 14:02:50 +0800
+
+fastfetch (2.19.1) jammy; urgency=medium
+
+  * Update to 2.19.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 23 Jul 2024 10:25:14 +0800
+
+fastfetch (2.19.0) jammy; urgency=medium
+
+  * Update to 2.19.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 22 Jul 2024 14:17:55 +0800
+
+fastfetch (2.18.1) jammy; urgency=medium
+
+  * Update to 2.18.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 11 Jul 2024 14:32:15 +0800
+
+fastfetch (2.18.0) jammy; urgency=medium
+
+  * Update to 2.18.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 10 Jul 2024 16:46:32 +0800
+
+fastfetch (2.17.2) jammy; urgency=medium
+
+  * Update to 2.17.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 04 Jul 2024 10:22:44 +0800
+
+fastfetch (2.17.1) jammy; urgency=medium
+
+  * Update to 2.17.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 01 Jul 2024 08:56:29 +0800
+
+fastfetch (2.17.0) jammy; urgency=medium
+
+  * Update to 2.17.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 28 Jun 2024 13:43:18 +0800
+
+fastfetch (2.16.0) jammy; urgency=medium
+
+  * Update to 2.16.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 19 Jun 2024 14:53:43 +0800
+
+fastfetch (2.15.0) jammy; urgency=medium
+
+  * Update to 2.15.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 07 Jun 2024 13:52:43 +0800
+
+fastfetch (2.14.0) jammy; urgency=medium
+
+  * Update to 2.14.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 30 May 2024 14:27:54 +0800
+
+fastfetch (2.13.2) jammy; urgency=medium
+
+  * Update to 2.13.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 24 May 2024 13:48:59 +0800
+
+fastfetch (2.13.1) jammy; urgency=medium
+
+  * Update to 2.13.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 21 May 2024 15:10:37 +0800
+
+fastfetch (2.12.0) jammy; urgency=medium
+
+  * Update to 2.12.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 14 May 2024 16:33:33 +0800
+
+fastfetch (2.11.5) jammy; urgency=medium
+
+  * Update to 2.11.5
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 07 May 2024 09:30:05 +0800
+
+fastfetch (2.11.3) jammy; urgency=medium
+
+  * Update to 2.11.3
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 06 May 2024 08:46:45 +0800
+
+fastfetch (2.10.2) jammy; urgency=medium
+
+  * Update to 2.10.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 23 Apr 2024 15:18:23 +0800
+
+fastfetch (2.10.1) jammy; urgency=medium
+
+  * Update to 2.10.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 23 Apr 2024 09:55:02 +0800
+
+fastfetch (2.9.2) jammy; urgency=medium
+
+  * Update to 2.9.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 16 Apr 2024 16:32:40 +0800
+
+fastfetch (2.9.1) jammy; urgency=medium
+
+  * Update to 2.9.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 08 Apr 2024 09:34:30 +0800
+
+fastfetch (2.8.10) jammy; urgency=medium
+
+  * Update to 2.8.10
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 25 Mar 2024 15:01:53 +0800
+
+fastfetch (2.8.9) jammy; urgency=medium
+
+  * Update to 2.8.9
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 15 Mar 2024 10:49:42 +0800
+
+fastfetch (2.8.8) jammy; urgency=medium
+
+  * Update to 2.8.8
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 08 Mar 2024 09:59:41 +0800
+
+fastfetch (2.8.6) jammy; urgency=medium
+
+  * Update to 2.8.6
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 28 Feb 2024 10:01:40 +0800
+
+fastfetch (2.8.4) jammy; urgency=medium
+
+  * Update to 2.8.4
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 23 Feb 2024 16:14:57 +0800
+
+fastfetch (2.7.1ubuntu2) jammy; urgency=medium
+
+  * Ignore .git
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 14:23:23 +0800
+
+fastfetch (2.7.1ubuntu1) jammy; urgency=medium
+
+  * Update build scripts
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 13:53:37 +0800
+
+fastfetch (2.7.1) jammy; urgency=medium
+
+  * Initial release.
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 06 Feb 2024 15:01:11 +0800

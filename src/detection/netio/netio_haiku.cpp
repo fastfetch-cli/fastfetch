@@ -1,6 +1,6 @@
 extern "C" {
 #include "netio.h"
-#include "common/netif/netif.h"
+#include "common/netif.h"
 }
 
 #include <NetworkInterface.h>

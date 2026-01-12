@@ -6,6 +6,7 @@ typedef struct FFCPUOptions
 {
     FFModuleArgs moduleArgs;
 
+    FFstrbuf tempSensor;
     bool temp;
     FFColorRangeConfig tempConfig;
     bool showPeCoreCount;

@@ -183,7 +183,7 @@
             },
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Clang     │{$4}│{#keys}│{$2}",
-            "text": "clang --version | head -1 | awk '{print $NF}'",
+            "text": "clang --version | sed -n 's/.*version \\([0-9][0-9.]*\\).*/\\1/p'",
             "format": "clang {}"
         },
         {

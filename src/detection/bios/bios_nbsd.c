@@ -1,6 +1,6 @@
 #include "bios.h"
 #include "common/sysctl.h"
-#include "util/smbiosHelper.h"
+#include "common/smbiosHelper.h"
 
 const char* ffDetectBios(FFBiosResult* bios)
 {

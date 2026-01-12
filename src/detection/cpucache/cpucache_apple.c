@@ -1,6 +1,6 @@
 #include "cpucache.h"
 #include "common/sysctl.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result)
 {
@@ -9,7 +9,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
     if (nPerfLevels <= 0) return "sysctl(hw.nperflevels) failed";
 
     // macOS provides the global system cache line size
-    uint32_t lineSize = (uint32_t) ffSysctlGetInt("hw.cachelinesize", 0);
+    uint32_t lineSize = (uint32_t) ffSysctlGetInt64("hw.cachelinesize", 0);
 
     char sysctlKey[128] = "hw.perflevelN.";
     char* pNum = sysctlKey + strlen("hw.perflevel");

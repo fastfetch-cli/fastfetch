@@ -1,5 +1,5 @@
 #include "icons.h"
-#include "util/windows/registry.h"
+#include "common/windows/registry.h"
 
 const char* ffDetectIcons(FFIconsResult* result)
 {
@@ -15,6 +15,9 @@ const char* ffDetectIcons(FFIconsResult* result)
     ffRegReadUint(hKey, L"{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}", &RemoteNetwork, NULL);
     ffRegReadUint(hKey, L"{645FF040-5081-101B-9F08-00AA002F954E}", &RecycleBin, NULL);
     ffRegReadUint(hKey, L"{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}", &ControlPanel, NULL);
+
+    if (ThisPC && UsersFiles && RemoteNetwork && RecycleBin && ControlPanel)
+        return "All icons are hidden";
 
     if (!ThisPC)
         ffStrbufAppendS(&result->icons1, "This PC, ");

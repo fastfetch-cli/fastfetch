@@ -1,7 +1,7 @@
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
-#include "util/apple/cf_helpers.h"
-#include "util/edidHelper.h"
+#include "common/apple/cf_helpers.h"
+#include "common/edidHelper.h"
 
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -55,7 +55,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 // Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
 static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result)
 {
-    if (!IOAVServiceCreate || !IOAVServiceReadI2C)
+    if (!IOAVServiceCreate || !IOAVServiceReadI2C || !IOAVServiceWriteI2C)
         return "IOAVService is not available";
 
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
@@ -123,65 +123,100 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
     return NULL;
 }
 #else
+static IOOptionBits getSupportedTransactionType(void)
+{
+    FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
+
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceNameMatching("IOFramebufferI2CInterface"), &iterator) != KERN_SUCCESS)
+        return kIOI2CNoTransactionType;
+
+    io_registry_entry_t registryEntry;
+    while ((registryEntry = IOIteratorNext(iterator)) != MACH_PORT_NULL)
+    {
+        FF_IOOBJECT_AUTO_RELEASE io_service_t io_service = registryEntry;
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef IOI2CTransactionTypes = IORegistryEntryCreateCFProperty(io_service, CFSTR(kIOI2CTransactionTypesKey), kCFAllocatorDefault, kNilOptions);
+
+        if (IOI2CTransactionTypes)
+        {
+            int64_t types = 0;
+            ffCfNumGetInt64(IOI2CTransactionTypes, &types);
+
+            if (types) {
+                if ((1 << kIOI2CDDCciReplyTransactionType) & (uint64_t) types)
+                    return kIOI2CDDCciReplyTransactionType;
+                if ((1 << kIOI2CSimpleTransactionType) & (uint64_t) types)
+                    return kIOI2CSimpleTransactionType;
+            }
+        }
+        break;
+    }
+
+    return kIOI2CNoTransactionType;
+}
+
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result)
 {
     if (!CGSServiceForDisplayNumber) return "CGSServiceForDisplayNumber is not available";
+    IOOptionBits transactionType = getSupportedTransactionType();
+    if (transactionType == kIOI2CNoTransactionType)
+        return "No supported IOI2C transaction type found";
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
         if (display->type == FF_DISPLAY_TYPE_EXTERNAL)
         {
-            io_service_t framebuffer = 0;
+            FF_IOOBJECT_AUTO_RELEASE io_service_t framebuffer = IO_OBJECT_NULL;
             CGSServiceForDisplayNumber((CGDirectDisplayID)display->id, &framebuffer);
-            if (framebuffer == 0) continue;
+            if (framebuffer == IO_OBJECT_NULL) continue;
 
             IOItemCount count;
-            if (IOFBGetI2CInterfaceCount(framebuffer, &count) != KERN_SUCCESS || count == 0) continue;
-
-            io_service_t interface = 0;
-            if (IOFBCopyI2CInterfaceForBus(framebuffer, 0, &interface) != KERN_SUCCESS) continue;
-
-            uint8_t i2cOut[12] = {};
-            IOI2CConnectRef connect;
-            if (IOI2CInterfaceOpen(interface, kNilOptions, &connect) != KERN_SUCCESS)
-            {
-                IOObjectRelease(interface);
+            if (IOFBGetI2CInterfaceCount(framebuffer, &count) != KERN_SUCCESS || count == 0)
                 continue;
+
+            for (IOItemCount bus = 0; bus < count; ++bus)
+            {
+                FF_IOOBJECT_AUTO_RELEASE io_service_t interface = IO_OBJECT_NULL;
+                if (IOFBCopyI2CInterfaceForBus(framebuffer, bus, &interface) != KERN_SUCCESS) continue;
+
+                uint8_t i2cOut[12] = {};
+                IOI2CConnectRef connect = NULL;
+                if (IOI2CInterfaceOpen(interface, kNilOptions, &connect) != KERN_SUCCESS)
+                    continue;
+
+                uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
+                i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
+
+                IOI2CRequest request = {
+                    .commFlags = kNilOptions,
+                    .sendAddress = 0x6e,
+                    .sendTransactionType = kIOI2CSimpleTransactionType,
+                    .sendBuffer = (vm_address_t) i2cIn,
+                    .sendBytes = ARRAY_SIZE(i2cIn),
+                    .minReplyDelay = options->ddcciSleep * 1000ULL,
+                    .replyAddress = 0x6F,
+                    .replySubAddress = 0x51,
+                    .replyTransactionType = transactionType,
+                    .replyBytes = ARRAY_SIZE(i2cOut),
+                    .replyBuffer = (vm_address_t) i2cOut,
+                };
+                IOReturn ret = IOI2CSendRequest(connect, kNilOptions, &request);
+                IOI2CInterfaceClose(connect, kNilOptions);
+
+                if (ret != KERN_SUCCESS || request.result != kIOReturnSuccess || request.replyBytes < 10) continue;
+                if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00) continue;
+
+                uint32_t current = ((uint32_t) i2cOut[8] << 8u) + (uint32_t) i2cOut[9];
+                uint32_t max = ((uint32_t) i2cOut[6] << 8u) + (uint32_t) i2cOut[7];
+
+                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                brightness->max = max;
+                brightness->min = 0;
+                brightness->current = current;
+                ffStrbufInitCopy(&brightness->name, &display->name);
+                brightness->builtin = false;
+
+                break;
             }
-
-            uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
-            i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
-
-            IOI2CRequest request = {
-                .commFlags = kNilOptions,
-                .sendAddress = 0x6e,
-                .sendTransactionType = kIOI2CSimpleTransactionType,
-                .sendBuffer = (vm_address_t) i2cIn,
-                .sendBytes = ARRAY_SIZE(i2cIn),
-                .minReplyDelay = options->ddcciSleep,
-                .replyAddress = 0x6F,
-                .replySubAddress = 0x51,
-                .replyTransactionType = kIOI2CDDCciReplyTransactionType,
-                .replyBytes = ARRAY_SIZE(i2cOut),
-                .replyBuffer = (vm_address_t) i2cOut,
-            };
-            IOReturn ret = IOI2CSendRequest(connect, kNilOptions, &request);
-            IOI2CInterfaceClose(connect, kNilOptions);
-            IOObjectRelease(interface);
-
-            if (ret  != KERN_SUCCESS || request.result != kIOReturnSuccess) continue;
-
-            if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00) continue;
-
-            uint32_t current = ((uint32_t) i2cOut[8] << 8u) + (uint32_t) i2cOut[9];
-            uint32_t max = ((uint32_t) i2cOut[6] << 8u) + (uint32_t) i2cOut[7];
-
-            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-            brightness->max = max;
-            brightness->min = 0;
-            brightness->current = current;
-            ffStrbufInitCopy(&brightness->name, &display->name);
-            brightness->builtin = false;
         }
     }
 

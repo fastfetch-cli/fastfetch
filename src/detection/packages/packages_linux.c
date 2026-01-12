@@ -1,10 +1,10 @@
 #include "packages.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/parsing.h"
 #include "common/properties.h"
 #include "common/settings.h"
+#include "common/stringUtils.h"
 #include "detection/os/os.h"
-#include "util/stringUtils.h"
 
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir)
 {
@@ -261,7 +261,7 @@ static uint32_t getAMUser(void)
     if (instance.state.platform.configDirs.length == 0) return 0;
 
     // check if $XDG_CONFIG_HOME/appman/appman-config exists
-    FFstrbuf* baseDir = FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0);
+    FFstrbuf* baseDir = FF_LIST_FIRST(FFstrbuf, instance.state.platform.configDirs);
     uint32_t baseLen = baseDir->length;
     ffStrbufAppendS(baseDir, "appman/appman-config");
     FF_STRBUF_AUTO_DESTROY packagesPath = ffStrbufCreate();
@@ -420,6 +420,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpakPackages(baseDir, "/var/lib");
+    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
         packageCounts->nixDefault += ffPackagesGetNix(baseDir, "/nix/var/nix/profiles/default");

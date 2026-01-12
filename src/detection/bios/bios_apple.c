@@ -1,73 +1,59 @@
 #include "bios.h"
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
 
 const char* ffDetectBios(FFBiosResult* bios)
 {
-    io_registry_entry_t registryEntry;
-
     #ifndef __aarch64__
 
     //https://github.com/osquery/osquery/blob/master/osquery/tables/system/darwin/smbios_tables.cpp
     //For Intel
-    if((registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/rom")))
-    {
-        CFMutableDictionaryRef properties;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        {
-            IOObjectRelease(registryEntry);
-            return "IORegistryEntryCreateCFProperties(registryEntry) failed";
-        }
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceRom = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/rom");
+    if (!deviceRom)
+        return "IODeviceTree:/rom not found";
 
-        ffCfDictGetString(properties, CFSTR("vendor"), &bios->vendor);
-        ffCfDictGetString(properties, CFSTR("version"), &bios->version);
-        ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
-        ffStrbufSetStatic(&bios->type, "UEFI");
+    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceRomProps = NULL;
+    if(IORegistryEntryCreateCFProperties(deviceRom, &deviceRomProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+        return "IORegistryEntryCreateCFProperties(deviceRom) failed";
 
-        CFRelease(properties);
-        IOObjectRelease(registryEntry);
-        return NULL;
-    }
+    ffCfDictGetString(deviceRomProps, CFSTR("vendor"), &bios->vendor);
+    ffCfDictGetString(deviceRomProps, CFSTR("version"), &bios->version);
+    ffCfDictGetString(deviceRomProps, CFSTR("release-date"), &bios->date);
+    ffStrbufSetStatic(&bios->type, "UEFI");
 
     #else
 
     //For arm64
-    if((registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/")))
-    {
-        CFMutableDictionaryRef properties;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
-        {
-            ffCfDictGetString(properties, CFSTR("manufacturer"), &bios->vendor);
-            ffCfDictGetString(properties, CFSTR("time-stamp"), &bios->date);
-            CFRelease(properties);
-        }
-        IOObjectRelease(registryEntry);
-    }
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t device = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/");
+    if (!device)
+        return "IODeviceTree:/ not found";
 
-    if((registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen")))
+    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceProps = NULL;
+    if(IORegistryEntryCreateCFProperties(device, &deviceProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+        return "IORegistryEntryCreateCFProperties(device) failed";
+
+    ffCfDictGetString(deviceProps, CFSTR("manufacturer"), &bios->vendor);
+    ffCfDictGetString(deviceProps, CFSTR("time-stamp"), &bios->date);
+
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceChosen = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
+    if (deviceChosen)
     {
-        CFMutableDictionaryRef properties;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) == kIOReturnSuccess)
+        FF_CFTYPE_AUTO_RELEASE CFStringRef systemFirmWareVersion = IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("system-firmware-version"), kCFAllocatorDefault, kNilOptions);
+        if (systemFirmWareVersion)
         {
-            ffCfDictGetString(properties, CFSTR("system-firmware-version"), &bios->version);
+            ffCfStrGetString(systemFirmWareVersion, &bios->version);
             uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
             if (index != bios->version.length)
             {
                 ffStrbufAppendNS(&bios->type, index, bios->version.chars);
                 ffStrbufRemoveSubstr(&bios->version, 0, index + 1);
             }
-            else
-            {
-                ffStrbufSetStatic(&bios->type, "iBoot");
-            }
-            CFRelease(properties);
         }
-        IOObjectRelease(registryEntry);
-        return NULL;
     }
-
+    if (!bios->type.length)
+        ffStrbufSetStatic(&bios->type, "iBoot");
     #endif
 
-    return "Failed to query bios info";
+    return NULL;
 }

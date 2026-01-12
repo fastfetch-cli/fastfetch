@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/bootmgr/bootmgr.h"
 #include "modules/bootmgr/bootmgr.h"
-#include "util/stringUtils.h"
 
 bool ffPrintBootmgr(FFBootmgrOptions* options)
 {

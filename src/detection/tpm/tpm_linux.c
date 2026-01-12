@@ -1,5 +1,5 @@
 #include "tpm.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 const char* ffDetectTPM(FFTPMResult* result)
 {

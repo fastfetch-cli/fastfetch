@@ -1,7 +1,7 @@
 #include "host.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/processing.h"
-#include "util/smbiosHelper.h"
+#include "common/smbiosHelper.h"
 
 #include <stdlib.h>
 

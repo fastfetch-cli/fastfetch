@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/locale/locale.h"
 #include "modules/locale/locale.h"
-#include "util/stringUtils.h"
 
 bool ffPrintLocale(FFLocaleOptions* options)
 {

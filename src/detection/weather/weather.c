@@ -1,5 +1,5 @@
 #include "weather.h"
-#include "common/networking/networking.h"
+#include "common/networking.h"
 
 #define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState state;
@@ -44,6 +44,10 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result)
 
     ffStrbufEnsureFree(result, 4095);
     const char* error = ffNetworkingRecvHttpResponse(&state, result);
+
+    state = (FFNetworkingState){};
+    status = FF_UNITIALIZED;
+
     if (error == NULL)
     {
         ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");

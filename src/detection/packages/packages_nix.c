@@ -1,7 +1,7 @@
 #include "packages.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 static bool isValidNixPkg(FFstrbuf* pkg)
 {

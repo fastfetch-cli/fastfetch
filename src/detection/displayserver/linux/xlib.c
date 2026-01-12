@@ -4,8 +4,8 @@
 
 #include "common/library.h"
 #include "common/properties.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>
@@ -134,8 +134,8 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
 
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
-        (uint32_t) crtcInfo->width,
-        (uint32_t) crtcInfo->height,
+        (uint32_t) (currentMode ? currentMode->width : crtcInfo->width),
+        (uint32_t) (currentMode ? currentMode->height : crtcInfo->height),
         currentMode ? (double) currentMode->dotClock / (double) ((uint32_t) currentMode->hTotal * currentMode->vTotal) : 0,
         (uint32_t) (crtcInfo->width / scaleFactor + .5),
         (uint32_t) (crtcInfo->height / scaleFactor + .5),
@@ -149,7 +149,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         0,
         (uint32_t) output->mm_width,
         (uint32_t) output->mm_height,
-        "xlib-randr-crtc"
+        currentMode ? "xlib-randr-mode" : "xlib-randr-crtc"
     );
 
     if (item)
@@ -298,7 +298,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 
 const char* ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xrandr, "dlopen libXrandr failed", "libXrandr" FF_LIBRARY_EXTENSION, 3)
+    FF_LIBRARY_LOAD_MESSAGE(xrandr, "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XOpenDisplay)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XCloseDisplay)

@@ -1008,7 +1008,7 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show icon before string keys",
+                            "description": "Set whether to show builtin icon before string keys",
                             "oneOf": [
                                 {
                                     "const": "none",
@@ -1020,11 +1020,31 @@
                                 },
                                 {
                                     "const": "icon",
-                                    "description": "Show icon keys (requires newest nerd font)"
+                                    "description": "Show builtin icon (requires newest nerd font)"
                                 },
                                 {
                                     "const": "both",
-                                    "description": "Show both icon and string keys"
+                                    "description": "Show both icon and string keys (alias of `both-1`)"
+                                },
+                                {
+                                    "const": "both-0",
+                                    "description": "Show both icon and string with no spaces between them"
+                                },
+                                {
+                                    "const": "both-1",
+                                    "description": "Show both icon and string with a space between them"
+                                },
+                                {
+                                    "const": "both-2",
+                                    "description": "Show both icon and string with 2 spaces between them"
+                                },
+                                {
+                                    "const": "both-3",
+                                    "description": "Show both icon and string with 3 spaces between them"
+                                },
+                                {
+                                    "const": "both-4",
+                                    "description": "Show both icon and string with 4 spaces between them"
                                 }
                             ],
                             "default": "string"
@@ -1860,6 +1880,10 @@
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },
+                                    "tempSensor": {
+                                        "description": "Set the temperature sensor to use for CPU temperature detection\n* Linux: `hwmon` or `thermal` path name (eg. `hwmon0`, `thermal_zone0)`\n* macOS: SMC sensor key (eg. `Tp01`)\n* Windows: thermal zone key (eg. `\\_TZ.CPUZ`)\n* FreeBSD: sysctl key (eg. `dev.cpu.0.temperature`)\n* NetBSD: sysmon sensor key (eg. `coretemp0`)",
+                                        "type": "string"
+                                    },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
                                         "type": "boolean",
@@ -2080,6 +2104,21 @@
                                     "text": {
                                         "description": "Set the command text to be executed",
                                         "type": "string"
+                                    },
+                                    "useStdErr": {
+                                        "description": "Set if stderr should be used instead of stdout for command output",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "parallel": {
+                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "splitLines": {
+                                        "description": "Set if the command output should be split into multiple lines",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2326,7 +2365,7 @@
                                         ]
                                     },
                                     "hideFolders": {
-                                        "description": "A list of folder paths to hide from the disk output",
+                                        "description": "A list of folder paths (or glob patterns) to hide from the disk output",
                                         "oneOf": [
                                             {
                                                 "type": "string",
@@ -2342,7 +2381,7 @@
                                                 "uniqueItems": true
                                             }
                                         ],
-                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
+                                        "default": "/efi:/boot:/boot/*"
                                     },
                                     "hideFS": {
                                         "description": "A list of file systems to hide from the disk output",
@@ -2925,8 +2964,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/keyboardFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -3161,6 +3203,20 @@
                                 }
                             },
                             {
+                                "title": "Logo",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "logo",
+                                        "description": "Query built-in logo for JSON output"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
                                 "title": "Media",
                                 "type": "object",
                                 "additionalProperties": false,
@@ -3257,8 +3313,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/mouseFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"

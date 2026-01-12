@@ -1,18 +1,18 @@
 extern "C"
 {
 #include "wm.h"
-#include "common/io/io.h"
+#include "common/io.h"
+#include "common/windows/version.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "util/windows/version.h"
 }
 
-#include "util/windows/com.hpp"
+#include "common/windows/com.hpp"
 
 #include <utility>
 #include <windows.h>
 #include <tlhelp32.h>
 #include <shlobj.h>
-#include <Propkey.h>
+#include <propkey.h>
 
 template <typename Fn>
 struct on_scope_exit {

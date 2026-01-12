@@ -1,9 +1,9 @@
 #include "image.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
-#include "util/base64.h"
+#include "common/stringUtils.h"
+#include "common/base64.h"
 #include "detection/terminalsize/terminalsize.h"
 
 #include <limits.h>
@@ -891,13 +891,13 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
-        if(fd == FF_INVALID_FD)
+        if(!ffIsValidNativeFD(fd))
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
     else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
 
-    if(fd == FF_INVALID_FD)
+    if(!ffIsValidNativeFD(fd))
         return false;
 
     ffPrintCharTimes('\n', options->paddingTop);

@@ -1,8 +1,8 @@
 #include "bios.h"
-#include "util/smbiosHelper.h"
+#include "common/smbiosHelper.h"
 
 #ifdef _WIN32
-#include "util/windows/registry.h"
+#include "common/windows/registry.h"
 
 #include <ntstatus.h>
 #include <winternl.h>
@@ -28,7 +28,7 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
 #elif __OpenBSD__
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <fcntl.h>
 #include <unistd.h>

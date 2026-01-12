@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/brightness/brightness.h"
 #include "modules/brightness/brightness.h"
-#include "util/stringUtils.h"
 
 bool ffPrintBrightness(FFBrightnessOptions* options)
 {

@@ -2,9 +2,9 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
-#include "util/stringUtils.h"
 
 void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
 {

@@ -1,5 +1,6 @@
 #include "host.h"
 #include "common/settings.h"
+
 #include <ctype.h>
 
 const char* ffDetectHost(FFHostResult* host)

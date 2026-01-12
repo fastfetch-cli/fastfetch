@@ -2,9 +2,9 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/btrfs/btrfs.h"
 #include "modules/btrfs/btrfs.h"
-#include "util/stringUtils.h"
 
 static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t index)
 {

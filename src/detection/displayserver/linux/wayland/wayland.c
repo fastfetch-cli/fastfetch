@@ -1,7 +1,7 @@
 #include "../displayserver_linux.h"
-#include "common/io/io.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -215,7 +215,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result)
     if (getenv("XDG_RUNTIME_DIR") == NULL)
         return "Wayland requires $XDG_RUNTIME_DIR being set";
 
-    FF_LIBRARY_LOAD(wayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(wayland, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_connect)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_get_fd)

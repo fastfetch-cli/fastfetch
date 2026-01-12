@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/mouse/mouse.h"
 #include "modules/mouse/mouse.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, uint8_t index)
 {

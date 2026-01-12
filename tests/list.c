@@ -1,5 +1,5 @@
-#include "util/FFlist.h"
-#include "util/textModifier.h"
+#include "common/FFlist.h"
+#include "common/textModifier.h"
 
 #include <string.h>
 #include <stdarg.h>

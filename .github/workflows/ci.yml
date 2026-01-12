@@ -145,8 +145,10 @@ jobs:
           strip fastfetch && ./polyfill-glibc fastfetch --target-glibc=2.17
           strip flashfetch && ./polyfill-glibc flashfetch --target-glibc=2.17
           echo 'set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-polyfilled")' >> CPackConfig.cmake
+          echo 'set(CPACK_PACKAGE_RELOCATABLE OFF)' >> CPackConfig.cmake
           echo 'set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.17)")' >> CPackConfig.cmake
-          cpack
+          echo 'set(CPACK_RPM_SPEC_MORE_DEFINE "%global __os_install_post %{nil}")' >> CPackConfig.cmake
+          cpack -V
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -188,10 +190,13 @@ jobs:
         run: cmake --version
 
       - name: configure project
-        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_DIRECTX_HEADERS=Off .
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -DCPACK_DEBIAN_PACKAGE_ARCHITECTURE=i386 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_DIRECTX_HEADERS=Off .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
+
+      - name: check deb package
+        run: dpkg -I fastfetch-*.deb
 
       - name: list features
         run: ./fastfetch --list-features
@@ -441,7 +446,6 @@ jobs:
           usesh: true
           prepare: |
             uname -a
-            pkg install pkg:/package/pkg
             pkg update --accept
             pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
 
@@ -516,12 +520,12 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.7'
+          version: '7.8'
           run: |
             uname -a
             sudo pkg_add -u
-            sudo pkg_add -r llvm cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            sudo pkg_add -r llvm-21.1.2p0 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
+            CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -556,8 +560,8 @@ jobs:
           version: '10.1'
           run: |
             uname -a
-            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            sudo pkgin -y install clang cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick
+            CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -589,10 +593,10 @@ jobs:
           prepare: |
             uname -a
             pkg update
-            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa libelf
+            pkg install -y llvm cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa libelf
 
           run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            env CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -643,7 +647,7 @@ jobs:
           path: ./fastfetch-*.*
 
   windows-hosts:
-    name: Windows-${{ matrix.arch }}
+    name: Windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
     runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
@@ -656,11 +660,22 @@ jobs:
             msystem: CLANG64
             msystem-lower: clang64
             msys-arch: x86_64
+            win7-compat-flag: OFF
+            win7-compat-postfix: ""
+          - arch: amd64
+            runs-on: windows-latest
+            msystem: CLANG64
+            msystem-lower: clang64
+            msys-arch: x86_64
+            win7-compat-flag: ON
+            win7-compat-postfix: "-win7"
           - arch: aarch64
             runs-on: windows-11-arm
             msystem: CLANGARM64
             msystem-lower: clangarm64
             msys-arch: aarch64
+            win7-compat-flag: OFF
+            win7-compat-postfix: ""
     defaults:
       run:
         shell: msys2 {0}
@@ -679,7 +694,7 @@ jobs:
         run: uname -a
 
       - name: configure project
-        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_WIN7_COMPAT=${{ matrix.win7-compat-flag }} .
 
       - name: build project
         run: cmake --build . --verbose -j4
@@ -705,17 +720,41 @@ jobs:
       - name: run tests
         run: ctest --output-on-failure
 
-      - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: upload artifacts
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        id: upload-unsigned-artifact
+        name: upload artifacts for signing
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-windows-${{ matrix.arch }}
-          path: ./fastfetch-windows-${{ matrix.arch }}.*
+          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
+          path: |
+            *.dll
+            fastfetch.exe
+            flashfetch.exe
+
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        name: submit signing request
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
+          project-slug: 'fastfetch'
+          signing-policy-slug: ${{ github.ref == 'refs/heads/master' && 'release-signing' || 'test-signing' }}
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: '.'
+
+      - name: create zip archive
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: create 7z archive
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: upload true artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
+          path: ./fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.*
+          overwrite: true
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'

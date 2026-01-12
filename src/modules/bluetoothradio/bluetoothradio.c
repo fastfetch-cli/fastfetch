@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/bluetoothradio/bluetoothradio.h"
 #include "modules/bluetoothradio/bluetoothradio.h"
-#include "util/stringUtils.h"
 
 #define FF_BLUETOOTHRADIO_DISPLAY_NAME "Bluetooth Radio"
 

@@ -4,9 +4,9 @@
 
 #include "common/library.h"
 #include "common/properties.h"
-#include "util/edidHelper.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/edidHelper.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -215,8 +215,8 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
 
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
-        (uint32_t) crtcInfoReply->width,
-        (uint32_t) crtcInfoReply->height,
+        (uint32_t) (currentMode ? currentMode->width : crtcInfoReply->width),
+        (uint32_t) (currentMode ? currentMode->height : crtcInfoReply->height),
         currentMode ? (double) currentMode->dot_clock / (double) ((uint32_t) currentMode->htotal * currentMode->vtotal) : 0,
         (uint32_t) (crtcInfoReply->width / scaleFactor + .5),
         (uint32_t) (crtcInfoReply->height / scaleFactor + .5),
@@ -230,7 +230,7 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         0,
         (uint32_t) outputInfoReply->mm_width,
         (uint32_t) outputInfoReply->mm_height,
-        "xcb-randr-crtc"
+        currentMode ? "xcb-randr-mode" : "xcb-randr-crtc"
     );
     if (item && edidLength)
     {
@@ -357,7 +357,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
 
 const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(xcbRandr, "dlopen libxcb-randr failed", "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(xcbRandr, "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connect)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connection_has_error)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_get_setup)

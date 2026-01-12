@@ -1,12 +1,9 @@
 #include "displayserver.h"
-#include "detection/os/os.h"
-#include "util/windows/unicode.h"
-#include "util/windows/registry.h"
-#include "util/mallocHelper.h"
-#include "util/edidHelper.h"
+#include "common/windows/unicode.h"
+#include "common/edidHelper.h"
 
 #include <dwmapi.h>
-#include <WinUser.h>
+#include <winuser.h>
 #include <wchar.h>
 
 typedef struct FFMonitorInfo
@@ -34,6 +31,13 @@ static void detectDisplays(FFDisplayServerResult* ds)
 {
     FF_LIST_AUTO_DESTROY monitors = ffListCreate(sizeof(FFMonitorInfo));
     EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM) &monitors);
+
+    #if FF_WIN7_COMPAT
+    HDC hdc = GetDC(NULL);
+    uint32_t systemDpi = (uint32_t) GetDeviceCaps(hdc, LOGPIXELSX);
+    if (systemDpi == 0) systemDpi = 96;
+    ReleaseDC(NULL, hdc);
+    #endif
 
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = ARRAY_SIZE(paths);
@@ -164,12 +168,21 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
             }
 
+            uint32_t scaledWidth = (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left);
+            uint32_t scaledHeight = (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top);
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left),
-                (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top),
+                #if FF_WIN7_COMPAT
+                // Windows 7 always reports scaled width as the real width, as I tested on VM with 200% scaling.
+                scaledWidth == width ? width * 96 / systemDpi : scaledWidth,
+                scaledHeight == height ? height * 96 / systemDpi : scaledHeight,
+                #else
+                scaledWidth,
+                scaledHeight,
+                #endif
                 preferredMode.width,
                 preferredMode.height,
                 preferredRefreshRate,
@@ -232,6 +245,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 if (edidLength > 0)
                     ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
+                display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }
         }
     }
@@ -254,27 +268,4 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
 
     detectDisplays(ds);
-
-    //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
-    const FFOSResult* os = ffDetectOS();
-    uint32_t ver = (uint32_t) ffStrbufToUInt(&os->version, 0);
-    if (ver > 1000)
-    {
-        // Windows Server
-        if (ver >= 2016)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 2012)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
-    else
-    {
-        if (ver >= 10)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 8)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
 }

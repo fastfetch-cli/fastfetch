@@ -5,7 +5,6 @@
 #include "common/frequency.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
-#include "util/stringUtils.h"
 
 static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
 {
@@ -111,6 +110,7 @@ bool ffPrintCPU(FFCPUOptions* options)
                 FF_FORMAT_ARG(coreTypes, "core-types"),
                 FF_FORMAT_ARG(cpu.packages, "packages"),
                 FF_FORMAT_ARG(cpu.march, "march"),
+                FF_FORMAT_ARG(cpu.numaNodes, "numa-nodes"),
             }));
         }
         success = true;
@@ -133,6 +133,12 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
+
+        if (unsafe_yyjson_equals_str(key, "tempSensor"))
+        {
+            ffStrbufSetS(&options->tempSensor, unsafe_yyjson_get_str(val));
+            continue;
+        }
 
         if (unsafe_yyjson_equals_str(key, "freqNdigits"))
         {
@@ -217,6 +223,11 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, obj, "march");
 
+        if (cpu.numaNodes > 0)
+            yyjson_mut_obj_add_uint(doc, obj, "numaNodes", cpu.numaNodes);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "numaNodes");
+
         success = true;
     }
 
@@ -229,6 +240,7 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffInitCPUOptions(FFCPUOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
+    ffStrbufInit(&options->tempSensor);
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->showPeCoreCount = false;
@@ -237,6 +249,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
 void ffDestroyCPUOptions(FFCPUOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->tempSensor);
 }
 
 FFModuleBaseInfo ffCPUModuleInfo = {
@@ -259,6 +272,7 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Temperature (formatted)", "temperature"},
         {"Logical core count grouped by frequency", "core-types"},
         {"Processor package count", "packages"},
-        {"X86-64 CPU microarchitecture", "march"},
+        {"CPU microarchitecture", "march"},
+        {"NUMA node count", "numa-nodes"},
     }))
 };

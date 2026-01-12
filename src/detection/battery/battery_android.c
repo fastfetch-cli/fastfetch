@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "battery.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 #include "common/processing.h"
 #include "common/properties.h"
 

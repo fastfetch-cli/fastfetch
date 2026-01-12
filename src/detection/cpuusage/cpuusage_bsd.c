@@ -1,5 +1,5 @@
 #include "detection/cpuusage/cpuusage.h"
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>

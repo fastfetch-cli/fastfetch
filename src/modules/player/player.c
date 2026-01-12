@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/media/media.h"
 #include "modules/player/player.h"
-#include "util/stringUtils.h"
 
 #include <ctype.h>
 
@@ -10,7 +10,7 @@
 
 bool ffPrintPlayer(FFPlayerOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {
