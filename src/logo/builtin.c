@@ -2875,7 +2875,7 @@ static const FFlogo M[] = {
     },
     // MacOS
     {
-        .names = {"macos", "mac"},
+        .names = {"macOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2890,7 +2890,7 @@ static const FFlogo M[] = {
     },
     // MacOSSmall
     {
-        .names = {"macos_small", "mac_small"},
+        .names = {"macOS_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS_SMALL,
         .colors = {
@@ -2905,12 +2905,13 @@ static const FFlogo M[] = {
     },
     // MacOS2
     {
-        .names = {"macos2", "mac2"},
+        .names = {"macOS2"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_BLUE,
@@ -2920,7 +2921,7 @@ static const FFlogo M[] = {
     },
     // MacOS2Small
     {
-        .names = {"macos2_small", "mac2_small"},
+        .names = {"macOS2_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS2_SMALL,
         .colors = {
@@ -2935,12 +2936,13 @@ static const FFlogo M[] = {
     },
     // MacOS3
     {
-        .names = {"macos3", "mac3"},
+        .names = {"macOS3"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MACOS3,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_BLUE,
