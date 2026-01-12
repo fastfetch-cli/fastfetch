@@ -3203,6 +3203,20 @@
                                 }
                             },
                             {
+                                "title": "Logo",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "logo",
+                                        "description": "Query built-in logo for JSON output"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
                                 "title": "Media",
                                 "type": "object",
                                 "additionalProperties": false,
