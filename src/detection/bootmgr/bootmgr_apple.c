@@ -4,6 +4,10 @@
 
 #include <IOKit/IOKitLib.h>
 
+#ifndef kIOMainPortDefault
+#define kIOMainPortDefault kIOMasterPortDefault
+#endif
+
 static const char* detectSecureBoot(bool* result)
 {
     #if __aarch64__

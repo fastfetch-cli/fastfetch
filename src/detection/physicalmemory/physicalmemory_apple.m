@@ -6,6 +6,10 @@
 
 #import <Foundation/Foundation.h>
 
+#ifndef kIOMainPortDefault
+#define kIOMainPortDefault kIOMasterPortDefault
+#endif
+
 static void appendDevice(
     FFlist* result,
     NSString* type,
