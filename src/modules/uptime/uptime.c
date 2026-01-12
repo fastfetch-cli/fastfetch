@@ -2,9 +2,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
+#include "common/stringUtils.h"
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
-#include "util/stringUtils.h"
 
 bool ffPrintUptime(FFUptimeOptions* options)
 {

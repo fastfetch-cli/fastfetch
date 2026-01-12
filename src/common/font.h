@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/FFstrbuf.h"
-#include "util/FFlist.h"
+#include "common/FFstrbuf.h"
+#include "common/FFlist.h"
 
 typedef struct FFfont
 {
@@ -15,6 +15,8 @@ void ffFontInit(FFfont* font);
 void ffFontInitQt(FFfont* font, const char* data);
 void ffFontInitPango(FFfont* font, const char* data);
 void ffFontInitValues(FFfont* font, const char* name, const char* size);
+void ffFontInitXlfd(FFfont* font, const char* xlfd);
+void ffFontInitXft(FFfont* font, const char* xft);
 void ffFontInitMoveValues(FFfont* font, FFstrbuf* name, FFstrbuf* size, FFstrbuf* style);
 void ffFontInitWithSpace(FFfont* font, const char* rawName);
 void ffFontDestroy(FFfont* font);

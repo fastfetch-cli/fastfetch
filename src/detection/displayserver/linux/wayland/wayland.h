@@ -3,7 +3,7 @@
 #ifdef FF_HAVE_WAYLAND
 
 #include "common/library.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <wayland-client.h>
 

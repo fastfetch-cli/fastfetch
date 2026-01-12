@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/de/de.h"
 #include "modules/de/de.h"
-#include "util/stringUtils.h"
 
 bool ffPrintDE(FFDEOptions* options)
 {

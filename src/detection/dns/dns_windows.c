@@ -1,6 +1,6 @@
 #include "detection/dns/dns.h"
-#include "common/netif/netif.h"
-#include "util/mallocHelper.h"
+#include "common/netif.h"
+#include "common/mallocHelper.h"
 
 #include <ws2tcpip.h>
 #include <iphlpapi.h>

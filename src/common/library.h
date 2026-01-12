@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "util/FFcheckmacros.h"
+#include "common/FFcheckmacros.h"
 
 #ifndef FF_DISABLE_DLOPEN
 
@@ -38,6 +38,14 @@ static inline void ffLibraryUnload(void** handle)
     if(libraryObjectName == NULL) \
         return returnValue;
 
+#if _WIN32
+#define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \
+    FF_LIBRARY_LOAD(libraryObjectName, "LoadLibraryA(" libraryFileName ") failed", libraryFileName, maxVersion, ##__VA_ARGS__)
+#else
+#define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \
+    FF_LIBRARY_LOAD(libraryObjectName, "dlopen(" libraryFileName ") failed", libraryFileName, maxVersion, ##__VA_ARGS__)
+#endif
+
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
     symbolMapping = (__typeof__(&symbolName)) dlsym(library, #symbolName); \
     if(symbolMapping == NULL) \
@@ -72,6 +80,9 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...);
 
 #define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...) \
     FF_MAYBE_UNUSED void* libraryObjectName = NULL; // Placeholder
+
+#define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \
+    FF_LIBRARY_LOAD(libraryObjectName, , libraryFileName, maxVersion, ##__VA_ARGS__)
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
     symbolMapping = (__typeof__(&symbolName)) &symbolName;

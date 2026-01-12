@@ -2,12 +2,12 @@
 #include "detection/vulkan/vulkan.h"
 #include "detection/cpu/cpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/library.h"
+#include "common/FFstrbuf.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
 #include "modules/gpu/option.h"
-#include "util/FFstrbuf.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
 
 #include <inttypes.h>
 #include <stdint.h>

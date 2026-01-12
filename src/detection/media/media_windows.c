@@ -1,11 +1,11 @@
 #include "common/library.h"
-#include "util/windows/unicode.h"
+#include "common/windows/unicode.h"
 #include "media.h"
 #include "media_windows.dll.h"
 
 static const char* getMedia(FFMediaResult* media, bool saveCover)
 {
-    FF_LIBRARY_LOAD(libffwinrt, "dlopen libffwinrt" FF_LIBRARY_EXTENSION " failed", "libffwinrt" FF_LIBRARY_EXTENSION, 0)
+    FF_LIBRARY_LOAD_MESSAGE(libffwinrt, "libffwinrt" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libffwinrt, ffWinrtDetectMedia)
     libffwinrt = NULL; // Don't close libffwinrt or it may crash
 

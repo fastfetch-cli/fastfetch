@@ -1,8 +1,8 @@
 extern "C" {
     #include "sound.h"
-    #include "util/windows/unicode.h"
+    #include "common/windows/unicode.h"
 }
-#include "util/windows/com.hpp"
+#include "common/windows/com.hpp"
 
 #include <initguid.h>
 #include <mmdeviceapi.h>

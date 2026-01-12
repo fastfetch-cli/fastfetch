@@ -1,7 +1,7 @@
 #include "gamepad.h"
-#include "common/io/io.h"
-#include "util/mallocHelper.h"
-#include "util/windows/unicode.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
+#include "common/windows/unicode.h"
 
 #include <winternl.h>
 #include <windows.h>

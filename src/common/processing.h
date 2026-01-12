@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/FFstrbuf.h"
+#include "common/FFstrbuf.h"
 
 #ifndef _WIN32
 #include <sys/types.h> // pid_t

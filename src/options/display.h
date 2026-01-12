@@ -1,8 +1,8 @@
 #pragma once
 
 #include "common/percent.h"
-#include "util/FFstrbuf.h"
-#include "util/FFlist.h"
+#include "common/FFstrbuf.h"
+#include "common/FFlist.h"
 
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 {

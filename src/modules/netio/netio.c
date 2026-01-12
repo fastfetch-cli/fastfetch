@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/netio/netio.h"
 #include "modules/netio/netio.h"
-#include "util/stringUtils.h"
 
 #define FF_NETIO_DISPLAY_NAME "Network IO"
 

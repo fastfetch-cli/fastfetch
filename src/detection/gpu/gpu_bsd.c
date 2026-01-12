@@ -1,7 +1,7 @@
 #include "gpu_driver_specific.h"
 
-#include "common/io/io.h"
-#include "util/mallocHelper.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
 
 #include <sys/pciio.h>
 #include <fcntl.h>
@@ -37,13 +37,13 @@ static void fillGPUTypeGeneric(FFGPUResult* gpu)
 
 #if FF_HAVE_DRM
 #include "common/library.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <xf86drm.h>
 
 static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
 

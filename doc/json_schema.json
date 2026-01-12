@@ -2964,8 +2964,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/keyboardFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -3200,6 +3203,20 @@
                                 }
                             },
                             {
+                                "title": "Logo",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "logo",
+                                        "description": "Query built-in logo for JSON output"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
                                 "title": "Media",
                                 "type": "object",
                                 "additionalProperties": false,
@@ -3296,8 +3313,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/mouseFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"

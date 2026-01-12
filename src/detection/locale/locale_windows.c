@@ -1,5 +1,5 @@
 #include "detection/locale/locale.h"
-#include "util/windows/unicode.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 #include <locale.h>

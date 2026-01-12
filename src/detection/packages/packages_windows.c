@@ -1,13 +1,13 @@
 #include "packages.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
-#include "util/path.h"
-#include "util/windows/unicode.h"
-#include "util/mallocHelper.h"
-#include "common/io/io.h"
+#include "common/stringUtils.h"
+#include "common/path.h"
+#include "common/windows/unicode.h"
+#include "common/mallocHelper.h"
+#include "common/io.h"
 
 #include <windows.h>
-#include "util/windows/nt.h"
+#include "common/windows/nt.h"
 #include <ntstatus.h>
 
 static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t* ignore)

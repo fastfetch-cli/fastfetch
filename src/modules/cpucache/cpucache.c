@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/cpucache/cpucache.h"
 #include "modules/cpucache/cpucache.h"
-#include "util/stringUtils.h"
 
 #define FF_CPUCACHE_DISPLAY_NAME "CPU Cache"
 

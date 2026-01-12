@@ -2,9 +2,9 @@
 #include "common/jsonconfig.h"
 #include "common/temps.h"
 #include "common/size.h"
+#include "common/stringUtils.h"
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
-#include "util/stringUtils.h"
 
 #define FF_PHYSICALDISK_DISPLAY_NAME "Physical Disk"
 

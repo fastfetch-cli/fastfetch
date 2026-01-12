@@ -520,12 +520,12 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.7'
+          version: '7.8'
           run: |
             uname -a
             sudo pkg_add -u
-            sudo pkg_add -r llvm-19.1.7p3 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
-            CC=clang-19 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            sudo pkg_add -r llvm-21.1.2p0 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
+            CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -647,7 +647,7 @@ jobs:
           path: ./fastfetch-*.*
 
   windows-hosts:
-    name: Windows-${{ matrix.arch }}
+    name: Windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
     runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
@@ -660,11 +660,22 @@ jobs:
             msystem: CLANG64
             msystem-lower: clang64
             msys-arch: x86_64
+            win7-compat-flag: OFF
+            win7-compat-postfix: ""
+          - arch: amd64
+            runs-on: windows-latest
+            msystem: CLANG64
+            msystem-lower: clang64
+            msys-arch: x86_64
+            win7-compat-flag: ON
+            win7-compat-postfix: "-win7"
           - arch: aarch64
             runs-on: windows-11-arm
             msystem: CLANGARM64
             msystem-lower: clangarm64
             msys-arch: aarch64
+            win7-compat-flag: OFF
+            win7-compat-postfix: ""
     defaults:
       run:
         shell: msys2 {0}
@@ -683,7 +694,7 @@ jobs:
         run: uname -a
 
       - name: configure project
-        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_WIN7_COMPAT=${{ matrix.win7-compat-flag }} .
 
       - name: build project
         run: cmake --build . --verbose -j4
@@ -714,7 +725,7 @@ jobs:
         name: upload artifacts for signing
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-windows-${{ matrix.arch }}
+          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
           path: |
             *.dll
             fastfetch.exe
@@ -733,16 +744,16 @@ jobs:
           output-artifact-directory: '.'
 
       - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-windows-${{ matrix.arch }}
-          path: ./fastfetch-windows-${{ matrix.arch }}.*
+          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
+          path: ./fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.*
           overwrite: true
 
   release:

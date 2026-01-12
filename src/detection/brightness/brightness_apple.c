@@ -1,7 +1,7 @@
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
-#include "util/apple/cf_helpers.h"
-#include "util/edidHelper.h"
+#include "common/apple/cf_helpers.h"
+#include "common/edidHelper.h"
 
 #include <CoreGraphics/CoreGraphics.h>
 

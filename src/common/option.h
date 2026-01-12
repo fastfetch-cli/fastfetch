@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/FFstrbuf.h"
+#include "common/FFstrbuf.h"
 
 struct yyjson_val;
 struct yyjson_mut_doc;

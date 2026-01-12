@@ -1,6 +1,6 @@
 #include "cpu.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 #include <kstat.h>
 
 static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t* kc, FFCPUResult* cpu)

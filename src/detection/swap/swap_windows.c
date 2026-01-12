@@ -1,6 +1,6 @@
 #include "swap.h"
-#include "util/mallocHelper.h"
-#include "util/windows/unicode.h"
+#include "common/mallocHelper.h"
+#include "common/windows/unicode.h"
 
 #include <winternl.h>
 #include <ntstatus.h>

@@ -1,6 +1,6 @@
 #include "wallpaper.h"
 #include "common/settings.h"
-#include "util/apple/osascript.h"
+#include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
 

@@ -3,7 +3,7 @@
 #ifdef FF_HAVE_DBUS
 #include <dbus/dbus.h>
 
-#include "util/FFstrbuf.h"
+#include "common/FFstrbuf.h"
 #include "common/library.h"
 
 typedef struct FFDBusLibrary

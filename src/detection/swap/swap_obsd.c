@@ -1,6 +1,6 @@
 #include "swap.h"
-#include "util/FFlist.h"
-#include "util/mallocHelper.h"
+#include "common/FFlist.h"
+#include "common/mallocHelper.h"
 
 #include <sys/types.h>
 #include <sys/swap.h>

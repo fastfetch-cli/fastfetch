@@ -1,9 +1,9 @@
 #include "image.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
-#include "util/stringUtils.h"
-#include "util/base64.h"
+#include "common/stringUtils.h"
+#include "common/base64.h"
 #include "detection/terminalsize/terminalsize.h"
 
 #include <limits.h>

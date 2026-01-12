@@ -2,7 +2,7 @@
 
 #if __has_include(<libgeom.h>)
 
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <devstat.h>
 #include <memory.h>

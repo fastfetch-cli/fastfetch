@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <OS.h>
 #include <private/shared/cpu_type.h>

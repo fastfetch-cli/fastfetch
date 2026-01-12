@@ -1,5 +1,5 @@
 #include "media.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 void ffDetectMediaImpl(FFMediaResult* media, bool saveCover);
 

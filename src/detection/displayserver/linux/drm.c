@@ -1,7 +1,7 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
-#include "util/edidHelper.h"
-#include "util/stringUtils.h"
+#include "common/io.h"
+#include "common/edidHelper.h"
+#include "common/stringUtils.h"
 
 #ifdef __linux__
 #include <dirent.h>
@@ -214,7 +214,7 @@ FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* 
 
 static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetResources)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetConnectorCurrent)

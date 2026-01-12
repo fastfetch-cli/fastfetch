@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/icons/icons.h"
 #include "modules/icons/icons.h"
-#include "util/stringUtils.h"
 
 bool ffPrintIcons(FFIconsOptions* options)
 {

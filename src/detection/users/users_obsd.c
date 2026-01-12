@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "users.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <utmp.h>
 
@@ -31,6 +31,6 @@ next:
         ffStrbufInit(&user->clientIp);
         user->loginTime = (uint64_t) n.ut_time * 1000;
     }
-    
+
     return NULL;
 }

@@ -1,9 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
+#include "common/stringUtils.h"
 #include "detection/users/users.h"
 #include "modules/users/users.h"
-#include "util/stringUtils.h"
 
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 

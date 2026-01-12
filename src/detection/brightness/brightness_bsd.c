@@ -2,7 +2,7 @@
 
 #if __has_include(<sys/backlight.h>)
 
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <sys/backlight.h>
 #include <sys/ioctl.h>

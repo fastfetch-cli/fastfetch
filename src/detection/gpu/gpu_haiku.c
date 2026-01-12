@@ -1,5 +1,5 @@
 #include "gpu.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <private/drivers/poke.h>
 

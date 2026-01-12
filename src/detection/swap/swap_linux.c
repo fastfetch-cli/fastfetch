@@ -1,7 +1,7 @@
 #include "swap.h"
 
-#include "common/io/io.h"
-#include "util/mallocHelper.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
 
 #include <inttypes.h>
 

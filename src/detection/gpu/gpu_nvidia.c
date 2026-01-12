@@ -40,7 +40,7 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result)
     {
         nvapiData.inited = true;
 
-        FF_LIBRARY_LOAD(libnvapi, "dlopen nvapi failed",
+        FF_LIBRARY_LOAD_MESSAGE(libnvapi,
             #ifdef _WIN64
             "nvapi64.dll"
             #else

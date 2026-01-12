@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/wmtheme/wmtheme.h"
 #include "modules/wmtheme/wmtheme.h"
-#include "util/stringUtils.h"
 
 #define FF_WMTHEME_DISPLAY_NAME "WM Theme"
 

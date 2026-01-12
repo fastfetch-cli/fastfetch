@@ -1,6 +1,6 @@
 #include "gpu.h"
-#include "util/apple/cf_helpers.h"
-#include "util/apple/smc_temps.h"
+#include "common/apple/cf_helpers.h"
+#include "common/apple/smc_temps.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
@@ -38,7 +38,7 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
 }
 
 #ifdef __aarch64__
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
 

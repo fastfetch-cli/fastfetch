@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/initsystem/initsystem.h"
 #include "modules/initsystem/initsystem.h"
-#include "util/stringUtils.h"
 
 #define FF_INITSYSTEM_DISPLAY_NAME "Init System"
 

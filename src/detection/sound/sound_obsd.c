@@ -1,5 +1,5 @@
 #include "sound.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <fcntl.h>
 #include <sndio.h>

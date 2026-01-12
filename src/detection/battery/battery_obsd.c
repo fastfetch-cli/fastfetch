@@ -1,5 +1,5 @@
 #include "battery.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <machine/apmvar.h>
 #include <sys/ioctl.h>

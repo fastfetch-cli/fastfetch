@@ -2,10 +2,10 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
+#include "common/FFstrbuf.h"
+#include "common/stringUtils.h"
 #include "detection/zpool/zpool.h"
 #include "modules/zpool/zpool.h"
-#include "util/FFstrbuf.h"
-#include "util/stringUtils.h"
 
 static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t index)
 {
@@ -223,5 +223,6 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         {"Size used percentage bar", "used-percentage-bar"},
         {"Size allocated percentage bar", "allocated-percentage-bar"},
         {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
+        {"Is read-only", "is-readonly"},
     }))
 };

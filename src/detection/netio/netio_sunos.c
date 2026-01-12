@@ -1,6 +1,7 @@
 #include "netio.h"
-#include "common/netif/netif.h"
-#include "util/stringUtils.h"
+#include "common/netif.h"
+#include "common/stringUtils.h"
+
 #include <kstat.h>
 
 static inline void kstatFreeWrap(kstat_ctl_t** pkc)

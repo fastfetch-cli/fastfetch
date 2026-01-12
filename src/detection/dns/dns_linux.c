@@ -1,9 +1,9 @@
 #include "detection/dns/dns.h"
 
-#include "common/io/io.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
-#include "util/debug.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/debug.h"
 
 #ifdef __HAIKU__
 #define RESOLV_CONF "/system/settings/network/resolv.conf"
@@ -75,7 +75,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
     // Handle different DNS management services
     if (results->length == 1)
     {
-        const FFstrbuf* firstEntry = FF_LIST_GET(FFstrbuf, *results, 0);
+        const FFstrbuf* firstEntry = FF_LIST_FIRST(FFstrbuf, *results);
 
         if (ffStrbufEqualS(firstEntry, "127.0.0.53"))
         {

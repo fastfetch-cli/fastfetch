@@ -1,8 +1,8 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/properties.h"
-#include "util/stringUtils.h"
-#include "util/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/mallocHelper.h"
 
 #include <stdlib.h>
 #include <string.h>

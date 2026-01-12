@@ -37,6 +37,7 @@
 #include "modules/loadavg/loadavg.h"
 #include "modules/locale/locale.h"
 #include "modules/localip/localip.h"
+#include "modules/logo/logo.h"
 #include "modules/media/media.h"
 #include "modules/memory/memory.h"
 #include "modules/monitor/monitor.h"

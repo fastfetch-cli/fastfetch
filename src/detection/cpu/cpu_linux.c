@@ -1,10 +1,10 @@
 #include "cpu.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
-#include "util/path.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
+#include "common/path.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -13,10 +13,6 @@
 #include <fcntl.h>
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
-
-#ifndef O_PATH
-#define O_PATH 0
-#endif
 
 static double readTempFile(int dfd, const char* filename, FFstrbuf* buffer)
 {
@@ -473,9 +469,9 @@ static const char* parseCpuInfo(
             (cpuIsa->length == 0 && ffParsePropLine(line, "isa :", cpuIsa)) ||
             (cpuUarch->length == 0 && ffParsePropLine(line, "uarch :", cpuUarch)) ||
             #elif __s390x__
-            (cpu->name.length == 0 && ffParsePropLine(line, "processor 0:", &cpu->name)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "machine :", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
-            (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz static :", cpuMHz)) || // This one cannot be detected because of early return
+            (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz static :", cpuMHz)) ||
             #elif __ia64__
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor :", &cpu->vendor)) ||
@@ -935,8 +931,7 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
         cpu->coresPhysical = getLoongarchPropCount(&cpuinfo, "\ncore\t\t\t:");
         if (cpu->packages > 1) cpu->coresPhysical *= cpu->packages;
         #elif __s390x__
-        if (ffStrbufSubstrAfterFirstS(&cpu->name, "machine = "))
-            ffStrbufPrependS(&cpu->name, "Machine ");
+        if (cpu->name.length) ffStrbufPrependS(&cpu->name, "Machine ");
         #endif
     }
 

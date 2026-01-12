@@ -1,5 +1,5 @@
 #include "bootmgr.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "efi_helper.h"
 
 #define FF_EFIVARS_PATH_PREFIX "/sys/firmware/efi/efivars/"

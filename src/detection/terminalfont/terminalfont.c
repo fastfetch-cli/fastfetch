@@ -1,10 +1,10 @@
 #include "terminalfont.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/properties.h"
 #include "common/processing.h"
+#include "common/debug.h"
+#include "common/stringUtils.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "util/debug.h"
-#include "util/stringUtils.h"
 
 static void detectAlacritty(FFTerminalFontResult* terminalFont)
 {

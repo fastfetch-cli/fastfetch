@@ -1,6 +1,6 @@
 #include "cpu.h"
 #include "common/sysctl.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 #include <errno.h>
 #include <sys/time.h>

@@ -1,13 +1,13 @@
 #include "de.h"
 
 #include "common/dbus.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/library.h"
 #include "common/parsing.h"
 #include "common/properties.h"
 #include "common/processing.h"
-#include "util/binary.h"
-#include "util/path.h"
+#include "common/binary.h"
+#include "common/path.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <ctype.h>
@@ -133,7 +133,7 @@ static const char* getXfce4ByLib(FFstrbuf* result)
 {
 #ifndef FF_DISABLE_DLOPEN
     const char* xfce_version_string(void); // from `xfce4/libxfce4util/xfce-misutils.h
-    FF_LIBRARY_LOAD(xfce4util, "dlopen libxfce4util" FF_LIBRARY_EXTENSION "failed", "libxfce4util" FF_LIBRARY_EXTENSION, 7);
+    FF_LIBRARY_LOAD_MESSAGE(xfce4util, "libxfce4util" FF_LIBRARY_EXTENSION, 7);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xfce4util, xfce_version_string);
     ffStrbufSetS(result, ffxfce_version_string());
     return NULL;
@@ -234,6 +234,21 @@ static const char* getTrinity(FFstrbuf* result, FFDEOptions* options)
     return "All methods failed";
 }
 
+static const char* getCosmic(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
+{
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        "cosmic-comp",
+        "--version",
+        NULL
+    }) == NULL) {
+        // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "All methods failed";
+}
 
 const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOptions* options)
 {
@@ -257,6 +272,8 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getUnity(result, options);
     else if (ffStrbufEqualS(deName, "trinity"))
         getTrinity(result, options);
+    else if (ffStrbufEqualS(deName, "COSMIC"))
+        getCosmic(result, options);
     else
         return "Unsupported DE";
     return NULL;

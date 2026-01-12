@@ -1,6 +1,6 @@
-#include "common/processing.h"
-#include "util/FFstrbuf.h"
 #include "detection/command/command.h"
+#include "common/processing.h"
+#include "common/FFstrbuf.h"
 
 typedef struct FFCommandResultBundle
 {

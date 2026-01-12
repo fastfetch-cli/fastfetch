@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/FFstrbuf.h"
+#include "common/FFstrbuf.h"
 
 typedef enum __attribute__((__packed__)) FFDsForceDrmType
 {

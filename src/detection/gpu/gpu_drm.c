@@ -5,10 +5,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/library.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include "intel_drm.h"
 #include "asahi_drm.h"
@@ -79,7 +79,7 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
 {
 #if FF_HAVE_DRM_AMDGPU
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_gpu_info)

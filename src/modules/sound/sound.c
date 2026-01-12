@@ -1,9 +1,9 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/sound/sound.h"
 #include "modules/sound/sound.h"
-#include "util/stringUtils.h"
 
 static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, uint8_t index)
 {

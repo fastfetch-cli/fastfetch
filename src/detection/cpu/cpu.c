@@ -130,7 +130,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
 // Worth noting: Apple M1 is marked as ARMv8.5-A on Wikipedia, but it lacks BTI (mandatory in v8.5)
 
 #ifdef __linux__
-#include "common/io/io.h"
+#include "common/io.h"
 #include <elf.h>
 // #include <asm/hwcap.h>
 

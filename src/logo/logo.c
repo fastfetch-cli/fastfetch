@@ -1,23 +1,16 @@
 #include "logo/logo.h"
-#include "common/io/io.h"
+#include "common/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
+#include "common/textModifier.h"
+#include "common/stringUtils.h"
 #include "detection/media/media.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
-#include "util/textModifier.h"
-#include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef enum __attribute__((__packed__)) FFLogoSize
-{
-    FF_LOGO_SIZE_UNKNOWN,
-    FF_LOGO_SIZE_NORMAL,
-    FF_LOGO_SIZE_SMALL,
-} FFLogoSize;
 
 static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError)
 {
@@ -451,7 +444,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
         return true;
     }
 
-    const FFlogo* logo = ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
+    const FFlogo* logo = ffLogoGetBuiltinForName(name, size);
     if(logo == NULL)
         return false;
 
@@ -494,7 +487,7 @@ static bool updateLogoPath(void)
         return true;
     }
 
-    FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreateA(128);
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {
         ffStrbufDestroy(&options->source);
@@ -783,4 +776,14 @@ void ffLogoBuiltinListAutocompletion(void)
         for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
             printf("%s\n", logo->names[0]);
     }
+}
+
+const FFlogo* ffLogoGetBuiltinForName(const FFstrbuf* name, FFLogoSize size)
+{
+    return ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
+}
+
+const FFlogo* ffLogoGetBuiltinDetected(FFLogoSize size)
+{
+    return logoGetBuiltinDetected(size);
 }

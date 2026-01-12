@@ -1,7 +1,7 @@
 #include "cpu.h"
 #include "common/sysctl.h"
-#include "util/apple/smc_temps.h"
-#include "util/stringUtils.h"
+#include "common/apple/smc_temps.h"
+#include "common/stringUtils.h"
 
 static double detectCpuTemp(const FFCPUOptions* options, const FFstrbuf* cpuName)
 {
@@ -37,7 +37,7 @@ static double detectCpuTemp(const FFCPUOptions* options, const FFstrbuf* cpuName
 }
 
 #ifdef __aarch64__
-#include "util/apple/cf_helpers.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
 

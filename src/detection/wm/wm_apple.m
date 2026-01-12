@@ -1,8 +1,8 @@
 #include "wm.h"
 
 #include "common/sysctl.h"
-#include "util/mallocHelper.h"
-#include "util/stringUtils.h"
+#include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include <ctype.h>
 #import <Foundation/Foundation.h>

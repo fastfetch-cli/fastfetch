@@ -1,6 +1,6 @@
 #include "cpucache.h"
 #include "common/sysctl.h"
-#include "util/stringUtils.h"
+#include "common/stringUtils.h"
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result)
 {

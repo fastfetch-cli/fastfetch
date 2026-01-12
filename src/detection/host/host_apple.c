@@ -1,13 +1,12 @@
 #include "host.h"
 #include "common/sysctl.h"
-#include "util/apple/cf_helpers.h"
-#include "util/stringUtils.h"
+#include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
 
 const char* getProductNameWithIokit(FFstrbuf* result)
 {
-    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t registryEntry = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("product"));
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t registryEntry = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/product");
     if (!registryEntry)
         return "IOServiceGetMatchingService() failed";
 

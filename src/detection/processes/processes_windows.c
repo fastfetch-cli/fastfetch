@@ -1,5 +1,5 @@
 #include "processes.h"
-#include "util/mallocHelper.h"
+#include "common/mallocHelper.h"
 
 #include <ntstatus.h>
 #include <winternl.h>

@@ -1,16 +1,16 @@
-$1                -:+:.
-$1               :++++.
-$1              /+++/.
-$1      .:-::- .+/:-\`\`.::-
-$1   .:/++++++/::::/++++++/::`
-$2 .:///////////////////////::`
-$2 /////////////////////////`
+                -:+:.
+               :++++.
+              /+++/.
+      .:-::- .+/:-\`\`.::-
+   .:/++++++/::::/++++++/::`
+ $2.:///////////////////////::`
+ /////////////////////////`
 $3+++++++++++++++++++++++++`
-$3++++++++++++++++++++++++
+++++++++++++++++++++++++
 $4ssssssssssssssssssssssss.
-$4:ssssssssssssssssssssssss-
-$5 osssssssssssssssssssssssss`
-$5 `syyyyyyyyyyyyyyyyyyyyyyyyys`
-$6  `ossssssssssssssssssssssss
-$6    :ooooooooooooooooooo+.
-$6     `:++oo+/:-  -:/+o+/-
+:ssssssssssssssssssssssss-
+ $5osssssssssssssssssssssssss`
+ `syyyyyyyyyyyyyyyyyyyyyyyyys`
+  $6`ossssssssssssssssssssssss
+    :ooooooooooooooooooo+.
+     `:++oo+/:-  -:/+o+/-

@@ -1,8 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/stringUtils.h"
 #include "detection/poweradapter/poweradapter.h"
 #include "modules/poweradapter/poweradapter.h"
-#include "util/stringUtils.h"
 
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
 

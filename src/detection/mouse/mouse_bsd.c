@@ -1,5 +1,5 @@
 #include "mouse.h"
-#include "common/io/io.h"
+#include "common/io.h"
 
 #include <stdio.h>
 #include <fcntl.h>
