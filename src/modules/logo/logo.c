@@ -1,4 +1,8 @@
-#include "3rdparty/yyjson/yyjson.h"
+#ifdef FF_USE_SYSTEM_YYJSON
+    #include <yyjson.h>
+#else
+    #include "3rdparty/yyjson/yyjson.h"
+#endif
 #include "common/printing.h"
 #include "logo/logo.h"
 #include "fastfetch.h"
