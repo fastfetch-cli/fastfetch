@@ -155,10 +155,16 @@ static void getUserName(FFPlatform* platform)
 
 static void getHostName(FFPlatform* platform)
 {
-    wchar_t buffer[128];
+    wchar_t buffer[256];
     DWORD len = ARRAY_SIZE(buffer);
-    if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
-        ffStrbufSetWS(&platform->hostName, buffer);
+    if (GetComputerNameExW(ComputerNameDnsHostname, buffer, &len) && len > 0)
+        ffStrbufSetNWS(&platform->hostName, len, buffer);
+    else
+    {
+        len = ARRAY_SIZE(buffer);
+        if (GetComputerNameExW(ComputerNameNetBIOS, buffer, &len) && len > 0)
+            ffStrbufSetNWS(&platform->hostName, len, buffer);
+    }
 }
 
 static void getUserShell(FFPlatform* platform)
