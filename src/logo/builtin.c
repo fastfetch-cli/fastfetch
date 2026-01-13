@@ -4060,6 +4060,16 @@ static const FFlogo P[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    // PrismLinuxSmall
+    {
+        .names = {"PrismLinux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_PRISMLINUX_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // LAST
     {},
 };
