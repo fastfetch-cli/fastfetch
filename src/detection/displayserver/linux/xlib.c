@@ -10,25 +10,29 @@
 #include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>
 
-typedef struct X11PropertyData
+typedef struct XrandrData
 {
     FF_LIBRARY_SYMBOL(XInternAtom)
+    FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XGetWindowProperty)
     FF_LIBRARY_SYMBOL(XServerVendor)
-    FF_LIBRARY_SYMBOL(XFree)
-} X11PropertyData;
+    FF_LIBRARY_SYMBOL(XFree);
+    FF_LIBRARY_SYMBOL(XRRGetMonitors)
+    FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
+    FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRGetOutputProperty)
+    FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeCrtcInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
+    FF_LIBRARY_SYMBOL(XRRFreeScreenResources)
+    FF_LIBRARY_SYMBOL(XRRFreeMonitors)
 
-static bool x11InitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, X11PropertyData* propertyData)
-{
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XInternAtom, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XGetWindowProperty, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XServerVendor, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XFree, false)
+    //Init once
+    Display* display;
+    FFDisplayServerResult* result;
+} XrandrData;
 
-    return true;
-}
-
-static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Window window, const char* request)
+static unsigned char* x11GetProperty(XrandrData* data, Display* display, Window window, const char* request)
 {
     Atom requestAtom = data->ffXInternAtom(display, request, False);
     if(requestAtom == None)
@@ -44,18 +48,18 @@ static unsigned char* x11GetProperty(X11PropertyData* data, Display* display, Wi
     return result;
 }
 
-static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
+static void x11DetectWMFromEWMH(XrandrData* data, FFDisplayServerResult* result)
 {
     if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
         return;
 
-    Window* wmWindow = (Window*) x11GetProperty(data, display, DefaultRootWindow(display), "_NET_SUPPORTING_WM_CHECK");
+    Window* wmWindow = (Window*) x11GetProperty(data, data->display, DefaultRootWindow(data->display), "_NET_SUPPORTING_WM_CHECK");
     if(wmWindow == NULL)
         return;
 
-    char* wmName = (char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
+    char* wmName = (char*) x11GetProperty(data, data->display, *wmWindow, "WM_NAME");
     if(!ffStrSet(wmName))
-        wmName = (char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
+        wmName = (char*) x11GetProperty(data, data->display, *wmWindow, "_NET_WM_NAME");
 
     if(ffStrSet(wmName))
         ffStrbufSetS(&result->wmProcessName, wmName);
@@ -64,34 +68,12 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     data->ffXFree(wmWindow);
 }
 
-static void x11FetchServerVendor(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
+static void x11FetchServerVendor(XrandrData* data, FFDisplayServerResult* result)
 {
-    const char* serverVendor = data->ffXServerVendor(display);
-    if (serverVendor && !ffStrEquals(serverVendor, "The X.Org Foundation")) {
+    const char* serverVendor = data->ffXServerVendor(data->display);
+    if (serverVendor && !ffStrEquals(serverVendor, "The X.Org Foundation"))
         ffStrbufSetS(&result->wmProtocolName, serverVendor);
-    }
 }
-
-typedef struct XrandrData
-{
-    FF_LIBRARY_SYMBOL(XInternAtom)
-    FF_LIBRARY_SYMBOL(XGetAtomName);
-    FF_LIBRARY_SYMBOL(XFree);
-    FF_LIBRARY_SYMBOL(XRRGetMonitors)
-    FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
-    FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
-    FF_LIBRARY_SYMBOL(XRRGetOutputProperty)
-    FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
-    FF_LIBRARY_SYMBOL(XRRFreeCrtcInfo)
-    FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
-    FF_LIBRARY_SYMBOL(XRRFreeScreenResources)
-    FF_LIBRARY_SYMBOL(XRRFreeMonitors)
-
-    //Init once
-    Display* display;
-    FFDisplayServerResult* result;
-    X11PropertyData* propData;
-} XrandrData;
 
 static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
 {
@@ -247,7 +229,7 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
     XRRScreenResources* screenResources = data->ffXRRGetScreenResourcesCurrent(data->display, RootWindowOfScreen(screen));
 
     double scaleFactor = 1;
-    char* resourceManager = (char*) x11GetProperty(data->propData, data->display, screen->root, "RESOURCE_MANAGER");
+    char* resourceManager = (char*) x11GetProperty(data, data->display, screen->root, "RESOURCE_MANAGER");
     if (resourceManager)
     {
         FF_STRBUF_AUTO_DESTROY dpi = ffStrbufCreate();
@@ -307,6 +289,8 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result)
 
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XInternAtom);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XGetAtomName);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XGetWindowProperty);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XServerVendor);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XFree);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRGetMonitors);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRGetScreenResourcesCurrent);
@@ -318,17 +302,13 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRFreeScreenResources);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRFreeMonitors);
 
-    X11PropertyData propertyData;
-    bool propertyDataInitialized = x11InitPropertyData(xrandr, &propertyData);
-    data.propData = &propertyData;
-
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)
         return "XOpenDisplay() failed";
 
-    if(propertyDataInitialized && ScreenCount(data.display) > 0) {
-        x11DetectWMFromEWMH(&propertyData, data.display, result);
-        x11FetchServerVendor(&propertyData, data.display, result);
+    if(ScreenCount(data.display) > 0) {
+        x11DetectWMFromEWMH(&data, result);
+        x11FetchServerVendor(&data, result);
     }
 
     data.result = result;
