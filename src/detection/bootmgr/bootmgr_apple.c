@@ -7,7 +7,7 @@
 static const char* detectSecureBoot(bool* result)
 {
     #if __aarch64__
-    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(kIOMainPortDefault, "IODeviceTree:/chosen");
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (!entryDevice)
         return "IORegistryEntryFromPath() failed";
 
@@ -20,7 +20,7 @@ static const char* detectSecureBoot(bool* result)
 
     *result = (bool) *CFDataGetBytePtr((CFDataRef) prop);
     #else
-    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(kIOMainPortDefault, "IODeviceTree:/options");
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/options");
     if (!entryDevice)
         return "IORegistryEntryFromPath() failed";
 

@@ -123,7 +123,7 @@ static const char* detectFromSystemProfiler(FFlist* result)
 
 FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
 {
-    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(kIOMainPortDefault, "IODeviceTree:/chosen");
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (!entryDevice)
         return "IORegistryEntryFromPath() failed";
 
