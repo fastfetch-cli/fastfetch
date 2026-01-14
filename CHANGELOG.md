@@ -1,3 +1,17 @@
+# 2.57.1
+
+Features:
+* Tiny performance improvements (Windows)
+* Improves the reliability of hostname retrieval (Title, Windows)
+
+Bugfixes:
+* Fixes potential compilation issues on Linux (#2142, Linux)
+* Fixes compilation errors on macOS when building with older SDKs (#2140, macOS)
+* Fixes compilation issues when building with `-DENABLE_SYSTEM_YYJSON=ON` (#2143)
+
+Logos:
+* Updates PrismLinux and adds a small variant
+
 # 2.57.0
 
 Deprecation notice:
@@ -15,8 +29,8 @@ Features:
 * Supports Secure Boot detection (Bootmgr, macOS)
 * Supports DPI scale factor detection on Windows 7 (Display, Windows)
 * Supports xterm 256-color codes in color configuration
-    * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
-    * In `*.format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
+    * In `display.color`: "`@<color-index>`" (e.g., "`@34`" for color index `34`)
+    * In `*.format` strings: "`#@<color-index>`" (e.g., "`#@34`" for color index `34`)
 * Improves uptime accuracy on Windows 10+ (Uptime, Windows)
 * Adds a new module `Logo` to query built-in logo raw data in JSON output (Logo)
     * Usage: `fastfetch -s logo -l <logo-name> -j # Supported in JSON format only`

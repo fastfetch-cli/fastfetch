@@ -7,21 +7,12 @@ extern "C"
 }
 
 #include "common/windows/com.hpp"
+#include "common/windows/util.hpp"
 
-#include <utility>
 #include <windows.h>
 #include <tlhelp32.h>
 #include <shlobj.h>
 #include <propkey.h>
-
-template <typename Fn>
-struct on_scope_exit {
-    on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
-    ~on_scope_exit() { this->_fn(); }
-
-private:
-    Fn _fn;
-};
 
 extern "C"
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)

@@ -4,17 +4,9 @@ extern "C"
 }
 #include "common/windows/wmi.hpp"
 #include "common/windows/unicode.hpp"
+#include "common/windows/util.hpp"
 
 STDAPI InitVariantFromStringArray(_In_reads_(cElems) PCWSTR *prgsz, _In_ ULONG cElems, _Out_ VARIANT *pvar);
-
-template <typename Fn>
-struct on_scope_exit {
-    on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
-    ~on_scope_exit() { this->_fn(); }
-
-private:
-    Fn _fn;
-};
 
 extern "C"
 const char* ffBluetoothDetectBattery(FFlist* devices)

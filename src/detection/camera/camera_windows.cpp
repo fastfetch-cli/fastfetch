@@ -4,19 +4,11 @@ extern "C" {
 }
 #include "common/windows/com.hpp"
 #include "common/windows/unicode.hpp"
+#include "common/windows/util.hpp"
 
 #include <initguid.h>
 #include <mfapi.h>
 #include <mfidl.h>
-
-template <typename Fn>
-struct on_scope_exit {
-    on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
-    ~on_scope_exit() { this->_fn(); }
-
-private:
-    Fn _fn;
-};
 
 extern "C"
 const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
