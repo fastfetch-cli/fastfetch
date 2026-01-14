@@ -13,10 +13,10 @@
 typedef struct XrandrData
 {
     FF_LIBRARY_SYMBOL(XInternAtom)
-    FF_LIBRARY_SYMBOL(XGetAtomName);
+    FF_LIBRARY_SYMBOL(XGetAtomName)
     FF_LIBRARY_SYMBOL(XGetWindowProperty)
     FF_LIBRARY_SYMBOL(XServerVendor)
-    FF_LIBRARY_SYMBOL(XFree);
+    FF_LIBRARY_SYMBOL(XFree)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
     FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
