@@ -1,7 +1,5 @@
-#include "3rdparty/yyjson/yyjson.h"
 #include "common/printing.h"
 #include "logo/logo.h"
-#include "fastfetch.h"
 #include "modules/logo/logo.h"
 #include "options/logo.h"
 
