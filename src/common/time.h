@@ -25,12 +25,6 @@ static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32
         extern double ffQpcMultiplier;
-        if (ffQpcMultiplier == 0)
-        {
-            LARGE_INTEGER frequency;
-            QueryPerformanceFrequency(&frequency);
-            ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
-        }
         LARGE_INTEGER start;
         QueryPerformanceCounter(&start);
         return (double) start.QuadPart * ffQpcMultiplier;

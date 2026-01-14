@@ -84,4 +84,12 @@ FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
 
 #ifdef _WIN32
     double ffQpcMultiplier;
+
+    __attribute__((constructor))
+    static void ffTimeInitQpcMultiplier(void)
+    {
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
+    }
 #endif
