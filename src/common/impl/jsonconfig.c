@@ -299,6 +299,9 @@ static const char* printJsonConfig(FFdata* data, bool prepare)
         else
             return "modules must be an array of strings or objects";
 
+        if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, type, ':'))
+            continue;
+
         if(prepare)
             prepareModuleJsonObject(type, module);
         else
