@@ -16,8 +16,11 @@ int main(void)
     instance.config.display.freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_NEVER;
     instance.config.display.sizeSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_NEVER;
 
-    // Logo printing and other preparation stuff
+    // Some preparation stuff
     ffStart();
+
+    // Print logo
+    ffLogoPrint();
 
     // Print all modules
     {

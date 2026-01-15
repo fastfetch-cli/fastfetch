@@ -230,9 +230,10 @@ static bool matchesJsonArray(const char* str, yyjson_val* val)
     return false;
 }
 
-static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
+static const char* printJsonConfig(FFdata* data, bool prepare)
 {
-    yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
+    yyjson_mut_doc* jsonDoc = data->resultDoc;
+    yyjson_val* const root = yyjson_doc_get_root(data->configDoc);
     assert(root);
 
     if (!yyjson_is_obj(root))
@@ -329,9 +330,10 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
     return NULL;
 }
 
-void ffPrintJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
+void ffPrintJsonConfig(FFdata* data, bool prepare)
 {
-    const char* error = printJsonConfig(prepare, jsonDoc);
+    yyjson_mut_doc* jsonDoc = data->resultDoc;
+    const char* error = printJsonConfig(data, prepare);
     if (error)
     {
         if (jsonDoc)

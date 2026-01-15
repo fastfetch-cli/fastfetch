@@ -117,8 +117,9 @@ void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
     #endif
 }
 
-void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_doc* doc)
+void ffOptionsGenerateGeneralJsonConfig(FFdata* data, FFOptionsGeneral* options)
 {
+    yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "general");
 
     yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);

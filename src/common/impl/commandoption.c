@@ -127,8 +127,10 @@ void ffPrepareCommandOption(FFdata* data)
     }
 }
 
-static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
+static void genJsonConfig(FFdata* data, FFModuleBaseInfo* baseInfo, void* options)
 {
+    yyjson_mut_doc* doc = data->resultDoc;
+
     yyjson_mut_val* modules = yyjson_mut_obj_get(doc->root, "modules");
     if (!modules)
         modules = yyjson_mut_obj_add_arr(doc, doc->root, "modules");
@@ -136,7 +138,7 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
     ffStrbufLowerCase(&type);
 
-    if (instance.state.fullConfig)
+    if (data->docType == FF_RESULT_DOC_TYPE_CONFIG_FULL)
     {
         yyjson_mut_val* module = yyjson_mut_obj(doc);
         yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
@@ -155,8 +157,9 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
     }
 }
 
-static void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
+static void genJsonResult(FFdata* data, FFModuleBaseInfo* baseInfo, void* options)
 {
+    yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
     yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
     if (baseInfo->generateJsonResult)
@@ -166,9 +169,9 @@ static void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
 }
 
 static void parseStructureCommand(
+    FFdata* data,
     const char* line,
-    void (*fn)(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* jsonDoc),
-    yyjson_mut_doc* jsonDoc
+    void (*fn)(FFdata*, FFModuleBaseInfo* baseInfo, void* options)
 )
 {
     if(ffCharIsEnglishAlphabet(line[0]))
@@ -180,8 +183,8 @@ static void parseStructureCommand(
             {
                 uint8_t optionBuf[FF_OPTION_MAX_SIZE];
                 baseInfo->initOptions(optionBuf);
-                if (__builtin_expect(jsonDoc != NULL, false))
-                    fn(baseInfo, optionBuf, jsonDoc);
+                if (__builtin_expect(data->resultDoc != NULL, false))
+                    fn(data, baseInfo, optionBuf);
                 else
                     baseInfo->printModule(optionBuf);
                 baseInfo->destroyOptions(optionBuf);
@@ -193,7 +196,7 @@ static void parseStructureCommand(
     ffPrintError(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
-void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
+void ffPrintCommandOption(FFdata* data)
 {
     //Parse the structure and call the modules
     int32_t thres = instance.config.display.stat;
@@ -209,16 +212,16 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
         if(thres >= 0)
             ms = ffTimeGetTick();
 
-        parseStructureCommand(moduleType, genJsonResult, jsonDoc);
+        parseStructureCommand(data, moduleType, genJsonResult);
 
         if(thres >= 0)
         {
             ms = ffTimeGetTick() - ms;
 
-            if (jsonDoc)
+            if (data->resultDoc)
             {
-                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
-                yyjson_mut_obj_add_real(jsonDoc, moduleJson, "stat", ms);
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(data->resultDoc->root);
+                yyjson_mut_obj_add_real(data->resultDoc, moduleJson, "stat", ms);
             }
             else
             {
@@ -236,7 +239,7 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
     }
 }
 
-void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
+void ffMigrateCommandOptionToJsonc(FFdata* data)
 {
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
@@ -249,6 +252,6 @@ void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
         if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleType, ':'))
             continue;
 
-        parseStructureCommand(moduleType, genJsonConfig, jsonDoc);
+        parseStructureCommand(data, moduleType, genJsonConfig);
     }
 }
