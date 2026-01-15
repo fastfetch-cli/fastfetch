@@ -71,35 +71,59 @@ bool ffParseModuleOptions(const char* key, const char* value)
 
 void ffPrepareCommandOption(FFdata* data)
 {
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME, ':'))
-        ffPrepareCPUUsage();
-
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME, ':'))
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
-        ffInitDiskIOOptions(&options);
-        ffPrepareDiskIO(&options);
-    }
+        #define FF_IF_MODULE_MATCH(moduleNameConstant) if (moduleLen == strlen(moduleNameConstant) \
+            && ffStrEqualsIgnCase(moduleType, moduleNameConstant) \
+            && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
-        ffInitNetIOOptions(&options);
-        ffPrepareNetIO(&options);
-    }
+        switch (moduleType[0])
+        {
+            case 'C': case 'c':
+                FF_IF_MODULE_MATCH(FF_CPUUSAGE_MODULE_NAME)
+                    ffPrepareCPUUsage();
+                break;
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
-        ffInitPublicIpOptions(&options);
-        ffPreparePublicIp(&options);
-    }
+            case 'D': case 'd':
+                FF_IF_MODULE_MATCH(FF_DISKIO_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
+                    ffInitDiskIOOptions(&options);
+                    ffPrepareDiskIO(&options);
+                }
+                break;
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
-        ffInitWeatherOptions(&options);
-        ffPrepareWeather(&options);
+            case 'N': case 'n':
+                FF_IF_MODULE_MATCH(FF_NETIO_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
+                    ffInitNetIOOptions(&options);
+                    ffPrepareNetIO(&options);
+                }
+                break;
+
+            case 'P': case 'p':
+                FF_IF_MODULE_MATCH(FF_PUBLICIP_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
+                    ffInitPublicIpOptions(&options);
+                    ffPreparePublicIp(&options);
+                }
+                break;
+
+            case 'W': case 'w':
+                FF_IF_MODULE_MATCH(FF_WEATHER_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
+                    ffInitWeatherOptions(&options);
+                    ffPrepareWeather(&options);
+                }
+                break;
+        }
+
+        #undef FF_IF_MODULE_MATCH
     }
 }
 
@@ -173,17 +197,19 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
 {
     //Parse the structure and call the modules
     int32_t thres = instance.config.display.stat;
-    uint32_t startIndex = 0;
-    while (startIndex < data->structure.length)
+
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
-        data->structure.chars[colonIndex] = '\0';
+        if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleType, ':'))
+            continue;
 
         double ms = 0;
         if(thres >= 0)
             ms = ffTimeGetTick();
 
-        parseStructureCommand(data->structure.chars + startIndex, genJsonResult, jsonDoc);
+        parseStructureCommand(moduleType, genJsonResult, jsonDoc);
 
         if(thres >= 0)
         {
@@ -207,8 +233,6 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
         #if defined(_WIN32)
             if (!jsonDoc && !instance.config.display.noBuffer) fflush(stdout);
         #endif
-
-        startIndex = colonIndex + 1;
     }
 }
 
@@ -218,15 +242,13 @@ void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
 
-    //Parse the structure and call the modules
-    uint32_t startIndex = 0;
-    while (startIndex < data->structure.length)
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
-        data->structure.chars[colonIndex] = '\0';
+        if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleType, ':'))
+            continue;
 
-        parseStructureCommand(data->structure.chars + startIndex, genJsonConfig, jsonDoc);
-
-        startIndex = colonIndex + 1;
+        parseStructureCommand(moduleType, genJsonConfig, jsonDoc);
     }
 }

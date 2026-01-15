@@ -6,6 +6,7 @@
 typedef struct FFdata
 {
     FFstrbuf structure;
+    FFstrbuf structureDisabled;
     bool configLoaded;
 } FFdata;
 

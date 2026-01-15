@@ -710,6 +710,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffParseModuleOptions(key, value)
     ) {}
 
+    else if(ffStrEqualsIgnCase(key, "--structure-disabled"))
+        ffOptionParseString(key, value, &data->structureDisabled);
+
     else
     {
         fprintf(stderr, "Error: unknown option: %s\n", key);
