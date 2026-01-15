@@ -234,7 +234,7 @@ void ffPrintCommandOption(FFdata* data)
         }
 
         #if defined(_WIN32)
-            if (!jsonDoc && !instance.config.display.noBuffer) fflush(stdout);
+            if (!data->resultDoc && !instance.config.display.noBuffer) fflush(stdout);
         #endif
     }
 }
