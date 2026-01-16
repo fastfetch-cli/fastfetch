@@ -313,21 +313,7 @@ static bool detectBedrock(FFOSResult* os)
 {
     const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
     if(bedrockRestrict && bedrockRestrict[0] == '1') return false;
-    if(parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
-    {
-        if(os->id.length == 0)
-            ffStrbufAppendS(&os->id, "bedrock");
-
-        if(os->name.length == 0)
-            ffStrbufAppendS(&os->name, "Bedrock");
-
-        if(os->prettyName.length == 0)
-            ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
-
-        parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os);
-        return true;
-    }
-    return false;
+    return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
 }
 
 static void detectOS(FFOSResult* os)
