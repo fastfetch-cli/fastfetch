@@ -2536,6 +2536,18 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // KISSLinux2
+    {
+        .names = {"kiss2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KISS2,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Kogaion
     {
         .names = {"Kogaion"},
