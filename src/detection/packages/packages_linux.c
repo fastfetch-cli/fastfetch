@@ -412,6 +412,25 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     return num_elements;
 }
 
+
+static uint32_t getPacmanPackages(FFstrbuf* baseDir)
+{
+    FF_STRBUF_AUTO_DESTROY pacmanDir = ffStrbufCreate();
+
+    uint32_t baseDirLen = baseDir->length;
+    ffStrbufAppendS(&pacmanDir, "/etc/pacman.conf");
+
+    if (!ffParsePropFile(baseDir->chars, "DBPath =", &pacmanDir))
+        ffStrbufSetS(&pacmanDir, "/var/lib/pacman");
+
+    ffStrbufSubstrBefore(&pacmanDir, baseDirLen);
+
+    ffStrbufTrimRight(&pacmanDir, '/');
+    ffStrbufAppendS(&pacmanDir, "/local");
+
+    return getNumElements(baseDir, pacmanDir.chars, true);
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
@@ -426,7 +445,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->nixDefault += ffPackagesGetNix(baseDir, "/nix/var/nix/profiles/default");
         packageCounts->nixSystem += ffPackagesGetNix(baseDir, "/run/current-system");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getPacmanPackages(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT))
