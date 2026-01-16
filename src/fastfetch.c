@@ -811,6 +811,11 @@ static void run(FFdata* data)
         }
         else
             break;
+
+        if (useJsonConfig)
+            ffPrintJsonConfig(data, true /* prepare */);
+        else
+            ffPrepareCommandOption(data);
     }
 
     if (data->resultDoc)

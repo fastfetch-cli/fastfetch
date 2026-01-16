@@ -702,7 +702,7 @@ void ffLogoPrintLine(void)
         printf("\033[%uC", instance.state.logoWidth);
 
     if (instance.state.dynamicInterval > 0)
-        fputs("\033[K", stdout);
+        fputs("\033[K", stdout); // Clear to the end of the line
 
     ++instance.state.keysHeight;
 }
