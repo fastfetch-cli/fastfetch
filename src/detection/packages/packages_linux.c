@@ -418,12 +418,12 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
     FF_STRBUF_AUTO_DESTROY pacmanDir = ffStrbufCreate();
 
     uint32_t baseDirLen = baseDir->length;
-    ffStrbufAppendS(&pacmanDir, "/etc/pacman.conf");
+    ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
     if (!ffParsePropFile(baseDir->chars, "DBPath =", &pacmanDir))
         ffStrbufSetS(&pacmanDir, "/var/lib/pacman");
 
-    ffStrbufSubstrBefore(&pacmanDir, baseDirLen);
+    ffStrbufSubstrBefore(baseDir, baseDirLen);
 
     ffStrbufTrimRight(&pacmanDir, '/');
     ffStrbufAppendS(&pacmanDir, "/local");
