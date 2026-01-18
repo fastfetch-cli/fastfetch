@@ -412,7 +412,6 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     return num_elements;
 }
 
-
 static uint32_t getPacmanPackages(FFstrbuf* baseDir)
 {
     FF_STRBUF_AUTO_DESTROY pacmanDir = ffStrbufCreate();
@@ -421,13 +420,14 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
     ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
     // Get DBPath for packages
-    // If DBpath is specified
-    if (!ffParsePropFile(baseDir->chars, "DBPath =", &pacmanDir)){
+    ffParsePropFile(baseDir->chars, "DBPath =", &pacmanDir);
+    // If DBPath is specified
+    if (pacmanDir.length == 0) {
+        ffParsePropFile(baseDir->chars, "RootDir =", &pacmanDir);
         // If DBpath is not specified and RootDir is specified
-        if (!ffParsePropFile(baseDir->chars, "RootDir =", &pacmanDir))
-        // If both are not specified
+        if (pacmanDir.length ==0)
+            // If both are not specified
             ffStrbufClear(&pacmanDir);
-
         ffStrbufTrimRight(&pacmanDir, '/');
         ffStrbufAppendS(&pacmanDir, "/var/lib/pacman");
     }
