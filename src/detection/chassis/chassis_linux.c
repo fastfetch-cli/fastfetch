@@ -23,17 +23,17 @@ const char* ffDetectChassis(FFChassisResult* result)
     {
         // Available on Asahi Linux
         uint32_t chassisType = 0;
-        if (ffReadFileData("/proc/device-tree/smbios/smbios/chassis/chassis-type", sizeof(chassisType), &chassisType)) // big endian
+        if (ffReadFileData("/sys/firmware/devicetree/base/smbios/smbios/chassis/chassis-type", sizeof(chassisType), &chassisType)) // big endian
         {
             chassisType = __builtin_bswap32(chassisType);
             const char* typeStr = ffChassisTypeToString(chassisType);
             if(typeStr)
                 ffStrbufSetStatic(&result->type, typeStr);
 
-            if(ffReadFileBuffer("/proc/device-tree/smbios/smbios/chassis/manufacturer", &result->vendor) && result->vendor.length > 0)
+            if(ffReadFileBuffer("/sys/firmware/devicetree/base/smbios/smbios/chassis/manufacturer", &result->vendor) && result->vendor.length > 0)
                 ffStrbufTrimRight(&result->vendor, '\0');
         }
-        else if(ffReadFileBuffer("/proc/device-tree/chassis-type", &result->type) && result->type.length > 0)
+        else if(ffReadFileBuffer("/sys/firmware/devicetree/base/chassis-type", &result->type) && result->type.length > 0)
         {
             ffStrbufTrimRight(&result->type, '\0');
             result->type.chars[0] = (char) toupper(result->type.chars[0]);
