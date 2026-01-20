@@ -22,7 +22,7 @@
     #define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
-static void getKDE(FFstrbuf* result, FFDEOptions* options)
+static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
 #ifdef _PATH_LOCALBASE
     ffParsePropFile(_PATH_LOCALBASE "/share/wayland-sessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
@@ -162,7 +162,7 @@ static void getXFCE4(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
     }
 }
 
-static void getLXQt(FFstrbuf* result, FFDEOptions* options)
+static void getLXQt(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     ffParsePropFileData("gconfig/lxqt.pc", "Version:", result);
 
@@ -206,7 +206,7 @@ static bool extractTdeVersion(const char* line, uint32_t len, void *userdata)
     return false;
 }
 
-static const char* getTrinity(FFstrbuf* result, FFDEOptions* options)
+static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("tde-config", &path);
