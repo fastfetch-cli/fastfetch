@@ -414,29 +414,41 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
 
 static uint32_t getPacmanPackages(FFstrbuf* baseDir)
 {
-    FF_STRBUF_AUTO_DESTROY pacmanDir = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY dbPath = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY rootDir = ffStrbufCreate();
+
     // Get path to pacman.conf
     uint32_t baseDirLen = baseDir->length;
     ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
-    // Get DBPath for packages
-    ffParsePropFile(baseDir->chars, "DBPath =", &pacmanDir);
-    // If DBPath is specified
-    if (pacmanDir.length == 0) {
-        ffParsePropFile(baseDir->chars, "RootDir =", &pacmanDir);
-        // If DBpath is not specified and RootDir is specified
-        if (pacmanDir.length ==0)
-            // If both are not specified
-            ffStrbufClear(&pacmanDir);
-        ffStrbufTrimRight(&pacmanDir, '/');
-        ffStrbufAppendS(&pacmanDir, "/var/lib/pacman");
-    }
+    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]){
+        { "DBPath =", &dbPath },
+        { "RootDir =", &rootDir },
+    });
     ffStrbufSubstrBefore(baseDir, baseDirLen);
 
-    ffStrbufTrimRight(&pacmanDir, '/');
-    ffStrbufAppendS(&pacmanDir, "/local");
+    if (confFound)
+    {
+        if (dbPath.length > 0)
+        {
+            // If DBPath is specified, use it
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "local");
+        }
+        else if (rootDir.length > 0)
+        {
+            // ... otherwise, use RootDir
+            ffStrbufDestroy(&dbPath);
+            ffStrbufInitMove(&dbPath, &rootDir);
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "var/lib/pacman/local");
+        }
+    }
 
-    return getNumElements(baseDir, pacmanDir.chars, true);
+    if (dbPath.length == 0)
+        ffStrbufSetStatic(&dbPath, "/var/lib/pacman/local");
+
+    return getNumElements(baseDir, dbPath.chars, true);
 }
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
