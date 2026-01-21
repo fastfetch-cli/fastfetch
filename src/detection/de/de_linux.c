@@ -219,14 +219,15 @@ static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* opt
         return NULL;
 
     ffStrbufClear(&path);
-    ffProcessAppendStdOut(&path, (char* const[]){
+    if (ffProcessAppendStdOut(&path, (char* const[]){
         "tde-config",
         "--version",
         NULL
-    });
-
-    ffParsePropLines(path.chars , "TDE: ", result);
-    return NULL;
+    }) == NULL)
+    {
+        ffParsePropLines(path.chars , "TDE: ", result);
+        return NULL;
+    }
 
     return "All methods failed";
 }
