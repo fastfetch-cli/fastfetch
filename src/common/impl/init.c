@@ -28,8 +28,6 @@ static void initState(FFstate* state)
     state->titleFqdn = false;
 
     ffPlatformInit(&state->platform);
-    state->configDoc = NULL;
-    state->resultDoc = NULL;
     state->dynamicInterval = 0;
 
     {
@@ -96,8 +94,8 @@ static void exitSignalHandler(FF_MAYBE_UNUSED int signal)
 
 void ffStart(void)
 {
-    ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe && !instance.state.resultDoc;
-    ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
+    ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe;
+    ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe;
 
     #ifdef _WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -124,7 +122,7 @@ void ffStart(void)
     #endif
 
     //reset everything to default before we start printing
-    if(!instance.config.display.pipe && !instance.state.resultDoc)
+    if(!instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
     if(ffHideCursor)
@@ -138,8 +136,6 @@ void ffStart(void)
         fputs("\033[?1049h\033[H", stdout); // Enable alternate buffer
         fflush(stdout);
     }
-
-    ffLogoPrint();
 }
 
 void ffFinish(void)
@@ -157,9 +153,6 @@ static void destroyConfig(void)
 static void destroyState(void)
 {
     ffPlatformDestroy(&instance.state.platform);
-    yyjson_doc_free(instance.state.configDoc);
-    yyjson_mut_doc_free(instance.state.resultDoc);
-    ffStrbufDestroy(&instance.state.genConfigPath);
 }
 
 void ffDestroyInstance(void)

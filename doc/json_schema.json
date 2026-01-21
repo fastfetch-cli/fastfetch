@@ -1999,7 +1999,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print some colored blocks",
+                                        "description": "Display the terminal's 16-color palette",
                                         "const": "colors"
                                     },
                                     "symbol": {

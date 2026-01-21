@@ -9,6 +9,8 @@ void ffPrepareNetIO(FFNetIOOptions* options)
 {
     if (options->detectTotal) return;
 
+    if (time1 != 0) return; // Already prepared
+
     ffListInit(&ioCounters1, sizeof(FFNetIOResult));
     ffNetIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();

@@ -54,6 +54,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         }
         FF_DEBUG("Device instance ID: %lu", devInst);
 
+        for (wchar_t* p = devId; *p; p++)
+        {
+            if (*p >= L'a' && *p <= L'z')
+                *p -= L'a' - L'A';
+        }
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         deviceCount++;
         FF_DEBUG("Added GPU #%d to list", deviceCount);
@@ -73,10 +79,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
-        if (
-            (*devId == 'P' && swscanf(devId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4) ||
-            (*devId == 'p' && swscanf(devId, L"pci\\ven_%x&dev_%x&subsys_%x&rev_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4) // Windows 7
-        )
+        if (swscanf(devId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
         {
             FF_DEBUG("Parsed PCI IDs - Vendor: 0x%x, Device: 0x%x, SubSystem: 0x%x, Rev: 0x%x", vendorId, deviceId, subSystemId, revId);
             ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));

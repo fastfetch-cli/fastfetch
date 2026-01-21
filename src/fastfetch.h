@@ -5,12 +5,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef FF_USE_SYSTEM_YYJSON
-    #include <yyjson.h>
-#else
-    #include "3rdparty/yyjson/yyjson.h"
-#endif
-
 #ifdef _MSC_VER
     #define __attribute__(x)
 #endif
@@ -40,13 +34,8 @@ typedef struct FFstate
     uint32_t keysHeight;
     bool terminalLightTheme;
     bool titleFqdn;
-
-    FFPlatform platform;
-    yyjson_doc* configDoc;
-    yyjson_mut_doc* resultDoc;
-    FFstrbuf genConfigPath;
-    bool fullConfig;
     uint32_t dynamicInterval;
+    FFPlatform platform;
 } FFstate;
 
 typedef struct FFinstance

@@ -469,6 +469,14 @@
             }
         },
         {
+            "long": "structure-disabled",
+            "desc": "Disable specific modules in the structure",
+            "remark": "Must be a colon-separated list of keys",
+            "arg": {
+                "type": "structure"
+            }
+        },
+        {
             "long": "stat",
             "desc": "Show time usage (in ms) for individual modules",
             "arg": {

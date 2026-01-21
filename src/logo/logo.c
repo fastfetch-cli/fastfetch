@@ -424,7 +424,8 @@ static void logoPrintStruct(const FFlogo* logo)
 
 static void logoPrintNone(void)
 {
-    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
+    if (!instance.config.display.pipe)
+        logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     instance.state.logoHeight = 0;
     instance.state.logoWidth = 0;
 }
@@ -614,16 +615,6 @@ static bool logoTryKnownType(void)
 
 void ffLogoPrint(void)
 {
-    //When generate JSON result, we don't have a logo or padding.
-    //We also don't need to set main color, because it won't be printed anyway.
-    //So we can return quickly here.
-    if(instance.state.resultDoc)
-    {
-        instance.state.logoHeight = 0;
-        instance.state.logoWidth = 0;
-        return;
-    }
-
     const FFOptionsLogo* options = &instance.config.logo;
 
     if (options->type == FF_LOGO_TYPE_NONE)
@@ -711,7 +702,7 @@ void ffLogoPrintLine(void)
         printf("\033[%uC", instance.state.logoWidth);
 
     if (instance.state.dynamicInterval > 0)
-        fputs("\033[K", stdout);
+        fputs("\033[K", stdout); // Clear to the end of the line
 
     ++instance.state.keysHeight;
 }

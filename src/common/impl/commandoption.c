@@ -71,40 +71,66 @@ bool ffParseModuleOptions(const char* key, const char* value)
 
 void ffPrepareCommandOption(FFdata* data)
 {
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME, ':'))
-        ffPrepareCPUUsage();
-
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME, ':'))
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
-        ffInitDiskIOOptions(&options);
-        ffPrepareDiskIO(&options);
-    }
+        #define FF_IF_MODULE_MATCH(moduleNameConstant) if (moduleLen == strlen(moduleNameConstant) \
+            && ffStrEqualsIgnCase(moduleType, moduleNameConstant) \
+            && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
-        ffInitNetIOOptions(&options);
-        ffPrepareNetIO(&options);
-    }
+        switch (moduleType[0])
+        {
+            case 'C': case 'c':
+                FF_IF_MODULE_MATCH(FF_CPUUSAGE_MODULE_NAME)
+                    ffPrepareCPUUsage();
+                break;
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
-        ffInitPublicIpOptions(&options);
-        ffPreparePublicIp(&options);
-    }
+            case 'D': case 'd':
+                FF_IF_MODULE_MATCH(FF_DISKIO_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
+                    ffInitDiskIOOptions(&options);
+                    ffPrepareDiskIO(&options);
+                }
+                break;
 
-    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME, ':'))
-    {
-        __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
-        ffInitWeatherOptions(&options);
-        ffPrepareWeather(&options);
+            case 'N': case 'n':
+                FF_IF_MODULE_MATCH(FF_NETIO_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
+                    ffInitNetIOOptions(&options);
+                    ffPrepareNetIO(&options);
+                }
+                break;
+
+            case 'P': case 'p':
+                FF_IF_MODULE_MATCH(FF_PUBLICIP_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
+                    ffInitPublicIpOptions(&options);
+                    ffPreparePublicIp(&options);
+                }
+                break;
+
+            case 'W': case 'w':
+                FF_IF_MODULE_MATCH(FF_WEATHER_MODULE_NAME)
+                {
+                    __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
+                    ffInitWeatherOptions(&options);
+                    ffPrepareWeather(&options);
+                }
+                break;
+        }
+
+        #undef FF_IF_MODULE_MATCH
     }
 }
 
-static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
+static void genJsonConfig(FFdata* data, FFModuleBaseInfo* baseInfo, void* options)
 {
+    yyjson_mut_doc* doc = data->resultDoc;
+
     yyjson_mut_val* modules = yyjson_mut_obj_get(doc->root, "modules");
     if (!modules)
         modules = yyjson_mut_obj_add_arr(doc, doc->root, "modules");
@@ -112,7 +138,7 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
     ffStrbufLowerCase(&type);
 
-    if (instance.state.fullConfig)
+    if (data->docType == FF_RESULT_DOC_TYPE_CONFIG_FULL)
     {
         yyjson_mut_val* module = yyjson_mut_obj(doc);
         yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
@@ -131,8 +157,9 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
     }
 }
 
-static void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
+static void genJsonResult(FFdata* data, FFModuleBaseInfo* baseInfo, void* options)
 {
+    yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
     yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
     if (baseInfo->generateJsonResult)
@@ -142,9 +169,9 @@ static void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_
 }
 
 static void parseStructureCommand(
+    FFdata* data,
     const char* line,
-    void (*fn)(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* jsonDoc),
-    yyjson_mut_doc* jsonDoc
+    void (*fn)(FFdata*, FFModuleBaseInfo* baseInfo, void* options)
 )
 {
     if(ffCharIsEnglishAlphabet(line[0]))
@@ -156,8 +183,8 @@ static void parseStructureCommand(
             {
                 uint8_t optionBuf[FF_OPTION_MAX_SIZE];
                 baseInfo->initOptions(optionBuf);
-                if (__builtin_expect(jsonDoc != NULL, false))
-                    fn(baseInfo, optionBuf, jsonDoc);
+                if (__builtin_expect(data->resultDoc != NULL, false))
+                    fn(data, baseInfo, optionBuf);
                 else
                     baseInfo->printModule(optionBuf);
                 baseInfo->destroyOptions(optionBuf);
@@ -169,30 +196,32 @@ static void parseStructureCommand(
     ffPrintError(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
-void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
+void ffPrintCommandOption(FFdata* data)
 {
     //Parse the structure and call the modules
     int32_t thres = instance.config.display.stat;
-    uint32_t startIndex = 0;
-    while (startIndex < data->structure.length)
+
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
-        data->structure.chars[colonIndex] = '\0';
+        if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleType, ':'))
+            continue;
 
         double ms = 0;
         if(thres >= 0)
             ms = ffTimeGetTick();
 
-        parseStructureCommand(data->structure.chars + startIndex, genJsonResult, jsonDoc);
+        parseStructureCommand(data, moduleType, genJsonResult);
 
         if(thres >= 0)
         {
             ms = ffTimeGetTick() - ms;
 
-            if (jsonDoc)
+            if (data->resultDoc)
             {
-                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
-                yyjson_mut_obj_add_real(jsonDoc, moduleJson, "stat", ms);
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(data->resultDoc->root);
+                yyjson_mut_obj_add_real(data->resultDoc, moduleJson, "stat", ms);
             }
             else
             {
@@ -205,28 +234,24 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
         }
 
         #if defined(_WIN32)
-            if (!jsonDoc && !instance.config.display.noBuffer) fflush(stdout);
+            if (!data->resultDoc && !instance.config.display.noBuffer) fflush(stdout);
         #endif
-
-        startIndex = colonIndex + 1;
     }
 }
 
-void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
+void ffMigrateCommandOptionToJsonc(FFdata* data)
 {
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
 
-    //Parse the structure and call the modules
-    uint32_t startIndex = 0;
-    while (startIndex < data->structure.length)
+    char* moduleType = NULL;
+    size_t moduleLen = 0;
+    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure))
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
-        data->structure.chars[colonIndex] = '\0';
+        if (ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleType, ':'))
+            continue;
 
-        parseStructureCommand(data->structure.chars + startIndex, genJsonConfig, jsonDoc);
-
-        startIndex = colonIndex + 1;
+        parseStructureCommand(data, moduleType, genJsonConfig);
     }
 }

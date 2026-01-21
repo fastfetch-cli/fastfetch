@@ -55,7 +55,7 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "slowVersionDetection"))
         {
-            options->slowVersionDetection = yyjson_get_bool(val);
+            ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Key `slowVersionDetection` is deprecated, it's always true");
             continue;
         }
 
@@ -66,8 +66,6 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
 void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
-
-    yyjson_mut_obj_add_bool(doc, module, "slowVersionDetection", options->slowVersionDetection);
 }
 
 bool ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -93,8 +91,6 @@ bool ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
 void ffInitDEOptions(FFDEOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->slowVersionDetection = false;
 }
 
 void ffDestroyDEOptions(FFDEOptions* options)

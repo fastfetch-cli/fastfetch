@@ -22,7 +22,7 @@
     #define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
-static void getKDE(FFstrbuf* result, FFDEOptions* options)
+static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
 #ifdef _PATH_LOCALBASE
     ffParsePropFile(_PATH_LOCALBASE "/share/wayland-sessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
@@ -44,7 +44,7 @@ static void getKDE(FFstrbuf* result, FFDEOptions* options)
     if(result->length == 0)
         ffParsePropFileData("wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", result);
 
-    if(result->length == 0 && options->slowVersionDetection)
+    if(result->length == 0)
     {
         if (ffProcessAppendStdOut(result, (char* const[]){
             "plasmashell",
@@ -73,7 +73,7 @@ static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     getGnomeByDbus(result);
 
-    if (result->length == 0 && options->slowVersionDetection)
+    if (result->length == 0)
     {
         if (ffProcessAppendStdOut(result, (char* const[]){
             "gnome-shell",
@@ -91,7 +91,7 @@ static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
     if (result->length == 0)
         ffParsePropFileData("applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", result);
 
-    if (result->length == 0 && options->slowVersionDetection)
+    if (result->length == 0)
     {
         if (ffProcessAppendStdOut(result, (char* const[]){
             "cinnamon",
@@ -102,7 +102,7 @@ static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
     }
 }
 
-static void getMate(FFstrbuf* result, FFDEOptions* options)
+static void getMate(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY major = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
@@ -116,7 +116,7 @@ static void getMate(FFstrbuf* result, FFDEOptions* options)
 
     ffParseSemver(result, &major, &minor, &micro);
 
-    if(result->length == 0 && options->slowVersionDetection)
+    if(result->length == 0)
     {
         ffProcessAppendStdOut(result, (char* const[]){
             "mate-session",
@@ -143,11 +143,11 @@ static const char* getXfce4ByLib(FFstrbuf* result)
 #endif
 }
 
-static void getXFCE4(FFstrbuf* result, FFDEOptions* options)
+static void getXFCE4(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     getXfce4ByLib(result);
 
-    if(result->length == 0 && options->slowVersionDetection)
+    if(result->length == 0)
     {
         //This is somewhat slow
         ffProcessAppendStdOut(result, (char* const[]){
@@ -162,7 +162,7 @@ static void getXFCE4(FFstrbuf* result, FFDEOptions* options)
     }
 }
 
-static void getLXQt(FFstrbuf* result, FFDEOptions* options)
+static void getLXQt(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     ffParsePropFileData("gconfig/lxqt.pc", "Version:", result);
 
@@ -171,7 +171,7 @@ static void getLXQt(FFstrbuf* result, FFDEOptions* options)
     if(result->length == 0)
         ffParsePropFileData("cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", result);
 
-    if(result->length == 0 && options->slowVersionDetection)
+    if(result->length == 0)
     {
         //This is really, really, really slow. Thank you, LXQt developers
         ffProcessAppendStdOut(result, (char* const[]){
@@ -206,7 +206,7 @@ static bool extractTdeVersion(const char* line, uint32_t len, void *userdata)
     return false;
 }
 
-static const char* getTrinity(FFstrbuf* result, FFDEOptions* options)
+static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("tde-config", &path);
@@ -218,15 +218,13 @@ static const char* getTrinity(FFstrbuf* result, FFDEOptions* options)
     if (ffBinaryExtractStrings(path.chars, extractTdeVersion, result, strlen("R0.0.0")) == NULL)
         return NULL;
 
-    if (options->slowVersionDetection)
+    ffStrbufClear(&path);
+    if (ffProcessAppendStdOut(&path, (char* const[]){
+        "tde-config",
+        "--version",
+        NULL
+    }) == NULL)
     {
-        ffStrbufClear(&path);
-        ffProcessAppendStdOut(&path, (char* const[]){
-            "tde-config",
-            "--version",
-            NULL
-        });
-
         ffParsePropLines(path.chars , "TDE: ", result);
         return NULL;
     }
