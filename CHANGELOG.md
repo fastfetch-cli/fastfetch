@@ -1,3 +1,25 @@
+# 2.58.0
+
+An early release to fix compatibility issues with KDE Plasma 6.6.
+
+Breaking changes:
+* The `de.slowVersionDetection` option has been removed. Slow version detection is now always enabled, as required on non-FHS-compliant distros (e.g., NixOS). (#2149, DE, Linux)
+
+Features:
+* Adds the `--structure-disabled <modules...>` command-line flag to temporarily disable module structure printing.
+    * For example: `fastfetch --structure-disabled colors` removes the color blocks from the default output.
+* Supports chassis type detection on Linux ARM devices when reported via the device tree (Chassis, Linux)
+* Supports Bedrock Linux version detection (#2155, OS, Linux)
+* Honors the `DBPath` and `RootDir` settings in `pacman.conf` when detecting Pacman packages (#2154, Packages, Linux)
+
+Bugfixes:
+* Fixes a crash issues on KDE Plasma 6.6 (Display, Linux)
+* Fixes the Command module not working with `--dynamic-interval` (#2152, Command)
+* Fixes Quartz Compositor version detection. It now correctly reports the version of `WindowServer` (`SkyLight`) instead of `WindowManager`. (WM, macOS)
+
+Logos:
+* Adds Kiss2
+
 # 2.57.1
 
 Features:
