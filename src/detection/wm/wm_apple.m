@@ -50,9 +50,16 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
     if (ffStrbufEqualS(wmName, "WindowServer"))
     {
         NSError* error;
-        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:@"file:///System/Library/CoreServices/WindowManager.app/Contents/version.plist"]
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:@"file:///System/Library/PrivateFrameworks/SkyLight.framework/Resources/version.plist"]
                                            error:&error];
-        ffStrbufInitS(result, ((NSString*) dict[@"CFBundleVersion"]).UTF8String);
+        if (!dict)
+        {
+            dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:@"file:///System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/Resources/version.plist"]
+                                           error:&error];
+        }
+
+        if (dict)
+            ffStrbufInitS(result, ((NSString*) dict[@"CFBundleShortVersionString"]).UTF8String);
     }
 
     return NULL;
