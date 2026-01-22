@@ -307,10 +307,10 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 static void logoApplyColors(const FFlogo* logo, bool replacement)
 {
     if(instance.config.display.colorTitle.length == 0)
-        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
+        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
 
     if(instance.config.display.colorKeys.length == 0)
-        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
+        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ?: logo->colors[1]);
 
     if (replacement)
     {
