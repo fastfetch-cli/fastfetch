@@ -36,6 +36,9 @@ static const char* armPartId2name(uint32_t partId)
 {
     switch (partId)
     {
+    case 0xb36: return "ARM1136j-s";
+    case 0xb56: return "ARM1156t2-s";
+    case 0xb76: return "ARM1176jz-s";
     case 0x810: return "ARM810";
     case 0x920: return "ARM920";
     case 0x922: return "ARM922";
@@ -82,10 +85,12 @@ static const char* armPartId2name(uint32_t partId)
     case 0xd0d: return "Cortex-A77";
     case 0xd0e: return "Cortex-A76AE";
     case 0xd13: return "Cortex-R52";
+    case 0xd14: return "Cortex-R82AE";
     case 0xd15: return "Cortex-R82";
     case 0xd16: return "Cortex-R52+";
     case 0xd20: return "Cortex-M23";
     case 0xd21: return "Cortex-M33";
+    case 0xd24: return "Cortex-M52";
     case 0xd22: return "Cortex-M55";
     case 0xd23: return "Cortex-M85";
     case 0xd40: return "Neoverse-V1";
