@@ -2346,6 +2346,17 @@ static const FFlogo H[] = {
 };
 
 static const FFlogo I[] = {
+    // Iridium
+    {
+        .names = {"Iridium"},
+        .lines = FASTFETCH_DATATEXT_LOGO_IRIDIUM,
+        .colors = {
+            FF_COLOR_FG_256 "93",   
+            FF_COLOR_FG_256 "129",  
+        },
+        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "129",
+        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "129",
+    },
     // Iglunix
     {
         .names = {"Iglunix", "Iglu"},
