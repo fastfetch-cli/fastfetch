@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "common/debug.h"
 
 #include <string.h>
 #include <mach/mach.h>
@@ -21,10 +22,15 @@ const char* ffDetectMemory(FFMemoryResult* ram)
         return "Failed to read host_statistics64";
 
     uint64_t pageSize = instance.state.platform.sysinfo.pageSize;
-    uint64_t appMemory = vmstat.internal_page_count * pageSize;
+    uint64_t appMemory = vmstat.internal_page_count * pageSize; // memory allocated by `mmap(..., MAP_ANON | MAP_PRIVATE, ...)`, i.e. malloc(3)
     uint64_t wiredMemory = vmstat.wire_count * pageSize;
     uint64_t compressed = vmstat.compressor_page_count * pageSize;
     uint64_t reserved = ram->bytesTotal - usableMemory;
+
+    FF_DEBUG("App: %.2f GiB", (double) appMemory / 1024. / 1024. / 1024.);
+    FF_DEBUG("Wired: %.2f GiB", (double) wiredMemory / 1024. / 1024. / 1024.);
+    FF_DEBUG("Compressed: %.2f GiB", (double) compressed / 1024. / 1024. / 1024.);
+    FF_DEBUG("Reserved: %.2f GiB", (double) reserved / 1024. / 1024. / 1024.);
 
     ram->bytesUsed = appMemory + wiredMemory + compressed + reserved;
 
