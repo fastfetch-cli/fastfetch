@@ -316,6 +316,140 @@ static bool detectBedrock(FFOSResult* os)
     return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
 }
 
+static bool detectHarmonyOS(FFOSResult* os)
+{
+    // HarmonyOS 5+ uses param command to read system parameters
+    // Check for const.product.os.dist.name=HarmonyOS
+    FF_STRBUF_AUTO_DESTROY osName = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&osName, (char* const[]) {
+        "param", "get", "const.product.os.dist.name",
+        NULL,
+    }) != NULL)
+        return false;
+
+    ffStrbufTrimRightSpace(&osName);
+    if (!ffStrbufEqualS(&osName, "HarmonyOS"))
+        return false;
+
+    // Detected HarmonyOS - read version and other info
+    ffStrbufSetS(&os->id, "harmonyos");
+    ffStrbufSetS(&os->idLike, "harmonyos");
+    ffStrbufSetS(&os->name, "HarmonyOS");
+
+    // Read base version (e.g., 6.0.0)
+    FF_STRBUF_AUTO_DESTROY baseVersion = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&baseVersion, (char* const[]) {
+        "param", "get", "const.product.os.dist.version",
+        NULL,
+    }) == NULL)
+    {
+        ffStrbufTrimRightSpace(&baseVersion);
+        if (baseVersion.length > 0)
+            ffStrbufSet(&os->version, &baseVersion);
+    }
+
+    // Read full incremental version (e.g., 6.0.1.112) - this is the complete version
+    FF_STRBUF_AUTO_DESTROY fullVersion = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&fullVersion, (char* const[]) {
+        "param", "get", "const.product.incremental.version",
+        NULL,
+    }) == NULL)
+    {
+        ffStrbufTrimRightSpace(&fullVersion);
+        if (fullVersion.length > 0)
+            ffStrbufSet(&os->versionID, &fullVersion);
+        else if (baseVersion.length > 0)
+            ffStrbufSet(&os->versionID, &baseVersion);
+    }
+    else if (baseVersion.length > 0)
+    {
+        ffStrbufSet(&os->versionID, &baseVersion);
+    }
+
+    // Read API version - store in variant field
+    FF_STRBUF_AUTO_DESTROY apiVersion = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&apiVersion, (char* const[]) {
+        "param", "get", "const.ohos.apiversion",
+        NULL,
+    }) == NULL)
+    {
+        ffStrbufTrimRightSpace(&apiVersion);
+        if (apiVersion.length > 0)
+        {
+            ffStrbufSet(&os->variant, &apiVersion);
+        }
+    }
+
+    // Read pretty name (full version name)
+    FF_STRBUF_AUTO_DESTROY prettyName = ffStrbufCreate();
+    bool hasPrettyName = (ffProcessAppendStdOut(&prettyName, (char* const[]) {
+        "param", "get", "const.product.software.version.name",
+        NULL,
+    }) == NULL);
+
+    if (hasPrettyName)
+    {
+        ffStrbufTrimRightSpace(&prettyName);
+        if (prettyName.length > 0)
+        {
+            // Append versionID if available
+            if (os->versionID.length > 0)
+            {
+                ffStrbufAppendC(&prettyName, ' ');
+                ffStrbufAppend(&prettyName, &os->versionID);
+            }
+            // Append API level (variant) if available
+            if (os->variant.length > 0)
+            {
+                ffStrbufAppendS(&prettyName, " (API ");
+                ffStrbufAppend(&prettyName, &os->variant);
+                ffStrbufAppendC(&prettyName, ')');
+            }
+            ffStrbufSet(&os->prettyName, &prettyName);
+        }
+    }
+
+    // Fallback: construct pretty name from version if we don't have one yet
+    if (os->prettyName.length == 0)
+    {
+        if (os->versionID.length > 0)
+        {
+            if (os->variant.length > 0)
+                ffStrbufSetF(&os->prettyName, "HarmonyOS %s (API %s)", os->versionID.chars, os->variant.chars);
+            else
+                ffStrbufSetF(&os->prettyName, "HarmonyOS %s", os->versionID.chars);
+        }
+        else
+            ffStrbufSetS(&os->prettyName, "HarmonyOS");
+    }
+
+    // Read build ID
+    FF_STRBUF_AUTO_DESTROY buildID = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buildID, (char* const[]) {
+        "param", "get", "const.product.software.version",
+        NULL,
+    }) == NULL)
+    {
+        ffStrbufTrimRightSpace(&buildID);
+        if (buildID.length > 0)
+            ffStrbufSet(&os->buildID, &buildID);
+    }
+
+    // Read security patch date
+    FF_STRBUF_AUTO_DESTROY securityPatch = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&securityPatch, (char* const[]) {
+        "param", "get", "const.ohos.version.security_patch",
+        NULL,
+    }) == NULL)
+    {
+        ffStrbufTrimRightSpace(&securityPatch);
+        if (securityPatch.length > 0)
+            ffStrbufSet(&os->codename, &securityPatch);
+    }
+
+    return true;
+}
+
 static void detectOS(FFOSResult* os)
 {
     #ifdef FF_CUSTOM_OS_RELEASE_PATH
@@ -329,6 +463,10 @@ static void detectOS(FFOSResult* os)
     if (detectBedrock(os))
         return;
 
+    // Check for HarmonyOS 5+ first (uses param command)
+    if (detectHarmonyOS(os))
+        return;
+
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
@@ -339,6 +477,7 @@ static void detectOS(FFOSResult* os)
     if (os->id.length == 0 && os->name.length == 0 && os->prettyName.length == 0)
     {
         // HarmonyOS has no os-release file
+        // This fallback checks sysinfo.name which may still work for older versions
         if (ffStrbufEqualS(&instance.state.platform.sysinfo.name, "HarmonyOS"))
         {
             ffStrbufSetS(&os->id, "harmonyos");
