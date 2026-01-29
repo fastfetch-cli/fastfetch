@@ -111,7 +111,7 @@ if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" ON)
 endif()
 if(APPLE)
-    option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" ON)
+    option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
 endif()
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
