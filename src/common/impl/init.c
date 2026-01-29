@@ -258,6 +258,9 @@ void ffListFeatures(void)
         #if FF_WIN7_COMPAT
             "Windows 7 Compatibility\n"
         #endif
+        #if FF_APPLE_MEMSIZE_USABLE
+            "Apple memsize_usable\n"
+        #endif
         ""
     , stdout);
 }
