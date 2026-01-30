@@ -2699,6 +2699,16 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // LimeOS
+    {
+        .names = {"LimeOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LIMEOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Linspire
     {
         .names = {"Linspire", "Lindows"},
