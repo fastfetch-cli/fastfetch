@@ -1343,6 +1343,15 @@ add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
+include(CheckCSourceCompiles)
+check_c_source_compiles("int main(void){int arr[1];return _Countof(arr);}" COMPILER_SUPPORTS_COUNT_OF)
+if(COMPILER_SUPPORTS_COUNT_OF)
+    message(STATUS "_Countof is supported by the compiler")
+    target_compile_definitions(libfastfetch PUBLIC FF_SUPPORTS_COUNT_OF=1)
+else()
+    message(STATUS "_Countof is NOT supported by the compiler")
+endif()
+
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
