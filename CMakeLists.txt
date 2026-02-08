@@ -1115,6 +1115,7 @@ elseif(SunOS)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
+        src/common/solaris/memrchr.c
         src/detection/gpu/gpu_sunos.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
