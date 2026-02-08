@@ -1,5 +1,5 @@
 #if defined(__sun) && ! defined(__illumos__)
-#include <stddef.h>
+#include "memrchr.h"
 
 void *memrchr(const void *s, int c, size_t n)
 {

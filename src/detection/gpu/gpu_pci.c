@@ -25,7 +25,7 @@
 #define FF_STR(x) FF_STR_INDIR(x)
 
 #if defined(__sun) && ! defined(__illumos__)
-extern void *memrchr(const void *, int, size_t);
+#include "common/solaris/memrchr.h"
 #endif
 
 static const FFstrbuf* loadPciIds()
