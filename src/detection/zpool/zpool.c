@@ -36,29 +36,12 @@ typedef struct FFZfsData
     FFlist* result;
 } FFZfsData;
 
-static inline int ff_zpool_get_prop_wrapper(
-    FFZfsData* data,
-    zpool_handle_t *zhp,
-    zpool_prop_t prop,
-    char *buf,
-    size_t len,
-    zprop_source_t *srctype,
-    boolean_t literal __attribute__((unused))
-)
-{
-    /* 
-    Solaris header: 
-        extern int zpool_get_prop(zpool_handle_t *, zpool_prop_t, char *, size_t __proplen, zprop_source_t *);
-    Illumos header:
-        extern int zpool_get_prop(zpool_handle_t *, zpool_prop_t, char *, size_t proplen, zprop_source_t *, boolean_t);
-    */
+
 #if defined(__sun) && ! defined(__illumos__)
-    return data->ffzpool_get_prop(zhp, prop, buf, len, srctype);
-#else
-    return data->ffzpool_get_prop(zhp, prop, buf, len, srctype, literal);
+#define ffzpool_get_prop(zhp, prop, buf, len, srctype, literal) \
+    ffzpool_get_prop(zhp, prop, buf, len, srctype)
 #endif
 
-}
 
 static inline void cleanLibzfs(FFZfsData* data)
 {
@@ -75,11 +58,11 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     zprop_source_t source;
     FFZpoolResult* item = ffListAdd(data->result);
     char buf[1024];
-    if (ff_zpool_get_prop_wrapper(data, zpool, data->props.name, buf, ARRAY_SIZE(buf), &source, false) == 0)
+    if (data->ffzpool_get_prop(zpool, data->props.name, buf, ARRAY_SIZE(buf), &source, false) == 0)
         ffStrbufInitS(&item->name, buf);
     else
         ffStrbufInitStatic(&item->name, "unknown");
-    if (ff_zpool_get_prop_wrapper(data, zpool, data->props.health, buf, ARRAY_SIZE(buf), &source, false) == 0)
+    if (data->ffzpool_get_prop(zpool, data->props.health, buf, ARRAY_SIZE(buf), &source, false) == 0)
         ffStrbufInitS(&item->state, buf);
     else
         ffStrbufInitStatic(&item->state, "unknown");
