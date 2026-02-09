@@ -1,7 +1,9 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 #include "common/io.h"
+#include "common/windows/unicode.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
 #include <winternl.h>
@@ -193,9 +195,16 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
 
 exit:
     {
-        DWORD exitCode = 0;
-        if (GetExitCodeProcess(hProcess, &exitCode) && exitCode != STILL_ACTIVE && exitCode != 0)
-            return "Child process exited with an error";
+        PROCESS_BASIC_INFORMATION info = {};
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
+        {
+            assert(size == sizeof(info));
+            if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0)
+                return "Child process exited with an error";
+        }
+        else
+            return "NtQueryInformationProcess(ProcessBasicInformation) failed";
     }
 
     return NULL;
@@ -227,12 +236,13 @@ bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFst
     }
     if(exe)
     {
-        DWORD bufSize = exe->allocated;
-        if(QueryFullProcessImageNameA(hProcess, 0, exe->chars, &bufSize))
+        alignas(alignof(UNICODE_STRING)) uint8_t buffer[4096];
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageFileNameWin32, &buffer, sizeof(buffer), &size)))
         {
-            // We use full path here
-            // Querying command line of remote processes in Windows requires either WMI or ReadProcessMemory
-            exe->length = bufSize;
+            UNICODE_STRING* imageName = (UNICODE_STRING*)buffer;
+            ffStrbufSetNWS(exe, imageName->Length / sizeof(wchar_t), imageName->Buffer);
+
             if (exePath) ffStrbufSet(exePath, exe);
         }
         else
