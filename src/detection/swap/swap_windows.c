@@ -6,10 +6,11 @@
 #include <ntstatus.h>
 #include <windows.h>
 #include <psapi.h>
+#include <stdalign.h>
 
 const char* detectByNqsi(FFlist* result)
 {
-    uint8_t buffer[4096];
+    alignas(SYSTEM_PAGEFILE_INFORMATION) uint8_t buffer[4096];
     ULONG size = sizeof(buffer);
     SYSTEM_PAGEFILE_INFORMATION* pstart = (SYSTEM_PAGEFILE_INFORMATION*) buffer;
     if(!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size)))

@@ -6,6 +6,7 @@
 #include "common/mallocHelper.h"
 #include "common/io.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include "common/windows/nt.h"
 #include <ntstatus.h>
@@ -17,7 +18,7 @@ static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t
 
     bool flag = ignore == NULL;
     uint32_t counter = 0;
-    uint8_t buffer[64 * 1024] __attribute__((aligned(8))); // Required for WoA
+    alignas(8) uint8_t buffer[64 * 1024];
     BOOLEAN firstScan = TRUE;
 
     size_t ignoreLen = ignore ? wcslen(ignore) : 0;
