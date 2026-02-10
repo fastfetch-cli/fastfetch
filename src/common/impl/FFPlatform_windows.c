@@ -138,40 +138,37 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    const char* userName = getenv("USERNAME");
-    if (ffStrSet(userName))
-        ffStrbufSetS(&platform->userName, userName);
-    else
-    {
-        wchar_t buffer[256];
-        DWORD len = ARRAY_SIZE(buffer);
-        if(GetUserNameW(buffer, &len))
-            ffStrbufSetWS(&platform->userName, buffer);
-    }
-
     wchar_t buffer[256];
     DWORD size = ARRAY_SIZE(buffer);
     if (GetUserNameExW(NameDisplay, buffer, &size))
         ffStrbufSetWS(&platform->fullUserName, buffer);
 
-    size = 0;
-    DWORD refDomainSize = 0;
-    SID_NAME_USE sidNameUse = SidTypeUnknown;
-    LookupAccountNameA(NULL, userName, NULL, &size, NULL, &refDomainSize, &sidNameUse);
-    if (size > 0)
+    size = ARRAY_SIZE(buffer);
+    if (GetUserNameW(buffer, &size)) // GetUserNameExW(10002)?
     {
-        FF_AUTO_FREE PSID sid = (PSID) malloc(size);
-        FF_AUTO_FREE char* refDomain = (char*) malloc(refDomainSize);
-        if (LookupAccountNameA(NULL, userName, sid, &size, refDomain, &refDomainSize, &sidNameUse))
+        ffStrbufSetWS(&platform->userName, buffer);
+
+        size = 0;
+        DWORD refDomainSize = 0;
+        SID_NAME_USE sidNameUse = SidTypeUnknown;
+        LookupAccountNameW(NULL, buffer, NULL, &size, NULL, &refDomainSize, &sidNameUse);
+        if (size > 0)
         {
-            LPWSTR sidString;
-            if (ConvertSidToStringSidW(sid, &sidString))
+            FF_AUTO_FREE PSID sid = (PSID) malloc(size);
+            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize);
+            if (LookupAccountNameW(NULL, buffer, sid, &size, refDomain, &refDomainSize, &sidNameUse))
             {
-                ffStrbufSetWS(&platform->sid, sidString);
-                LocalFree(sidString);
+                LPWSTR sidString;
+                if (ConvertSidToStringSidW(sid, &sidString))
+                {
+                    ffStrbufSetWS(&platform->sid, sidString);
+                    LocalFree(sidString);
+                }
             }
         }
     }
+    else
+        ffStrbufSetS(&platform->userName, getenv("USERNAME"));
 }
 
 static void getHostName(FFPlatform* platform)

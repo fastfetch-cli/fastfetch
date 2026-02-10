@@ -177,16 +177,15 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 {
-    const char* user = getenv("USER");
-    if(!ffStrSet(user) && pwd)
-        user = pwd->pw_name;
-
-    ffStrbufAppendS(&platform->userName, user);
-
     if (pwd)
     {
-        ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+        ffStrbufSetS(&platform->userName, pwd->pw_name);
+        ffStrbufSetS(&platform->fullUserName, pwd->pw_gecos);
         ffStrbufTrimSpace(&platform->fullUserName);
+    }
+    else
+    {
+        ffStrbufSetS(&platform->userName, getenv("USER"));
     }
 }
 
