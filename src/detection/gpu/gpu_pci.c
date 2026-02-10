@@ -24,6 +24,10 @@
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
 
+#if defined(__sun) && ! defined(__illumos__)
+#include "common/solaris/memrchr.h"
+#endif
+
 static const FFstrbuf* loadPciIds()
 {
     static FFstrbuf pciids;
