@@ -70,15 +70,15 @@ static void getCacheDir(FFPlatform* platform)
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
 {
     PWSTR pPath = NULL;
-    if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
+    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
+        CoTaskMemFree(pPath);
         ffStrbufReplaceAllC(&buffer, '\\', '/');
         ffStrbufEnsureEndsWithC(&buffer, '/');
         if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
             ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
     }
-    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)

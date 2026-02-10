@@ -10,6 +10,7 @@
 #include <windows.h>
 #include "common/windows/nt.h"
 #include <ntstatus.h>
+#include <shlobj.h>
 
 static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t* ignore)
 {
@@ -108,7 +109,12 @@ static void detectScoop(FFPackagesResult* result)
             ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "global_path"));
         if (scoopPath.length == 0)
         {
-            ffStrbufSetS(&scoopPath, getenv("ProgramData"));
+            PWSTR pPath = NULL;
+            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, NULL, &pPath)))
+            {
+                ffStrbufSetWS(&scoopPath, pPath);
+                CoTaskMemFree(pPath);
+            }
             ffStrbufAppendS(&scoopPath, "/scoop");
         }
         ffStrbufAppendS(&scoopPath, "/apps/");
