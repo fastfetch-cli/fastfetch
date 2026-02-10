@@ -1,6 +1,7 @@
 #include "gpu.h"
 #include "common/io.h"
 #include "common/properties.h"
+#include "common/memrchr.h"
 
 #include <stdlib.h>
 #ifdef __FreeBSD__
@@ -23,10 +24,6 @@
 
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
-
-#if defined(__sun) && ! defined(__illumos__)
-#include "common/solaris/memrchr.h"
-#endif
 
 static const FFstrbuf* loadPciIds()
 {

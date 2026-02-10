@@ -1115,7 +1115,6 @@ elseif(SunOS)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/common/solaris/memrchr.c
         src/detection/gpu/gpu_sunos.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
@@ -1325,6 +1324,10 @@ if(NOT HAVE_WCWIDTH)
 endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
+endif()
+check_function_exists(memrchr HAVE_MEMRCHR)
+if(NOT HAVE_MEMRCHR)
+    list(APPEND LIBFASTFETCH_SRC src/common/impl/memrchr.c)
 endif()
 
 if(ENABLE_SYSTEM_YYJSON)
@@ -1672,6 +1675,9 @@ if(ENABLE_LIBZFS)
             PRIVATE "zfs"
         )
     endif()
+endif()
+if(NOT HAVE_MEMRCHR)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_CUSTOM_MEMRCHR=1)
 endif()
 
 if(LINUX)
