@@ -8,9 +8,12 @@
 #include "common/windows/version.h"
 #include "common/stringUtils.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include <wchar.h>
 #include <tlhelp32.h>
+#include <ntstatus.h>
+#include <winternl.h>
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
@@ -204,14 +207,19 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
         }
     }
 
-conhost:
-    ffStrbufSetF(&result->exe, "%s\\System32\\conhost.exe", getenv("SystemRoot"));
-    if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
+conhost:;
+    ULONG_PTR conhostPid = 0;
+    ULONG size;
+    if(NT_SUCCESS(NtQueryInformationProcess(GetCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0)
     {
-        ffStrbufSetS(&result->processName, "conhost.exe");
-        ffStrbufSetS(&result->prettyName, "conhost");
-        result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
+        // For Windows Terminal, it reports the PID of OpenConsole
+        if(ffProcessGetInfoWindows((uint32_t) conhostPid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
+    {
+            ffStrbufSet(&result->prettyName, &result->processName);
+            if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+                ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
         return true;
+        }
     }
 
     ffStrbufClear(&result->exe);
