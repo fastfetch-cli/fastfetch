@@ -100,7 +100,7 @@ const char* detectBySystemd(FFUsersOptions* options, FFlist* users)
 
     if (options->myselfOnly)
     {
-        ffStrbufAppendUInt(&pathUsers, getuid());
+        ffStrbufAppendUInt(&pathUsers, instance.state.platform.uid);
         detectUserBySystemd(&pathUsers, users);
     }
     else

@@ -142,7 +142,7 @@ const char* ffDetectLM(FFLMResult* result)
     {
         // On some incorrectly configured systems, $XDG_SESSION_ID is not set. Try finding it ourself
         // WARNING: This is private data. Do not parse
-        ffStrbufSetF(&path, FF_SYSTEMD_USERS_PATH "%d", getuid());
+        ffStrbufSetF(&path, FF_SYSTEMD_USERS_PATH "%d", instance.state.platform.uid);
 
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use

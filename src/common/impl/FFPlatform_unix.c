@@ -227,7 +227,8 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
-    struct passwd* pwd = getpwuid(getuid());
+    platform->uid = getuid();
+    struct passwd* pwd = getpwuid(platform->uid);
 
     struct utsname uts;
     if(uname(&uts) < 0)

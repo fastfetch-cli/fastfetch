@@ -121,6 +121,11 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
 bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    #ifdef _WIN32
+    yyjson_mut_obj_add_strbuf(doc, obj, "userId", &instance.state.platform.sid);
+    #else
+    yyjson_mut_obj_add_uint(doc, obj, "userId", instance.state.platform.uid);
+    #endif
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
     yyjson_mut_obj_add_strbuf(doc, obj, "fullUserName", &instance.state.platform.fullUserName);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
@@ -169,5 +174,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"@ symbol (colored)", "at-symbol-colored"},
         {"Host name (colored)", "host-name-colored"},
         {"Full user name", "full-user-name"},
+        {"UID / SID", "user-id"},
     }))
 };

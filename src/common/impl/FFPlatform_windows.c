@@ -1,6 +1,7 @@
 #include "FFPlatform_private.h"
 #include "common/io.h"
 #include "common/library.h"
+#include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
@@ -8,6 +9,7 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <sddl.h>
 
 #define SECURITY_WIN32 1 // For secext.h
 #include <secext.h>
@@ -148,9 +150,28 @@ static void getUserName(FFPlatform* platform)
     }
 
     wchar_t buffer[256];
-    DWORD len = ARRAY_SIZE(buffer);
-    if (GetUserNameExW(NameDisplay, buffer, &len))
+    DWORD size = ARRAY_SIZE(buffer);
+    if (GetUserNameExW(NameDisplay, buffer, &size))
         ffStrbufSetWS(&platform->fullUserName, buffer);
+
+    size = 0;
+    DWORD refDomainSize = 0;
+    SID_NAME_USE sidNameUse = SidTypeUnknown;
+    LookupAccountNameA(NULL, userName, NULL, &size, NULL, &refDomainSize, &sidNameUse);
+    if (size > 0)
+    {
+        FF_AUTO_FREE PSID sid = (PSID) malloc(size);
+        FF_AUTO_FREE char* refDomain = (char*) malloc(refDomainSize);
+        if (LookupAccountNameA(NULL, userName, sid, &size, refDomain, &refDomainSize, &sidNameUse))
+        {
+            LPWSTR sidString;
+            if (ConvertSidToStringSidW(sid, &sidString))
+            {
+                ffStrbufSetWS(&platform->sid, sidString);
+                LocalFree(sidString);
+            }
+        }
+    }
 }
 
 static void getHostName(FFPlatform* platform)
