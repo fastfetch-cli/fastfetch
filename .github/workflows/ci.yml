@@ -433,9 +433,9 @@ jobs:
           name: fastfetch-macos-${{ matrix.arch }}
           path: ./fastfetch-*.*
 
-  sunos-amd64:
+  omnios-amd64:
     runs-on: ubuntu-latest
-    name: SunOS-amd64
+    name: OmniOS-amd64
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -447,23 +447,59 @@ jobs:
           prepare: |
             uname -a
             pkg update --accept
-            pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
+            pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja
 
           run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-            cmake --build . --target package --verbose -j4
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake --build . --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
             ctest --output-on-failure
-            cpack
+            echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-omnios-amd64")' >> CPackConfig.cmake
+            cpack -V
 
       - name: upload artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: fastfetch-sunos-amd64
+          name: fastfetch-omnios-amd64
+          path: ./fastfetch-*.*
+
+  solaris-amd64:
+    runs-on: ubuntu-latest
+    name: Solaris-amd64
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: run VM
+        uses: vmactions/solaris-vm@v1
+        with:
+          usesh: true
+          release: "11.4-gcc-14"
+          prepare: |
+            uname -a
+            pkg install cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja dconf mesa
+
+          run: |
+            export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake --build . --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+            echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-solaris-amd64")' >> CPackConfig.cmake
+            cpack -V
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: fastfetch-solaris-amd64
           path: ./fastfetch-*.*
 
   freebsd-amd64:
@@ -772,7 +808,8 @@ jobs:
       - openbsd-amd64
       - netbsd-amd64
       - dragonfly-amd64
-      - sunos-amd64
+      - solaris-amd64
+      - omnios-amd64
       - haiku-amd64
       - windows-hosts
     permissions:
