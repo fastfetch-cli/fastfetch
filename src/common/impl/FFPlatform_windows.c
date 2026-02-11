@@ -155,7 +155,7 @@ static void getUserName(FFPlatform* platform)
         if (size > 0)
         {
             FF_AUTO_FREE PSID sid = (PSID) malloc(size);
-            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize);
+            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize * sizeof(wchar_t));
             if (LookupAccountNameW(NULL, buffer, sid, &size, refDomain, &refDomainSize, &sidNameUse))
             {
                 LPWSTR sidString;
