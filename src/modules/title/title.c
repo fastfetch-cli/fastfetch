@@ -64,6 +64,7 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(atColored, "at-symbol-colored"),
             FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
             FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
+            FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
         }));
     }
 
@@ -132,6 +133,7 @@ bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", instance.state.platform.pid);
 
     return true;
 }
@@ -175,5 +177,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"Host name (colored)", "host-name-colored"},
         {"Full user name", "full-user-name"},
         {"UID / SID", "user-id"},
+        {"Fastfetch PID", "pid"},
     }))
 };

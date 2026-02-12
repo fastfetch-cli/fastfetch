@@ -53,7 +53,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
 
     wchar_t pipeName[32];
     static unsigned pidCounter = 0;
-    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u-%u", GetCurrentProcessId(), ++pidCounter);
+    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u-%u", instance.state.platform.pid, ++pidCounter);
 
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
         pipeName,

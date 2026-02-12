@@ -307,6 +307,7 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
+    platform->pid = (uint32_t) GetCurrentProcessId();
     getExePath(platform);
     getHomeDir(platform);
     getCacheDir(platform);

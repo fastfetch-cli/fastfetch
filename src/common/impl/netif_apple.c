@@ -72,7 +72,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
     }
 
-    int pid = getpid();
+    uint32_t pid = instance.state.platform.pid;
 
     struct {
         struct rt_msghdr hdr;
@@ -145,7 +145,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
     }
 
-    int pid = getpid();
+    uint32_t pid = instance.state.platform.pid;
 
     struct {
         struct rt_msghdr hdr;
