@@ -3305,6 +3305,10 @@ static const FFlogo N[] = {
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
         },
     },
     // NixOSSmall
