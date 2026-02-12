@@ -235,7 +235,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
 
-    int pid = instance.state.platform.pid;
+    uint32_t pid = instance.state.platform.pid;
     FF_DEBUG("Process PID: %u", pid);
 
     // Bind socket

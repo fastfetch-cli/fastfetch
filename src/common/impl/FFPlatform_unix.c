@@ -28,7 +28,7 @@ static void getExePath(FFPlatform* platform)
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
-        int exePathLen = proc_pidpath(platform->pid, exePath, sizeof(exePath));
+        int exePathLen = proc_pidpath((pid_t) platform->pid, exePath, sizeof(exePath));
     #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
