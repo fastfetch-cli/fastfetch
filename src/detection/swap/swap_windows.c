@@ -5,10 +5,9 @@
 #include <winternl.h>
 #include <ntstatus.h>
 #include <windows.h>
-#include <psapi.h>
 #include <stdalign.h>
 
-const char* detectByNqsi(FFlist* result)
+const char* ffDetectSwap(FFlist* result)
 {
     alignas(SYSTEM_PAGEFILE_INFORMATION) uint8_t buffer[4096];
     ULONG size = sizeof(buffer);
@@ -29,26 +28,4 @@ const char* detectByNqsi(FFlist* result)
             break;
     }
     return NULL;
-}
-
-const char* detectByKgpi(FFlist* result)
-{
-    PERFORMANCE_INFORMATION pi = {};
-    if (!K32GetPerformanceInfo(&pi, sizeof(pi)))
-        return "K32GetPerformanceInfo(&pi, sizeof(pi)) failed";
-    FFSwapResult* swap = ffListAdd(result);
-    ffStrbufInitS(&swap->name, "Page File");
-    swap->bytesTotal = (uint64_t) (pi.CommitLimit > pi.PhysicalTotal ? pi.CommitLimit - pi.PhysicalTotal : 0) * pi.PageSize;
-    swap->bytesUsed = (uint64_t) (pi.CommitTotal > pi.PhysicalTotal ? pi.CommitTotal - pi.PhysicalTotal : 0) * pi.PageSize;
-
-    return NULL;
-}
-
-const char* ffDetectSwap(FFlist* result)
-{
-    const char* err = detectByNqsi(result);
-    if (err == NULL)
-        return NULL;
-
-    return detectByKgpi(result);
 }
