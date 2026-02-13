@@ -34,7 +34,7 @@ static void getExePath(FFPlatform* platform)
         if(sysctl(
             (int[]){CTL_KERN,
             #ifdef __FreeBSD__
-                KERN_PROC, KERN_PROC_PATHNAME, platform->pid
+                KERN_PROC, KERN_PROC_PATHNAME, (pid_t) platform->pid
             #else
                 KERN_PROC_ARGS, platform->pid, KERN_PROC_PATHNAME
             #endif
