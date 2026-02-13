@@ -6,6 +6,7 @@
 #include "common/windows/registry.h"
 #include "common/windows/unicode.h"
 #include "common/windows/version.h"
+#include "common/windows/nt.h"
 #include "common/stringUtils.h"
 
 #include <stdalign.h>
@@ -223,7 +224,7 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
 conhost:;
     ULONG_PTR conhostPid = 0;
     ULONG size;
-    if(NT_SUCCESS(NtQueryInformationProcess(GetCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0)
+    if(NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0)
     {
         // For Windows Terminal, it reports the PID of OpenConsole
         if(ffProcessGetInfoWindows((uint32_t) conhostPid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))

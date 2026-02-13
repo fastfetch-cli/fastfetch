@@ -2,6 +2,7 @@
 #include "common/processing.h"
 #include "common/io.h"
 #include "common/windows/unicode.h"
+#include "common/windows/nt.h"
 
 #include <stdalign.h>
 #include <windows.h>
@@ -213,7 +214,7 @@ exit:
 bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
 {
     FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
-        ? GetCurrentProcess()
+        ? NtCurrentProcess()
         : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
 
     if (hProcess == NULL)

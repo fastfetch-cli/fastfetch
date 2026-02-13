@@ -12,7 +12,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
     PROCESS_DEVICEMAP_INFORMATION_EX info = {};
     ULONG size = 0;
-    if(!NT_SUCCESS(NtQueryInformationProcess(GetCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size)))
+    if(!NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size)))
         return "NtQueryInformationProcess(ProcessDeviceMap) failed";
 
     // For cross-platform portability; used by `presets/examples/13.jsonc`
