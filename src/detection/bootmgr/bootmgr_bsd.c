@@ -9,6 +9,7 @@
 #endif
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <stdalign.h>
 
 #ifdef __NetBSD__
     typedef uint16_t efi_char;
@@ -23,7 +24,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     FF_AUTO_CLOSE_FD int efifd = open("/dev/efi", O_RDWR | O_CLOEXEC);
     if (efifd < 0) return "open(/dev/efi) failed";
 
-    uint8_t buffer[2048];
+    alignas(uint16_t) uint8_t buffer[2048];
     struct efi_var_ioc ioc = {
         .vendor = EFI_GLOBAL_VARIABLE,
         .data = buffer,

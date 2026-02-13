@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/io.h"
 #include "common/stringUtils.h"
+#include "common/memrchr.h"
 #include "detection/media/media.h"
 
 #include <string.h>

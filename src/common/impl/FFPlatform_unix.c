@@ -28,15 +28,15 @@ static void getExePath(FFPlatform* platform)
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
-        int exePathLen = proc_pidpath((int) getpid(), exePath, sizeof(exePath));
+        int exePathLen = proc_pidpath((pid_t) platform->pid, exePath, sizeof(exePath));
     #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
             (int[]){CTL_KERN,
             #ifdef __FreeBSD__
-                KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()
+                KERN_PROC, KERN_PROC_PATHNAME, (pid_t) platform->pid
             #else
-                KERN_PROC_ARGS, (int) getpid(), KERN_PROC_PATHNAME
+                KERN_PROC_ARGS, platform->pid, KERN_PROC_PATHNAME
             #endif
             }, 4,
             exePath, &exePathLen,
@@ -177,16 +177,15 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 {
-    const char* user = getenv("USER");
-    if(!ffStrSet(user) && pwd)
-        user = pwd->pw_name;
-
-    ffStrbufAppendS(&platform->userName, user);
-
     if (pwd)
     {
-        ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+        ffStrbufSetS(&platform->userName, pwd->pw_name);
+        ffStrbufSetS(&platform->fullUserName, pwd->pw_gecos);
         ffStrbufTrimSpace(&platform->fullUserName);
+    }
+    else
+    {
+        ffStrbufSetS(&platform->userName, getenv("USER"));
     }
 }
 
@@ -227,7 +226,9 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
-    struct passwd* pwd = getpwuid(getuid());
+    platform->pid = (uint32_t) getpid();
+    platform->uid = getuid();
+    struct passwd* pwd = getpwuid(platform->uid);
 
     struct utsname uts;
     if(uname(&uts) < 0)

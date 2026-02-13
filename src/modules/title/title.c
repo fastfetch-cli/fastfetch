@@ -64,6 +64,12 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(atColored, "at-symbol-colored"),
             FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
             FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
+            #ifndef _WIN32
+            FF_FORMAT_ARG(instance.state.platform.uid, "user-id"),
+            #else
+            FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
+            #endif
+            FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
         }));
     }
 
@@ -121,12 +127,18 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
 bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    #ifdef _WIN32
+    yyjson_mut_obj_add_strbuf(doc, obj, "userId", &instance.state.platform.sid);
+    #else
+    yyjson_mut_obj_add_uint(doc, obj, "userId", instance.state.platform.uid);
+    #endif
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
     yyjson_mut_obj_add_strbuf(doc, obj, "fullUserName", &instance.state.platform.fullUserName);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", instance.state.platform.pid);
 
     return true;
 }
@@ -169,5 +181,7 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"@ symbol (colored)", "at-symbol-colored"},
         {"Host name (colored)", "host-name-colored"},
         {"Full user name", "full-user-name"},
+        {"UID (*nix) / SID (Windows)", "user-id"},
+        {"PID of current process", "pid"},
     }))
 };

@@ -266,7 +266,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 
 static const char* getFromProcesses(FFDisplayServerResult* result)
 {
-    uint32_t userId = getuid();
+    uint32_t userId = instance.state.platform.uid;
 
 #if __FreeBSD__
     #ifdef __DragonFly__

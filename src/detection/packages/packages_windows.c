@@ -6,9 +6,11 @@
 #include "common/mallocHelper.h"
 #include "common/io.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include "common/windows/nt.h"
 #include <ntstatus.h>
+#include <shlobj.h>
 
 static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t* ignore)
 {
@@ -17,7 +19,7 @@ static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t
 
     bool flag = ignore == NULL;
     uint32_t counter = 0;
-    uint8_t buffer[64 * 1024] __attribute__((aligned(8))); // Required for WoA
+    alignas(8) uint8_t buffer[64 * 1024];
     BOOLEAN firstScan = TRUE;
 
     size_t ignoreLen = ignore ? wcslen(ignore) : 0;
@@ -76,7 +78,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 static void detectScoop(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
-    ffStrbufAppendS(&scoopPath, instance.state.platform.homeDir.chars);
+    ffStrbufAppend(&scoopPath, &instance.state.platform.homeDir);
     ffStrbufAppendS(&scoopPath, ".config/scoop/config.json");
 
     yyjson_val* root = NULL;
@@ -107,7 +109,12 @@ static void detectScoop(FFPackagesResult* result)
             ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "global_path"));
         if (scoopPath.length == 0)
         {
-            ffStrbufSetS(&scoopPath, getenv("ProgramData"));
+            PWSTR pPath = NULL;
+            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, NULL, &pPath)))
+            {
+                ffStrbufSetWS(&scoopPath, pPath);
+                CoTaskMemFree(pPath);
+            }
             ffStrbufAppendS(&scoopPath, "/scoop");
         }
         ffStrbufAppendS(&scoopPath, "/apps/");

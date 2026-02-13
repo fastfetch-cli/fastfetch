@@ -61,7 +61,7 @@ bool ffParseModuleOptions(const char* key, const char* value)
             }
             fprintf(stderr, "Error: Unsupported module option: %s\n", key);
             fputs("       Support of module options has been removed. Please add the flag to the JSON config instead.\n", stderr);
-            fprintf(stderr, "       Example (demonstration only): `{ \"modules\": [ { \"type\": \"%s\", \"%s\": %s%s%s } ] }`\n", moduleName.chars, jsonKey.chars, value ? "\"" : "", value ? value : "true", value ? "\"" : "");
+            fprintf(stderr, "       Example (demonstration only): `{ \"modules\": [ { \"type\": \"%s\", \"%s\": %s%s%s } ] }`\n", moduleName.chars, jsonKey.chars, value ? "\"" : "", value ?: "true", value ? "\"" : "");
             fputs("       See <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for more information.\n", stderr);
             exit(477);
         }

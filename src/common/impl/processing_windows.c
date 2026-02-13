@@ -1,7 +1,10 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 #include "common/io.h"
+#include "common/windows/unicode.h"
+#include "common/windows/nt.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
 #include <winternl.h>
@@ -51,7 +54,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
 
     wchar_t pipeName[32];
     static unsigned pidCounter = 0;
-    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u-%u", GetCurrentProcessId(), ++pidCounter);
+    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u-%u", instance.state.platform.pid, ++pidCounter);
 
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
         pipeName,
@@ -193,9 +196,16 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
 
 exit:
     {
-        DWORD exitCode = 0;
-        if (GetExitCodeProcess(hProcess, &exitCode) && exitCode != STILL_ACTIVE && exitCode != 0)
-            return "Child process exited with an error";
+        PROCESS_BASIC_INFORMATION info = {};
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
+        {
+            assert(size == sizeof(info));
+            if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0)
+                return "Child process exited with an error";
+        }
+        else
+            return "NtQueryInformationProcess(ProcessBasicInformation) failed";
     }
 
     return NULL;
@@ -204,7 +214,7 @@ exit:
 bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
 {
     FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
-        ? GetCurrentProcess()
+        ? NtCurrentProcess()
         : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
 
     if (hProcess == NULL)
@@ -227,12 +237,15 @@ bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFst
     }
     if(exe)
     {
-        DWORD bufSize = exe->allocated;
-        if(QueryFullProcessImageNameA(hProcess, 0, exe->chars, &bufSize))
+        // TODO: It's possible to query the command line with `NtQueryInformationProcess(60/*ProcessCommandLineInformation*/)` since Windows 8.1
+
+        alignas(alignof(UNICODE_STRING)) uint8_t buffer[4096];
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageFileNameWin32, &buffer, sizeof(buffer), &size)))
         {
-            // We use full path here
-            // Querying command line of remote processes in Windows requires either WMI or ReadProcessMemory
-            exe->length = bufSize;
+            UNICODE_STRING* imageName = (UNICODE_STRING*)buffer;
+            ffStrbufSetNWS(exe, imageName->Length / sizeof(wchar_t), imageName->Buffer);
+
             if (exePath) ffStrbufSet(exePath, exe);
         }
         else

@@ -1,6 +1,7 @@
 #include "FFPlatform_private.h"
 #include "common/io.h"
 #include "common/library.h"
+#include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
@@ -8,6 +9,7 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <sddl.h>
 
 #define SECURITY_WIN32 1 // For secext.h
 #include <secext.h>
@@ -70,15 +72,15 @@ static void getCacheDir(FFPlatform* platform)
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
 {
     PWSTR pPath = NULL;
-    if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
+    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
+        CoTaskMemFree(pPath);
         ffStrbufReplaceAllC(&buffer, '\\', '/');
         ffStrbufEnsureEndsWithC(&buffer, '/');
         if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
             ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
     }
-    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)
@@ -136,21 +138,37 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    const char* userName = getenv("USERNAME");
-    if (ffStrSet(userName))
-        ffStrbufSetS(&platform->userName, userName);
-    else
-    {
-        wchar_t buffer[256];
-        DWORD len = ARRAY_SIZE(buffer);
-        if(GetUserNameW(buffer, &len))
-            ffStrbufSetWS(&platform->userName, buffer);
-    }
-
     wchar_t buffer[256];
-    DWORD len = ARRAY_SIZE(buffer);
-    if (GetUserNameExW(NameDisplay, buffer, &len))
+    DWORD size = ARRAY_SIZE(buffer);
+    if (GetUserNameExW(NameDisplay, buffer, &size))
         ffStrbufSetWS(&platform->fullUserName, buffer);
+
+    size = ARRAY_SIZE(buffer);
+    if (GetUserNameW(buffer, &size)) // GetUserNameExW(10002)?
+    {
+        ffStrbufSetWS(&platform->userName, buffer);
+
+        size = 0;
+        DWORD refDomainSize = 0;
+        SID_NAME_USE sidNameUse = SidTypeUnknown;
+        LookupAccountNameW(NULL, buffer, NULL, &size, NULL, &refDomainSize, &sidNameUse);
+        if (size > 0)
+        {
+            FF_AUTO_FREE PSID sid = (PSID) malloc(size);
+            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize * sizeof(wchar_t));
+            if (LookupAccountNameW(NULL, buffer, sid, &size, refDomain, &refDomainSize, &sidNameUse))
+            {
+                LPWSTR sidString;
+                if (ConvertSidToStringSidW(sid, &sidString))
+                {
+                    ffStrbufSetWS(&platform->sid, sidString);
+                    LocalFree(sidString);
+                }
+            }
+        }
+    }
+    else
+        ffStrbufSetS(&platform->userName, getenv("USERNAME"));
 }
 
 static void getHostName(FFPlatform* platform)
@@ -289,6 +307,7 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
+    platform->pid = (uint32_t) GetCurrentProcessId();
     getExePath(platform);
     getHomeDir(platform);
     getCacheDir(platform);

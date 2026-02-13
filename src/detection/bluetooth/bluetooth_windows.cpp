@@ -79,8 +79,7 @@ const char* ffBluetoothDetectBattery(FFlist* devices)
                 batt = data.get<uint8_t>();
             else
             {
-                FF_STRBUF_AUTO_DESTROY addr; // MAC address without colon
-                ffStrbufInitWSV(&addr, data.get<std::wstring_view>());
+                FF_STRBUF_AUTO_DESTROY addr = ffStrbufCreateWSV(data.get<std::wstring_view>()); // MAC address without colon
                 if (__builtin_expect(addr.length != 12, 0))
                     continue;
 

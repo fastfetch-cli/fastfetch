@@ -1,6 +1,7 @@
 #include "gpu.h"
 #include "common/io.h"
 #include "common/properties.h"
+#include "common/memrchr.h"
 
 #include <stdlib.h>
 #ifdef __FreeBSD__

@@ -20,6 +20,12 @@ typedef struct FFPlatform
     FFlist dataDirs;   // List of FFstrbuf, trailing slash included
     FFstrbuf exePath;  // The real path of current exe (empty if unavailable)
 
+    uint32_t pid;
+    #ifndef _WIN32
+    uint32_t uid;
+    #else
+    FFstrbuf sid;
+    #endif
     FFstrbuf userName;
     FFstrbuf fullUserName;
     FFstrbuf hostName;

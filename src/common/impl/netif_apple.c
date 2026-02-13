@@ -72,7 +72,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
     }
 
-    int pid = getpid();
+    uint32_t pid = instance.state.platform.pid;
 
     struct {
         struct rt_msghdr hdr;
@@ -85,7 +85,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             .rtm_version = RTM_VERSION,
             .rtm_addrs = RTA_DST | RTA_IFP | RTA_IFA,
             .rtm_msglen = sizeof(rtmsg.hdr) + sizeof(rtmsg.dst),
-            .rtm_pid = pid,
+            .rtm_pid = (pid_t) pid,
             .rtm_seq = 1,
         },
         .dst = {
@@ -99,7 +99,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     if (send(pfRoute, &rtmsg, rtmsg.hdr.rtm_msglen, 0) != rtmsg.hdr.rtm_msglen)
         return false;
 
-    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == pid))
+    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == (pid_t) pid))
         ;
 
     #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason
@@ -145,7 +145,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
     }
 
-    int pid = getpid();
+    uint32_t pid = instance.state.platform.pid;
 
     struct {
         struct rt_msghdr hdr;
@@ -158,7 +158,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             .rtm_version = RTM_VERSION,
             .rtm_addrs = RTA_DST | RTA_IFP,
             .rtm_msglen = sizeof(rtmsg.hdr) + sizeof(rtmsg.dst),
-            .rtm_pid = pid,
+            .rtm_pid = (pid_t) pid,
             .rtm_seq = 2,
         },
         .dst = {
@@ -172,7 +172,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     if (send(pfRoute, &rtmsg, rtmsg.hdr.rtm_msglen, 0) != rtmsg.hdr.rtm_msglen)
         return false;
 
-    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 2 && rtmsg.hdr.rtm_pid == pid))
+    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 2 && rtmsg.hdr.rtm_pid == (pid_t) pid))
         ;
 
     #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason

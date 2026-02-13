@@ -225,9 +225,6 @@ void ffListFeatures(void)
         #if FF_HAVE_FREETYPE
             "freetype\n"
         #endif
-        #if FF_HAVE_PCIACCESS
-            "libpciaccess\n"
-        #endif
         #if FF_HAVE_PULSE
             "libpulse\n"
         #endif
@@ -257,6 +254,9 @@ void ffListFeatures(void)
         #endif
         #if FF_WIN7_COMPAT
             "Windows 7 Compatibility\n"
+        #endif
+        #if FF_APPLE_MEMSIZE_USABLE
+            "Apple memsize_usable\n"
         #endif
         ""
     , stdout);
