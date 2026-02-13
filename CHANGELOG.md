@@ -1,3 +1,25 @@
+# 2.59.0
+
+Changes:
+* Fastfetch no longer relies on the unreliable environment variables `$USER` or `%USERPROFILE%` to determine the current username (Title)
+    * People who set `$USER` to customize the Fastfetch title should use `{ "type": "title", "format": "your-custom-user-name" }` to achieve the same result.
+* Fastfetch no longer tries to probe inaccessible remote disk drives on Windows (Disk, Windows)
+    * People who have remote drives may use `{ "type": "disk", "hideFolders": "X:\\" }` to ignore problematic ones.
+    * This change removes some ugly hacks from the codebase and matches the behavior on `*nix`.
+
+Features:
+* Adds Oracle Solaris support (#2176, SunOS)
+* Adds UID / SID detection (Title)
+    * In custom format: `{user-id}`
+* Switches to native GPU detection on GNU/Hurd and removes the `libpciaccess` dependency (GPU, Hurd)
+* Improves memory size detection on macOS (Memory, macOS)
+    * Avoids relying on `hw.memsize_usable` by default, which may not be available on older macOS versions
+* Improves Windows disk detection accuracy and performance (Disk, Windows)
+* Adds more ARM CPU parts and removes duplicated cases (CPU, ARM)
+
+Logos:
+* Adds 6-color support to the NixOS logo (including the small variant) (#2180)
+
 # 2.58.0
 
 An early release to fix compatibility issues with KDE Plasma 6.6.
