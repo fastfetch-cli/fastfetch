@@ -64,6 +64,11 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(atColored, "at-symbol-colored"),
             FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
             FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
+            #ifndef _WIN32
+            FF_FORMAT_ARG(instance.state.platform.uid, "user-id"),
+            #else
+            FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
+            #endif
             FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
         }));
     }
@@ -176,7 +181,7 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"@ symbol (colored)", "at-symbol-colored"},
         {"Host name (colored)", "host-name-colored"},
         {"Full user name", "full-user-name"},
-        {"UID / SID", "user-id"},
-        {"Fastfetch PID", "pid"},
+        {"UID (*nix) / SID (Windows)", "user-id"},
+        {"PID of current process", "pid"},
     }))
 };
