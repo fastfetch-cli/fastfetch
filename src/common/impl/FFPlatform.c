@@ -16,6 +16,10 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->hostName);
     ffStrbufInit(&platform->userShell);
 
+    #ifdef _WIN32
+    ffStrbufInit(&platform->sid);
+    #endif
+
     FFPlatformSysinfo* info = &platform->sysinfo;
 
     ffStrbufInit(&info->name);
@@ -50,6 +54,10 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&platform->hostName);
     ffStrbufDestroy(&platform->userShell);
     ffStrbufDestroy(&platform->fullUserName);
+
+    #ifdef _WIN32
+    ffStrbufDestroy(&platform->sid);
+    #endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;
     ffStrbufDestroy(&info->architecture);
