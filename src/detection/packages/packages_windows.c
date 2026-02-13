@@ -78,7 +78,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 static void detectScoop(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
-    ffStrbufAppendS(&scoopPath, instance.state.platform.homeDir.chars);
+    ffStrbufAppend(&scoopPath, &instance.state.platform.homeDir);
     ffStrbufAppendS(&scoopPath, ".config/scoop/config.json");
 
     yyjson_val* root = NULL;
