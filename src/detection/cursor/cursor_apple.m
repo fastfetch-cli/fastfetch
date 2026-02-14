@@ -1,5 +1,7 @@
 #include "cursor.h"
 
+#include "detection/displayserver/displayserver.h"
+
 #import <Foundation/Foundation.h>
 
 static void appendColor(FFstrbuf* str, NSDictionary* dict)
@@ -30,6 +32,14 @@ static void appendColor(FFstrbuf* str, NSDictionary* dict)
 
 void ffDetectCursor(FFCursorResult* result)
 {
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
+
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_X11)) {
+        void ffDetectCursorLinux(FFCursorResult* result);
+        ffDetectCursorLinux(result);
+        return;
+    }
+
     NSError* error;
     NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/com.apple.universalaccess.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]

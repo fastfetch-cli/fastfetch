@@ -127,7 +127,13 @@ static const char* detectSound(FFlist* devices)
 
 #endif // FF_HAVE_PULSE
 
-const char* ffDetectSound(FFlist* devices)
+const char*
+#ifdef __APPLE__
+ffDetectSoundLinux
+#else
+ffDetectSound
+#endif
+(FFlist* devices)
 {
     #ifdef FF_HAVE_PULSE
         return detectSound(devices);

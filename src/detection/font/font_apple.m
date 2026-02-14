@@ -23,6 +23,11 @@ static void generateString(FFFontResult* font)
 
 const char* ffDetectFontImpl(FFFontResult* result)
 {
+    const char* ffDetectFontImplLinux(FFFontResult* result);
+    const char* error = ffDetectFontImplLinux(result);
+
+    if(!error) return NULL;
+
     ffStrbufAppendS(&result->fonts[0], [NSFont systemFontOfSize:12].familyName.UTF8String);
     ffStrbufAppendS(&result->fonts[1], [NSFont userFontOfSize:12].familyName.UTF8String);
     #ifdef MAC_OS_X_VERSION_10_15

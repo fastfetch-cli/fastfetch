@@ -10,6 +10,9 @@
 
 const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 {
+    const char* ffDetectSoundLinux(FFlist* devices);
+    ffDetectSoundLinux(devices);
+
     AudioDeviceID mainDeviceId;
     UInt32 dataSize = sizeof(mainDeviceId);
     if(AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress){

@@ -3,7 +3,13 @@
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 
-const char* ffDetectTheme(FFThemeResult* result)
+const char*
+#if __APPLE__
+ffDetectThemeLinux
+#else
+ffDetectTheme
+#endif
+(FFThemeResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 

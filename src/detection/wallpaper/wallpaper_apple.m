@@ -1,11 +1,19 @@
 #include "wallpaper.h"
 #include "common/settings.h"
 #include "common/apple/osascript.h"
+#include "detection/displayserver/displayserver.h"
 
 #import <Foundation/Foundation.h>
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
+
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_X11)) {
+        const char* ffDetectWallpaperLinux(FFstrbuf* result);
+        return ffDetectWallpaperLinux(result);
+    }
+
     {
         // For Sonoma
         // https://github.com/JohnCoates/Aerial/issues/1332

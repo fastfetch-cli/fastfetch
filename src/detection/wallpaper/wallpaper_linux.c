@@ -2,7 +2,13 @@
 #include "common/settings.h"
 #include "detection/gtk_qt/gtk_qt.h"
 
-const char* ffDetectWallpaper(FFstrbuf* result)
+const char*
+#if __APPLE__
+ffDetectWallpaperLinux
+#else
+ffDetectWallpaper
+#endif
+(FFstrbuf* result)
 {
     const FFstrbuf* wallpaper = NULL;
     const FFGTKResult* gtk = ffDetectGTK4();

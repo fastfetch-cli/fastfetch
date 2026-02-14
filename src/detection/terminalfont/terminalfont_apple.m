@@ -100,7 +100,10 @@ bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectAppleTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal"))
         detectWarpTerminal(terminalFont);
-    else
-        return false;
+    else {
+        bool ffDetectTerminalFontPlatformLinux(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
+        return ffDetectTerminalFontPlatformLinux(terminal, terminalFont);
+    }
+
     return true;
 }

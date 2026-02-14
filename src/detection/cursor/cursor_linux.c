@@ -81,12 +81,20 @@ static bool detectCursorHyprcursor(FFCursorResult* result)
     return true;
 }
 
-void ffDetectCursor(FFCursorResult* result)
+void
+#ifdef __APPLE__
+ffDetectCursorLinux
+#else
+ffDetectCursor
+#endif
+(FFCursorResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
     if(ffStrbufEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG))
         ffStrbufAppendS(&result->error, "WSLg uses native windows cursor");
+    else if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_COREGRAPHICS))
+        ffStrbufAppendS(&result->error, "Linux cursor isn't supported in macOS unless running X11");
     else if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))

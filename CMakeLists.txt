@@ -71,13 +71,13 @@ include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR GNU" OFF)
-cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD OR GNU" OFF)
-cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
 cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
@@ -87,7 +87,7 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
+cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR APPLE OR ANDROID OR GNU" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
@@ -931,6 +931,7 @@ elseif(OpenBSD)
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/impl/dbus.c
         src/common/impl/io_unix.c
         src/common/impl/netif_apple.c
         src/common/impl/networking_linux.c
@@ -954,18 +955,26 @@ elseif(APPLE)
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
+        src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
         src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
+        src/detection/displayserver/linux/common.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/gtk_qt/qt.c
         src/detection/font/font_apple.m
+        src/detection/font/font_linux.c
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
         src/detection/host/host_mac.c
-        src/detection/icons/icons_nosupport.c
+        src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
         src/detection/lm/lm_nosupport.c
@@ -985,19 +994,25 @@ elseif(APPLE)
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/processes/processes_bsd.c
         src/detection/sound/sound_apple.c
+        src/detection/sound/sound_linux.c
         src/detection/swap/swap_apple.c
         src/detection/terminalfont/terminalfont_apple.m
+        src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_apple.c
+        src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m
+        src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_apple.m
         src/detection/wm/wm_apple.m
-        src/detection/de/de_nosupport.c
+        src/detection/wm/wm_linux.c
+        src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_apple.m
+        src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_apple.m
     )
 elseif(WIN32)

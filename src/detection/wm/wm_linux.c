@@ -8,10 +8,12 @@
 #include "common/debug.h"
 #include "detection/displayserver/displayserver.h"
 
+#ifndef __APPLE__
 const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
 {
     return "Not supported on this platform";
 }
+#endif
 
 static bool extractCommonWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
@@ -23,7 +25,7 @@ static bool extractCommonWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t le
     return false;
 }
 
-#if !__ANDROID__
+#if !__ANDROID__ && !__APPLE__
 static bool extractHyprlandVersion(const char* line, uint32_t len, void *userdata)
 {
     if (line[0] != 'v') return true;
@@ -195,7 +197,7 @@ static const char* getWslg(FFstrbuf* result)
 }
 #endif
 
-#endif // !__ANDROID__
+#endif // !__ANDROID__ && !__APPLE__
 
 static bool extractI3Version(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
@@ -299,12 +301,18 @@ static const char* getOpenbox(FFstrbuf* result)
     return "Failed to run command `openbox --version`";
 }
 
-const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
+const char*
+#ifdef __APPLE__
+ffDetectWMVersionLinux
+#else
+ffDetectWMVersion
+#endif
+(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
         return "No WM detected";
 
-    #if !__ANDROID__
+    #if !__ANDROID__ && !__APPLE__
     // Wayland compositors
     if (ffStrbufIgnCaseEqualS(wmName, "Hyprland"))
         return getHyprland(result);

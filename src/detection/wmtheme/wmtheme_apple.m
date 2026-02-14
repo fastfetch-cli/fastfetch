@@ -1,10 +1,18 @@
 #include "fastfetch.h"
 #include "wmtheme.h"
+#include "detection/displayserver/displayserver.h"
 
 #import <Foundation/Foundation.h>
 
 bool ffDetectWmTheme(FFstrbuf* themeOrError)
 {
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
+
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_X11)) {
+        bool ffDetectWmThemeLinux(FFstrbuf* themeOrError);
+        return ffDetectWmThemeLinux(themeOrError);
+    }
+
     NSError* error;
     NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Preferences/.GlobalPreferences.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]

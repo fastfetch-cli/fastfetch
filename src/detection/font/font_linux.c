@@ -24,12 +24,23 @@ static void generateString(FFFontResult* font)
     ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
 }
 
-const char* ffDetectFontImpl(FFFontResult* result)
+const char*
+#if __APPLE__
+ffDetectFontImplLinux
+#else
+ffDetectFontImpl
+#endif
+(FFFontResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
     if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         return "Font isn't supported in TTY";
+
+    #if __APPLE__
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_COREGRAPHICS))
+        return "Linux font isn't supported in macOS unless running X11";
+    #endif
 
     FFfont qt;
     ffFontInitQt(&qt, ffDetectQt()->font.chars);

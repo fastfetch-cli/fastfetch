@@ -504,7 +504,7 @@ static void detectHaikuTerminal(FFTerminalFontResult* terminalFont)
 #endif
 
 bool
-#ifdef __ANDROID__
+#if __ANDROID__ || __APPLE__
 ffDetectTerminalFontPlatformLinux
 #else
 ffDetectTerminalFontPlatform

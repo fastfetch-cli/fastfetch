@@ -3,6 +3,7 @@
 #include "common/stringUtils.h"
 #include "common/edidHelper.h"
 #include "detection/os/os.h"
+#include "linux/displayserver_linux.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -187,12 +188,22 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
+    const char* error = ffdsConnectXcbRandr(ds);
+    if (error)
+        error = ffdsConnectXrandr(ds);
+    if (!error)
+    {
+        ffdsDetectWMDE(ds);
+        return;
+    }
+
     {
         FF_CFTYPE_AUTO_RELEASE CFMachPortRef port = CGWindowServerCreateServerPort();
         if (port)
         {
             ffStrbufSetStatic(&ds->wmProcessName, "WindowServer");
             ffStrbufSetStatic(&ds->wmPrettyName, "Quartz Compositor");
+            ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_COREGRAPHICS);
         }
     }
 

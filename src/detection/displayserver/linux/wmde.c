@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if __FreeBSD__
+#if __FreeBSD__ || __APPLE__
     #include <sys/sysctl.h>
     #include <sys/types.h>
     #include <sys/user.h>
@@ -268,9 +268,12 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 {
     uint32_t userId = instance.state.platform.uid;
 
-#if __FreeBSD__
+#if __FreeBSD__ || __APPLE__
     #ifdef __DragonFly__
         #define ki_comm kp_comm
+    #endif
+    #ifdef __APPLE__
+        #define ki_comm kp_proc.p_comm
     #endif
 
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
@@ -435,6 +438,11 @@ void ffdsDetectWMDE(FFDisplayServerResult* result)
 {
     #if __ANDROID__
     if(ffStrbufIgnCaseEqualS(&result->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER))
+        return; // Only supported when connected to X11
+    #endif
+
+    #if __APPLE__
+    if(ffStrbufIgnCaseEqualS(&result->wmProtocolName, FF_WM_PROTOCOL_COREGRAPHICS))
         return; // Only supported when connected to X11
     #endif
 

@@ -1,9 +1,17 @@
 #include "theme.h"
 
 #include "detection/os/os.h"
+#include "detection/displayserver/displayserver.h"
 
 const char* ffDetectTheme(FFThemeResult* result)
 {
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
+
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_X11)) {
+        const char* ffDetectThemeLinux(FFThemeResult* result);
+        return ffDetectThemeLinux(result);
+    }
+
     const FFOSResult* os = ffDetectOS();
 
     char* str_end;

@@ -187,7 +187,13 @@ name_not_found:
     return false;
 }
 
-bool ffDetectWmTheme(FFstrbuf* themeOrError)
+bool
+#if __APPLE__
+ffDetectWmThemeLinux
+#else
+ffDetectWmTheme
+#endif
+(FFstrbuf* themeOrError)
 {
     const FFDisplayServerResult* wm = ffConnectDisplayServer();
 

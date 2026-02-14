@@ -3,6 +3,7 @@
 #include "common/sysctl.h"
 #include "common/mallocHelper.h"
 #include "common/stringUtils.h"
+#include "detection/displayserver/displayserver.h"
 
 #include <ctype.h>
 #import <Foundation/Foundation.h>
@@ -46,6 +47,13 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 {
     if (!wmName)
         return "No WM detected";
+
+    const FFDisplayServerResult* wmde = ffConnectDisplayServer();
+
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_X11)) {
+        const char* ffDetectWMVersionLinux(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options);
+        return ffDetectWMVersionLinux(wmName, result, options);
+    }
 
     if (ffStrbufEqualS(wmName, "WindowServer"))
     {

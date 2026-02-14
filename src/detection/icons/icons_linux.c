@@ -10,6 +10,11 @@ const char* ffDetectIcons(FFIconsResult* result)
     if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         return "Icons aren't supported in TTY";
 
+    #if __APPLE__
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_COREGRAPHICS))
+        return "Linux icons aren't supported in macOS unless running X11";
+    #endif
+
     const FFstrbuf* plasma = &ffDetectQt()->icons;
     const FFstrbuf* gtk2 = &ffDetectGTK2()->icons;
     const FFstrbuf* gtk3 = &ffDetectGTK3()->icons;
