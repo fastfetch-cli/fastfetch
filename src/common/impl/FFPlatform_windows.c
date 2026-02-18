@@ -248,13 +248,22 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
     }
 }
 
-static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
+static void getSystemPageSize(FFPlatformSysinfo* info)
 {
-    SYSTEM_INFO sysInfo;
-    GetNativeSystemInfo(&sysInfo);
+    SYSTEM_BASIC_INFORMATION sbi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), NULL)))
+        info->pageSize = sbi.PhysicalPageSize;
+    else
+        info->pageSize = 4096;
+}
 
-    switch(sysInfo.wProcessorArchitecture)
+static void getSystemArchitecture(FFPlatformSysinfo* info)
+{
+    SYSTEM_PROCESSOR_INFORMATION spi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemProcessorInformation, &spi, sizeof(spi), NULL)))
     {
+        switch (spi.ProcessorArchitecture)
+        {
         case PROCESSOR_ARCHITECTURE_AMD64:
             ffStrbufSetStatic(&info->architecture, "x86_64");
             break;
@@ -262,7 +271,7 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
             ffStrbufSetStatic(&info->architecture, "ia64");
             break;
         case PROCESSOR_ARCHITECTURE_INTEL:
-            switch (sysInfo.wProcessorLevel)
+            switch (spi.ProcessorLevel)
             {
                 case 4:
                     ffStrbufSetStatic(&info->architecture, "i486");
@@ -300,9 +309,8 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
         default:
             ffStrbufSetStatic(&info->architecture, "unknown");
             break;
+        }
     }
-
-    info->pageSize = sysInfo.dwPageSize;
 }
 
 void ffPlatformInitImpl(FFPlatform* platform)
@@ -319,5 +327,6 @@ void ffPlatformInitImpl(FFPlatform* platform)
     getUserShell(platform);
 
     getSystemReleaseAndVersion(&platform->sysinfo);
-    getSystemArchitectureAndPageSize(&platform->sysinfo);
+    getSystemArchitecture(&platform->sysinfo);
+    getSystemPageSize(&platform->sysinfo);
 }
