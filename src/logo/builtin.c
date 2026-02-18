@@ -2772,7 +2772,7 @@ static const FFlogo L[] = {
     },
     // LinuxMint
     {
-        .names = {"linuxmint", "linux-mint"},
+        .names = {"linuxmint"},
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2783,7 +2783,7 @@ static const FFlogo L[] = {
     },
     // LinuxMintSmall
     {
-        .names = {"linuxmint_small", "linux-mint_small"},
+        .names = {"linuxmint_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT_SMALL,
         .colors = {
@@ -2793,9 +2793,21 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // LinuxMint2
+    {
+        .names = {"linuxmint2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT2,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // LinuxMintOld
     {
-        .names = {"linuxmint_old", "linux-mint_old"},
+        .names = {"linuxmint_old"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT_OLD,
         .colors = {
