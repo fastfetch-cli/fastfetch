@@ -313,10 +313,22 @@ static void getSystemArchitecture(FFPlatformSysinfo* info)
     }
 }
 
+static void getCwd(FFPlatform* platform)
+{
+    static_assert(
+        offsetof(RTL_USER_PROCESS_PARAMETERS, Reserved2[5]) == 0x38,
+        "CurrentDirectory should be at offset 0x38 in RTL_USER_PROCESS_PARAMETERS. Structure layout mismatch detected.");
+    PCURDIR cwd = (PCURDIR) &NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters->Reserved2[5];
+    ffStrbufSetNWS(&platform->cwd, cwd->DosPath.Length / sizeof(WCHAR), cwd->DosPath.Buffer);
+    ffStrbufReplaceAllC(&platform->cwd, '\\', '/');
+    ffStrbufEnsureEndsWithC(&platform->cwd, '/');
+}
+
 void ffPlatformInitImpl(FFPlatform* platform)
 {
     platform->pid = (uint32_t) GetCurrentProcessId();
     getExePath(platform);
+    getCwd(platform);
     getHomeDir(platform);
     getCacheDir(platform);
     getConfigDirs(platform);

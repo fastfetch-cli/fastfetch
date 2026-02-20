@@ -70,6 +70,7 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
             #endif
             FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
+            FF_FORMAT_ARG(instance.state.platform.cwd, "cwd"),
         }));
     }
 
@@ -139,6 +140,7 @@ bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
     yyjson_mut_obj_add_uint(doc, obj, "pid", instance.state.platform.pid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "cwd", &instance.state.platform.cwd);
 
     return true;
 }
@@ -183,5 +185,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"Full user name", "full-user-name"},
         {"UID (*nix) / SID (Windows)", "user-id"},
         {"PID of current process", "pid"},
+        {"Current working directory", "cwd"},
     }))
 };

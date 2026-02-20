@@ -224,6 +224,16 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     #endif
 }
 
+static void getCwd(FFPlatform* platform)
+{
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        ffStrbufSetS(&platform->cwd, cwd);
+        ffStrbufEnsureEndsWithC(&platform->cwd, '/');
+    }
+}
+
 void ffPlatformInitImpl(FFPlatform* platform)
 {
     platform->pid = (uint32_t) getpid();
@@ -235,6 +245,7 @@ void ffPlatformInitImpl(FFPlatform* platform)
         memset(&uts, 0, sizeof(uts));
 
     getExePath(platform);
+    getCwd(platform);
     getHomeDir(platform, pwd);
     getCacheDir(platform);
     getConfigDirs(platform);
