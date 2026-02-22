@@ -19,9 +19,9 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
         if (!ffStrEndsWith(entry->d_name, "-event-kbd"))
             continue;
 
-        char buffer[32]; // `../eventX`
+        char buffer[32]; // `../eventXX`
         ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, ARRAY_SIZE(buffer) - 1);
-        if (len != strlen("../eventX") || !ffStrStartsWith(buffer, "../event")) continue;
+        if (len <= (ssize_t) strlen("../event") || !ffStrStartsWith(buffer, "../event")) continue;
         buffer[len] = 0;
 
         const char* eventid = buffer + strlen("../event");
@@ -30,8 +30,8 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
         uint32_t index = (uint32_t) strtoul(eventid, &pend, 10);
         if (pend == eventid) continue;
 
-        // Ignore duplicate entries
-        if (flags & (1UL << index))
+        // Ignore duplicate entries (flags supports up to 64 event indices)
+        if (index >= 64 || (flags & (1UL << index)))
             continue;
         flags |= (1UL << index);
 
@@ -41,7 +41,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
         if (ffAppendFileBuffer(path.chars, &name))
         {
             ffStrbufTrimRightSpace(&name);
-            ffStrbufSubstrBefore(&path, path.length - 4);
+            ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
 
             FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
             ffStrbufInitMove(&device->name, &name);
