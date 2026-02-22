@@ -270,3 +270,9 @@ typedef struct _PROCESS_DEVICEMAP_INFORMATION_EX
 #ifndef NtCurrentProcess
 #define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
 #endif
+
+typedef struct _CURDIR
+{
+    UNICODE_STRING DosPath;
+    HANDLE Handle;
+} CURDIR, *PCURDIR;
