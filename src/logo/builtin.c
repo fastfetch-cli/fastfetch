@@ -3072,7 +3072,7 @@ static const FFlogo M[] = {
     },
     // MassOS
     {
-        .names = {"MassOS", "mass"},
+        .names = {"MassOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_MASSOS,
         .colors = {
             FF_COLOR_FG_DEFAULT,
