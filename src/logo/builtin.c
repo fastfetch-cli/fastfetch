@@ -2747,9 +2747,9 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // LinuxLight
+    // LinuxLite
     {
-        .names = {"LinuxLite", "Linux Lite", "linux_lite"},
+        .names = {"LinuxLite"},
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXLITE,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -2758,9 +2758,9 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // LinuxLightSmall
+    // LinuxLiteSmall
     {
-        .names = {"LinuxLite_small", "Linux Lite_small"},
+        .names = {"LinuxLite_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_LINUXLITE_SMALL,
         .colors = {
