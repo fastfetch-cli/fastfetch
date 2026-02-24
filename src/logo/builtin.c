@@ -3189,7 +3189,7 @@ static const FFlogo M[] = {
     },
     // MiracleLinux
     {
-        .names = {"MIRACLE LINUX", "miracle_linux"},
+        .names = {"miraclelinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_MIRACLE_LINUX,
         .colors = {
             FF_COLOR_FG_256 "29",
