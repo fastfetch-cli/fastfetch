@@ -4394,7 +4394,7 @@ static const FFlogo R[] = {
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
     {
-        .names = {"RengeOS", "RengeOS Linux"},
+        .names = {"RengeOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_RENGEOS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
