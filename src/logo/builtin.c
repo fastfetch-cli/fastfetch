@@ -3394,7 +3394,7 @@ static const FFlogo N[] = {
     },
     // Nobara
     {
-        .names = {"nobara", "nobara-linux"},
+        .names = {"nobara"},
         .lines = FASTFETCH_DATATEXT_LOGO_NOBARA,
         .colors = {
             FF_COLOR_FG_DEFAULT,
