@@ -1383,7 +1383,7 @@ static const FFlogo D[] = {
     },
     // Debian
     {
-        .names = {"Debian", "debian-linux"},
+        .names = {"Debian"},
         .lines = FASTFETCH_DATATEXT_LOGO_DEBIAN,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1394,7 +1394,7 @@ static const FFlogo D[] = {
     },
     // DebianSmall
     {
-        .names = {"Debian_small", "debian-linux_small"},
+        .names = {"Debian_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_DEBIAN_SMALL,
         .colors = {
