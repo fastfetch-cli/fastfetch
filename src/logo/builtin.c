@@ -3016,7 +3016,7 @@ static const FFlogo M[] = {
     },
     // Magix
     {
-        .names = {"Magix","MagixOS"},
+        .names = {"Magix", "MagixOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_MAGIX,
         .colors = {
             FF_COLOR_FG_LIGHT_MAGENTA,
