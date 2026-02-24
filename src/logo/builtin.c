@@ -4275,7 +4275,7 @@ static const FFlogo R[] = {
     },
     // RedOS
     {
-        .names = {"RedOS", "RED OS", "red-os", "redos"},
+        .names = {"RedOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_REDOS,
         .colors = {
             FF_COLOR_FG_RED,
@@ -4286,7 +4286,7 @@ static const FFlogo R[] = {
     },
     // RedOS small
     {
-        .names = {"RedOS_small", "RED OS_small", "red-os_small", "redos_small"},
+        .names = {"RedOS_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_REDOS_SMALL,
         .colors = {
