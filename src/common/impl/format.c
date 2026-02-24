@@ -204,7 +204,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
-            if (index > numArgs)
+            if (index > numArgs || index < 1)
             {
                 appendInvalidPlaceholder(buffer, "{?", &placeholderValue, i, formatstr->length);
                 continue;
@@ -230,7 +230,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
-            if (index > numArgs)
+            if (index > numArgs || index < 1)
             {
                 appendInvalidPlaceholder(buffer, "{/", &placeholderValue, i, formatstr->length);
                 continue;
