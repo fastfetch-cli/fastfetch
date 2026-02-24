@@ -1699,7 +1699,7 @@ static const FFlogo E[] = {
     },
     // Exherbo
     {
-        .names = {"Exherbo", "exherbo-linux"},
+        .names = {"Exherbo"},
         .lines = FASTFETCH_DATATEXT_LOGO_EXHERBO,
         .colors = {
             FF_COLOR_FG_BLUE,
