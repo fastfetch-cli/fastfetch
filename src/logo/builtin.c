@@ -1709,9 +1709,9 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // ExodiaPredator
+    // ExodiaOS
     {
-        .names = {"Exodia Predator", "exodia-predator", "Exodia Predator OS"},
+        .names = {"Exodia"},
         .lines = FASTFETCH_DATATEXT_LOGO_EXODIA_PREDATOR,
         .colors = {
             FF_COLOR_FG_MAGENTA,
