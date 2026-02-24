@@ -4180,7 +4180,7 @@ static const FFlogo R[] = {
     },
     // Raspbian
     {
-        .names = {"raspbian", "raspi", "raspberrypi", "raspberrypios"},
+        .names = {"raspbian"},
         .lines = FASTFETCH_DATATEXT_LOGO_RASPBIAN,
         .colors = {
             FF_COLOR_FG_RED,
@@ -4191,7 +4191,7 @@ static const FFlogo R[] = {
     },
     // RaspbianSmall
     {
-        .names = {"raspbian_small", "raspi_small", "raspberrypi_small", "raspberrypios_small"},
+        .names = {"raspbian_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_RASPBIAN_SMALL,
         .colors = {
