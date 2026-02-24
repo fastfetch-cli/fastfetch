@@ -4350,7 +4350,7 @@ static const FFlogo R[] = {
     },
     // RockyLinux
     {
-        .names = {"rocky", "rocky-linux", "rockylinux"},
+        .names = {"rocky"},
         .lines = FASTFETCH_DATATEXT_LOGO_ROCKY,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -4360,7 +4360,7 @@ static const FFlogo R[] = {
     },
     // RockyLinuxSmall
     {
-        .names = {"rocky_small", "rocky-linux_small", "rockylinux_small"},
+        .names = {"rocky_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ROCKY_SMALL,
         .colors = {
