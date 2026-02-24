@@ -1403,9 +1403,9 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
-    // deepin
+    // Deepin
     {
-        .names = {"deepin", "deepin-linux"},
+        .names = {"Deepin"},
         .lines = FASTFETCH_DATATEXT_LOGO_DEEPIN,
         .colors = {
             FF_COLOR_FG_BLUE,
