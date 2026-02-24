@@ -4306,10 +4306,10 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
-    // Refracted Devuan
+    // Refracta
     {
-        .names = {"Refracted Devuan", "refracted-devuan"},
-        .lines = FASTFETCH_DATATEXT_LOGO_REFRACTED_DEVUAN,
+        .names = {"Refracta"},
+        .lines = FASTFETCH_DATATEXT_LOGO_REFRACTA,
         .colors = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_LIGHT_BLACK,
