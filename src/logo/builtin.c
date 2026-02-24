@@ -557,9 +557,9 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
-    // ArcoLinux
+    // ArcoLinux (Discontinued)
     {
-        .names = {"arco", "arcolinux", "arco-linux"},
+        .names = {"arco", "arcolinux"}, // ID=arcolinux
         .lines = FASTFETCH_DATATEXT_LOGO_ARCO,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -570,7 +570,7 @@ static const FFlogo A[] = {
     },
     // ArcoLinuxSmall
     {
-        .names = {"arco_small", "arcolinux_small", "arco-linux_small"},
+        .names = {"arco_small", "arcolinux_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ARCO_SMALL,
         .colors = {
