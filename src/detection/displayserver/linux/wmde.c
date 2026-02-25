@@ -226,9 +226,12 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     ) {
         ffStrbufSetS(&result->deProcessName, "lxqt-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
-        FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
-        ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
-        applyBetterWM(result, wmProcessNameBuffer.chars);
+        if (result->wmProcessName.length == 0)
+        {
+            FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
+            ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
+            applyBetterWM(result, wmProcessNameBuffer.chars);
+        }
     }
 
     else if(
