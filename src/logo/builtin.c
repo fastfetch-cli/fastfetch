@@ -3133,6 +3133,29 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // Metalos
+    {
+        .names = {"metalos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_METALOS,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    // MetalosSmall
+    {
+        .names = {"metalos_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_METALOS_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // MidnightBSD
     {
         .names = {"MidnightBSD"},
