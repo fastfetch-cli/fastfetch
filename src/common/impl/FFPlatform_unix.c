@@ -12,7 +12,7 @@
 #include <paths.h>
 
 #ifdef __APPLE__
-    #include <libproc.h>
+    #include <mach-o/dyld.h>
     #include <sys/sysctl.h>
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
     #include <sys/sysctl.h>
@@ -33,7 +33,11 @@ static void getExePath(FFPlatform* platform)
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
-        int exePathLen = proc_pidpath((pid_t) platform->pid, exePath, sizeof(exePath));
+        uint32_t exePathLen = sizeof(exePath);
+        if (_NSGetExecutablePath(exePath, &exePathLen) == 0)
+            exePathLen = (uint32_t) strlen(exePath);
+        else
+            exePathLen = 0;
     #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
