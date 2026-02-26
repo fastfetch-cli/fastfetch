@@ -3138,7 +3138,7 @@ static const FFlogo M[] = {
         .names = {"metalos"},
         .lines = FASTFETCH_DATATEXT_LOGO_METALOS,
         .colors = {
-            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_WHITE,
             FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_WHITE,
@@ -3150,7 +3150,7 @@ static const FFlogo M[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_METALOS_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
-            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_WHITE,
             FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_WHITE,
