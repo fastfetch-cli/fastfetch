@@ -180,6 +180,7 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
             ffStrbufClear(&result->album);
             ffStrbufClear(&result->url);
             ffStrbufClear(&result->status);
+            data->lib->ffdbus_message_unref(reply);
             return false;
         }
     }

@@ -254,6 +254,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
     }
 
     FF_DEBUG("NetworkManager wifi detection completed successfully");
+    dbus.lib->ffdbus_message_unref(reply);
     return NULL;
 }
 #endif // FF_HAVE_DBUS
