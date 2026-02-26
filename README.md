@@ -1,17 +1,5 @@
-# Fastfetch
+# Fastfetch (dustlinux port
 
-[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fastfetch-cli/fastfetch/ci.yml)](https://github.com/fastfetch-cli/fastfetch/actions)
-[![GitHub license](https://img.shields.io/github/license/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/blob/dev/LICENSE)
-[![GitHub contributors](https://img.shields.io/github/contributors/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/graphs/contributors)
-[![GitHub top language](https://img.shields.io/github/languages/top/fastfetch-cli/fastfetch?logo=c&label=)](https://github.com/fastfetch-cli/fastfetch/blob/dev/CMakeLists.txt#L5)
-[![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/m/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/commits)  
-[![homebrew downloads](https://img.shields.io/homebrew/installs/dm/fastfetch?logo=homebrew)](https://formulae.brew.sh/formula/fastfetch#default)
-[![GitHub all releases](https://img.shields.io/github/downloads/fastfetch-cli/fastfetch/total?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)  
-[![GitHub release (with filter)](https://img.shields.io/github/v/release/fastfetch-cli/fastfetch?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)
-[![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
-[![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastfetch-cli/fastfetch)
-[![中文README](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README-red)](README-cn.md)
 
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it in a visually appealing way. It is written mainly in C, with a focus on performance and customizability. Currently, it supports Linux, macOS, Windows 7+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku, illumos (SunOS), and Solaris.
 
@@ -26,69 +14,6 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 According configuration files for examples are located [here](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets/examples).
 
 There are [screenshots on different platforms](https://github.com/fastfetch-cli/fastfetch/wiki).
-
-## Installation
-
-### Linux
-
-Some distributions package outdated versions of fastfetch. Older versions receive no support, so please always try to use the latest version.
-
-<a href="https://repology.org/project/fastfetch/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
-</a>
-
-* Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (Ubuntu 22.04 or newer; latest version)
-* Debian / Ubuntu: `apt install fastfetch` (Debian 13 or newer; Ubuntu 25.04 or newer)
-* Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
-* Arch Linux: `pacman -S fastfetch`
-* Fedora: `dnf install fastfetch`
-* Gentoo: `emerge --ask app-misc/fastfetch`
-* Alpine: `apk add --upgrade fastfetch`
-* NixOS: `nix-shell -p fastfetch`
-* openSUSE: `zypper install fastfetch`
-* ALT Linux: `apt-get install fastfetch`
-* Exherbo: `cave resolve --execute app-misc/fastfetch`
-* Solus: `eopkg install fastfetch`
-* Slackware: `sbopkg -i fastfetch`
-* Void Linux: `xbps-install fastfetch`
-* Venom Linux: `scratch install fastfetch`
-
-You may need `sudo`, `doas`, or `sup` to run these commands.
-
-If fastfetch is not packaged for your distribution or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
-
-### macOS
-
-* [Homebrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
-* [MacPorts](https://ports.macports.org/port/fastfetch/): `sudo port install fastfetch`
-
-### Windows
-
-* [scoop](https://scoop.sh/#/apps?q=fastfetch): `scoop install fastfetch`
-* [Chocolatey](https://community.chocolatey.org/packages/fastfetch): `choco install fastfetch`
-* [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
-* [MSYS2 MinGW](https://packages.msys2.org/base/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
-
-You may also download the program directly from [the GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) in the form of an archive file.
-
-### BSD systems
-
-* FreeBSD: `pkg install fastfetch`
-* NetBSD: `pkgin in fastfetch`
-* OpenBSD: `pkg_add fastfetch` (Snapshots only)
-* DragonFly BSD: `pkg install fastfetch` (Snapshots only)
-
-### Android (Termux)
-
-* `pkg install fastfetch`
-
-### Nightly
-
-<https://nightly.link/fastfetch-cli/fastfetch/workflows/ci/dev?preview>
-
-## Build from source
-
-See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 
 ## Usage
 
