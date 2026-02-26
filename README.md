@@ -1,4 +1,5 @@
-# Fastfetch (dustlinux port
+# Fastfetch (dustlinux port)
+
 
 
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it in a visually appealing way. It is written mainly in C, with a focus on performance and customizability. Currently, it supports Linux, macOS, Windows 7+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku, illumos (SunOS), and Solaris.
