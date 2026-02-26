@@ -261,7 +261,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
 
 static const char* getMedia(FFMediaResult* result)
 {
-    FFDBusData data;
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData data = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SESSION, &data);
     if(error != NULL)
         return error;
