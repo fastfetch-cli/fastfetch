@@ -1573,6 +1573,17 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Emmabuntüs
+    {
+        .names = {"Emmabuntüs", "Emmabuntus"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EMMABUNTUS,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLUE,
+            FF_COLOR_FG_LIGHT_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
+        .colorTitle = FF_COLOR_FG_LIGHT_YELLOW,
+    },
     // EmperorOS
     {
         .names = {"Emperor"},
