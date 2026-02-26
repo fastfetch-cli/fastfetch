@@ -109,6 +109,8 @@ bool ffTempsParseCommandOptions(const char* key, const char* subkey, const char*
 
 bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, FFColorRangeConfig* config)
 {
+    assert(key);
+
     if (!unsafe_yyjson_equals_str(key, "temp"))
         return false;
 
