@@ -47,7 +47,7 @@ typedef enum {
 static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 {
     FF_DEBUG("Starting NetworkManager wifi detection for interface %s", item->inf.description.chars);
-    FFDBusData dbus;
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
     if(error)
     {
@@ -254,6 +254,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
     }
 
     FF_DEBUG("NetworkManager wifi detection completed successfully");
+    dbus.lib->ffdbus_message_unref(reply);
     return NULL;
 }
 #endif // FF_HAVE_DBUS

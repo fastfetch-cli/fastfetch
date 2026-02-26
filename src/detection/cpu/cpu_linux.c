@@ -741,7 +741,7 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
 
     // [x-vendor,x-model\0]*N
     char content[512];
-    ssize_t length = ffReadFileData("/proc/device-tree/compatible", ARRAY_SIZE(content), content);
+    ssize_t length = ffReadFileData("/sys/firmware/devicetree/base/compatible", ARRAY_SIZE(content), content);
     if (length < 4) return; // v,m\0
 
     if (content[length - 1] != '\0') return; // must end with \0

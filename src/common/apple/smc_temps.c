@@ -166,7 +166,7 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                     case 1: *value = *(uint8_t *)(val.bytes); break;
                     case 2: *value = ntohs(*(uint16_t *)(val.bytes)); break;
                     case 4: *value = ntohl(*(uint32_t *)(val.bytes)); break;
-                    case 8: *value = ntohll(*(uint64_t *)(val.bytes)); break;
+                    case 8: *value = (double) ntohll(*(uint64_t *)(val.bytes)); break;
                     default:
                         return "Unsupported SMC unsigned integer data size";
                 }
@@ -213,7 +213,7 @@ static const char *smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                     case 1: *value = *(int8_t *)(val.bytes); break;
                     case 2: *value = ntohs(*(int16_t *)(val.bytes)); break;
                     case 4: *value = ntohl(*(int32_t *)(val.bytes)); break;
-                    case 8: *value = ntohll(*(int64_t *)(val.bytes)); break;
+                    case 8: *value = (double)ntohll(*(int64_t *)(val.bytes)); break;
                     default: return "Unsupported SMC signed integer data size";
                 }
             }

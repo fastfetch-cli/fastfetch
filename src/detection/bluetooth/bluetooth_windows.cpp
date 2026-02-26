@@ -4,17 +4,9 @@ extern "C"
 }
 #include "common/windows/wmi.hpp"
 #include "common/windows/unicode.hpp"
+#include "common/windows/util.hpp"
 
 STDAPI InitVariantFromStringArray(_In_reads_(cElems) PCWSTR *prgsz, _In_ ULONG cElems, _Out_ VARIANT *pvar);
-
-template <typename Fn>
-struct on_scope_exit {
-    on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
-    ~on_scope_exit() { this->_fn(); }
-
-private:
-    Fn _fn;
-};
 
 extern "C"
 const char* ffBluetoothDetectBattery(FFlist* devices)
@@ -87,8 +79,7 @@ const char* ffBluetoothDetectBattery(FFlist* devices)
                 batt = data.get<uint8_t>();
             else
             {
-                FF_STRBUF_AUTO_DESTROY addr; // MAC address without colon
-                ffStrbufInitWSV(&addr, data.get<std::wstring_view>());
+                FF_STRBUF_AUTO_DESTROY addr = ffStrbufCreateWSV(data.get<std::wstring_view>()); // MAC address without colon
                 if (__builtin_expect(addr.length != 12, 0))
                     continue;
 

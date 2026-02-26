@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "detection/vulkan/vulkan.h"
 #include "detection/opencl/opencl.h"
 #include "detection/opengl/opengl.h"
@@ -50,6 +51,8 @@ const char* ffGPUGetVendorString(unsigned vendorId)
 
 const char* detectByOpenGL(FFlist* gpus)
 {
+    FF_DEBUG("Starting OpenGL GPU detection fallback");
+
     FFOpenGLResult result;
     ffStrbufInit(&result.version);
     ffStrbufInit(&result.renderer);
@@ -60,6 +63,7 @@ const char* detectByOpenGL(FFlist* gpus)
     __attribute__((__cleanup__(ffDestroyOpenGLOptions))) FFOpenGLOptions options;
     ffInitOpenGLOptions(&options);
     const char* error = ffDetectOpenGL(&options, &result);
+    FF_DEBUG("OpenGL detection returns: %s", error ?: "success");
 
     if (!error)
     {
@@ -78,6 +82,11 @@ const char* detectByOpenGL(FFlist* gpus)
         gpu->dedicated = gpu->shared = (FFGPUMemory){0, 0};
         gpu->deviceId = 0;
 
+        FF_DEBUG("OpenGL reported renderer='%s', vendor='%s', version='%s'",
+            gpu->name.chars,
+            gpu->vendor.chars,
+            result.version.chars);
+
         if (ffStrbufContainS(&gpu->name, "Apple"))
         {
             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
@@ -92,6 +101,11 @@ const char* detectByOpenGL(FFlist* gpus)
         else if (ffStrbufContainS(&gpu->name, "MTT"))
             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_MTHREADS);
 
+        FF_DEBUG("OpenGL fallback produced GPU: name='%s', vendor='%s', type=%u",
+            gpu->name.chars,
+            gpu->vendor.chars,
+            gpu->type);
+
     }
 
     ffStrbufDestroy(&result.version);
@@ -104,43 +118,77 @@ const char* detectByOpenGL(FFlist* gpus)
 
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
 {
+    FF_DEBUG("Starting GPU detection with method=%d", (int) options->detectionMethod);
+
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_PCI)
     {
+        FF_DEBUG("Trying PCI/native GPU detection");
         const char* error = ffDetectGPUImpl(options, result);
-        if (!error && result->length > 0) return NULL;
+        if (!error && result->length > 0)
+        {
+            FF_DEBUG("PCI/native GPU detection succeeded with %u GPU(s)", result->length);
+            return NULL;
+        }
+
+        FF_DEBUG("PCI/native GPU detection did not produce results (error=%s, gpuCount=%u)",
+            error ?: "none",
+            result->length);
     }
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_VULKAN)
     {
+        FF_DEBUG("Trying Vulkan GPU detection fallback");
         FFVulkanResult* vulkan = ffDetectVulkan();
         if (!vulkan->error && vulkan->gpus.length > 0)
         {
+            FF_DEBUG("Vulkan detection succeeded with %u GPU(s)", vulkan->gpus.length);
             ffListDestroy(result);
             ffListInitMove(result, &vulkan->gpus);
 
             #ifdef __ANDROID__
             double ffGPUDetectTempFromTZ(void);
             if (options->temp && result->length == 1)
+            {
+                FF_DEBUG("Applying Android thermal-zone temperature to single Vulkan GPU");
                 FF_LIST_GET(FFGPUResult, *result, 0)->temperature = ffGPUDetectTempFromTZ();
+            }
             #endif
 
             return NULL;
         }
+
+        FF_DEBUG("Vulkan detection did not produce results (error=%s, gpuCount=%u)",
+            vulkan->error ?: "none",
+            vulkan->gpus.length);
     }
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENCL)
     {
+        FF_DEBUG("Trying OpenCL GPU detection fallback");
         FFOpenCLResult* opencl = ffDetectOpenCL();
         if (!opencl->error && opencl->gpus.length > 0)
         {
+            FF_DEBUG("OpenCL detection succeeded with %u GPU(s)", opencl->gpus.length);
             ffListDestroy(result);
             ffListInitMove(result, &opencl->gpus);
             return NULL;
         }
+
+        FF_DEBUG("OpenCL detection did not produce results (error=%s, gpuCount=%u)",
+            opencl->error ?: "none",
+            opencl->gpus.length);
     }
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENGL)
     {
-        if (detectByOpenGL(result) == NULL)
+        FF_DEBUG("Trying OpenGL GPU detection fallback");
+        const char* error = detectByOpenGL(result);
+        if (error == NULL)
+        {
+            FF_DEBUG("OpenGL fallback succeeded with %u GPU(s)", result->length);
             return NULL;
+        }
+
+        FF_DEBUG("OpenGL fallback failed: %s", error);
     }
 
+    FF_DEBUG("GPU detection failed in all enabled backends");
     return "GPU detection failed";
 }

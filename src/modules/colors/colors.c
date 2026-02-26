@@ -249,7 +249,7 @@ void ffDestroyColorsOptions(FFColorsOptions* options)
 
 FFModuleBaseInfo ffColorsModuleInfo = {
     .name = FF_COLORS_MODULE_NAME,
-    .description = "Print some colored blocks",
+    .description = "Display the terminal's 16-color palette",
     .initOptions = (void*) ffInitColorsOptions,
     .destroyOptions = (void*) ffDestroyColorsOptions,
     .parseJsonObject = (void*) ffParseColorsJsonObject,

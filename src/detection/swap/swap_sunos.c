@@ -2,13 +2,14 @@
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <limits.h>
+#include <stdalign.h>
 
 enum { FFMaxNSwap = 8 };
 
 const char* ffDetectSwap(FFlist* result)
 {
     char strings[FFMaxNSwap][PATH_MAX];
-    uint8_t buffer[sizeof(swaptbl_t) + sizeof(swapent_t) * (FFMaxNSwap - 1)] = {};
+    alignas(swaptbl_t) uint8_t buffer[sizeof(swaptbl_t) + sizeof(swapent_t) * (FFMaxNSwap - 1)] = {};
     swaptbl_t* table = (swaptbl_t*) buffer;
     table->swt_n = FFMaxNSwap;
     for (int i = 0; i < FFMaxNSwap; ++i)

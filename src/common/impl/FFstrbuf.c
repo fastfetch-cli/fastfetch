@@ -183,7 +183,7 @@ const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char unti
     if(value == NULL)
         return NULL;
 
-    char* end = strchr(value, until);
+    const char* end = strchr(value, until);
     if(end == NULL)
         ffStrbufAppendS(strbuf, value);
     else

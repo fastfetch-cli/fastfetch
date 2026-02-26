@@ -16,6 +16,15 @@ body:
       options:
         - label: I have checked the FAQ but the issue is not covered
           required: true
+  - type: checkboxes
+    attributes:
+      label: Not a known issue
+      description: Please check if the issue is already known and being worked on.
+      options:
+        - label: I have checked the existing issues but the issue is not covered
+          required: true
+        - label: My issue is not about crashing on Fedora and KDE 6.6
+          required: true
   - type: markdown
     attributes:
       value: "### General description of the bug"

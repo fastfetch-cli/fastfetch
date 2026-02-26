@@ -1,13 +1,14 @@
 #include "bootmgr.h"
 #include "efi_helper.h"
 #include "common/io.h"
+#include "common/windows/nt.h"
 
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege)
 {
     FF_AUTO_CLOSE_FD HANDLE token = NULL;
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
+    if (!OpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
         return "OpenProcessToken() failed";
 
     TOKEN_PRIVILEGES tp = {

@@ -186,9 +186,12 @@ static bool detectDE(FFDisplayServerResult* ds)
         ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
         return true;
     }
-    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName) && ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS"))
+    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName))
     {
-        ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS"))
+            ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
+
+        // Google Pixel uses native Android
         return true;
     }
 

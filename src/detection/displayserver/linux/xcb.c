@@ -13,103 +13,6 @@
 #include <xcb/randr.h>
 #include <xcb/xcb.h>
 
-typedef struct XcbPropertyData
-{
-    FF_LIBRARY_SYMBOL(xcb_intern_atom)
-    FF_LIBRARY_SYMBOL(xcb_intern_atom_reply)
-    FF_LIBRARY_SYMBOL(xcb_get_property)
-    FF_LIBRARY_SYMBOL(xcb_get_property_reply)
-    FF_LIBRARY_SYMBOL(xcb_get_property_value)
-    FF_LIBRARY_SYMBOL(xcb_get_property_value_length)
-    FF_LIBRARY_SYMBOL(xcb_get_atom_name)
-    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name)
-    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name_length)
-    FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
-    FF_LIBRARY_SYMBOL(xcb_get_setup)
-    FF_LIBRARY_SYMBOL(xcb_setup_vendor)
-    FF_LIBRARY_SYMBOL(xcb_setup_vendor_length)
-} XcbPropertyData;
-
-static bool xcbInitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, XcbPropertyData* propertyData)
-{
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_property_value_length, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name_length, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_setup, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_setup_vendor, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_setup_vendor_length, false)
-
-    return true;
-}
-
-static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection, xcb_window_t window, const char* request)
-{
-    xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(connection, true, (uint16_t) strlen(request), request);
-    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(connection, requestAtomCookie, NULL);
-    if(requestAtomReply == NULL)
-        return NULL;
-
-    xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 8 * 1024);
-
-    FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(connection, propertyCookie, NULL);
-    if(propertyReply == NULL)
-        return NULL;
-
-    int length = data->ffxcb_get_property_value_length(propertyReply);
-    if(length <= 0)
-        return NULL;
-
-    //Why are xcb property strings not null terminated???
-    void* replyValue = malloc((size_t)length + 1);
-    memcpy(replyValue, data->ffxcb_get_property_value(propertyReply), (size_t) length);
-    ((char*) replyValue)[length] = '\0';
-
-    return replyValue;
-}
-
-static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connection, xcb_window_t rootWindow, FFDisplayServerResult* result)
-{
-    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
-        return;
-
-    FF_AUTO_FREE xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, connection, rootWindow, "_NET_SUPPORTING_WM_CHECK");
-    if(wmWindow == NULL)
-        return;
-
-    FF_AUTO_FREE char* wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "WM_NAME");
-    if(!ffStrSet(wmName))
-        wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "_NET_WM_NAME");
-
-    if(!ffStrSet(wmName))
-        return;
-
-    ffStrbufSetS(&result->wmProcessName, wmName);
-}
-
-static void xcbFetchServerVendor(XcbPropertyData* data, xcb_connection_t* connection, FFDisplayServerResult* result)
-{
-    const xcb_setup_t* setup = data->ffxcb_get_setup(connection);
-
-    int length = data->ffxcb_setup_vendor_length(setup);
-    if(length <= 0)
-        return;
-
-    FF_STRBUF_AUTO_DESTROY serverVendor = ffStrbufCreateNS((uint32_t) length, data->ffxcb_setup_vendor(setup));
-
-    if (!ffStrbufEqualS(&serverVendor, "The X.Org Foundation")) // Original
-    {
-        ffStrbufDestroy(&result->wmProtocolName);
-        ffStrbufInitMove(&result->wmProtocolName, &serverVendor);
-    }
-}
-
 typedef struct XcbRandrData
 {
     FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current)
@@ -131,14 +34,85 @@ typedef struct XcbRandrData
     FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_reply)
     FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_data)
     FF_LIBRARY_SYMBOL(xcb_randr_get_output_property_data_length)
+
     FF_LIBRARY_SYMBOL(xcb_intern_atom)
     FF_LIBRARY_SYMBOL(xcb_intern_atom_reply)
+    FF_LIBRARY_SYMBOL(xcb_get_property)
+    FF_LIBRARY_SYMBOL(xcb_get_property_reply)
+    FF_LIBRARY_SYMBOL(xcb_get_property_value)
+    FF_LIBRARY_SYMBOL(xcb_get_property_value_length)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_name_length)
+    FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
+    FF_LIBRARY_SYMBOL(xcb_get_setup)
+    FF_LIBRARY_SYMBOL(xcb_setup_vendor)
+    FF_LIBRARY_SYMBOL(xcb_setup_vendor_length)
 
     //init once
     xcb_connection_t* connection;
     FFDisplayServerResult* result;
-    XcbPropertyData propData;
 } XcbRandrData;
+
+static void* xcbGetProperty(XcbRandrData* data, xcb_window_t window, const char* request)
+{
+    xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen(request), request);
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
+    if(requestAtomReply == NULL)
+        return NULL;
+
+    xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(data->connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 8 * 1024);
+    FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(data->connection, propertyCookie, NULL);
+    if(propertyReply == NULL)
+        return NULL;
+
+    int length = data->ffxcb_get_property_value_length(propertyReply);
+    if(length <= 0)
+        return NULL;
+
+    //Why are xcb property strings not null terminated???
+    void* replyValue = malloc((size_t)length + 1);
+    memcpy(replyValue, data->ffxcb_get_property_value(propertyReply), (size_t) length);
+    ((char*) replyValue)[length] = '\0';
+
+    return replyValue;
+}
+
+static void xcbDetectWMfromEWMH(XcbRandrData* data, xcb_window_t rootWindow, FFDisplayServerResult* result)
+{
+    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
+        return;
+
+    FF_AUTO_FREE xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, rootWindow, "_NET_SUPPORTING_WM_CHECK");
+    if(wmWindow == NULL)
+        return;
+
+    FF_AUTO_FREE char* wmName = (char*) xcbGetProperty(data, *wmWindow, "WM_NAME");
+    if(!ffStrSet(wmName))
+        wmName = (char*) xcbGetProperty(data, *wmWindow, "_NET_WM_NAME");
+
+    if(!ffStrSet(wmName))
+        return;
+
+    ffStrbufSetS(&result->wmProcessName, wmName);
+}
+
+static void xcbFetchServerVendor(XcbRandrData* data, FFDisplayServerResult* result)
+{
+    const xcb_setup_t* setup = data->ffxcb_get_setup(data->connection);
+
+    int length = data->ffxcb_setup_vendor_length(setup);
+    if(length <= 0)
+        return;
+
+    FF_STRBUF_AUTO_DESTROY serverVendor = ffStrbufCreateNS((uint32_t) length, data->ffxcb_setup_vendor(setup));
+
+    if (!ffStrbufEqualS(&serverVendor, "The X.Org Foundation")) // Original
+    {
+        ffStrbufDestroy(&result->wmProtocolName);
+        ffStrbufInitMove(&result->wmProtocolName, &serverVendor);
+    }
+}
 
 static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType, struct xcb_randr_get_screen_resources_current_reply_t* screenResources, uint8_t bitDepth, double scaleFactor)
 {
@@ -251,14 +225,14 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         .rem = data->ffxcb_randr_monitor_info_outputs_length(monitor)
     };
 
-    FF_AUTO_FREE xcb_get_atom_name_reply_t* nameReply = data->propData.ffxcb_get_atom_name_reply(
+    FF_AUTO_FREE xcb_get_atom_name_reply_t* nameReply = data->ffxcb_get_atom_name_reply(
         data->connection,
-        data->propData.ffxcb_get_atom_name(data->connection, monitor->name),
+        data->ffxcb_get_atom_name(data->connection, monitor->name),
         NULL
     );
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateNS(
-        (uint32_t) data->propData.ffxcb_get_atom_name_name_length(nameReply),
-        data->propData.ffxcb_get_atom_name_name(nameReply)
+        (uint32_t) data->ffxcb_get_atom_name_name_length(nameReply),
+        data->ffxcb_get_atom_name_name(nameReply)
     );
     const FFDisplayType displayType = ffdsGetDisplayType(name.chars);
 
@@ -306,7 +280,7 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
     FF_AUTO_FREE struct xcb_randr_get_screen_resources_current_reply_t* screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, NULL);
 
     double scaleFactor = 1;
-    FF_AUTO_FREE const char* resourceManager = xcbGetProperty(&data->propData, data->connection, screen->root, "RESOURCE_MANAGER");
+    FF_AUTO_FREE const char* resourceManager = xcbGetProperty(data, screen->root, "RESOURCE_MANAGER");
     if (resourceManager)
     {
         FF_STRBUF_AUTO_DESTROY dpi = ffStrbufCreate();
@@ -369,6 +343,18 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
 
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_intern_atom)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_intern_atom_reply)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_property)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_property_reply)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_property_value)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_property_value_length)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_atom_name)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_atom_name_name)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_atom_name_name_length)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_atom_name_reply)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_get_setup)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_setup_vendor)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_setup_vendor_length)
+
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_screen_resources_current)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_screen_resources_current_reply)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_screen_resources_current_modes_iterator)
@@ -389,8 +375,6 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_crtc_info)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_crtc_info_reply)
 
-    bool propertyDataInitialized = xcbInitPropertyData(xcbRandr, &data.propData);
-
 
     data.connection = ffxcb_connect(NULL, NULL);
     if(ffxcb_connection_has_error(data.connection) > 0)
@@ -405,9 +389,9 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(data.connection));
 
 
-    if(iterator.rem > 0 && propertyDataInitialized) {
-        xcbDetectWMfromEWMH(&data.propData, data.connection, iterator.data->root, result);
-        xcbFetchServerVendor(&data.propData, data.connection, result);
+    if(iterator.rem > 0) {
+        xcbDetectWMfromEWMH(&data, iterator.data->root, result);
+        xcbFetchServerVendor(&data, result);
     }
 
 

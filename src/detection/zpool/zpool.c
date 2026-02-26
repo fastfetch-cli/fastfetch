@@ -6,6 +6,11 @@
 
 #ifdef __sun
 #include <libzfs.h>
+    #ifndef __illumos__
+    // On Solaris 11, zpool_get_prop has only 5 arguments. #2173
+    #define ffzpool_get_prop(zhp, prop, buf, len, srctype, literal) \
+        ffzpool_get_prop(zhp, prop, buf, len, srctype)
+    #endif
 #else
 #include "libzfs_simplified.h"
 #endif

@@ -39,6 +39,7 @@ static const struct kde_output_device_mode_v2_listener modeListener = {
     .refresh = waylandKdeModeRefreshListener,
     .preferred = waylandKdeModePreferredListener,
     .removed = (void*) stubListener,
+    .flags = (void*) stubListener,
 };
 
 static void waylandKdeModeListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* _, struct kde_output_device_mode_v2 *mode)

@@ -9,7 +9,8 @@ static uint64_t startTime;
 
 void ffPrepareCPUUsage(void)
 {
-    assert(cpuTimes1.elementSize == 0);
+    if (cpuTimes1.elementSize != 0) return; // Already prepared
+
     ffListInit(&cpuTimes1, sizeof(FFCpuUsageInfo));
     ffGetCpuUsageInfo(&cpuTimes1);
     startTime = ffTimeGetNow();

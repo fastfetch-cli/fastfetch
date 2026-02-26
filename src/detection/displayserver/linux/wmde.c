@@ -226,9 +226,12 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     ) {
         ffStrbufSetS(&result->deProcessName, "lxqt-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
-        FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
-        ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
-        applyBetterWM(result, wmProcessNameBuffer.chars);
+        if (result->wmProcessName.length == 0)
+        {
+            FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
+            ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
+            applyBetterWM(result, wmProcessNameBuffer.chars);
+        }
     }
 
     else if(
@@ -266,7 +269,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 
 static const char* getFromProcesses(FFDisplayServerResult* result)
 {
-    uint32_t userId = getuid();
+    uint32_t userId = instance.state.platform.uid;
 
 #if __FreeBSD__
     #ifdef __DragonFly__

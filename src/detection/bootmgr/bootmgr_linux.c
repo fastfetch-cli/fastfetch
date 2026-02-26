@@ -2,11 +2,13 @@
 #include "common/io.h"
 #include "efi_helper.h"
 
+#include <stdalign.h>
+
 #define FF_EFIVARS_PATH_PREFIX "/sys/firmware/efi/efivars/"
 
 const char* ffDetectBootmgr(FFBootmgrResult* result)
 {
-    uint8_t buffer[2048];
+    alignas(uint16_t) uint8_t buffer[2048];
 
     if (ffReadFileData(FF_EFIVARS_PATH_PREFIX "BootCurrent-" FF_EFI_GLOBAL_GUID, sizeof(buffer), buffer) != 6)
         return "Failed to read efivar: BootCurrent";

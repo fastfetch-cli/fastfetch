@@ -27,6 +27,7 @@ typedef struct FFPackagesResult
     uint32_t lpkgbuild;
     uint32_t macports;
     uint32_t mport;
+    uint32_t moss;
     uint32_t nixDefault;
     uint32_t nixSystem;
     uint32_t nixUser;

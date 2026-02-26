@@ -6,11 +6,16 @@
 #include "common/windows/registry.h"
 #include "common/windows/unicode.h"
 #include "common/windows/version.h"
+#include "common/windows/nt.h"
 #include "common/stringUtils.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include <wchar.h>
 #include <tlhelp32.h>
+#include <ntstatus.h>
+#include <winternl.h>
+#include <shlobj.h>
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
@@ -186,17 +191,29 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
                 {
                     ffStrbufSetS(&result->processName, "WindowsTerminal.exe");
                     ffStrbufSetS(&result->prettyName, "WindowsTerminal");
-                    ffStrbufSetF(&result->exe, "%s\\WindowsApps\\%s\\WindowsTerminal.exe", getenv("ProgramFiles"), path.chars);
-                    if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
+
+                    PWSTR programFiles = NULL;
+                    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, NULL, &programFiles)))
                     {
-                        result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
-                        ffStrbufSet(&result->exePath, &result->exe);
-                    }
-                    else
-                    {
-                        ffStrbufDestroy(&result->exe);
-                        ffStrbufInitMove(&result->exe, &path);
-                        result->exeName = "";
+                        ffStrbufSetWS(&result->exe, programFiles);
+                        CoTaskMemFree(programFiles);
+                        programFiles = NULL;
+
+                        ffStrbufAppendS(&result->exe, "\\WindowsApps\\");
+                        ffStrbufAppend(&result->exe, &path);
+                        ffStrbufAppendS(&result->exe, "\\WindowsTerminal.exe");
+
+                        if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
+                        {
+                            result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
+                            ffStrbufSet(&result->exePath, &result->exe);
+                        }
+                        else
+                        {
+                            ffStrbufDestroy(&result->exe);
+                            ffStrbufInitMove(&result->exe, &path);
+                            result->exeName = "";
+                        }
                     }
                     return true;
                 }
@@ -204,14 +221,19 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
         }
     }
 
-conhost:
-    ffStrbufSetF(&result->exe, "%s\\System32\\conhost.exe", getenv("SystemRoot"));
-    if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
+conhost:;
+    ULONG_PTR conhostPid = 0;
+    ULONG size;
+    if(NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0)
     {
-        ffStrbufSetS(&result->processName, "conhost.exe");
-        ffStrbufSetS(&result->prettyName, "conhost");
-        result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
-        return true;
+        // For Windows Terminal, it reports the PID of OpenConsole
+        if(ffProcessGetInfoWindows((uint32_t) conhostPid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
+        {
+            ffStrbufSet(&result->prettyName, &result->processName);
+            if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+                ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
+            return true;
+        }
     }
 
     ffStrbufClear(&result->exe);

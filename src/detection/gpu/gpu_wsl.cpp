@@ -6,6 +6,7 @@ extern "C" {
 #include "detection/gpu/gpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
 }
+#include "common/windows/util.hpp"
 
 #include <wsl/winadapter.h>
 #include <directx/dxcore.h>
@@ -15,15 +16,6 @@ extern "C" {
 #include <cinttypes>
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-
-template <typename Fn>
-struct on_scope_exit {
-    on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
-    ~on_scope_exit() { this->_fn(); }
-
-private:
-    Fn _fn;
-};
 
 extern "C"
 const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)

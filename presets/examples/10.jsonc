@@ -1,4 +1,4 @@
-// Load with --load-config examples/2.jsonc
+// Load with --config examples/2.jsonc
 // Note that you must replace the image path to an existing image to display it.
 
 {

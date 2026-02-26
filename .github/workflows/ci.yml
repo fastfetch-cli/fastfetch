@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install codespell
         shell: bash
@@ -32,7 +32,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: uname -a
         run: uname -a
@@ -78,7 +78,7 @@ jobs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: uname -a
         run: uname -a
@@ -102,7 +102,7 @@ jobs:
 
       - name: Initialize CodeQL
         if: matrix.arch == 'amd64'
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: c
 
@@ -114,7 +114,7 @@ jobs:
 
       - name: perform CodeQL analysis
         if: matrix.arch == 'amd64'
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
       - name: list features
         run: ./fastfetch --list-features
@@ -151,7 +151,7 @@ jobs:
           cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
@@ -164,7 +164,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: uname -a
         run: uname -a
@@ -217,7 +217,7 @@ jobs:
         run: ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-linux-i686
           path: ./fastfetch-*.*
@@ -230,7 +230,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -257,7 +257,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-linux-armv7l
           path: ./fastfetch-*.*
@@ -270,7 +270,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -293,7 +293,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-linux-armv6l
           path: ./fastfetch-*.*
@@ -312,7 +312,7 @@ jobs:
           - arch: s390x
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -336,7 +336,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
@@ -345,7 +345,7 @@ jobs:
     name: Musl-amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: setup alpine linux
         uses: jirutka/setup-alpine@master
@@ -374,7 +374,7 @@ jobs:
         shell: alpine.sh {0}
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-musl-amd64
           path: ./fastfetch-*.*
@@ -394,7 +394,7 @@ jobs:
             runs-on: macos-latest
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: uname -a
         run: uname -a
@@ -428,17 +428,17 @@ jobs:
         run: ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-macos-${{ matrix.arch }}
           path: ./fastfetch-*.*
 
-  sunos-amd64:
+  omnios-amd64:
     runs-on: ubuntu-latest
-    name: SunOS-amd64
+    name: OmniOS-amd64
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: vmactions/omnios-vm@v1
@@ -447,23 +447,59 @@ jobs:
           prepare: |
             uname -a
             pkg update --accept
-            pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
+            pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja
 
           run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-            cmake --build . --target package --verbose -j4
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake --build . --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
             ctest --output-on-failure
-            cpack
+            echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-omnios-amd64")' >> CPackConfig.cmake
+            cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
-          name: fastfetch-sunos-amd64
+          name: fastfetch-omnios-amd64
+          path: ./fastfetch-*.*
+
+  solaris-amd64:
+    runs-on: ubuntu-latest
+    name: Solaris-amd64
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: run VM
+        uses: vmactions/solaris-vm@v1
+        with:
+          usesh: true
+          release: "11.4-gcc-14"
+          prepare: |
+            uname -a
+            pkg install cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja dconf mesa
+
+          run: |
+            export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake --build . --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+            echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-solaris-amd64")' >> CPackConfig.cmake
+            cpack -V
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: fastfetch-solaris-amd64
           path: ./fastfetch-*.*
 
   freebsd-amd64:
@@ -474,7 +510,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -483,7 +519,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '14.3'
+          version: '15.0'
           run: |
             uname -a
             sudo pkg update
@@ -498,7 +534,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-freebsd-amd64
           path: ./fastfetch-*.*
@@ -511,7 +547,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -535,7 +571,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-openbsd-amd64
           path: ./fastfetch-*.*
@@ -548,7 +584,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -571,7 +607,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-netbsd-amd64
           path: ./fastfetch-*.*
@@ -584,7 +620,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: vmactions/dragonflybsd-vm@v1
@@ -606,7 +642,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-dragonfly-amd64
           path: ./fastfetch-*.*
@@ -619,7 +655,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -641,7 +677,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-haiku-amd64
           path: ./fastfetch-*.*
@@ -681,7 +717,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
@@ -723,7 +759,7 @@ jobs:
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         id: upload-unsigned-artifact
         name: upload artifacts for signing
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
           path: |
@@ -750,7 +786,7 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
           path: ./fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.*
@@ -772,7 +808,8 @@ jobs:
       - openbsd-amd64
       - netbsd-amd64
       - dragonfly-amd64
-      - sunos-amd64
+      - solaris-amd64
+      - omnios-amd64
       - haiku-amd64
       - windows-hosts
     permissions:

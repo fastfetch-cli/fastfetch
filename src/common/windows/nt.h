@@ -6,12 +6,12 @@
 #define D3DKMT_ALIGN64 __attribute__((aligned(8)))
 
 typedef struct _PROCESSOR_POWER_INFORMATION {
-  ULONG Number;
-  ULONG MaxMhz;
-  ULONG CurrentMhz;
-  ULONG MhzLimit;
-  ULONG MaxIdleState;
-  ULONG CurrentIdleState;
+    ULONG Number;
+    ULONG MaxMhz;
+    ULONG CurrentMhz;
+    ULONG MhzLimit;
+    ULONG MaxIdleState;
+    ULONG CurrentIdleState;
 } PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
 
 NTSTATUS NTAPI NtPowerInformation(
@@ -237,14 +237,42 @@ NTSYSCALLAPI
 NTSTATUS
 NTAPI
 NtQueryDirectoryFile(
-  IN HANDLE FileHandle,
-  IN HANDLE Event OPTIONAL,
-  IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
-  IN PVOID ApcContext OPTIONAL,
-  OUT PIO_STATUS_BLOCK IoStatusBlock,
-  OUT PVOID FileInformation,
-  IN ULONG Length,
-  IN FILE_INFORMATION_CLASS FileInformationClass,
-  IN BOOLEAN ReturnSingleEntry,
-  IN PUNICODE_STRING FileName OPTIONAL,
-  IN BOOLEAN RestartScan);
+    IN HANDLE FileHandle,
+    IN HANDLE Event OPTIONAL,
+    IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
+    IN PVOID ApcContext OPTIONAL,
+    OUT PIO_STATUS_BLOCK IoStatusBlock,
+    OUT PVOID FileInformation,
+    IN ULONG Length,
+    IN FILE_INFORMATION_CLASS FileInformationClass,
+    IN BOOLEAN ReturnSingleEntry,
+    IN PUNICODE_STRING FileName OPTIONAL,
+    IN BOOLEAN RestartScan);
+
+// https://ntdoc.m417z.com/process_devicemap_information_ex
+typedef struct _PROCESS_DEVICEMAP_INFORMATION_EX
+{
+    union
+    {
+        struct
+        {
+            HANDLE DirectoryHandle; // A handle to a directory object that can be set as the new device map for the process. This handle must have DIRECTORY_TRAVERSE access.
+        } Set;
+        struct
+        {
+            ULONG DriveMap;         // A bitmask that indicates which drive letters are currently in use in the process's device map.
+            UCHAR DriveType[32];    // A value that indicates the type of each drive (e.g., local disk, network drive, etc.). // DRIVE_* WinBase.h
+        } Query;
+    };
+    ULONG Flags; // PROCESS_LUID_DOSDEVICES_ONLY
+} PROCESS_DEVICEMAP_INFORMATION_EX, *PPROCESS_DEVICEMAP_INFORMATION_EX;
+
+#ifndef NtCurrentProcess
+#define NtCurrentProcess() ((HANDLE)(LONG_PTR)-1)
+#endif
+
+typedef struct _CURDIR
+{
+    UNICODE_STRING DosPath;
+    HANDLE Handle;
+} CURDIR, *PCURDIR;

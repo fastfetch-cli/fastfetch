@@ -10,11 +10,16 @@ void ffPlatformInit(FFPlatform* platform)
     ffListInit(&platform->configDirs, sizeof(FFstrbuf));
     ffListInit(&platform->dataDirs, sizeof(FFstrbuf));
     ffStrbufInit(&platform->exePath);
+    ffStrbufInit(&platform->cwd);
 
     ffStrbufInit(&platform->userName);
     ffStrbufInit(&platform->fullUserName);
     ffStrbufInit(&platform->hostName);
     ffStrbufInit(&platform->userShell);
+
+    #ifdef _WIN32
+    ffStrbufInit(&platform->sid);
+    #endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;
 
@@ -45,11 +50,16 @@ void ffPlatformDestroy(FFPlatform* platform)
         ffStrbufDestroy(dir);
     ffListDestroy(&platform->dataDirs);
     ffStrbufDestroy(&platform->exePath);
+    ffStrbufDestroy(&platform->cwd);
 
     ffStrbufDestroy(&platform->userName);
     ffStrbufDestroy(&platform->hostName);
     ffStrbufDestroy(&platform->userShell);
     ffStrbufDestroy(&platform->fullUserName);
+
+    #ifdef _WIN32
+    ffStrbufDestroy(&platform->sid);
+    #endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;
     ffStrbufDestroy(&info->architecture);

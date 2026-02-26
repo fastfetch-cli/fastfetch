@@ -441,6 +441,45 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     return num_elements;
 }
 
+static uint32_t getPacmanPackages(FFstrbuf* baseDir)
+{
+    FF_STRBUF_AUTO_DESTROY dbPath = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY rootDir = ffStrbufCreate();
+
+    // Get path to pacman.conf
+    uint32_t baseDirLen = baseDir->length;
+    ffStrbufAppendS(baseDir, "/etc/pacman.conf");
+
+    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]){
+        { "DBPath =", &dbPath },
+        { "RootDir =", &rootDir },
+    });
+    ffStrbufSubstrBefore(baseDir, baseDirLen);
+
+    if (confFound)
+    {
+        if (dbPath.length > 0)
+        {
+            // If DBPath is specified, use it
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "local");
+        }
+        else if (rootDir.length > 0)
+        {
+            // ... otherwise, use RootDir
+            ffStrbufDestroy(&dbPath);
+            ffStrbufInitMove(&dbPath, &rootDir);
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "var/lib/pacman/local");
+        }
+    }
+
+    if (dbPath.length == 0)
+        ffStrbufSetStatic(&dbPath, "/var/lib/pacman/local");
+
+    return getNumElements(baseDir, dbPath.chars, true);
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
@@ -455,7 +494,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->nixDefault += ffPackagesGetNix(baseDir, "/nix/var/nix/profiles/default");
         packageCounts->nixSystem += ffPackagesGetNix(baseDir, "/run/current-system");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getPacmanPackages(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT))
@@ -482,6 +521,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_MOSS_BIT)) packageCounts->moss += getSQLite3Int(baseDir, "/.moss/db/state", "SELECT COUNT(*) FROM state_selections WHERE state_id = (SELECT MAX(id) FROM state)", "moss");
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)

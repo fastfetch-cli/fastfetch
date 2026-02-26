@@ -1,6 +1,7 @@
 #include "FFPlatform_private.h"
 #include "common/io.h"
 #include "common/library.h"
+#include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
@@ -8,6 +9,7 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <sddl.h>
 
 #define SECURITY_WIN32 1 // For secext.h
 #include <secext.h>
@@ -70,15 +72,15 @@ static void getCacheDir(FFPlatform* platform)
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
 {
     PWSTR pPath = NULL;
-    if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
+    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
+        CoTaskMemFree(pPath);
         ffStrbufReplaceAllC(&buffer, '\\', '/');
         ffStrbufEnsureEndsWithC(&buffer, '/');
         if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
             ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
     }
-    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)
@@ -136,29 +138,51 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    const char* userName = getenv("USERNAME");
-    if (ffStrSet(userName))
-        ffStrbufSetS(&platform->userName, userName);
-    else
-    {
-        wchar_t buffer[256];
-        DWORD len = ARRAY_SIZE(buffer);
-        if(GetUserNameW(buffer, &len))
-            ffStrbufSetWS(&platform->userName, buffer);
-    }
-
     wchar_t buffer[256];
-    DWORD len = ARRAY_SIZE(buffer);
-    if (GetUserNameExW(NameDisplay, buffer, &len))
+    DWORD size = ARRAY_SIZE(buffer);
+    if (GetUserNameExW(NameDisplay, buffer, &size))
         ffStrbufSetWS(&platform->fullUserName, buffer);
+
+    size = ARRAY_SIZE(buffer);
+    if (GetUserNameW(buffer, &size)) // GetUserNameExW(10002)?
+    {
+        ffStrbufSetWS(&platform->userName, buffer);
+
+        size = 0;
+        DWORD refDomainSize = 0;
+        SID_NAME_USE sidNameUse = SidTypeUnknown;
+        LookupAccountNameW(NULL, buffer, NULL, &size, NULL, &refDomainSize, &sidNameUse);
+        if (size > 0)
+        {
+            FF_AUTO_FREE PSID sid = (PSID) malloc(size);
+            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize * sizeof(wchar_t));
+            if (LookupAccountNameW(NULL, buffer, sid, &size, refDomain, &refDomainSize, &sidNameUse))
+            {
+                LPWSTR sidString;
+                if (ConvertSidToStringSidW(sid, &sidString))
+                {
+                    ffStrbufSetWS(&platform->sid, sidString);
+                    LocalFree(sidString);
+                }
+            }
+        }
+    }
+    else
+        ffStrbufSetS(&platform->userName, getenv("USERNAME"));
 }
 
 static void getHostName(FFPlatform* platform)
 {
-    wchar_t buffer[128];
+    wchar_t buffer[256];
     DWORD len = ARRAY_SIZE(buffer);
-    if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
-        ffStrbufSetWS(&platform->hostName, buffer);
+    if (GetComputerNameExW(ComputerNameDnsHostname, buffer, &len) && len > 0)
+        ffStrbufSetNWS(&platform->hostName, len, buffer);
+    else
+    {
+        len = ARRAY_SIZE(buffer);
+        if (GetComputerNameExW(ComputerNameNetBIOS, buffer, &len) && len > 0)
+            ffStrbufSetNWS(&platform->hostName, len, buffer);
+    }
 }
 
 static void getUserShell(FFPlatform* platform)
@@ -224,13 +248,22 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
     }
 }
 
-static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
+static void getSystemPageSize(FFPlatformSysinfo* info)
 {
-    SYSTEM_INFO sysInfo;
-    GetNativeSystemInfo(&sysInfo);
+    SYSTEM_BASIC_INFORMATION sbi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), NULL)))
+        info->pageSize = sbi.PhysicalPageSize;
+    else
+        info->pageSize = 4096;
+}
 
-    switch(sysInfo.wProcessorArchitecture)
+static void getSystemArchitecture(FFPlatformSysinfo* info)
+{
+    SYSTEM_PROCESSOR_INFORMATION spi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemProcessorInformation, &spi, sizeof(spi), NULL)))
     {
+        switch (spi.ProcessorArchitecture)
+        {
         case PROCESSOR_ARCHITECTURE_AMD64:
             ffStrbufSetStatic(&info->architecture, "x86_64");
             break;
@@ -238,7 +271,7 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
             ffStrbufSetStatic(&info->architecture, "ia64");
             break;
         case PROCESSOR_ARCHITECTURE_INTEL:
-            switch (sysInfo.wProcessorLevel)
+            switch (spi.ProcessorLevel)
             {
                 case 4:
                     ffStrbufSetStatic(&info->architecture, "i486");
@@ -276,14 +309,26 @@ static void getSystemArchitectureAndPageSize(FFPlatformSysinfo* info)
         default:
             ffStrbufSetStatic(&info->architecture, "unknown");
             break;
+        }
     }
+}
 
-    info->pageSize = sysInfo.dwPageSize;
+static void getCwd(FFPlatform* platform)
+{
+    static_assert(
+        offsetof(RTL_USER_PROCESS_PARAMETERS, Reserved2[5]) == 0x38,
+        "CurrentDirectory should be at offset 0x38 in RTL_USER_PROCESS_PARAMETERS. Structure layout mismatch detected.");
+    PCURDIR cwd = (PCURDIR) &NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters->Reserved2[5];
+    ffStrbufSetNWS(&platform->cwd, cwd->DosPath.Length / sizeof(WCHAR), cwd->DosPath.Buffer);
+    ffStrbufReplaceAllC(&platform->cwd, '\\', '/');
+    ffStrbufEnsureEndsWithC(&platform->cwd, '/');
 }
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
+    platform->pid = (uint32_t) GetCurrentProcessId();
     getExePath(platform);
+    getCwd(platform);
     getHomeDir(platform);
     getCacheDir(platform);
     getConfigDirs(platform);
@@ -294,5 +339,6 @@ void ffPlatformInitImpl(FFPlatform* platform)
     getUserShell(platform);
 
     getSystemReleaseAndVersion(&platform->sysinfo);
-    getSystemArchitectureAndPageSize(&platform->sysinfo);
+    getSystemArchitecture(&platform->sysinfo);
+    getSystemPageSize(&platform->sysinfo);
 }

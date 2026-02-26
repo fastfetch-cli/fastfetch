@@ -4,7 +4,6 @@
 
 typedef struct FFLogoOptions
 {
-    FFModuleArgs moduleArgs;
 } FFLogoOptions;
 
 static_assert(sizeof(FFLogoOptions) <= FF_OPTION_MAX_SIZE, "FFLogoOptions size exceeds maximum allowed size");

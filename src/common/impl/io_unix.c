@@ -23,7 +23,7 @@ static void createSubfolders(const char* fileName)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
-    char *token = NULL;
+    const char *token = NULL;
     while((token = strchr(fileName, '/')) != NULL)
     {
         ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);

@@ -1,3 +1,61 @@
+# 2.59.0
+
+Changes:
+* Fastfetch no longer relies on the unreliable environment variables `$USER` or `%USERPROFILE%` to determine the current username (Title)
+    * People who set `$USER` to customize the Fastfetch title should use `{ "type": "title", "format": "your-custom-user-name" }` to achieve the same result.
+* Fastfetch no longer tries to probe inaccessible remote disk drives on Windows (Disk, Windows)
+    * People who have remote drives may use `{ "type": "disk", "hideFolders": "X:\\" }` to ignore problematic ones.
+    * This change removes some ugly hacks from the codebase and matches the behavior on `*nix`.
+
+Features:
+* Adds Oracle Solaris support (#2176, SunOS)
+* Adds UID / SID detection (Title)
+    * In custom format: `{user-id}`
+* Switches to native GPU detection on GNU/Hurd and removes the `libpciaccess` dependency (GPU, Hurd)
+* Improves memory size detection on macOS (Memory, macOS)
+    * Avoids relying on `hw.memsize_usable` by default, which may not be available on older macOS versions
+* Improves Windows disk detection accuracy and performance (Disk, Windows)
+* Adds more ARM CPU parts and removes duplicated cases (CPU, ARM)
+
+Logos:
+* Adds 6-color support to the NixOS logo (including the small variant) (#2180)
+
+# 2.58.0
+
+An early release to fix compatibility issues with KDE Plasma 6.6.
+
+Breaking changes:
+* The `de.slowVersionDetection` option has been removed. Slow version detection is now always enabled, as required on non-FHS-compliant distros (e.g., NixOS). (#2149, DE, Linux)
+
+Features:
+* Adds the `--structure-disabled <modules...>` command-line flag to temporarily disable module structure printing.
+    * For example: `fastfetch --structure-disabled colors` removes the color blocks from the default output.
+* Supports chassis type detection on Linux ARM devices when reported via the device tree (Chassis, Linux)
+* Supports Bedrock Linux version detection (#2155, OS, Linux)
+* Honors the `DBPath` and `RootDir` settings in `pacman.conf` when detecting Pacman packages (#2154, Packages, Linux)
+
+Bugfixes:
+* Fixes a crash issues on KDE Plasma 6.6 (Display, Linux)
+* Fixes the Command module not working with `--dynamic-interval` (#2152, Command)
+* Fixes Quartz Compositor version detection. It now correctly reports the version of `WindowServer` (`SkyLight`) instead of `WindowManager`. (WM, macOS)
+
+Logos:
+* Adds Kiss2
+
+# 2.57.1
+
+Features:
+* Tiny performance improvements (Windows)
+* Improves the reliability of hostname retrieval (Title, Windows)
+
+Bugfixes:
+* Fixes potential compilation issues on Linux (#2142, Linux)
+* Fixes compilation errors on macOS when building with older SDKs (#2140, macOS)
+* Fixes compilation issues when building with `-DENABLE_SYSTEM_YYJSON=ON` (#2143)
+
+Logos:
+* Updates PrismLinux and adds a small variant
+
 # 2.57.0
 
 Deprecation notice:
@@ -15,8 +73,8 @@ Features:
 * Supports Secure Boot detection (Bootmgr, macOS)
 * Supports DPI scale factor detection on Windows 7 (Display, Windows)
 * Supports xterm 256-color codes in color configuration
-    * In `display.color`: "@<color-index>" (e.g., "@34" for color index 34)
-    * In `format` strings: "#@<color-index>" (e.g., "#@34" for color index 34)
+    * In `display.color`: "`@<color-index>`" (e.g., "`@34`" for color index `34`)
+    * In `*.format` strings: "`#@<color-index>`" (e.g., "`#@34`" for color index `34`)
 * Improves uptime accuracy on Windows 10+ (Uptime, Windows)
 * Adds a new module `Logo` to query built-in logo raw data in JSON output (Logo)
     * Usage: `fastfetch -s logo -l <logo-name> -j # Supported in JSON format only`
@@ -32,9 +90,10 @@ Bugfixes:
 
 Logos:
 * Adds openSUSE Tumbleweed braille logo
+* Adds Xinux
 * Renames HydraPWK to NetHydra
-* Fixes colors of deepin
-* Fixes colors of UOS
+* Fixes colors of deepin and UOS
+* Fixes colors of macOS and variants
 
 # 2.56.1
 

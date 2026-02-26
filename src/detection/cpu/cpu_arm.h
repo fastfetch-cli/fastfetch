@@ -46,7 +46,7 @@ static const char* armPartId2name(uint32_t partId)
     case 0xa20: return "ARM1020";
     case 0xa22: return "ARM1022";
     case 0xa26: return "ARM1026";
-    case 0xb02: return "ARM11 MPCore";
+    case 0xb02: return "ARM11-MPCore";
     case 0xb36: return "ARM1136";
     case 0xb56: return "ARM1156";
     case 0xb76: return "ARM1176";
@@ -82,10 +82,12 @@ static const char* armPartId2name(uint32_t partId)
     case 0xd0d: return "Cortex-A77";
     case 0xd0e: return "Cortex-A76AE";
     case 0xd13: return "Cortex-R52";
+    case 0xd14: return "Cortex-R82AE";
     case 0xd15: return "Cortex-R82";
     case 0xd16: return "Cortex-R52+";
     case 0xd20: return "Cortex-M23";
     case 0xd21: return "Cortex-M33";
+    case 0xd24: return "Cortex-M52";
     case 0xd22: return "Cortex-M55";
     case 0xd23: return "Cortex-M85";
     case 0xd40: return "Neoverse-V1";
@@ -215,7 +217,7 @@ static const char* nvidiaPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0x000: return "Denver";
-    case 0x003: return "Denver 2";
+    case 0x003: return "Denver-2";
     case 0x004: return "Carmel";
     case 0x010: return "Olympus";
     default: return NULL;
