@@ -3141,7 +3141,7 @@ static const FFlogo M[] = {
             FF_COLOR_FG_LIGHT_BLACK, //grey
             FF_COLOR_FG_DEFAULT,
         },
-        .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
+        .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // MetalosSmall
