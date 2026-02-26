@@ -1,0 +1,26 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+    "logo": {
+        "source": "dustlinux",
+        "type": "auto"
+    },
+  "modules": [
+    "os",
+    "host",
+    "kernel",
+    "packages",
+    "wm",
+    "wmtheme",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "localip",
+    "battery",
+    "poweradapter",
+    "locale",
+    "colors"
+  ]
+}

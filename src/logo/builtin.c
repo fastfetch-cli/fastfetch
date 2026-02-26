@@ -1357,6 +1357,13 @@ static const FFlogo C[] = {
 };
 
 static const FFlogo D[] = {
+        // dustLinux
+    {
+        .names = {"dustLinux", "dustLinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_DUSTLINUX,
+        .colors = {},
+    },
+
     // DahliaOS
     {
         .names = {"dahliaOS"},
