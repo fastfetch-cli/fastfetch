@@ -4487,7 +4487,7 @@
                                     "detectPlugin": {
                                         "description": "Set if window manager plugin should be detected on supported platforms",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
