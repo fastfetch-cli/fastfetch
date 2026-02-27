@@ -35,6 +35,7 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
             ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "lldb-dap")      ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
             ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || // scoop warps the real binaries with a "shim" exe
             ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
