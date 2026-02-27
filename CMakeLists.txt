@@ -1068,7 +1068,7 @@ elseif(WIN32)
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
-        src/detection/wm/wm_windows.cpp
+        src/detection/wm/wm_windows.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
@@ -1729,6 +1729,7 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "propsys"
         PRIVATE "secur32"
+        PRIVATE "wintrust"
     )
     if(NOT ENABLE_WIN7_COMPAT)
         target_link_libraries(libfastfetch
