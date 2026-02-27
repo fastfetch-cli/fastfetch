@@ -1725,7 +1725,6 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
-        PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "propsys"

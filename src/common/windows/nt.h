@@ -276,3 +276,5 @@ typedef struct _CURDIR
     UNICODE_STRING DosPath;
     HANDLE Handle;
 } CURDIR, *PCURDIR;
+
+PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
