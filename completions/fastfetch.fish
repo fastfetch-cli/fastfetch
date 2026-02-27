@@ -24,6 +24,7 @@ function __fastfetch_complete_color
     echo -e "cyan\tColor"
     echo -e "white\tColor"
     echo -e "default\tColor"
+    echo -e "purple\tColor"
 end
 
 function __fastfetch_complete_command

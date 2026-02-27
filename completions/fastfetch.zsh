@@ -80,7 +80,7 @@ EOF
 
   case $state in
     colors)
-      local -a colors=(black red green yellow blue magenta cyan white default)
+      local -a colors=(black red green yellow blue magenta cyan white default purple)
       _describe 'color' colors
       ;;
     modules)

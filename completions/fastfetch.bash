@@ -13,7 +13,7 @@ _fastfetch() {
   # Handle standard completion cases
   case "$prev" in
     --color|--color-keys|--color-title|--color-output|--color-separator|--*-color|--*-key-color|--*-output-color|--logo-color-[1-9]|--percent-color-*|--temp-color-*)
-      local -a colors=("black" "red" "green" "yellow" "blue" "magenta" "cyan" "white" "default")
+      local -a colors=("black" "red" "green" "yellow" "blue" "magenta" "cyan" "white" "default" "purple")
       COMPREPLY=($(compgen -W "${colors[*]}" -- "$cur"))
       return
       ;;
