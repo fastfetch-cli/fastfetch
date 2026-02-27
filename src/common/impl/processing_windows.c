@@ -239,7 +239,7 @@ bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFst
     {
         // TODO: It's possible to query the command line with `NtQueryInformationProcess(60/*ProcessCommandLineInformation*/)` since Windows 8.1
 
-        alignas(alignof(UNICODE_STRING)) uint8_t buffer[4096];
+        alignas(UNICODE_STRING) uint8_t buffer[4096];
         ULONG size;
         if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageFileNameWin32, &buffer, sizeof(buffer), &size)))
         {
