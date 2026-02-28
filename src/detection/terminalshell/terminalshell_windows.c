@@ -22,15 +22,17 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
     uint32_t ppid = 0;
+    bool gui = false;
 
-    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
+    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui))
     {
         ffStrbufSet(&result->prettyName, &result->processName);
-        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+        if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
             ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
 
         //Common programs that are between terminal and own process, but are not the shell
-        if(
+        if (
+            !gui && (
             ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
@@ -41,8 +43,8 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
             ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
             ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
             ffStrbufContainIgnCaseS(&result->prettyName, "time")        ||
-            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
-        ) {
+            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
+        )) {
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
@@ -52,13 +54,18 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
         }
 
         result->pid = pid;
-        result->ppid = ppid;
 
-        if(ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+        if (gui)
         {
-            ffStrbufSetS(&result->prettyName, "Windows Explorer"); // Started without shell
+            // Started without shell
             // In this case, terminal process will be created by fastfetch itself.
             ppid = 0;
+            if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+                ffStrbufSetS(&result->prettyName, "Windows Explorer");
+        }
+        else
+        {
+            result->ppid = ppid;
         }
 
         break;
@@ -91,9 +98,11 @@ static void setShellInfoDetails(FFShellResult* result)
                 {
                     if(wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0)
                     {
-                        ffStrbufAppendS(&result->prettyName, " (with Clink ");
-                        ffGetFileVersion(module.szExePath, NULL, &result->prettyName);
-                        ffStrbufAppendC(&result->prettyName, ')');
+                        FF_STRBUF_AUTO_DESTROY clinkVersion = ffStrbufCreate();
+                        if (ffGetFileVersion(module.szExePath, NULL, &clinkVersion))
+                            ffStrbufAppendF(&result->prettyName, " (with Clink %s)", clinkVersion.chars);
+                        else
+                            ffStrbufAppendS(&result->prettyName, " (with Clink)");
                         break;
                     }
                 }
@@ -251,11 +260,11 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
     }
 
     uint32_t ppid = 0;
-    bool hasGui;
+    bool gui;
 
-    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &hasGui))
+    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui))
     {
-        if(!hasGui || ffStrbufIgnCaseEqualS(&result->processName, "far.exe")) // Far includes GUI objects...
+        if (!gui)
         {
             //We are in nested shell
             ffStrbufClear(&result->processName);
