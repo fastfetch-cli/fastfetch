@@ -54,6 +54,22 @@ bool ffPrintTitle(FFTitleOptions* options)
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY cwdTilde = ffStrbufCreate();
+        if (
+            #if _WIN32
+                ffStrbufStartsWithIgnCase
+            #else
+                ffStrbufStartsWith
+            #endif
+            (&instance.state.platform.cwd, &instance.state.platform.homeDir))
+        {
+            ffStrbufAppendS(&cwdTilde, "~/");
+            ffStrbufAppendNS(&cwdTilde, instance.state.platform.cwd.length - instance.state.platform.homeDir.length, &instance.state.platform.cwd.chars[instance.state.platform.homeDir.length]);
+        }
+        else
+            ffStrbufSet(&cwdTilde, &instance.state.platform.cwd);
+        ffStrbufTrimRight(&cwdTilde, '/');
+
         FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
             FF_FORMAT_ARG(hostName, "host-name"),
@@ -71,6 +87,7 @@ bool ffPrintTitle(FFTitleOptions* options)
             #endif
             FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
             FF_FORMAT_ARG(instance.state.platform.cwd, "cwd"),
+            FF_FORMAT_ARG(cwdTilde, "cwd-tilde"),
         }));
     }
 
@@ -186,5 +203,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"UID (*nix) / SID (Windows)", "user-id"},
         {"PID of current process", "pid"},
         {"Current working directory", "cwd"},
+        {"CWD with home dir replaced by `~`, and trims trailing `/`", "cwd-tilde"},
     }))
 };

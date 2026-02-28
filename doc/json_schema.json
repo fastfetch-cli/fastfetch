@@ -498,7 +498,7 @@
             "type": "string"
         },
         "titleFormat": {
-            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: Current working directory",
+            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: Current working directory\n    13. {cwd-tilde}: CWD with home dir replaced by ~",
             "type": "string"
         },
         "themeFormat": {
