@@ -261,6 +261,8 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
 
 bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageModuleConfig* config)
 {
+    assert(key);
+
     if (!unsafe_yyjson_equals_str(key, "percent"))
         return false;
 

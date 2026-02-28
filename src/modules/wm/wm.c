@@ -122,7 +122,7 @@ bool ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 void ffInitWMOptions(FFWMOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->detectPlugin = false;
+    options->detectPlugin = true;
 }
 
 void ffDestroyWMOptions(FFWMOptions* options)

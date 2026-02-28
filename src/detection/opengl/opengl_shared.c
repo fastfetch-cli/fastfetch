@@ -98,6 +98,9 @@ static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data, bool 
     const char* error = eglHandleContext(result, data);
     FF_DEBUG("eglHandleContext() returns: %s", error ?: "success");
 
+    FF_DEBUG("Releasing current EGL context");
+    data->ffeglMakeCurrent(data->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
     FF_DEBUG("Destroying EGL context");
     data->ffeglDestroyContext(data->display, data->context);
     return error;

@@ -1053,7 +1053,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.cpp
+        src/detection/os/os_windows.c
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1068,7 +1068,7 @@ elseif(WIN32)
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
-        src/detection/wm/wm_windows.cpp
+        src/detection/wm/wm_windows.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
@@ -1715,7 +1715,6 @@ elseif(APPLE)
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
-        PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
         PRIVATE "ole32"
@@ -1725,10 +1724,11 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
-        PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
+        PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
+        PRIVATE "wintrust"
     )
     if(NOT ENABLE_WIN7_COMPAT)
         target_link_libraries(libfastfetch

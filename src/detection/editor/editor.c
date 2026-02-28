@@ -115,7 +115,8 @@ const char* ffDetectEditor(FFEditorResult* result)
         ffStrbufEqualS(&result->exe, "hx") ||
         ffStrbufEqualS(&result->exe, "code") ||
         ffStrbufEqualS(&result->exe, "pluma") ||
-        ffStrbufEqualS(&result->exe, "sublime_text")
+        ffStrbufEqualS(&result->exe, "sublime_text") ||
+        ffStrbufEqualS(&result->exe, "zeditor")
     ) param = "--version";
     else if (
         ffStrbufEqualS(&result->exe, "kak") ||

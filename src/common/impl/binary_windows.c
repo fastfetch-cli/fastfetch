@@ -1,10 +1,9 @@
 #include "common/binary.h"
 #include "common/io.h"
 #include "common/stringUtils.h"
-#include "common/mallocHelper.h"
+#include "common/windows/nt.h"
 
 #include <windows.h>
-#include <imagehlp.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,19 +16,33 @@
  */
 const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
-    // Use MapAndLoad with cleanup attribute to ensure proper unloading
-    __attribute__((__cleanup__(UnMapAndLoad))) LOADED_IMAGE loadedImage = {};
-    if (!MapAndLoad(peFile, NULL, &loadedImage, FALSE, TRUE))
-        return "File could not be loaded";
+    FF_AUTO_CLOSE_FD HANDLE hFile = CreateFileA(peFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE)
+        return "CreateFileA() failed";
 
-    // Iterate through all sections in the PE file
-    for (ULONG i = 0; i < loadedImage.NumberOfSections; ++i)
+    FF_AUTO_CLOSE_FD HANDLE hMap = CreateFileMappingW(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+    if (!hMap)
+        return "CreateFileMappingW() failed";
+
+    void* base = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+    if (!base)
+        return "MapViewOfFile() failed";
+
+    PIMAGE_NT_HEADERS ntHeaders = RtlImageNtHeader(base);
+    if (!ntHeaders)
     {
-        PIMAGE_SECTION_HEADER section = &loadedImage.Sections[i];
+        UnmapViewOfFile(base);
+        return "RtlImageNtHeader() failed";
+    }
+
+    PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(ntHeaders);
+    for (WORD i = 0; i < ntHeaders->FileHeader.NumberOfSections; ++i, ++section)
+    {
         // Look for initialized data sections with the name ".rdata" which typically contains string literals
         if ((section->Characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA) && ffStrEquals((const char*) section->Name, ".rdata"))
         {
-            uint8_t *data = (uint8_t *) loadedImage.MappedAddress + section->PointerToRawData;
+            uint8_t *data = (uint8_t *) base + section->PointerToRawData;
 
             // Scan the section for string literals
             for (size_t off = 0; off < section->SizeOfRawData; ++off)
@@ -48,5 +61,6 @@ const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *st
         }
     }
 
+    UnmapViewOfFile(base);
     return NULL;
 }

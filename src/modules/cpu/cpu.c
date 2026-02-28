@@ -136,7 +136,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "tempSensor"))
         {
-            ffStrbufSetS(&options->tempSensor, unsafe_yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->tempSensor, val);
             continue;
         }
 
