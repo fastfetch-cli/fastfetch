@@ -1575,7 +1575,7 @@ static const FFlogo E[] = {
     },
     // Emmabuntüs
     {
-        .names = {"Emmabuntüs", "Emmabuntus"},
+        .names = {"Emmabuntus"},
         .lines = FASTFETCH_DATATEXT_LOGO_EMMABUNTUS,
         .colors = {
             FF_COLOR_FG_LIGHT_BLUE,
