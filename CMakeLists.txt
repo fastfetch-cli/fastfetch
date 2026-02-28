@@ -1715,7 +1715,6 @@ elseif(APPLE)
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
-        PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
         PRIVATE "ole32"

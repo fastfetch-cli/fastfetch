@@ -2,9 +2,11 @@
 #include "common/windows/unicode.h"
 #include "common/edidHelper.h"
 
-#include <dwmapi.h>
-#include <winuser.h>
+#include <windows.h>
 #include <wchar.h>
+
+// http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
+BOOL WINAPI IsThreadDesktopComposited();
 
 typedef struct FFMonitorInfo
 {
@@ -253,8 +255,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    BOOL enabled;
-    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
+    if (IsThreadDesktopComposited())
     {
         ffStrbufSetStatic(&ds->wmProcessName, "dwm.exe");
         ffStrbufSetStatic(&ds->wmPrettyName, "Desktop Window Manager");
