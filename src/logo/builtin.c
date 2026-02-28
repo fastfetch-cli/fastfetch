@@ -1578,11 +1578,9 @@ static const FFlogo E[] = {
         .names = {"Emmabuntus"},
         .lines = FASTFETCH_DATATEXT_LOGO_EMMABUNTUS,
         .colors = {
-            FF_COLOR_FG_LIGHT_BLUE,
-            FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_YELLOW,
         },
-        .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
-        .colorTitle = FF_COLOR_FG_LIGHT_YELLOW,
     },
     // EmperorOS
     {
