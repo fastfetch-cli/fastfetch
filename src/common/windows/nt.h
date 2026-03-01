@@ -4,6 +4,7 @@
 #include <winnt.h>
 
 enum {
+    SystemModuleInformation = 11,
     SystemBootEnvironmentInformation = 90,
 };
 
@@ -357,3 +358,23 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
         };
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+
+typedef struct _RTL_PROCESS_MODULE_INFORMATION
+{
+    PVOID Section;
+    PVOID MappedBase;
+    PVOID ImageBase;
+    ULONG ImageSize;
+    ULONG Flags;
+    USHORT LoadOrderIndex;
+    USHORT InitOrderIndex;
+    USHORT LoadCount;
+    USHORT OffsetToFileName;
+    UCHAR FullPathName[256];
+} RTL_PROCESS_MODULE_INFORMATION, *PRTL_PROCESS_MODULE_INFORMATION;
+
+typedef struct _RTL_PROCESS_MODULES
+{
+    ULONG NumberOfModules;
+    _Field_size_(NumberOfModules) RTL_PROCESS_MODULE_INFORMATION Modules[1];
+} RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;

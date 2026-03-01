@@ -398,7 +398,6 @@ set(LIBFASTFETCH_SRC
     src/common/impl/base64.c
     src/common/impl/FFlist.c
     src/common/impl/FFstrbuf.c
-    src/common/impl/kmod.c
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
     src/common/impl/smbiosHelper.c
@@ -523,6 +522,7 @@ if(LINUX)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -607,6 +607,7 @@ elseif(ANDROID)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -681,6 +682,7 @@ elseif(FreeBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_bsd.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
@@ -774,6 +776,7 @@ elseif(NetBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nbsd.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
         src/detection/bluetooth/bluetooth_bsd.c
@@ -857,6 +860,7 @@ elseif(OpenBSD)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/smbiosHelper.c
+        src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -938,6 +942,7 @@ elseif(APPLE)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_apple.c
+        src/common/impl/kmod_apple.c
         src/common/apple/cf_helpers.c
         src/common/apple/osascript.m
         src/common/apple/smc_temps.c
@@ -1009,6 +1014,7 @@ elseif(WIN32)
         src/common/impl/FFPlatform_windows.c
         src/common/impl/binary_windows.c
         src/common/impl/debug_windows.c
+        src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.cpp
         src/common/windows/registry.c
@@ -1082,6 +1088,7 @@ elseif(SunOS)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1163,6 +1170,7 @@ elseif(Haiku)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nosupport.c
         src/common/haiku/version.cpp
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
@@ -1232,6 +1240,7 @@ elseif(GNU)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
