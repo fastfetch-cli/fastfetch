@@ -1,7 +1,11 @@
 #pragma once
 
-#include <winnt.h>
 #include <winternl.h>
+#include <winnt.h>
+
+enum {
+    SystemBootEnvironmentInformation = 90,
+};
 
 #define D3DKMT_ALIGN64 __attribute__((aligned(8)))
 
@@ -329,3 +333,27 @@ typedef struct _SECTION_IMAGE_INFORMATION
     ULONG ImageFileSize;             // The size of the image, in bytes, including all headers.
     ULONG CheckSum;                  // The image file checksum, from the PE optional header.
 } SECTION_IMAGE_INFORMATION, *PSECTION_IMAGE_INFORMATION;
+
+typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
+{
+    GUID BootIdentifier;
+    FIRMWARE_TYPE FirmwareType;
+    union
+    {
+        ULONGLONG BootFlags;
+        struct
+        {
+            ULONGLONG DbgMenuOsSelection : 1; // REDSTONE4
+            ULONGLONG DbgHiberBoot : 1;
+            ULONGLONG DbgSoftBoot : 1;
+            ULONGLONG DbgMeasuredLaunch : 1;
+            ULONGLONG DbgMeasuredLaunchCapable : 1; // 19H1
+            ULONGLONG DbgSystemHiveReplace : 1;
+            ULONGLONG DbgMeasuredLaunchSmmProtections : 1;
+            ULONGLONG DbgMeasuredLaunchSmmLevel : 7; // 20H1
+            ULONGLONG DbgBugCheckRecovery : 1; // 24H2
+            ULONGLONG DbgFASR : 1;
+            ULONGLONG DbgUseCachedBcd : 1;
+        };
+    };
+} SYSTEM_BOOT_ENVIRONMENT_INFORMATION;

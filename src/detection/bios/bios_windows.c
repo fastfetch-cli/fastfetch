@@ -5,28 +5,7 @@
 #include "common/windows/registry.h"
 
 #include <ntstatus.h>
-#include <winternl.h>
-
-typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
-{
-    GUID BootIdentifier;
-    FIRMWARE_TYPE FirmwareType;
-    union
-    {
-        ULONGLONG BootFlags;
-        struct
-        {
-            ULONGLONG DbgMenuOsSelection : 1; // REDSTONE4
-            ULONGLONG DbgHiberBoot : 1;
-            ULONGLONG DbgSoftBoot : 1;
-            ULONGLONG DbgMeasuredLaunch : 1;
-            ULONGLONG DbgMeasuredLaunchCapable : 1; // 19H1
-            ULONGLONG DbgSystemHiveReplace : 1;
-            ULONGLONG DbgMeasuredLaunchSmmProtections : 1;
-            ULONGLONG DbgMeasuredLaunchSmmLevel : 7; // 20H1
-        };
-    };
-} SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+#include "common/windows/nt.h"
 #elif __OpenBSD__
 #include "common/io.h"
 
@@ -90,7 +69,7 @@ const char* ffDetectBios(FFBiosResult* bios)
     // Same as GetFirmwareType, but support (?) Windows 7
     // https://ntdoc.m417z.com/system_information_class
     SYSTEM_BOOT_ENVIRONMENT_INFORMATION sbei;
-    if (NT_SUCCESS(NtQuerySystemInformation(90 /*SystemBootEnvironmentInformation*/, &sbei, sizeof(sbei), NULL)))
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemBootEnvironmentInformation, &sbei, sizeof(sbei), NULL)))
     {
         switch (sbei.FirmwareType)
         {
