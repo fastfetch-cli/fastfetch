@@ -107,7 +107,7 @@ option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `pyt
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-    option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" ON)
+    option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" OFF)
 endif()
 if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
