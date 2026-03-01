@@ -1088,7 +1088,7 @@ elseif(SunOS)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
-        src/common/impl/kmod_nosupport.c
+        src/common/impl/kmod_sunos.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
