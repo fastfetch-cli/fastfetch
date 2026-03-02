@@ -6,6 +6,7 @@
 enum {
     SystemModuleInformation = 11,
     SystemBootEnvironmentInformation = 90,
+    SystemSecureBootInformation = 146,
 };
 
 #define D3DKMT_ALIGN64 __attribute__((aligned(8)))
@@ -378,3 +379,19 @@ typedef struct _RTL_PROCESS_MODULES
     ULONG NumberOfModules;
     _Field_size_(NumberOfModules) RTL_PROCESS_MODULE_INFORMATION Modules[1];
 } RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;
+
+NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
+    _In_ PCUNICODE_STRING VariableName,
+    _In_ const GUID* VendorGuid,
+    _Out_writes_bytes_opt_(*BufferLength) PVOID Buffer,
+    _Inout_ PULONG BufferLength,
+    _Out_opt_ PULONG Attributes // EFI_VARIABLE_*
+);
+
+NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
+
+typedef struct _SYSTEM_SECUREBOOT_INFORMATION
+{
+    BOOLEAN SecureBootEnabled;
+    BOOLEAN SecureBootCapable;
+} SYSTEM_SECUREBOOT_INFORMATION, *PSYSTEM_SECUREBOOT_INFORMATION;
