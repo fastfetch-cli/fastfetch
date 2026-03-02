@@ -79,7 +79,7 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
 
         LONG status = WinVerifyTrustEx(NULL, &actionID, &trustData);
         trustData.dwStateAction = WTD_STATEACTION_CLOSE;
-        WinVerifyTrust(NULL, &actionID, &trustData);
+        WinVerifyTrustEx(NULL, &actionID, &trustData);
 
         if (status != ERROR_SUCCESS)
             return false;
