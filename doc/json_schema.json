@@ -498,7 +498,7 @@
             "type": "string"
         },
         "titleFormat": {
-            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: Current working directory\n    13. {cwd-tilde}: CWD with home dir replaced by ~",
+            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: Current working directory\n    13. {cwd-tilde}: CWD with home dir replaced by `~`, and trims trailing `/`",
             "type": "string"
         },
         "themeFormat": {
@@ -1521,7 +1521,7 @@
                                         "description": "Print battery capacity, status, etc"
                                     },
                                     "useSetupApi": {
-                                        "description": "Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
+                                        "description": "Set if `CM API` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2517,11 +2517,6 @@
                                     "type": {
                                         "const": "de",
                                         "description": "Print desktop environment name"
-                                    },
-                                    "slowVersionDetection": {
-                                        "type": "boolean",
-                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.\nThis is only used as a fallback method. Please file a bug report if you encounter any issues.",
-                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
