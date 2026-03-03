@@ -209,7 +209,7 @@ static const char* detectWine(void)
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 {
     RTL_OSVERSIONINFOW osVersion = { .dwOSVersionInfoSize = sizeof(osVersion) };
-    if (!NT_SUCCESS(RtlGetVersion(&osVersion)))
+    if (!NT_SUCCESS(RtlGetVersion(&osVersion))) // From PEB, not affected by manifest shenanigans
         return;
 
     FF_HKEY_AUTO_DESTROY hKey = NULL;
@@ -233,7 +233,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
         ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
     else
     {
-        switch (osVersion.dwPlatformId)
+        switch (osVersion.dwPlatformId) // Hardcoded as WIN32_NT, but just in case
         {
         case VER_PLATFORM_WIN32s:
             ffStrbufSetStatic(&info->name, "WIN32s");
