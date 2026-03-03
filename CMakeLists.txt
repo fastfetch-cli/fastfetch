@@ -1020,6 +1020,7 @@ elseif(WIN32)
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/wmi.cpp
+        src/common/windows/variant.cpp
         src/common/windows/version.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
@@ -1735,7 +1736,6 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
-        PRIVATE "propsys"
         PRIVATE "secur32"
         PRIVATE "wintrust"
     )

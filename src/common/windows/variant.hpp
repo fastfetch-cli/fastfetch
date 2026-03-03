@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <utility>
 #include <string_view>
+#include <cassert>
 
 template <typename TVariant>
 struct FFBaseVariant: TVariant
@@ -137,6 +138,7 @@ struct FFWmiVariant: FFBaseVariant<VARIANT>
     FFWmiVariant(const FFWmiVariant&) = delete;
     FFWmiVariant(FFWmiVariant&&); // don't define it to enforce NRVO optimization
     explicit FFWmiVariant() { VariantInit(this); }
+    explicit FFWmiVariant(std::initializer_list<PCWSTR> strings);
     ~FFWmiVariant() { VariantClear(this); }
 };
 static_assert(sizeof(FFWmiVariant) == sizeof(VARIANT), "");
@@ -149,3 +151,18 @@ struct FFPropVariant: FFBaseVariant<PROPVARIANT>
     ~FFPropVariant() { PropVariantClear(this); }
 };
 static_assert(sizeof(FFPropVariant) == sizeof(PROPVARIANT), "");
+
+namespace
+{
+    // Provide our bstr_t to avoid libstdc++ dependency
+    struct bstr_t
+    {
+        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
+        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
+        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
+        operator BSTR(void) const noexcept { return _bstr; }
+
+        private:
+            BSTR _bstr;
+    };
+}

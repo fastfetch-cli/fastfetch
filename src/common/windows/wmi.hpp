@@ -8,7 +8,6 @@ extern "C" {
 
 #include <initguid.h>
 #include <wbemidl.h>
-#include <cassert>
 
 #include "variant.hpp"
 
@@ -73,21 +72,6 @@ struct FFWmiQuery
         return result;
     }
 };
-
-namespace
-{
-    // Provide our bstr_t to avoid libstdc++ dependency
-    struct bstr_t
-    {
-        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
-        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
-        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
-        operator BSTR(void) const noexcept { return _bstr; }
-
-        private:
-            BSTR _bstr;
-    };
-}
 
 #else
     // Win32 COM headers requires C++ compiler
