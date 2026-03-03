@@ -87,7 +87,7 @@ static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs,
         for (uint32_t i = 0; i < numArgs; ++i)
         {
             const FFformatarg* arg = &arguments[i];
-            if (arg->name && strcasecmp(placeholderValue, arg->name) == 0)
+            if (arg->name && ffStrEqualsIgnCase(placeholderValue, arg->name))
                 return i + 1;
         }
     }
