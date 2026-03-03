@@ -6,6 +6,7 @@
 enum {
     SystemModuleInformation = 11,
     SystemBootEnvironmentInformation = 90,
+    SystemLogicalProcessorAndGroupInformation = 107,
     SystemSecureBootInformation = 146,
 };
 
@@ -395,3 +396,12 @@ typedef struct _SYSTEM_SECUREBOOT_INFORMATION
     BOOLEAN SecureBootEnabled;
     BOOLEAN SecureBootCapable;
 } SYSTEM_SECUREBOOT_INFORMATION, *PSYSTEM_SECUREBOOT_INFORMATION;
+
+NTSTATUS NTAPI NtQuerySystemInformationEx(
+    _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    _In_reads_bytes_(InputBufferLength) PVOID InputBuffer,
+    _In_ ULONG InputBufferLength,
+    _Out_writes_bytes_opt_(SystemInformationLength) PVOID SystemInformation,
+    _In_ ULONG SystemInformationLength,
+    _Out_opt_ PULONG ReturnLength
+);

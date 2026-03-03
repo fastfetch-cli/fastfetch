@@ -6,6 +6,7 @@
 
 #include <windows.h>
 #include "common/windows/perflib_.h"
+#include "common/windows/nt.h"
 #include <wchar.h>
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)
@@ -212,15 +213,16 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 
 static const char* detectNCores(FFCPUResult* cpu)
 {
-    DWORD length = 0;
-    GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
+    LOGICAL_PROCESSOR_RELATIONSHIP lpr = RelationAll;
+    ULONG length = 0;
+    NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), NULL, 0, &length);
     if (length == 0)
         return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
 
     SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
         pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
-    if (!pProcessorInfo || !GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
+    if (!NT_SUCCESS(NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), pProcessorInfo, length, &length)))
         return "GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length) failed";
 
     for(
