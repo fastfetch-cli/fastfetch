@@ -1,6 +1,7 @@
 #include "wm.h"
 #include "common/mallocHelper.h"
 #include "common/io.h"
+#include "common/library.h"
 #include "common/processing.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
@@ -20,6 +21,35 @@ typedef enum {
     FF_PROCESS_TYPE_GUI = 1 << 2,
     FF_PROCESS_TYPE_CUI = 1 << 3,
 } FFProcessType;
+
+bool verifySignature(const wchar_t* filePath)
+{
+    FF_LIBRARY_LOAD(wintrust, true, "wintrust" FF_LIBRARY_EXTENSION, -1)
+    FF_LIBRARY_LOAD_SYMBOL(wintrust, WinVerifyTrustEx, true)
+
+    WINTRUST_FILE_INFO fileInfo = {
+        .cbStruct = sizeof(fileInfo),
+        .pcwszFilePath = filePath,
+    };
+
+    GUID actionID = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+
+    WINTRUST_DATA trustData = {
+        .cbStruct = sizeof(trustData),
+        .dwUIChoice = WTD_UI_NONE,
+        .fdwRevocationChecks = WTD_REVOKE_NONE,
+        .dwUnionChoice = WTD_CHOICE_FILE,
+        .pFile = &fileInfo,
+        .dwStateAction = WTD_STATEACTION_VERIFY,
+        .dwProvFlags = WTD_SAFER_FLAG,
+    };
+
+    LONG status = ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+    trustData.dwStateAction = WTD_STATEACTION_CLOSE;
+    ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+
+    return status == ERROR_SUCCESS;
+}
 
 bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
 {
@@ -60,29 +90,7 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
 
     if (processType & FF_PROCESS_TYPE_SIGNED)
     {
-        WINTRUST_FILE_INFO fileInfo = {
-            .cbStruct = sizeof(fileInfo),
-            .pcwszFilePath = buffer->Buffer,
-        };
-
-        GUID actionID = WINTRUST_ACTION_GENERIC_VERIFY_V2;
-
-        WINTRUST_DATA trustData = {
-            .cbStruct = sizeof(trustData),
-            .dwUIChoice = WTD_UI_NONE,
-            .fdwRevocationChecks = WTD_REVOKE_NONE,
-            .dwUnionChoice = WTD_CHOICE_FILE,
-            .pFile = &fileInfo,
-            .dwStateAction = WTD_STATEACTION_VERIFY,
-            .dwProvFlags = WTD_SAFER_FLAG,
-        };
-
-        LONG status = WinVerifyTrustEx(NULL, &actionID, &trustData);
-        trustData.dwStateAction = WTD_STATEACTION_CLOSE;
-        WinVerifyTrustEx(NULL, &actionID, &trustData);
-
-        if (status != ERROR_SUCCESS)
-            return false;
+        if (!verifySignature(buffer->Buffer)) return false;
     }
 
     if (processType & (FF_PROCESS_TYPE_GUI | FF_PROCESS_TYPE_CUI))

@@ -1737,7 +1737,6 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "secur32"
-        PRIVATE "wintrust"
     )
     if(NOT ENABLE_WIN7_COMPAT)
         target_link_libraries(libfastfetch
