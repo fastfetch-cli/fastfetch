@@ -5,6 +5,7 @@
 
 enum {
     SystemModuleInformation = 11,
+    SystemFirmwareTableInformation = 76,
     SystemBootEnvironmentInformation = 90,
     SystemLogicalProcessorAndGroupInformation = 107,
     SystemSecureBootInformation = 146,
@@ -405,3 +406,19 @@ NTSTATUS NTAPI NtQuerySystemInformationEx(
     _In_ ULONG SystemInformationLength,
     _Out_opt_ PULONG ReturnLength
 );
+
+typedef enum _SYSTEM_FIRMWARE_TABLE_ACTION
+{
+    SystemFirmwareTableEnumerate,
+    SystemFirmwareTableGet,
+    SystemFirmwareTableMax
+} SYSTEM_FIRMWARE_TABLE_ACTION;
+
+typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
+{
+    ULONG ProviderSignature; // (same as the GetSystemFirmwareTable function)
+    SYSTEM_FIRMWARE_TABLE_ACTION Action;
+    ULONG TableID;
+    ULONG TableBufferLength;
+    _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
+} SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
