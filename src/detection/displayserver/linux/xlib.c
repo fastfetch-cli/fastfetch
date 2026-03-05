@@ -48,6 +48,32 @@ static unsigned char* x11GetProperty(XrandrData* data, Display* display, Window 
     return result;
 }
 
+static uint8_t* xrandrGetProperty(XrandrData* data, RROutput output, const char* name, uint32_t* bufSize)
+{
+    unsigned long size = 0;
+    uint8_t* result = NULL;
+    Atom atomEdid = data->ffXInternAtom(data->display, name, true);
+    if (atomEdid != None)
+    {
+        int actual_format = 0;
+        unsigned long bytes_after = 0;
+        Atom actual_type = None;
+        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, false, false, AnyPropertyType, &actual_type, &actual_format, &size, &bytes_after, &result) == Success)
+        {
+            if (size == 0)
+                data->ffXFree(result);
+            else
+            {
+                if (bufSize)
+                    *bufSize = (uint32_t) size;
+                return result;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 static void x11DetectWMFromEWMH(XrandrData* data, FFDisplayServerResult* result)
 {
     if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
@@ -75,7 +101,7 @@ static void x11FetchServerVendor(XrandrData* data, FFDisplayServerResult* result
         ffStrbufSetS(&result->wmProtocolName, serverVendor);
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
+static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor, bool randrEmulation)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(screenResources == NULL)
@@ -131,7 +157,9 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         0,
         (uint32_t) output->mm_width,
         (uint32_t) output->mm_height,
-        currentMode ? "xlib-randr-mode" : "xlib-randr-crtc"
+        randrEmulation
+            ? (currentMode ? "xlib-randr-emu-mode" : "xlib-randr-emu-crtc")
+            : (currentMode ? "xlib-randr-mode" : "xlib-randr-crtc")
     );
 
     if (item)
@@ -154,30 +182,25 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
     if(outputInfo == NULL)
         return false;
 
-    uint8_t* edidData = NULL;
-    unsigned long edidLength = 0;
-    Atom atomEdid = data->ffXInternAtom(data->display, "EDID", true);
-    if (atomEdid != None)
-    {
-        int actual_format = 0;
-        unsigned long bytes_after = 0;
-        Atom actual_type = None;
-        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, false, false, AnyPropertyType, &actual_type, &actual_format, &edidLength, &bytes_after, &edidData) == Success)
-        {
-            if (edidLength >= 128)
-            {
-                ffStrbufClear(name);
-                ffEdidGetName(edidData, name);
-            }
-            else
-                edidLength = 0;
-        }
-    }
+    uint32_t edidLength = 0;
+    uint8_t* edidData = xrandrGetProperty(data, output, RR_PROPERTY_RANDR_EDID, &edidLength);
 
-    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, (uint32_t) edidLength, screenResources, bitDepth, scaleFactor);
+    if (edidLength >= 128)
+    {
+        ffStrbufClear(name);
+        ffEdidGetName(edidData, name);
+    }
+    else
+        edidLength = 0;
+
+    uint8_t* randrEmulation = xrandrGetProperty(data, output, "RANDR Emulation", NULL);
+
+    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, edidLength, screenResources, bitDepth, scaleFactor, randrEmulation ? !!randrEmulation[0] : false);
 
     if (edidData)
         data->ffXFree(edidData);
+    if (randrEmulation)
+        data->ffXFree(randrEmulation);
     data->ffXRRFreeOutputInfo(outputInfo);
 
     return res;

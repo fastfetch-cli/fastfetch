@@ -78,6 +78,19 @@ static void* xcbGetProperty(XcbRandrData* data, xcb_window_t window, const char*
     return replyValue;
 }
 
+static xcb_randr_get_output_property_reply_t* xcbRandrGetProperty(XcbRandrData* data, xcb_randr_output_t output, const char* name)
+{
+    xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen(name), name);
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
+
+    if(requestAtomReply)
+    {
+        xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
+        return data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
+    }
+    return NULL;
+}
+
 static void xcbDetectWMfromEWMH(XcbRandrData* data, xcb_window_t rootWindow, FFDisplayServerResult* result)
 {
     if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
@@ -121,26 +134,32 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
     if(outputInfoReply == NULL)
         return false;
 
-    xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen("EDID"), "EDID");
-    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
-    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = NULL;
+    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* edidReply = xcbRandrGetProperty(data, output, "EDID");
     uint8_t* edidData = NULL;
     uint32_t edidLength = 0;
-    if(requestAtomReply)
+    if(edidReply)
     {
-        xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
-        outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
-        if(outputPropertyReply)
+        int len = data->ffxcb_randr_get_output_property_data_length(edidReply);
+        if(len >= 128)
         {
-            int len = data->ffxcb_randr_get_output_property_data_length(outputPropertyReply);
-            if(len >= 128)
-            {
-                ffStrbufClear(name);
-                edidData = data->ffxcb_randr_get_output_property_data(outputPropertyReply);
-                ffEdidGetName(edidData, name);
-                edidLength = (uint32_t) len;
-            }
+            edidData = data->ffxcb_randr_get_output_property_data(edidReply);
+            edidLength = (uint32_t) len;
         }
+    }
+
+    if(edidData)
+    {
+        ffStrbufClear(name);
+        ffEdidGetName(edidData, name);
+    }
+
+    uint8_t randrEmulation = 0;
+    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* randrEmulationReply = xcbRandrGetProperty(data, output, "RANDR Emulation");
+    if(randrEmulationReply)
+    {
+        int len = data->ffxcb_randr_get_output_property_data_length(randrEmulationReply);
+        if(len >= 1)
+            randrEmulation = data->ffxcb_randr_get_output_property_data(randrEmulationReply)[0];
     }
 
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, outputInfoReply->crtc, XCB_CURRENT_TIME);
@@ -204,9 +223,12 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         0,
         (uint32_t) outputInfoReply->mm_width,
         (uint32_t) outputInfoReply->mm_height,
-        currentMode ? "xcb-randr-mode" : "xcb-randr-crtc"
+        randrEmulation
+            ? (currentMode ? "xcb-randr-emu-mode" : "xcb-randr-emu-crtc")
+            : (currentMode ? "xcb-randr-mode" : "xcb-randr-crtc")
+
     );
-    if (item && edidLength)
+    if (item && edidData && edidLength >= 128)
     {
         item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
         ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
