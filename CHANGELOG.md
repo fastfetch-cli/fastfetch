@@ -1,3 +1,35 @@
+# 2.60.0
+
+Changes:
+* The CMake option `ENABLE_WIN7_COMPAT:BOOLEAN` now defaults to `OFF`
+    * This follows the Windows 7 deprecation notice introduced in v2.57.0
+    * The removal of Win7-compat code, however, is delayed to later version.
+* `wm.detectPlugin` now defaults to `true` (WM)
+
+Features:
+* Adds `{cwd-tilde}` for custom title formatting, which prints the current working directory (Title)
+* Adds support for detecting the Zed version (#2200, Editor)
+* Adds support for detecting `moss` packages (Packages, Linux)
+* Adds support for detecting komorebi, FancyWM, and GlazeWM (WM, Windows)
+* Adds support for WM plugin version detection on macOS (WM, macOS)
+* Adds support for retrieving the executable path on OpenBSD (#2195, OpenBSD)
+
+Bugfixes:
+* Fixes a potential segmentation fault caused by dereferencing a negative index (#2198)
+* Fixes `tempSensor` parsing so that it accepts only string values (#2202, CPU)
+* Fixes an issue which reports less devices unexpectedly (Keyboard, Linux)
+* Improves WM detection on LXQt by querying WM settings only when no WM has already been detected (#2199, WM, Linux)
+* Fixes memory leaks in DBus connection handling and in the OpenGL EGL context lifecycle
+* Fixes niri version detection on Fedora (WM, Linux)
+* Includes various internal cleanups and optimizations
+
+Logos:
+* Adds `RengeOS` (#2170)
+* Updates Linux Mint (#2186)
+* Adds `Emmabuntüs` (#2207)
+* Renames `Refracted Devuan` to `Refracta`
+* Renames `ExodiaPredator` to `ExodiaOS`
+
 # 2.59.0
 
 Changes:
@@ -35,7 +67,7 @@ Features:
 * Honors the `DBPath` and `RootDir` settings in `pacman.conf` when detecting Pacman packages (#2154, Packages, Linux)
 
 Bugfixes:
-* Fixes a crash issues on KDE Plasma 6.6 (Display, Linux)
+* Fixes a crash issue on KDE Plasma 6.6 (Display, Linux)
 * Fixes the Command module not working with `--dynamic-interval` (#2152, Command)
 * Fixes Quartz Compositor version detection. It now correctly reports the version of `WindowServer` (`SkyLight`) instead of `WindowManager`. (WM, macOS)
 
@@ -62,7 +94,7 @@ Deprecation notice:
 * Support for Windows 7 (and 8.x) is deprecated and will be removed in a future release. Extended support for Windows 7 (and 8.1) ended on January 10, 2023. These versions do not officially support ANSI escape codes (running fastfetch on them requires a third-party terminal such as ConEmu). In addition, Windows 7 lacks some APIs used by fastfetch. Fastfetch currently loads these APIs dynamically at runtime to maintain compatibility, but this adds complexity to the codebase and increases the maintenance burden.
     * A CMake flag `ENABLE_WIN7_COMPAT:BOOLEAN` has been introduced (defaults to `ON` for now). If set to `OFF`, Windows 7 compatibility code is excluded, and the resulting binaries will support only Windows 10 (version 1607 and later) and Windows 11.
     * The main prebuilt Windows binaries on the Release page (`fastfetch-windows-amd64.*`) are built with `ENABLE_WIN7_COMPAT=OFF`. These are the binaries used by `scoop` and `winget`. Users who need Windows 7 (or 8.x) support can download the `-win7` variant instead.
-    * The `ENABLE_WIN7_COMPAT` CMake option and the `-win7` variant binaries are planned to be removed in 2.60.0.
+    * ~~The `ENABLE_WIN7_COMPAT` CMake option and the `-win7` variant binaries are planned to be removed in 2.60.0~~.
 
 Features:
 * Supports COSMIC DE version detection (DE, Linux)
