@@ -2,6 +2,8 @@
 
 #include <winternl.h>
 #include <winnt.h>
+#include <stdint.h>
+#include <assert.h>
 
 enum {
     SystemModuleInformation = 11,
@@ -422,6 +424,8 @@ typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
     ULONG TableBufferLength;
     _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
 } SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
+
+NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
 /**
  * The KSYSTEM_TIME structure represents interrupt time, system time, and time zone bias.
