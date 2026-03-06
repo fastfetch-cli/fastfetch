@@ -109,7 +109,7 @@ typedef struct FFSmbios20EntryPoint
     uint8_t SmbiosBcdRevision;
 } __attribute__((__packed__)) FFSmbios20EntryPoint;
 static_assert(offsetof(FFSmbios20EntryPoint, SmbiosBcdRevision) == 0x1E,
-    "FFSmbios30EntryPoint: Wrong struct alignment");
+    "FFSmbios20EntryPoint: Wrong struct alignment");
 
 typedef struct FFSmbios30EntryPoint
 {
@@ -482,6 +482,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         if (!NT_SUCCESS(NtQuerySystemInformation(SystemFirmwareTableInformation, buffer, bufSize, &bufSize)))
         {
             FF_DEBUG("NtQuerySystemInformation(SystemFirmwareTableInformation) failed");
+            free(buffer);
+            buffer = NULL;
             return NULL;
         }
         FFRawSmbiosData* rawData = (FFRawSmbiosData*) buffer->TableBuffer;
