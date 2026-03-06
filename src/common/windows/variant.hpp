@@ -4,6 +4,7 @@
 #include <utility>
 #include <string_view>
 #include <cassert>
+#include <cstdint>
 
 template <typename TVariant>
 struct FFBaseVariant: TVariant
