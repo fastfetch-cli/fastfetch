@@ -22,7 +22,7 @@ typedef enum {
     FF_PROCESS_TYPE_CUI = 1 << 3,
 } FFProcessType;
 
-bool verifySignature(const wchar_t* filePath)
+static bool verifySignature(const wchar_t* filePath)
 {
     FF_LIBRARY_LOAD(wintrust, true, "wintrust" FF_LIBRARY_EXTENSION, -1)
     FF_LIBRARY_LOAD_SYMBOL(wintrust, WinVerifyTrustEx, true)
@@ -51,7 +51,7 @@ bool verifySignature(const wchar_t* filePath)
     return status == ERROR_SUCCESS;
 }
 
-bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
+static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
 {
     FF_AUTO_CLOSE_FD HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
     if (!hProcess)
@@ -83,8 +83,8 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
             CoTaskMemFree(pPath);
         }
         if (windowsAppsPathLen != -1u &&
-            buffer->Length > windowsAppsPathLen * sizeof(wchar_t) &&
-            _wcsnicmp(buffer->Buffer, windowsAppsPath, windowsAppsPathLen) != 0
+            (buffer->Length <= windowsAppsPathLen * sizeof(wchar_t) || // Path is too short to be in WindowsApps
+            _wcsnicmp(buffer->Buffer, windowsAppsPath, windowsAppsPathLen) != 0) // Path does not start with WindowsApps
         ) return false;
     }
 
@@ -107,6 +107,8 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
 
     return true;
 }
+
+#define ffStrEqualNWS(str, compareTo) (_wcsnicmp(str, L ## compareTo, sizeof(compareTo) - 1) == 0)
 
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 {
@@ -133,11 +135,11 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             return "NtQuerySystemInformation(SystemProcessInformation) failed";
     }
 
-    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ptr->NextEntryOffset; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
+    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
     {
         assert(ptr->ImageName.Length == 0 || ptr->ImageName.MaximumLength >= ptr->ImageName.Length + 2); // NULL terminated
         if (ptr->ImageName.Length == strlen("FancyWM-GUI.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"FancyWM-GUI.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "FancyWM-GUI.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_WINDOWS_STORE | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
             if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
@@ -147,7 +149,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             break;
         }
         else if (ptr->ImageName.Length == strlen("glazewm-watcher.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"glazewm-watcher.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "glazewm-watcher.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_SIGNED | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
             if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
@@ -157,7 +159,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             break;
         }
         else if (ptr->ImageName.Length == strlen("komorebi.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"komorebi.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "komorebi.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_CUI, filePath, sizeof(buffer))
         ) {
             if (instance.config.general.detectVersion)
@@ -174,6 +176,8 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
                 ffStrbufSetStatic(pluginName, "Komorebi");
             break;
         }
+
+        if (ptr->NextEntryOffset == 0) break;
     }
 
     return NULL;
