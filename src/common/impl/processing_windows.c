@@ -7,7 +7,6 @@
 #include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
-#include <winternl.h>
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 

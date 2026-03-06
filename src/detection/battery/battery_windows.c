@@ -11,7 +11,6 @@
 #include <batclass.h>
 #include <devguid.h>
 #include <cfgmgr32.h>
-#include <winternl.h>
 
 static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results)
 {

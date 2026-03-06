@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ntdef.h>
 #include <winternl.h>
 #include <winnt.h>
 #include <stdint.h>
@@ -438,6 +439,12 @@ typedef struct _KSYSTEM_TIME
 } KSYSTEM_TIME, *PKSYSTEM_TIME;
 
 /**
+ * PROCESSOR_FEATURE_MAX defines the maximum number of processor feature flags
+ * that may be reported by the system.
+ */
+#define PROCESSOR_FEATURE_MAX 64
+
+/**
  * The KUSER_SHARED_DATA structure contains information shared with user-mode.
  *
  * \sa https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data
@@ -488,6 +495,142 @@ typedef struct _KUSER_SHARED_DATA
     //
 
     WCHAR NtSystemRoot[260];
+
+    //
+    // Maximum stack trace depth if tracing enabled.
+    //
+
+    ULONG MaxStackTraceDepth;
+
+    //
+    // Crypto exponent value.
+    //
+
+    ULONG CryptoExponent;
+
+    //
+    // Time zone ID.
+    //
+
+    ULONG TimeZoneId;
+
+    //
+    // Minimum size of a large page on the system, in bytes.
+    //
+    // N.B. Returned by GetLargePageMinimum() function.
+    //
+
+    ULONG LargePageMinimum;
+
+    //
+    // This value controls the Application Impact Telemetry (AIT) Sampling rate.
+    //
+    // This value determines how frequently the system records AIT events,
+    // which are used by the Application Experience and compatibility
+    // subsystems to evaluate application behavior, performance, and
+    // potential compatibility issues.
+    //
+    // Lower values increase sampling frequency, while higher values reduce it.
+    // The kernel updates this field as part of its internal telemetry and
+    // heuristics logic.
+    //
+
+    ULONG AitSamplingValue;
+
+    //
+    // This value controls Application Compatibility (AppCompat) switchback processing.
+    //
+
+    union
+    {
+        ULONG AppCompatFlag;
+        struct
+        {
+            ULONG SwitchbackEnabled : 1;    // Basic switchback processing
+            ULONG ExtendedHeuristics : 1;   // Extended switchback heuristics
+            ULONG TelemetryFallback : 1;    // Telemetry-driven fallback
+            ULONG Reserved : 29;
+        } AppCompatFlags;
+    };
+
+    //
+    // Current Kernel Root RNG state seed version
+    //
+
+    ULONGLONG RNGSeedVersion;
+
+    //
+    // This value controls assertion failure handling.
+    //
+    // Historically (prior to Windows 10), this value was also used by
+    // Code Integrity (CI), AppLocker, and related security components to
+    // determine the minimum validation requirements for executable images,
+    // drivers, and privileged operations.
+    //
+    // In modern Windows versions, this field is used primarily by the kernel's
+    // diagnostic and validation infrastructure to decide how assertion failures
+    // should be handled (e.g., logging, debugger break-in, or bugcheck).
+
+    ULONG GlobalValidationRunlevel;
+
+    //
+    // Monotonic stamp incremented by the kernel whenever the system's
+    // time zone bias value changes.
+    //
+    // N.B. This field must be accessed via the RtlGetSystemTimeAndBias API for
+    //      an accurate result.
+    // This value is read before and after accessing the bias fields to determine
+    // whether the time zone data changed during the read. If the stamp differs,
+    // the caller must re-read the bias values to ensure consistency.
+    //
+
+    volatile LONG TimeZoneBiasStamp;
+
+    //
+    // The shared collective build number undecorated with C or F.
+    // GetVersionEx hides the real number
+    //
+
+    ULONG NtBuildNumber;
+
+    //
+    // Product type.
+    //
+    // N.B. This field must be accessed via the RtlGetNtProductType API for
+    //      an accurate result.
+    //
+
+    NT_PRODUCT_TYPE NtProductType;
+    BOOLEAN ProductTypeIsValid;
+    BOOLEAN Reserved0[1];
+
+    //
+    // Native hardware processor architecture of the running system.
+    //
+    // N.B. User-mode components read this field to determine the true system
+    // architecture, especially in WOW64 scenarios where the process architecture
+    // differs from the native one.
+    //
+
+    USHORT NativeProcessorArchitecture;
+
+    //
+    // The NT Version.
+    //
+    // N. B. Note that each process sees a version from its PEB, but if the
+    //       process is running with an altered view of the system version,
+    //       the following two fields are used to correctly identify the
+    //       version
+    //
+
+    ULONG NtMajorVersion;
+    ULONG NtMinorVersion;
+
+    //
+    // Processor features.
+    //
+
+    BOOLEAN ProcessorFeatures[PROCESSOR_FEATURE_MAX];
 
     // ... more fields follow, but we don't need them
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;

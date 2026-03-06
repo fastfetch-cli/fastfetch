@@ -3,7 +3,6 @@
 #include "common/io.h"
 #include "common/windows/nt.h"
 
-#include <ntdef.h>
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege)

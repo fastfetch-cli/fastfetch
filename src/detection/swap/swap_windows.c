@@ -1,5 +1,4 @@
 #include "swap.h"
-#include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
 
 #include <winternl.h>

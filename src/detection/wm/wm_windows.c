@@ -10,7 +10,6 @@
 #include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
-#include <winternl.h>
 #include <shlobj.h>
 #include <softpub.h>
 
