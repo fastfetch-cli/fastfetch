@@ -36,32 +36,35 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             !ffStrEqualsIgnCase(comm, "rectangle")
         ) continue;
 
-        char buf[PROC_PIDPATHINFO_MAXSIZE];
-        int length = proc_pidpath(proc->kp_proc.p_pid, buf, ARRAY_SIZE(buf));
-        if (length > 0)
+        if (instance.config.general.detectVersion)
         {
-            char* lastSlash = strrchr(buf, '/');
-            if (lastSlash)
+            char buf[PROC_PIDPATHINFO_MAXSIZE];
+            int length = proc_pidpath(proc->kp_proc.p_pid, buf, ARRAY_SIZE(buf));
+            if (length > 0)
             {
-                *lastSlash = '\0';
-                if (ffStrEndsWith(buf, ".app/Contents/MacOS"))
+                char* lastSlash = strrchr(buf, '/');
+                if (lastSlash)
                 {
-                    lastSlash -= strlen("MacOS");
-                    strcpy(lastSlash, "Info.plist"); // X.app/Contents/Info.plist
-                    NSError* error;
-                    NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL fileURLWithPath:@(buf)]
-                                                       error:&error];
-                    if (dict)
+                    *lastSlash = '\0';
+                    if (ffStrEndsWith(buf, ".app/Contents/MacOS"))
                     {
-                        ffStrbufSetS(pluginName, [dict[@"CFBundleName"] UTF8String]);
-                        NSString* version = dict[@"CFBundleShortVersionString"];
-                        if (version)
+                        lastSlash -= strlen("MacOS");
+                        strcpy(lastSlash, "Info.plist"); // X.app/Contents/Info.plist
+                        NSError* error;
+                        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL fileURLWithPath:@(buf)]
+                                                        error:&error];
+                        if (dict)
                         {
-                            ffStrbufAppendC(pluginName, ' ');
-                            ffStrbufAppendS(pluginName, version.UTF8String);
-                        }
+                            ffStrbufSetS(pluginName, [dict[@"CFBundleName"] UTF8String]);
+                            NSString* version = dict[@"CFBundleShortVersionString"];
+                            if (version)
+                            {
+                                ffStrbufAppendC(pluginName, ' ');
+                                ffStrbufAppendS(pluginName, version.UTF8String);
+                            }
 
-                        break;
+                            break;
+                        }
                     }
                 }
             }

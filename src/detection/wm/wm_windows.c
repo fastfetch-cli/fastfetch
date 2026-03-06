@@ -140,7 +140,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             memcmp(ptr->ImageName.Buffer, L"FancyWM-GUI.exe", ptr->ImageName.Length) == 0 &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_WINDOWS_STORE | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
-            if (ffGetFileVersion(filePath->Buffer, NULL, pluginName))
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
                 ffStrbufPrependS(pluginName, "FancyWM ");
             else
                 ffStrbufSetStatic(pluginName, "FancyWM");
@@ -150,7 +150,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             memcmp(ptr->ImageName.Buffer, L"glazewm-watcher.exe", ptr->ImageName.Length) == 0 &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_SIGNED | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
-            if (ffGetFileVersion(filePath->Buffer, NULL, pluginName))
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
                 ffStrbufPrependS(pluginName, "GlazeWM ");
             else
                 ffStrbufSetStatic(pluginName, "GlazeWM");
@@ -160,14 +160,17 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             memcmp(ptr->ImageName.Buffer, L"komorebi.exe", ptr->ImageName.Length) == 0 &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_CUI, filePath, sizeof(buffer))
         ) {
-            FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateNWS(filePath->Length / sizeof(wchar_t), filePath->Buffer);
-            if (ffProcessAppendStdOut(pluginName, (char *const[]) {
-                path.chars,
-                "--version",
-                NULL,
-            }) == NULL)
-                ffStrbufSubstrBeforeFirstC(pluginName, '\n');
-            else
+            if (instance.config.general.detectVersion)
+            {
+                FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateNWS(filePath->Length / sizeof(wchar_t), filePath->Buffer);
+                if (ffProcessAppendStdOut(pluginName, (char *const[]) {
+                    path.chars,
+                    "--version",
+                    NULL,
+                }) == NULL)
+                    ffStrbufSubstrBeforeFirstC(pluginName, '\n');
+            }
+            if (pluginName->length == 0)
                 ffStrbufSetStatic(pluginName, "Komorebi");
             break;
         }
