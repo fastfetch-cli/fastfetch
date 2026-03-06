@@ -1,6 +1,6 @@
 // Inspired by microfetch
 {
-    "$schema": "file:///C:/msys64/home/zhang/fastfetch/doc/json_schema.json",
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
         "type": "small"
     },
@@ -17,7 +17,7 @@
     "modules": [
         {
             "type": "title",
-            "format": "{user-name-colored}{#light_red}@{host-name-colored} {#}{cwd-tilde}"
+            "format": "{user-name-colored}{#light_red}@{host-name-colored} {#}{cwd}"
         },
         {
             "type": "os",

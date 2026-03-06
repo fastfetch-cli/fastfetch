@@ -7,7 +7,7 @@ Changes:
 * `wm.detectPlugin` now defaults to `true` (WM)
 
 Features:
-* Adds `{cwd-tilde}` for custom title formatting, which prints the current working directory (Title)
+* Adds `{cwd}` for custom title formatting, which prints the current working directory (Title)
 * Adds support for detecting the Zed version (#2200, Editor)
 * Adds support for detecting `moss` packages (Packages, Linux)
 * Adds support for detecting komorebi, FancyWM, and GlazeWM (WM, Windows)

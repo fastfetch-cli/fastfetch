@@ -68,7 +68,7 @@ bool ffPrintTitle(FFTitleOptions* options)
         }
         else
             ffStrbufSet(&cwdTilde, &instance.state.platform.cwd);
-        ffStrbufTrimRight(&cwdTilde, '/');
+        if (cwdTilde.length > 1) ffStrbufTrimRight(&cwdTilde, '/');
 
         FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
@@ -86,8 +86,7 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
             #endif
             FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
-            FF_FORMAT_ARG(instance.state.platform.cwd, "cwd"),
-            FF_FORMAT_ARG(cwdTilde, "cwd-tilde"),
+            FF_FORMAT_ARG(cwdTilde, "cwd"),
         }));
     }
 
@@ -202,7 +201,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"Full user name", "full-user-name"},
         {"UID (*nix) / SID (Windows)", "user-id"},
         {"PID of current process", "pid"},
-        {"Current working directory", "cwd"},
-        {"CWD with home dir replaced by `~`, and trims trailing `/`", "cwd-tilde"},
+        {"CWD with home dir replaced by `~`", "cwd"},
     }))
 };
