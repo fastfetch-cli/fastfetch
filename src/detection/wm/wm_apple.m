@@ -39,7 +39,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
         if (instance.config.general.detectVersion)
         {
             char buf[PROC_PIDPATHINFO_MAXSIZE];
-            int length = proc_pidpath(proc->kp_proc.p_pid, buf, ARRAY_SIZE(buf));
+            int length = proc_pidpath(proc->kp_proc.p_pid, buf, ARRAY_SIZE(buf) - strlen("Info.plist"));
             if (length > 0)
             {
                 char* lastSlash = strrchr(buf, '/');
@@ -55,7 +55,9 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
                                                         error:&error];
                         if (dict)
                         {
-                            ffStrbufSetS(pluginName, [dict[@"CFBundleName"] UTF8String]);
+                            NSString* name = dict[@"CFBundleDisplayName"] ?: dict[@"CFBundleName"];
+                            ffStrbufSetS(pluginName, name.UTF8String ?: comm);
+
                             NSString* version = dict[@"CFBundleShortVersionString"];
                             if (version)
                             {
@@ -95,7 +97,7 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
         }
 
         if (dict)
-            ffStrbufInitS(result, ((NSString*) dict[@"CFBundleShortVersionString"]).UTF8String);
+            ffStrbufSetS(result, ((NSString*) dict[@"CFBundleShortVersionString"]).UTF8String);
     }
 
     return NULL;
