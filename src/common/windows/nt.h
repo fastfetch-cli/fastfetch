@@ -422,3 +422,90 @@ typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
     ULONG TableBufferLength;
     _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
 } SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
+
+/**
+ * The KSYSTEM_TIME structure represents interrupt time, system time, and time zone bias.
+ */
+typedef struct _KSYSTEM_TIME
+{
+    ULONG LowPart;
+    LONG High1Time;
+    LONG High2Time;
+} KSYSTEM_TIME, *PKSYSTEM_TIME;
+
+/**
+ * The KUSER_SHARED_DATA structure contains information shared with user-mode.
+ *
+ * \sa https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data
+ */
+typedef struct _KUSER_SHARED_DATA
+{
+    //
+    // Current low 32-bit of tick count and tick count multiplier.
+    //
+    // N.B. The tick count is updated each time the clock ticks.
+    //
+
+    ULONG TickCountLowDeprecated;
+    ULONG TickCountMultiplier;
+
+    //
+    // Current 64-bit interrupt time in 100ns units.
+    //
+
+    volatile KSYSTEM_TIME InterruptTime;
+
+    //
+    // Current 64-bit system time in 100ns units.
+    //
+
+    volatile KSYSTEM_TIME SystemTime;
+
+    //
+    // Current 64-bit time zone bias.
+    //
+
+    volatile KSYSTEM_TIME TimeZoneBias;
+
+    //
+    // Support image magic number range for the host system.
+    //
+    // N.B. This is an inclusive range.
+    //
+
+    USHORT ImageNumberLow;
+    USHORT ImageNumberHigh;
+
+    //
+    // Copy of system root in unicode.
+    //
+    // N.B. This field must be accessed via the RtlGetNtSystemRoot API for
+    //      an accurate result.
+    //
+
+    WCHAR NtSystemRoot[260];
+
+    // ... more fields follow, but we don't need them
+} KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
+
+#define SharedUserData     ((const KUSER_SHARED_DATA*) 0x7FFE0000UL)
+
+static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
+{
+    #if _WIN64
+
+    return *(uint64_t*) pTime;
+
+    #else
+
+    uint32_t low, high1, high2;
+
+    do {
+        high1 = pTime->High1Time;
+        low   = pTime->LowPart;
+        high2 = pTime->High2Time;
+    } while (high1 != high2);
+
+    return ((uint64_t) high1 << 32) | low;
+    #endif
+}
