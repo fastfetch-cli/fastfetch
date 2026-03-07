@@ -1007,6 +1007,29 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // CGOS
+    {
+        .names = {"cgos", "CGOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CGOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    // CGOSSmall
+    {
+        .names = {"cgos_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_CGOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Center
     {
         .names = {"Center"},
