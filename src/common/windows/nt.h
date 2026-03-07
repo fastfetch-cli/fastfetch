@@ -635,7 +635,7 @@ typedef struct _KUSER_SHARED_DATA
     // ... more fields follow, but we don't need them
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
 
-#define SharedUserData     ((const KUSER_SHARED_DATA*) 0x7FFE0000UL)
+#define SharedUserData ((const KUSER_SHARED_DATA*) 0x7FFE0000UL)
 
 static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 {
@@ -655,4 +655,18 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 
     return ((uint64_t) high1 << 32) | low;
     #endif
+}
+
+static inline bool ffIsWindows10OrGreater()
+{
+    #if FF_WIN7_COMPAT
+    return SharedUserData->NtMajorVersion >= 10;
+    #else
+    return true;
+    #endif
+}
+
+static inline bool ffIsWindows11OrGreater()
+{
+    return ffIsWindows10OrGreater() && SharedUserData->NtBuildNumber >= 22000;
 }
