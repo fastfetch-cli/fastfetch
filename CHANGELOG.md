@@ -24,8 +24,9 @@ Bugfixes:
 
 Logos:
 * Adds `RengeOS` (#2170)
-* Updates Linux Mint (#2186)
 * Adds `Emmabuntüs` (#2207)
+* Updates Artix Linux (#2157)
+* Updates Linux Mint (#2186)
 * Renames `Refracted Devuan` to `Refracta`
 * Renames `ExodiaPredator` to `ExodiaOS`
 
