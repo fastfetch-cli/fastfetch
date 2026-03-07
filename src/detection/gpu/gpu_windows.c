@@ -352,11 +352,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         D3DKMT_ADAPTERTYPE adapterType = {};
                         D3DKMT_QUERYADAPTERINFO queryAdapterInfo = {
                             .hAdapter = openAdapterFromLuid.hAdapter,
-                            .Type = KMTQAITYPE_ADAPTERTYPE,
+                            .Type = KMTQAITYPE_ADAPTERTYPE, // Windows 8 and later
                             .pPrivateDriverData = &adapterType,
                             .PrivateDriverDataSize = sizeof(adapterType),
                         };
-                        if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo))) // Vista and later
+                        if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo)))
                         {
                             FF_DEBUG("Queried adapter type - HybridDiscrete: %d, HybridIntegrated: %d", adapterType.HybridDiscrete, adapterType.HybridIntegrated);
                             if (adapterType.HybridDiscrete)
@@ -369,7 +369,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             FF_DEBUG("Failed to query adapter type");
                         }
 
-                        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
+                        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET && ffIsWindows11OrGreater())
                         {
                             FF_DEBUG("Trying to get GPU frequency information");
                             for (ULONG nodeIdx = 0; ; nodeIdx++)
@@ -379,14 +379,14 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                                 };
                                 queryAdapterInfo = (D3DKMT_QUERYADAPTERINFO) {
                                     .hAdapter = openAdapterFromLuid.hAdapter,
-                                    .Type = KMTQAITYPE_NODEMETADATA,
+                                    .Type = KMTQAITYPE_NODEMETADATA, // Windows 10 and later
                                     .pPrivateDriverData = &nodeMetadata,
                                     .PrivateDriverDataSize = sizeof(nodeMetadata),
                                 };
                                 if (!NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo)))
                                 {
                                     FF_DEBUG("No more nodes to query (index %lu)", nodeIdx);
-                                    break; // Windows 10 and later
+                                    break;
                                 }
                                 if (nodeMetadata.NodeData.EngineType != DXGK_ENGINE_TYPE_3D)
                                 {
@@ -395,11 +395,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                                 }
 
                                 D3DKMT_QUERYSTATISTICS queryStatistics = {
-                                    .Type = D3DKMT_QUERYSTATISTICS_NODE2,
+                                    .Type = D3DKMT_QUERYSTATISTICS_NODE2, // Windows 11 (22H2) and later
                                     .AdapterLuid = *(LUID*)&adapterLuid,
                                     .QueryNode2 = { .PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx },
                                 };
-                                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) // Windows 11 (22H2) and later
+                                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
                                 {
                                     gpu->frequency = (uint32_t) (queryStatistics.QueryResult.NodeInformation.NodePerfData.MaxFrequency / 1000 / 1000);
                                     FF_DEBUG("Found GPU frequency: %u MHz", gpu->frequency);
@@ -422,11 +422,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         FF_DEBUG("Failed to open adapter from LUID");
                     }
 
-                    if (options->temp && gpu->temperature == FF_GPU_TEMP_UNSET)
+                    if (options->temp && gpu->temperature == FF_GPU_TEMP_UNSET && ffIsWindows10OrGreater())
                     {
                         FF_DEBUG("Trying to get GPU temperature");
                         D3DKMT_QUERYSTATISTICS queryStatistics = {
-                            .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER,
+                            .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER, // Windows 10 (1803) and later
                             .AdapterLuid = *(LUID*)&adapterLuid,
                             .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
                         };

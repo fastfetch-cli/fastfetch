@@ -1,5 +1,6 @@
 #include "FFPlatform_private.h"
 #include "common/FFstrbuf.h"
+#include "common/arrayUtils.h"
 #include "common/stringUtils.h"
 #include "common/io.h"
 #include "fastfetch_config.h"
@@ -11,10 +12,14 @@
 #include <paths.h>
 
 #ifdef __APPLE__
-    #include <libproc.h>
+    #include <mach-o/dyld.h>
     #include <sys/sysctl.h>
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
     #include <sys/sysctl.h>
+#elif defined(__OpenBSD__)
+    #include <sys/sysctl.h>
+    #include <kvm.h>
+    #include "common/path.h"
 #elif defined(__HAIKU__)
     #include <image.h>
     #include <OS.h>
@@ -28,7 +33,11 @@ static void getExePath(FFPlatform* platform)
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
-        int exePathLen = proc_pidpath((pid_t) platform->pid, exePath, sizeof(exePath));
+        uint32_t exePathLen = sizeof(exePath);
+        if (_NSGetExecutablePath(exePath, &exePathLen) == 0)
+            exePathLen = (uint32_t) strlen(exePath);
+        else
+            exePathLen = 0;
     #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
@@ -46,7 +55,81 @@ static void getExePath(FFPlatform* platform)
         else
             exePathLen--; // remove terminating NUL
     #elif defined(__OpenBSD__)
+        // OpenBSD doesn't have a reliable way to get the executable path.
+        // Current implementation uses argv[0], which can be easily spoofed.
+        // See #2195
         size_t exePathLen = 0;
+        kvm_t* kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+        if (kd)
+        {
+            int kpCount;
+            struct kinfo_proc* kp = kvm_getprocs(kd, KERN_PROC_PID, (pid_t) platform->pid, sizeof(*kp), &kpCount);
+            if (kp && kpCount == 1)
+            {
+                char** argv = kvm_getargv(kd, kp, 0);
+                if (argv && argv[0])
+                {
+                    char* arg0 = argv[0];
+                    if (arg0[0])
+                    {
+                        if (strchr(arg0, '/') != NULL) // likely a path (absolute or relative)
+                        {
+                            exePathLen = strlen(arg0);
+                            if (exePathLen < ARRAY_SIZE(exePath))
+                            {
+                                memcpy(exePath, arg0, exePathLen);
+                                exePath[exePathLen] = '\0';
+                            }
+                            else
+                                exePathLen = 0;
+                        }
+                        else
+                        {
+                            FF_STRBUF_AUTO_DESTROY tmpPath = ffStrbufCreate();
+                            if (ffFindExecutableInPath(arg0, &tmpPath) == NULL && tmpPath.length < ARRAY_SIZE(exePath))
+                            {
+                                memcpy(exePath, tmpPath.chars, tmpPath.length + 1);
+                                exePathLen = tmpPath.length;
+                            }
+                        }
+
+                        if (exePathLen > 0)
+                        {
+                            struct stat st;
+                            if (stat(exePath, &st) == 0 && S_ISREG(st.st_mode))
+                            {
+                                int cntp;
+                                struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, platform->pid, sizeof(*kf), &cntp);
+                                if (kf)
+                                {
+                                    int i;
+                                    for (i = 0; i < cntp; i++)
+                                    {
+                                        if (kf[i].fd_fd == KERN_FILE_TEXT)
+                                        {
+                                            // KERN_FILE_TEXT is the executable file, not a shared library, and should be unique in the list.
+                                            if (st.st_dev != (dev_t)kf[i].va_fsid || st.st_ino != (ino_t)kf[i].va_fileid)
+                                                i = -1;
+                                            break;
+                                        }
+                                    }
+                                    if (i < 0)
+                                        exePathLen = 0;
+                                }
+                                else
+                                {
+                                    // If we can't get the list of open files, we can't verify that the file is actually the executable
+                                    // Assume it is
+                                }
+                            }
+                            else
+                                exePathLen = 0;
+                        }
+                    }
+                }
+            }
+            kvm_close(kd);
+        }
     #elif defined(__sun)
         ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
         if (exePathLen >= 0)
@@ -224,6 +307,16 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     #endif
 }
 
+static void getCwd(FFPlatform* platform)
+{
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        ffStrbufSetS(&platform->cwd, cwd);
+        ffStrbufEnsureEndsWithC(&platform->cwd, '/');
+    }
+}
+
 void ffPlatformInitImpl(FFPlatform* platform)
 {
     platform->pid = (uint32_t) getpid();
@@ -235,6 +328,7 @@ void ffPlatformInitImpl(FFPlatform* platform)
         memset(&uts, 0, sizeof(uts));
 
     getExePath(platform);
+    getCwd(platform);
     getHomeDir(platform, pwd);
     getCacheDir(platform);
     getConfigDirs(platform);

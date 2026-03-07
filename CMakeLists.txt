@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.59.0
+    VERSION 2.60.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -107,7 +107,7 @@ option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `pyt
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-    option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" ON)
+    option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" OFF)
 endif()
 if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
@@ -398,7 +398,6 @@ set(LIBFASTFETCH_SRC
     src/common/impl/base64.c
     src/common/impl/FFlist.c
     src/common/impl/FFstrbuf.c
-    src/common/impl/kmod.c
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
     src/common/impl/smbiosHelper.c
@@ -523,6 +522,7 @@ if(LINUX)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -607,6 +607,7 @@ elseif(ANDROID)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -681,6 +682,7 @@ elseif(FreeBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_bsd.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
@@ -774,6 +776,7 @@ elseif(NetBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nbsd.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
         src/detection/bluetooth/bluetooth_bsd.c
@@ -857,6 +860,7 @@ elseif(OpenBSD)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/smbiosHelper.c
+        src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -938,6 +942,7 @@ elseif(APPLE)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_apple.c
+        src/common/impl/kmod_apple.c
         src/common/apple/cf_helpers.c
         src/common/apple/osascript.m
         src/common/apple/smc_temps.c
@@ -1009,11 +1014,13 @@ elseif(WIN32)
         src/common/impl/FFPlatform_windows.c
         src/common/impl/binary_windows.c
         src/common/impl/debug_windows.c
+        src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.cpp
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/wmi.cpp
+        src/common/windows/variant.cpp
         src/common/windows/version.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
@@ -1053,7 +1060,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.cpp
+        src/detection/os/os_windows.c
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1068,7 +1075,7 @@ elseif(WIN32)
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
         src/detection/wifi/wifi_windows.c
-        src/detection/wm/wm_windows.cpp
+        src/detection/wm/wm_windows.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
@@ -1082,6 +1089,7 @@ elseif(SunOS)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_sunos.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
@@ -1163,6 +1171,7 @@ elseif(Haiku)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nosupport.c
         src/common/haiku/version.cpp
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
@@ -1232,6 +1241,7 @@ elseif(GNU)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
@@ -1715,7 +1725,6 @@ elseif(APPLE)
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
-        PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
         PRIVATE "ole32"
@@ -1725,9 +1734,8 @@ elseif(WIN32)
         PRIVATE "version"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
-        PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
-        PRIVATE "propsys"
+        PRIVATE "winbrand"
         PRIVATE "secur32"
     )
     if(NOT ENABLE_WIN7_COMPAT)

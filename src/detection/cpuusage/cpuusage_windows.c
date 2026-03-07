@@ -1,13 +1,12 @@
-#include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
-
 #include "common/mallocHelper.h"
+#include "common/debug.h"
 
 #include <ntstatus.h>
-#include <winternl.h>
 #include <windows.h>
 #include <wchar.h>
 #include "common/windows/perflib_.h"
+#include "common/windows/nt.h"
 
 static const char* getInfoByNqsi(FFlist* cpuTimes)
 {
@@ -155,20 +154,17 @@ static const char* getInfoByPerflib(FFlist* cpuTimes)
 
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
-    #if !FF_WIN7_COMPAT
-    static uint8_t winver = 10; // Assume Windows 10 or later for WoA
-    #else
-    static uint8_t winver = 0;
-    if (winver == 0)
-        winver = (uint8_t) ffStrbufToUInt(&instance.state.platform.sysinfo.release, 1);
-    #endif
+    const char* error = NULL;
 
-    if (winver >= 10)
+    if (ffIsWindows10OrGreater())
     {
-        if (getInfoByPerflib(cpuTimes) == NULL) return NULL;
+        error = getInfoByPerflib(cpuTimes);
+        FF_DEBUG("Get CPU usage info by Perflib: %s", error ?: "success");
+        if (!error) return NULL;
         ffListClear(cpuTimes);
-        winver = 1; // Fall back to NQSI
     }
 
-    return getInfoByNqsi(cpuTimes);
+    error = getInfoByNqsi(cpuTimes);
+    FF_DEBUG("Get CPU usage info by NtQuerySystemInformation: %s", error ?: "success");
+    return error;
 }

@@ -19,6 +19,7 @@ typedef struct FFDBusLibrary
     FF_LIBRARY_SYMBOL(dbus_message_iter_next)
     FF_LIBRARY_SYMBOL(dbus_message_unref)
     FF_LIBRARY_SYMBOL(dbus_connection_send_with_reply_and_block)
+    FF_LIBRARY_SYMBOL(dbus_connection_unref)
 } FFDBusLibrary;
 
 typedef struct FFDBusData
@@ -36,10 +37,13 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result);
 bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result);
+void ffDBusDestroyData(FFDBusData* data);
 
 static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface)
 {
     return ffDBusGetMethodReply(dbus, busName, objectPath, "org.freedesktop.DBus.Properties", "GetAll", interface, NULL);
 }
+
+#define FF_DBUS_AUTO_DESTROY_DATA __attribute__((__cleanup__(ffDBusDestroyData)))
 
 #endif // FF_HAVE_DBUS

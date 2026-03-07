@@ -10,6 +10,7 @@ void ffPlatformInit(FFPlatform* platform)
     ffListInit(&platform->configDirs, sizeof(FFstrbuf));
     ffListInit(&platform->dataDirs, sizeof(FFstrbuf));
     ffStrbufInit(&platform->exePath);
+    ffStrbufInit(&platform->cwd);
 
     ffStrbufInit(&platform->userName);
     ffStrbufInit(&platform->fullUserName);
@@ -49,6 +50,7 @@ void ffPlatformDestroy(FFPlatform* platform)
         ffStrbufDestroy(dir);
     ffListDestroy(&platform->dataDirs);
     ffStrbufDestroy(&platform->exePath);
+    ffStrbufDestroy(&platform->cwd);
 
     ffStrbufDestroy(&platform->userName);
     ffStrbufDestroy(&platform->hostName);

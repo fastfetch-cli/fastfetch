@@ -87,7 +87,7 @@ static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs,
         for (uint32_t i = 0; i < numArgs; ++i)
         {
             const FFformatarg* arg = &arguments[i];
-            if (arg->name && strcasecmp(placeholderValue, arg->name) == 0)
+            if (arg->name && ffStrEqualsIgnCase(placeholderValue, arg->name))
                 return i + 1;
         }
     }
@@ -204,7 +204,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
-            if (index > numArgs)
+            if (index > numArgs || index < 1)
             {
                 appendInvalidPlaceholder(buffer, "{?", &placeholderValue, i, formatstr->length);
                 continue;
@@ -230,7 +230,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
-            if (index > numArgs)
+            if (index > numArgs || index < 1)
             {
                 appendInvalidPlaceholder(buffer, "{/", &placeholderValue, i, formatstr->length);
                 continue;

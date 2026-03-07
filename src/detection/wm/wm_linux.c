@@ -170,8 +170,8 @@ static const char* getNiri(FFstrbuf* result)
         NULL
     }) == NULL)
     { // niri 25.11 (b35bcae)
-        ffStrbufSubstrBeforeLastC(result, ' ');
         ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeLastC(result, ' ');
         return NULL;
     }
 

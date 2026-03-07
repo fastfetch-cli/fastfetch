@@ -18,9 +18,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     // For cross-platform portability; used by `presets/examples/13.jsonc`
     if (options->folders.length == 1 && options->folders.chars[0] == '/')
     {
-        wchar_t path[MAX_PATH + 1];
-        GetSystemWindowsDirectoryW(path, ARRAY_SIZE(path));
-        options->folders.chars[0] = (char) path[0];
+        options->folders.chars[0] = (char) SharedUserData->NtSystemRoot[0];
         ffStrbufAppendS(&options->folders, ":\\");
     }
 

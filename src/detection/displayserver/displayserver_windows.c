@@ -2,41 +2,30 @@
 #include "common/windows/unicode.h"
 #include "common/edidHelper.h"
 
-#include <dwmapi.h>
-#include <winuser.h>
-#include <wchar.h>
+#include <windows.h>
+#include <shellscalingapi.h>
 
-typedef struct FFMonitorInfo
-{
-    HMONITOR handle;
-    MONITORINFOEXW info;
-} FFMonitorInfo;
-
-static CALLBACK BOOL MonitorEnumProc(
-    HMONITOR hMonitor,
-    FF_MAYBE_UNUSED HDC hdc,
-    FF_MAYBE_UNUSED LPRECT lpRect,
-    LPARAM lParam
-)
-{
-    FFlist* monitors = (FFlist*) lParam;
-    FFMonitorInfo* newMonitor = ffListAdd(monitors);
-    newMonitor->handle = hMonitor;
-    newMonitor->info.cbSize = sizeof(newMonitor->info);
-
-    return GetMonitorInfoW(hMonitor, (MONITORINFO*) &newMonitor->info);
-}
+// http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
+BOOL WINAPI IsThreadDesktopComposited();
+BOOL WINAPI GetDpiForMonitorInternal(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
-    FF_LIST_AUTO_DESTROY monitors = ffListCreate(sizeof(FFMonitorInfo));
-    EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM) &monitors);
-
     #if FF_WIN7_COMPAT
-    HDC hdc = GetDC(NULL);
-    uint32_t systemDpi = (uint32_t) GetDeviceCaps(hdc, LOGPIXELSX);
-    if (systemDpi == 0) systemDpi = 96;
-    ReleaseDC(NULL, hdc);
+    static __typeof__(GetDpiForMonitorInternal)* ffGetDpiForMonitor;
+    if (!ffGetDpiForMonitor)
+    {
+        HMODULE user32 = GetModuleHandleW(L"user32.dll");
+        if (user32)
+        {
+            // GetDpiForMonitorInternal (returns BOOL) is in user32, while GetDpiForMonitor (returns HRESULT) is in shcore.
+            // Both are available since Windows 8.1. Not sure why Microsoft decided to put them in different DLLs, but whatever.
+            // Use GetDpiForMonitorInternal for loading one less dll
+            ffGetDpiForMonitor = (void*) GetProcAddress(user32, "GetDpiForMonitorInternal");
+        }
+    }
+    #else
+    #define ffGetDpiForMonitor GetDpiForMonitorInternal
     #endif
 
     DISPLAYCONFIG_PATH_INFO paths[128];
@@ -54,7 +43,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
     {
         for (uint32_t i = 0; i < pathCount; ++i)
         {
-            DISPLAYCONFIG_PATH_INFO* path = &paths[i];
+            const DISPLAYCONFIG_PATH_INFO* path = &paths[i];
+            const DISPLAYCONFIG_SOURCE_MODE* sourceMode = &modes[path->sourceInfo.modeInfoIdx].sourceMode;
 
             DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
                 .header = {
@@ -64,20 +54,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     .id = path->sourceInfo.id,
                 },
             };
-
-            FFMonitorInfo* monitorInfo = NULL;
-            if (DisplayConfigGetDeviceInfo(&sourceName.header) == ERROR_SUCCESS)
-            {
-                FF_LIST_FOR_EACH(FFMonitorInfo, item, monitors)
-                {
-                    if (wcsncmp(item->info.szDevice, sourceName.viewGdiDeviceName, ARRAY_SIZE(sourceName.viewGdiDeviceName)) == 0)
-                    {
-                        monitorInfo = item;
-                        break;
-                    }
-                }
-            }
-            if (!monitorInfo) continue;
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             uint32_t physicalWidth = 0, physicalHeight = 0;
@@ -131,8 +107,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             }
 
-            uint32_t width = modes[path->sourceInfo.modeInfoIdx].sourceMode.width;
-            uint32_t height = modes[path->sourceInfo.modeInfoIdx].sourceMode.height;
+            uint32_t width = sourceMode->width;
+            uint32_t height = sourceMode->height;
             if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
                 path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
             {
@@ -168,21 +144,32 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
             }
 
-            uint32_t scaledWidth = (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left);
-            uint32_t scaledHeight = (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top);
+            uint32_t systemDpi = 0;
+
+            if (ffGetDpiForMonitor)
+            {
+                HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
+                if (hMonitor)
+                {
+                    UINT ignored;
+                    ffGetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
+                }
+            }
+
+            if (systemDpi == 0)
+            {
+                HDC hdc = GetDC(NULL);
+                systemDpi = (uint32_t) GetDeviceCaps(hdc, LOGPIXELSX);
+                if (systemDpi == 0) systemDpi = 96;
+                ReleaseDC(NULL, hdc);
+            }
 
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                #if FF_WIN7_COMPAT
-                // Windows 7 always reports scaled width as the real width, as I tested on VM with 200% scaling.
-                scaledWidth == width ? width * 96 / systemDpi : scaledWidth,
-                scaledHeight == height ? height * 96 / systemDpi : scaledHeight,
-                #else
-                scaledWidth,
-                scaledHeight,
-                #endif
+                width * 96 / systemDpi,
+                height * 96 / systemDpi,
                 preferredMode.width,
                 preferredMode.height,
                 preferredRefreshRate,
@@ -193,8 +180,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
                     ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
-                !!(monitorInfo->info.dwFlags & MONITORINFOF_PRIMARY),
-                (uint64_t)(uintptr_t) monitorInfo->handle,
+                sourceMode->position.x == 0 && sourceMode->position.y == 0,
+                path->sourceInfo.id,
                 physicalWidth,
                 physicalHeight,
                 "GDI"
@@ -253,8 +240,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    BOOL enabled;
-    if(SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
+    if (IsThreadDesktopComposited())
     {
         ffStrbufSetStatic(&ds->wmProcessName, "dwm.exe");
         ffStrbufSetStatic(&ds->wmPrettyName, "Desktop Window Manager");

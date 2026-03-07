@@ -4,6 +4,8 @@
 
 #include <windows.h>
 
+#define FF_VERSION_LANG_EN_US L"040904b0"
+
 bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrbuf* version)
 {
     DWORD handle;
@@ -19,40 +21,25 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
                 UINT len;
                 if (VerQueryValueW(versionData, L"\\", (void **)&verInfo, &len) && len && verInfo->dwSignature == 0xFEEF04BD)
                 {
-                    ffStrbufAppendF(version, "%u.%u.%u.%u",
-                                    (unsigned)((verInfo->dwProductVersionMS >> 16) & 0xffff),
-                                    (unsigned)((verInfo->dwProductVersionMS >> 0) & 0xffff),
-                                    (unsigned)((verInfo->dwProductVersionLS >> 16) & 0xffff),
-                                    (unsigned)((verInfo->dwProductVersionLS >> 0) & 0xffff));
+                    ffStrbufSetF(version, "%u.%u.%u.%u",
+                        (unsigned)((verInfo->dwProductVersionMS >> 16) & 0xffff),
+                        (unsigned)((verInfo->dwProductVersionMS >> 0) & 0xffff),
+                        (unsigned)((verInfo->dwProductVersionLS >> 16) & 0xffff),
+                        (unsigned)((verInfo->dwProductVersionLS >> 0) & 0xffff));
                     return true;
                 }
             }
             else
             {
-                struct
+                wchar_t* value;
+                UINT valueLen;
+
+                wchar_t subBlock[128] = L"\\StringFileInfo\\" FF_VERSION_LANG_EN_US L"\\";
+                wcscat_s(subBlock, ARRAY_SIZE(subBlock), stringName);
+                if (VerQueryValueW(versionData, subBlock, (void **)&value, &valueLen) && valueLen > 0)
                 {
-                    WORD language;
-                    WORD codePage;
-                }* translations;
-
-                UINT translationsLen;
-
-                if (VerQueryValueW(versionData, L"\\VarFileInfo\\Translation",
-                                   (void **) &translations, &translationsLen) &&
-                    translationsLen >= sizeof(*translations))
-                {
-                    wchar_t subBlock[128];
-                    snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\%04x%04x\\%ls",
-                              translations[0].language, translations[0].codePage, stringName);
-
-                    wchar_t* value;
-                    UINT valueLen;
-
-                    if (VerQueryValueW(versionData, subBlock, (void **)&value, &valueLen) && valueLen > 0)
-                    {
-                        ffStrbufSetWS(version, value);
-                        return true;
-                    }
+                    ffStrbufSetWS(version, value);
+                    return true;
                 }
             }
         }

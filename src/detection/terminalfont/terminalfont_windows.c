@@ -1,5 +1,6 @@
 #include "common/library.h"
 #include "common/io.h"
+#include "common/path.h"
 #include "common/processing.h"
 #include "common/properties.h"
 #include "common/windows/unicode.h"
@@ -94,44 +95,51 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
     FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
     const char* error = NULL;
 
-    if(terminalExe && terminalExe->length > 0 && !ffStrbufEqualS(terminalExe, "Windows Terminal"))
+    if(terminalExe && ffIsAbsolutePath(terminalExe->chars))
     {
-        char jsonPath[MAX_PATH + 1];
-        char* pathEnd = ffStrCopy(jsonPath, terminalExe->chars, ffStrbufLastIndexC(terminalExe, '\\') + 1);
-        ffStrCopy(pathEnd, ".portable", ARRAY_SIZE(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
+        FF_STRBUF_AUTO_DESTROY jsonPath = ffStrbufCreateA(MAX_PATH);
+        ffStrbufAppendNS(&jsonPath, ffStrbufLastIndexC(terminalExe, '\\') + 1, terminalExe->chars);
+        ffStrbufAppendS(&jsonPath, ".portable");
 
-        if(ffPathExists(jsonPath, FF_PATHTYPE_ANY))
+        if(ffPathExists(jsonPath.chars, FF_PATHTYPE_ANY))
         {
-            ffStrCopy(pathEnd, "settings\\settings.json", ARRAY_SIZE(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
-            if(!ffAppendFileBuffer(jsonPath, &json))
+            ffStrbufSubstrBefore(&jsonPath, jsonPath.length - strlen(".portable"));
+            ffStrbufAppendS(&jsonPath, "settings\\settings.json");
+            if(!ffAppendFileBuffer(jsonPath.chars, &json))
                 error = "Error reading Windows Terminal portable settings JSON file";
         }
-        else if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, jsonPath)))
+        else
         {
-            size_t remaining = ARRAY_SIZE(jsonPath) - strlen(jsonPath) - 1;
-            if(ffStrbufContainIgnCaseS(terminalExe, "_8wekyb3d8bbwe\\"))
+            PWSTR localAppDataW = NULL;
+            if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, NULL, &localAppDataW)))
             {
-                // Microsoft Store version
-                if(ffStrbufContainIgnCaseS(terminalExe, ".WindowsTerminalPreview_"))
+                ffStrbufSetWS(&jsonPath, localAppDataW);
+                CoTaskMemFree(localAppDataW);
+
+                if(ffStrbufContainIgnCaseS(terminalExe, "_8wekyb3d8bbwe\\"))
                 {
-                    // Preview version
-                    strncat(jsonPath, "\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json", remaining);
-                    if(!ffAppendFileBuffer(jsonPath, &json))
-                        error = "Error reading Windows Terminal Preview settings JSON file";
+                    // Microsoft Store version
+                    if(ffStrbufContainIgnCaseS(terminalExe, ".WindowsTerminalPreview_"))
+                    {
+                        // Preview version
+                        ffStrbufAppendS(&jsonPath, "\\Packages\\Microsoft.WindowsTerminalPreview_8wekyb3d8bbwe\\LocalState\\settings.json");
+                        if(!ffAppendFileBuffer(jsonPath.chars, &json))
+                            error = "Error reading Windows Terminal Preview settings JSON file";
+                    }
+                    else
+                    {
+                        // Stable version
+                        ffStrbufAppendS(&jsonPath, "\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json");
+                        if(!ffAppendFileBuffer(jsonPath.chars, &json))
+                            error = "Error reading Windows Terminal settings JSON file";
+                    }
                 }
                 else
                 {
-                    // Stable version
-                    strncat(jsonPath, "\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json", remaining);
-                    if(!ffAppendFileBuffer(jsonPath, &json))
+                    ffStrbufAppendS(&jsonPath, "\\Microsoft\\Windows Terminal\\settings.json");
+                    if(!ffAppendFileBuffer(jsonPath.chars, &json))
                         error = "Error reading Windows Terminal settings JSON file";
                 }
-            }
-            else
-            {
-                strncat(jsonPath, "\\Microsoft\\Windows Terminal\\settings.json", remaining);
-                if(!ffAppendFileBuffer(jsonPath, &json))
-                    error = "Error reading Windows Terminal settings JSON file";
             }
         }
     }

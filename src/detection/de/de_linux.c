@@ -58,7 +58,7 @@ static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 static const char* getGnomeByDbus(FF_MAYBE_UNUSED FFstrbuf* result)
 {
 #ifdef FF_HAVE_DBUS
-    FFDBusData dbus;
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL)
         return "ffDBusLoadData() failed";
 

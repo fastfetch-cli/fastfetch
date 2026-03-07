@@ -54,6 +54,22 @@ bool ffPrintTitle(FFTitleOptions* options)
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY cwdTilde = ffStrbufCreate();
+        if (
+            #if _WIN32
+                ffStrbufStartsWithIgnCase
+            #else
+                ffStrbufStartsWith
+            #endif
+            (&instance.state.platform.cwd, &instance.state.platform.homeDir))
+        {
+            ffStrbufAppendS(&cwdTilde, "~/");
+            ffStrbufAppendNS(&cwdTilde, instance.state.platform.cwd.length - instance.state.platform.homeDir.length, &instance.state.platform.cwd.chars[instance.state.platform.homeDir.length]);
+        }
+        else
+            ffStrbufSet(&cwdTilde, &instance.state.platform.cwd);
+        if (cwdTilde.length > 1) ffStrbufTrimRight(&cwdTilde, '/');
+
         FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
             FF_FORMAT_ARG(hostName, "host-name"),
@@ -70,6 +86,7 @@ bool ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
             #endif
             FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
+            FF_FORMAT_ARG(cwdTilde, "cwd"),
         }));
     }
 
@@ -139,6 +156,7 @@ bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
     yyjson_mut_obj_add_uint(doc, obj, "pid", instance.state.platform.pid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "cwd", &instance.state.platform.cwd);
 
     return true;
 }
@@ -183,5 +201,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"Full user name", "full-user-name"},
         {"UID (*nix) / SID (Windows)", "user-id"},
         {"PID of current process", "pid"},
+        {"CWD with home dir replaced by `~`", "cwd"},
     }))
 };

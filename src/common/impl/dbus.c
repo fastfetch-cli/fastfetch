@@ -19,6 +19,7 @@ static bool loadLibSymbols(FFDBusLibrary* lib)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_next, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_unref, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_send_with_reply_and_block, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_unref, false)
     dbus = NULL; // don't auto dlclose
     return true;
 }
@@ -49,6 +50,15 @@ const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data)
         return "Failed to connect to DBus";
 
     return NULL;
+}
+
+void ffDBusDestroyData(FFDBusData* data)
+{
+    if (data->connection != NULL)
+    {
+        data->lib->ffdbus_connection_unref(data->connection);
+        data->connection = NULL;
+    }
 }
 
 bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)

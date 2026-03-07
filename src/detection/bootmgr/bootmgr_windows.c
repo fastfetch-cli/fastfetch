@@ -34,21 +34,30 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     if (enablePrivilege(L"SeSystemEnvironmentPrivilege") != NULL)
         return "Failed to enable SeSystemEnvironmentPrivilege";
 
-    if (GetFirmwareEnvironmentVariableW(L"BootCurrent", L"{" FF_EFI_GLOBAL_GUID L"}", &result->order, sizeof(result->order)) != 2)
-        return "GetFirmwareEnvironmentVariableW(BootCurrent) failed";
+    GUID efiGlobalGuid;
+    if (!NT_SUCCESS(RtlGUIDFromString(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"{" FF_EFI_GLOBAL_GUID L"}"), &efiGlobalGuid)))
+        return "RtlGUIDFromString() failed";
+
+    ULONG size = sizeof(result->order);
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"BootCurrent"), &efiGlobalGuid, &result->order, &size, NULL)))
+        return "NtQuerySystemEnvironmentValueEx(BootCurrent) failed";
+    if (size != sizeof(result->order))
+        return "NtQuerySystemEnvironmentValueEx(BootCurrent) returned unexpected size";
 
     uint8_t buffer[2048];
-    wchar_t key[16];
+    wchar_t key[9];
     swprintf(key, ARRAY_SIZE(key), L"Boot%04X", result->order);
-    uint32_t size = GetFirmwareEnvironmentVariableW(key, L"{" FF_EFI_GLOBAL_GUID L"}", buffer, sizeof(buffer));
+    size = sizeof(buffer);
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(key), &efiGlobalGuid, buffer, &size, NULL)))
+        return "NtQuerySystemEnvironmentValueEx(Boot####) failed";
     if (size < sizeof(FFEfiLoadOption) || size == ARRAY_SIZE(buffer))
-        return "GetFirmwareEnvironmentVariableW(Boot####) failed";
+        return "NtQuerySystemEnvironmentValueEx(Boot####) returned unexpected size";
 
     ffEfiFillLoadOption((FFEfiLoadOption *)buffer, result);
 
-    DWORD uefiSecureBootEnabled = 0, bufSize = 0;
-    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State", L"UEFISecureBootEnabled", RRF_RT_REG_DWORD, NULL, &uefiSecureBootEnabled, &bufSize) == ERROR_SUCCESS)
-        result->secureBoot = !!uefiSecureBootEnabled;
+    SYSTEM_SECUREBOOT_INFORMATION ssi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemSecureBootInformation, &ssi, sizeof(ssi), NULL)))
+        result->secureBoot = ssi.SecureBootEnabled;
 
     return NULL;
 }

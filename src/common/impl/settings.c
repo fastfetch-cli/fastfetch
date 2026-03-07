@@ -201,7 +201,7 @@ FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaNa
 
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
-    FFDBusData dbus;
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL)
         return FF_VARIANT_NULL;
 
@@ -260,7 +260,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
 
 FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* propertyPrefix, FFvarianttype type, void* data, FFTestXfconfPropCallback* cb)
 {
-    FFDBusData dbus;
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL)
         return FF_VARIANT_NULL;
 
