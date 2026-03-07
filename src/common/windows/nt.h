@@ -659,7 +659,7 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 
 static inline bool ffIsWindows10OrGreater()
 {
-    #if FF_WIN7_COMPAT
+    #if FF_WIN81_COMPAT
     return SharedUserData->NtMajorVersion >= 10;
     #else
     return true;
