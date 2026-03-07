@@ -208,10 +208,6 @@ static const char* detectWine(void)
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 {
-    RTL_OSVERSIONINFOW osVersion = { .dwOSVersionInfoSize = sizeof(osVersion) };
-    if (!NT_SUCCESS(RtlGetVersion(&osVersion))) // From PEB, not affected by manifest shenanigans
-        return;
-
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
         return;
@@ -221,31 +217,23 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 
     ffStrbufAppendF(&info->release,
         "%u.%u.%u.%u",
-        (unsigned) osVersion.dwMajorVersion,
-        (unsigned) osVersion.dwMinorVersion,
-        (unsigned) osVersion.dwBuildNumber,
+        (unsigned) SharedUserData->NtMajorVersion,
+        (unsigned) SharedUserData->NtMinorVersion,
+        (unsigned) SharedUserData->NtBuildNumber,
         (unsigned) ubr);
 
     ffRegReadStrbuf(hKey, L"BuildLabEx", &info->version, NULL);
 
     const char* wineVersion = detectWine();
     if (wineVersion)
-        ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
-    else
     {
-        switch (osVersion.dwPlatformId) // Hardcoded as WIN32_NT, but just in case
-        {
-        case VER_PLATFORM_WIN32s:
-            ffStrbufSetStatic(&info->name, "WIN32s");
-            break;
-        case VER_PLATFORM_WIN32_WINDOWS:
-            ffStrbufSetStatic(&info->name, "WIN32_WINDOWS");
-            break;
-        case VER_PLATFORM_WIN32_NT:
-            ffStrbufSetStatic(&info->name, "WIN32_NT");
-            break;
-        }
+        if (instance.config.general.detectVersion)
+            ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
+        else
+            ffStrbufSetStatic(&info->name, "Wine");
     }
+    else
+        ffStrbufSetStatic(&info->name, "WIN32_NT");
 }
 
 static void getSystemPageSize(FFPlatformSysinfo* info)
