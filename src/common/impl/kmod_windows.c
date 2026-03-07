@@ -3,7 +3,7 @@
 #include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 
-bool ffKmodLoaded(FF_MAYBE_UNUSED const char* modName)
+bool ffKmodLoaded(const char* modName)
 {
     ULONG bufferSize = 0;
     NtQuerySystemInformation(SystemModuleInformation, NULL, 0, &bufferSize);
