@@ -226,12 +226,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 
     const char* wineVersion = detectWine();
     if (wineVersion)
-    {
-        if (instance.config.general.detectVersion)
-            ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
-        else
-            ffStrbufSetStatic(&info->name, "Wine");
-    }
+        ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
     else
         ffStrbufSetStatic(&info->name, "WIN32_NT");
 }
