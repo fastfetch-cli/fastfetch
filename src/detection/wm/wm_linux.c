@@ -169,9 +169,10 @@ static const char* getNiri(FFstrbuf* result)
         "--version",
         NULL
     }) == NULL)
-    { // niri 25.11 (b35bcae)
+    { // niri 25.11 (commit b35bcae)
         ffStrbufSubstrAfterFirstC(result, ' ');
-        ffStrbufSubstrBeforeLastC(result, ' ');
+        ffStrbufSubstrBeforeLastC(result, '(');
+        ffStrbufTrimRightSpace(result);
         return NULL;
     }
 

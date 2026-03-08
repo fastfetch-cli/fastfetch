@@ -14,6 +14,7 @@ extern "C" {
 /**
  * @page page_kde_output_device_v2 The kde_output_device_v2 protocol
  * @section page_ifaces_kde_output_device_v2 Interfaces
+ * - @subpage page_iface_kde_output_device_registry_v2 - output devices
  * - @subpage page_iface_kde_output_device_v2 - output configuration representation
  * - @subpage page_iface_kde_output_device_mode_v2 - output mode
  * @section page_copyright_kde_output_device_v2 Copyright
@@ -29,8 +30,32 @@ extern "C" {
  * </pre>
  */
 struct kde_output_device_mode_v2;
+struct kde_output_device_registry_v2;
 struct kde_output_device_v2;
 
+#ifndef KDE_OUTPUT_DEVICE_REGISTRY_V2_INTERFACE
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_INTERFACE
+/**
+ * @page page_iface_kde_output_device_registry_v2 kde_output_device_registry_v2
+ * @section page_iface_kde_output_device_registry_v2_desc Description
+ *
+ * This interface can be used to list output devices.
+ *
+ * If this global is bound with a version less than 21, the unsupported_version
+ * protocol error will be posted.
+ * @section page_iface_kde_output_device_registry_v2_api API
+ * See @ref iface_kde_output_device_registry_v2.
+ */
+/**
+ * @defgroup iface_kde_output_device_registry_v2 The kde_output_device_registry_v2 interface
+ *
+ * This interface can be used to list output devices.
+ *
+ * If this global is bound with a version less than 21, the unsupported_version
+ * protocol error will be posted.
+ */
+extern const struct wl_interface kde_output_device_registry_v2_interface;
+#endif
 #ifndef KDE_OUTPUT_DEVICE_V2_INTERFACE
 #define KDE_OUTPUT_DEVICE_V2_INTERFACE
 /**
@@ -119,6 +144,119 @@ extern const struct wl_interface kde_output_device_v2_interface;
  */
 extern const struct wl_interface kde_output_device_mode_v2_interface;
 #endif
+
+#ifndef KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ * kde_output_device_registry_v2 error values
+ *
+ * These errors can be emitted in response to some requests.
+ */
+enum kde_output_device_registry_v2_error {
+	/**
+	 * the registry was bound with an unsupported version
+	 */
+	KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_UNSUPPORTED_VERSION = 0,
+};
+#endif /* KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM */
+
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ * @struct kde_output_device_registry_v2_listener
+ */
+struct kde_output_device_registry_v2_listener {
+	/**
+	 * no new output announcements
+	 *
+	 * This event is sent in response to the stop request. The
+	 * compositor will immediately destroy the object after sending
+	 * this event.
+	 * @since 21
+	 */
+	void (*finished)(void *data,
+			 struct kde_output_device_registry_v2 *kde_output_device_registry_v2);
+	/**
+	 * new available output
+	 *
+	 * This event is sent when a new output is connected or after
+	 * binding this global to list all available outputs.
+	 * @since 21
+	 */
+	void (*output)(void *data,
+		       struct kde_output_device_registry_v2 *kde_output_device_registry_v2,
+		       struct kde_output_device_v2 *output);
+};
+
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ */
+static inline int
+kde_output_device_registry_v2_add_listener(struct kde_output_device_registry_v2 *kde_output_device_registry_v2,
+					   const struct kde_output_device_registry_v2_listener *listener, void *data)
+{
+	return wl_proxy_add_listener((struct wl_proxy *) kde_output_device_registry_v2,
+				     (void (**)(void)) listener, data);
+}
+
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP 0
+
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ */
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_FINISHED_SINCE_VERSION 21
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ */
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_OUTPUT_SINCE_VERSION 21
+
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ */
+#define KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP_SINCE_VERSION 21
+
+/** @ingroup iface_kde_output_device_registry_v2 */
+static inline void
+kde_output_device_registry_v2_set_user_data(struct kde_output_device_registry_v2 *kde_output_device_registry_v2, void *user_data)
+{
+	wl_proxy_set_user_data((struct wl_proxy *) kde_output_device_registry_v2, user_data);
+}
+
+/** @ingroup iface_kde_output_device_registry_v2 */
+static inline void *
+kde_output_device_registry_v2_get_user_data(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
+{
+	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_device_registry_v2);
+}
+
+static inline uint32_t
+kde_output_device_registry_v2_get_version(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
+{
+	return wl_proxy_get_version((struct wl_proxy *) kde_output_device_registry_v2);
+}
+
+/** @ingroup iface_kde_output_device_registry_v2 */
+static inline void
+kde_output_device_registry_v2_destroy(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
+{
+	wl_proxy_destroy((struct wl_proxy *) kde_output_device_registry_v2);
+}
+
+/**
+ * @ingroup iface_kde_output_device_registry_v2
+ *
+ * This request indicates that the client no longer wants to receive new
+ * output announcements. The compositor will send the
+ * kde_output_device_registry_v2.finished event in response to this request.
+ * The compositor may still send new output announcements after calling this
+ * request until the kde_output_device_registry_v2.finished event is sent.
+ */
+static inline void
+kde_output_device_registry_v2_stop(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
+{
+	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_registry_v2,
+			 KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_registry_v2), 0);
+}
 
 #ifndef KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
 #define KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
@@ -838,6 +976,16 @@ struct kde_output_device_v2_listener {
 	void (*auto_brightness)(void *data,
 				struct kde_output_device_v2 *kde_output_device_v2,
 				uint32_t enabled);
+	/**
+	 * the output has been removed
+	 *
+	 * This event is sent when the output device is disconnected and
+	 * no new updates will be sent. The client should call the
+	 * kde_output_device_v2.release request after receiving this event.
+	 * @since 21
+	 */
+	void (*removed)(void *data,
+			struct kde_output_device_v2 *kde_output_device_v2);
 };
 
 /**
@@ -850,6 +998,8 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
 	return wl_proxy_add_listener((struct wl_proxy *) kde_output_device_v2,
 				     (void (**)(void)) listener, data);
 }
+
+#define KDE_OUTPUT_DEVICE_V2_RELEASE 0
 
 /**
  * @ingroup iface_kde_output_device_v2
@@ -995,7 +1145,15 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_AUTO_BRIGHTNESS_SINCE_VERSION 20
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_REMOVED_SINCE_VERSION 21
 
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_RELEASE_SINCE_VERSION 21
 
 /** @ingroup iface_kde_output_device_v2 */
 static inline void
@@ -1022,6 +1180,19 @@ static inline void
 kde_output_device_v2_destroy(struct kde_output_device_v2 *kde_output_device_v2)
 {
 	wl_proxy_destroy((struct wl_proxy *) kde_output_device_v2);
+}
+
+/**
+ * @ingroup iface_kde_output_device_v2
+ *
+ * This notifies the compositor that the client no longer wishes to use
+ * the kde_output_device_v2 object.
+ */
+static inline void
+kde_output_device_v2_release(struct kde_output_device_v2 *kde_output_device_v2)
+{
+	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_v2,
+			 KDE_OUTPUT_DEVICE_V2_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2), WL_MARSHAL_FLAG_DESTROY);
 }
 
 #ifndef KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM

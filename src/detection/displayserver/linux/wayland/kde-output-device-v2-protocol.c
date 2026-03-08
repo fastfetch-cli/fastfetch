@@ -18,6 +18,7 @@
 #include <wayland-util.h>
 
 extern const struct wl_interface kde_output_device_mode_v2_interface;
+extern const struct wl_interface kde_output_device_v2_interface;
 
 static const struct wl_interface *kde_output_device_v2_types[] = {
 	NULL,
@@ -28,14 +29,34 @@ static const struct wl_interface *kde_output_device_v2_types[] = {
 	NULL,
 	NULL,
 	NULL,
+	&kde_output_device_v2_interface,
 	&kde_output_device_mode_v2_interface,
 	&kde_output_device_mode_v2_interface,
 };
 
+static const struct wl_message kde_output_device_registry_v2_requests[] = {
+	{ "stop", "21", kde_output_device_v2_types + 0 },
+};
+
+static const struct wl_message kde_output_device_registry_v2_events[] = {
+	{ "finished", "21", kde_output_device_v2_types + 0 },
+	{ "output", "21n", kde_output_device_v2_types + 8 },
+};
+
+WL_EXPORT const struct wl_interface kde_output_device_registry_v2_interface = {
+	"kde_output_device_registry_v2", 21,
+	1, kde_output_device_registry_v2_requests,
+	2, kde_output_device_registry_v2_events,
+};
+
+static const struct wl_message kde_output_device_v2_requests[] = {
+	{ "release", "21", kde_output_device_v2_types + 0 },
+};
+
 static const struct wl_message kde_output_device_v2_events[] = {
 	{ "geometry", "iiiiissi", kde_output_device_v2_types + 0 },
-	{ "current_mode", "o", kde_output_device_v2_types + 8 },
-	{ "mode", "n", kde_output_device_v2_types + 9 },
+	{ "current_mode", "o", kde_output_device_v2_types + 9 },
+	{ "mode", "n", kde_output_device_v2_types + 10 },
 	{ "done", "", kde_output_device_v2_types + 0 },
 	{ "scale", "f", kde_output_device_v2_types + 0 },
 	{ "edid", "s", kde_output_device_v2_types + 0 },
@@ -69,12 +90,13 @@ static const struct wl_message kde_output_device_v2_events[] = {
 	{ "sharpness", "17u", kde_output_device_v2_types + 0 },
 	{ "priority", "18u", kde_output_device_v2_types + 0 },
 	{ "auto_brightness", "20u", kde_output_device_v2_types + 0 },
+	{ "removed", "21", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_v2_interface = {
-	"kde_output_device_v2", 20,
-	0, NULL,
-	36, kde_output_device_v2_events,
+	"kde_output_device_v2", 21,
+	1, kde_output_device_v2_requests,
+	37, kde_output_device_v2_events,
 };
 
 static const struct wl_message kde_output_device_mode_v2_events[] = {
@@ -86,7 +108,7 @@ static const struct wl_message kde_output_device_mode_v2_events[] = {
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_mode_v2_interface = {
-	"kde_output_device_mode_v2", 20,
+	"kde_output_device_mode_v2", 21,
 	0, NULL,
 	5, kde_output_device_mode_v2_events,
 };

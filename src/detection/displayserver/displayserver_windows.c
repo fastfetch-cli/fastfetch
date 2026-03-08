@@ -11,23 +11,6 @@ BOOL WINAPI GetDpiForMonitorInternal(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
-    #if FF_WIN7_COMPAT
-    static __typeof__(GetDpiForMonitorInternal)* ffGetDpiForMonitor;
-    if (!ffGetDpiForMonitor)
-    {
-        HMODULE user32 = GetModuleHandleW(L"user32.dll");
-        if (user32)
-        {
-            // GetDpiForMonitorInternal (returns BOOL) is in user32, while GetDpiForMonitor (returns HRESULT) is in shcore.
-            // Both are available since Windows 8.1. Not sure why Microsoft decided to put them in different DLLs, but whatever.
-            // Use GetDpiForMonitorInternal for loading one less dll
-            ffGetDpiForMonitor = (void*) GetProcAddress(user32, "GetDpiForMonitorInternal");
-        }
-    }
-    #else
-    #define ffGetDpiForMonitor GetDpiForMonitorInternal
-    #endif
-
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = ARRAY_SIZE(paths);
     DISPLAYCONFIG_MODE_INFO modes[256];
@@ -145,15 +128,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
             }
 
             uint32_t systemDpi = 0;
-
-            if (ffGetDpiForMonitor)
+            HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
+            if (hMonitor)
             {
-                HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
-                if (hMonitor)
-                {
-                    UINT ignored;
-                    ffGetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
-                }
+                UINT ignored;
+                GetDpiForMonitorInternal(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
             }
 
             if (systemDpi == 0)

@@ -252,8 +252,8 @@ void ffListFeatures(void)
         #if FF_HAVE_EMBEDDED_PCIIDS
             "Embedded pciids\n"
         #endif
-        #if FF_WIN7_COMPAT
-            "Windows 7 Compatibility\n"
+        #if FF_WIN81_COMPAT
+            "Windows 8.1 Compatibility\n"
         #endif
         #if FF_APPLE_MEMSIZE_USABLE
             "Apple memsize_usable\n"

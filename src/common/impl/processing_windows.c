@@ -154,30 +154,14 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
             switch (GetLastError())
             {
             case ERROR_IO_PENDING:
-                #if !FF_WIN7_COMPAT
                 if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, timeout < 0 ? INFINITE : (DWORD) timeout, FALSE))
-                #else
-                // To support Windows 7
-                if (timeout >= 0 && WaitForSingleObject(hChildPipeRead, (DWORD) timeout) != WAIT_OBJECT_0)
-                {
-                    CancelIo(hChildPipeRead);
-                    TerminateProcess(hProcess, 1);
-                    return "WaitForSingleObject(hChildPipeRead) failed or timeout (try increasing --processing-timeout)";
-                }
-
-                if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))
-                #endif
                 {
                     if (GetLastError() == ERROR_BROKEN_PIPE)
                         return NULL;
 
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
-                    return "GetOverlappedResult"
-                        #if !FF_WIN7_COMPAT
-                        "Ex"
-                        #endif
-                        "(hChildPipeRead) failed";
+                    return "GetOverlappedResultEx(hChildPipeRead) failed";
                 }
                 break;
 
