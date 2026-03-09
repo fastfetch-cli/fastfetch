@@ -286,11 +286,12 @@ static void getSystemArchitecture(FFPlatformSysinfo* info)
 
 static void getCwd(FFPlatform* platform)
 {
-    #if _WIN64
     static_assert(
-        offsetof(RTL_USER_PROCESS_PARAMETERS, Reserved2[5]) == 0x38,
-        "CurrentDirectory should be at offset 0x38 in RTL_USER_PROCESS_PARAMETERS. Structure layout mismatch detected.");
-    #endif
+        offsetof(RTL_USER_PROCESS_PARAMETERS, Reserved2[5]) == sizeof(ULONG) * 5 + sizeof(HANDLE) * 4
+        #if __amd64__ || __aarch64__
+            + sizeof(ULONG) // Padding
+        #endif
+        , "Structure layout mismatch detected.");
     PCURDIR cwd = (PCURDIR) &NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters->Reserved2[5];
     ffStrbufSetNWS(&platform->cwd, cwd->DosPath.Length / sizeof(WCHAR), cwd->DosPath.Buffer);
     ffStrbufReplaceAllC(&platform->cwd, '\\', '/');
@@ -299,7 +300,8 @@ static void getCwd(FFPlatform* platform)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
-    platform->pid = (uint32_t) GetCurrentProcessId();
+    static_assert(offsetof(TEB, Reserved1[8]) == sizeof(NT_TIB) + sizeof(PVOID) /*EnvironmentPointer*/, "Structure layout mismatch detected.");
+    platform->pid = (uint32_t) (uintptr_t) ((CLIENT_ID*) &NtCurrentTeb()->Reserved1[8])->UniqueProcess;
     getExePath(platform);
     getCwd(platform);
     getHomeDir(platform);
