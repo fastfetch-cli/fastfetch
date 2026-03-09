@@ -3,13 +3,14 @@
 #include "common/io.h"
 #include "common/windows/nt.h"
 
+#include <ntstatus.h>
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege)
 {
     FF_AUTO_CLOSE_FD HANDLE token = NULL;
-    if (!OpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
-        return "OpenProcessToken() failed";
+    if (!NT_SUCCESS(NtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)))
+        return "NtOpenProcessToken() failed";
 
     TOKEN_PRIVILEGES tp = {
         .PrivilegeCount = 1,
@@ -20,19 +21,21 @@ const char* enablePrivilege(const wchar_t* privilege)
     if (!LookupPrivilegeValueW(NULL, privilege, &tp.Privileges[0].Luid))
         return "LookupPrivilegeValue() failed";
 
-    if (!AdjustTokenPrivileges(token, false, &tp, sizeof(tp), NULL, NULL))
-        return "AdjustTokenPrivileges() failed";
+    NTSTATUS status = NtAdjustPrivilegesToken(token, false, &tp, sizeof(tp), NULL, NULL);
+    if (!NT_SUCCESS(status))
+        return "NtAdjustPrivilegesToken() failed";
 
-    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-        return "The token does not have the specified privilege";
+    if (status == STATUS_NOT_ALL_ASSIGNED)
+        return "The token does not have the specified privilege; try sudo please";
 
     return NULL;
 }
 
 const char* ffDetectBootmgr(FFBootmgrResult* result)
 {
-    if (enablePrivilege(L"SeSystemEnvironmentPrivilege") != NULL)
-        return "Failed to enable SeSystemEnvironmentPrivilege";
+    const char* err = enablePrivilege(L"SeSystemEnvironmentPrivilege");
+    if (err != NULL)
+        return err;
 
     GUID efiGlobalGuid;
     if (!NT_SUCCESS(RtlGUIDFromString(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"{" FF_EFI_GLOBAL_GUID L"}"), &efiGlobalGuid)))
