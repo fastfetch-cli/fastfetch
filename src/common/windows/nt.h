@@ -892,3 +892,4 @@ NTSYSAPI NTSTATUS NTAPI NtQueryInformationToken(
     _In_ ULONG TokenInformationLength,
     _Out_ PULONG ReturnLength
 );
+#define NtCurrentProcessToken() ((HANDLE)(LONG_PTR)-4) // for NtQueryInformationToken only; Windows 8+
