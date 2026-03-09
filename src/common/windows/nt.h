@@ -25,7 +25,7 @@ typedef struct _PROCESSOR_POWER_INFORMATION {
     ULONG CurrentIdleState;
 } PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
 
-NTSTATUS NTAPI NtPowerInformation(
+NTSYSAPI NTSTATUS NTAPI NtPowerInformation(
     IN POWER_INFORMATION_LEVEL InformationLevel,
     IN PVOID InputBuffer OPTIONAL,
     IN ULONG InputBufferLength,
@@ -33,7 +33,7 @@ NTSTATUS NTAPI NtPowerInformation(
     IN ULONG OutputBufferLength);
 
 
-NTSTATUS NTAPI RtlGetVersion(
+NTSYSAPI NTSTATUS NTAPI RtlGetVersion(
     _Inout_ PRTL_OSVERSIONINFOW lpVersionInformation
 );
 
@@ -244,10 +244,7 @@ static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structur
 
 #endif
 
-NTSYSCALLAPI
-NTSTATUS
-NTAPI
-NtQueryDirectoryFile(
+NTSYSAPI NTSTATUS NTAPI NtQueryDirectoryFile(
     IN HANDLE FileHandle,
     IN HANDLE Event OPTIONAL,
     IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
@@ -288,7 +285,7 @@ typedef struct _CURDIR
     HANDLE Handle;
 } CURDIR, *PCURDIR;
 
-PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
+NTSYSAPI PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
 
 /**
  * The SECTION_IMAGE_INFORMATION structure contains detailed information about an image section.
@@ -426,7 +423,7 @@ typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
     _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
 } SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
 
-NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
+NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
 /**
  * The KSYSTEM_TIME structure represents interrupt time, system time, and time zone bias.
@@ -443,6 +440,20 @@ typedef struct _KSYSTEM_TIME
  * that may be reported by the system.
  */
 #define PROCESSOR_FEATURE_MAX 64
+
+/**
+ * The ALTERNATIVE_ARCHITECTURE_TYPE enumeration specifies the hardware
+ * architecture variant used by the system.
+ *
+ * \remarks NEC98x86 represents the NEC PC-98 architecture,
+ * supported only on very early Windows releases.
+ */
+typedef enum _ALTERNATIVE_ARCHITECTURE_TYPE
+{
+    StandardDesign,
+    NEC98x86,
+    EndAlternatives
+} ALTERNATIVE_ARCHITECTURE_TYPE;
 
 /**
  * The KUSER_SHARED_DATA structure contains information shared with user-mode.
@@ -632,6 +643,196 @@ typedef struct _KUSER_SHARED_DATA
 
     BOOLEAN ProcessorFeatures[PROCESSOR_FEATURE_MAX];
 
+
+    //
+    // Reserved fields - do not use.
+    //
+
+    ULONG MaximumUserModeAddressDeprecated; // Deprecated, use SystemBasicInformation instead.
+    ULONG SystemRangeStartDeprecated; // Deprecated, use SystemRangeStartInformation instead.
+
+    //
+    // Time slippage while in debugger.
+    //
+
+    volatile ULONG TimeSlip;
+
+    //
+    // Alternative system architecture, e.g., NEC PC98xx on x86.
+    //
+
+    ALTERNATIVE_ARCHITECTURE_TYPE AlternativeArchitecture;
+
+    //
+    // Boot sequence, incremented for each boot attempt by the OS loader.
+    //
+
+    ULONG BootId;
+
+    //
+    // If the system is an evaluation unit, the following field contains the
+    // date and time that the evaluation unit expires. A value of 0 indicates
+    // that there is no expiration. A non-zero value is the UTC absolute time
+    // that the system expires.
+    //
+
+    LARGE_INTEGER SystemExpirationDate;
+
+    //
+    // Suite support.
+    //
+    // N.B. This field must be accessed via the RtlGetSuiteMask API for
+    //      an accurate result.
+    //
+
+    ULONG SuiteMask;
+
+    //
+    // TRUE if a kernel debugger is connected/enabled.
+    //
+
+    BOOLEAN KdDebuggerEnabled;
+
+    //
+    // Mitigation policies.
+    //
+
+    union
+    {
+        UCHAR MitigationPolicies;
+        struct
+        {
+            UCHAR NXSupportPolicy : 2;
+            UCHAR SEHValidationPolicy : 2;
+            UCHAR CurDirDevicesSkippedForDlls : 2;
+            UCHAR Reserved : 2;
+        };
+    };
+
+    //
+    // Measured duration of a single processor yield, in cycles. This is used by
+    // lock packages to determine how many times to spin waiting for a state
+    // change before blocking.
+    //
+
+    USHORT CyclesPerYield;
+
+    //
+    // Current console session Id. Always zero on non-TS systems.
+    //
+    // N.B. This field must be accessed via the RtlGetActiveConsoleId API for an
+    //      accurate result.
+    //
+
+    volatile ULONG ActiveConsoleId;
+
+    //
+    // Force-dismounts cause handles to become invalid. Rather than always
+    // probe handles, a serial number of dismounts is maintained that clients
+    // can use to see if they need to probe handles.
+    //
+
+    volatile ULONG DismountCount;
+
+    //
+    // This field indicates the status of the 64-bit COM+ package on the
+    // system. It indicates whether the Intermediate Language (IL) COM+
+    // images need to use the 64-bit COM+ runtime or the 32-bit COM+ runtime.
+    //
+
+    ULONG ComPlusPackage;
+
+    //
+    // Time in tick count for system-wide last user input across all terminal
+    // sessions. For MP performance, it is not updated all the time (e.g. once
+    // a minute per session). It is used for idle detection.
+    //
+
+    ULONG LastSystemRITEventTickCount;
+
+    //
+    // Number of physical pages in the system. This can dynamically change as
+    // physical memory can be added or removed from a running system.  This
+    // cell is too small to hold the non-truncated value on very large memory
+    // machines so code that needs the full value should access
+    // FullNumberOfPhysicalPages instead.
+    //
+
+    ULONG NumberOfPhysicalPages;
+
+    //
+    // True if the system was booted in safe boot mode.
+    //
+
+    BOOLEAN SafeBootMode;
+
+    //
+    // Virtualization flags.
+    //
+
+    union
+    {
+        UCHAR VirtualizationFlags;
+
+#if defined(_ARM64_)
+
+        //
+        // N.B. Keep this bitfield in sync with the one in arc.w.
+        //
+
+        struct
+        {
+            UCHAR ArchStartedInEl2 : 1;
+            UCHAR QcSlIsSupported : 1;
+            UCHAR : 6;
+        };
+
+#endif
+
+    };
+
+    //
+    // Reserved (available for reuse).
+    //
+
+    UCHAR Reserved12[2];
+
+    //
+    // This is a packed bitfield that contains various flags concerning
+    // the system state. They must be manipulated using interlocked
+    // operations.
+    //
+    // N.B. DbgMultiSessionSku must be accessed via the RtlIsMultiSessionSku
+    //      API for an accurate result
+    //
+
+    union
+    {
+        ULONG SharedDataFlags;
+        struct
+        {
+            //
+            // The following bit fields are for the debugger only. Do not use.
+            // Use the bit definitions instead.
+            //
+
+            ULONG DbgErrorPortPresent       : 1;
+            ULONG DbgElevationEnabled       : 1;
+            ULONG DbgVirtEnabled            : 1;
+            ULONG DbgInstallerDetectEnabled : 1;
+            ULONG DbgLkgEnabled             : 1;
+            ULONG DbgDynProcessorEnabled    : 1;
+            ULONG DbgConsoleBrokerEnabled   : 1;
+            ULONG DbgSecureBootEnabled      : 1;
+            ULONG DbgMultiSessionSku        : 1;
+            ULONG DbgMultiUsersInSessionSku : 1;
+            ULONG DbgStateSeparationEnabled : 1;
+            ULONG DbgSplitTokenEnabled      : 1;
+            ULONG DbgShadowAdminEnabled     : 1;
+            ULONG SpareBits                 : 19;
+        };
+    };
+
     // ... more fields follow, but we don't need them
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
 
@@ -670,3 +871,24 @@ static inline bool ffIsWindows11OrGreater()
 {
     return ffIsWindows10OrGreater() && SharedUserData->NtBuildNumber >= 22000;
 }
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
+    _In_ HANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _Out_ PHANDLE TokenHandle
+);
+NTSYSAPI NTSTATUS NTAPI NtAdjustPrivilegesToken(
+    _In_ HANDLE TokenHandle,
+    _In_ BOOLEAN DisableAllPrivileges,
+    _In_opt_ PTOKEN_PRIVILEGES NewState,
+    _In_ ULONG BufferLength,
+    _Out_writes_bytes_to_opt_(BufferLength, *ReturnLength) PTOKEN_PRIVILEGES PreviousState,
+    _Out_opt_ PULONG ReturnLength
+);
+NTSYSAPI NTSTATUS NTAPI NtQueryInformationToken(
+    _In_ HANDLE TokenHandle,
+    _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
+    _Out_writes_bytes_to_opt_(TokenInformationLength, *ReturnLength) PVOID TokenInformation,
+    _In_ ULONG TokenInformationLength,
+    _Out_ PULONG ReturnLength
+);
