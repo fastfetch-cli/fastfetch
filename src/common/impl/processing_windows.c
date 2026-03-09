@@ -140,40 +140,60 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
     int32_t timeout = instance.config.general.processingTimeout;
     FF_AUTO_CLOSE_FD HANDLE hProcess = handle->pid;
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = handle->pipeRead;
+    FF_AUTO_CLOSE_FD HANDLE hReadEvent = NULL;
     handle->pid = INVALID_HANDLE_VALUE;
     handle->pipeRead = INVALID_HANDLE_VALUE;
 
+    if (timeout >= 0 && !NT_SUCCESS(NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, NULL, SynchronizationEvent, FALSE)))
+        return "NtCreateEvent() failed";
+
     char str[FF_PIPE_BUFSIZ];
-    DWORD nRead = 0;
-    OVERLAPPED overlapped = {};
-    // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
+    uint32_t nRead = 0;
+    IO_STATUS_BLOCK iosb = {};
     do
     {
-        if (!ReadFile(hChildPipeRead, str, sizeof(str), &nRead, &overlapped))
+        NTSTATUS status = NtReadFile(
+            hChildPipeRead,
+            hReadEvent,
+            NULL,
+            NULL,
+            &iosb,
+            str,
+            (ULONG) sizeof(str),
+            NULL,
+            NULL
+        );
+        if (status == STATUS_PENDING)
         {
-            switch (GetLastError())
+            switch (NtWaitForSingleObject(hReadEvent, TRUE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }))
             {
-            case ERROR_IO_PENDING:
-                if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, timeout < 0 ? INFINITE : (DWORD) timeout, FALSE))
-                {
-                    if (GetLastError() == ERROR_BROKEN_PIPE)
-                        return NULL;
-
-                    CancelIo(hChildPipeRead);
-                    TerminateProcess(hProcess, 1);
-                    return "GetOverlappedResultEx(hChildPipeRead) failed";
-                }
+            case STATUS_WAIT_0:
+                status = iosb.Status;
                 break;
 
-            case ERROR_BROKEN_PIPE:
-                goto exit;
+            case STATUS_TIMEOUT:
+                CancelIo(hChildPipeRead);
+                TerminateProcess(hProcess, 1);
+                return "NtReadFile(hChildPipeRead) timed out";
 
             default:
                 CancelIo(hChildPipeRead);
                 TerminateProcess(hProcess, 1);
-                return "ReadFile(hChildPipeRead) failed";
+                return "WaitForSingleObject(hReadEvent) failed";
             }
         }
+
+        if (status == STATUS_PIPE_BROKEN || status == STATUS_END_OF_FILE)
+            goto exit;
+
+        if (!NT_SUCCESS(status))
+        {
+            CancelIo(hChildPipeRead);
+            TerminateProcess(hProcess, 1);
+            return "NtReadFile(hChildPipeRead) failed";
+        }
+
+        nRead = (uint32_t) iosb.Information;
         ffStrbufAppendNS(buffer, nRead, str);
     } while (nRead > 0);
 

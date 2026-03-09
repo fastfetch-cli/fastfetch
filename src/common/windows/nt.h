@@ -893,3 +893,23 @@ NTSYSAPI NTSTATUS NTAPI NtQueryInformationToken(
     _Out_ PULONG ReturnLength
 );
 #define NtCurrentProcessToken() ((HANDLE)(LONG_PTR)-4) // for NtQueryInformationToken only; Windows 8+
+
+NTSYSAPI NTSTATUS NTAPI NtReadFile(
+    _In_ HANDLE FileHandle,
+    _In_opt_ HANDLE Event,
+    _In_opt_ PIO_APC_ROUTINE ApcRoutine,
+    _In_opt_ PVOID ApcContext,
+    _Out_ PIO_STATUS_BLOCK IoStatusBlock,
+    _Out_writes_bytes_(Length) PVOID Buffer,
+    _In_ ULONG Length,
+    _In_opt_ PLARGE_INTEGER ByteOffset,
+    _In_opt_ PULONG Key
+);
+
+NTSYSAPI NTSTATUS NTAPI NtCreateEvent(
+    _Out_ PHANDLE EventHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _In_ EVENT_TYPE EventType,
+    _In_ BOOLEAN InitialState
+);
