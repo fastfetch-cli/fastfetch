@@ -2,80 +2,52 @@
 #include "common/io.h"
 #include "common/stringUtils.h"
 
-static void addDevice(FFlist* devices, uint64_t* flags, uint32_t index, FFstrbuf* path)
+static bool isRealKeyboard(uint32_t index, FFstrbuf* path)
 {
-    if (index >= 64 || (*flags & (1ULL << index)))
-        return;
-
-    ffStrbufSetF(path, "/sys/class/input/event%u/device/name", (unsigned) index);
-
-    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-    if (ffAppendFileBuffer(path->chars, &name))
+    // Check EV_REP (auto-repeat, bit 20) to filter pseudo-keyboards (Power Button, PC Speaker).
+    ffStrbufSetF(path, "/sys/class/input/event%u/device/capabilities/ev", (unsigned) index);
     {
-        *flags |= (1ULL << index);
-        ffStrbufTrimRightSpace(&name);
-        ffStrbufSubstrBefore(path, path->length - (uint32_t) strlen("name"));
+        FF_STRBUF_AUTO_DESTROY caps = ffStrbufCreate();
+        if (!ffReadFileBuffer(path->chars, &caps))
+            return false;
 
-        FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
-        ffStrbufInitMove(&device->name, &name);
-        ffStrbufInit(&device->serial);
-
-        ffStrbufAppendS(path, "uniq");
-        if (ffAppendFileBuffer(path->chars, &device->serial))
-            ffStrbufTrimRightSpace(&device->serial);
+        ffStrbufTrimRightSpace(&caps);
+        unsigned long val = strtoul(caps.chars, NULL, 16);
+        if (!(val & (1UL << 20))) // EV_REP
+            return false;
     }
-}
 
-static bool detectFromByPath(FFlist* devices, uint64_t* flags, FFstrbuf* path)
-{
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/input/by-path/");
-    if (dirp == NULL)
-        return false;
-
-    struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
+    // Check KEY_A (bit 30) to filter media remotes and headset controls.
+    // The key capability bitmap is space-separated hex longs, MSB first;
+    // KEY_A falls in the last (least significant) word on all architectures.
+    ffStrbufSetF(path, "/sys/class/input/event%u/device/capabilities/key", (unsigned) index);
     {
-        if (!ffStrEndsWith(entry->d_name, "-event-kbd"))
-            continue;
+        FF_STRBUF_AUTO_DESTROY caps = ffStrbufCreate();
+        if (!ffReadFileBuffer(path->chars, &caps))
+            return false;
 
-        char buffer[32]; // `../eventXX`
-        ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, ARRAY_SIZE(buffer) - 1);
-        if (len <= (ssize_t) strlen("../event") || !ffStrStartsWith(buffer, "../event")) continue;
-        buffer[len] = 0;
+        ffStrbufTrimRightSpace(&caps);
+        const char* lastWord = strrchr(caps.chars, ' ');
+        lastWord = lastWord ? lastWord + 1 : caps.chars;
 
-        char* pend = NULL;
-        uint32_t index = (uint32_t) strtoul(buffer + strlen("../event"), &pend, 10);
-        if (pend == buffer + strlen("../event")) continue;
-
-        addDevice(devices, flags, index, path);
+        unsigned long val = strtoul(lastWord, NULL, 16);
+        if (!(val & (1UL << 30))) // KEY_A
+            return false;
     }
 
     return true;
 }
 
-static bool hasAutoRepeat(uint32_t index, FFstrbuf* path)
+const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
 {
-    // Filter out pseudo-keyboards (Power Button, PC Speaker) by checking for
-    // EV_REP (auto-repeat, bit 20) in the device's event capabilities.
-    // Real keyboards and macro pads support auto-repeat; system buttons don't.
-    ffStrbufSetF(path, "/sys/class/input/event%u/device/capabilities/ev", (unsigned) index);
-
-    FF_STRBUF_AUTO_DESTROY caps = ffStrbufCreate();
-    if (!ffReadFileBuffer(path->chars, &caps))
-        return false;
-
-    ffStrbufTrimRightSpace(&caps);
-    unsigned long val = strtoul(caps.chars, NULL, 16);
-    return (val & (1UL << 20)) != 0; // EV_REP
-}
-
-static bool detectFromProc(FFlist* devices, uint64_t* flags, FFstrbuf* path)
-{
-    // Bluetooth and other virtual keyboards may not appear in /dev/input/by-path/.
-    // Parse /proc/bus/input/devices to find any keyboard with a "kbd" handler.
+    // Parse /proc/bus/input/devices to find keyboards with a "kbd" handler.
+    // This detects both wired and Bluetooth keyboards uniformly.
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     if (!ffAppendFileBuffer("/proc/bus/input/devices", &content))
-        return false;
+        return "ffAppendFileBuffer(\"/proc/bus/input/devices\") == NULL";
+
+    uint64_t flags = 0;
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     const char* line = content.chars;
     while (line && *line)
@@ -102,36 +74,41 @@ static bool detectFromProc(FFlist* devices, uint64_t* flags, FFstrbuf* path)
                 else if (wordLen > strlen("event") && memcmp(wordStart, "event", strlen("event")) == 0)
                 {
                     char* pend = NULL;
-                    eventIndex = (uint32_t) strtoul(wordStart + 5, &pend, 10);
-                    if (pend == wordStart + 5) eventIndex = UINT32_MAX;
+                    eventIndex = (uint32_t) strtoul(wordStart + strlen("event"), &pend, 10);
+                    if (pend == wordStart + strlen("event")) eventIndex = UINT32_MAX;
                 }
             }
 
-            if (hasKbd && eventIndex != UINT32_MAX && hasAutoRepeat(eventIndex, path))
-                addDevice(devices, flags, eventIndex, path);
+            // Skip duplicates (dedup bitmap covers indices 0-63; higher indices are not deduped)
+            bool seen = eventIndex < 64 && (flags & (1ULL << eventIndex));
+
+            if (hasKbd && eventIndex != UINT32_MAX && !seen && isRealKeyboard(eventIndex, &path))
+            {
+                ffStrbufSetF(&path, "/sys/class/input/event%u/device/name", (unsigned) eventIndex);
+
+                FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+                if (ffAppendFileBuffer(path.chars, &name))
+                {
+                    if (eventIndex < 64)
+                        flags |= (1ULL << eventIndex);
+
+                    ffStrbufTrimRightSpace(&name);
+                    ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
+
+                    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+                    ffStrbufInitMove(&device->name, &name);
+                    ffStrbufInit(&device->serial);
+
+                    ffStrbufAppendS(&path, "uniq");
+                    if (ffAppendFileBuffer(path.chars, &device->serial))
+                        ffStrbufTrimRightSpace(&device->serial);
+                }
+            }
         }
 
         const char* next = strchr(line, '\n');
         line = next ? next + 1 : NULL;
     }
-
-    return true;
-}
-
-const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
-{
-    uint64_t flags = 0;
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-
-    // Prefer /dev/input/by-path/ for wired/USB keyboards
-    bool byPathOk = detectFromByPath(devices, &flags, &path);
-
-    // Fall back to /proc/bus/input/devices for Bluetooth and other keyboards
-    // that don't appear in by-path. The flags bitmap prevents duplicates.
-    bool procOk = detectFromProc(devices, &flags, &path);
-
-    if (!byPathOk && !procOk)
-        return "Failed to read both /dev/input/by-path/ and /proc/bus/input/devices";
 
     return NULL;
 }
