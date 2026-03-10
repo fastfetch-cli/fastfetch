@@ -48,66 +48,56 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
 
     uint64_t flags = 0;
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    FFstrbuf kbd = ffStrbufCreateStatic("kbd");
 
-    const char* line = content.chars;
-    while (line && *line)
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetline(&line, &len, &content))
     {
-        if (ffStrStartsWith(line, "H: Handlers="))
+        if (!ffStrStartsWith(line, "H: Handlers="))
+            continue;
+
+        const char* handlers = line + strlen("H: Handlers=");
+
+        if (!ffStrbufMatchSeparatedS(&kbd, handlers, ' '))
+            continue;
+
+        // Find "eventN" token and extract the index
+        const char* eventStr = strstr(handlers, "event");
+        if (!eventStr)
+            continue;
+
+        char* pend = NULL;
+        uint32_t eventIndex = (uint32_t) strtoul(eventStr + strlen("event"), &pend, 10);
+        if (pend == eventStr + strlen("event"))
+            continue;
+
+        // Skip duplicates (dedup bitmap covers indices 0-63; higher indices are not deduped)
+        if (eventIndex < 64 && (flags & (1ULL << eventIndex)))
+            continue;
+
+        if (!isRealKeyboard(eventIndex, &path))
+            continue;
+
+        ffStrbufSetF(&path, "/sys/class/input/event%u/device/name", (unsigned) eventIndex);
+
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+        if (ffAppendFileBuffer(path.chars, &name))
         {
-            const char* handlers = line + strlen("H: Handlers=");
-            bool hasKbd = false;
-            uint32_t eventIndex = UINT32_MAX;
+            if (eventIndex < 64)
+                flags |= (1ULL << eventIndex);
 
-            // Parse space-separated handler names
-            const char* p = handlers;
-            while (*p && *p != '\n')
-            {
-                while (*p == ' ') p++;
-                if (*p == '\n' || *p == '\0') break;
+            ffStrbufTrimRightSpace(&name);
+            ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
 
-                const char* wordStart = p;
-                while (*p && *p != ' ' && *p != '\n') p++;
-                uint32_t wordLen = (uint32_t)(p - wordStart);
+            FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+            ffStrbufInitMove(&device->name, &name);
+            ffStrbufInit(&device->serial);
 
-                if (wordLen == 3 && memcmp(wordStart, "kbd", 3) == 0)
-                    hasKbd = true;
-                else if (wordLen > strlen("event") && memcmp(wordStart, "event", strlen("event")) == 0)
-                {
-                    char* pend = NULL;
-                    eventIndex = (uint32_t) strtoul(wordStart + strlen("event"), &pend, 10);
-                    if (pend == wordStart + strlen("event")) eventIndex = UINT32_MAX;
-                }
-            }
-
-            // Skip duplicates (dedup bitmap covers indices 0-63; higher indices are not deduped)
-            bool seen = eventIndex < 64 && (flags & (1ULL << eventIndex));
-
-            if (hasKbd && eventIndex != UINT32_MAX && !seen && isRealKeyboard(eventIndex, &path))
-            {
-                ffStrbufSetF(&path, "/sys/class/input/event%u/device/name", (unsigned) eventIndex);
-
-                FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-                if (ffAppendFileBuffer(path.chars, &name))
-                {
-                    if (eventIndex < 64)
-                        flags |= (1ULL << eventIndex);
-
-                    ffStrbufTrimRightSpace(&name);
-                    ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
-
-                    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
-                    ffStrbufInitMove(&device->name, &name);
-                    ffStrbufInit(&device->serial);
-
-                    ffStrbufAppendS(&path, "uniq");
-                    if (ffAppendFileBuffer(path.chars, &device->serial))
-                        ffStrbufTrimRightSpace(&device->serial);
-                }
-            }
+            ffStrbufAppendS(&path, "uniq");
+            if (ffAppendFileBuffer(path.chars, &device->serial))
+                ffStrbufTrimRightSpace(&device->serial);
         }
-
-        const char* next = strchr(line, '\n');
-        line = next ? next + 1 : NULL;
     }
 
     return NULL;
