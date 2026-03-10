@@ -4,15 +4,15 @@
 
 static void addDevice(FFlist* devices, uint64_t* flags, uint32_t index, FFstrbuf* path)
 {
-    if (index >= 64 || (*flags & (1UL << index)))
+    if (index >= 64 || (*flags & (1ULL << index)))
         return;
-    *flags |= (1UL << index);
 
     ffStrbufSetF(path, "/sys/class/input/event%u/device/name", (unsigned) index);
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
     if (ffAppendFileBuffer(path->chars, &name))
     {
+        *flags |= (1ULL << index);
         ffStrbufTrimRightSpace(&name);
         ffStrbufSubstrBefore(path, path->length - (uint32_t) strlen("name"));
 
