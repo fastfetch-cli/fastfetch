@@ -110,26 +110,29 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED FFBrightnessOptions* options,
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
 
     #ifndef FF_DISABLE_DLOPEN
-    __typeof__(&ddca_init) ffddca_init = dlsym(libddcutil, "ddca_init");
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_init)
     if (ffddca_init)
-    #else
-    __typeof__(&ddca_init) ffddca_init = ddca_init;
-    #endif
     {
         FF_SUPPRESS_IO();
         // Ref: https://github.com/rockowitz/ddcutil/issues/344
         if (ffddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
             return "ddca_init() failed";
     }
-    #ifndef FF_DISABLE_DLOPEN
     else
     {
-        __typeof__(&ddca_set_default_sleep_multiplier) ffddca_set_default_sleep_multiplier = dlsym(libddcutil, "ddca_set_default_sleep_multiplier");
+        FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_set_default_sleep_multiplier);
         if (ffddca_set_default_sleep_multiplier)
             ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
 
         libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
     }
+    #else
+    #if DDCUTIL_VMAJOR >= 2
+        if (ddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
+            return "ddca_init() failed";
+    #else
+        ddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
+    #endif
     #endif
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
