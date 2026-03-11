@@ -996,3 +996,12 @@ static inline RTL_USER_PROCESS_PARAMETERS_FULL* ffGetProcessParams()
 {
     return (RTL_USER_PROCESS_PARAMETERS_FULL*) NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters;
 }
+
+NTSYSAPI NTSTATUS NTAPI RtlExpandEnvironmentStrings(
+    _In_opt_ PVOID Environment,
+    _In_reads_(SourceLength) PCWSTR Source,
+    _In_ SIZE_T SourceLength,
+    _Out_writes_(DestinationLength) PWSTR Destination,
+    _In_ SIZE_T DestinationLength,
+    _Out_opt_ PSIZE_T ReturnLength
+);

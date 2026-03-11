@@ -2,6 +2,7 @@
 #include "common/io.h"
 #include "common/stringUtils.h"
 #include "common/windows/nt.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 
@@ -314,13 +315,17 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
         }
     }
 
-    DWORD length = ExpandEnvironmentStringsA(in, NULL, 0);
-    if (length <= 1) return false;
+    wchar_t pathInW[MAX_PATH], pathOutW[MAX_PATH];
+    ULONG len = (ULONG) strlen(in);
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(pathInW, (ULONG) sizeof(pathInW), &len, in, len)))
+        return false;
+    len /= sizeof(wchar_t); // convert from bytes to characters
 
-    ffStrbufClear(out);
-    ffStrbufEnsureFree(out, (uint32_t)length);
-    ExpandEnvironmentStringsA(in, out->chars, length);
-    out->length = (uint32_t)length - 1;
+    size_t outLen; // in characters, including null terminator
+    if (!NT_SUCCESS(RtlExpandEnvironmentStrings(NULL, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen)))
+        return false;
+
+    ffStrbufSetNWS(out, (uint32_t) outLen - 1, pathOutW);
     return true;
 }
 
