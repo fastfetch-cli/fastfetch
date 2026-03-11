@@ -352,7 +352,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
         va_list cargs;
         va_copy(cargs, args);
-        int ret = vsscanf(buffer, format, args);
+        int ret = vsscanf(buffer, format, cargs);
         va_end(cargs);
 
         if (ret <= 0)
