@@ -450,7 +450,7 @@
             "type": "string"
         },
         "physicalmemoryFormat": {
-            "description": "Output format of the module `PhysicalMemory`. See Wiki for formatting syntax\n    1. {bytes}: Size (in bytes)\n    2. {size}: Size formatted\n    3. {max-speed}: Max speed (in MT/s)\n    4. {running-speed}: Running speed (in MT/s)\n    5. {type}: Type (DDR4, DDR5, etc.)\n    6. {form-factor}: Form factor (SODIMM, DIMM, etc.)\n    7. {locator}: Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)\n    8. {vendor}: Vendor\n    9. {serial}: Serial number\n    10. {part-number}: Part number\n    11. {is-ecc-enabled}: True if ECC enabled",
+            "description": "Output format of the module `PhysicalMemory`. See Wiki for formatting syntax\n    1. {bytes}: Size (in bytes)\n    2. {size}: Size formatted\n    3. {max-speed}: Max speed (in MT/s)\n    4. {running-speed}: Running speed (in MT/s)\n    5. {type}: Type (DDR4, DDR5, etc.)\n    6. {form-factor}: Form factor (SODIMM, DIMM, etc.)\n    7. {locator}: Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)\n    8. {vendor}: Vendor\n    9. {serial}: Serial number\n    10. {part-number}: Part number\n    11. {is-ecc-enabled}: True if ECC enabled\n    12. {is-installed}: True if a memory module is installed in the slot",
             "type": "string"
         },
         "playerFormat": {
@@ -3649,6 +3649,11 @@
                                     "type": {
                                         "const": "physicalmemory",
                                         "description": "Print system physical memory devices"
+                                    },
+                                    "showEmptySlots": {
+                                        "description": "Set if uninstalled memory slots should be printed",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
