@@ -913,3 +913,86 @@ NTSYSAPI NTSTATUS NTAPI NtCreateEvent(
     _In_ EVENT_TYPE EventType,
     _In_ BOOLEAN InitialState
 );
+
+NTSYSAPI NTSTATUS NTAPI NtQueryAttributesFile(
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _Out_ PFILE_BASIC_INFORMATION FileInformation
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUnicodeToUTF8N(
+    _Out_writes_bytes_to_(UTF8StringMaxByteCount, *UTF8StringActualByteCount) PCHAR UTF8StringDestination,
+    _In_ ULONG UTF8StringMaxByteCount,
+    _Out_opt_ PULONG UTF8StringActualByteCount,
+    _In_reads_bytes_(UnicodeStringByteCount) PCWCH UnicodeStringSource,
+    _In_ ULONG UnicodeStringByteCount
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUTF8ToUnicodeN(
+    _Out_writes_bytes_to_(UnicodeStringMaxByteCount, *UnicodeStringActualByteCount) PWSTR UnicodeStringDestination,
+    _In_ ULONG UnicodeStringMaxByteCount,
+    _Out_opt_ PULONG UnicodeStringActualByteCount,
+    _In_reads_bytes_(UTF8StringByteCount) PCCH UTF8StringSource,
+    _In_ ULONG UTF8StringByteCount
+);
+
+#define RTL_MAX_DRIVE_LETTERS 32
+typedef struct _RTL_DRIVE_LETTER_CURDIR
+{
+    USHORT Flags;
+    USHORT Length;
+    ULONG TimeStamp;
+    STRING DosPath;
+} RTL_DRIVE_LETTER_CURDIR, *PRTL_DRIVE_LETTER_CURDIR;
+
+typedef struct _RTL_USER_PROCESS_PARAMETERS_FULL
+{
+    ULONG MaximumLength;
+    ULONG Length;
+
+    ULONG Flags;
+    ULONG DebugFlags;
+
+    HANDLE ConsoleHandle;
+    ULONG ConsoleFlags;
+    HANDLE StandardInput;
+    HANDLE StandardOutput;
+    HANDLE StandardError;
+
+    CURDIR CurrentDirectory;
+    UNICODE_STRING DllPath;
+    UNICODE_STRING ImagePathName;
+    UNICODE_STRING CommandLine;
+    PVOID Environment;
+
+    ULONG StartingX;
+    ULONG StartingY;
+    ULONG CountX;
+    ULONG CountY;
+    ULONG CountCharsX;
+    ULONG CountCharsY;
+    ULONG FillAttribute;
+
+    ULONG WindowFlags;
+    ULONG ShowWindowFlags;
+    UNICODE_STRING WindowTitle;
+    UNICODE_STRING DesktopInfo;
+    UNICODE_STRING ShellInfo;
+    UNICODE_STRING RuntimeData;
+    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[RTL_MAX_DRIVE_LETTERS];
+
+    // Windows Vista
+    ULONG_PTR EnvironmentSize;
+    // Windows 7
+    ULONG_PTR EnvironmentVersion;
+
+    // Windows 8
+    PVOID PackageDependencyData;
+    ULONG ProcessGroupId;
+
+    // ...
+} RTL_USER_PROCESS_PARAMETERS_FULL;
+
+static inline RTL_USER_PROCESS_PARAMETERS_FULL* ffGetProcessParams()
+{
+    return (RTL_USER_PROCESS_PARAMETERS_FULL*) NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters;
+}
