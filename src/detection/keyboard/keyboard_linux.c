@@ -2,44 +2,91 @@
 #include "common/io.h"
 #include "common/stringUtils.h"
 
+static bool isRealKeyboard(uint32_t index, FFstrbuf* path)
+{
+    // Check EV_REP (auto-repeat, bit 20) to filter pseudo-keyboards (Power Button, PC Speaker).
+    ffStrbufSetF(path, "/sys/class/input/event%u/device/capabilities/ev", (unsigned) index);
+    {
+        FF_STRBUF_AUTO_DESTROY caps = ffStrbufCreate();
+        if (!ffReadFileBuffer(path->chars, &caps))
+            return false;
+
+        ffStrbufTrimRightSpace(&caps);
+        unsigned long val = strtoul(caps.chars, NULL, 16);
+        if (!(val & (1UL << 20))) // EV_REP
+            return false;
+    }
+
+    // Check KEY_A (bit 30) to filter media remotes and headset controls.
+    // The key capability bitmap is space-separated hex longs, MSB first;
+    // KEY_A falls in the last (least significant) word on all architectures.
+    ffStrbufSetF(path, "/sys/class/input/event%u/device/capabilities/key", (unsigned) index);
+    {
+        FF_STRBUF_AUTO_DESTROY caps = ffStrbufCreate();
+        if (!ffReadFileBuffer(path->chars, &caps))
+            return false;
+
+        ffStrbufTrimRightSpace(&caps);
+        const char* lastWord = strrchr(caps.chars, ' ');
+        lastWord = lastWord ? lastWord + 1 : caps.chars;
+
+        unsigned long val = strtoul(lastWord, NULL, 16);
+        if (!(val & (1UL << 30))) // KEY_A
+            return false;
+    }
+
+    return true;
+}
+
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
 {
-    // There is no /sys/class/input/kbd* on Linux
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/input/by-path/");
-    if (dirp == NULL)
-        return "opendir(\"/dev/input/by-path/\") == NULL";
+    // Parse /proc/bus/input/devices to find keyboards with a "kbd" handler.
+    // This detects both wired and Bluetooth keyboards uniformly.
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffAppendFileBuffer("/proc/bus/input/devices", &content))
+        return "ffAppendFileBuffer(\"/proc/bus/input/devices\") == NULL";
 
     uint64_t flags = 0;
-
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    FFstrbuf kbd = ffStrbufCreateStatic("kbd");
 
-    struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetline(&line, &len, &content))
     {
-        if (!ffStrEndsWith(entry->d_name, "-event-kbd"))
+        if (!ffStrStartsWith(line, "H: Handlers="))
             continue;
 
-        char buffer[32]; // `../eventXX`
-        ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, ARRAY_SIZE(buffer) - 1);
-        if (len <= (ssize_t) strlen("../event") || !ffStrStartsWith(buffer, "../event")) continue;
-        buffer[len] = 0;
+        const char* handlers = line + strlen("H: Handlers=");
 
-        const char* eventid = buffer + strlen("../event");
+        if (!ffStrbufMatchSeparatedS(&kbd, handlers, ' '))
+            continue;
+
+        // Find "eventN" token and extract the index
+        const char* eventStr = strstr(handlers, "event");
+        if (!eventStr)
+            continue;
 
         char* pend = NULL;
-        uint32_t index = (uint32_t) strtoul(eventid, &pend, 10);
-        if (pend == eventid) continue;
-
-        // Ignore duplicate entries (flags supports up to 64 event indices)
-        if (index >= 64 || (flags & (1UL << index)))
+        uint32_t eventIndex = (uint32_t) strtoul(eventStr + strlen("event"), &pend, 10);
+        if (pend == eventStr + strlen("event"))
             continue;
-        flags |= (1UL << index);
 
-        ffStrbufSetF(&path, "/sys/class/input/event%s/device/name", eventid);
+        // Skip duplicates (dedup bitmap covers indices 0-63; higher indices are not deduped)
+        if (eventIndex < 64 && (flags & (1ULL << eventIndex)))
+            continue;
+
+        if (!isRealKeyboard(eventIndex, &path))
+            continue;
+
+        ffStrbufSetF(&path, "/sys/class/input/event%u/device/name", (unsigned) eventIndex);
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
         if (ffAppendFileBuffer(path.chars, &name))
         {
+            if (eventIndex < 64)
+                flags |= (1ULL << eventIndex);
+
             ffStrbufTrimRightSpace(&name);
             ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
 
