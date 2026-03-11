@@ -131,11 +131,13 @@ HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool d
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
 {
     wchar_t fileNameW[MAX_PATH];
-    int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, fileName, -1, fileNameW, ARRAY_SIZE(fileNameW));
-    if (len == 0) return INVALID_HANDLE_VALUE;
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG)strlen(fileName) + 1)))
+        return INVALID_HANDLE_VALUE;
     // Implies `fileNameW[len] = L'\0';` and `len` includes the null terminator
+    len /= sizeof(wchar_t); // convert from bytes to characters
 
-    for (int i = 0; i < len - 1; ++i)
+    for (uint32_t i = 0; i < len - 1; ++i)
     {
         if (fileNameW[i] == L'/')
             fileNameW[i] = L'\\';

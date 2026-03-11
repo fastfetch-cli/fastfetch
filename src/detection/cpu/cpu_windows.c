@@ -38,10 +38,8 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result)
 
     if (options->tempSensor.length > 0)
     {
-        int written = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, options->tempSensor.chars, (int) options->tempSensor.length, querySpec.Name, (int)(ARRAY_SIZE(querySpec.Name) - 1));
-        if (written == 0)
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(querySpec.Name, (ULONG) sizeof(querySpec.Name), NULL, options->tempSensor.chars, (ULONG)options->tempSensor.length + 1)))
             return "Invalid temp sensor string";
-        querySpec.Name[written] = L'\0';
     }
 
     DWORD dataSize = 0;

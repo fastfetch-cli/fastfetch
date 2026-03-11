@@ -99,11 +99,10 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             continue;
         }
 
-        char name[128];
-        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, ARRAY_SIZE(name), NULL, NULL);
-        FF_DEBUG("Adapter %u name: '%s'", (unsigned)adapter->IfIndex, name);
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(adapter->FriendlyName);
+        FF_DEBUG("Adapter %u name: '%s'", (unsigned)adapter->IfIndex, name.chars);
 
-        if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
         {
             FF_DEBUG("Skipping adapter %u (name doesn't match prefix '%.*s')",
                      (unsigned)adapter->IfIndex, (int)options->namePrefix.length, options->namePrefix.chars);
@@ -121,10 +120,10 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         }
 
         processedCount++;
-        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned)adapter->IfIndex, name);
+        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned)adapter->IfIndex, name.chars);
 
         FFLocalIpResult* item = (FFLocalIpResult*) ffListAdd(results);
-        ffStrbufInitS(&item->name, name);
+        ffStrbufInitMove(&item->name, &name);
         ffStrbufInit(&item->ipv4);
         ffStrbufInit(&item->ipv6);
         ffStrbufInit(&item->mac);

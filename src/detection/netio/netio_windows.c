@@ -46,9 +46,8 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
         if (options->defaultRouteOnly && !isDefaultRoute)
             continue;
 
-        char name[128];
-        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, ARRAY_SIZE(name), NULL, NULL);
-        if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(adapter->FriendlyName);
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
             continue;
 
         MIB_IF_ROW2 ifRow = { .InterfaceIndex = adapter->IfIndex };
@@ -56,7 +55,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
         {
             FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
             *counters = (FFNetIOResult) {
-                .name = ffStrbufCreateS(name),
+                .name = ffStrbufCreateMove(&name),
                 .txBytes = ifRow.OutOctets,
                 .rxBytes = ifRow.InOctets,
                 .txPackets = (ifRow.OutUcastPkts + ifRow.OutNUcastPkts),
