@@ -34,10 +34,10 @@ bool ffPrintTerminalTheme(FFTerminalThemeOptions* options)
         snprintf(fg, ARRAY_SIZE(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
         snprintf(bg, ARRAY_SIZE(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
         FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(fg, "fg-color"),
-            FF_FORMAT_ARG(fgType, "fg-type"),
-            FF_FORMAT_ARG(bg, "bg-color"),
-            FF_FORMAT_ARG(bgType, "bg-type"),
+            FF_ARG(fg, "fg-color"),
+            FF_ARG(fgType, "fg-type"),
+            FF_ARG(bg, "bg-color"),
+            FF_ARG(bgType, "bg-type"),
         }));
     }
 

@@ -42,16 +42,16 @@ bool ffPrintUptime(FFUptimeOptions* options)
         FFTimeGetAgeResult age = ffTimeGetAge(result.bootTime, ffTimeGetNow());
 
         FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(days, "days"),
-            FF_FORMAT_ARG(hours, "hours"),
-            FF_FORMAT_ARG(minutes, "minutes"),
-            FF_FORMAT_ARG(seconds, "seconds"),
-            FF_FORMAT_ARG(milliseconds, "milliseconds"),
-            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"},
-            FF_FORMAT_ARG(age.years, "years"),
-            FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
-            FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
-            FF_FORMAT_ARG(buffer, "formatted")
+            FF_ARG(days, "days"),
+            FF_ARG(hours, "hours"),
+            FF_ARG(minutes, "minutes"),
+            FF_ARG(seconds, "seconds"),
+            FF_ARG(milliseconds, "milliseconds"),
+            {FF_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"},
+            FF_ARG(age.years, "years"),
+            FF_ARG(age.daysOfYear, "days-of-year"),
+            FF_ARG(age.yearsFraction, "years-fraction"),
+            FF_ARG(buffer, "formatted")
         }));
     }
 

@@ -23,10 +23,10 @@ static void formatKey(const FFPhysicalDiskOptions* options, FFPhysicalDiskResult
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]){
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(dev->name, "name"),
-            FF_FORMAT_ARG(dev->devPath, "dev-path"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(dev->name, "name"),
+            FF_ARG(dev->devPath, "dev-path"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -108,16 +108,16 @@ bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
             if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
                 readOnlyType = "Read-write";
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-                FF_FORMAT_ARG(buffer, "size"),
-                FF_FORMAT_ARG(dev->name, "name"),
-                FF_FORMAT_ARG(dev->interconnect, "interconnect"),
-                FF_FORMAT_ARG(dev->devPath, "dev-path"),
-                FF_FORMAT_ARG(dev->serial, "serial"),
-                FF_FORMAT_ARG(physicalType, "physical-type"),
-                FF_FORMAT_ARG(removableType, "removable-type"),
-                FF_FORMAT_ARG(readOnlyType, "readonly-type"),
-                FF_FORMAT_ARG(dev->revision, "revision"),
-                FF_FORMAT_ARG(tempStr, "temperature"),
+                FF_ARG(buffer, "size"),
+                FF_ARG(dev->name, "name"),
+                FF_ARG(dev->interconnect, "interconnect"),
+                FF_ARG(dev->devPath, "dev-path"),
+                FF_ARG(dev->serial, "serial"),
+                FF_ARG(physicalType, "physical-type"),
+                FF_ARG(removableType, "removable-type"),
+                FF_ARG(readOnlyType, "readonly-type"),
+                FF_ARG(dev->revision, "revision"),
+                FF_ARG(tempStr, "temperature"),
             }));
         }
         ++index;

@@ -25,10 +25,10 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(ip->name, "ifname"),
-            FF_FORMAT_ARG(ip->mac, "mac"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(ip->name, "ifname"),
+            FF_ARG(ip->mac, "mac"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -151,14 +151,14 @@ bool ffPrintLocalIp(FFLocalIpOptions* options)
                 if (ip->speed > 0)
                     appendSpeed(ip, &buffer);
                 FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-                    FF_FORMAT_ARG(ip->ipv4, "ipv4"),
-                    FF_FORMAT_ARG(ip->ipv6, "ipv6"),
-                    FF_FORMAT_ARG(ip->mac, "mac"),
-                    FF_FORMAT_ARG(ip->name, "ifname"),
-                    FF_FORMAT_ARG(ip->defaultRoute, "is-default-route"),
-                    FF_FORMAT_ARG(ip->mtu, "mtu"),
-                    FF_FORMAT_ARG(buffer, "speed"),
-                    FF_FORMAT_ARG(ip->flags, "flags"),
+                    FF_ARG(ip->ipv4, "ipv4"),
+                    FF_ARG(ip->ipv6, "ipv6"),
+                    FF_ARG(ip->mac, "mac"),
+                    FF_ARG(ip->name, "ifname"),
+                    FF_ARG(ip->defaultRoute, "is-default-route"),
+                    FF_ARG(ip->mtu, "mtu"),
+                    FF_ARG(buffer, "speed"),
+                    FF_ARG(ip->flags, "flags"),
                 }));
             }
             ++index;

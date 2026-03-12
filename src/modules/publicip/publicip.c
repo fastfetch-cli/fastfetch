@@ -30,8 +30,8 @@ bool ffPrintPublicIp(FFPublicIPOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(result.ip, "ip"),
-            FF_FORMAT_ARG(result.location, "location"),
+            FF_ARG(result.ip, "ip"),
+            FF_ARG(result.location, "location"),
         }));
     }
 

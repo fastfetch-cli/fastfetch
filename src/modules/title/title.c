@@ -71,22 +71,22 @@ bool ffPrintTitle(FFTitleOptions* options)
         if (cwdTilde.length > 1) ffStrbufTrimRight(&cwdTilde, '/');
 
         FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
-            FF_FORMAT_ARG(hostName, "host-name"),
-            FF_FORMAT_ARG(instance.state.platform.homeDir, "home-dir"),
-            FF_FORMAT_ARG(instance.state.platform.exePath, "exe-path"),
-            FF_FORMAT_ARG(instance.state.platform.userShell, "user-shell"),
-            FF_FORMAT_ARG(userNameColored, "user-name-colored"),
-            FF_FORMAT_ARG(atColored, "at-symbol-colored"),
-            FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
-            FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
+            FF_ARG(instance.state.platform.userName, "user-name"),
+            FF_ARG(hostName, "host-name"),
+            FF_ARG(instance.state.platform.homeDir, "home-dir"),
+            FF_ARG(instance.state.platform.exePath, "exe-path"),
+            FF_ARG(instance.state.platform.userShell, "user-shell"),
+            FF_ARG(userNameColored, "user-name-colored"),
+            FF_ARG(atColored, "at-symbol-colored"),
+            FF_ARG(hostNameColored, "host-name-colored"),
+            FF_ARG(instance.state.platform.fullUserName, "full-user-name"),
             #ifndef _WIN32
-            FF_FORMAT_ARG(instance.state.platform.uid, "user-id"),
+            FF_ARG(instance.state.platform.uid, "user-id"),
             #else
-            FF_FORMAT_ARG(instance.state.platform.sid, "user-id"),
+            FF_ARG(instance.state.platform.sid, "user-id"),
             #endif
-            FF_FORMAT_ARG(instance.state.platform.pid, "pid"),
-            FF_FORMAT_ARG(cwdTilde, "cwd"),
+            FF_ARG(instance.state.platform.pid, "pid"),
+            FF_ARG(cwdTilde, "cwd"),
         }));
     }
 

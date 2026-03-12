@@ -47,8 +47,8 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
             {
                 FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
                 FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, ((FFformatarg[]) {
-                    FF_FORMAT_ARG(moduleIndex, "index"),
-                    FF_FORMAT_ARG(moduleArgs->keyIcon, "icon"),
+                    FF_ARG(moduleIndex, "index"),
+                    FF_ARG(moduleArgs->keyIcon, "icon"),
                 }));
                 ffStrbufWriteTo(&key, stdout);
             }

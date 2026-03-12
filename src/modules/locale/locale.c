@@ -23,7 +23,7 @@ bool ffPrintLocale(FFLocaleOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(locale, "result")
+            FF_ARG(locale, "result")
         }));
     }
 

@@ -99,18 +99,18 @@ bool ffPrintCPU(FFCPUOptions* options)
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(cpu.name, "name"),
-                FF_FORMAT_ARG(cpu.vendor, "vendor"),
-                FF_FORMAT_ARG(cpu.coresPhysical, "cores-physical"),
-                FF_FORMAT_ARG(cpu.coresLogical, "cores-logical"),
-                FF_FORMAT_ARG(cpu.coresOnline, "cores-online"),
-                FF_FORMAT_ARG(freqBase, "freq-base"),
-                FF_FORMAT_ARG(freqMax, "freq-max"),
-                FF_FORMAT_ARG(tempStr, "temperature"),
-                FF_FORMAT_ARG(coreTypes, "core-types"),
-                FF_FORMAT_ARG(cpu.packages, "packages"),
-                FF_FORMAT_ARG(cpu.march, "march"),
-                FF_FORMAT_ARG(cpu.numaNodes, "numa-nodes"),
+                FF_ARG(cpu.name, "name"),
+                FF_ARG(cpu.vendor, "vendor"),
+                FF_ARG(cpu.coresPhysical, "cores-physical"),
+                FF_ARG(cpu.coresLogical, "cores-logical"),
+                FF_ARG(cpu.coresOnline, "cores-online"),
+                FF_ARG(freqBase, "freq-base"),
+                FF_ARG(freqMax, "freq-max"),
+                FF_ARG(tempStr, "temperature"),
+                FF_ARG(coreTypes, "core-types"),
+                FF_ARG(cpu.packages, "packages"),
+                FF_ARG(cpu.march, "march"),
+                FF_ARG(cpu.numaNodes, "numa-nodes"),
             }));
         }
         success = true;

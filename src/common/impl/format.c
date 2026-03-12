@@ -10,37 +10,37 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
 {
     switch(formatarg->type)
     {
-        case FF_FORMAT_ARG_TYPE_INT:
+        case FF_ARG_TYPE_INT:
             ffStrbufAppendSInt(buffer, *(int32_t*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_UINT:
+        case FF_ARG_TYPE_UINT:
             ffStrbufAppendUInt(buffer, *(uint32_t*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_UINT64:
+        case FF_ARG_TYPE_UINT64:
             ffStrbufAppendUInt(buffer, *(uint64_t*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_UINT16:
+        case FF_ARG_TYPE_UINT16:
             ffStrbufAppendUInt(buffer, *(uint16_t*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_UINT8:
+        case FF_ARG_TYPE_UINT8:
             ffStrbufAppendUInt(buffer, *(uint8_t*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_STRING:
+        case FF_ARG_TYPE_STRING:
             ffStrbufAppendS(buffer, (const char*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_STRBUF:
+        case FF_ARG_TYPE_STRBUF:
             ffStrbufAppend(buffer, (const FFstrbuf*)formatarg->value);
             break;
-        case FF_FORMAT_ARG_TYPE_FLOAT:
+        case FF_ARG_TYPE_FLOAT:
             ffStrbufAppendDouble(buffer, *(float*)formatarg->value, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
             break;
-        case FF_FORMAT_ARG_TYPE_DOUBLE:
+        case FF_ARG_TYPE_DOUBLE:
             ffStrbufAppendDouble(buffer, *(double*)formatarg->value, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
             break;
-        case FF_FORMAT_ARG_TYPE_BOOL:
+        case FF_ARG_TYPE_BOOL:
             ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
             break;
-        case FF_FORMAT_ARG_TYPE_LIST:
+        case FF_ARG_TYPE_LIST:
         {
             const FFlist* list = (const FFlist*) formatarg->value;
             for(uint32_t i = 0; i < list->length; i++)
@@ -52,7 +52,7 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
             break;
         }
         default:
-            if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
+            if(formatarg->type != FF_ARG_TYPE_NULL)
                 fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
             break;
     }
@@ -107,16 +107,16 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 static inline bool formatArgSet(const FFformatarg* arg)
 {
     return arg->value != NULL && (
-        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_FLOAT && *(float*)arg->value > 0.0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet((char*)arg->value)) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_BOOL && *(bool*)arg->value) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_LIST && ((FFlist*)arg->value)->length > 0)
+        (arg->type == FF_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_FLOAT && *(float*)arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_INT && *(int*)arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
+        (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*)arg->value)) ||
+        (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_BOOL && *(bool*)arg->value) ||
+        (arg->type == FF_ARG_TYPE_LIST && ((FFlist*)arg->value)->length > 0)
     );
 }
 

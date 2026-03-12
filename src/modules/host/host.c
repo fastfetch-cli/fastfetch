@@ -48,13 +48,13 @@ bool ffPrintHost(FFHostOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(host.family, "family"),
-            FF_FORMAT_ARG(host.name, "name"),
-            FF_FORMAT_ARG(host.version, "version"),
-            FF_FORMAT_ARG(host.sku, "sku"),
-            FF_FORMAT_ARG(host.vendor, "vendor"),
-            FF_FORMAT_ARG(host.serial, "serial"),
-            FF_FORMAT_ARG(host.uuid, "uuid"),
+            FF_ARG(host.family, "family"),
+            FF_ARG(host.name, "name"),
+            FF_ARG(host.version, "version"),
+            FF_ARG(host.sku, "sku"),
+            FF_ARG(host.vendor, "vendor"),
+            FF_ARG(host.serial, "serial"),
+            FF_ARG(host.uuid, "uuid"),
         }));
     }
     success = true;

@@ -25,9 +25,9 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]){
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(inf->name, "name"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(inf->name, "name"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -80,18 +80,18 @@ bool ffPrintNetIO(FFNetIOOptions* options)
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-                FF_FORMAT_ARG(buffer, "rx-size"),
-                FF_FORMAT_ARG(buffer2, "tx-size"),
-                FF_FORMAT_ARG(inf->name, "ifname"),
-                FF_FORMAT_ARG(inf->defaultRoute, "is-default-route"),
-                FF_FORMAT_ARG(inf->txBytes, "tx-bytes"),
-                FF_FORMAT_ARG(inf->rxBytes, "rx-bytes"),
-                FF_FORMAT_ARG(inf->txPackets, "tx-packets"),
-                FF_FORMAT_ARG(inf->rxPackets, "rx-packets"),
-                FF_FORMAT_ARG(inf->rxErrors, "rx-errors"),
-                FF_FORMAT_ARG(inf->txErrors, "tx-errors"),
-                FF_FORMAT_ARG(inf->rxDrops, "rx-drops"),
-                FF_FORMAT_ARG(inf->txDrops, "tx-drops"),
+                FF_ARG(buffer, "rx-size"),
+                FF_ARG(buffer2, "tx-size"),
+                FF_ARG(inf->name, "ifname"),
+                FF_ARG(inf->defaultRoute, "is-default-route"),
+                FF_ARG(inf->txBytes, "tx-bytes"),
+                FF_ARG(inf->rxBytes, "rx-bytes"),
+                FF_ARG(inf->txPackets, "tx-packets"),
+                FF_ARG(inf->rxPackets, "rx-packets"),
+                FF_ARG(inf->rxErrors, "rx-errors"),
+                FF_ARG(inf->txErrors, "tx-errors"),
+                FF_ARG(inf->rxDrops, "rx-drops"),
+                FF_ARG(inf->txDrops, "tx-drops"),
             }));
         }
         ++index;

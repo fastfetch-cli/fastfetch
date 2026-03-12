@@ -34,8 +34,8 @@ bool ffPrintWallpaper(FFWallpaperOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(filename, "file-name"),
-            FF_FORMAT_ARG(fullpath, "full-path"),
+            FF_ARG(filename, "file-name"),
+            FF_ARG(fullpath, "full-path"),
         }));
     }
 

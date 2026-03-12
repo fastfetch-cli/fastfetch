@@ -92,10 +92,10 @@ bool ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-                FF_FORMAT_ARG(moduleIndex, "index"),
-                FF_FORMAT_ARG(result->name, "name"),
-                FF_FORMAT_ARG(displayType, "type"),
-                FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+                FF_ARG(moduleIndex, "index"),
+                FF_ARG(result->name, "name"),
+                FF_ARG(displayType, "type"),
+                FF_ARG(options->moduleArgs.keyIcon, "icon"),
             }));
         }
 
@@ -192,30 +192,30 @@ bool ffPrintDisplay(FFDisplayOptions* options)
                 buf[0] = '\0';
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-                FF_FORMAT_ARG(result->width, "width"),
-                FF_FORMAT_ARG(result->height, "height"),
-                FF_FORMAT_ARG(refreshRate, "refresh-rate"),
-                FF_FORMAT_ARG(result->scaledWidth, "scaled-width"),
-                FF_FORMAT_ARG(result->scaledHeight, "scaled-height"),
-                FF_FORMAT_ARG(result->name, "name"),
-                FF_FORMAT_ARG(displayType, "type"),
-                FF_FORMAT_ARG(result->rotation, "rotation"),
-                FF_FORMAT_ARG(result->primary, "is-primary"),
-                FF_FORMAT_ARG(result->physicalWidth, "physical-width"),
-                FF_FORMAT_ARG(result->physicalHeight, "physical-height"),
-                FF_FORMAT_ARG(iInch, "inch"),
-                FF_FORMAT_ARG(iPpi, "ppi"),
-                FF_FORMAT_ARG(result->bitDepth, "bit-depth"),
-                FF_FORMAT_ARG(hdrEnabled, "hdr-enabled"),
-                FF_FORMAT_ARG(result->manufactureYear, "manufacture-year"),
-                FF_FORMAT_ARG(result->manufactureWeek, "manufacture-week"),
-                FF_FORMAT_ARG(buf, "serial"),
-                FF_FORMAT_ARG(result->platformApi, "platform-api"),
-                FF_FORMAT_ARG(hdrCompatible, "hdr-compatible"),
-                FF_FORMAT_ARG(scaleFactor, "scale-factor"),
-                FF_FORMAT_ARG(result->preferredWidth, "preferred-width"),
-                FF_FORMAT_ARG(result->preferredHeight, "preferred-height"),
-                FF_FORMAT_ARG(preferredRefreshRate, "preferred-refresh-rate"),
+                FF_ARG(result->width, "width"),
+                FF_ARG(result->height, "height"),
+                FF_ARG(refreshRate, "refresh-rate"),
+                FF_ARG(result->scaledWidth, "scaled-width"),
+                FF_ARG(result->scaledHeight, "scaled-height"),
+                FF_ARG(result->name, "name"),
+                FF_ARG(displayType, "type"),
+                FF_ARG(result->rotation, "rotation"),
+                FF_ARG(result->primary, "is-primary"),
+                FF_ARG(result->physicalWidth, "physical-width"),
+                FF_ARG(result->physicalHeight, "physical-height"),
+                FF_ARG(iInch, "inch"),
+                FF_ARG(iPpi, "ppi"),
+                FF_ARG(result->bitDepth, "bit-depth"),
+                FF_ARG(hdrEnabled, "hdr-enabled"),
+                FF_ARG(result->manufactureYear, "manufacture-year"),
+                FF_ARG(result->manufactureWeek, "manufacture-week"),
+                FF_ARG(buf, "serial"),
+                FF_ARG(result->platformApi, "platform-api"),
+                FF_ARG(hdrCompatible, "hdr-compatible"),
+                FF_ARG(scaleFactor, "scale-factor"),
+                FF_ARG(result->preferredWidth, "preferred-width"),
+                FF_ARG(result->preferredHeight, "preferred-height"),
+                FF_ARG(preferredRefreshRate, "preferred-refresh-rate"),
             }));
         }
     }

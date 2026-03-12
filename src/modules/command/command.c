@@ -35,7 +35,7 @@ bool ffPrintCommand(FFCommandOptions* options)
             else
             {
                 FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                    FF_FORMAT_ARG(line, "result")
+                    FF_ARG(line, "result")
                 }));
             }
         }
@@ -50,7 +50,7 @@ bool ffPrintCommand(FFCommandOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(result, "result")
+                FF_ARG(result, "result")
             }));
         }
     }

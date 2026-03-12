@@ -78,18 +78,18 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_PHYSICALMEMORY_DISPLAY_NAME, (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-                FF_FORMAT_ARG(device->size, "bytes"),
-                FF_FORMAT_ARG(prettySize, "size"),
-                FF_FORMAT_ARG(device->maxSpeed, "max-speed"),
-                FF_FORMAT_ARG(device->runningSpeed, "running-speed"),
-                FF_FORMAT_ARG(device->type, "type"),
-                FF_FORMAT_ARG(device->formFactor, "form-factor"),
-                FF_FORMAT_ARG(device->locator, "locator"),
-                FF_FORMAT_ARG(device->vendor, "vendor"),
-                FF_FORMAT_ARG(device->serial, "serial"),
-                FF_FORMAT_ARG(device->partNumber, "part-number"),
-                FF_FORMAT_ARG(device->ecc, "is-ecc-enabled"),
-                FF_FORMAT_ARG(device->installed, "is-installed"),
+                FF_ARG(device->size, "bytes"),
+                FF_ARG(prettySize, "size"),
+                FF_ARG(device->maxSpeed, "max-speed"),
+                FF_ARG(device->runningSpeed, "running-speed"),
+                FF_ARG(device->type, "type"),
+                FF_ARG(device->formFactor, "form-factor"),
+                FF_ARG(device->locator, "locator"),
+                FF_ARG(device->vendor, "vendor"),
+                FF_ARG(device->serial, "serial"),
+                FF_ARG(device->partNumber, "part-number"),
+                FF_ARG(device->ecc, "is-ecc-enabled"),
+                FF_ARG(device->installed, "is-installed"),
             }));
         }
     }

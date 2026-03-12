@@ -40,11 +40,11 @@ bool ffPrintEditor(FFEditorOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result.type, "type"),
-            FF_FORMAT_ARG(result.name, "name"),
-            FF_FORMAT_ARG(result.exe, "exe-name"),
-            FF_FORMAT_ARG(result.path, "path"),
-            FF_FORMAT_ARG(result.version, "version"),
+            FF_ARG(result.type, "type"),
+            FF_ARG(result.name, "name"),
+            FF_ARG(result.exe, "exe-name"),
+            FF_ARG(result.path, "path"),
+            FF_ARG(result.version, "version"),
         }));
     }
 
