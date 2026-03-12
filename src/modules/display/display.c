@@ -17,6 +17,21 @@ static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b)
     return -ffStrbufComp(&a->name, &b->name);
 }
 
+static bool isOrthogonal(FFDisplayResult* display)
+{
+    return display->rotation % 180 == 90;
+}
+
+static uint32_t rotatedHeight(FFDisplayResult* display)
+{
+    return isOrthogonal(display) ? display->width : display->height;
+}
+
+static uint32_t rotatedWidth(FFDisplayResult* display)
+{
+    return isOrthogonal(display) ? display->height : display->width;
+}
+
 bool ffPrintDisplay(FFDisplayOptions* options)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
@@ -101,17 +116,17 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
-        double scaleFactor = (double) result->height / (double) result->scaledHeight;
+        double scaleFactor = (double) rotatedHeight(result) / (double) result->scaledHeight;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
+            ffStrbufAppendF(&buffer, "%ix%i", rotatedWidth(result), rotatedHeight(result));
 
             if(
-                result->scaledWidth > 0 && result->scaledWidth != result->width &&
-                result->scaledHeight > 0 && result->scaledHeight != result->height)
+                result->scaledWidth > 0 && result->scaledWidth != rotatedWidth(result) &&
+                result->scaledHeight > 0 && result->scaledHeight != rotatedHeight(result))
             {
                 ffStrbufAppendS(&buffer, " @ ");
                 ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
