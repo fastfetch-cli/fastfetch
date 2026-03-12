@@ -71,6 +71,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     #define loff_t off_t
 #endif
 
+#ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     if (ffReadFileBuffer(devicesPath, buffer))
@@ -90,6 +91,7 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     ffStrbufClear(buffer);
     return false;
 }
+#endif
 
 typedef struct FFSmbios20EntryPoint
 {

@@ -23,7 +23,7 @@ bool ffPrintHost(FFHostOptions* options)
         goto exit;
     }
 
-    if(host.family.length == 0 && host.name.length == 0)
+    if(host.name.length == 0 && host.family.length == 0)
     {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "neither product_family nor product_name is set by O.E.M.");
         goto exit;
