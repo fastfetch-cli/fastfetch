@@ -148,6 +148,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(pisi)
         FF_PRINT_PACKAGE(soar)
         FF_PRINT_PACKAGE(moss)
+        FF_PRINT_PACKAGE_NAME(sdkman, "sdk")
 
         putchar('\n');
     }
@@ -198,6 +199,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.soar, "soar"),
             FF_FORMAT_ARG(counts.kiss, "kiss"),
             FF_FORMAT_ARG(counts.moss, "moss"),
+            FF_FORMAT_ARG(counts.sdkman, "sdk"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -305,6 +307,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             break;
                         case 'S': if (false);
                             FF_TEST_PACKAGE_NAME(SCOOP)
+                            FF_TEST_PACKAGE_NAME(SDKMAN)
                             FF_TEST_PACKAGE_NAME(SNAP)
                             FF_TEST_PACKAGE_NAME(SOAR)
                             FF_TEST_PACKAGE_NAME(SORCERY)
@@ -372,6 +375,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(PKGSRC)
     FF_TEST_PACKAGE_NAME(RPM)
     FF_TEST_PACKAGE_NAME(SCOOP)
+    FF_TEST_PACKAGE_NAME(SDKMAN)
     FF_TEST_PACKAGE_NAME(SNAP)
     FF_TEST_PACKAGE_NAME(SOAR)
     FF_TEST_PACKAGE_NAME(SORCERY)
@@ -435,6 +439,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
+    FF_APPEND_PACKAGE_COUNT(sdkman)
     FF_APPEND_PACKAGE_COUNT(snap)
     FF_APPEND_PACKAGE_COUNT(soar)
     FF_APPEND_PACKAGE_COUNT(sorcery)
@@ -512,6 +517,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of soar packages", "soar"},
         {"Number of kiss packages", "kiss"},
         {"Number of moss packages", "moss"},
+        {"Number of SDKMAN! packages", "sdk"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
