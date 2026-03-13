@@ -1,21 +1,68 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "common/argType.h"
+#include "common/io.h"
 
-#include <windows.h>
+#ifndef HKEY_CURRENT_USER
+#define HKEY_CLASSES_ROOT ((HKEY) (ULONG_PTR)((LONG)0x80000000))
+#define HKEY_CURRENT_USER ((HKEY) (ULONG_PTR)((LONG)0x80000001))
+#define HKEY_LOCAL_MACHINE ((HKEY) (ULONG_PTR)((LONG)0x80000002))
+#define HKEY_USERS ((HKEY) (ULONG_PTR)((LONG)0x80000003))
+#define HKEY_PERFORMANCE_DATA ((HKEY) (ULONG_PTR)((LONG)0x80000004))
+#define HKEY_CURRENT_CONFIG ((HKEY) (ULONG_PTR)((LONG)0x80000005))
+#define HKEY_DYN_DATA ((HKEY) (ULONG_PTR)((LONG)0x80000006))
+#define HKEY_CURRENT_USER_LOCAL_SETTINGS ((HKEY) (ULONG_PTR)((LONG)0x80000007))
+#endif
 
-static inline void wrapRegCloseKey(HKEY* phKey)
+typedef struct FFRegValueArg
 {
-    if(*phKey)
-        RegCloseKey(*phKey);
+    FFArgType type;
+    const void* value;
+    const wchar_t* name;
+} FFRegValueArg;
+
+HANDLE ffRegGetRootKeyHandle(HKEY hKey);
+bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result, FFstrbuf* error);
+bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error);
+bool ffRegReadValues(HANDLE hKey, uint32_t argc, const FFRegValueArg argv[], FFstrbuf* error);
+bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error);
+bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error);
+
+static inline bool ffRegOpenKeyForRead(HKEY hRootKey, const wchar_t* subKeyW, HANDLE* result, FFstrbuf* error)
+{
+    return ffRegOpenSubkeyForRead(ffRegGetRootKeyHandle(hRootKey), subKeyW, result, error);
 }
 
-#define FF_HKEY_AUTO_DESTROY HKEY __attribute__((__cleanup__(wrapRegCloseKey)))
-
-bool ffRegOpenKeyForRead(HKEY hKey, const wchar_t* subKeyW, HKEY* result, FFstrbuf* error);
-bool ffRegReadStrbuf(HKEY hKey, const wchar_t* valueNameW, FFstrbuf* result, FFstrbuf* error);
-bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t** result, uint32_t* length, FFstrbuf* error);
-bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error);
-bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error);
-bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error);
-bool ffRegGetNSubKeys(HKEY hKey, uint32_t* result, FFstrbuf* error);
+static inline bool ffRegReadStrbuf(HANDLE hKey, const wchar_t* valueNameW, FFstrbuf* result, FFstrbuf* error)
+{
+    return ffRegReadValue(hKey, &(FFRegValueArg) {
+        .type = FF_ARG_TYPE_STRBUF,
+        .value = result,
+        .name = valueNameW,
+    }, error);
+}
+static inline bool ffRegReadUint(HANDLE hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error)
+{
+    return ffRegReadValue(hKey, &(FFRegValueArg) {
+        .type = FF_ARG_TYPE_UINT,
+        .value = result,
+        .name = valueNameW,
+    }, error);
+}
+static inline bool ffRegReadUint64(HANDLE hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error)
+{
+    return ffRegReadValue(hKey, &(FFRegValueArg) {
+        .type = FF_ARG_TYPE_UINT64,
+        .value = result,
+        .name = valueNameW,
+    }, error);
+}
+static inline bool ffRegReadData(HANDLE hKey, const wchar_t* valueNameW, FFlist* result /*list of uint8_t*/, FFstrbuf* error)
+{
+    return ffRegReadValue(hKey, &(FFRegValueArg) {
+        .type = FF_ARG_TYPE_LIST,
+        .value = result,
+        .name = valueNameW,
+    }, error);
+}

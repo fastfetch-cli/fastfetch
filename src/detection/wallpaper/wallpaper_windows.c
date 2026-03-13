@@ -3,7 +3,7 @@
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop", &hKey, NULL))
         return "ffRegOpenKeyForRead(Control Panel\\Desktop) failed";
 

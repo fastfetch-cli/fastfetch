@@ -1,12 +1,12 @@
 #include "gpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
-#include "common/library.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/mallocHelper.h"
 #include "common/debug.h"
 #include "common/windows/nt.h"
 
+#include <windows.h>
 #include <cfgmgr32.h>
 
 #define FF_EMPTY_GUID_STR L"{00000000-0000-0000-0000-000000000000}"
@@ -18,6 +18,13 @@ wchar_t regDriverKey[] = L"SYSTEM\\CurrentControlSet\\Control\\Class\\" FF_EMPTY
 const uint32_t regDriverKeyPrefixLength = (uint32_t) __builtin_strlen("SYSTEM\\CurrentControlSet\\Control\\Class\\");
 
 #define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
+
+static inline void wrapRegCloseKey(HKEY* phKey)
+{
+    if(*phKey)
+        RegCloseKey(*phKey);
+}
+#define FF_HKEY_AUTO_DESTROY __attribute__((__cleanup__(wrapRegCloseKey)))
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
@@ -115,7 +122,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         uint64_t adapterLuid = 0;
 
-        FF_HKEY_AUTO_DESTROY hVideoIdKey = NULL;
+        FF_HKEY_AUTO_DESTROY HKEY hVideoIdKey = NULL;
 
         wchar_t buffer[256];
         ULONG bufferLen = 0;
@@ -147,7 +154,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             {
                 FF_DEBUG("Found VideoID: %ls", buffer);
                 wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, buffer, FF_GUID_STRLEN);
-                FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
+                FF_AUTO_CLOSE_FD HANDLE hDirectxKey = NULL;
                 if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL))
                 {
                     FF_DEBUG("Opened DirectX registry key");
@@ -237,7 +244,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             {
                 FF_DEBUG("Found driver GUID: %ls", buffer);
                 wmemcpy(regDriverKey + regDriverKeyPrefixLength, buffer, FF_GUID_STRLEN + strlen("\\0000"));
-                FF_HKEY_AUTO_DESTROY hRegDriverKey = NULL;
+                FF_AUTO_CLOSE_FD HANDLE hRegDriverKey = NULL;
                 if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDriverKey, &hRegDriverKey, NULL))
                 {
                     FF_DEBUG("Opened driver registry key");

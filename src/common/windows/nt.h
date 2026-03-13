@@ -1005,3 +1005,96 @@ NTSYSAPI NTSTATUS NTAPI RtlExpandEnvironmentStrings(
     _In_ SIZE_T DestinationLength,
     _Out_opt_ PSIZE_T ReturnLength
 );
+
+NTSYSAPI NTSTATUS NTAPI NtOpenKey(
+    _Out_ PHANDLE KeyHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ POBJECT_ATTRIBUTES ObjectAttributes
+);
+
+typedef enum _KEY_VALUE_INFORMATION_CLASS
+{
+    KeyValueBasicInformation, // KEY_VALUE_BASIC_INFORMATION
+    KeyValueFullInformation, // KEY_VALUE_FULL_INFORMATION
+    KeyValuePartialInformation, // KEY_VALUE_PARTIAL_INFORMATION
+    KeyValueFullInformationAlign64, // KEY_VALUE_FULL_INFORMATION_ALIGN64
+    KeyValuePartialInformationAlign64,  // KEY_VALUE_PARTIAL_INFORMATION_ALIGN64
+    KeyValueLayerInformation, // KEY_VALUE_LAYER_INFORMATION
+    MaxKeyValueInfoClass
+} KEY_VALUE_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryValueKey(
+    _In_ HANDLE KeyHandle,
+    _In_ PCUNICODE_STRING ValueName,
+    _In_ KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyValueInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlFormatCurrentUserKeyPath(
+    _Out_ PUNICODE_STRING CurrentUserKeyPath
+);
+
+typedef struct _KEY_VALUE_PARTIAL_INFORMATION
+{
+    ULONG TitleIndex;
+    ULONG Type;
+    ULONG DataLength;
+    _Field_size_bytes_(DataLength) UCHAR Data[];
+} KEY_VALUE_PARTIAL_INFORMATION, *PKEY_VALUE_PARTIAL_INFORMATION;
+
+typedef enum _KEY_INFORMATION_CLASS
+{
+    KeyBasicInformation, // KEY_BASIC_INFORMATION
+    KeyNodeInformation, // KEY_NODE_INFORMATION
+    KeyFullInformation, // KEY_FULL_INFORMATION
+    KeyNameInformation, // KEY_NAME_INFORMATION
+    KeyCachedInformation, // KEY_CACHED_INFORMATION
+    KeyFlagsInformation, // KEY_FLAGS_INFORMATION
+    KeyVirtualizationInformation, // KEY_VIRTUALIZATION_INFORMATION
+    KeyHandleTagsInformation, // KEY_HANDLE_TAGS_INFORMATION
+    KeyTrustInformation, // KEY_TRUST_INFORMATION
+    KeyLayerInformation, // KEY_LAYER_INFORMATION
+    MaxKeyInfoClass
+} KEY_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtEnumerateKey(
+    _In_ HANDLE KeyHandle,
+    _In_ ULONG Index,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+typedef struct _KEY_BASIC_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;                    // Number of 100-nanosecond intervals since this key or any of its values changed.
+    ULONG TitleIndex;                               // Reserved // A legacy field originally intended for use with localization such as an index of a resource table.
+    ULONG NameLength;                               // The size, in bytes, of the key name string in the Name array.
+    _Field_size_bytes_(NameLength) WCHAR Name[];   // The name of the registry key. This string is not null-terminated.
+} KEY_BASIC_INFORMATION, *PKEY_BASIC_INFORMATION;
+
+typedef struct _KEY_FULL_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;
+    ULONG TitleIndex;
+    ULONG ClassOffset;
+    ULONG ClassLength;
+    ULONG SubKeys;
+    ULONG MaxNameLength;
+    ULONG MaxClassLength;
+    ULONG Values;
+    ULONG MaxValueNameLength;
+    ULONG MaxValueDataLength;
+    WCHAR Class[];
+} KEY_FULL_INFORMATION, *PKEY_FULL_INFORMATION;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryKey(
+    _In_ HANDLE KeyHandle,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);

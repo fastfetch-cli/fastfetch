@@ -205,21 +205,22 @@ static const char* detectWine(void)
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
         return;
 
     uint32_t ubr = 0;
-    ffRegReadUint(hKey, L"UBR", &ubr, NULL);
+    ffRegReadValues(hKey, 2, (FFRegValueArg[]) {
+        FF_ARG(ubr, L"UBR"),
+        FF_ARG(info->version, L"BuildLabEx"),
+    }, NULL);
 
-    ffStrbufAppendF(&info->release,
+    ffStrbufSetF(&info->release,
         "%u.%u.%u.%u",
         (unsigned) SharedUserData->NtMajorVersion,
         (unsigned) SharedUserData->NtMinorVersion,
         (unsigned) SharedUserData->NtBuildNumber,
         (unsigned) ubr);
-
-    ffRegReadStrbuf(hKey, L"BuildLabEx", &info->version, NULL);
 
     const char* wineVersion = detectWine();
     if (wineVersion)

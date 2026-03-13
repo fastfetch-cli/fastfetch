@@ -250,28 +250,18 @@ static const char* detectNCores(FFCPUResult* cpu)
 
 static const char* detectByRegistry(FFCPUResult* cpu)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
-    ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
-    if (ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL))
+    if (ffRegReadValues(hKey, 3, (FFRegValueArg[]) {
+        FF_ARG(cpu->name, L"ProcessorNameString"),
+        FF_ARG(cpu->vendor, L"VendorIdentifier"),
+        FF_ARG(cpu->frequencyBase, L"~MHz"),
+    }, NULL))
         ffStrbufTrimRightSpace(&cpu->vendor);
-
-    if (cpu->coresLogical == 0)
-    {
-        FF_HKEY_AUTO_DESTROY hProcsKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor", &hProcsKey, NULL))
-        {
-            uint32_t cores;
-            if (ffRegGetNSubKeys(hProcsKey, &cores, NULL))
-                cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
-        }
-    }
-
-    uint32_t mhz;
-    if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-        cpu->frequencyBase = mhz;
+    else
+        return "ffRegReadValues() failed for CPU registry key";
 
     return NULL;
 }

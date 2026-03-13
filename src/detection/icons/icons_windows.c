@@ -3,7 +3,7 @@
 
 const char* ffDetectIcons(FFIconsResult* result)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
        !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))
         return "ffRegOpenKeyForRead(Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\{NewStartPanel|ClassicStartMenu}) failed";
