@@ -76,7 +76,7 @@ static uint8_t* xrandrGetProperty(XrandrData* data, RROutput output, const char*
 
 static void x11DetectWMFromEWMH(XrandrData* data, FFDisplayServerResult* result)
 {
-    if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
+    if(result->wmProcessName.length > 0 || ffStrbufEqualS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND))
         return;
 
     Window* wmWindow = (Window*) x11GetProperty(data, data->display, DefaultRootWindow(data->display), "_NET_SUPPORTING_WM_CHECK");
@@ -101,7 +101,7 @@ static void x11FetchServerVendor(XrandrData* data, FFDisplayServerResult* result
         ffStrbufSetS(&result->wmProtocolName, serverVendor);
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor, bool randrEmulation)
+static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, uint32_t dpi, bool randrEmulation)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(screenResources == NULL)
@@ -145,8 +145,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         (uint32_t) (currentMode ? currentMode->width : crtcInfo->width),
         (uint32_t) (currentMode ? currentMode->height : crtcInfo->height),
         currentMode ? (double) currentMode->dotClock / (double) ((uint32_t) currentMode->hTotal * currentMode->vTotal) : 0,
-        (uint32_t) (crtcInfo->width / scaleFactor + .5),
-        (uint32_t) (crtcInfo->height / scaleFactor + .5),
+        dpi,
         preferredMode ? (uint32_t) preferredMode->width : 0,
         preferredMode ? (uint32_t) preferredMode->height : 0,
         preferredMode ? (double) preferredMode->dotClock / (double) ((uint32_t) preferredMode->hTotal * preferredMode->vTotal) : 0,
@@ -176,7 +175,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
     return !!item;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType, XRRScreenResources* screenResources, uint8_t bitDepth, uint32_t dpi)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, screenResources, output);
     if(outputInfo == NULL)
@@ -195,7 +194,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
 
     uint8_t* randrEmulation = xrandrGetProperty(data, output, "RANDR Emulation", NULL);
 
-    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, edidLength, screenResources, bitDepth, scaleFactor, randrEmulation ? !!randrEmulation[0] : false);
+    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, edidLength, screenResources, bitDepth, dpi, randrEmulation ? !!randrEmulation[0] : false);
 
     if (edidData)
         data->ffXFree(edidData);
@@ -206,7 +205,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
     return res;
 }
 
-static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
+static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, XRRScreenResources* screenResources, uint8_t bitDepth, uint32_t dpi)
 {
     bool foundOutput = false;
     char* xname = data->ffXGetAtomName(data->display, monitorInfo->name);
@@ -215,7 +214,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, X
     FFDisplayType displayType = ffdsGetDisplayType(name.chars);
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType, screenResources, bitDepth, scaleFactor))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType, screenResources, bitDepth, dpi))
             foundOutput = true;
     }
 
@@ -226,8 +225,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, X
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
         0,
-        (uint32_t) (monitorInfo->width / scaleFactor + .5),
-        (uint32_t) (monitorInfo->height / scaleFactor + .5),
+        dpi,
         0, 0, 0,
         0,
         &name,
@@ -251,13 +249,13 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
 
     XRRScreenResources* screenResources = data->ffXRRGetScreenResourcesCurrent(data->display, RootWindowOfScreen(screen));
 
-    double scaleFactor = 1;
+    uint32_t dpi = 1;
     char* resourceManager = (char*) x11GetProperty(data, data->display, screen->root, "RESOURCE_MANAGER");
     if (resourceManager)
     {
-        FF_STRBUF_AUTO_DESTROY dpi = ffStrbufCreate();
-        if (ffParsePropLines(resourceManager, "Xft.dpi:", &dpi))
-            scaleFactor = ffStrbufToDouble(&dpi, 96) / 96;
+        FF_STRBUF_AUTO_DESTROY dpiStr = ffStrbufCreate();
+        if (ffParsePropLines(resourceManager, "Xft.dpi:", &dpiStr))
+            dpi = (uint32_t) ffStrbufToUInt(&dpiStr, 96);
         data->ffXFree(resourceManager);
     }
     uint8_t bitDepth = (uint8_t) (screen->root_depth / 3);
@@ -266,7 +264,7 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
 
     for(int i = 0; i < numberOfMonitors; i++)
     {
-        if(xrandrHandleMonitor(data, &monitorInfos[i], screenResources, bitDepth, scaleFactor))
+        if(xrandrHandleMonitor(data, &monitorInfos[i], screenResources, bitDepth, dpi))
             foundAMonitor = true;
     }
 
@@ -287,8 +285,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
         0,
-        (uint32_t) WidthOfScreen(screen),
-        (uint32_t) HeightOfScreen(screen),
+        0,
         0, 0, 0,
         0,
         NULL,

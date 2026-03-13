@@ -45,7 +45,9 @@ bool ffPrintDisplay(FFDisplayOptions* options)
             }
             else
             {
-                ffStrbufAppendF(&buffer, "%ix%i", result->scaledWidth, result->scaledHeight);
+                uint32_t scaledWidth = result->width * 96 / result->dpi;
+                uint32_t scaledHeight = result->height * 96 / result->dpi;
+                ffStrbufAppendF(&buffer, "%ix%i", scaledWidth, scaledHeight);
             }
 
             if (options->compactType & FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT)
@@ -101,7 +103,9 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
-        double scaleFactor = (double) result->height / (double) result->scaledHeight;
+        uint32_t scaledWidth = result->width * 96 / result->dpi;
+        uint32_t scaledHeight = result->height * 96 / result->dpi;
+        double scaleFactor = (double) result->dpi / 96.;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -109,9 +113,7 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
             ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
 
-            if(
-                result->scaledWidth > 0 && result->scaledWidth != result->width &&
-                result->scaledHeight > 0 && result->scaledHeight != result->height)
+            if(result->dpi != 96)
             {
                 ffStrbufAppendS(&buffer, " @ ");
                 ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
@@ -195,8 +197,8 @@ bool ffPrintDisplay(FFDisplayOptions* options)
                 FF_ARG(result->width, "width"),
                 FF_ARG(result->height, "height"),
                 FF_ARG(refreshRate, "refresh-rate"),
-                FF_ARG(result->scaledWidth, "scaled-width"),
-                FF_ARG(result->scaledHeight, "scaled-height"),
+                FF_ARG(scaledWidth, "scaled-width"),
+                FF_ARG(scaledHeight, "scaled-height"),
                 FF_ARG(result->name, "name"),
                 FF_ARG(displayType, "type"),
                 FF_ARG(result->rotation, "rotation"),
@@ -216,6 +218,7 @@ bool ffPrintDisplay(FFDisplayOptions* options)
                 FF_ARG(result->preferredWidth, "preferred-width"),
                 FF_ARG(result->preferredHeight, "preferred-height"),
                 FF_ARG(preferredRefreshRate, "preferred-refresh-rate"),
+                FF_ARG(result->dpi, "dpi"),
             }));
         }
     }
@@ -362,10 +365,13 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
                 yyjson_mut_obj_add_str(doc, output, "drrStatus", "Unknown");
                 break;
         }
+        yyjson_mut_obj_add_uint(doc, output, "dpi", item->dpi);
 
+        uint32_t scaledWidth = item->width * 96 / item->dpi;
+        uint32_t scaledHeight = item->height * 96 / item->dpi;
         yyjson_mut_val* scaled = yyjson_mut_obj_add_obj(doc, obj, "scaled");
-        yyjson_mut_obj_add_uint(doc, scaled, "width", item->scaledWidth);
-        yyjson_mut_obj_add_uint(doc, scaled, "height", item->scaledHeight);
+        yyjson_mut_obj_add_uint(doc, scaled, "width", scaledWidth);
+        yyjson_mut_obj_add_uint(doc, scaled, "height", scaledHeight);
 
         yyjson_mut_val* preferred = yyjson_mut_obj_add_obj(doc, obj, "preferred");
         yyjson_mut_obj_add_uint(doc, preferred, "width", item->preferredWidth);
@@ -478,5 +484,6 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         {"Screen preferred width (in pixels)", "preferred-width"},
         {"Screen preferred height (in pixels)", "preferred-height"},
         {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
+        {"DPI", "dpi"},
     }))
 };

@@ -93,17 +93,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             uint32_t width = sourceMode->width;
             uint32_t height = sourceMode->height;
-            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
-                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
-            {
-                uint32_t temp = width;
-                width = height;
-                height = temp;
-                temp = physicalWidth;
-                physicalWidth = physicalHeight;
-                physicalHeight = temp;
-            }
-
             uint32_t rotation;
             switch (path->targetInfo.rotation)
             {
@@ -144,12 +133,19 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 ReleaseDC(NULL, hdc);
             }
 
+            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
+                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
+            {
+                uint32_t temp = width;
+                width = height;
+                height = temp;
+            }
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                width * 96 / systemDpi,
-                height * 96 / systemDpi,
+                systemDpi,
                 preferredMode.width,
                 preferredMode.height,
                 preferredRefreshRate,

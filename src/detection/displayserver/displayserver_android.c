@@ -85,7 +85,7 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 (uint32_t)width, (uint32_t)height,
                 refreshRate,
-                0, 0,
+                0,
                 0, 0,
                 0,
                 0,
@@ -117,11 +117,11 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
-        double scaleFactor = (double) ffStrbufToUInt(&buffer, 0) / 160.;
+        uint32_t dpi = (uint32_t) ffStrbufToUInt(&buffer, 0) * 96 / 160;
         FFDisplayResult* display = ffdsAppendDisplay(ds,
             width, height,
             0,
-            (uint32_t) (width / scaleFactor + .5), (uint32_t) (height / scaleFactor + .5),
+            dpi,
             0, 0,
             0,
             0,

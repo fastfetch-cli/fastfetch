@@ -72,8 +72,7 @@ typedef struct FFDisplayResult
     uint32_t width; // in px
     uint32_t height; // in px
     double refreshRate; // in Hz
-    uint32_t scaledWidth; // in px
-    uint32_t scaledHeight; // in px
+    uint32_t dpi; // Base 96
     uint32_t preferredWidth; // in px
     uint32_t preferredHeight; // in px
     double preferredRefreshRate; // in Hz
@@ -110,8 +109,7 @@ FFDisplayResult* ffdsAppendDisplay(
     uint32_t width,
     uint32_t height,
     double refreshRate,
-    uint32_t scaledWidth,
-    uint32_t scaledHeight,
+    uint32_t dpi,
     uint32_t preferredWidth,
     uint32_t preferredHeight,
     double preferredRefreshRate,
