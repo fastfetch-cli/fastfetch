@@ -128,3 +128,16 @@ bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length)
     }
     return false;
 }
+
+bool ffEdidIsValid(const uint8_t edid[128], uint32_t length)
+{
+    if (length < 128 || length % 128 != 0) return false;
+
+    static const uint8_t edidHeader[] = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00 };
+    if (memcmp(edid, edidHeader, sizeof(edidHeader)) != 0) return false;
+
+    uint8_t sum = 0;
+    for (uint32_t i = 0; i < 128; i++) sum += edid[i];
+
+    return sum == 0;
+}
