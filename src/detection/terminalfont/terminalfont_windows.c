@@ -289,6 +289,13 @@ static void detectWarp(FFTerminalFontResult* terminalFont)
     }
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    FFstrbuf* fontWeight = (FFstrbuf*) ffListAdd(&terminalFont->font.styles);
+    ffStrbufInit(fontWeight);
+    if (ffRegReadStrbuf(key, L"FontWeight", fontWeight, NULL))
+        ffStrbufTrim(fontWeight, '"');
+    else
+        ffStrbufSetStatic(fontWeight, "Normal");
 }
 
 bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
