@@ -6,11 +6,7 @@
 void* ffListAdd(FFlist* list)
 {
     if(list->length == list->capacity)
-    {
-        list->capacity = list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2;
-        // realloc(NULL, newSize) is same as malloc(newSize)
-        list->data = realloc(list->data, (size_t)list->capacity * list->elementSize);
-    }
+        ffListReserve(list, list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2);
 
     ++list->length;
     return ffListGet(list, list->length - 1);
