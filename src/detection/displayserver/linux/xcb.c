@@ -153,13 +153,13 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         ffEdidGetName(edidData, name);
     }
 
-    uint8_t randrEmulation = 0;
+    bool randrEmulation = false;
     FF_AUTO_FREE xcb_randr_get_output_property_reply_t* randrEmulationReply = xcbRandrGetProperty(data, output, "RANDR Emulation");
     if(randrEmulationReply)
     {
         int len = data->ffxcb_randr_get_output_property_data_length(randrEmulationReply);
         if(len >= 1)
-            randrEmulation = data->ffxcb_randr_get_output_property_data(randrEmulationReply)[0];
+            randrEmulation = !!data->ffxcb_randr_get_output_property_data(randrEmulationReply)[0];
     }
 
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, outputInfoReply->crtc, XCB_CURRENT_TIME);
@@ -227,11 +227,21 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
             : (currentMode ? "xcb-randr-mode" : "xcb-randr-crtc")
 
     );
-    if (item && edidData && edidLength >= 128)
+    if (item)
     {
-        item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        if (edidData && edidLength >= 128)
+        {
+            item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+            ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        }
         item->bitDepth = bitDepth;
+        if ((rotation == 90 || rotation == 180) && !randrEmulation)
+        {
+            // In XWayland mode, width / height has been swapped out of box
+            uint32_t tmp = item->width;
+            item->width = item->height;
+            item->height = tmp;
+        }
     }
 
     return !!item;

@@ -169,6 +169,13 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
             ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
         }
         item->bitDepth = bitDepth;
+        if ((rotation == 90 || rotation == 180) && !randrEmulation)
+        {
+            // In XWayland mode, width / height has been swapped out of box
+            uint32_t tmp = item->width;
+            item->width = item->height;
+            item->height = tmp;
+        }
     }
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
