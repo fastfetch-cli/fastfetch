@@ -204,7 +204,7 @@ static inline bool wrapClose(FFNativeFD* pfd)
     #ifndef _WIN32
         close(*pfd);
     #else
-        CloseHandle(*pfd);
+        NtClose(*pfd);
     #endif
 
     return true;

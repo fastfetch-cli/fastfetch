@@ -116,7 +116,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         &piProcInfo    // receives PROCESS_INFORMATION
     );
 
-    CloseHandle(hChildPipeWrite);
+    NtClose(hChildPipeWrite);
     if(!success)
     {
         if (GetLastError() == ERROR_FILE_NOT_FOUND)
@@ -124,7 +124,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         return "CreateProcessA() failed";
     }
 
-    CloseHandle(piProcInfo.hThread); // we don't need the thread handle
+    NtClose(piProcInfo.hThread); // we don't need the thread handle
     outHandle->pid   = piProcInfo.hProcess;
     outHandle->pipeRead  = hChildPipeRead;
     hChildPipeRead = INVALID_HANDLE_VALUE; // ownership transferred, don't close it

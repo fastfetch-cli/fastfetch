@@ -128,12 +128,12 @@ static bool createSubfolders(wchar_t* fileName)
         if (!NT_SUCCESS(status))
         {
             if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
-                CloseHandle(hRoot);
+                NtClose(hRoot);
             return false;
         }
 
         if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
-            CloseHandle(hRoot);
+            NtClose(hRoot);
         hRoot = hNew;
         closeRoot = true;
 
@@ -141,7 +141,7 @@ static bool createSubfolders(wchar_t* fileName)
     }
 
     if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
-        CloseHandle(hRoot);
+        NtClose(hRoot);
 
     return true;
 }

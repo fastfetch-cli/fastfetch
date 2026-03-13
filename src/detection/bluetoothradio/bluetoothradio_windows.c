@@ -98,7 +98,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         device->connectable = ffBluetoothIsConnectable(hRadio);
         device->discoverable = ffBluetoothIsDiscoverable(hRadio);
 
-        CloseHandle(hRadio);
+        NtClose(hRadio);
     } while (ffBluetoothFindNextRadio(hFind, &hRadio));
 
     ffBluetoothFindRadioClose(hFind);
