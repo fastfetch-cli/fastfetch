@@ -179,7 +179,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
             default:
                 CancelIo(hChildPipeRead);
                 TerminateProcess(hProcess, 1);
-                return "WaitForSingleObject(hReadEvent) failed";
+                return "NtWaitForSingleObject(hReadEvent) failed";
             }
         }
 

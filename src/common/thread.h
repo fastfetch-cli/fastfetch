@@ -21,7 +21,7 @@
         static inline void ffThreadDetach(FFThreadType thread) { NtClose(thread); }
         static inline bool ffThreadJoin(FFThreadType thread, uint32_t timeout)
         {
-            if (WaitForSingleObject(thread, timeout == 0 ? (DWORD) -1 : timeout) != 0 /*WAIT_OBJECT_0*/)
+            if (NtWaitForSingleObject(thread, TRUE, timeout == 0 ? NULL : &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }) != STATUS_WAIT_0)
             {
                 TerminateThread(thread, (DWORD) -1);
                 NtClose(thread);
