@@ -843,7 +843,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->disableLinewrap = !options->pipe;
     #else
     options->disableLinewrap = false;
-    options->debugMode = false;
+    options->debugMode = !!getenv("FF_DEBUG");
     #endif
 
     options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
