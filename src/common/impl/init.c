@@ -55,8 +55,8 @@ void ffInitInstance(void)
         setlocale(LC_TIME, "");
     #endif
 
-    initState(&instance.state);
     defaultConfig();
+    initState(&instance.state);
 }
 
 static volatile bool ffDisableLinewrap = true;

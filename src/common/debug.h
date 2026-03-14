@@ -30,4 +30,5 @@ static inline const char* ffFindFileName(const char* file)
 
 #if _WIN32
 const char* ffDebugWin32Error(unsigned long errorCode);
+const char* ffDebugNtStatus(NTSTATUS status);
 #endif
