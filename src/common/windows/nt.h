@@ -1098,3 +1098,10 @@ NTSYSAPI NTSTATUS NTAPI NtQueryKey(
     _In_ ULONG Length,
     _Out_ PULONG ResultLength
 );
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
+    _Out_ PHANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _In_opt_ PCLIENT_ID ClientId
+);

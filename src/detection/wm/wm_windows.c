@@ -52,8 +52,10 @@ static bool verifySignature(const wchar_t* filePath)
 
 static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
 {
-    FF_AUTO_CLOSE_FD HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
-    if (!hProcess)
+    FF_AUTO_CLOSE_FD HANDLE hProcess = NULL;
+    if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
+        .Length = sizeof(OBJECT_ATTRIBUTES),
+    }, &(CLIENT_ID) { .UniqueProcess = (HANDLE)(uintptr_t) processId })))
         return false;
 
     ULONG size;

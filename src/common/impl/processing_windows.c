@@ -216,12 +216,14 @@ exit:
 
 bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
 {
-    FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
-        ? NtCurrentProcess()
-        : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-
-    if (hProcess == NULL)
-        return false;
+    FF_AUTO_CLOSE_FD HANDLE hProcess = NtCurrentProcess();
+    if(pid != 0)
+    {
+        if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
+            .Length = sizeof(OBJECT_ATTRIBUTES),
+        }, &(CLIENT_ID) { .UniqueProcess = (HANDLE)(uintptr_t) pid })))
+            return false;
+    }
 
     if(ppid)
     {
