@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/mallocHelper.h"
 #include "common/processing.h"
 #include "common/io.h"
 #include "common/windows/unicode.h"
@@ -85,7 +86,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
     PROCESS_INFORMATION piProcInfo = {};
-    STARTUPINFOA siStartInfo = {
+    STARTUPINFOW siStartInfo = {
         .cb = sizeof(siStartInfo),
         .dwFlags = STARTF_USESTDHANDLES,
     };
@@ -100,12 +101,19 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         siStartInfo.hStdError = ffGetNullFD();
     }
 
-    FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
-    argvToCmdline(argv, &cmdline);
+    FF_AUTO_FREE wchar_t* cmdline = NULL;
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        argvToCmdline(argv, &buf);
+        uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
+        cmdline = malloc(cmdlineBytes);
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, NULL, buf.chars, buf.length + 1)))
+            return "RtlUTF8ToUnicodeN() failed";
+    }
 
-    BOOL success = CreateProcessA(
+    BOOL success = CreateProcessW(
         NULL,          // application name
-        cmdline.chars, // command line
+        cmdline,       // command line
         NULL,          // process security attributes
         NULL,          // primary thread security attributes
         TRUE,          // handles are inherited
@@ -121,7 +129,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     {
         if (GetLastError() == ERROR_FILE_NOT_FOUND)
             return "command not found";
-        return "CreateProcessA() failed";
+        return "CreateProcessW() failed";
     }
 
     NtClose(piProcInfo.hThread); // we don't need the thread handle
