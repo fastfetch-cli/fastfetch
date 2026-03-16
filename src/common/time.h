@@ -29,11 +29,20 @@ static inline double ffTimeGetTick(void) //In msec
     #endif
 }
 
+#if _WIN32
+static inline uint64_t ffFileTimeToUnixMs(uint64_t value)
+{
+    if (__builtin_expect(__builtin_usubll_overflow(value, 116444736000000000ull, &value), false))
+        return 0;
+    return value / 10000ull;
+}
+#endif
+
 static inline uint64_t ffTimeGetNow(void)
 {
     #ifdef _WIN32
         uint64_t timeNow = ffKSystemTimeToUInt64(&SharedUserData->SystemTime);
-        return (timeNow - 116444736000000000ull) / 10000ull;
+        return ffFileTimeToUnixMs((uint64_t) timeNow);
     #elif defined(__HAIKU__)
         return (uint64_t) real_time_clock_usecs() / 1000u;
     #else
