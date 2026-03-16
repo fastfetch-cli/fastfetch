@@ -960,8 +960,8 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 {
     #ifdef _WIN32
 
-    CONSOLE_FONT_INFO cfi;
-    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) // Only works for ConHost
+    CONSOLE_FONT_INFOEX cfi;
+    if(GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) // Only works for ConHost
     {
         requestData->characterPixelWidth = cfi.dwFontSize.X;
         requestData->characterPixelHeight = cfi.dwFontSize.Y;
