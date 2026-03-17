@@ -6,7 +6,6 @@
 #include "common/settings.h"
 #include "common/stringUtils.h"
 #include "detection/os/os.h"
-#include <ctype.h>
 
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir)
 {
