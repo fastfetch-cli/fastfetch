@@ -451,12 +451,141 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
+static uint32_t getProfSysPackages(FFstrbuf* profileDir, uint32_t depth)
+{
+    if (depth > 64)
+        return 0;
+
+    ffStrbufEnsureEndsWithC(profileDir, '/');
+    uint32_t profileDirLen = profileDir->length;
+
+    uint32_t count = 0;
+    {
+        ffStrbufAppendS(profileDir, "packages");
+        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+        if (ffReadFileBuffer(profileDir->chars, &content))
+        {
+            for (const char* line = content.chars; *line; )
+            {
+                const char* eol = strchr(line, '\n');
+                if (!eol) eol = content.chars + content.length;
+                if (*line == '*') ++count;
+                else if (*line == '-' && line + 1 < eol && line[1] == '*' && count > 0) --count;
+                line = (*eol) ? eol + 1 : eol;
+            }
+        }
+        ffStrbufSubstrBefore(profileDir, profileDirLen);
+    }
+
+    ffStrbufAppendS(profileDir, "parent");
+    FF_STRBUF_AUTO_DESTROY parentContent = ffStrbufCreate();
+    bool ok = ffReadFileBuffer(profileDir->chars, &parentContent);
+    ffStrbufSubstrBefore(profileDir, profileDirLen);
+
+    if (!ok)
+        return count;
+
+    for (const char* line = parentContent.chars; *line; )
+    {
+        const char* eol = strchr(line, '\n');
+        if (!eol)
+            eol = parentContent.chars + parentContent.length;
+
+        uint32_t lineLen = (uint32_t)(eol - line);
+        if (lineLen > 0 && *line != '#')
+        {
+            FF_STRBUF_AUTO_DESTROY parentPath = ffStrbufCreate();
+            if (*line == '/')
+                ffStrbufSetNS(&parentPath, lineLen, line);
+            else
+            {
+                ffStrbufSet(&parentPath, profileDir);
+                ffStrbufAppendNS(&parentPath, lineLen, line);
+            }
+
+            char resolved[PATH_MAX] = {0};
+            if (realpath(parentPath.chars, resolved))
+            {
+                FF_STRBUF_AUTO_DESTROY resolvedBuf = ffStrbufCreateS(resolved);
+                count += getProfSysPackages(&resolvedBuf, depth + 1);
+            }
+        }
+
+        line = (*eol) ? eol + 1 : eol;
+    }
+
+    return count;
+}
+
+static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+{
+    uint32_t total = countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    if (total == 0)
+        return;
+
+    uint32_t world = 0;
+    {
+        uint32_t baseDirLen = baseDir->length;
+        ffStrbufAppendS(baseDir, "/var/lib/portage/world");
+        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+        if (ffReadFileBuffer(baseDir->chars, &content))
+        {
+            for (const char* line = content.chars; *line; )
+            {
+                const char* eol = strchr(line, '\n');
+                if (!eol) eol = content.chars + content.length;
+                if (*line != '#') ++world;
+                line = (*eol) ? eol + 1 : eol;
+            }
+        }
+        ffStrbufSubstrBefore(baseDir, baseDirLen);
+    }
+
+    uint32_t system = 0;
+    {
+        uint32_t baseDirLen = baseDir->length;
+        ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ROOT "/etc/portage/make.profile");
+        char resolved[PATH_MAX] = {0};
+        if (realpath(baseDir->chars, resolved))
+        {
+            FF_STRBUF_AUTO_DESTROY profileDir = ffStrbufCreateS(resolved);
+            system = getProfSysPackages(&profileDir, 0);
+        }
+        ffStrbufSubstrBefore(baseDir, baseDirLen);
+    }
+
+    {
+        uint32_t baseDirLen = baseDir->length;
+        ffStrbufAppendS(baseDir, "/etc/portage/profile/packages");
+        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+        if (ffReadFileBuffer(baseDir->chars, &content))
+        {
+            for (const char* line = content.chars; *line; )
+            {
+                const char* eol = strchr(line, '\n');
+                if (!eol) eol = content.chars + content.length;
+                if (*line == '*') ++system;
+                else if (*line == '-' && line + 1 < eol && line[1] == '*' && system > 0) --system;
+                line = (*eol) ? eol + 1 : eol;
+            }
+        }
+        ffStrbufSubstrBefore(baseDir, baseDirLen);
+    }
+
+    uint32_t deps = (world + system < total) ? total - world - system : 0;
+
+    packageCounts->emergeWorld += world;
+    packageCounts->emergeSys += system;
+    packageCounts->emergeDeps += deps;
+    packageCounts->emerge += total;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
     if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
-    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) getPackageCountsEmerge(baseDir, packageCounts);
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpakPackages(baseDir, "/var/lib");
     if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);

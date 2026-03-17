@@ -17,6 +17,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         return false;
     }
 
+    uint32_t emergeAll = counts.emerge;
     uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
     uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
     uint32_t brewAll = counts.brew + counts.brewCask;
@@ -60,7 +61,16 @@ bool ffPrintPackages(FFPackagesOptions* options)
         };
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
-        FF_PRINT_PACKAGE(emerge)
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(emerge);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(emergeWorld, "emerge-world")
+            FF_PRINT_PACKAGE_NAME(emergeSys, "emerge-system")
+            FF_PRINT_PACKAGE_NAME(emergeDeps, "emerge-deps")
+        }
         FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
         if (options->combined)
@@ -160,6 +170,9 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(counts.dpkg, "dpkg"),
             FF_ARG(counts.rpm, "rpm"),
             FF_ARG(counts.emerge, "emerge"),
+            FF_ARG(counts.emergeWorld, "emerge-world"),
+            FF_ARG(counts.emergeSys, "emerge-system"),
+            FF_ARG(counts.emergeDeps, "emerge-deps"),
             FF_ARG(counts.eopkg, "eopkg"),
             FF_ARG(counts.xbps, "xbps"),
             FF_ARG(counts.nixSystem, "nix-system"),
@@ -408,6 +421,9 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
     FF_APPEND_PACKAGE_COUNT(emerge)
+    FF_APPEND_PACKAGE_COUNT(emergeDeps)
+    FF_APPEND_PACKAGE_COUNT(emergeSys)
+    FF_APPEND_PACKAGE_COUNT(emergeWorld)
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
     FF_APPEND_PACKAGE_COUNT(flatpakUser)
@@ -473,7 +489,10 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Pacman branch on manjaro", "pacman-branch"},
         {"Number of dpkg packages", "dpkg"},
         {"Number of rpm packages", "rpm"},
-        {"Number of emerge packages", "emerge"},
+        {"Number of all combined emerge packages", "emerge"},
+        {"Number of @world emerge set packages", "emerge-world"},
+        {"Number of @system emerge set packages", "emerge-system"},
+        {"Number of emerged dependencies", "emerge-deps"},
         {"Number of eopkg packages", "eopkg"},
         {"Number of xbps packages", "xbps"},
         {"Number of nix-system packages", "nix-system"},

@@ -13,6 +13,9 @@ typedef struct FFPackagesResult
     uint32_t choco;
     uint32_t dpkg;
     uint32_t emerge;
+    uint32_t emergeDeps;
+    uint32_t emergeSys;
+    uint32_t emergeWorld;
     uint32_t eopkg;
     uint32_t flatpakSystem;
     uint32_t flatpakUser;
