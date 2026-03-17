@@ -586,8 +586,19 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
             {
                 const char* eol = strchr(line, '\n');
                 if (!eol) eol = content.chars + content.length;
-                if (*line == '*') ++system;
-                else if (*line == '-' && line + 1 < eol && line[1] == '*' && system > 0) --system;
+
+                const char* p = line;
+                while (p < eol && isspace((unsigned char)*p))
+                    ++p;
+
+                if (p < eol && *p != '#')
+                {
+                    if (*p == '*')
+                        ++system;
+                    else if (*p == '-' && system > 0)
+                        --system;
+                }
+
                 line = (*eol) ? eol + 1 : eol;
             }
         }
