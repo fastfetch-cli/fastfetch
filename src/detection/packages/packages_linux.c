@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdlib.h>
 #include "packages.h"
 #include "common/io.h"
 #include "common/parsing.h"
@@ -504,16 +505,24 @@ static uint32_t getProfSysPackages(FFstrbuf* profileDir, uint32_t depth)
         if (!eol)
             eol = parentContent.chars + parentContent.length;
 
-        uint32_t lineLen = (uint32_t)(eol - line);
-        if (lineLen > 0 && *line != '#')
+        const char* p = line;
+        while (p < eol && isspace((unsigned char)*p))
+            ++p;
+
+        const char* end = eol;
+        while (end > p && isspace((unsigned char)*(end - 1)))
+            --end;
+
+        if (p < end && *p != '#')
         {
             FF_STRBUF_AUTO_DESTROY parentPath = ffStrbufCreate();
-            if (*line == '/')
-                ffStrbufSetNS(&parentPath, lineLen, line);
+            uint32_t pathLen = (uint32_t)(end - p);
+            if (*p == '/')
+                ffStrbufSetNS(&parentPath, pathLen, p);
             else
             {
                 ffStrbufSet(&parentPath, profileDir);
-                ffStrbufAppendNS(&parentPath, lineLen, line);
+                ffStrbufAppendNS(&parentPath, pathLen, p);
             }
 
             char resolved[PATH_MAX] = {0};
