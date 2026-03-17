@@ -17,7 +17,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         return false;
     }
 
-    uint32_t emergeAll = counts.emergeWorld + counts.emergeSys + counts.emergeDeps;
+    uint32_t emergeAll = counts.emergeWorld + counts.emergeSystem;
     uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
     uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
     uint32_t brewAll = counts.brew + counts.brewCask;
@@ -63,13 +63,12 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(rpm)
         if (options->combined)
         {
-            FF_PRINT_PACKAGE_ALL(emerge);
+            FF_PRINT_PACKAGE_NAME(emergeAll, "emerge");
         }
         else
         {
             FF_PRINT_PACKAGE_NAME(emergeWorld, "emerge-world")
-            FF_PRINT_PACKAGE_NAME(emergeSys, "emerge-system")
-            FF_PRINT_PACKAGE_NAME(emergeDeps, "emerge-deps")
+            FF_PRINT_PACKAGE_NAME(emergeSystem, "emerge-system")
         }
         FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
@@ -170,8 +169,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(counts.dpkg, "dpkg"),
             FF_ARG(counts.rpm, "rpm"),
             FF_ARG(counts.emergeWorld, "emerge-world"),
-            FF_ARG(counts.emergeSys, "emerge-system"),
-            FF_ARG(counts.emergeDeps, "emerge-deps"),
+            FF_ARG(counts.emergeSystem, "emerge-system"),
             FF_ARG(counts.eopkg, "eopkg"),
             FF_ARG(counts.xbps, "xbps"),
             FF_ARG(counts.nixSystem, "nix-system"),
@@ -420,8 +418,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(brewCask)
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
-    FF_APPEND_PACKAGE_COUNT(emergeDeps)
-    FF_APPEND_PACKAGE_COUNT(emergeSys)
+    FF_APPEND_PACKAGE_COUNT(emergeSystem)
     FF_APPEND_PACKAGE_COUNT(emergeWorld)
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
@@ -455,7 +452,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
-    yyjson_mut_obj_add_uint(doc, obj, "emerge-all", counts.emergeWorld + counts.emergeSys + counts.emergeDeps);
+    yyjson_mut_obj_add_uint(doc, obj, "emerge-all", counts.emergeWorld + counts.emergeSystem);
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 
     return true;
@@ -490,8 +487,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of dpkg packages", "dpkg"},
         {"Number of rpm packages", "rpm"},
         {"Number of @world emerge set packages", "emerge-world"},
-        {"Number of @system emerge set packages", "emerge-system"},
-        {"Number of emerged dependencies", "emerge-deps"},
+        {"Number of non-world emerge set packages", "emerge-system"},
         {"Number of eopkg packages", "eopkg"},
         {"Number of xbps packages", "xbps"},
         {"Number of nix-system packages", "nix-system"},
