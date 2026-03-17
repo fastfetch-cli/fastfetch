@@ -453,92 +453,6 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
-static uint32_t getProfSysPackages(FFstrbuf* profileDir, uint32_t depth)
-{
-    if (depth > 16)
-        return 0;
-
-    ffStrbufEnsureEndsWithC(profileDir, '/');
-    uint32_t profileDirLen = profileDir->length;
-
-    uint32_t count = 0;
-    {
-        ffStrbufAppendS(profileDir, "packages");
-        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-        if (ffReadFileBuffer(profileDir->chars, &content))
-        {
-            for (const char* line = content.chars; *line; )
-            {
-                const char* eol = strchr(line, '\n');
-                if (!eol)
-                    eol = content.chars + content.length;
-
-                const char* p = line;
-                while (p < eol && isspace((unsigned char)*p))
-                    ++p;
-
-                if (p < eol && *p != '#')
-                {
-                    if (*p == '*')
-                        ++count;
-                    else if (*p == '-' && count > 0)
-                        --count;
-                }
-
-                line = (*eol) ? eol + 1 : eol;
-            }
-        }
-        ffStrbufSubstrBefore(profileDir, profileDirLen);
-    }
-
-    ffStrbufAppendS(profileDir, "parent");
-    FF_STRBUF_AUTO_DESTROY parentContent = ffStrbufCreate();
-    bool ok = ffReadFileBuffer(profileDir->chars, &parentContent);
-    ffStrbufSubstrBefore(profileDir, profileDirLen);
-
-    if (!ok)
-        return count;
-
-    for (const char* line = parentContent.chars; *line; )
-    {
-        const char* eol = strchr(line, '\n');
-        if (!eol)
-            eol = parentContent.chars + parentContent.length;
-
-        const char* p = line;
-        while (p < eol && isspace((unsigned char)*p))
-            ++p;
-
-        const char* end = eol;
-        while (end > p && isspace((unsigned char)*(end - 1)))
-            --end;
-
-        if (p < end && *p != '#')
-        {
-            FF_STRBUF_AUTO_DESTROY parentPath = ffStrbufCreate();
-            uint32_t pathLen = (uint32_t)(end - p);
-            if (*p == '/')
-                ffStrbufSetNS(&parentPath, pathLen, p);
-            else
-            {
-                ffStrbufSet(&parentPath, profileDir);
-                ffStrbufAppendNS(&parentPath, pathLen, p);
-            }
-
-            char resolved[PATH_MAX] = {0};
-            if (realpath(parentPath.chars, resolved))
-            {
-                FF_STRBUF_AUTO_DESTROY resolvedBuf = ffStrbufCreateS(resolved);
-                count += getProfSysPackages(&resolvedBuf, depth + 1);
-            }
-        }
-
-        line = (*eol) ? eol + 1 : eol;
-    }
-
-    return count;
-}
-
 static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
 {
     uint32_t total = countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
@@ -551,80 +465,15 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
         ffStrbufAppendS(baseDir, "/var/lib/portage/world");
         FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
         if (ffReadFileBuffer(baseDir->chars, &content))
-        {
-            for (const char* line = content.chars; *line; )
-            {
-                const char* eol = strchr(line, '\n');
-                if (!eol) eol = content.chars + content.length;
-
-                /* Skip leading whitespace on the current line */
-                const char* p = line;
-                while (p < eol && isspace((unsigned char)*p))
-                    ++p;
-
-                /* Count only non-empty, non-comment lines */
-                if (p < eol && *p != '#')
-                    ++world;
-
-                line = (*eol) ? eol + 1 : eol;
-            }
-        }
-        ffStrbufSubstrBefore(baseDir, baseDirLen);
-    }
-
-    uint32_t system = 0;
-    {
-        uint32_t baseDirLen = baseDir->length;
-        ffStrbufAppendS(baseDir, "/etc/portage/make.profile");
-        char resolved[PATH_MAX] = {0};
-        if (realpath(baseDir->chars, resolved))
-        {
-            FF_STRBUF_AUTO_DESTROY profileDir = ffStrbufCreateS(resolved);
-            system = getProfSysPackages(&profileDir, 0);
-        }
-        ffStrbufSubstrBefore(baseDir, baseDirLen);
-    }
-
-    {
-        uint32_t baseDirLen = baseDir->length;
-        ffStrbufAppendS(baseDir, "/etc/portage/profile/packages");
-        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-        if (ffReadFileBuffer(baseDir->chars, &content))
-        {
-            for (const char* line = content.chars; *line; )
-            {
-                const char* eol = strchr(line, '\n');
-                if (!eol) eol = content.chars + content.length;
-
-                const char* p = line;
-                while (p < eol && isspace((unsigned char)*p))
-                    ++p;
-
-                if (p < eol && *p != '#')
-                {
-                    if (*p == '*')
-                        ++system;
-                    else if (*p == '-' && system > 0)
-                        --system;
-                }
-
-                line = (*eol) ? eol + 1 : eol;
-            }
-        }
+            world = ffStrbufCountC(&content, '\n');
         ffStrbufSubstrBefore(baseDir, baseDirLen);
     }
 
     if (world > total)
         world = total;
 
-    if (system > total - world)
-        system = total - world;
-
-    uint32_t deps = total - world - system;
-
     packageCounts->emergeWorld += world;
-    packageCounts->emergeSys += system;
-    packageCounts->emergeDeps += deps;
+    packageCounts->emergeSystem += total - world;
 }
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
