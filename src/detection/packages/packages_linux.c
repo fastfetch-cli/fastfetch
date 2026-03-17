@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include "packages.h"
 #include "common/io.h"
 #include "common/parsing.h"
@@ -5,6 +6,7 @@
 #include "common/settings.h"
 #include "common/stringUtils.h"
 #include "detection/os/os.h"
+#include <ctype.h>
 
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir)
 {
@@ -468,9 +470,21 @@ static uint32_t getProfSysPackages(FFstrbuf* profileDir, uint32_t depth)
             for (const char* line = content.chars; *line; )
             {
                 const char* eol = strchr(line, '\n');
-                if (!eol) eol = content.chars + content.length;
-                if (*line == '*') ++count;
-                else if (*line == '-' && line + 1 < eol && line[1] == '*' && count > 0) --count;
+                if (!eol)
+                    eol = content.chars + content.length;
+
+                const char* p = line;
+                while (p < eol && isspace((unsigned char)*p))
+                    ++p;
+
+                if (p < eol && *p != '#')
+                {
+                    if (*p == '*')
+                        ++count;
+                    else if (*p == '-' && count > 0)
+                        --count;
+                }
+
                 line = (*eol) ? eol + 1 : eol;
             }
         }
@@ -534,7 +548,16 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
             {
                 const char* eol = strchr(line, '\n');
                 if (!eol) eol = content.chars + content.length;
-                if (*line != '#') ++world;
+
+                /* Skip leading whitespace on the current line */
+                const char* p = line;
+                while (p < eol && isspace((unsigned char)*p))
+                    ++p;
+
+                /* Count only non-empty, non-comment lines */
+                if (p < eol && *p != '#')
+                    ++world;
+
                 line = (*eol) ? eol + 1 : eol;
             }
         }
@@ -544,7 +567,7 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
     uint32_t system = 0;
     {
         uint32_t baseDirLen = baseDir->length;
-        ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ROOT "/etc/portage/make.profile");
+        ffStrbufAppendS(baseDir, "/etc/portage/make.profile");
         char resolved[PATH_MAX] = {0};
         if (realpath(baseDir->chars, resolved))
         {
@@ -572,7 +595,13 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
         ffStrbufSubstrBefore(baseDir, baseDirLen);
     }
 
-    uint32_t deps = (world + system < total) ? total - world - system : 0;
+    if (world > total)
+        world = total;
+
+    if (system > total - world)
+        system = total - world;
+
+    uint32_t deps = total - world - system;
 
     packageCounts->emergeWorld += world;
     packageCounts->emergeSys += system;

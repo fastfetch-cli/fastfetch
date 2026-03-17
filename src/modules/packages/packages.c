@@ -17,7 +17,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         return false;
     }
 
-    uint32_t emergeAll = counts.emerge;
+    uint32_t emergeAll = counts.emergeWorld + counts.emergeSys + counts.emergeDeps;
     uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
     uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
     uint32_t brewAll = counts.brew + counts.brewCask;
@@ -169,7 +169,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(counts.pacmanBranch, "pacman-branch"),
             FF_ARG(counts.dpkg, "dpkg"),
             FF_ARG(counts.rpm, "rpm"),
-            FF_ARG(counts.emerge, "emerge"),
+            FF_ARG(emergeAll, "emerge"),
             FF_ARG(counts.emergeWorld, "emerge-world"),
             FF_ARG(counts.emergeSys, "emerge-system"),
             FF_ARG(counts.emergeDeps, "emerge-deps"),
