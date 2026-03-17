@@ -169,7 +169,6 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(counts.pacmanBranch, "pacman-branch"),
             FF_ARG(counts.dpkg, "dpkg"),
             FF_ARG(counts.rpm, "rpm"),
-            FF_ARG(emergeAll, "emerge"),
             FF_ARG(counts.emergeWorld, "emerge-world"),
             FF_ARG(counts.emergeSys, "emerge-system"),
             FF_ARG(counts.emergeDeps, "emerge-deps"),
@@ -216,6 +215,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(brewAll, "brew-all"),
             FF_ARG(guixAll, "guix-all"),
             FF_ARG(hpkgAll, "hpkg-all"),
+            FF_ARG(emergeAll, "emerge-all"),
         }));
     }
 
@@ -420,7 +420,6 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(brewCask)
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
-    FF_APPEND_PACKAGE_COUNT(emerge)
     FF_APPEND_PACKAGE_COUNT(emergeDeps)
     FF_APPEND_PACKAGE_COUNT(emergeSys)
     FF_APPEND_PACKAGE_COUNT(emergeWorld)
@@ -456,6 +455,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
+    yyjson_mut_obj_add_uint(doc, obj, "emerge-all", counts.emergeWorld + counts.emergeSys + counts.emergeDeps);
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 
     return true;
@@ -489,7 +489,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Pacman branch on manjaro", "pacman-branch"},
         {"Number of dpkg packages", "dpkg"},
         {"Number of rpm packages", "rpm"},
-        {"Number of all combined emerge packages", "emerge"},
         {"Number of @world emerge set packages", "emerge-world"},
         {"Number of @system emerge set packages", "emerge-system"},
         {"Number of emerged dependencies", "emerge-deps"},
@@ -536,5 +535,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Total number of all brew packages", "brew-all"},
         {"Total number of all guix packages", "guix-all"},
         {"Total number of all hpkg packages", "hpkg-all"},
+        {"Total number of all emerge package", "emerge-all"},
     }))
 };

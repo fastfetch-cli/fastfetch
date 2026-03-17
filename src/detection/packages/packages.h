@@ -51,7 +51,6 @@ typedef struct FFPackagesResult
     uint32_t xbps;
 
     uint32_t all; // Make sure this goes last among package counter fields
-    uint32_t emerge;
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;
