@@ -454,7 +454,7 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
 
 static uint32_t getProfSysPackages(FFstrbuf* profileDir, uint32_t depth)
 {
-    if (depth > 64)
+    if (depth > 16)
         return 0;
 
     ffStrbufEnsureEndsWithC(profileDir, '/');
@@ -616,7 +616,6 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
     packageCounts->emergeWorld += world;
     packageCounts->emergeSys += system;
     packageCounts->emergeDeps += deps;
-    packageCounts->emerge += total;
 }
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
