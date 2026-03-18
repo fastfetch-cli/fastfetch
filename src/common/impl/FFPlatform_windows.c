@@ -28,7 +28,7 @@ static void getExePath(FFPlatform* platform)
         NULL);
     if (hPath != INVALID_HANDLE_VALUE)
     {
-        DWORD len = GetFinalPathNameByHandleW(hPath, exePathW, MAX_PATH, FILE_NAME_OPENED);
+        DWORD len = GetFinalPathNameByHandleW(hPath, exePathW, MAX_PATH, FILE_NAME_NORMALIZED);
         if (len > 0 && len < MAX_PATH)
         {
             ffStrbufSetNWS(&platform->exePath, len, exePathW);

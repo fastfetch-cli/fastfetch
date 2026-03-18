@@ -13,3 +13,10 @@ static inline bool ffIsAbsolutePath(const char* path)
     return path[0] == '/';
     #endif
 }
+
+#if _WIN32
+char* frealpath(void* __restrict hFile, char* __restrict resolved_name /*MAX_PATH*/);
+char* realpath(const char* __restrict file_name, char* __restrict resolved_name  /*MAX_PATH*/);
+ssize_t freadlink(void* hFile, char* buf, size_t bufsiz);
+ssize_t readlink(const char* path, char* buf, size_t bufsiz);
+#endif
