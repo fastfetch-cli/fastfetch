@@ -7,8 +7,31 @@ extern "C"
 #include "common/windows/wmi.hpp"
 #include "common/windows/unicode.hpp"
 
-#include <highlevelmonitorconfigurationapi.h>
-#include <physicalmonitorenumerationapi.h>
+#include <winternl.h>
+
+NTSYSAPI NTSTATUS WINAPI GetPhysicalMonitors(
+  _In_  UNICODE_STRING *pstrDeviceName,
+  _In_  DWORD          dwPhysicalMonitorArraySize,
+  _Out_ DWORD          *pdwNumPhysicalMonitorHandlesInArray,
+  _Out_ HANDLE         *phPhysicalMonitorArray
+);
+
+typedef enum _MC_VCP_CODE_TYPE {
+  MC_MOMENTARY,
+  MC_SET_PARAMETER
+} MC_VCP_CODE_TYPE, *LPMC_VCP_CODE_TYPE;
+
+NTSYSAPI NTSTATUS WINAPI DDCCIGetVCPFeature(
+  _In_      HANDLE             hMonitor,
+  _In_      DWORD              dwVCPCode,
+  _Out_opt_ LPMC_VCP_CODE_TYPE pvct,
+  _Out_     DWORD              *pdwCurrentValue,
+  _Out_opt_ DWORD              *pdwMaximumValue
+);
+
+NTSYSAPI NTSTATUS WINAPI DestroyPhysicalMonitorInternal(
+  _In_ HANDLE hMonitor
+);
 
 static const char* detectWithWmi(FFlist* result)
 {
@@ -40,33 +63,42 @@ static const char* detectWithWmi(FFlist* result)
 
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
 {
-    FF_LIBRARY_LOAD_MESSAGE(dxva2, "dxva2" FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetPhysicalMonitorsFromHMONITOR)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetMonitorBrightness)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, DestroyPhysicalMonitor)
+    HMODULE gdi32 = GetModuleHandleW(L"gdi32.dll");
+    if (!gdi32) return "GetModuleHandleW(gdi32.dll) failed";
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, GetPhysicalMonitors)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, DDCCIGetVCPFeature)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, DestroyPhysicalMonitorInternal)
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
-        PHYSICAL_MONITOR physicalMonitor;
-        if (ffGetPhysicalMonitorsFromHMONITOR((HMONITOR)(uintptr_t) display->id, 1, &physicalMonitor))
+        if (display->type == FF_DISPLAY_TYPE_BUILTIN) continue;
+
+        MONITORINFOEXW mi;
+        mi.cbSize = sizeof(mi);
+        if (!GetMonitorInfoW((HMONITOR)(uintptr_t) display->id, (LPMONITORINFO) &mi))
+            continue;
+
+        UNICODE_STRING deviceName = {
+            .Length = (USHORT) (wcslen(mi.szDevice) * sizeof(wchar_t)),
+            .MaximumLength = 0,
+            .Buffer = mi.szDevice,
+        };
+        HANDLE physicalMonitor;
+        DWORD monitorCount = 0;
+        if (NT_SUCCESS(ffGetPhysicalMonitors(&deviceName, 1, &monitorCount, &physicalMonitor)) && monitorCount >= 1)
         {
-            DWORD min = 0, curr = 0, max = 0;
-            if (ffGetMonitorBrightness(physicalMonitor.hPhysicalMonitor, &min, &curr, &max))
+            DWORD curr = 0, max = 0;
+            if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, 0x10 /* luminance */, NULL, &curr, &max)))
             {
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-
-                if (display->name.length)
-                    ffStrbufInitCopy(&brightness->name, &display->name);
-                else
-                    ffStrbufInitWS(&brightness->name, physicalMonitor.szPhysicalMonitorDescription);
-
+                ffStrbufInitCopy(&brightness->name, &display->name);
                 brightness->max = max;
-                brightness->min = min;
+                brightness->min = 0;
                 brightness->current = curr;
                 brightness->builtin = false;
             }
 
-            ffDestroyPhysicalMonitor(physicalMonitor.hPhysicalMonitor);
+            ffDestroyPhysicalMonitorInternal(physicalMonitor);
         }
     }
     return NULL;
