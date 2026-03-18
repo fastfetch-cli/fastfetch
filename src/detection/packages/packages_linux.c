@@ -465,7 +465,11 @@ static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageC
         ffStrbufAppendS(baseDir, "/var/lib/portage/world");
         FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
         if (ffReadFileBuffer(baseDir->chars, &content))
+        {
             world = ffStrbufCountC(&content, '\n');
+            if (!ffStrbufEndsWithC(&content, '\n'))
+                ++world;
+        }
         ffStrbufSubstrBefore(baseDir, baseDirLen);
     }
 
