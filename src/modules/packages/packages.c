@@ -63,7 +63,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(rpm)
         if (options->combined)
         {
-            FF_PRINT_PACKAGE_NAME(emergeAll, "emerge");
+            FF_PRINT_PACKAGE_ALL(emerge);
         }
         else
         {
