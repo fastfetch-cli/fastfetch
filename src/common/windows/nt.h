@@ -1249,3 +1249,28 @@ NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
     _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
     _In_opt_ PCLIENT_ID ClientId
 );
+
+NTSYSAPI NTSTATUS NTAPI LdrLoadDll(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrUnloadDll(
+    _In_ PVOID DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetDllHandle(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
+    _In_ PVOID DllHandle,
+    _In_opt_ PCANSI_STRING ProcedureName,
+    _In_opt_ ULONG ProcedureNumber,
+    _Out_ PVOID *ProcedureAddress
+);

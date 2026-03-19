@@ -199,7 +199,7 @@ static void getUserShell(FFPlatform* platform)
 static const char* detectWine(void)
 {
     const char * __cdecl wine_get_version(void);
-    HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
+    void* hntdll = ffLibraryGetModule(L"ntdll.dll");
     if (!hntdll) return NULL;
     FF_LIBRARY_LOAD_SYMBOL_LAZY(hntdll, wine_get_version);
     if (!ffwine_get_version) return NULL;

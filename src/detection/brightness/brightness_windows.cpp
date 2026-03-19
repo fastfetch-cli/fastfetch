@@ -63,8 +63,8 @@ static const char* detectWithWmi(FFlist* result)
 
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
 {
-    HMODULE gdi32 = GetModuleHandleW(L"gdi32.dll");
-    if (!gdi32) return "GetModuleHandleW(gdi32.dll) failed";
+    void* gdi32 = ffLibraryGetModule(L"gdi32.dll");
+    if (!gdi32) return "ffLibraryGetModule(gdi32.dll) failed";
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, GetPhysicalMonitors)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, DDCCIGetVCPFeature)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, DestroyPhysicalMonitorInternal)
