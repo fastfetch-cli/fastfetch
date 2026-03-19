@@ -33,6 +33,12 @@ NTSYSAPI NTSTATUS WINAPI DestroyPhysicalMonitorInternal(
   _In_ HANDLE hMonitor
 );
 
+NTSTATUS WINAPI GetPhysicalMonitorDescription(
+  _In_  HANDLE hMonitor,
+  _In_  DWORD  dwPhysicalMonitorDescriptionSizeInChars,
+  _Out_ LPWSTR szPhysicalMonitorDescription
+);
+
 static const char* detectWithWmi(FFlist* result)
 {
     FFWmiQuery query(L"SELECT CurrentBrightness, InstanceName FROM WmiMonitorBrightness WHERE Active = true", nullptr, FFWmiNamespace::WMI);
@@ -91,7 +97,20 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
             if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, 0x10 /* luminance */, NULL, &curr, &max)))
             {
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-                ffStrbufInitCopy(&brightness->name, &display->name);
+                if (display->name.length > 0)
+                    ffStrbufInitCopy(&brightness->name, &display->name);
+                else
+                {
+                    FF_LIBRARY_LOAD_SYMBOL_LAZY(gdi32, GetPhysicalMonitorDescription)
+                    if (ffGetPhysicalMonitorDescription)
+                    {
+                        wchar_t description[128 /*MUST be PHYSICAL_MONITOR_DESCRIPTION_SIZE*/];
+                        if (NT_SUCCESS(ffGetPhysicalMonitorDescription(physicalMonitor, ARRAY_SIZE(description), description)))
+                            ffStrbufInitWS(&brightness->name, description);
+                    }
+                    if (brightness->name.length == 0)
+                        ffStrbufSetNWS(&brightness->name, deviceName.Length / 2, deviceName.Buffer);
+                }
                 brightness->max = max;
                 brightness->min = 0;
                 brightness->current = curr;
