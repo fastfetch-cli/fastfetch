@@ -990,11 +990,155 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS_FULL
     ULONG ProcessGroupId;
 
     // ...
-} RTL_USER_PROCESS_PARAMETERS_FULL;
+} RTL_USER_PROCESS_PARAMETERS_FULL, *PRTL_USER_PROCESS_PARAMETERS_FULL;
 
-static inline RTL_USER_PROCESS_PARAMETERS_FULL* ffGetProcessParams()
+typedef struct _PEB_FULL
 {
-    return (RTL_USER_PROCESS_PARAMETERS_FULL*) NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters;
+    //
+    // The process was cloned with an inherited address space.
+    //
+    BOOLEAN InheritedAddressSpace;
+
+    //
+    // The process has image file execution options (IFEO).
+    //
+    BOOLEAN ReadImageFileExecOptions;
+
+    //
+    // The process has a debugger attached.
+    //
+    BOOLEAN BeingDebugged;
+
+    union
+    {
+        BOOLEAN BitField;
+        struct
+        {
+            BOOLEAN ImageUsesLargePages : 1;            // The process uses large image regions (4 MB).
+            BOOLEAN IsProtectedProcess : 1;             // The process is a protected process.
+            BOOLEAN IsImageDynamicallyRelocated : 1;    // The process image base address was relocated.
+            BOOLEAN SkipPatchingUser32Forwarders : 1;   // The process skipped forwarders for User32.dll functions. 1 for 64-bit, 0 for 32-bit.
+            BOOLEAN IsPackagedProcess : 1;              // The process is a packaged store process (APPX/MSIX).
+            BOOLEAN IsAppContainerProcess : 1;          // The process has an AppContainer token.
+            BOOLEAN IsProtectedProcessLight : 1;        // The process is a protected process (light).
+            BOOLEAN IsLongPathAwareProcess : 1;         // The process is long path aware.
+        };
+    };
+
+    //
+    // Handle to a mutex for synchronization.
+    //
+    HANDLE Mutant;
+
+    //
+    // Pointer to the base address of the process image.
+    //
+    PVOID ImageBaseAddress;
+
+    //
+    // Pointer to the process loader data.
+    //
+    PPEB_LDR_DATA Ldr;
+
+    //
+    // Pointer to the process parameters.
+    //
+    PRTL_USER_PROCESS_PARAMETERS_FULL ProcessParameters;
+
+    //
+    // Reserved.
+    //
+    PVOID SubSystemData;
+
+    //
+    // Pointer to the process default heap.
+    //
+    PVOID ProcessHeap;
+
+    // ...
+} PEB_FULL, *PPEB_FULL;
+
+typedef struct _TEB_FULL
+{
+    //
+    // Thread Information Block (TIB) contains the thread's stack, base and limit addresses, the current stack pointer, and the exception list.
+    //
+    NT_TIB NtTib;
+
+    //
+    // Reserved.
+    //
+    PVOID EnvironmentPointer;
+
+    //
+    // Client ID for this thread.
+    //
+    CLIENT_ID ClientId;
+
+    //
+    // A handle to an active Remote Procedure Call (RPC) if the thread is currently involved in an RPC operation.
+    //
+    PVOID ActiveRpcHandle;
+
+    //
+    // A pointer to the __declspec(thread) local storage array.
+    //
+    PVOID ThreadLocalStoragePointer;
+
+    //
+    // A pointer to the Process Environment Block (PEB), which contains information about the process.
+    //
+    PPEB_FULL ProcessEnvironmentBlock;
+
+    //
+    // The previous Win32 error value for this thread.
+    //
+    ULONG LastErrorValue;
+
+    //
+    // The number of critical sections currently owned by this thread.
+    //
+    ULONG CountOfOwnedCriticalSections;
+
+    //
+    // Reserved.
+    //
+    PVOID CsrClientThread;
+
+    //
+    // Reserved for win32k.sys
+    //
+    PVOID Win32ThreadInfo;
+
+    //
+    // Reserved for user32.dll
+    //
+    ULONG User32Reserved[26];
+
+    //
+    // Reserved for winsrv.dll
+    //
+    ULONG UserReserved[5];
+
+    //
+    // Reserved.
+    //
+    PVOID WOW32Reserved;
+
+    //
+    // The LCID of the current thread. (Kernel32!GetThreadLocale)
+    //
+    LCID CurrentLocale;
+} TEB_FULL, *PTEB_FULL;
+
+static inline PTEB_FULL ffGetTeb()
+{
+    return (PTEB_FULL) NtCurrentTeb();
+}
+
+static inline PPEB_FULL ffGetPeb()
+{
+    return ffGetTeb()->ProcessEnvironmentBlock;
 }
 
 NTSYSAPI NTSTATUS NTAPI RtlExpandEnvironmentStrings(
@@ -1104,4 +1248,29 @@ NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
     _In_ ACCESS_MASK DesiredAccess,
     _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
     _In_opt_ PCLIENT_ID ClientId
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrLoadDll(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrUnloadDll(
+    _In_ PVOID DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetDllHandle(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
+    _In_ PVOID DllHandle,
+    _In_opt_ PCANSI_STRING ProcedureName,
+    _In_opt_ ULONG ProcedureNumber,
+    _Out_ PVOID *ProcedureAddress
 );

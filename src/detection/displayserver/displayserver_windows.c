@@ -30,15 +30,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
             const DISPLAYCONFIG_PATH_INFO* path = &paths[i];
             const DISPLAYCONFIG_SOURCE_MODE* sourceMode = &modes[path->sourceInfo.modeInfoIdx].sourceMode;
 
-            DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
-                .header = {
-                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
-                    .size = sizeof(sourceName),
-                    .adapterId = path->sourceInfo.adapterId,
-                    .id = path->sourceInfo.id,
-                },
-            };
-
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             uint32_t physicalWidth = 0, physicalHeight = 0;
 
@@ -157,7 +148,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
                     ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 sourceMode->position.x == 0 && sourceMode->position.y == 0,
-                path->sourceInfo.id,
+                (uintptr_t) hMonitor,
                 physicalWidth,
                 physicalHeight,
                 "GDI"

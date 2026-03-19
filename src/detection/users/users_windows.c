@@ -42,8 +42,8 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
             else if (address->AddressFamily == AF_INET6)
             {
                 char ipStr[INET6_ADDRSTRLEN];
-                if (inet_ntop(AF_INET6, address->Address, ipStr, sizeof(ipStr)) != NULL)
-                    ffStrbufSetS(&user->clientIp, ipStr);
+                const char* end = RtlIpv6AddressToStringA((const IN6_ADDR *) address->Address, ipStr);
+                ffStrbufSetNS(&user->clientIp, (uint32_t) (end - ipStr), ipStr);
             }
             WTSFreeMemory(address);
         }

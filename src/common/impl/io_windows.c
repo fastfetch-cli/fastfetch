@@ -8,7 +8,7 @@
 
 static bool createSubfolders(wchar_t* fileName)
 {
-    HANDLE hRoot = ffGetProcessParams()->CurrentDirectory.Handle;
+    HANDLE hRoot = ffGetPeb()->ProcessParameters->CurrentDirectory.Handle;
     bool closeRoot = false;
     wchar_t* ptr = fileName;
 
@@ -69,7 +69,7 @@ static bool createSubfolders(wchar_t* fileName)
     // Rooted path on current drive: \foo\bar
     else if (ptr[0] == L'\\')
     {
-        UNICODE_STRING* dosPath = &ffGetProcessParams()->CurrentDirectory.DosPath;
+        UNICODE_STRING* dosPath = &ffGetPeb()->ProcessParameters->CurrentDirectory.DosPath;
         wchar_t driveRoot[] = { dosPath->Buffer[0], L':', L'\\', L'\0' };
         hRoot = CreateFileW(
             driveRoot,
