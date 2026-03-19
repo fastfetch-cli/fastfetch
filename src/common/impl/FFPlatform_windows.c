@@ -19,7 +19,7 @@ static void getExePath(FFPlatform* platform)
     wchar_t exePathW[MAX_PATH];
 
     FF_AUTO_CLOSE_FD HANDLE hPath = CreateFileW(
-        ffGetProcessParams()->ImagePathName.Buffer,
+        ffGetPeb()->ProcessParameters->ImagePathName.Buffer,
         GENERIC_READ,
         FILE_SHARE_READ,
         NULL,
@@ -38,7 +38,10 @@ static void getExePath(FFPlatform* platform)
     }
 
     if (platform->exePath.length == 0)
-        ffStrbufSetNWS(&platform->exePath, ffGetProcessParams()->ImagePathName.Length / 2, ffGetProcessParams()->ImagePathName.Buffer);
+    {
+        PCUNICODE_STRING imagePathName = &ffGetPeb()->ProcessParameters->ImagePathName;
+        ffStrbufSetNWS(&platform->exePath, imagePathName->Length / sizeof(wchar_t), imagePathName->Buffer);
+    }
 
     ffStrbufReplaceAllC(&platform->exePath, '\\', '/');
 }
@@ -296,7 +299,7 @@ static void getSystemArchitecture(FFPlatformSysinfo* info)
 
 static void getCwd(FFPlatform* platform)
 {
-    PCURDIR cwd = &ffGetProcessParams()->CurrentDirectory;
+    PCURDIR cwd = &ffGetPeb()->ProcessParameters->CurrentDirectory;
     ffStrbufSetNWS(&platform->cwd, cwd->DosPath.Length / sizeof(WCHAR), cwd->DosPath.Buffer);
     ffStrbufReplaceAllC(&platform->cwd, '\\', '/');
     ffStrbufEnsureEndsWithC(&platform->cwd, '/');
@@ -304,8 +307,7 @@ static void getCwd(FFPlatform* platform)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
-    static_assert(offsetof(TEB, Reserved1[8]) == sizeof(NT_TIB) + sizeof(PVOID) /*EnvironmentPointer*/, "Structure layout mismatch detected.");
-    platform->pid = (uint32_t) (uintptr_t) ((CLIENT_ID*) &NtCurrentTeb()->Reserved1[8])->UniqueProcess;
+    platform->pid = (uint32_t) (uintptr_t) ffGetTeb()->ClientId.UniqueProcess;
     getExePath(platform);
     getCwd(platform);
     getHomeDir(platform);
