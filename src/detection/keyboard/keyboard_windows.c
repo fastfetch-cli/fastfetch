@@ -5,7 +5,6 @@
 #include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
 
-#include <winternl.h>
 #include <windows.h>
 #include <hidsdi.h>
 #include <cfgmgr32.h>

@@ -1,7 +1,18 @@
 #pragma once
 
-#include <winnt.h>
+#include <ntdef.h>
 #include <winternl.h>
+#include <winnt.h>
+#include <stdint.h>
+#include <assert.h>
+
+enum {
+    SystemModuleInformation = 11,
+    SystemFirmwareTableInformation = 76,
+    SystemBootEnvironmentInformation = 90,
+    SystemLogicalProcessorAndGroupInformation = 107,
+    SystemSecureBootInformation = 146,
+};
 
 #define D3DKMT_ALIGN64 __attribute__((aligned(8)))
 
@@ -14,7 +25,7 @@ typedef struct _PROCESSOR_POWER_INFORMATION {
     ULONG CurrentIdleState;
 } PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
 
-NTSTATUS NTAPI NtPowerInformation(
+NTSYSAPI NTSTATUS NTAPI NtPowerInformation(
     IN POWER_INFORMATION_LEVEL InformationLevel,
     IN PVOID InputBuffer OPTIONAL,
     IN ULONG InputBufferLength,
@@ -22,7 +33,7 @@ NTSTATUS NTAPI NtPowerInformation(
     IN ULONG OutputBufferLength);
 
 
-NTSTATUS NTAPI RtlGetVersion(
+NTSYSAPI NTSTATUS NTAPI RtlGetVersion(
     _Inout_ PRTL_OSVERSIONINFOW lpVersionInformation
 );
 
@@ -233,10 +244,7 @@ static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structur
 
 #endif
 
-NTSYSCALLAPI
-NTSTATUS
-NTAPI
-NtQueryDirectoryFile(
+NTSYSAPI NTSTATUS NTAPI NtQueryDirectoryFile(
     IN HANDLE FileHandle,
     IN HANDLE Event OPTIONAL,
     IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
@@ -277,7 +285,7 @@ typedef struct _CURDIR
     HANDLE Handle;
 } CURDIR, *PCURDIR;
 
-PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
+NTSYSAPI PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
 
 /**
  * The SECTION_IMAGE_INFORMATION structure contains detailed information about an image section.
@@ -329,3 +337,940 @@ typedef struct _SECTION_IMAGE_INFORMATION
     ULONG ImageFileSize;             // The size of the image, in bytes, including all headers.
     ULONG CheckSum;                  // The image file checksum, from the PE optional header.
 } SECTION_IMAGE_INFORMATION, *PSECTION_IMAGE_INFORMATION;
+
+typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
+{
+    GUID BootIdentifier;
+    FIRMWARE_TYPE FirmwareType;
+    union
+    {
+        ULONGLONG BootFlags;
+        struct
+        {
+            ULONGLONG DbgMenuOsSelection : 1; // REDSTONE4
+            ULONGLONG DbgHiberBoot : 1;
+            ULONGLONG DbgSoftBoot : 1;
+            ULONGLONG DbgMeasuredLaunch : 1;
+            ULONGLONG DbgMeasuredLaunchCapable : 1; // 19H1
+            ULONGLONG DbgSystemHiveReplace : 1;
+            ULONGLONG DbgMeasuredLaunchSmmProtections : 1;
+            ULONGLONG DbgMeasuredLaunchSmmLevel : 7; // 20H1
+            ULONGLONG DbgBugCheckRecovery : 1; // 24H2
+            ULONGLONG DbgFASR : 1;
+            ULONGLONG DbgUseCachedBcd : 1;
+        };
+    };
+} SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+
+typedef struct _RTL_PROCESS_MODULE_INFORMATION
+{
+    PVOID Section;
+    PVOID MappedBase;
+    PVOID ImageBase;
+    ULONG ImageSize;
+    ULONG Flags;
+    USHORT LoadOrderIndex;
+    USHORT InitOrderIndex;
+    USHORT LoadCount;
+    USHORT OffsetToFileName;
+    UCHAR FullPathName[256];
+} RTL_PROCESS_MODULE_INFORMATION, *PRTL_PROCESS_MODULE_INFORMATION;
+
+typedef struct _RTL_PROCESS_MODULES
+{
+    ULONG NumberOfModules;
+    _Field_size_(NumberOfModules) RTL_PROCESS_MODULE_INFORMATION Modules[1];
+} RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;
+
+NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
+    _In_ PCUNICODE_STRING VariableName,
+    _In_ const GUID* VendorGuid,
+    _Out_writes_bytes_opt_(*BufferLength) PVOID Buffer,
+    _Inout_ PULONG BufferLength,
+    _Out_opt_ PULONG Attributes // EFI_VARIABLE_*
+);
+
+NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
+
+typedef struct _SYSTEM_SECUREBOOT_INFORMATION
+{
+    BOOLEAN SecureBootEnabled;
+    BOOLEAN SecureBootCapable;
+} SYSTEM_SECUREBOOT_INFORMATION, *PSYSTEM_SECUREBOOT_INFORMATION;
+
+NTSTATUS NTAPI NtQuerySystemInformationEx(
+    _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    _In_reads_bytes_(InputBufferLength) PVOID InputBuffer,
+    _In_ ULONG InputBufferLength,
+    _Out_writes_bytes_opt_(SystemInformationLength) PVOID SystemInformation,
+    _In_ ULONG SystemInformationLength,
+    _Out_opt_ PULONG ReturnLength
+);
+
+typedef enum _SYSTEM_FIRMWARE_TABLE_ACTION
+{
+    SystemFirmwareTableEnumerate,
+    SystemFirmwareTableGet,
+    SystemFirmwareTableMax
+} SYSTEM_FIRMWARE_TABLE_ACTION;
+
+typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
+{
+    ULONG ProviderSignature; // (same as the GetSystemFirmwareTable function)
+    SYSTEM_FIRMWARE_TABLE_ACTION Action;
+    ULONG TableID;
+    ULONG TableBufferLength;
+    _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
+} SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
+
+NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
+
+/**
+ * The KSYSTEM_TIME structure represents interrupt time, system time, and time zone bias.
+ */
+typedef struct _KSYSTEM_TIME
+{
+    ULONG LowPart;
+    LONG High1Time;
+    LONG High2Time;
+} KSYSTEM_TIME, *PKSYSTEM_TIME;
+
+/**
+ * PROCESSOR_FEATURE_MAX defines the maximum number of processor feature flags
+ * that may be reported by the system.
+ */
+#define PROCESSOR_FEATURE_MAX 64
+
+/**
+ * The ALTERNATIVE_ARCHITECTURE_TYPE enumeration specifies the hardware
+ * architecture variant used by the system.
+ *
+ * \remarks NEC98x86 represents the NEC PC-98 architecture,
+ * supported only on very early Windows releases.
+ */
+typedef enum _ALTERNATIVE_ARCHITECTURE_TYPE
+{
+    StandardDesign,
+    NEC98x86,
+    EndAlternatives
+} ALTERNATIVE_ARCHITECTURE_TYPE;
+
+/**
+ * The KUSER_SHARED_DATA structure contains information shared with user-mode.
+ *
+ * \sa https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data
+ */
+typedef struct _KUSER_SHARED_DATA
+{
+    //
+    // Current low 32-bit of tick count and tick count multiplier.
+    //
+    // N.B. The tick count is updated each time the clock ticks.
+    //
+
+    ULONG TickCountLowDeprecated;
+    ULONG TickCountMultiplier;
+
+    //
+    // Current 64-bit interrupt time in 100ns units.
+    //
+
+    volatile KSYSTEM_TIME InterruptTime;
+
+    //
+    // Current 64-bit system time in 100ns units.
+    //
+
+    volatile KSYSTEM_TIME SystemTime;
+
+    //
+    // Current 64-bit time zone bias.
+    //
+
+    volatile KSYSTEM_TIME TimeZoneBias;
+
+    //
+    // Support image magic number range for the host system.
+    //
+    // N.B. This is an inclusive range.
+    //
+
+    USHORT ImageNumberLow;
+    USHORT ImageNumberHigh;
+
+    //
+    // Copy of system root in unicode.
+    //
+    // N.B. This field must be accessed via the RtlGetNtSystemRoot API for
+    //      an accurate result.
+    //
+
+    WCHAR NtSystemRoot[260];
+
+    //
+    // Maximum stack trace depth if tracing enabled.
+    //
+
+    ULONG MaxStackTraceDepth;
+
+    //
+    // Crypto exponent value.
+    //
+
+    ULONG CryptoExponent;
+
+    //
+    // Time zone ID.
+    //
+
+    ULONG TimeZoneId;
+
+    //
+    // Minimum size of a large page on the system, in bytes.
+    //
+    // N.B. Returned by GetLargePageMinimum() function.
+    //
+
+    ULONG LargePageMinimum;
+
+    //
+    // This value controls the Application Impact Telemetry (AIT) Sampling rate.
+    //
+    // This value determines how frequently the system records AIT events,
+    // which are used by the Application Experience and compatibility
+    // subsystems to evaluate application behavior, performance, and
+    // potential compatibility issues.
+    //
+    // Lower values increase sampling frequency, while higher values reduce it.
+    // The kernel updates this field as part of its internal telemetry and
+    // heuristics logic.
+    //
+
+    ULONG AitSamplingValue;
+
+    //
+    // This value controls Application Compatibility (AppCompat) switchback processing.
+    //
+
+    union
+    {
+        ULONG AppCompatFlag;
+        struct
+        {
+            ULONG SwitchbackEnabled : 1;    // Basic switchback processing
+            ULONG ExtendedHeuristics : 1;   // Extended switchback heuristics
+            ULONG TelemetryFallback : 1;    // Telemetry-driven fallback
+            ULONG Reserved : 29;
+        } AppCompatFlags;
+    };
+
+    //
+    // Current Kernel Root RNG state seed version
+    //
+
+    ULONGLONG RNGSeedVersion;
+
+    //
+    // This value controls assertion failure handling.
+    //
+    // Historically (prior to Windows 10), this value was also used by
+    // Code Integrity (CI), AppLocker, and related security components to
+    // determine the minimum validation requirements for executable images,
+    // drivers, and privileged operations.
+    //
+    // In modern Windows versions, this field is used primarily by the kernel's
+    // diagnostic and validation infrastructure to decide how assertion failures
+    // should be handled (e.g., logging, debugger break-in, or bugcheck).
+
+    ULONG GlobalValidationRunlevel;
+
+    //
+    // Monotonic stamp incremented by the kernel whenever the system's
+    // time zone bias value changes.
+    //
+    // N.B. This field must be accessed via the RtlGetSystemTimeAndBias API for
+    //      an accurate result.
+    // This value is read before and after accessing the bias fields to determine
+    // whether the time zone data changed during the read. If the stamp differs,
+    // the caller must re-read the bias values to ensure consistency.
+    //
+
+    volatile LONG TimeZoneBiasStamp;
+
+    //
+    // The shared collective build number undecorated with C or F.
+    // GetVersionEx hides the real number
+    //
+
+    ULONG NtBuildNumber;
+
+    //
+    // Product type.
+    //
+    // N.B. This field must be accessed via the RtlGetNtProductType API for
+    //      an accurate result.
+    //
+
+    NT_PRODUCT_TYPE NtProductType;
+    BOOLEAN ProductTypeIsValid;
+    BOOLEAN Reserved0[1];
+
+    //
+    // Native hardware processor architecture of the running system.
+    //
+    // N.B. User-mode components read this field to determine the true system
+    // architecture, especially in WOW64 scenarios where the process architecture
+    // differs from the native one.
+    //
+
+    USHORT NativeProcessorArchitecture;
+
+    //
+    // The NT Version.
+    //
+    // N. B. Note that each process sees a version from its PEB, but if the
+    //       process is running with an altered view of the system version,
+    //       the following two fields are used to correctly identify the
+    //       version
+    //
+
+    ULONG NtMajorVersion;
+    ULONG NtMinorVersion;
+
+    //
+    // Processor features.
+    //
+
+    BOOLEAN ProcessorFeatures[PROCESSOR_FEATURE_MAX];
+
+
+    //
+    // Reserved fields - do not use.
+    //
+
+    ULONG MaximumUserModeAddressDeprecated; // Deprecated, use SystemBasicInformation instead.
+    ULONG SystemRangeStartDeprecated; // Deprecated, use SystemRangeStartInformation instead.
+
+    //
+    // Time slippage while in debugger.
+    //
+
+    volatile ULONG TimeSlip;
+
+    //
+    // Alternative system architecture, e.g., NEC PC98xx on x86.
+    //
+
+    ALTERNATIVE_ARCHITECTURE_TYPE AlternativeArchitecture;
+
+    //
+    // Boot sequence, incremented for each boot attempt by the OS loader.
+    //
+
+    ULONG BootId;
+
+    //
+    // If the system is an evaluation unit, the following field contains the
+    // date and time that the evaluation unit expires. A value of 0 indicates
+    // that there is no expiration. A non-zero value is the UTC absolute time
+    // that the system expires.
+    //
+
+    LARGE_INTEGER SystemExpirationDate;
+
+    //
+    // Suite support.
+    //
+    // N.B. This field must be accessed via the RtlGetSuiteMask API for
+    //      an accurate result.
+    //
+
+    ULONG SuiteMask;
+
+    //
+    // TRUE if a kernel debugger is connected/enabled.
+    //
+
+    BOOLEAN KdDebuggerEnabled;
+
+    //
+    // Mitigation policies.
+    //
+
+    union
+    {
+        UCHAR MitigationPolicies;
+        struct
+        {
+            UCHAR NXSupportPolicy : 2;
+            UCHAR SEHValidationPolicy : 2;
+            UCHAR CurDirDevicesSkippedForDlls : 2;
+            UCHAR Reserved : 2;
+        };
+    };
+
+    //
+    // Measured duration of a single processor yield, in cycles. This is used by
+    // lock packages to determine how many times to spin waiting for a state
+    // change before blocking.
+    //
+
+    USHORT CyclesPerYield;
+
+    //
+    // Current console session Id. Always zero on non-TS systems.
+    //
+    // N.B. This field must be accessed via the RtlGetActiveConsoleId API for an
+    //      accurate result.
+    //
+
+    volatile ULONG ActiveConsoleId;
+
+    //
+    // Force-dismounts cause handles to become invalid. Rather than always
+    // probe handles, a serial number of dismounts is maintained that clients
+    // can use to see if they need to probe handles.
+    //
+
+    volatile ULONG DismountCount;
+
+    //
+    // This field indicates the status of the 64-bit COM+ package on the
+    // system. It indicates whether the Intermediate Language (IL) COM+
+    // images need to use the 64-bit COM+ runtime or the 32-bit COM+ runtime.
+    //
+
+    ULONG ComPlusPackage;
+
+    //
+    // Time in tick count for system-wide last user input across all terminal
+    // sessions. For MP performance, it is not updated all the time (e.g. once
+    // a minute per session). It is used for idle detection.
+    //
+
+    ULONG LastSystemRITEventTickCount;
+
+    //
+    // Number of physical pages in the system. This can dynamically change as
+    // physical memory can be added or removed from a running system.  This
+    // cell is too small to hold the non-truncated value on very large memory
+    // machines so code that needs the full value should access
+    // FullNumberOfPhysicalPages instead.
+    //
+
+    ULONG NumberOfPhysicalPages;
+
+    //
+    // True if the system was booted in safe boot mode.
+    //
+
+    BOOLEAN SafeBootMode;
+
+    //
+    // Virtualization flags.
+    //
+
+    union
+    {
+        UCHAR VirtualizationFlags;
+
+#if defined(_ARM64_)
+
+        //
+        // N.B. Keep this bitfield in sync with the one in arc.w.
+        //
+
+        struct
+        {
+            UCHAR ArchStartedInEl2 : 1;
+            UCHAR QcSlIsSupported : 1;
+            UCHAR : 6;
+        };
+
+#endif
+
+    };
+
+    //
+    // Reserved (available for reuse).
+    //
+
+    UCHAR Reserved12[2];
+
+    //
+    // This is a packed bitfield that contains various flags concerning
+    // the system state. They must be manipulated using interlocked
+    // operations.
+    //
+    // N.B. DbgMultiSessionSku must be accessed via the RtlIsMultiSessionSku
+    //      API for an accurate result
+    //
+
+    union
+    {
+        ULONG SharedDataFlags;
+        struct
+        {
+            //
+            // The following bit fields are for the debugger only. Do not use.
+            // Use the bit definitions instead.
+            //
+
+            ULONG DbgErrorPortPresent       : 1;
+            ULONG DbgElevationEnabled       : 1;
+            ULONG DbgVirtEnabled            : 1;
+            ULONG DbgInstallerDetectEnabled : 1;
+            ULONG DbgLkgEnabled             : 1;
+            ULONG DbgDynProcessorEnabled    : 1;
+            ULONG DbgConsoleBrokerEnabled   : 1;
+            ULONG DbgSecureBootEnabled      : 1;
+            ULONG DbgMultiSessionSku        : 1;
+            ULONG DbgMultiUsersInSessionSku : 1;
+            ULONG DbgStateSeparationEnabled : 1;
+            ULONG DbgSplitTokenEnabled      : 1;
+            ULONG DbgShadowAdminEnabled     : 1;
+            ULONG SpareBits                 : 19;
+        };
+    };
+
+    // ... more fields follow, but we don't need them
+} KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
+
+#define SharedUserData ((const KUSER_SHARED_DATA*) 0x7FFE0000UL)
+
+static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
+{
+    #if _WIN64
+
+    return *(uint64_t*) pTime;
+
+    #else
+
+    uint32_t low, high1, high2;
+
+    do {
+        high1 = pTime->High1Time;
+        low   = pTime->LowPart;
+        high2 = pTime->High2Time;
+    } while (high1 != high2);
+
+    return ((uint64_t) high1 << 32) | low;
+    #endif
+}
+
+static inline bool ffIsWindows10OrGreater()
+{
+    #if FF_WIN81_COMPAT
+    return SharedUserData->NtMajorVersion >= 10;
+    #else
+    return true;
+    #endif
+}
+
+static inline bool ffIsWindows11OrGreater()
+{
+    return ffIsWindows10OrGreater() && SharedUserData->NtBuildNumber >= 22000;
+}
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
+    _In_ HANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _Out_ PHANDLE TokenHandle
+);
+NTSYSAPI NTSTATUS NTAPI NtAdjustPrivilegesToken(
+    _In_ HANDLE TokenHandle,
+    _In_ BOOLEAN DisableAllPrivileges,
+    _In_opt_ PTOKEN_PRIVILEGES NewState,
+    _In_ ULONG BufferLength,
+    _Out_writes_bytes_to_opt_(BufferLength, *ReturnLength) PTOKEN_PRIVILEGES PreviousState,
+    _Out_opt_ PULONG ReturnLength
+);
+NTSYSAPI NTSTATUS NTAPI NtQueryInformationToken(
+    _In_ HANDLE TokenHandle,
+    _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
+    _Out_writes_bytes_to_opt_(TokenInformationLength, *ReturnLength) PVOID TokenInformation,
+    _In_ ULONG TokenInformationLength,
+    _Out_ PULONG ReturnLength
+);
+#define NtCurrentProcessToken() ((HANDLE)(LONG_PTR)-4) // for NtQueryInformationToken only; Windows 8+
+
+NTSYSAPI NTSTATUS NTAPI NtReadFile(
+    _In_ HANDLE FileHandle,
+    _In_opt_ HANDLE Event,
+    _In_opt_ PIO_APC_ROUTINE ApcRoutine,
+    _In_opt_ PVOID ApcContext,
+    _Out_ PIO_STATUS_BLOCK IoStatusBlock,
+    _Out_writes_bytes_(Length) PVOID Buffer,
+    _In_ ULONG Length,
+    _In_opt_ PLARGE_INTEGER ByteOffset,
+    _In_opt_ PULONG Key
+);
+
+NTSYSAPI NTSTATUS NTAPI NtCreateEvent(
+    _Out_ PHANDLE EventHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _In_ EVENT_TYPE EventType,
+    _In_ BOOLEAN InitialState
+);
+
+NTSYSAPI NTSTATUS NTAPI NtQueryAttributesFile(
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _Out_ PFILE_BASIC_INFORMATION FileInformation
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUnicodeToUTF8N(
+    _Out_writes_bytes_to_(UTF8StringMaxByteCount, *UTF8StringActualByteCount) PCHAR UTF8StringDestination,
+    _In_ ULONG UTF8StringMaxByteCount,
+    _Out_opt_ PULONG UTF8StringActualByteCount,
+    _In_reads_bytes_(UnicodeStringByteCount) PCWCH UnicodeStringSource,
+    _In_ ULONG UnicodeStringByteCount
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUTF8ToUnicodeN(
+    _Out_writes_bytes_to_(UnicodeStringMaxByteCount, *UnicodeStringActualByteCount) PWSTR UnicodeStringDestination,
+    _In_ ULONG UnicodeStringMaxByteCount,
+    _Out_opt_ PULONG UnicodeStringActualByteCount,
+    _In_reads_bytes_(UTF8StringByteCount) PCCH UTF8StringSource,
+    _In_ ULONG UTF8StringByteCount
+);
+
+#define RTL_MAX_DRIVE_LETTERS 32
+typedef struct _RTL_DRIVE_LETTER_CURDIR
+{
+    USHORT Flags;
+    USHORT Length;
+    ULONG TimeStamp;
+    STRING DosPath;
+} RTL_DRIVE_LETTER_CURDIR, *PRTL_DRIVE_LETTER_CURDIR;
+
+typedef struct _RTL_USER_PROCESS_PARAMETERS_FULL
+{
+    ULONG MaximumLength;
+    ULONG Length;
+
+    ULONG Flags;
+    ULONG DebugFlags;
+
+    HANDLE ConsoleHandle;
+    ULONG ConsoleFlags;
+    HANDLE StandardInput;
+    HANDLE StandardOutput;
+    HANDLE StandardError;
+
+    CURDIR CurrentDirectory;
+    UNICODE_STRING DllPath;
+    UNICODE_STRING ImagePathName;
+    UNICODE_STRING CommandLine;
+    PVOID Environment;
+
+    ULONG StartingX;
+    ULONG StartingY;
+    ULONG CountX;
+    ULONG CountY;
+    ULONG CountCharsX;
+    ULONG CountCharsY;
+    ULONG FillAttribute;
+
+    ULONG WindowFlags;
+    ULONG ShowWindowFlags;
+    UNICODE_STRING WindowTitle;
+    UNICODE_STRING DesktopInfo;
+    UNICODE_STRING ShellInfo;
+    UNICODE_STRING RuntimeData;
+    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[RTL_MAX_DRIVE_LETTERS];
+
+    // Windows Vista
+    ULONG_PTR EnvironmentSize;
+    // Windows 7
+    ULONG_PTR EnvironmentVersion;
+
+    // Windows 8
+    PVOID PackageDependencyData;
+    ULONG ProcessGroupId;
+
+    // ...
+} RTL_USER_PROCESS_PARAMETERS_FULL, *PRTL_USER_PROCESS_PARAMETERS_FULL;
+
+typedef struct _PEB_FULL
+{
+    //
+    // The process was cloned with an inherited address space.
+    //
+    BOOLEAN InheritedAddressSpace;
+
+    //
+    // The process has image file execution options (IFEO).
+    //
+    BOOLEAN ReadImageFileExecOptions;
+
+    //
+    // The process has a debugger attached.
+    //
+    BOOLEAN BeingDebugged;
+
+    union
+    {
+        BOOLEAN BitField;
+        struct
+        {
+            BOOLEAN ImageUsesLargePages : 1;            // The process uses large image regions (4 MB).
+            BOOLEAN IsProtectedProcess : 1;             // The process is a protected process.
+            BOOLEAN IsImageDynamicallyRelocated : 1;    // The process image base address was relocated.
+            BOOLEAN SkipPatchingUser32Forwarders : 1;   // The process skipped forwarders for User32.dll functions. 1 for 64-bit, 0 for 32-bit.
+            BOOLEAN IsPackagedProcess : 1;              // The process is a packaged store process (APPX/MSIX).
+            BOOLEAN IsAppContainerProcess : 1;          // The process has an AppContainer token.
+            BOOLEAN IsProtectedProcessLight : 1;        // The process is a protected process (light).
+            BOOLEAN IsLongPathAwareProcess : 1;         // The process is long path aware.
+        };
+    };
+
+    //
+    // Handle to a mutex for synchronization.
+    //
+    HANDLE Mutant;
+
+    //
+    // Pointer to the base address of the process image.
+    //
+    PVOID ImageBaseAddress;
+
+    //
+    // Pointer to the process loader data.
+    //
+    PPEB_LDR_DATA Ldr;
+
+    //
+    // Pointer to the process parameters.
+    //
+    PRTL_USER_PROCESS_PARAMETERS_FULL ProcessParameters;
+
+    //
+    // Reserved.
+    //
+    PVOID SubSystemData;
+
+    //
+    // Pointer to the process default heap.
+    //
+    PVOID ProcessHeap;
+
+    // ...
+} PEB_FULL, *PPEB_FULL;
+
+typedef struct _TEB_FULL
+{
+    //
+    // Thread Information Block (TIB) contains the thread's stack, base and limit addresses, the current stack pointer, and the exception list.
+    //
+    NT_TIB NtTib;
+
+    //
+    // Reserved.
+    //
+    PVOID EnvironmentPointer;
+
+    //
+    // Client ID for this thread.
+    //
+    CLIENT_ID ClientId;
+
+    //
+    // A handle to an active Remote Procedure Call (RPC) if the thread is currently involved in an RPC operation.
+    //
+    PVOID ActiveRpcHandle;
+
+    //
+    // A pointer to the __declspec(thread) local storage array.
+    //
+    PVOID ThreadLocalStoragePointer;
+
+    //
+    // A pointer to the Process Environment Block (PEB), which contains information about the process.
+    //
+    PPEB_FULL ProcessEnvironmentBlock;
+
+    //
+    // The previous Win32 error value for this thread.
+    //
+    ULONG LastErrorValue;
+
+    //
+    // The number of critical sections currently owned by this thread.
+    //
+    ULONG CountOfOwnedCriticalSections;
+
+    //
+    // Reserved.
+    //
+    PVOID CsrClientThread;
+
+    //
+    // Reserved for win32k.sys
+    //
+    PVOID Win32ThreadInfo;
+
+    //
+    // Reserved for user32.dll
+    //
+    ULONG User32Reserved[26];
+
+    //
+    // Reserved for winsrv.dll
+    //
+    ULONG UserReserved[5];
+
+    //
+    // Reserved.
+    //
+    PVOID WOW32Reserved;
+
+    //
+    // The LCID of the current thread. (Kernel32!GetThreadLocale)
+    //
+    LCID CurrentLocale;
+} TEB_FULL, *PTEB_FULL;
+
+static inline PTEB_FULL ffGetTeb()
+{
+    return (PTEB_FULL) NtCurrentTeb();
+}
+
+static inline PPEB_FULL ffGetPeb()
+{
+    return ffGetTeb()->ProcessEnvironmentBlock;
+}
+
+NTSYSAPI NTSTATUS NTAPI RtlExpandEnvironmentStrings(
+    _In_opt_ PVOID Environment,
+    _In_reads_(SourceLength) PCWSTR Source,
+    _In_ SIZE_T SourceLength,
+    _Out_writes_(DestinationLength) PWSTR Destination,
+    _In_ SIZE_T DestinationLength,
+    _Out_opt_ PSIZE_T ReturnLength
+);
+
+NTSYSAPI NTSTATUS NTAPI NtOpenKey(
+    _Out_ PHANDLE KeyHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ POBJECT_ATTRIBUTES ObjectAttributes
+);
+
+typedef enum _KEY_VALUE_INFORMATION_CLASS
+{
+    KeyValueBasicInformation, // KEY_VALUE_BASIC_INFORMATION
+    KeyValueFullInformation, // KEY_VALUE_FULL_INFORMATION
+    KeyValuePartialInformation, // KEY_VALUE_PARTIAL_INFORMATION
+    KeyValueFullInformationAlign64, // KEY_VALUE_FULL_INFORMATION_ALIGN64
+    KeyValuePartialInformationAlign64,  // KEY_VALUE_PARTIAL_INFORMATION_ALIGN64
+    KeyValueLayerInformation, // KEY_VALUE_LAYER_INFORMATION
+    MaxKeyValueInfoClass
+} KEY_VALUE_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryValueKey(
+    _In_ HANDLE KeyHandle,
+    _In_ PCUNICODE_STRING ValueName,
+    _In_ KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyValueInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlFormatCurrentUserKeyPath(
+    _Out_ PUNICODE_STRING CurrentUserKeyPath
+);
+
+typedef struct _KEY_VALUE_PARTIAL_INFORMATION
+{
+    ULONG TitleIndex;
+    ULONG Type;
+    ULONG DataLength;
+    _Field_size_bytes_(DataLength) UCHAR Data[];
+} KEY_VALUE_PARTIAL_INFORMATION, *PKEY_VALUE_PARTIAL_INFORMATION;
+
+typedef enum _KEY_INFORMATION_CLASS
+{
+    KeyBasicInformation, // KEY_BASIC_INFORMATION
+    KeyNodeInformation, // KEY_NODE_INFORMATION
+    KeyFullInformation, // KEY_FULL_INFORMATION
+    KeyNameInformation, // KEY_NAME_INFORMATION
+    KeyCachedInformation, // KEY_CACHED_INFORMATION
+    KeyFlagsInformation, // KEY_FLAGS_INFORMATION
+    KeyVirtualizationInformation, // KEY_VIRTUALIZATION_INFORMATION
+    KeyHandleTagsInformation, // KEY_HANDLE_TAGS_INFORMATION
+    KeyTrustInformation, // KEY_TRUST_INFORMATION
+    KeyLayerInformation, // KEY_LAYER_INFORMATION
+    MaxKeyInfoClass
+} KEY_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtEnumerateKey(
+    _In_ HANDLE KeyHandle,
+    _In_ ULONG Index,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+typedef struct _KEY_BASIC_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;                    // Number of 100-nanosecond intervals since this key or any of its values changed.
+    ULONG TitleIndex;                               // Reserved // A legacy field originally intended for use with localization such as an index of a resource table.
+    ULONG NameLength;                               // The size, in bytes, of the key name string in the Name array.
+    _Field_size_bytes_(NameLength) WCHAR Name[];   // The name of the registry key. This string is not null-terminated.
+} KEY_BASIC_INFORMATION, *PKEY_BASIC_INFORMATION;
+
+typedef struct _KEY_FULL_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;
+    ULONG TitleIndex;
+    ULONG ClassOffset;
+    ULONG ClassLength;
+    ULONG SubKeys;
+    ULONG MaxNameLength;
+    ULONG MaxClassLength;
+    ULONG Values;
+    ULONG MaxValueNameLength;
+    ULONG MaxValueDataLength;
+    WCHAR Class[];
+} KEY_FULL_INFORMATION, *PKEY_FULL_INFORMATION;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryKey(
+    _In_ HANDLE KeyHandle,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
+    _Out_ PHANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _In_opt_ PCLIENT_ID ClientId
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrLoadDll(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrUnloadDll(
+    _In_ PVOID DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetDllHandle(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
+    _In_ PVOID DllHandle,
+    _In_opt_ PCANSI_STRING ProcedureName,
+    _In_opt_ ULONG ProcedureNumber,
+    _Out_ PVOID *ProcedureAddress
+);

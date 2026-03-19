@@ -2,55 +2,100 @@
 #include "common/io.h"
 #include "common/stringUtils.h"
 
+#include <linux/input-event-codes.h>
+
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
 {
-    // There is no /sys/class/input/kbd* on Linux
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/input/by-path/");
-    if (dirp == NULL)
-        return "opendir(\"/dev/input/by-path/\") == NULL";
+    // Parse /proc/bus/input/devices to find keyboards with a "kbd" handler.
+    // This detects both wired and Bluetooth keyboards uniformly.
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffAppendFileBuffer("/proc/bus/input/devices", &content))
+        return "ffAppendFileBuffer(\"/proc/bus/input/devices\") == NULL";
 
-    uint64_t flags = 0;
+    FFstrbuf kbd = ffStrbufCreateStatic("kbd");
 
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    FFKeyboardDevice device = {
+        .name = ffStrbufCreate(),
+        .serial = ffStrbufCreate()
+    };
 
-    struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetline(&line, &len, &content))
     {
-        if (!ffStrEndsWith(entry->d_name, "-event-kbd"))
-            continue;
-
-        char buffer[32]; // `../eventXX`
-        ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, ARRAY_SIZE(buffer) - 1);
-        if (len <= (ssize_t) strlen("../event") || !ffStrStartsWith(buffer, "../event")) continue;
-        buffer[len] = 0;
-
-        const char* eventid = buffer + strlen("../event");
-
-        char* pend = NULL;
-        uint32_t index = (uint32_t) strtoul(eventid, &pend, 10);
-        if (pend == eventid) continue;
-
-        // Ignore duplicate entries (flags supports up to 64 event indices)
-        if (index >= 64 || (flags & (1UL << index)))
-            continue;
-        flags |= (1UL << index);
-
-        ffStrbufSetF(&path, "/sys/class/input/event%s/device/name", eventid);
-
-        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-        if (ffAppendFileBuffer(path.chars, &name))
+        switch (line[0])
         {
-            ffStrbufTrimRightSpace(&name);
-            ffStrbufSubstrBefore(&path, path.length - (uint32_t) strlen("name"));
+            case 'N': {
+                const uint32_t prefixLen = strlen("N: Name=");
+                if (__builtin_expect(len <= prefixLen, false)) continue;
+                const char* name = line + prefixLen;
+                const uint32_t nameLen = (uint32_t) len - prefixLen;
+                ffStrbufSetNS(&device.name, nameLen, name);
+                ffStrbufTrim(&device.name, '"');
+                continue;
+            }
+            case 'H': {
+                const uint32_t prefixLen = strlen("H: Handlers=");
+                if (__builtin_expect(len <= prefixLen, false)) continue;
+                const char* handlers = line + prefixLen;
+                const uint32_t handlersLen = (uint32_t) len - prefixLen;
+                if (!ffStrbufMatchSeparatedNS(&kbd, handlersLen, handlers, ' '))
+                    goto skipDevice;
+                continue;
+            }
+            case 'B': {
+                const char* bits = line + strlen("B: ");
+                if (ffStrStartsWith(bits, "EV="))
+                {
+                    // Check EV_REP (auto-repeat, bit 20) to filter pseudo-keyboards (Power Button, PC Speaker).
+                    const char* evBits = bits + strlen("EV=");
+                    uint64_t val = strtoull(evBits, NULL, 16);
+                    if (!(val & (1ULL << EV_REP)))
+                        goto skipDevice;
+                }
+                else if (ffStrStartsWith(bits, "KEY="))
+                {
+                    // Check KEY_A (bit 30) to filter media remotes and headset controls.
+                    // The key capability bitmap is space-separated hex longs, MSB first;
+                    // KEY_A falls in the last (least significant) word on all architectures.
+                    const char* keyBits = bits + strlen("KEY=");
+                    const char* lastWord = memrchr(keyBits, ' ', len - (size_t) (keyBits - line));
+                    lastWord = lastWord ? lastWord + 1 : keyBits;
 
-            FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
-            ffStrbufInitMove(&device->name, &name);
-            ffStrbufInit(&device->serial);
-
-            ffStrbufAppendS(&path, "uniq");
-            if (ffAppendFileBuffer(path.chars, &device->serial))
-                ffStrbufTrimRightSpace(&device->serial);
+                    uint64_t val = strtoull(lastWord, NULL, 16);
+                    if (!(val & (1ULL << KEY_A)))
+                        goto skipDevice;
+                }
+                continue;
+            }
+            case 'U': {
+                const uint32_t prefixLen = strlen("U: Uniq=");
+                if (__builtin_expect(len <= prefixLen, false)) continue;
+                const char* uniq = line + prefixLen;
+                const uint32_t uniqLen =  (uint32_t) len - prefixLen;
+                ffStrbufSetNS(&device.serial, uniqLen, uniq);
+                continue;
+            }
+            case '\0':
+                // End of device entry; add to list if it has a name.
+                if (device.name.length > 0)
+                {
+                    FFKeyboardDevice* added = (FFKeyboardDevice*) ffListAdd(devices);
+                    ffStrbufInitMove(&added->name, &device.name);
+                    ffStrbufInitMove(&added->serial, &device.serial);
+                }
+                continue;
+            default:
+                continue;
         }
+
+        skipDevice:
+            // Skip to the end of the current device entry.
+            while (line[0] != '\0' && ffStrbufGetline(&line, &len, &content))
+                ;
+            // Despite the fn name, it resets the string buffer to initial state
+            ffStrbufDestroy(&device.name);
+            ffStrbufDestroy(&device.serial);
     }
 
     return NULL;

@@ -10,3 +10,4 @@ void ffEdidGetPhysicalResolution(const uint8_t edid[128], uint32_t* width, uint3
 void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* height); // in mm
 void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial, uint16_t* year, uint16_t* week);
 bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length);
+bool ffEdidIsValid(const uint8_t edid[128], uint32_t length);

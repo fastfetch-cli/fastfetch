@@ -43,7 +43,7 @@ typedef struct WaylandDisplay
     int32_t preferredRefreshRate;
     int32_t physicalWidth;
     int32_t physicalHeight;
-    double scale;
+    uint32_t dpi;
     enum wl_output_transform transform;
     FFDisplayType type;
     FFstrbuf name;

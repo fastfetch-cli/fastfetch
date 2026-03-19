@@ -94,14 +94,14 @@ bool ffPrintMedia(FFMediaOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(songPretty, "combined"),
-            FF_FORMAT_ARG(media->song, "title"),
-            FF_FORMAT_ARG(media->artist, "artist"),
-            FF_FORMAT_ARG(media->album, "album"),
-            FF_FORMAT_ARG(media->status, "status"),
-            FF_FORMAT_ARG(media->player, "player-name"),
-            FF_FORMAT_ARG(media->playerId, "player-id"),
-            FF_FORMAT_ARG(media->url, "url"),
+            FF_ARG(songPretty, "combined"),
+            FF_ARG(media->song, "title"),
+            FF_ARG(media->artist, "artist"),
+            FF_ARG(media->album, "album"),
+            FF_ARG(media->status, "status"),
+            FF_ARG(media->player, "player-name"),
+            FF_ARG(media->playerId, "player-id"),
+            FF_ARG(media->url, "url"),
         }));
     }
 

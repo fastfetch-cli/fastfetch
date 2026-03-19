@@ -21,9 +21,9 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
     {
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(storage->name, "name"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(storage->name, "name"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -82,11 +82,11 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-            FF_FORMAT_ARG(usedPretty, "used"),
-            FF_FORMAT_ARG(totalPretty, "total"),
-            FF_FORMAT_ARG(percentageNum, "percentage"),
-            FF_FORMAT_ARG(percentageBar, "percentage-bar"),
-            FF_FORMAT_ARG(storage->name, "name"),
+            FF_ARG(usedPretty, "used"),
+            FF_ARG(totalPretty, "total"),
+            FF_ARG(percentageNum, "percentage"),
+            FF_ARG(percentageBar, "percentage-bar"),
+            FF_ARG(storage->name, "name"),
         }));
     }
 }

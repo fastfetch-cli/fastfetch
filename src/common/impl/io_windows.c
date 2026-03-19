@@ -1,32 +1,172 @@
-#include "common/io.h"
 #include "fastfetch.h"
+#include "common/io.h"
 #include "common/stringUtils.h"
+#include "common/windows/nt.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
-#include "common/windows/nt.h"
-#include <ntstatus.h>
 
-static void createSubfolders(const char* fileName)
+static bool createSubfolders(wchar_t* fileName)
 {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-    char *token = NULL;
-    while((token = strchr(fileName, '/')) != NULL)
+    HANDLE hRoot = ffGetPeb()->ProcessParameters->CurrentDirectory.Handle;
+    bool closeRoot = false;
+    wchar_t* ptr = fileName;
+
+    // Absolute drive path: C:\...
+    if (ffCharIsEnglishAlphabet((char)ptr[0]) && ptr[1] == L':' && ptr[2] == L'\\')
     {
-        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
-        CreateDirectoryA(path.chars, NULL);
-        fileName = token + 1;
+        wchar_t saved = ptr[3];
+        ptr[3] = L'\0';
+
+        hRoot = CreateFileW(
+            fileName,
+            FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
+            NULL
+        );
+
+        ptr[3] = saved;
+        if (hRoot == INVALID_HANDLE_VALUE)
+            return false;
+
+        closeRoot = true;
+        ptr += 3; // skip "C:\"
     }
+    // UNC path: \\server\share\...
+    else if (ptr[0] == L'\\' && ptr[1] == L'\\')
+    {
+        wchar_t* serverEnd = wcschr(ptr + 2, L'\\');
+        if (serverEnd == NULL)
+            return false;
+
+        wchar_t* shareEnd = wcschr(serverEnd + 1, L'\\');
+        if (shareEnd == NULL)
+            return true; // no parent subfolder exists before file name
+
+        wchar_t saved = *shareEnd;
+        *shareEnd = L'\0';
+
+        hRoot = CreateFileW(
+            fileName,
+            FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
+            NULL
+        );
+
+        *shareEnd = saved;
+        if (hRoot == INVALID_HANDLE_VALUE)
+            return false;
+
+        closeRoot = true;
+        ptr = shareEnd + 1; // first component under share
+    }
+    // Rooted path on current drive: \foo\bar
+    else if (ptr[0] == L'\\')
+    {
+        UNICODE_STRING* dosPath = &ffGetPeb()->ProcessParameters->CurrentDirectory.DosPath;
+        wchar_t driveRoot[] = { dosPath->Buffer[0], L':', L'\\', L'\0' };
+        hRoot = CreateFileW(
+            driveRoot,
+            FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            NULL,
+            OPEN_EXISTING,
+            FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
+            NULL
+        );
+        if (hRoot == INVALID_HANDLE_VALUE)
+            return false;
+        closeRoot = true;
+        ptr++; // skip leading '\'
+    }
+
+    while (true)
+    {
+        wchar_t* token = wcschr(ptr, L'\\');
+        if (token == NULL)
+            break;
+
+        // Skip empty path segments caused by duplicated '\'
+        if (token == ptr)
+        {
+            ptr = token + 1;
+            continue;
+        }
+
+        HANDLE hNew = INVALID_HANDLE_VALUE;
+        IO_STATUS_BLOCK iosb = {};
+
+        NTSTATUS status = NtCreateFile(
+            &hNew,
+            FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
+            &(OBJECT_ATTRIBUTES) {
+                .Length = sizeof(OBJECT_ATTRIBUTES),
+                .RootDirectory = hRoot,
+                .ObjectName = &(UNICODE_STRING) {
+                    .Buffer = ptr,
+                    .Length = (USHORT)((USHORT)(token - ptr) * sizeof(wchar_t)),
+                    .MaximumLength = (USHORT)((USHORT)(token - ptr) * sizeof(wchar_t)),
+                },
+                .Attributes = OBJ_CASE_INSENSITIVE,
+            },
+            &iosb,
+            NULL,
+            FILE_ATTRIBUTE_NORMAL,
+            FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+            FILE_OPEN_IF,
+            FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT,
+            NULL,
+            0
+        );
+
+        if (!NT_SUCCESS(status))
+        {
+            if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
+                NtClose(hRoot);
+            return false;
+        }
+
+        if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
+            NtClose(hRoot);
+        hRoot = hNew;
+        closeRoot = true;
+
+        ptr = token + 1;
+    }
+
+    if (closeRoot && hRoot != INVALID_HANDLE_VALUE)
+        NtClose(hRoot);
+
+    return true;
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
-    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    wchar_t fileNameW[MAX_PATH];
+    ULONG len = 0;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG)strlen(fileName) + 1)))
+        return false;
+
+    for (ULONG i = 0; i < len / sizeof(wchar_t); ++i)
+    {
+        if (fileNameW[i] == L'/')
+            fileNameW[i] = L'\\';
+    }
+
+    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (handle == INVALID_HANDLE_VALUE)
     {
         if (GetLastError() == ERROR_PATH_NOT_FOUND)
         {
-            createSubfolders(fileName);
-            handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (!createSubfolders(fileNameW))
+                return false;
+            handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
             if (handle == INVALID_HANDLE_VALUE)
                 return false;
         }
@@ -70,12 +210,13 @@ static inline void readUntilEOF(HANDLE handle, FFstrbuf* buffer)
 
 bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 {
-    LARGE_INTEGER fileSize;
-    if(!GetFileSizeEx(handle, &fileSize))
-        fileSize.QuadPart = 0;
+    FILE_STANDARD_INFORMATION fileInfo;
+    IO_STATUS_BLOCK iosb;
+    if(!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileStandardInformation)))
+        fileInfo.EndOfFile.QuadPart = 0;
 
-    if (fileSize.QuadPart > 0)
-        readWithLength(handle, buffer, (uint32_t)fileSize.QuadPart);
+    if (fileInfo.EndOfFile.QuadPart > 0)
+        readWithLength(handle, buffer, (uint32_t)fileInfo.EndOfFile.QuadPart);
     else
         readUntilEOF(handle, buffer);
 
@@ -131,11 +272,13 @@ HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool d
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
 {
     wchar_t fileNameW[MAX_PATH];
-    int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, fileName, -1, fileNameW, ARRAY_SIZE(fileNameW));
-    if (len == 0) return INVALID_HANDLE_VALUE;
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG)strlen(fileName) + 1)))
+        return INVALID_HANDLE_VALUE;
     // Implies `fileNameW[len] = L'\0';` and `len` includes the null terminator
+    len /= sizeof(wchar_t); // convert from bytes to characters
 
-    for (int i = 0; i < len - 1; ++i)
+    for (uint32_t i = 0; i < len - 1; ++i)
     {
         if (fileNameW[i] == L'/')
             fileNameW[i] = L'\\';
@@ -172,13 +315,17 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
         }
     }
 
-    DWORD length = ExpandEnvironmentStringsA(in, NULL, 0);
-    if (length <= 1) return false;
+    wchar_t pathInW[MAX_PATH], pathOutW[MAX_PATH];
+    ULONG len = (ULONG) strlen(in);
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(pathInW, (ULONG) sizeof(pathInW), &len, in, len)))
+        return false;
+    len /= sizeof(wchar_t); // convert from bytes to characters
 
-    ffStrbufClear(out);
-    ffStrbufEnsureFree(out, (uint32_t)length);
-    ExpandEnvironmentStringsA(in, out->chars, length);
-    out->length = (uint32_t)length - 1;
+    size_t outLen; // in characters, including null terminator
+    if (!NT_SUCCESS(RtlExpandEnvironmentStrings(NULL, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen)))
+        return false;
+
+    ffStrbufSetNWS(out, (uint32_t) outLen - 1, pathOutW);
     return true;
 }
 
@@ -308,10 +455,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true)
     {
-        if (WaitForSingleObjectEx(hInput, FF_IO_TERM_RESP_WAIT_MS, TRUE) != WAIT_OBJECT_0)
+        if (NtWaitForSingleObject(hInput, TRUE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 }) != STATUS_WAIT_0)
         {
             SetConsoleMode(hInput, inputMode);
-            return "WaitForSingleObject() failed or timeout";
+            return "NtWaitForSingleObject() failed or timeout";
         }
 
         // Ignore all unexpected input events
@@ -350,7 +497,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
         va_list cargs;
         va_copy(cargs, args);
-        int ret = vsscanf(buffer, format, args);
+        int ret = vsscanf(buffer, format, cargs);
         va_end(cargs);
 
         if (ret <= 0)

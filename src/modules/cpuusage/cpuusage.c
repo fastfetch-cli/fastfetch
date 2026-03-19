@@ -104,14 +104,14 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options)
             ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(avgNum, "avg"),
-            FF_FORMAT_ARG(maxNum, "max"),
-            FF_FORMAT_ARG(maxIndex, "max-index"),
-            FF_FORMAT_ARG(minNum, "min"),
-            FF_FORMAT_ARG(minIndex, "min-index"),
-            FF_FORMAT_ARG(avgBar, "avg-bar"),
-            FF_FORMAT_ARG(maxBar, "max-bar"),
-            FF_FORMAT_ARG(minBar, "min-bar"),
+            FF_ARG(avgNum, "avg"),
+            FF_ARG(maxNum, "max"),
+            FF_ARG(maxIndex, "max-index"),
+            FF_ARG(minNum, "min"),
+            FF_ARG(minIndex, "min-index"),
+            FF_ARG(avgBar, "avg-bar"),
+            FF_ARG(maxBar, "max-bar"),
+            FF_ARG(minBar, "min-bar"),
         }));
     }
 

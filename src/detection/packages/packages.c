@@ -1,5 +1,6 @@
 #include "packages.h"
 #include "common/io.h"
+#include "common/time.h"
 
 #include <inttypes.h>
 #include <stddef.h>
@@ -47,13 +48,12 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
     }
 
     uint64_t mtime_current;
-    if (!GetFileTime(handle, NULL, NULL, (FILETIME*) &mtime_current))
+    FILE_BASIC_INFORMATION fileInfo;
+    IO_STATUS_BLOCK iosb;
+    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation)))
         return false;
 
-    mtime_current = (mtime_current - 116444736000000000ull) / 10000ull;
-
-    if (__builtin_expect(mtime_current == 0, false))
-        return false;
+    mtime_current = ffFileTimeToUnixMs((uint64_t) fileInfo.LastWriteTime.QuadPart);
     #endif
 
     ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);

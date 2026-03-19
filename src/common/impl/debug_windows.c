@@ -26,3 +26,8 @@ const char* ffDebugWin32Error(DWORD errorCode)
 
     return buffer;
 }
+
+const char* ffDebugNtStatus(NTSTATUS status)
+{
+    return ffDebugWin32Error(RtlNtStatusToDosError(status));
+}

@@ -17,7 +17,8 @@ static const char* doInitCom()
         return "CoInitializeEx() failed";
 
     // Set general COM security levels
-    if (FAILED(CoInitializeSecurity(
+
+    HRESULT hRes = CoInitializeSecurity(
         NULL,
         -1,                          // COM authentication
         NULL,                        // Authentication services
@@ -27,7 +28,9 @@ static const char* doInitCom()
         NULL,                        // Authentication info
         EOAC_NONE,                   // Additional capabilities
         NULL                         // Reserved
-    )))
+    );
+
+    if (FAILED(hRes) && hRes != RPC_E_TOO_LATE /* Has been set by a random dll */)
     {
         CoUninitialize();
         return "CoInitializeSecurity() failed";

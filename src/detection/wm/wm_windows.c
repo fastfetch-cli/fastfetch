@@ -1,6 +1,7 @@
 #include "wm.h"
 #include "common/mallocHelper.h"
 #include "common/io.h"
+#include "common/library.h"
 #include "common/processing.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
@@ -9,7 +10,6 @@
 #include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
-#include <winternl.h>
 #include <shlobj.h>
 #include <softpub.h>
 
@@ -21,10 +21,41 @@ typedef enum {
     FF_PROCESS_TYPE_CUI = 1 << 3,
 } FFProcessType;
 
-bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
+static bool verifySignature(const wchar_t* filePath)
 {
-    FF_AUTO_CLOSE_FD HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
-    if (!hProcess)
+    FF_LIBRARY_LOAD(wintrust, true, "wintrust" FF_LIBRARY_EXTENSION, -1)
+    FF_LIBRARY_LOAD_SYMBOL(wintrust, WinVerifyTrustEx, true)
+
+    WINTRUST_FILE_INFO fileInfo = {
+        .cbStruct = sizeof(fileInfo),
+        .pcwszFilePath = filePath,
+    };
+
+    GUID actionID = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+
+    WINTRUST_DATA trustData = {
+        .cbStruct = sizeof(trustData),
+        .dwUIChoice = WTD_UI_NONE,
+        .fdwRevocationChecks = WTD_REVOKE_NONE,
+        .dwUnionChoice = WTD_CHOICE_FILE,
+        .pFile = &fileInfo,
+        .dwStateAction = WTD_STATEACTION_VERIFY,
+        .dwProvFlags = WTD_SAFER_FLAG,
+    };
+
+    LONG status = ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+    trustData.dwStateAction = WTD_STATEACTION_CLOSE;
+    ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+
+    return status == ERROR_SUCCESS;
+}
+
+static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize)
+{
+    FF_AUTO_CLOSE_FD HANDLE hProcess = NULL;
+    if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
+        .Length = sizeof(OBJECT_ATTRIBUTES),
+    }, &(CLIENT_ID) { .UniqueProcess = (HANDLE)(uintptr_t) processId })))
         return false;
 
     ULONG size;
@@ -53,36 +84,14 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
             CoTaskMemFree(pPath);
         }
         if (windowsAppsPathLen != -1u &&
-            buffer->Length > windowsAppsPathLen * sizeof(wchar_t) &&
-            _wcsnicmp(buffer->Buffer, windowsAppsPath, windowsAppsPathLen) != 0
+            (buffer->Length <= windowsAppsPathLen * sizeof(wchar_t) || // Path is too short to be in WindowsApps
+            _wcsnicmp(buffer->Buffer, windowsAppsPath, windowsAppsPathLen) != 0) // Path does not start with WindowsApps
         ) return false;
     }
 
     if (processType & FF_PROCESS_TYPE_SIGNED)
     {
-        WINTRUST_FILE_INFO fileInfo = {
-            .cbStruct = sizeof(fileInfo),
-            .pcwszFilePath = buffer->Buffer,
-        };
-
-        GUID actionID = WINTRUST_ACTION_GENERIC_VERIFY_V2;
-
-        WINTRUST_DATA trustData = {
-            .cbStruct = sizeof(trustData),
-            .dwUIChoice = WTD_UI_NONE,
-            .fdwRevocationChecks = WTD_REVOKE_NONE,
-            .dwUnionChoice = WTD_CHOICE_FILE,
-            .pFile = &fileInfo,
-            .dwStateAction = WTD_STATEACTION_VERIFY,
-            .dwProvFlags = WTD_SAFER_FLAG,
-        };
-
-        LONG status = WinVerifyTrustEx(NULL, &actionID, &trustData);
-        trustData.dwStateAction = WTD_STATEACTION_CLOSE;
-        WinVerifyTrust(NULL, &actionID, &trustData);
-
-        if (status != ERROR_SUCCESS)
-            return false;
+        if (!verifySignature(buffer->Buffer)) return false;
     }
 
     if (processType & (FF_PROCESS_TYPE_GUI | FF_PROCESS_TYPE_CUI))
@@ -99,6 +108,8 @@ bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING
 
     return true;
 }
+
+#define ffStrEqualNWS(str, compareTo) (_wcsnicmp(str, L ## compareTo, sizeof(compareTo) - 1) == 0)
 
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 {
@@ -125,44 +136,49 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             return "NtQuerySystemInformation(SystemProcessInformation) failed";
     }
 
-    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ptr->NextEntryOffset; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
+    for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ; ptr = (SYSTEM_PROCESS_INFORMATION*)((uint8_t*)ptr + ptr->NextEntryOffset))
     {
         assert(ptr->ImageName.Length == 0 || ptr->ImageName.MaximumLength >= ptr->ImageName.Length + 2); // NULL terminated
         if (ptr->ImageName.Length == strlen("FancyWM-GUI.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"FancyWM-GUI.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "FancyWM-GUI.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_WINDOWS_STORE | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
-            if (ffGetFileVersion(filePath->Buffer, NULL, pluginName))
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
                 ffStrbufPrependS(pluginName, "FancyWM ");
             else
                 ffStrbufSetStatic(pluginName, "FancyWM");
             break;
         }
         else if (ptr->ImageName.Length == strlen("glazewm-watcher.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"glazewm-watcher.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "glazewm-watcher.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_SIGNED | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))
         ) {
-            if (ffGetFileVersion(filePath->Buffer, NULL, pluginName))
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName))
                 ffStrbufPrependS(pluginName, "GlazeWM ");
             else
                 ffStrbufSetStatic(pluginName, "GlazeWM");
             break;
         }
         else if (ptr->ImageName.Length == strlen("komorebi.exe") * sizeof(wchar_t) &&
-            memcmp(ptr->ImageName.Buffer, L"komorebi.exe", ptr->ImageName.Length) == 0 &&
+            ffStrEqualNWS(ptr->ImageName.Buffer, "komorebi.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_CUI, filePath, sizeof(buffer))
         ) {
-            FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateNWS(filePath->Length / sizeof(wchar_t), filePath->Buffer);
-            if (ffProcessAppendStdOut(pluginName, (char *const[]) {
-                path.chars,
-                "--version",
-                NULL,
-            }) == NULL)
-                ffStrbufSubstrBeforeFirstC(pluginName, '\n');
-            else
+            if (instance.config.general.detectVersion)
+            {
+                FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateNWS(filePath->Length / sizeof(wchar_t), filePath->Buffer);
+                if (ffProcessAppendStdOut(pluginName, (char *const[]) {
+                    path.chars,
+                    "--version",
+                    NULL,
+                }) == NULL)
+                    ffStrbufSubstrBeforeFirstC(pluginName, '\n');
+            }
+            if (pluginName->length == 0)
                 ffStrbufSetStatic(pluginName, "Komorebi");
             break;
         }
+
+        if (ptr->NextEntryOffset == 0) break;
     }
 
     return NULL;

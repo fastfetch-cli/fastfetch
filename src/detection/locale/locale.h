@@ -2,4 +2,4 @@
 
 #include "fastfetch.h"
 
-void ffDetectLocale(FFstrbuf* result);
+const char* ffDetectLocale(FFstrbuf* result);

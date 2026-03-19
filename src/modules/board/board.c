@@ -37,10 +37,10 @@ bool ffPrintBoard(FFBoardOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(result.name, "name"),
-            FF_FORMAT_ARG(result.vendor, "vendor"),
-            FF_FORMAT_ARG(result.version, "version"),
-            FF_FORMAT_ARG(result.serial, "serial"),
+            FF_ARG(result.name, "name"),
+            FF_ARG(result.vendor, "vendor"),
+            FF_ARG(result.version, "version"),
+            FF_ARG(result.serial, "serial"),
         }));
     }
     success = true;

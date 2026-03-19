@@ -83,7 +83,7 @@ static void waylandKdeCurrentModeListener(void* data, FF_MAYBE_UNUSED struct kde
 static void waylandKdeScaleListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* _, wl_fixed_t scale)
 {
     WaylandDisplay* wldata = (WaylandDisplay*) data;
-    wldata->scale = wl_fixed_to_double(scale);
+    wldata->dpi = (uint32_t) scale * 3 / 8; // wl_fixed_to_double(scale) * 96;
 }
 
 static void waylandKdeEdidListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* _, const char* raw)
@@ -181,6 +181,7 @@ static struct kde_output_device_v2_listener outputListener = {
     .sharpness = (void*) stubListener,
     .priority = (void*) stubListener,
     .auto_brightness = (void*) stubListener,
+    .removed = (void*) stubListener,
 };
 
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
@@ -192,7 +193,6 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandKdeMode));
     WaylandDisplay display = {
         .parent = wldata,
-        .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
         .name = ffStrbufCreate(),
@@ -223,8 +223,7 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
-        (uint32_t) (display.width / display.scale + .5),
-        (uint32_t) (display.height / display.scale + .5),
+        display.dpi,
         (uint32_t) display.preferredWidth,
         (uint32_t) display.preferredHeight,
         display.preferredRefreshRate / 1000.0,

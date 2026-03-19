@@ -1,15 +1,10 @@
 #include "users.h"
 #include "common/windows/unicode.h"
+#include "common/time.h"
 
 #include <windows.h>
 #include <wtsapi32.h>
 #include <ws2tcpip.h>
-
-static inline uint64_t to_ms(uint64_t ret)
-{
-    ret -= 116444736000000000ull;
-    return ret / 10000ull;
-}
 
 const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
 {
@@ -47,8 +42,8 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
             else if (address->AddressFamily == AF_INET6)
             {
                 char ipStr[INET6_ADDRSTRLEN];
-                if (inet_ntop(AF_INET6, address->Address, ipStr, sizeof(ipStr)) != NULL)
-                    ffStrbufSetS(&user->clientIp, ipStr);
+                const char* end = RtlIpv6AddressToStringA((const IN6_ADDR *) address->Address, ipStr);
+                ffStrbufSetNS(&user->clientIp, (uint32_t) (end - ipStr), ipStr);
             }
             WTSFreeMemory(address);
         }
@@ -57,7 +52,7 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
         PWTSINFOW wtsInfo = NULL;
         if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE, session->SessionId, WTSSessionInfo, (LPWSTR *) &wtsInfo, &bytes))
         {
-            user->loginTime = to_ms(*(uint64_t*) &wtsInfo->LogonTime);
+            user->loginTime = ffFileTimeToUnixMs((uint64_t) wtsInfo->LogonTime.QuadPart);
             WTSFreeMemory(wtsInfo);
         }
     }

@@ -28,11 +28,11 @@ bool ffPrintFont(FFFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-                FF_FORMAT_ARG(font.fonts[0], "font1"),
-                FF_FORMAT_ARG(font.fonts[1], "font2"),
-                FF_FORMAT_ARG(font.fonts[2], "font3"),
-                FF_FORMAT_ARG(font.fonts[3], "font4"),
-                FF_FORMAT_ARG(font.display, "combined"),
+                FF_ARG(font.fonts[0], "font1"),
+                FF_ARG(font.fonts[1], "font2"),
+                FF_ARG(font.fonts[2], "font3"),
+                FF_ARG(font.fonts[3], "font4"),
+                FF_ARG(font.display, "combined"),
             }));
         }
 

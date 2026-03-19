@@ -7,6 +7,7 @@
     #include <fileapi.h>
     #include <handleapi.h>
     #include <io.h>
+    #include "common/windows/nt.h"
     typedef HANDLE FFNativeFD;
     #define FF_INVALID_FD INVALID_HANDLE_VALUE
 #else
@@ -117,7 +118,11 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
 {
     #ifdef _WIN32
 
-    DWORD attr = GetFileAttributesA(path);
+    wchar_t wPath[MAX_PATH];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(wPath, (ULONG) sizeof(wPath), NULL, path, (ULONG)strlen(path) + 1)))
+        return false;
+
+    DWORD attr = GetFileAttributesW(wPath);
 
     if(attr == INVALID_FILE_ATTRIBUTES)
         return false;
@@ -199,7 +204,7 @@ static inline bool wrapClose(FFNativeFD* pfd)
     #ifndef _WIN32
         close(*pfd);
     #else
-        CloseHandle(*pfd);
+        NtClose(*pfd);
     #endif
 
     return true;

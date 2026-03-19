@@ -3,13 +3,14 @@
 #include "common/io.h"
 #include "common/windows/nt.h"
 
+#include <ntstatus.h>
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege)
 {
     FF_AUTO_CLOSE_FD HANDLE token = NULL;
-    if (!OpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
-        return "OpenProcessToken() failed";
+    if (!NT_SUCCESS(NtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)))
+        return "NtOpenProcessToken() failed";
 
     TOKEN_PRIVILEGES tp = {
         .PrivilegeCount = 1,
@@ -20,35 +21,46 @@ const char* enablePrivilege(const wchar_t* privilege)
     if (!LookupPrivilegeValueW(NULL, privilege, &tp.Privileges[0].Luid))
         return "LookupPrivilegeValue() failed";
 
-    if (!AdjustTokenPrivileges(token, false, &tp, sizeof(tp), NULL, NULL))
-        return "AdjustTokenPrivileges() failed";
+    NTSTATUS status = NtAdjustPrivilegesToken(token, false, &tp, sizeof(tp), NULL, NULL);
+    if (!NT_SUCCESS(status))
+        return "NtAdjustPrivilegesToken() failed";
 
-    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-        return "The token does not have the specified privilege";
+    if (status == STATUS_NOT_ALL_ASSIGNED)
+        return "The token does not have the specified privilege; try sudo please";
 
     return NULL;
 }
 
 const char* ffDetectBootmgr(FFBootmgrResult* result)
 {
-    if (enablePrivilege(L"SeSystemEnvironmentPrivilege") != NULL)
-        return "Failed to enable SeSystemEnvironmentPrivilege";
+    const char* err = enablePrivilege(L"SeSystemEnvironmentPrivilege");
+    if (err != NULL)
+        return err;
 
-    if (GetFirmwareEnvironmentVariableW(L"BootCurrent", L"{" FF_EFI_GLOBAL_GUID L"}", &result->order, sizeof(result->order)) != 2)
-        return "GetFirmwareEnvironmentVariableW(BootCurrent) failed";
+    GUID efiGlobalGuid;
+    if (!NT_SUCCESS(RtlGUIDFromString(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"{" FF_EFI_GLOBAL_GUID L"}"), &efiGlobalGuid)))
+        return "RtlGUIDFromString() failed";
+
+    ULONG size = sizeof(result->order);
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"BootCurrent"), &efiGlobalGuid, &result->order, &size, NULL)))
+        return "NtQuerySystemEnvironmentValueEx(BootCurrent) failed";
+    if (size != sizeof(result->order))
+        return "NtQuerySystemEnvironmentValueEx(BootCurrent) returned unexpected size";
 
     uint8_t buffer[2048];
-    wchar_t key[16];
+    wchar_t key[9];
     swprintf(key, ARRAY_SIZE(key), L"Boot%04X", result->order);
-    uint32_t size = GetFirmwareEnvironmentVariableW(key, L"{" FF_EFI_GLOBAL_GUID L"}", buffer, sizeof(buffer));
+    size = sizeof(buffer);
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(key), &efiGlobalGuid, buffer, &size, NULL)))
+        return "NtQuerySystemEnvironmentValueEx(Boot####) failed";
     if (size < sizeof(FFEfiLoadOption) || size == ARRAY_SIZE(buffer))
-        return "GetFirmwareEnvironmentVariableW(Boot####) failed";
+        return "NtQuerySystemEnvironmentValueEx(Boot####) returned unexpected size";
 
     ffEfiFillLoadOption((FFEfiLoadOption *)buffer, result);
 
-    DWORD uefiSecureBootEnabled = 0, bufSize = 0;
-    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State", L"UEFISecureBootEnabled", RRF_RT_REG_DWORD, NULL, &uefiSecureBootEnabled, &bufSize) == ERROR_SUCCESS)
-        result->secureBoot = !!uefiSecureBootEnabled;
+    SYSTEM_SECUREBOOT_INFORMATION ssi;
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemSecureBootInformation, &ssi, sizeof(ssi), NULL)))
+        result->secureBoot = ssi.SecureBootEnabled;
 
     return NULL;
 }

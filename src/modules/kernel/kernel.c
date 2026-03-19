@@ -17,11 +17,11 @@ bool ffPrintKernel(FFKernelOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         ffSizeAppendNum(info->pageSize, &str);
         FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(info->name, "sysname"),
-            FF_FORMAT_ARG(info->release, "release"),
-            FF_FORMAT_ARG(info->version, "version"),
-            FF_FORMAT_ARG(info->architecture, "arch"),
-            FF_FORMAT_ARG(str, "page-size"),
+            FF_ARG(info->name, "sysname"),
+            FF_ARG(info->release, "release"),
+            FF_ARG(info->version, "version"),
+            FF_ARG(info->architecture, "arch"),
+            FF_ARG(str, "page-size"),
         }));
     }
 

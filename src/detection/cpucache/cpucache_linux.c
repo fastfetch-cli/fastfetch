@@ -44,12 +44,15 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
 
     ffStrbufSubstrBefore(path, baseLen);
     ffStrbufAppendS(path, "/shared_cpu_list");
-    if (!ffReadFileBuffer(path->chars, buffer))
-        return "ffReadFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/shared_cpu_list\") == NULL";
+    ffStrbufClear(buffer);
+    ffStrbufAppendC(buffer, '[');
+    if (!ffAppendFileBuffer(path->chars, buffer))
+        return "ffAppendFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/shared_cpu_list\") == NULL";
     ffStrbufTrimRightSpace(buffer);
 
     // deduplicate shared caches
-    ffStrbufAppendF(buffer, "_%u_%u_%u_%u\n", level, sizeKb, lineSize, cacheType);
+    ffStrbufAppendF(buffer, "_%u_%u_%u_%u]", level, sizeKb, lineSize, cacheType);
+
     if (ffStrbufContain(added, buffer)) return NULL;
     ffStrbufAppend(added, buffer);
     ffCPUCacheAddItem(result, level, sizeKb * 1024, lineSize, cacheType);

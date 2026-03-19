@@ -191,7 +191,7 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
             goto conhost;
         }
 
-        FF_HKEY_AUTO_DESTROY hKey = NULL;
+        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
         if(ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL))
         {
             FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();

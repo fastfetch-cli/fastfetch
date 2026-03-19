@@ -269,6 +269,15 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetStatic(&result->prettyName, "TrueNAS Scale");
         return true;
     }
+    else if (ffPathExists("/usr/bin/emmabuntus_config.sh", FF_PATHTYPE_FILE))
+    {
+        // Emmabuntüs
+        ffStrbufSetStatic(&result->id, "emmabuntus");
+        ffStrbufSetStatic(&result->idLike, "debian");
+        ffStrbufSetStatic(&result->name, "Emmabuntüs");
+        getDebianVersion(result);
+        return true;
+    }
     else
     {
         // Hack for MX Linux. See #847
