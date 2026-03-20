@@ -656,10 +656,10 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
-    #ifdef FF_HAVE_DIRECTX_HEADERS
-        const char* ffGPUDetectByDirectX(const FFGPUOptions* options, FFlist* gpus);
-        if (ffGPUDetectByDirectX(options, gpus) == NULL)
-            return NULL;
+    #if __x86_64__ || __aarch64__
+    const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus);
+    if (ffGPUDetectWsl2(options, gpus) == NULL)
+        return NULL;
     #endif
 
     if (options->detectionMethod == FF_GPU_DETECTION_METHOD_AUTO)

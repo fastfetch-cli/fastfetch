@@ -89,7 +89,6 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR Ope
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
@@ -159,7 +158,7 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
-if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
+if(WIN32 OR Haiku)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -561,6 +560,7 @@ if(LINUX)
         src/detection/gpu/gpu_linux.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
+        src/detection/gpu/gpu_wsl.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/host/host_mac.c
@@ -1315,11 +1315,6 @@ elseif(GNU)
    )
 endif()
 
-if(ENABLE_DIRECTX_HEADERS)
-    message(STATUS "Enabling DirectX headers for WSL")
-    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
-endif()
-
 # Proprietary GPU driver APIs
 if(LINUX OR FreeBSD OR WIN32)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
@@ -1660,10 +1655,6 @@ ff_lib_enable(DDCUTIL
 ff_lib_enable(ELF
     "libelf"
     "libelf"
-)
-ff_lib_enable(DIRECTX_HEADERS
-    "DirectX-Headers"
-    "DirectX-Headers"
 )
 
 if(ENABLE_THREADS)

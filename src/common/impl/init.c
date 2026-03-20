@@ -237,9 +237,6 @@ void ffListFeatures(void)
         #if FF_HAVE_LIBZFS
             "libzfs\n"
         #endif
-        #if FF_HAVE_DIRECTX_HEADERS
-            "Directx Headers\n"
-        #endif
         #if FF_USE_SYSTEM_YYJSON
             "System yyjson\n"
         #endif
