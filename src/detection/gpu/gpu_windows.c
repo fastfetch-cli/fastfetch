@@ -8,6 +8,7 @@
 
 #include <windows.h>
 #include <cfgmgr32.h>
+#include "d3dkmthk.h"
 
 #define FF_EMPTY_GUID_STR L"{00000000-0000-0000-0000-000000000000}"
 enum { FF_GUID_STRLEN = sizeof(FF_EMPTY_GUID_STR) / sizeof(wchar_t) - 1 };
@@ -410,7 +411,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
                 D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
                 (void) D3DKMTCloseAdapter(&closeAdapter);
-                openAdapterFromLuid.hAdapter = 0;
+                openAdapterFromLuid.hAdapter = (D3DKMT_HANDLE) {};
                 FF_DEBUG("Closed adapter handle");
             }
             else
