@@ -438,6 +438,49 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     FF_DEBUG("Failed to get GPU temperature or temperature is 0");
                 }
             }
+
+            if (options->driverSpecific && gpu->dedicated.used == FF_GPU_VMEM_SIZE_UNSET && ffIsWindows11OrGreater())
+            {
+                FF_DEBUG("Trying to get used video memory from D3DKMT method");
+                D3DKMT_QUERYSTATISTICS queryStatistics = {
+                    .Type = D3DKMT_QUERYSTATISTICS_SEGMENT_GROUP_USAGE,
+                    .AdapterLuid = *(LUID*)&adapterLuid,
+                    .QuerySegmentGroupUsage = {
+                        .PhysicalAdapterIndex = 0,
+                        .SegmentGroup = D3DKMT_MEMORY_SEGMENT_GROUP_LOCAL,
+                    },
+                };
+                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
+                {
+                    D3DKMT_QUERYSTATISTICS_MEMORY_USAGE* info = &queryStatistics.QueryResult.SegmentGroupUsageInformation;
+                    uint64_t used = info->AllocatedBytes + info->ModifiedBytes + info->StandbyBytes;
+                    uint64_t total = used + info->FreeBytes + info->ZeroBytes;
+                    gpu->dedicated.used = used;
+                    gpu->dedicated.total = total;
+
+                    FF_DEBUG("Found local memory size %llu / %llu", used, total);
+                }
+                else
+                {
+                    FF_DEBUG("Failed to query segment group usage for local memory");
+                }
+
+                queryStatistics.QuerySegmentGroupUsage.SegmentGroup = D3DKMT_MEMORY_SEGMENT_GROUP_NON_LOCAL;
+                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
+                {
+                    D3DKMT_QUERYSTATISTICS_MEMORY_USAGE* info = &queryStatistics.QueryResult.SegmentGroupUsageInformation;
+                    uint64_t used = info->AllocatedBytes + info->ModifiedBytes + info->StandbyBytes;
+                    uint64_t total = used + info->FreeBytes + info->ZeroBytes;
+                    gpu->shared.used = used;
+                    gpu->shared.total = total;
+
+                    FF_DEBUG("Found non-local memory size %llu / %llu", used, total);
+                }
+                else
+                {
+                    FF_DEBUG("Failed to query segment group usage for non-local memory");
+                }
+            }
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)
@@ -447,11 +490,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             {
                 gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
                 FF_DEBUG("Intel GPU type determined: %s", gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
-            }
-            else if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-            {
-                gpu->type = gpu->dedicated.total >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
-                FF_DEBUG("GPU type determined by memory size (%llu bytes): %s", gpu->dedicated.total, gpu->type == FF_GPU_TYPE_DISCRETE ? "Discrete" : "Integrated");
             }
             else
             {
