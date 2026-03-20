@@ -1,17 +1,18 @@
 #include "cursor.h"
 
+#include "common/io.h"
 #include "common/windows/registry.h"
 
 void ffDetectCursor(FFCursorResult* result)
 {
-    FF_HKEY_AUTO_DESTROY hKey;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Cursors", &hKey, &result->error))
     {
-        if (!ffRegReadStrbuf(hKey, NULL, &result->theme, &result->error))
-            return;
-
         uint32_t cursorBaseSize;
-        if (ffRegReadUint(hKey, L"CursorBaseSize", &cursorBaseSize, NULL))
-            ffStrbufAppendF(&result->size, "%u", (unsigned) cursorBaseSize);
+        if (ffRegReadValues(hKey, 2, (FFRegValueArg[]) {
+            FF_ARG(result->theme, NULL),
+            FF_ARG(cursorBaseSize, L"CursorBaseSize"),
+        }, &result->error))
+            ffStrbufAppendUInt(&result->size, cursorBaseSize);
     }
 }

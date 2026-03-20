@@ -78,9 +78,10 @@ const char* ffDetectPhysicalMemory(FFlist* result)
     for (; data->Header.Type < FF_SMBIOS_TYPE_END_OF_TABLE;
         data = (const FFSmbiosMemoryDevice*) ffSmbiosNextEntry(&data->Header))
     {
-        if (data->Header.Type != FF_SMBIOS_TYPE_MEMORY_DEVICE || data->Size == 0) continue;
+        if (data->Header.Type != FF_SMBIOS_TYPE_MEMORY_DEVICE) continue;
 
         const char* strings = (const char*) data + data->Header.Length;
+        bool installed = data->Size != 0;
 
         FFPhysicalMemoryResult* device = ffListAdd(result);
         ffStrbufInit(&device->type);
@@ -92,12 +93,13 @@ const char* ffDetectPhysicalMemory(FFlist* result)
         device->size = 0;
         device->maxSpeed = 0;
         device->runningSpeed = 0;
+        device->installed = installed;
         device->ecc = false;
 
-        if (data->TotalWidth != 0xFFFF && data->DataWidth != 0xFFFF)
+        if (installed && data->TotalWidth != 0xFFFF && data->DataWidth != 0xFFFF)
             device->ecc = data->TotalWidth > data->DataWidth;
 
-        if (data->Size != 0xFFFF)
+        if (installed && data->Size != 0xFFFF)
         {
             if (data->Size == 0x7FFF)
                 device->size = (data->ExtendedSize & ~(1ULL << 31)) * 1024ULL * 1024ULL;
@@ -186,12 +188,14 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             "LPDDR5",     // 0x23
             "HBM3",       // 0x24
         };
-        if (data->MemoryType > 0 && data->MemoryType < ARRAY_SIZE(memoryTypeNames))
+        if (!installed)
+            ffStrbufSetStatic(&device->type, "Empty");
+        else if (data->MemoryType > 0 && data->MemoryType < ARRAY_SIZE(memoryTypeNames))
             ffStrbufSetStatic(&device->type, memoryTypeNames[data->MemoryType]);
         else
             ffStrbufSetF(&device->type, "Unknown (%d)", (int) data->MemoryType);
 
-        if (data->Header.Length > offsetof(FFSmbiosMemoryDevice, Speed)) // 2.3+
+        if (installed && data->Header.Length > offsetof(FFSmbiosMemoryDevice, Speed)) // 2.3+
         {
             if (data->Speed)
                 device->maxSpeed = data->Speed == 0xFFFF ? data->ExtendedSpeed : data->Speed;
@@ -207,7 +211,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             ffCleanUpSmbiosValue(&device->partNumber);
         }
 
-        if (data->Header.Length > offsetof(FFSmbiosMemoryDevice, ConfiguredMemorySpeed)) // 2.7+
+        if (installed && data->Header.Length > offsetof(FFSmbiosMemoryDevice, ConfiguredMemorySpeed)) // 2.7+
         {
             if (data->ConfiguredMemorySpeed)
                 device->runningSpeed = data->ConfiguredMemorySpeed == 0xFFFF

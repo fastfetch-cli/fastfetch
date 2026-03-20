@@ -54,11 +54,11 @@ bool ffPrintWM(FFWMOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result->wmProcessName, "process-name"),
-            FF_FORMAT_ARG(result->wmPrettyName, "pretty-name"),
-            FF_FORMAT_ARG(result->wmProtocolName, "protocol-name"),
-            FF_FORMAT_ARG(pluginName, "plugin-name"),
-            FF_FORMAT_ARG(version, "version"),
+            FF_ARG(result->wmProcessName, "process-name"),
+            FF_ARG(result->wmPrettyName, "pretty-name"),
+            FF_ARG(result->wmProtocolName, "protocol-name"),
+            FF_ARG(pluginName, "plugin-name"),
+            FF_ARG(version, "version"),
         }));
     }
 
@@ -122,7 +122,7 @@ bool ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 void ffInitWMOptions(FFWMOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->detectPlugin = false;
+    options->detectPlugin = true;
 }
 
 void ffDestroyWMOptions(FFWMOptions* options)

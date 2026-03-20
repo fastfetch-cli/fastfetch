@@ -8,6 +8,7 @@ typedef struct FFPhysicalMemoryResult
     uint64_t size; // B
     uint32_t maxSpeed; // MT/s
     uint32_t runningSpeed; // MT/s
+    bool installed;
     FFstrbuf type;
     FFstrbuf formFactor;
     FFstrbuf locator;

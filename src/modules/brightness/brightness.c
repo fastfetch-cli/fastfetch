@@ -56,9 +56,9 @@ bool ffPrintBrightness(FFBrightnessOptions* options)
         {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-                FF_FORMAT_ARG(moduleIndex, "index"),
-                FF_FORMAT_ARG(item->name, "name"),
-                FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+                FF_ARG(moduleIndex, "index"),
+                FF_ARG(item->name, "name"),
+                FF_ARG(options->moduleArgs.keyIcon, "icon"),
             }));
         }
 
@@ -96,13 +96,13 @@ bool ffPrintBrightness(FFBrightnessOptions* options)
                 ffPercentAppendBar(&valueBar, percent, options->percent, &options->moduleArgs);
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-                FF_FORMAT_ARG(valueNum, "percentage"),
-                FF_FORMAT_ARG(item->name, "name"),
-                FF_FORMAT_ARG(item->max, "max"),
-                FF_FORMAT_ARG(item->min, "min"),
-                FF_FORMAT_ARG(item->current, "current"),
-                FF_FORMAT_ARG(valueBar, "percentage-bar"),
-                FF_FORMAT_ARG(item->builtin, "is-builtin"),
+                FF_ARG(valueNum, "percentage"),
+                FF_ARG(item->name, "name"),
+                FF_ARG(item->max, "max"),
+                FF_ARG(item->min, "min"),
+                FF_ARG(item->current, "current"),
+                FF_ARG(valueBar, "percentage-bar"),
+                FF_ARG(item->builtin, "is-builtin"),
             }));
         }
 

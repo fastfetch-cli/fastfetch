@@ -6,6 +6,7 @@
 
 #include <windows.h>
 #include "common/windows/perflib_.h"
+#include "common/windows/nt.h"
 #include <wchar.h>
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)
@@ -37,10 +38,8 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result)
 
     if (options->tempSensor.length > 0)
     {
-        int written = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, options->tempSensor.chars, (int) options->tempSensor.length, querySpec.Name, (int)(ARRAY_SIZE(querySpec.Name) - 1));
-        if (written == 0)
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(querySpec.Name, (ULONG) sizeof(querySpec.Name), NULL, options->tempSensor.chars, (ULONG)options->tempSensor.length + 1)))
             return "Invalid temp sensor string";
-        querySpec.Name[written] = L'\0';
     }
 
     DWORD dataSize = 0;
@@ -212,15 +211,16 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 
 static const char* detectNCores(FFCPUResult* cpu)
 {
-    DWORD length = 0;
-    GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
+    LOGICAL_PROCESSOR_RELATIONSHIP lpr = RelationAll;
+    ULONG length = 0;
+    NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), NULL, 0, &length);
     if (length == 0)
         return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
 
     SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
         pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
-    if (!pProcessorInfo || !GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
+    if (!NT_SUCCESS(NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), pProcessorInfo, length, &length)))
         return "GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length) failed";
 
     for(
@@ -250,28 +250,18 @@ static const char* detectNCores(FFCPUResult* cpu)
 
 static const char* detectByRegistry(FFCPUResult* cpu)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
-    ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
-    if (ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL))
+    if (ffRegReadValues(hKey, 3, (FFRegValueArg[]) {
+        FF_ARG(cpu->name, L"ProcessorNameString"),
+        FF_ARG(cpu->vendor, L"VendorIdentifier"),
+        FF_ARG(cpu->frequencyBase, L"~MHz"),
+    }, NULL))
         ffStrbufTrimRightSpace(&cpu->vendor);
-
-    if (cpu->coresLogical == 0)
-    {
-        FF_HKEY_AUTO_DESTROY hProcsKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor", &hProcsKey, NULL))
-        {
-            uint32_t cores;
-            if (ffRegGetNSubKeys(hProcsKey, &cores, NULL))
-                cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
-        }
-    }
-
-    uint32_t mhz;
-    if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-        cpu->frequencyBase = mhz;
+    else
+        return "ffRegReadValues() failed for CPU registry key";
 
     return NULL;
 }

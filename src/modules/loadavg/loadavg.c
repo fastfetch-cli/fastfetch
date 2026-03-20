@@ -47,9 +47,9 @@ bool ffPrintLoadavg(FFLoadavgOptions* options)
                 {
                     ffStrbufClear(&buffer);
                     FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
-                        FF_FORMAT_ARG(index, "index"),
-                        FF_FORMAT_ARG(duration, "duration"),
-                        FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+                        FF_ARG(index, "index"),
+                        FF_ARG(duration, "duration"),
+                        FF_ARG(options->moduleArgs.keyIcon, "icon"),
                     }));
                 }
 
@@ -83,9 +83,9 @@ bool ffPrintLoadavg(FFLoadavgOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result[0], "loadavg1"),
-            FF_FORMAT_ARG(result[1], "loadavg2"),
-            FF_FORMAT_ARG(result[2], "loadavg3"),
+            FF_ARG(result[0], "loadavg1"),
+            FF_ARG(result[1], "loadavg2"),
+            FF_ARG(result[2], "loadavg3"),
         }));
     }
 

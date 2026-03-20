@@ -4,7 +4,7 @@
 
 #ifdef FF_HAVE_THREADS
     #if defined(_WIN32)
-        #include <handleapi.h>
+        #include <winternl.h>
         #include <synchapi.h>
         #include <process.h>
         #include <processthreadsapi.h>
@@ -18,16 +18,16 @@
         }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType) static __stdcall unsigned fn ## ThreadMain (void* data) { fn((paramType)data); return 0; }
         #define FF_THREAD_ENTRY_DECL_WRAPPER_NOPARAM(fn) static __stdcall unsigned fn ## ThreadMain () { fn(); return 0; }
-        static inline void ffThreadDetach(FFThreadType thread) { CloseHandle(thread); }
+        static inline void ffThreadDetach(FFThreadType thread) { NtClose(thread); }
         static inline bool ffThreadJoin(FFThreadType thread, uint32_t timeout)
         {
-            if (WaitForSingleObject(thread, timeout == 0 ? (DWORD) -1 : timeout) != 0 /*WAIT_OBJECT_0*/)
+            if (NtWaitForSingleObject(thread, TRUE, timeout == 0 ? NULL : &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }) != STATUS_WAIT_0)
             {
                 TerminateThread(thread, (DWORD) -1);
-                CloseHandle(thread);
+                NtClose(thread);
                 return false;
             }
-            CloseHandle(thread);
+            NtClose(thread);
             return true;
         }
     #else

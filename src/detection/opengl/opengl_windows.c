@@ -1,6 +1,7 @@
 #include "opengl.h"
 #include "common/library.h"
 #include "common/printing.h"
+#include "common/windows/nt.h"
 
 #include <windows.h>
 #include <GL/gl.h>
@@ -81,7 +82,7 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglDeleteContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, glGetString);
 
-    HINSTANCE hInstance = GetModuleHandleW(NULL);
+    HINSTANCE hInstance = ffGetPeb()->ImageBaseAddress;
 
     WNDCLASSW wc = {
         .lpfnWndProc = DefWindowProcW,

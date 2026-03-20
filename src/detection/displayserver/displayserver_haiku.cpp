@@ -37,13 +37,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
         uint32_t width = (uint32_t) s.Frame().Width() + 1;
         uint32_t height = (uint32_t) (uint32_t)s.Frame().Height() + 1;
-        double scaleFactor = (double) 1.0;
         FFDisplayResult* res = ffdsAppendDisplay(ds,
             width,
             height,
             (double)mode.timing.pixel_clock * 1000 / (mode.timing.v_total * mode.timing.h_total),
-            (uint32_t) (width / scaleFactor + .5),
-            (uint32_t) (height / scaleFactor + .5),
+            0,
             0,
             0,
             0,

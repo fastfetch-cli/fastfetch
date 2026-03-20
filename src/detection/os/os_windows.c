@@ -1,37 +1,16 @@
-extern "C" {
 #include "os.h"
 #include "common/library.h"
 #include "common/stringUtils.h"
 #include "common/windows/registry.h"
-}
-#include "common/windows/unicode.hpp"
-#include "common/windows/wmi.hpp"
+#include "common/windows/unicode.h"
 
-static const char* getOsNameByWmi(FFstrbuf* osName)
-{
-    FFWmiQuery query(L"SELECT Caption FROM Win32_OperatingSystem");
-    if(!query)
-        return "Query WMI service failed";
-
-    if(FFWmiRecord record = query.next())
-    {
-        if(auto vtCaption = record.get(L"Caption"))
-        {
-            ffStrbufSetWSV(osName, vtCaption.get<std::wstring_view>());
-            ffStrbufTrimRight(osName, ' ');
-            return NULL;
-        }
-        return "Get Caption failed";
-    }
-
-    return "No WMI result returned";
-}
+#include <windows.h>
 
 PWSTR WINAPI BrandingFormatString(PCWSTR format);
 
 static bool getCodeName(FFOSResult* os)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
         return false;
 
@@ -45,24 +24,13 @@ static bool getCodeName(FFOSResult* os)
     return true;
 }
 
-static const char* getOsNameByWinbrand(FFstrbuf* osName)
-{
-    //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
-    FF_LIBRARY_LOAD_MESSAGE(winbrand, "winbrand" FF_LIBRARY_EXTENSION, 1);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
-
-    const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");
-    ffStrbufSetWS(osName, rawName);
-    GlobalFree((HGLOBAL)rawName);
-    return NULL;
-}
-
-extern "C"
 void ffDetectOSImpl(FFOSResult* os)
 {
-    if(getOsNameByWinbrand(&os->variant) && getOsNameByWmi(&os->variant))
-        return;
-
+    //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
+    const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
+    ffStrbufSetWS(&os->variant, rawName);
+    GlobalFree((HGLOBAL)rawName);
+    ffStrbufSet(&os->prettyName, &os->variant);
     ffStrbufTrimRight(&os->variant, ' ');
 
     //WMI returns the "Microsoft" prefix while BrandingFormatString doesn't. Make them consistent.
@@ -71,13 +39,9 @@ void ffDetectOSImpl(FFOSResult* os)
 
     if(os->variant.length == 0) // Windows PE?
     {
-        wchar_t buf[128];
-        DWORD bufSize = (DWORD) sizeof(buf); // with trailing '\0'
-        if(RegGetValueW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", RRF_RT_REG_SZ, NULL, buf, &bufSize) == ERROR_SUCCESS)
-        {
-            assert(bufSize >= sizeof(wchar_t));
-            ffStrbufSetNWS(&os->variant, bufSize / sizeof(wchar_t) - 1, buf);
-        }
+        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
+        if(ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
+            ffRegReadStrbuf(hKey, L"ProductName", &os->variant, NULL);
     }
 
     ffStrbufSet(&os->prettyName, &os->variant);

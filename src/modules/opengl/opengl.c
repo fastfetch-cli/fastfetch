@@ -29,11 +29,11 @@ bool ffPrintOpenGL(FFOpenGLOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-                FF_FORMAT_ARG(result.version, "version"),
-                FF_FORMAT_ARG(result.renderer, "renderer"),
-                FF_FORMAT_ARG(result.vendor, "vendor"),
-                FF_FORMAT_ARG(result.slv, "slv"),
-                FF_FORMAT_ARG(result.library, "library"),
+                FF_ARG(result.version, "version"),
+                FF_ARG(result.renderer, "renderer"),
+                FF_ARG(result.vendor, "vendor"),
+                FF_ARG(result.slv, "slv"),
+                FF_ARG(result.library, "library"),
             }));
         }
         success = true;

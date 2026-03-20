@@ -5,8 +5,7 @@ FFDisplayResult* ffdsAppendDisplay(
     uint32_t width,
     uint32_t height,
     double refreshRate,
-    uint32_t scaledWidth,
-    uint32_t scaledHeight,
+    uint32_t dpi,
     uint32_t preferredWidth,
     uint32_t preferredHeight,
     double preferredRefreshRate,
@@ -26,8 +25,7 @@ FFDisplayResult* ffdsAppendDisplay(
     display->width = width;
     display->height = height;
     display->refreshRate = refreshRate;
-    display->scaledWidth = scaledWidth;
-    display->scaledHeight = scaledHeight;
+    display->dpi = dpi ?: 96; // 0 means unknown
     display->preferredWidth = preferredWidth;
     display->preferredHeight = preferredHeight;
     display->preferredRefreshRate = preferredRefreshRate;

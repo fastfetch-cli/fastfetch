@@ -25,10 +25,8 @@
 static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, FFstrbuf* version)
 {
     wchar_t exePathW[PATH_MAX + 1];
-    int len = MultiByteToWideChar(CP_UTF8, 0, exePath->chars, (int)exePath->length, exePathW, ARRAY_SIZE(exePathW));
-    if (len <= 0) return false;
-    assert(len < (int) ARRAY_SIZE(exePathW));
-    exePathW[len] = L'\0';
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(exePathW, (ULONG) sizeof(exePathW), NULL, exePath->chars, (ULONG)exePath->length + 1)))
+        return false;
     return ffGetFileVersion(exePathW, stringName, version);
 }
 

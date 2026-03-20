@@ -34,10 +34,10 @@ bool ffPrintTerminalFont(FFTerminalFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(terminalFont.font.pretty, "combined"),
-                FF_FORMAT_ARG(terminalFont.font.name, "name"),
-                FF_FORMAT_ARG(terminalFont.font.size, "size"),
-                FF_FORMAT_ARG(terminalFont.font.styles, "styles"),
+                FF_ARG(terminalFont.font.pretty, "combined"),
+                FF_ARG(terminalFont.font.name, "name"),
+                FF_ARG(terminalFont.font.size, "size"),
+                FF_ARG(terminalFont.font.styles, "styles"),
             }));
         }
         success = true;

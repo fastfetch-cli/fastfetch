@@ -1,5 +1,6 @@
 #include "disk.h"
 #include "common/io.h"
+#include "common/time.h"
 #include "common/windows/unicode.h"
 #include "common/windows/nt.h"
 
@@ -18,9 +19,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     // For cross-platform portability; used by `presets/examples/13.jsonc`
     if (options->folders.length == 1 && options->folders.chars[0] == '/')
     {
-        wchar_t path[MAX_PATH + 1];
-        GetSystemWindowsDirectoryW(path, ARRAY_SIZE(path));
-        options->folders.chars[0] = (char) path[0];
+        options->folders.chars[0] = (char) SharedUserData->NtSystemRoot[0];
         ffStrbufAppendS(&options->folders, ":\\");
     }
 
@@ -103,7 +102,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             if (fsVolume->VolumeLabelLength > 0)
                 ffStrbufSetNWS(&disk->name, fsVolume->VolumeLabelLength / sizeof(WCHAR), fsVolume->VolumeLabel);
             if (fsVolume->VolumeCreationTime.QuadPart)
-                disk->createTime = ((uint64_t) fsVolume->VolumeCreationTime.QuadPart - 116444736000000000ull) / 10000ull;
+                disk->createTime = ffFileTimeToUnixMs((uint64_t) fsVolume->VolumeCreationTime.QuadPart);
         }
 
         if (fsAttr)

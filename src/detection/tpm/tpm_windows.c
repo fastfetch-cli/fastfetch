@@ -1,6 +1,7 @@
 #include "tpm.h"
 #include "common/library.h"
 
+#include <windef.h>
 #include <tbs.h>
 #include <winerror.h>
 

@@ -71,6 +71,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     #define loff_t off_t
 #endif
 
+#ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     if (ffReadFileBuffer(devicesPath, buffer))
@@ -90,6 +91,7 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     ffStrbufClear(buffer);
     return false;
 }
+#endif
 
 typedef struct FFSmbios20EntryPoint
 {
@@ -109,7 +111,7 @@ typedef struct FFSmbios20EntryPoint
     uint8_t SmbiosBcdRevision;
 } __attribute__((__packed__)) FFSmbios20EntryPoint;
 static_assert(offsetof(FFSmbios20EntryPoint, SmbiosBcdRevision) == 0x1E,
-    "FFSmbios30EntryPoint: Wrong struct alignment");
+    "FFSmbios20EntryPoint: Wrong struct alignment");
 
 typedef struct FFSmbios30EntryPoint
 {
@@ -434,7 +436,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
     return &table;
 }
 #elif defined(_WIN32)
-#include <windows.h>
+#include "common/windows/nt.h"
 
 #pragma GCC diagnostic ignored "-Wmultichar"
 
@@ -450,36 +452,52 @@ typedef struct FFRawSmbiosData
 
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
-    static FFRawSmbiosData* buffer;
+    static SYSTEM_FIRMWARE_TABLE_INFORMATION* buffer;
     static FFSmbiosHeaderTable table;
 
     if (!buffer)
     {
         FF_DEBUG("Initializing Windows SMBIOS buffer");
-        const DWORD signature = 'RSMB';
+
         FF_DEBUG("Querying system firmware table size with signature 'RSMB'");
-        uint32_t bufSize = GetSystemFirmwareTable(signature, 0, NULL, 0);
-        if (bufSize <= sizeof(FFRawSmbiosData)) {
-            FF_DEBUG("Invalid firmware table size: %u (must be > %zu)",
-                bufSize, sizeof(FFRawSmbiosData));
+        SYSTEM_FIRMWARE_TABLE_INFORMATION sfti = {
+            .ProviderSignature = 'RSMB',
+            .Action = SystemFirmwareTableGet,
+        };
+        ULONG bufSize = 0;
+        NtQuerySystemInformation(SystemFirmwareTableInformation, &sfti, sizeof(sfti), &bufSize);
+        if (bufSize <= sizeof(FFRawSmbiosData) + sizeof(sfti)) {
+            FF_DEBUG("Invalid firmware table size: %lu (must be > %zu)", bufSize, sizeof(FFRawSmbiosData) + sizeof(sfti));
             return NULL;
         }
-        FF_DEBUG("Firmware table size: %u bytes", bufSize);
+        if (bufSize != sfti.TableBufferLength + (ULONG) sizeof(sfti)) {
+            FF_DEBUG("Firmware table size mismatch: NtQuerySystemInformation returned %lu but expected %lu",
+                bufSize, sfti.TableBufferLength + (ULONG) sizeof(sfti));
+            return NULL;
+        }
+        FF_DEBUG("Firmware table size: %lu bytes", bufSize);
 
-        buffer = (FFRawSmbiosData*) malloc(bufSize);
-        assert(buffer);
+        buffer = malloc(bufSize);
+        *buffer = sfti;
         FF_DEBUG("Allocated buffer for SMBIOS data");
 
-        FF_MAYBE_UNUSED uint32_t resultSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
-        assert(resultSize == bufSize);
+        if (!NT_SUCCESS(NtQuerySystemInformation(SystemFirmwareTableInformation, buffer, bufSize, &bufSize)))
+        {
+            FF_DEBUG("NtQuerySystemInformation(SystemFirmwareTableInformation) failed");
+            free(buffer);
+            buffer = NULL;
+            return NULL;
+        }
+        FFRawSmbiosData* rawData = (FFRawSmbiosData*) buffer->TableBuffer;
+
         FF_DEBUG("Successfully retrieved SMBIOS data: version %u.%u, length %u bytes",
-            buffer->SMBIOSMajorVersion, buffer->SMBIOSMinorVersion, buffer->Length);
+            rawData->SMBIOSMajorVersion, rawData->SMBIOSMinorVersion, rawData->Length);
 
         FF_DEBUG("Parsing SMBIOS table structures");
         FF_MAYBE_UNUSED int structureCount = 0;
         for (
-            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer->SMBIOSTableData;
-            (const uint8_t*) header < buffer->SMBIOSTableData + buffer->Length;
+            const FFSmbiosHeader* header = (const FFSmbiosHeader*) rawData->SMBIOSTableData;
+            (const uint8_t*) header < rawData->SMBIOSTableData + rawData->Length;
             header = ffSmbiosNextEntry(header)
         )
         {

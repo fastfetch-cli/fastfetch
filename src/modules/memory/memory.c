@@ -63,10 +63,10 @@ bool ffPrintMemory(FFMemoryOptions* options)
             ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(usedPretty, "used"),
-            FF_FORMAT_ARG(totalPretty, "total"),
-            FF_FORMAT_ARG(percentageNum, "percentage"),
-            FF_FORMAT_ARG(percentageBar, "percentage-bar"),
+            FF_ARG(usedPretty, "used"),
+            FF_ARG(totalPretty, "total"),
+            FF_ARG(percentageNum, "percentage"),
+            FF_ARG(percentageBar, "percentage-bar"),
         }));
     }
 

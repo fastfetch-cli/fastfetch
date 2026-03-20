@@ -35,9 +35,9 @@ bool ffPrintMonitor(FFMonitorOptions* options)
         {
             uint32_t moduleIndex = result->displays.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-                FF_FORMAT_ARG(moduleIndex, "index"),
-                FF_FORMAT_ARG(display->name, "name"),
-                FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+                FF_ARG(moduleIndex, "index"),
+                FF_ARG(display->name, "name"),
+                FF_ARG(options->moduleArgs.keyIcon, "icon"),
             }));
         }
 
@@ -66,18 +66,18 @@ bool ffPrintMonitor(FFMonitorOptions* options)
                 buf[0] = '\0';
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-                FF_FORMAT_ARG(display->name, "name"),
-                FF_FORMAT_ARG(display->width, "width"),
-                FF_FORMAT_ARG(display->height, "height"),
-                FF_FORMAT_ARG(display->physicalWidth, "physical-width"),
-                FF_FORMAT_ARG(display->physicalHeight, "physical-height"),
-                FF_FORMAT_ARG(inch, "inch"),
-                FF_FORMAT_ARG(ppi, "ppi"),
-                FF_FORMAT_ARG(display->manufactureYear, "manufacture-year"),
-                FF_FORMAT_ARG(display->manufactureWeek, "manufacture-week"),
-                FF_FORMAT_ARG(buf, "serial"),
-                FF_FORMAT_ARG(display->refreshRate, "refresh-rate"),
-                FF_FORMAT_ARG(hdrCompatible, "hdr-compatible"),
+                FF_ARG(display->name, "name"),
+                FF_ARG(display->width, "width"),
+                FF_ARG(display->height, "height"),
+                FF_ARG(display->physicalWidth, "physical-width"),
+                FF_ARG(display->physicalHeight, "physical-height"),
+                FF_ARG(inch, "inch"),
+                FF_ARG(ppi, "ppi"),
+                FF_ARG(display->manufactureYear, "manufacture-year"),
+                FF_ARG(display->manufactureWeek, "manufacture-week"),
+                FF_ARG(buf, "serial"),
+                FF_ARG(display->refreshRate, "refresh-rate"),
+                FF_ARG(hdrCompatible, "hdr-compatible"),
             }));
         }
 

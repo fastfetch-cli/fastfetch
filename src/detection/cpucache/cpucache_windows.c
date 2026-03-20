@@ -1,19 +1,19 @@
 #include "cpucache.h"
 #include "common/mallocHelper.h"
-
-#include <windows.h>
+#include "common/windows/nt.h"
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result)
 {
+    LOGICAL_PROCESSOR_RELATIONSHIP lpr = RelationCache;
     DWORD length = 0;
-    GetLogicalProcessorInformationEx(RelationCache, NULL, &length);
+    NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), NULL, 0, &length);
     if (length == 0)
         return "GetLogicalProcessorInformationEx(RelationCache, NULL, &length) failed";
 
     SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
         pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
 
-    if (!pProcessorInfo || !GetLogicalProcessorInformationEx(RelationCache, pProcessorInfo, &length))
+    if (!NT_SUCCESS(NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), pProcessorInfo, length, &length)))
         return "GetLogicalProcessorInformationEx(RelationCache, pProcessorInfo, &length) failed";
 
     for(

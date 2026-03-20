@@ -32,6 +32,7 @@ static void appendDevice(
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;
+    device->installed = true;
     device->ecc = ecc;
 
     if (size)
@@ -143,6 +144,7 @@ FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;
+    device->installed = true;
     device->ecc = false;
 
     ffCfStrGetString(dramType, &device->type);

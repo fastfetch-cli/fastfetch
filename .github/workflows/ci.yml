@@ -93,12 +93,12 @@ jobs:
         run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y gcc-13 g++-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev libchafa-dev directx-headers-dev rpm ninja-build
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 g++-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev directx-headers-dev rpm ninja-build
 
       - name: install linuxbrew packages
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick --ignore-dependencies
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
 
       - name: Initialize CodeQL
         if: matrix.arch == 'amd64'
@@ -151,7 +151,7 @@ jobs:
           cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
@@ -217,7 +217,7 @@ jobs:
         run: ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-linux-i686
           path: ./fastfetch-*.*
@@ -237,14 +237,14 @@ jobs:
         id: runcmd
         with:
           arch: armv7
-          distro: ubuntu20.04
+          distro: ubuntu22.04
           githubToken: ${{ github.token }}
           run: |
             uname -a
             apt-get update && apt-get install -y software-properties-common ca-certificates gpg curl
             add-apt-repository -y ppa:ubuntu-toolchain-r/test
             curl -L https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
-            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
             echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99ignore-certificates
             apt-get update && apt-get install -y cmake make gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
             CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_DIRECTX_HEADERS=Off -DCMAKE_INSTALL_PREFIX=/usr .
@@ -257,7 +257,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-linux-armv7l
           path: ./fastfetch-*.*
@@ -293,7 +293,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-linux-armv6l
           path: ./fastfetch-*.*
@@ -336,7 +336,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
@@ -374,7 +374,7 @@ jobs:
         shell: alpine.sh {0}
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-musl-amd64
           path: ./fastfetch-*.*
@@ -428,7 +428,7 @@ jobs:
         run: ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-macos-${{ matrix.arch }}
           path: ./fastfetch-*.*
@@ -444,6 +444,7 @@ jobs:
         uses: vmactions/omnios-vm@v1
         with:
           usesh: true
+          envs: 'CMAKE_BUILD_TYPE'
           prepare: |
             uname -a
             pkg update --accept
@@ -462,7 +463,7 @@ jobs:
             cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-omnios-amd64
           path: ./fastfetch-*.*
@@ -478,6 +479,7 @@ jobs:
         uses: vmactions/solaris-vm@v1
         with:
           usesh: true
+          envs: 'CMAKE_BUILD_TYPE'
           release: "11.4-gcc-14"
           prepare: |
             uname -a
@@ -497,7 +499,7 @@ jobs:
             cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-solaris-amd64
           path: ./fastfetch-*.*
@@ -520,6 +522,7 @@ jobs:
           cpu_count: 4
           shell: bash
           version: '15.0'
+          environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
             sudo pkg update
@@ -534,7 +537,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-freebsd-amd64
           path: ./fastfetch-*.*
@@ -557,6 +560,7 @@ jobs:
           cpu_count: 4
           shell: bash
           version: '7.8'
+          environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
             sudo pkg_add -u
@@ -571,7 +575,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-openbsd-amd64
           path: ./fastfetch-*.*
@@ -594,6 +598,7 @@ jobs:
           cpu_count: 4
           shell: bash
           version: '10.1'
+          environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
             sudo pkgin -y install clang cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick
@@ -607,7 +612,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-netbsd-amd64
           path: ./fastfetch-*.*
@@ -626,6 +631,7 @@ jobs:
         uses: vmactions/dragonflybsd-vm@v1
         with:
           usesh: yes
+          envs: 'CMAKE_BUILD_TYPE'
           prepare: |
             uname -a
             pkg update
@@ -642,7 +648,7 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-dragonfly-amd64
           path: ./fastfetch-*.*
@@ -665,6 +671,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
+          environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
             pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake gcc make pkgconfig python3.10 || pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake gcc make pkgconfig python3.10
@@ -677,13 +684,13 @@ jobs:
             ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fastfetch-haiku-amd64
           path: ./fastfetch-*.*
 
   windows-hosts:
-    name: Windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
+    name: Windows-${{ matrix.arch }}
     runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
@@ -696,22 +703,11 @@ jobs:
             msystem: CLANG64
             msystem-lower: clang64
             msys-arch: x86_64
-            win7-compat-flag: OFF
-            win7-compat-postfix: ""
-          - arch: amd64
-            runs-on: windows-latest
-            msystem: CLANG64
-            msystem-lower: clang64
-            msys-arch: x86_64
-            win7-compat-flag: ON
-            win7-compat-postfix: "-win7"
           - arch: aarch64
             runs-on: windows-11-arm
             msystem: CLANGARM64
             msystem-lower: clangarm64
             msys-arch: aarch64
-            win7-compat-flag: OFF
-            win7-compat-postfix: ""
     defaults:
       run:
         shell: msys2 {0}
@@ -730,7 +726,7 @@ jobs:
         run: uname -a
 
       - name: configure project
-        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_WIN7_COMPAT=${{ matrix.win7-compat-flag }} .
+        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --verbose -j4
@@ -759,9 +755,9 @@ jobs:
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         id: upload-unsigned-artifact
         name: upload artifacts for signing
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
+          name: fastfetch-windows-${{ matrix.arch }}
           path: |
             *.dll
             fastfetch.exe
@@ -780,16 +776,16 @@ jobs:
           output-artifact-directory: '.'
 
       - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}
-          path: ./fastfetch-windows-${{ matrix.arch }}${{ matrix.win7-compat-postfix }}.*
+          name: fastfetch-windows-${{ matrix.arch }}
+          path: ./fastfetch-windows-${{ matrix.arch }}.*
           overwrite: true
 
   release:
@@ -823,7 +819,7 @@ jobs:
 
       - name: download artifacts
         if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
 
       - name: create release
         if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
