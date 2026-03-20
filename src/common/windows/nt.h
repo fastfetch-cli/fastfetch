@@ -182,6 +182,7 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
 );
 
 NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
+NTSTATUS NTAPI RtlStringFromGUIDEx(IN GUID* Guid, OUT PCUNICODE_STRING GuidString, _In_ BOOLEAN AllocateGuidString);
 
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION
 {

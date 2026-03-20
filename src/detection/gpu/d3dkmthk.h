@@ -165,22 +165,30 @@ typedef enum _QAI_DRIVERVERSION
     KMT_DRIVERVERSION_WDDM_2_5 = 2500, // Windows 10 (1809)
     KMT_DRIVERVERSION_WDDM_2_6 = 2600, // Windows 10 (1903)
     KMT_DRIVERVERSION_WDDM_2_7 = 2700, // Windows 10 (2004)
-    KMT_DRIVERVERSION_WDDM_2_8 = 2800, // Never released, was planned for Windows 10 (Insider Preview Manganese)
-    KMT_DRIVERVERSION_WDDM_2_9 = 2900, // Windows 10 (Insider Preview Iron)
+    KMT_DRIVERVERSION_WDDM_2_8 = 2800, // Windows 11 Insider Preview Manganese
+    KMT_DRIVERVERSION_WDDM_2_9 = 2900, // Windows 11 Insider Preview Iron
     KMT_DRIVERVERSION_WDDM_3_0 = 3000, // Windows 11 (21H2)
     KMT_DRIVERVERSION_WDDM_3_1 = 3100, // Windows 11 (22H2)
     KMT_DRIVERVERSION_WDDM_3_2 = 3200, // Windows 11 (24H2)
 } D3DKMT_DRIVERVERSION;
 
+typedef struct _D3DKMT_QUERY_ADAPTER_UNIQUE_GUID
+{
+    WCHAR AdapterUniqueGUID[40];
+} D3DKMT_QUERY_ADAPTER_UNIQUE_GUID;
+
 typedef enum _KMTQUERYADAPTERINFOTYPE
 {
-    KMTQAITYPE_ADAPTERADDRESS           = 6,
-    KMTQAITYPE_ADAPTERREGISTRYINFO      = 8,
-    KMTQAITYPE_DRIVERVERSION            = 13,
-    KMTQAITYPE_ADAPTERTYPE              = 15,  // WDDM 1.2, Windows 8
-    KMTQAITYPE_UMD_DRIVER_VERSION       = 18,
-    KMTQAITYPE_NODEMETADATA             = 25,  // WDDM 2.0, Windows 10
-    KMTQAITYPE_PHYSICALADAPTERDEVICEIDS = 31,
+    KMTQAITYPE_ADAPTERGUID               = 4,
+    KMTQAITYPE_ADAPTERADDRESS            = 6,
+    KMTQAITYPE_ADAPTERREGISTRYINFO       = 8,
+    KMTQAITYPE_DRIVERVERSION             = 13,
+    KMTQAITYPE_ADAPTERTYPE               = 15,  // WDDM 1.2, Windows 8
+    KMTQAITYPE_UMD_DRIVER_VERSION        = 18,
+    KMTQAITYPE_NODEMETADATA              = 25,  // WDDM 2.0, Windows 10
+    KMTQAITYPE_PHYSICALADAPTERDEVICEIDS  = 31,
+    KMTQAITYPE_QUERY_ADAPTER_UNIQUE_GUID = 60,  // WDDM 2.4, Windows 10 (1803)
+                                                // This reports the GUID string used by the adapter's registry key (DirectX and Video)
 } KMTQUERYADAPTERINFOTYPE;
 
 typedef struct _D3DKMT_QUERYADAPTERINFO
