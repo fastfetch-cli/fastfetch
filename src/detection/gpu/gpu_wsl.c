@@ -90,7 +90,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
         }
 
-        D3DKMT_ADAPTERADDRESS adapterAddress = { .BusNumber = -1u };
+        D3DKMT_ADAPTERADDRESS adapterAddress;
         if (NT_SUCCESS(D3DKMTQueryAdapterInfo(dxg, &(D3DKMT_QUERYADAPTERINFO) {
             .hAdapter = adapter->hAdapter,
             .Type = KMTQAITYPE_ADAPTERADDRESS,
@@ -99,7 +99,10 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
         })))
             gpu->deviceId = ffGPUPciAddr2Id(0, adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
         else
+        {
+            adapterAddress.BusNumber = -1u;
             gpu->deviceId = ffGPUGeneral2Id(((uint64_t)adapter->AdapterLuid.HighPart << 32) | (uint64_t)adapter->AdapterLuid.LowPart);
+        }
 
         D3DKMT_UMD_DRIVER_VERSION umdDriverVersion;
         if (NT_SUCCESS(D3DKMTQueryAdapterInfo(dxg, &(D3DKMT_QUERYADAPTERINFO) {
@@ -116,14 +119,14 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
                 umdDriverVersion.DriverVersion.QuadPart >> 0ul  & 0xFFFF);
         }
 
-        D3DKMT_DRIVERVERSION kmdDriverVersion;
+        D3DKMT_DRIVERVERSION wddmVersion = KMT_DRIVERVERSION_WDDM_3_0;
         if (NT_SUCCESS(D3DKMTQueryAdapterInfo(dxg, &(D3DKMT_QUERYADAPTERINFO) {
             .hAdapter = adapter->hAdapter,
             .Type = KMTQAITYPE_DRIVERVERSION,
-            .pPrivateDriverData = &kmdDriverVersion,
-            .PrivateDriverDataSize = sizeof(kmdDriverVersion),
+            .pPrivateDriverData = &wddmVersion,
+            .PrivateDriverDataSize = sizeof(wddmVersion),
         })))
-            ffStrbufSetF(&gpu->platformApi, "WDDM %u.%u", kmdDriverVersion / 1000, (kmdDriverVersion % 1000) / 100);
+            ffStrbufSetF(&gpu->platformApi, "WDDM %u.%u", wddmVersion / 1000, (wddmVersion % 1000) / 100);
         else
             ffStrbufSetStatic(&gpu->platformApi, "WDDM");
 
@@ -168,7 +171,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
             }, "/usr/lib/wsl/lib/libnvidia-ml.so");
         }
 
-        if (gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET && gpu->shared.total == FF_GPU_VMEM_SIZE_UNSET)
+        if (gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET && gpu->shared.total == FF_GPU_VMEM_SIZE_UNSET && wddmVersion >= KMT_DRIVERVERSION_WDDM_3_1)
         {
             D3DKMT_QUERYSTATISTICS queryStatistics = {
                 .Type = D3DKMT_QUERYSTATISTICS_SEGMENT_GROUP_USAGE,
@@ -198,7 +201,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
             }
         }
 
-        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
+        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET && wddmVersion >= KMT_DRIVERVERSION_WDDM_3_1)
         {
             for (ULONG nodeIdx = 0; ; nodeIdx++)
             {
