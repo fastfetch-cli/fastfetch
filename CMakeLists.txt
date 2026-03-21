@@ -414,6 +414,7 @@ set(LIBFASTFETCH_SRC
     src/detection/editor/editor.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
+    src/detection/host/host_mac.c
     src/detection/media/media.c
     src/detection/netio/netio.c
     src/detection/opencl/opencl.c
@@ -563,7 +564,6 @@ if(LINUX)
         src/detection/gpu/gpu_wsl.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
-        src/detection/host/host_mac.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_linux.c
@@ -722,7 +722,6 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
-        src/detection/host/host_mac.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
@@ -966,7 +965,6 @@ elseif(APPLE)
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
-        src/detection/host/host_mac.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
@@ -1058,7 +1056,6 @@ elseif(WIN32)
         src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/host/host_mac.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
