@@ -18,6 +18,7 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "None") &&
         !ffStrbufIgnCaseEqualS(value, "System Name") &&
         !ffStrbufIgnCaseEqualS(value, "System Version") &&
+        !ffStrbufIgnCaseEqualS(value, "System SKU#") &&
         !ffStrbufIgnCaseEqualS(value, "Default string") &&
         !ffStrbufIgnCaseEqualS(value, "Undefined") &&
         !ffStrbufIgnCaseEqualS(value, "Not Specified") &&
@@ -32,8 +33,23 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
         !ffStrbufIgnCaseEqualS(value, "N/A") &&
         !ffStrbufIgnCaseEqualS(value, "Unknown") &&
-        !ffStrbufIgnCaseEqualS(value, "Standard") &&
-        !ffStrbufIgnCaseEqualS(value, "0x0000")
+        !ffStrbufIgnCaseEqualS(value, "Standard") && ({
+            // Some SMBIOS implementations use "0x0000" to indicate an unset value, even for strings.
+            bool zero = ffStrbufStartsWithS(value, "0x0");
+            if (zero)
+            {
+                for (size_t i = 2; i < value->length; i++)
+                {
+                    char c = value->chars[i];
+                    if (c != '0')
+                    {
+                        zero = false;
+                        break;
+                    }
+                }
+            }
+            !zero;
+        })
     ;
 }
 
