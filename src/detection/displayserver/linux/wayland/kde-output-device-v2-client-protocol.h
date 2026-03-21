@@ -251,12 +251,12 @@ kde_output_device_registry_v2_destroy(struct kde_output_device_registry_v2 *kde_
  * The compositor may still send new output announcements after calling this
  * request until the kde_output_device_registry_v2.finished event is sent.
  */
-static inline void
-kde_output_device_registry_v2_stop(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_registry_v2,
-			 KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_registry_v2), 0);
-}
+// static inline void
+// kde_output_device_registry_v2_stop(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_registry_v2,
+// 			 KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_registry_v2), 0);
+// }
 
 #ifndef KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
 #define KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
@@ -1188,12 +1188,12 @@ kde_output_device_v2_destroy(struct kde_output_device_v2 *kde_output_device_v2)
  * This notifies the compositor that the client no longer wishes to use
  * the kde_output_device_v2 object.
  */
-static inline void
-kde_output_device_v2_release(struct kde_output_device_v2 *kde_output_device_v2)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_v2,
-			 KDE_OUTPUT_DEVICE_V2_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2), WL_MARSHAL_FLAG_DESTROY);
-}
+// static inline void
+// kde_output_device_v2_release(struct kde_output_device_v2 *kde_output_device_v2)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_v2,
+// 			 KDE_OUTPUT_DEVICE_V2_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 #ifndef KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
 #define KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
