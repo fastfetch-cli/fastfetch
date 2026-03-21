@@ -784,6 +784,14 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS_FULL
     // ...
 } RTL_USER_PROCESS_PARAMETERS_FULL, *PRTL_USER_PROCESS_PARAMETERS_FULL;
 
+typedef struct KERNEL_CALLBACK_TABLE* PKERNEL_CALLBACK_TABLE;
+typedef struct API_SET_NAMESPACE* PAPI_SET_NAMESPACE;
+typedef struct RTL_BITMAP* PRTL_BITMAP;
+typedef struct SILO_USER_SHARED_DATA* PSILO_USER_SHARED_DATA;
+typedef struct CPTABLEINFO* PCPTABLEINFO;
+typedef struct NLSTABLEINFO* PNLSTABLEINFO;
+typedef struct GDI_HANDLE_ENTRY* PGDI_HANDLE_ENTRY;
+
 typedef struct _PEB_FULL
 {
     //
@@ -846,6 +854,261 @@ typedef struct _PEB_FULL
     // Pointer to the process default heap.
     //
     PVOID ProcessHeap;
+
+    //
+    // Pointer to a critical section used to synchronize access to the PEB.
+    //
+    PRTL_CRITICAL_SECTION FastPebLock;
+
+    //
+    // Pointer to a singly linked list used by ATL.
+    //
+    PSLIST_HEADER AtlThunkSListPtr;
+
+    //
+    // Handle to the Image File Execution Options key.
+    //
+    HANDLE IFEOKey;
+
+    //
+    // Cross process flags.
+    //
+    union
+    {
+        ULONG CrossProcessFlags;
+        struct
+        {
+            ULONG ProcessInJob : 1;                 // The process is part of a job.
+            ULONG ProcessInitializing : 1;          // The process is initializing.
+            ULONG ProcessUsingVEH : 1;              // The process is using VEH.
+            ULONG ProcessUsingVCH : 1;              // The process is using VCH.
+            ULONG ProcessUsingFTH : 1;              // The process is using FTH.
+            ULONG ProcessPreviouslyThrottled : 1;   // The process was previously throttled.
+            ULONG ProcessCurrentlyThrottled : 1;    // The process is currently throttled.
+            ULONG ProcessImagesHotPatched : 1;      // The process images are hot patched. // RS5
+            ULONG ReservedBits0 : 24;
+        };
+    };
+
+    //
+    // User32 KERNEL_CALLBACK_TABLE (ntuser.h)
+    //
+    union
+    {
+        PKERNEL_CALLBACK_TABLE KernelCallbackTable;
+        PVOID UserSharedInfoPtr;
+    };
+
+    //
+    // Reserved.
+    //
+    ULONG SystemReserved;
+
+    //
+    // Pointer to the Active Template Library (ATL) singly linked list (32-bit)
+    //
+    ULONG AtlThunkSListPtr32;
+
+    //
+    // Pointer to the API Set Schema.
+    //
+    PAPI_SET_NAMESPACE ApiSetMap;
+
+    //
+    // Counter for TLS expansion.
+    //
+    ULONG TlsExpansionCounter;
+
+    //
+    // Pointer to the TLS bitmap.
+    //
+    PRTL_BITMAP TlsBitmap;
+
+    //
+    // Bits for the TLS bitmap.
+    //
+    ULONG TlsBitmapBits[2];
+
+    //
+    // Reserved for CSRSS.
+    //
+    PVOID ReadOnlySharedMemoryBase;
+
+    //
+    // Pointer to the USER_SHARED_DATA for the current SILO.
+    //
+    PSILO_USER_SHARED_DATA SharedData;
+
+    //
+    // Reserved for CSRSS.
+    //
+    PVOID* ReadOnlyStaticServerData;
+
+    //
+    // Pointer to the ANSI code page data.
+    //
+    PCPTABLEINFO AnsiCodePageData;
+
+    //
+    // Pointer to the OEM code page data.
+    //
+    PCPTABLEINFO OemCodePageData;
+
+    //
+    // Pointer to the Unicode case table data.
+    //
+    PNLSTABLEINFO UnicodeCaseTableData;
+
+    //
+    // The total number of system processors.
+    //
+    ULONG NumberOfProcessors;
+
+    //
+    // Global flags for the system.
+    //
+    union
+    {
+        ULONG NtGlobalFlag;
+        struct
+        {
+            ULONG StopOnException : 1;          // FLG_STOP_ON_EXCEPTION
+            ULONG ShowLoaderSnaps : 1;          // FLG_SHOW_LDR_SNAPS
+            ULONG DebugInitialCommand : 1;      // FLG_DEBUG_INITIAL_COMMAND
+            ULONG StopOnHungGUI : 1;            // FLG_STOP_ON_HUNG_GUI
+            ULONG HeapEnableTailCheck : 1;      // FLG_HEAP_ENABLE_TAIL_CHECK
+            ULONG HeapEnableFreeCheck : 1;      // FLG_HEAP_ENABLE_FREE_CHECK
+            ULONG HeapValidateParameters : 1;   // FLG_HEAP_VALIDATE_PARAMETERS
+            ULONG HeapValidateAll : 1;          // FLG_HEAP_VALIDATE_ALL
+            ULONG ApplicationVerifier : 1;      // FLG_APPLICATION_VERIFIER
+            ULONG MonitorSilentProcessExit : 1; // FLG_MONITOR_SILENT_PROCESS_EXIT
+            ULONG PoolEnableTagging : 1;        // FLG_POOL_ENABLE_TAGGING
+            ULONG HeapEnableTagging : 1;        // FLG_HEAP_ENABLE_TAGGING
+            ULONG UserStackTraceDb : 1;         // FLG_USER_STACK_TRACE_DB
+            ULONG KernelStackTraceDb : 1;       // FLG_KERNEL_STACK_TRACE_DB
+            ULONG MaintainObjectTypeList : 1;   // FLG_MAINTAIN_OBJECT_TYPELIST
+            ULONG HeapEnableTagByDll : 1;       // FLG_HEAP_ENABLE_TAG_BY_DLL
+            ULONG DisableStackExtension : 1;    // FLG_DISABLE_STACK_EXTENSION
+            ULONG EnableCsrDebug : 1;           // FLG_ENABLE_CSRDEBUG
+            ULONG EnableKDebugSymbolLoad : 1;   // FLG_ENABLE_KDEBUG_SYMBOL_LOAD
+            ULONG DisablePageKernelStacks : 1;  // FLG_DISABLE_PAGE_KERNEL_STACKS
+            ULONG EnableSystemCritBreaks : 1;   // FLG_ENABLE_SYSTEM_CRIT_BREAKS
+            ULONG HeapDisableCoalescing : 1;    // FLG_HEAP_DISABLE_COALESCING
+            ULONG EnableCloseExceptions : 1;    // FLG_ENABLE_CLOSE_EXCEPTIONS
+            ULONG EnableExceptionLogging : 1;   // FLG_ENABLE_EXCEPTION_LOGGING
+            ULONG EnableHandleTypeTagging : 1;  // FLG_ENABLE_HANDLE_TYPE_TAGGING
+            ULONG HeapPageAllocs : 1;           // FLG_HEAP_PAGE_ALLOCS
+            ULONG DebugInitialCommandEx : 1;    // FLG_DEBUG_INITIAL_COMMAND_EX
+            ULONG DisableDbgPrint : 1;          // FLG_DISABLE_DBGPRINT
+            ULONG CritSecEventCreation : 1;     // FLG_CRITSEC_EVENT_CREATION
+            ULONG LdrTopDown : 1;               // FLG_LDR_TOP_DOWN
+            ULONG EnableHandleExceptions : 1;   // FLG_ENABLE_HANDLE_EXCEPTIONS
+            ULONG DisableProtDlls : 1;          // FLG_DISABLE_PROTDLLS
+        } NtGlobalFlags;
+    };
+
+    //
+    // Timeout for critical sections.
+    //
+    LARGE_INTEGER CriticalSectionTimeout;
+
+    //
+    // Reserved size for heap segments.
+    //
+    SIZE_T HeapSegmentReserve;
+
+    //
+    // Committed size for heap segments.
+    //
+    SIZE_T HeapSegmentCommit;
+
+    //
+    // Threshold for decommitting total free heap.
+    //
+    SIZE_T HeapDeCommitTotalFreeThreshold;
+
+    //
+    // Threshold for decommitting free heap blocks.
+    //
+    SIZE_T HeapDeCommitFreeBlockThreshold;
+
+    //
+    // Number of process heaps.
+    //
+    ULONG NumberOfHeaps;
+
+    //
+    // Maximum number of process heaps.
+    //
+    ULONG MaximumNumberOfHeaps;
+
+    //
+    // Pointer to an array of process heaps. ProcessHeaps is initialized
+    // to point to the first free byte after the PEB and MaximumNumberOfHeaps
+    // is computed from the page size used to hold the PEB, less the fixed
+    // size of this data structure.
+    //
+    PVOID* ProcessHeaps;
+
+    //
+    // Pointer to the system GDI shared handle table.
+    //
+    PGDI_HANDLE_ENTRY GdiSharedHandleTable;
+
+    //
+    // Pointer to the process starter helper.
+    //
+    PVOID ProcessStarterHelper;
+
+    //
+    // The maximum number of GDI function calls during batch operations (GdiSetBatchLimit)
+    //
+    ULONG GdiDCAttributeList;
+
+    //
+    // Pointer to the loader lock critical section.
+    //
+    PRTL_CRITICAL_SECTION LoaderLock;
+
+    //
+    // Major version of the operating system.
+    //
+    ULONG OSMajorVersion;
+
+    //
+    // Minor version of the operating system.
+    //
+    ULONG OSMinorVersion;
+
+    //
+    // Build number of the operating system.
+    //
+    USHORT OSBuildNumber;
+
+    //
+    // CSD version of the operating system.
+    //
+    USHORT OSCSDVersion;
+
+    //
+    // Platform ID of the operating system.
+    //
+    ULONG OSPlatformId;
+
+    //
+    // Subsystem version of the current process image (PE Headers).
+    //
+    ULONG ImageSubsystem;
+
+    //
+    // Major version of the current process image subsystem (PE Headers).
+    //
+    ULONG ImageSubsystemMajorVersion;
+
+    //
+    // Minor version of the current process image subsystem (PE Headers).
+    //
+    ULONG ImageSubsystemMinorVersion;
 
     // ...
 } PEB_FULL, *PPEB_FULL;

@@ -218,11 +218,13 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
         FF_ARG(info->version, L"BuildLabEx"),
     }, NULL);
 
+    PPEB_FULL peb = ffGetPeb();
+
     ffStrbufSetF(&info->release,
         "%u.%u.%u.%u",
-        (unsigned) SharedUserData->NtMajorVersion,
-        (unsigned) SharedUserData->NtMinorVersion,
-        (unsigned) SharedUserData->NtBuildNumber,
+        (unsigned) peb->OSMajorVersion,
+        (unsigned) peb->OSMinorVersion,
+        (unsigned) peb->OSBuildNumber,
         (unsigned) ubr);
 
     const char* wineVersion = detectWine();
