@@ -15,10 +15,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef _WIN32
-    #include "common/windows/getline.h"
-#endif
-
 static void printCommandFormatHelpJson(void)
 {
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
@@ -793,7 +789,7 @@ static void run(FFdata* data)
         ffLogoPrint();
 
     #if defined(_WIN32)
-        if (!instance.config.display.noBuffer) fflush(stdout);
+    if (!instance.config.display.noBuffer) fflush(stdout);
     #endif
 
     while (true)
