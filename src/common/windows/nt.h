@@ -1231,8 +1231,9 @@ NTSYSAPI NTSTATUS NTAPI NtQueryValueKey(
     _Out_ PULONG ResultLength
 );
 
-NTSYSAPI NTSTATUS NTAPI RtlFormatCurrentUserKeyPath(
-    _Out_ PUNICODE_STRING CurrentUserKeyPath
+NTSYSAPI NTSTATUS NTAPI RtlOpenCurrentUser(
+    _In_ ACCESS_MASK DesiredAccess,
+    _Out_ PHANDLE CurrentUserKey
 );
 
 typedef struct _KEY_VALUE_PARTIAL_INFORMATION

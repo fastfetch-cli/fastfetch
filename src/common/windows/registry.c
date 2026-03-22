@@ -42,27 +42,15 @@ HANDLE ffRegGetRootKeyHandle(HKEY hKey)
     switch ((uintptr_t) hKey)
     {
         case (uintptr_t) HKEY_CURRENT_USER: {
-            UNICODE_STRING path = {};
-            NTSTATUS status = RtlFormatCurrentUserKeyPath(&path);
+            NTSTATUS status = RtlOpenCurrentUser(KEY_READ, &result);
             if (!NT_SUCCESS(status))
             {
-                FF_DEBUG("RtlFormatCurrentUserKeyPath() failed: %s", ffDebugNtStatus(status));
+                FF_DEBUG("RtlOpenCurrentUser() failed: %s", ffDebugNtStatus(status));
                 return NULL;
             }
-            status = NtOpenKey(&result, KEY_READ, &(OBJECT_ATTRIBUTES) {
-                .Length = sizeof(OBJECT_ATTRIBUTES),
-                .RootDirectory = NULL,
-                .ObjectName = &path,
-            });
-            if (!NT_SUCCESS(status))
-            {
-                FF_DEBUG("NtOpenKey(%ls) failed: %s (0x%08lx)", path.Buffer, ffDebugNtStatus(status), status);
-                RtlFreeUnicodeString(&path);
-                return NULL;
-            }
-            RtlFreeUnicodeString(&path);
             break;
         }
+
         case (uintptr_t) HKEY_LOCAL_MACHINE: {
             UNICODE_STRING path = RTL_CONSTANT_STRING(L"\\Registry\\Machine");
             NTSTATUS status = NtOpenKey(&result, KEY_READ, &(OBJECT_ATTRIBUTES) {
