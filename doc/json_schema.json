@@ -2044,7 +2044,7 @@
                                         "default": 0
                                     },
                                     "block": {
-                                        "description": "Set behavior of block printing",
+                                        "description": "Set behavior of block printing. Only works when symbol is set to `block` or `background`",
                                         "type": "object",
                                         "additionalProperties": false,
                                         "properties": {
@@ -2066,6 +2066,25 @@
                                                 "maxItems": 2
                                             }
                                         }
+                                    },
+                                    "brightness": {
+                                        "description": "Set the brightness of colors. Works together with the block color range to determine which colors are displayed",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "default",
+                                                "description": "Use the default setting (block/background: 0-15, others: 8-1)"
+                                            },
+                                            {
+                                                "const": "light",
+                                                "description": "Use ANSI bright foreground colors (codes 90-97, not color indices 9-15)"
+                                            },
+                                            {
+                                                "const": "normal",
+                                                "description": "Use normal ANSI colors (30-37; standard foreground colors, corresponding to color indices 0-7)"
+                                            }
+                                        ],
+                                        "default": "default"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
