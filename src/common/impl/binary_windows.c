@@ -33,7 +33,7 @@ const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *st
     PIMAGE_NT_HEADERS ntHeaders = RtlImageNtHeader(base);
     if (!ntHeaders)
     {
-        UnmapViewOfFile(base);
+        NtUnmapViewOfSection(NtCurrentProcess(), base);
         return "RtlImageNtHeader() failed";
     }
 
