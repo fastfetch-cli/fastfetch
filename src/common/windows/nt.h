@@ -1363,3 +1363,11 @@ NTSYSAPI NTSTATUS NTAPI NtUnmapViewOfSection(
     _In_ HANDLE ProcessHandle,
     _In_opt_ PVOID BaseAddress
 );
+
+NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceCounter(
+    _Out_ PLARGE_INTEGER PerformanceCounter
+);
+
+NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceFrequency(
+    _Out_ PLARGE_INTEGER PerformanceFrequency
+);

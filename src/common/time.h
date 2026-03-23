@@ -18,7 +18,7 @@ static inline double ffTimeGetTick(void) //In msec
     #ifdef _WIN32
         extern double ffQpcMultiplier;
         LARGE_INTEGER start;
-        QueryPerformanceCounter(&start);
+        RtlQueryPerformanceCounter(&start);
         return (double) start.QuadPart * ffQpcMultiplier;
     #elif defined(__HAIKU__)
         return (double) system_time() / 1000.;
