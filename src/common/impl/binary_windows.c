@@ -21,13 +21,14 @@ const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *st
     if (hFile == INVALID_HANDLE_VALUE)
         return "CreateFileA() failed";
 
-    FF_AUTO_CLOSE_FD HANDLE hMap = CreateFileMappingW(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-    if (!hMap)
-        return "CreateFileMappingW() failed";
+    FF_AUTO_CLOSE_FD HANDLE hSection = NULL;
+    if (!NT_SUCCESS(NtCreateSection(&hSection, SECTION_MAP_READ, NULL, NULL, PAGE_READONLY, SEC_COMMIT, hFile)))
+        return "NtCreateSection() failed";
 
-    void* base = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-    if (!base)
-        return "MapViewOfFile() failed";
+    PVOID base = NULL;
+    SIZE_T viewSize = 0;
+    if (!NT_SUCCESS(NtMapViewOfSection(hSection, NtCurrentProcess(), &base, 0, 0, NULL, &viewSize, ViewUnmap, 0, PAGE_READONLY)))
+        return "NtMapViewOfSection() failed";
 
     PIMAGE_NT_HEADERS ntHeaders = RtlImageNtHeader(base);
     if (!ntHeaders)
@@ -61,6 +62,6 @@ const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *st
         }
     }
 
-    UnmapViewOfFile(base);
+    NtUnmapViewOfSection(NtCurrentProcess(), base);
     return NULL;
 }
