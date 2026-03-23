@@ -634,7 +634,9 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 {
     #if _WIN64
 
-    return *(uint64_t*) pTime;
+    // This is safe even if pTime is not 8-byte aligned
+    // See https://learn.microsoft.com/en-us/windows/win32/winprog64/fault-alignments
+    return *(const volatile uint64_t*) pTime;
 
     #else
 
