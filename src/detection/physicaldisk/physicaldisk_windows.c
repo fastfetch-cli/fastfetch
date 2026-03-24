@@ -220,5 +220,17 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
     }
 
+    {
+        wchar_t szTape[32] = L"\\\\.\\Tape";
+        wchar_t* pNum = szTape + strlen("\\\\.\\Tape");
+        for (uint32_t idev = 0; ; ++idev)
+        {
+            _ultow(idev, pNum, 10);
+
+            if (!detectPhysicalDisk(szTape, result, options))
+                break;
+        }
+    }
+
     return NULL;
 }
