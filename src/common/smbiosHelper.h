@@ -63,14 +63,22 @@ typedef enum __attribute__((__packed__)) FFSmbiosType // : uint8_t
     FF_SMBIOS_TYPE_STRING_PROPERTY = 46,
     FF_SMBIOS_TYPE_INACTIVE = 126,
     FF_SMBIOS_TYPE_END_OF_TABLE = 127,
+    FF_SMBIOS_TYPE__MAX,
     // system- and OEM-specific information 128~256
 } FFSmbiosType;
 static_assert(sizeof(FFSmbiosType) == 1, "FFSmbiosType should be 1 byte");
 
 typedef struct FFSmbiosHeader
 {
+    // Type of SMBIOS structure. Do NOT test `Type == FF_SMBIOS_END_OF_TABLE` to determine the end of the table,
+    // as malformed tables may be missing the end-of-table marker.
+    // **Use FFSmbiosHeaderTable[FF_SMBIOS_TYPE_END_OF_TABLE] pointer instead.**
     FFSmbiosType Type;
+    // Length of formatted section, excluding unformatted string section
+    // Must be at least 4 (sizeof(FFSmbiosHeader)) to be valid
     uint8_t Length;
+    // Unique handle, used to reference this structure from other structures.
+    // Not guaranteed to be consistent across reboots or even multiple reads of the same table.
     uint16_t Handle;
 } __attribute__((__packed__)) FFSmbiosHeader;
 static_assert(sizeof(FFSmbiosHeader) == 4, "FFSmbiosHeader should be 4 bytes");
@@ -84,7 +92,7 @@ static inline const char* ffSmbiosLocateString(const char* start, uint8_t index 
     return start;
 }
 
-typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE_END_OF_TABLE];
+typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE__MAX];
 
 const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header);
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable();

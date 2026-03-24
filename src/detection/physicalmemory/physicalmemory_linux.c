@@ -75,8 +75,8 @@ const char* ffDetectPhysicalMemory(FFlist* result)
     if (!data)
         return "Memory device is not found in SMBIOS data";
 
-    for (; data->Header.Type != FF_SMBIOS_TYPE_END_OF_TABLE; // Ignores custom types (which is larger than 127)
-        data = (const FFSmbiosMemoryDevice*) ffSmbiosNextEntry(&data->Header))
+    const FFSmbiosMemoryDevice* endOfTable = (const FFSmbiosMemoryDevice*) (*smbiosTable)[FF_SMBIOS_TYPE_END_OF_TABLE];
+    for (; data != endOfTable; data = (const FFSmbiosMemoryDevice*) ffSmbiosNextEntry(&data->Header))
     {
         if (data->Header.Type != FF_SMBIOS_TYPE_MEMORY_DEVICE) continue;
 
