@@ -124,7 +124,7 @@ void ffDestroyMonitorOptions(FFMonitorOptions* options)
 
 FFModuleBaseInfo ffMonitorModuleInfo = {
     .name = FF_MONITOR_MODULE_NAME,
-    .description = "Alias of Display module",
+    .description = "Same as Display module, but with a different default output format",
     .initOptions = (void*) ffInitMonitorOptions,
     .destroyOptions = (void*) ffDestroyMonitorOptions,
     .parseJsonObject = (void*) ffParseMonitorJsonObject,
