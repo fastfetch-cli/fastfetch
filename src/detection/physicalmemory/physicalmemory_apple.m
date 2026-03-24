@@ -62,7 +62,6 @@ static void appendDevice(
             case 'G': device->maxSpeed *= 1000; break;
             case 'K': device->maxSpeed /= 1000; break;
         }
-        device->runningSpeed = device->maxSpeed;
     }
 }
 
