@@ -51,6 +51,13 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
             }
             break;
         }
+        case FF_ARG_TYPE_BUFFER:
+        {
+            // Placeholder for binary data, just print the size for now
+            const FFArgBuffer* argBuffer = (const FFArgBuffer*) formatarg->value;
+            ffStrbufAppendF(buffer, "buffer(%u bytes)", argBuffer->length);
+            break;
+        }
         default:
             if(formatarg->type != FF_ARG_TYPE_NULL)
                 fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);

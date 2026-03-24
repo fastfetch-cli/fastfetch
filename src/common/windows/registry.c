@@ -180,51 +180,56 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
 
         case FF_ARG_TYPE_LIST:
         {
-            if (regType != REG_MULTI_SZ && regType != REG_BINARY)
+            if (regType != REG_MULTI_SZ)
                 goto type_mismatch;
 
             FFlist* list = (FFlist*) arg->value;
+            if (list->elementSize != sizeof(FFstrbuf))
+            {
+                if (error)
+                {
+                    FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
+                    ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: expected list of strbuf for REG_MULTI_SZ", nameA.chars);
+                }
+                return false;
+            }
+
             ffListClear(list);
 
-            if (regType == REG_MULTI_SZ)
+            for (
+                const wchar_t* ptr = (const wchar_t*) regData;
+                (const uint8_t*) ptr < (const uint8_t*) regData + regDataLen && *ptr;
+                ptr++
+            )
             {
-                if (list->elementSize != sizeof(FFstrbuf))
-                {
-                    if (error)
-                    {
-                        FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
-                        ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: expected list of strbuf for REG_MULTI_SZ", nameA.chars);
-                    }
-                    return false;
-                }
-
-                for (
-                    const wchar_t* ptr = (const wchar_t*) regData;
-                    (const uint8_t*) ptr < (const uint8_t*) regData + regDataLen && *ptr;
-                    ptr++
-                )
-                {
-                    uint32_t strLen = (uint32_t) wcsnlen(ptr, regDataLen / sizeof(wchar_t) - (size_t) (ptr - (const wchar_t*) regData));
-                    ffStrbufInitNWS(FF_LIST_ADD(FFstrbuf, *list), strLen, ptr);
-                    ptr += strLen;
-                }
+                uint32_t strLen = (uint32_t) wcsnlen(ptr, regDataLen / sizeof(wchar_t) - (size_t) (ptr - (const wchar_t*) regData));
+                ffStrbufInitNWS(FF_LIST_ADD(FFstrbuf, *list), strLen, ptr);
+                ptr += strLen;
             }
-            else
+            break;
+        }
+
+        case FF_ARG_TYPE_BUFFER:
+        {
+            if (regType != REG_BINARY)
+                goto type_mismatch;
+
+            FFArgBuffer* buffer = (FFArgBuffer*) arg->value;
+            if (buffer->length == 0)
             {
-                if (list->elementSize != sizeof(uint8_t))
-                {
-                    if (error)
-                    {
-                        FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
-                        ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: expected list of uint8_t for REG_BINARY", nameA.chars);
-                    }
-                    return false;
-                }
-
-                ffListReserve(list, regDataLen);
-                memcpy(list->data, regData, regDataLen);
-                list->length = regDataLen;
+                buffer->data = malloc(regDataLen);
             }
+            else if (buffer->length < regDataLen)
+            {
+                if (error)
+                {
+                    FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
+                    ffStrbufAppendF(error, "ffRegReadValues(%s) buffer too small (%u): expected %u", nameA.chars, (unsigned) buffer->length, (unsigned) regDataLen);
+                }
+                return false;
+            }
+            buffer->length = regDataLen;
+            memcpy(buffer->data, regData, regDataLen);
             break;
         }
 

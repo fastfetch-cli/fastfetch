@@ -2,6 +2,15 @@
 
 #include "common/FFstrbuf.h"
 
+// For ffRegReadValue(s)
+// If length is 0, data will be allocated with malloc() and must be freed by the caller
+// Otherwise, data must point to a buffer of at least length bytes, and the actual length of the data will be written to length.
+typedef struct FFArgBuffer
+{
+    void* data;
+    uint32_t length;
+} FFArgBuffer;
+
 typedef enum __attribute__((__packed__)) FFArgType
 {
     FF_ARG_TYPE_NULL = 0,
@@ -15,7 +24,8 @@ typedef enum __attribute__((__packed__)) FFArgType
     FF_ARG_TYPE_FLOAT,
     FF_ARG_TYPE_DOUBLE,
     FF_ARG_TYPE_LIST,
-    FF_ARG_TYPE_BOOL
+    FF_ARG_TYPE_BOOL,
+    FF_ARG_TYPE_BUFFER,
 } FFArgType;
 
 #define FF_ARG(variable, var_name) { _Generic((variable), \
@@ -30,5 +40,6 @@ typedef enum __attribute__((__packed__)) FFArgType
         float: FF_ARG_TYPE_FLOAT, \
         double: FF_ARG_TYPE_DOUBLE, \
         FFlist: FF_ARG_TYPE_LIST, \
-        bool: FF_ARG_TYPE_BOOL \
+        bool: FF_ARG_TYPE_BOOL, \
+        FFArgBuffer: FF_ARG_TYPE_BUFFER \
     ), _Generic((variable), char*: (variable), const char*: (variable), default: &(variable) ), (var_name) }

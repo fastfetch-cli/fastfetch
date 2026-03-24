@@ -58,11 +58,11 @@ static inline bool ffRegReadUint64(HANDLE hKey, const wchar_t* valueNameW, uint6
         .name = valueNameW,
     }, error);
 }
-static inline bool ffRegReadData(HANDLE hKey, const wchar_t* valueNameW, FFlist* result /*list of uint8_t*/, FFstrbuf* error)
+static inline bool ffRegReadData(HANDLE hKey, const wchar_t* valueNameW, FFArgBuffer* buffer, FFstrbuf* error)
 {
     return ffRegReadValue(hKey, &(FFRegValueArg) {
-        .type = FF_ARG_TYPE_LIST,
-        .value = result,
+        .type = FF_ARG_TYPE_BUFFER,
+        .value = buffer,
         .name = valueNameW,
     }, error);
 }

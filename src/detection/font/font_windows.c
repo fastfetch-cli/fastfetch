@@ -24,35 +24,31 @@ static void generateString(FFFontResult* font)
     ffStrbufAppendC(&font->display, ']');
 }
 
-WINUSERAPI WINBOOL WINAPI ClassicSystemParametersInfoW(UINT uiAction,UINT uiParam,PVOID pvParam,UINT fWinIni);
-
 const char* ffDetectFontImpl(FFFontResult* result)
 {
     FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop\\WindowMetrics", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
 
-    FF_LIST_AUTO_DESTROY CaptionFont = ffListCreate(sizeof(uint8_t));
-    FF_LIST_AUTO_DESTROY MenuFont = ffListCreate(sizeof(uint8_t));
-    FF_LIST_AUTO_DESTROY MessageFont = ffListCreate(sizeof(uint8_t));
-    FF_LIST_AUTO_DESTROY StatusFont = ffListCreate(sizeof(uint8_t));
+    LOGFONTW fonts[4];
+    FFArgBuffer fontBuffers[4] = {
+        { .data = &fonts[0], .length = sizeof(fonts[0]) },
+        { .data = &fonts[1], .length = sizeof(fonts[1]) },
+        { .data = &fonts[2], .length = sizeof(fonts[2]) },
+        { .data = &fonts[3], .length = sizeof(fonts[3]) },
+    };
 
     if (!ffRegReadValues(hKey, 4, (FFRegValueArg[]) {
-        FF_ARG(CaptionFont, L"CaptionFont"),
-        FF_ARG(MenuFont, L"MenuFont"),
-        FF_ARG(MessageFont, L"MessageFont"),
-        FF_ARG(StatusFont, L"StatusFont"),
+        FF_ARG(fontBuffers[0], L"CaptionFont"),
+        FF_ARG(fontBuffers[1], L"MenuFont"),
+        FF_ARG(fontBuffers[2], L"MessageFont"),
+        FF_ARG(fontBuffers[3], L"StatusFont"),
     }, NULL))
         return "ffRegReadValues(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
 
-    FFlist* fonts[4] = { &CaptionFont, &MenuFont, &MessageFont, &StatusFont };
-
     for (uint32_t i = 0; i < ARRAY_SIZE(fonts); ++i)
     {
-        if (fonts[i]->length < sizeof(LOGFONTW))
-            continue;
-
-        LOGFONTW* logFont = (LOGFONTW*) fonts[i]->data;
+        LOGFONTW* logFont = &fonts[i];
 
         ffStrbufSetWS(&result->fonts[i], logFont->lfFaceName);
         if (logFont->lfHeight < 0)

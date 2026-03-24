@@ -6,6 +6,15 @@
 #include <windows.h>
 #include <shellscalingapi.h>
 
+static inline void freeArgBuffer(FFArgBuffer* buffer)
+{
+    if (buffer->data)
+        free(buffer->data);
+    buffer->data = NULL;
+    buffer->length = 0;
+}
+#define FF_AUTO_FREE_ARG_BUFFER __attribute__((__cleanup__(freeArgBuffer)))
+
 // http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
 BOOL WINAPI IsThreadDesktopComposited();
 BOOL WINAPI GetDpiForMonitorInternal(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
@@ -41,8 +50,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     .id = path->targetInfo.id,
                 },
             };
-            FF_LIST_AUTO_DESTROY edid = ffListCreate(sizeof(uint8_t));
-
+            FF_AUTO_FREE_ARG_BUFFER FFArgBuffer edid = {};
             if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
             {
                 wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
@@ -70,7 +78,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 else
                 {
-                    ffListClear(&edid);
+                    edid.length = 0;
                     if (targetName.flags.friendlyNameFromEdid)
                         ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
                     else
