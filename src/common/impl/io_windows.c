@@ -225,24 +225,6 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
     return buffer->length > 0;
 }
 
-ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
-{
-    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(handle == INVALID_HANDLE_VALUE)
-        return -1;
-
-    return ffReadFDData(handle, dataSize, data);
-}
-
-bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
-{
-    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(handle == INVALID_HANDLE_VALUE)
-        return false;
-
-    return ffAppendFDBuffer(handle, buffer);
-}
-
 HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory)
 {
     assert(fileNameLen <= 0x7FFF);
@@ -269,7 +251,7 @@ HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool d
     return hFile;
 }
 
-HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
+HANDLE openat(HANDLE dfd, const char* fileName, int oflag)
 {
     wchar_t fileNameW[MAX_PATH];
     ULONG len;
@@ -284,25 +266,7 @@ HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
             fileNameW[i] = L'\\';
     }
 
-    return openatW(dfd, fileNameW, (uint16_t)(len - 1), directory);
-}
-
-bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
-{
-    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
-    if(fd == INVALID_HANDLE_VALUE)
-        return false;
-
-    return ffAppendFDBuffer(fd, buffer);
-}
-
-ssize_t ffReadFileDataRelative(HANDLE dfd, const char* fileName, size_t dataSize, void* data)
-{
-    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
-    if(fd == INVALID_HANDLE_VALUE)
-        return -1;
-
-    return ffReadFDData(fd, dataSize, data);
+    return openatW(dfd, fileNameW, (uint16_t)(len - 1), !!(oflag & O_DIRECTORY));
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)
