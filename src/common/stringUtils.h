@@ -80,6 +80,23 @@ static inline bool ffCharIsDigit(char c)
     return '0' <= c && c <= '9';
 }
 
+static inline bool ffCharIsHexDigit(char c)
+{
+    return ffCharIsDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
+}
+
+static inline int8_t ffHexCharToInt(char c)
+{
+    if (ffCharIsDigit(c))
+        return (int8_t) (c - '0');
+    else if ('a' <= c && c <= 'f')
+        return (int8_t) (c - 'a' + 10);
+    else if ('A' <= c && c <= 'F')
+        return (int8_t) (c - 'A' + 10);
+    else
+        return -1;
+}
+
 // Copies at most (dstBufSiz - 1) bytes from src to dst; dst is always null-terminated
 static inline char* ffStrCopy(char* __restrict__ dst, const char* __restrict__ src, size_t dstBufSiz)
 {
