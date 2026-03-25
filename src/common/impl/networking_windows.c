@@ -258,7 +258,8 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             } else {
                 FF_DEBUG("WSAWaitForMultipleEvents failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
             }
-            CancelIo((HANDLE) state->sockfd);
+            if (CancelIoEx((HANDLE) state->sockfd, &state->overlapped))
+                WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, 10, TRUE);
             WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             ffStrbufDestroy(&state->command);
@@ -283,6 +284,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) != 0)
     {
         FF_DEBUG("Failed to update connect context: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        // Not a critical error, continue anyway
+    }
+
+    if (shutdown(state->sockfd, SD_SEND) == SOCKET_ERROR)
+    {
+        FF_DEBUG("Failed to shutdown socket send: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         // Not a critical error, continue anyway
     }
 
