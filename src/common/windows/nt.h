@@ -1373,3 +1373,14 @@ NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceCounter(
 NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceFrequency(
     _Out_ PLARGE_INTEGER PerformanceFrequency
 );
+
+NTSYSAPI NTSTATUS NTAPI NtCancelIoFileEx(
+    _In_ HANDLE FileHandle,
+    _In_opt_ PIO_STATUS_BLOCK IoRequestToCancel,
+    _Out_ PIO_STATUS_BLOCK IoStatusBlock
+);
+
+NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
+    _In_opt_ HANDLE ProcessHandle,
+    _In_ NTSTATUS ExitStatus
+);

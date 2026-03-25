@@ -140,6 +140,17 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     return NULL;
 }
 
+static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE hReadEvent, IO_STATUS_BLOCK* piosb)
+{
+    IO_STATUS_BLOCK cancelIosb = {};
+    if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb)))
+    {
+        if (hReadEvent)
+            NtWaitForSingleObject(hReadEvent, TRUE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
+    }
+    NtTerminateProcess(hProcess, 1);
+}
+
 const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
 {
     assert(handle->pipeRead != INVALID_HANDLE_VALUE);
@@ -180,13 +191,13 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
                 break;
 
             case STATUS_TIMEOUT:
-                CancelIo(hChildPipeRead);
-                TerminateProcess(hProcess, 1);
+            {
+                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
                 return "NtReadFile(hChildPipeRead) timed out";
+            }
 
             default:
-                CancelIo(hChildPipeRead);
-                TerminateProcess(hProcess, 1);
+                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
                 return "NtWaitForSingleObject(hReadEvent) failed";
             }
         }
@@ -196,8 +207,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
 
         if (!NT_SUCCESS(status))
         {
-            CancelIo(hChildPipeRead);
-            TerminateProcess(hProcess, 1);
+            terminateChildProcess(hProcess, hChildPipeRead, NULL, &iosb);
             return "NtReadFile(hChildPipeRead) failed";
         }
 
