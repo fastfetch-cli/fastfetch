@@ -161,15 +161,27 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length)
 #ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
-    if (ffReadFileBuffer(devicesPath, buffer))
+    // /sys/class/dmi/id/* are all pseudo-files with very small content
+    // so reading the whole file at once is efficient
+    ffStrbufEnsureFixedLengthFree(buffer, 127);
+
+    ssize_t len = ffReadFileData(devicesPath, buffer->allocated - 1, buffer->chars);
+    if (len > 0)
     {
+        assert(len < buffer->allocated);
+        buffer->chars[len] = '\0';
+        buffer->length = (uint32_t) len;
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
             return true;
     }
 
-    if (ffReadFileBuffer(classPath, buffer))
+    len = ffReadFileData(classPath, buffer->allocated - 1, buffer->chars);
+    if (len > 0)
     {
+        assert(len < buffer->allocated);
+        buffer->chars[len] = '\0';
+        buffer->length = (uint32_t) len;
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
             return true;

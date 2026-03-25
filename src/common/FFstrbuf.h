@@ -230,6 +230,7 @@ static inline void ffStrbufInitMoveS(FFstrbuf* strbuf, char* heapStr)
     ffStrbufInitMoveNS(strbuf, (uint32_t) strlen(heapStr), heapStr);
 }
 
+// Despite the name, this function resets strbuf to the initial/unallocated state
 static inline void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     if(strbuf->allocated > 0)
