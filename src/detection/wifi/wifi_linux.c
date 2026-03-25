@@ -297,7 +297,11 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
     FF_DEBUG("BSSID: %s", item->conn.bssid.chars);
 
     if(ffParsePropLines(output.chars, "SSID: ", &item->conn.ssid))
+    {
         FF_DEBUG("SSID: %s", item->conn.ssid.chars);
+        if (ffStrbufDecodeHexEscapeSequences(&item->conn.ssid))
+            FF_DEBUG("Decoded SSID: %s", item->conn.ssid.chars);
+    }
     else
         FF_DEBUG("SSID not found in iw output");
 
