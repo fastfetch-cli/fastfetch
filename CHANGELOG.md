@@ -7,7 +7,7 @@ Changes:
 Features:
 * Adds `brightness` option for color display configuration (#2238, Colors)
 * Adds support for detecting Bluetooth keyboards on Linux (#2220, Keyboard)
-* Adds `glazewm` support and updates M5 models (WM macOS, Host macOS)
+* Adds `GlazeWM` detection support (WM, macOS)
 * Adds `showEmptySlots` option to show empty memory slots on Linux (#2222, PhysicalMemory)
 * Adds marketing product name detection on Asahi Linux (Host, Linux)
 * Adds new M5 Mac models (Host, macOS)
@@ -21,6 +21,7 @@ Bugfixes:
 * Fixes CPUCache deduplication on shared caches (#2228, CPUCache, Linux)
 * Fixes WM version reporting for niri (#2218, WM, Linux)
 * Fixes SSID decoding issues from `iw` output (Wifi, Linux)
+* Fixes CMD codepage changed after running fastfetch on Windows (#2245, Windows)
 
 # 2.60.0
 
