@@ -63,7 +63,7 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
     }
 
     wchar_t* value;
-    UINT valueLen;
+    UINT valueLen; // Number of characters, including null terminator
 
     wchar_t subBlock[128];
     snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\" FF_VERSION_LANG_EN_US L"\\%ls", stringName);
@@ -71,7 +71,7 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
 
     if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0)
     {
-        ffStrbufSetNWS(version, valueLen / sizeof(wchar_t), value);
+        ffStrbufSetNWS(version, valueLen - 1, value);
         FF_DEBUG("version string resolved (default lang): %s", version->chars);
         return true;
     }
@@ -90,7 +90,7 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
 
         if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0)
         {
-            ffStrbufSetNWS(version, valueLen / sizeof(wchar_t), value);
+            ffStrbufSetNWS(version, valueLen - 1, value);
             FF_DEBUG("version string resolved (translation fallback): %s", version->chars);
             return true;
         }
