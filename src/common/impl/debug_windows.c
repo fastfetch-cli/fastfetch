@@ -10,7 +10,7 @@ const char* ffDebugWin32Error(DWORD errorCode)
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
         (DWORD) errorCode,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        0,
         buffer,
         sizeof(buffer),
         NULL);
