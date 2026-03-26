@@ -22,7 +22,7 @@ const char* ffDebugWin32Error(DWORD errorCode)
         while (len > 0 && (buffer[len - 1] == '\r' || buffer[len - 1] == '\n')) {
             buffer[--len] = '\0';
         }
-        snprintf(buffer + len - 2, sizeof(buffer) - len + 2, " (%lu)", errorCode);
+        snprintf(buffer + len, sizeof(buffer) - len + 2, " (%lu)", errorCode);
     }
 
     return buffer;
