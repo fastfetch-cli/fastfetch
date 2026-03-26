@@ -14,7 +14,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     FF_AUTO_CLOSE_FD int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
     if (sock_fd < 0)
     {
-        FF_DEBUG("Failed to create netlink socket: %s", strerror(errno));
+        FF_DEBUG("Failed to create netlink socket: %m");
         return false;
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
@@ -30,7 +30,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     };
 
     if (bind(sock_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        FF_DEBUG("Failed to bind socket: %s", strerror(errno));
+        FF_DEBUG("Failed to bind socket: %m");
         return false;
     }
     FF_DEBUG("Successfully bound socket");
@@ -97,7 +97,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             (struct sockaddr*)&src_addr, &src_addr_len);
 
         if (received < 0) {
-            FF_DEBUG("Failed to receive netlink response: %s", strerror(errno));
+            FF_DEBUG("Failed to receive netlink response: %m");
             return false;
         }
 
@@ -230,7 +230,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     FF_AUTO_CLOSE_FD int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
     if (sock_fd < 0)
     {
-        FF_DEBUG("Failed to create netlink socket: %s", strerror(errno));
+        FF_DEBUG("Failed to create netlink socket: %m");
         return false;
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
@@ -246,7 +246,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     };
 
     if (bind(sock_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        FF_DEBUG("Failed to bind socket: %s", strerror(errno));
+        FF_DEBUG("Failed to bind socket: %m");
         return false;
     }
     FF_DEBUG("Successfully bound socket");
@@ -313,7 +313,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             (struct sockaddr*)&src_addr, &src_addr_len);
 
         if (received < 0) {
-            FF_DEBUG("Failed to receive netlink response: %s", strerror(errno));
+            FF_DEBUG("Failed to receive netlink response: %m");
             return false;
         }
 

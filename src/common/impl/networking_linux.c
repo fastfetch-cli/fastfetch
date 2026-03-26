@@ -43,7 +43,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                 TCP_FASTOPEN
                 #endif
                 , &flag, sizeof(flag)) != 0) {
-                FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
+                FF_DEBUG("Failed to set TCP_FASTOPEN option: %m");
                 return "setsockopt(TCP_FASTOPEN) failed";
             } else {
                 #if __linux__ || __GNU__
@@ -73,7 +73,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                                 state->addr->ai_addrlen);
         #else
         if (fcntl(state->sockfd, F_SETFL, O_NONBLOCK) == -1) {
-            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            FF_DEBUG("fcntl(F_SETFL) failed: %m");
             return "fcntl(F_SETFL) failed";
         }
         FF_DEBUG("Using connectx() to send %u bytes of data", state->command.length);
@@ -90,7 +90,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                 .iov_len = state->command.length,
             }, 1, &sent, NULL) != 0) sent = 0;
         if (fcntl(state->sockfd, F_SETFL, 0) == -1) {
-            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            FF_DEBUG("fcntl(F_SETFL) failed: %m");
             return "fcntl(F_SETFL) failed";
         }
         #endif
@@ -108,8 +108,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                 #else
                 "sendto()"
                 #endif
-                " %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
-                sent, errno, strerror(errno));
+                " %s (sent=%zd, %m)", errno == 0 ? "succeeded" : "was in progress", sent);
             freeaddrinfo(state->addr);
             state->addr = NULL;
             ffStrbufDestroy(&state->command);
@@ -122,7 +121,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
             #else
             "sendto()"
             #endif
-            " failed: %s (errno=%d)", strerror(errno), errno);
+            " failed: %m");
         #ifdef __APPLE__
         return "connectx() failed";
         #else
@@ -143,7 +142,7 @@ static const char* connectAndSend(FFNetworkingState* state)
     FF_DEBUG("Attempting connect() to server...");
     if(connect(state->sockfd, state->addr->ai_addr, state->addr->ai_addrlen) == -1)
     {
-        FF_DEBUG("connect() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("connect() failed: %m");
         ret = "connect() failed";
         goto error;
     }
@@ -152,7 +151,7 @@ static const char* connectAndSend(FFNetworkingState* state)
     FF_DEBUG("Attempting to send %u bytes of data...", state->command.length);
     if(send(state->sockfd, state->command.chars, state->command.length, 0) < 0)
     {
-        FF_DEBUG("send() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("send() failed: %m");
         ret = "send() failed";
         goto error;
     }
@@ -227,7 +226,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     state->sockfd = socket(state->addr->ai_family, state->addr->ai_socktype, state->addr->ai_protocol);
     if(state->sockfd == -1)
     {
-        FF_DEBUG("socket() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("socket() failed: %m");
         ret = "socket() failed";
         goto error;
     }
@@ -237,7 +236,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     #ifdef TCP_NODELAY
     // Disable Nagle's algorithm to reduce small packet transmission delay
     if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_NODELAY: %s", strerror(errno));
+        FF_DEBUG("Failed to set TCP_NODELAY: %m");
     } else {
         FF_DEBUG("Successfully disabled Nagle's algorithm");
     }
@@ -246,7 +245,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     #ifdef TCP_QUICKACK
     // Set TCP_QUICKACK option to avoid delayed acknowledgments
     if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_QUICKACK, &flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_QUICKACK: %s", strerror(errno));
+        FF_DEBUG("Failed to set TCP_QUICKACK: %m");
     } else {
         FF_DEBUG("Successfully enabled TCP quick acknowledgment");
     }
@@ -399,7 +398,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         }
         else if (pollRes == -1)
         {
-            FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
+            FF_DEBUG("poll() failed: %m");
             close(state->sockfd);
             state->sockfd = -1;
             return "poll() failed";
@@ -419,7 +418,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
 
     if (shutdown(state->sockfd, SHUT_WR) == -1)
     {
-        FF_DEBUG("Failed to shutdown socket send: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("Failed to shutdown socket send: %m");
         // Not a critical error, continue anyway
     }
 
@@ -440,7 +439,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             if (received == 0) {
                 FF_DEBUG("Connection closed (received=0)");
             } else {
-                FF_DEBUG("Reception failed: %s (errno=%d)", strerror(errno), errno);
+                FF_DEBUG("Reception failed: %m");
             }
             break;
         }
