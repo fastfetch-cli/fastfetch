@@ -1,3 +1,27 @@
+# 2.61.0
+
+Changes:
+* Windows 7 and 8 support has been removed.
+    * The oldest version supported by fastfetch is now Windows 8.1
+
+Features:
+* Adds `brightness` option for color display configuration (#2238, Colors)
+* Adds support for detecting Bluetooth keyboards on Linux (#2220, Keyboard)
+* Adds `glazewm` support and updates M5 models (WM macOS, Host macOS)
+* Adds `showEmptySlots` option to show empty memory slots on Linux (#2222, PhysicalMemory)
+* Adds marketing product name detection on Asahi Linux (Host, Linux)
+* Adds new M5 Mac models (Host, macOS)
+* Improves SMBIOS robustness with malformed data verification and better error handling
+* Improves reliability when terminating child processes (Processing, Windows)
+* Improves Intel Mac support by querying SMBIOS data directly (Global, macOS)
+* Lots of internal code cleanups and optimizations
+
+Bugfixes:
+* Fixes missing memory devices on certain machines (PhysicalMemory)
+* Fixes CPUCache deduplication on shared caches (#2228, CPUCache, Linux)
+* Fixes WM version reporting for niri (#2218, WM, Linux)
+* Fixes SSID decoding issues from `iw` output (Wifi, Linux)
+
 # 2.60.0
 
 Changes:
