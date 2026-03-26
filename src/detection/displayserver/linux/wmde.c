@@ -302,7 +302,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 #elif __OpenBSD__
     kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
     int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, userId, sizeof(*proc), &count);
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, (int) userId, sizeof(*proc), &count);
     if (proc)
     {
         for (int i = 0; i < count; ++i)

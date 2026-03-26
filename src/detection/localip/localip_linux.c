@@ -641,7 +641,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     ffStrCopy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))
                     {
-                        FF_DEBUG("Interface %s media type: 0x%x", iface->name.chars, IFM_SUBTYPE(ifmr.ifm_active));
+                        FF_DEBUG("Interface %s media type: 0x%x", iface->name.chars, (unsigned) IFM_SUBTYPE(ifmr.ifm_active));
                         switch (IFM_SUBTYPE(ifmr.ifm_active))
                         {
                         #ifdef IFM_HPNA_1
