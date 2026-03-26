@@ -417,6 +417,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
     #endif
 
+    if (shutdown(state->sockfd, SHUT_WR) == -1)
+    {
+        FF_DEBUG("Failed to shutdown socket send: %s (errno=%d)", strerror(errno), errno);
+        // Not a critical error, continue anyway
+    }
+
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
     uint32_t contentLength = 0;
