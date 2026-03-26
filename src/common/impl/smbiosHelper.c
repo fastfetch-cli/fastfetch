@@ -286,7 +286,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
             FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
-                FF_DEBUG("Failed to open /dev/mem: %m");
+                FF_DEBUG("Failed to open /dev/mem: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("/dev/mem opened successfully with fd=%d", fd);
@@ -301,7 +301,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 // https://stackoverflow.com/questions/69372330/how-to-read-dev-mem-using-read
                 void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, entryAddress);
                 if (p == MAP_FAILED) {
-                    FF_DEBUG("mmap failed: %m");
+                    FF_DEBUG("mmap failed: %s", strerror(errno));
                     return NULL;
                 }
                 memcpy(&entryPoint, p, sizeof(entryPoint));
@@ -322,7 +322,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
             FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
-                FF_DEBUG("Failed to open /dev/smbios: %m");
+                FF_DEBUG("Failed to open /dev/smbios: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("/dev/smbios opened successfully with fd=%d", fd);
@@ -337,14 +337,14 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             FF_DEBUG("Got SMBIOS address from sysctl: 0x%lx", (unsigned long)addr);
 
             if (pread(fd, &entryPoint, sizeof(entryPoint), addr) < 1) {
-                FF_DEBUG("Failed to read SMBIOS entry point: %m");
+                FF_DEBUG("Failed to read SMBIOS entry point: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("Successfully read SMBIOS entry point");
             #else
             FF_DEBUG("Reading SMBIOS entry point from /dev/smbios");
             if (ffReadFDData(fd, sizeof(entryPoint), &entryPoint) < 1) {
-                FF_DEBUG("Failed to read SMBIOS entry point: %m");
+                FF_DEBUG("Failed to read SMBIOS entry point: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("Successfully read SMBIOS entry point");
@@ -402,7 +402,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 void* p = mmap(NULL, tableLength, PROT_READ, MAP_SHARED, fd, tableAddress);
                 if (p == MAP_FAILED)
                 {
-                    FF_DEBUG("mmap failed: %m");
+                    FF_DEBUG("mmap failed: %s", strerror(errno));
                     ffStrbufDestroy(&buffer); // free buffer and reset state
                     return NULL;
                 }
@@ -431,7 +431,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 #endif
             , O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
-                FF_DEBUG("Failed to open memory device: %m");
+                FF_DEBUG("Failed to open memory device: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("Memory device opened successfully with fd=%d", fd);
@@ -443,7 +443,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             // which is not available via EFIIOC_GET_TABLE.
             FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
             if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000) {
-                FF_DEBUG("Failed to read SMBIOS memory region: %m");
+                FF_DEBUG("Failed to read SMBIOS memory region: %s", strerror(errno));
                 return NULL;
             }
             FF_DEBUG("Successfully read 0x10000 bytes from physical address 0xF0000");
@@ -496,7 +496,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 FF_DEBUG("Successfully read SMBIOS table data: %u bytes", tableLength);
             }
             else {
-                FF_DEBUG("Failed to read SMBIOS table data: %m");
+                FF_DEBUG("Failed to read SMBIOS table data: %s", strerror(errno));
                 return NULL;
             }
         }
