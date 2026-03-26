@@ -48,6 +48,9 @@ const char* ffDetectFontImpl(FFFontResult* result)
 
     for (uint32_t i = 0; i < ARRAY_SIZE(fonts); ++i)
     {
+        if (fontBuffers[i].length != sizeof(LOGFONTW))
+            continue; // Invalid data, skip
+
         LOGFONTW* logFont = &fonts[i];
 
         ffStrbufSetWS(&result->fonts[i], logFont->lfFaceName);

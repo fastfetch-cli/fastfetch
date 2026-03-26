@@ -33,7 +33,7 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
         return false;
 
     {
-        CONSOLE_FONT_INFOEX cfi;
+        CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
         if(GetCurrentConsoleFontEx(hOutput, FALSE, &cfi)) // Only works for ConHost
         {
             result->width = result->columns * (uint16_t) cfi.dwFontSize.X;

@@ -7,7 +7,7 @@ def main(amdgpu_ids_path: str):
         full_text = f.read()
 
     if full_text == '':
-        sys.exit('Error: pci.ids file is empty')
+        sys.exit(f'Error: {amdgpu_ids_path} file is empty')
 
     products = []
     for line in full_text.split('\n'):
