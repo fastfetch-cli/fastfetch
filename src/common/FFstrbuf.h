@@ -628,6 +628,7 @@ static inline bool ffStrbufSeparatedContainIgnCase(const FFstrbuf* strbuf, const
     return ffStrbufSeparatedContainIgnCaseNS(strbuf, comp->length, comp->chars, separator);
 }
 
+// Returns true if the strbuf is modified
 bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf);
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
