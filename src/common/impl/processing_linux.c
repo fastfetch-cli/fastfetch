@@ -128,6 +128,8 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     {
         close(pipes[0]);
         close(pipes[1]);
+        if (ret == ENOENT)
+            return "command not found";
         return "posix_spawnp() failed";
     }
 
