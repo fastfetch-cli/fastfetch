@@ -19,8 +19,9 @@ const char* ffDebugWin32Error(DWORD errorCode)
         snprintf(buffer, sizeof(buffer), "Unknown error code (%lu)", errorCode);
     } else {
         // Remove trailing newline
-        if (buffer[len - 1] == '\n') buffer[len - 1] = '\0';
-        if (buffer[len - 2] == '\r') buffer[len - 2] = '\0';
+        while (len > 0 && (buffer[len - 1] == '\r' || buffer[len - 1] == '\n')) {
+            buffer[--len] = '\0';
+        }
         snprintf(buffer + len - 2, sizeof(buffer) - len + 2, " (%lu)", errorCode);
     }
 
