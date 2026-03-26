@@ -5,8 +5,6 @@
 
 #include <windows.h>
 
-#define FF_VERSION_LANG_EN_US L"040904b0"
-
 bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrbuf* version)
 {
     FF_DEBUG("ffGetFileVersion: enter filePath=%ls stringName=%ls", filePath, stringName);
@@ -62,32 +60,19 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
         return false;
     }
 
-    wchar_t* value;
-    UINT valueLen; // Number of characters, including null terminator
-
-    wchar_t subBlock[128];
-    snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\" FF_VERSION_LANG_EN_US L"\\%ls", stringName);
-    FF_DEBUG("query version string with default lang (en_US): %ls", subBlock);
-
-    if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0)
-    {
-        ffStrbufSetNWS(version, valueLen - 1, value);
-        FF_DEBUG("version string resolved (default lang): %s", version->chars);
-        return true;
-    }
-
-    FF_DEBUG("default lang query failed, trying translation fallback");
-
     struct { WORD language; WORD codePage; }* translations;
     UINT translationsLen;
 
     if (VerQueryValueW(versionData, L"\\VarFileInfo\\Translation", (void**) &translations, &translationsLen) &&
         translationsLen >= sizeof(*translations))
     {
+        wchar_t subBlock[128];
         snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\%04x%04x\\%ls",
                   translations[0].language, translations[0].codePage, stringName);
         FF_DEBUG("query version string with translation: %ls", subBlock);
 
+        wchar_t* value;
+        UINT valueLen; // Number of characters, including null terminator
         if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0)
         {
             ffStrbufSetNWS(version, valueLen - 1, value);
