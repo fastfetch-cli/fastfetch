@@ -45,7 +45,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
 
     FF_DEBUG("Opened /dev/dxg successfully");
 
-    D3DKMT_ADAPTERINFO adapters[MAX_ENUM_ADAPTERS];
+    D3DKMT_ADAPTERINFO adapters[64];
     D3DKMT_ENUMADAPTERS2 enumAdapters = {
         .NumAdapters = ARRAY_SIZE(adapters),
         .pAdapters = adapters,
