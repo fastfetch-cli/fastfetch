@@ -298,7 +298,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (options->driverSpecific && getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName))
         {
             FF_DEBUG("Calling driver-specific detection function for vendor: %s, DLL: %s", gpu->vendor.chars, dllName);
-            detectFn(
+            const char* error = detectFn(
                 &(FFGpuDriverCondition) {
                     .type = (deviceId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID : 0)
                             | (adapterLuid > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0)
@@ -331,7 +331,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 },
                 dllName
             );
-            FF_DEBUG("Driver-specific detection completed");
+            FF_DEBUG("Driver-specific detection completed: %s", error ?: "Success");
         }
         else if (options->driverSpecific)
         {
