@@ -146,7 +146,7 @@ static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE
     if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb)))
     {
         if (hReadEvent)
-            NtWaitForSingleObject(hReadEvent, TRUE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
+            NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
     }
     NtTerminateProcess(hProcess, 1);
 }
@@ -184,7 +184,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
         );
         if (status == STATUS_PENDING)
         {
-            switch (NtWaitForSingleObject(hReadEvent, TRUE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }))
+            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }))
             {
             case STATUS_WAIT_0:
                 status = iosb.Status;

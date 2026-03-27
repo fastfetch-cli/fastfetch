@@ -419,7 +419,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true)
     {
-        if (NtWaitForSingleObject(hInput, TRUE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 }) != STATUS_WAIT_0)
+        if (NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 }) != STATUS_WAIT_0)
         {
             SetConsoleMode(hInput, inputMode);
             return "NtWaitForSingleObject() failed or timeout";
