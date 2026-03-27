@@ -38,7 +38,7 @@ jobs:
         run: uname -a
 
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_DRM_AMDGPU=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OPENCL=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_ELF=OFF -DENABLE_DIRECTX_HEADERS=OFF -DENABLE_THREADS=OFF
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_DRM_AMDGPU=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OPENCL=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_ELF=OFF -DENABLE_THREADS=OFF
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -93,7 +93,7 @@ jobs:
         run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y gcc-13 g++-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev directx-headers-dev rpm ninja-build
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev rpm ninja-build
 
       - name: install linuxbrew packages
         run: |
@@ -107,7 +107,7 @@ jobs:
           languages: c
 
       - name: configure project
-        run: CC=gcc-13 CXX=g++-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -190,7 +190,7 @@ jobs:
         run: cmake --version
 
       - name: configure project
-        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -DCPACK_DEBIAN_PACKAGE_ARCHITECTURE=i386 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_DIRECTX_HEADERS=Off .
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -DCPACK_DEBIAN_PACKAGE_ARCHITECTURE=i386 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -247,7 +247,7 @@ jobs:
             echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
             echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99ignore-certificates
             apt-get update && apt-get install -y cmake make gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
-            CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_DIRECTX_HEADERS=Off -DCMAKE_INSTALL_PREFIX=/usr .
+            CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -283,7 +283,7 @@ jobs:
             uname -a
             apt-get update && apt-get install -y wget
             apt-get install -y cmake make gcc libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_DIRECTX_HEADERS=Off -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -326,7 +326,7 @@ jobs:
             apt-get update && apt-get install -y software-properties-common
             add-apt-repository -y ppa:ubuntu-toolchain-r/test
             apt-get update && apt-get install -y cmake make gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libchafa-dev libelf-dev rpm
-            CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_DIRECTX_HEADERS=Off -DCMAKE_INSTALL_PREFIX=/usr .
+            CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -720,7 +720,7 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           update: true
-          install: git mingw-w64-clang-${{ matrix.msys-arch }}-7zip mingw-w64-clang-${{ matrix.msys-arch }}-cmake mingw-w64-clang-${{ matrix.msys-arch }}-clang mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-loader mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-headers mingw-w64-clang-${{ matrix.msys-arch }}-opencl-icd mingw-w64-clang-${{ matrix.msys-arch }}-opencl-headers mingw-w64-clang-${{ matrix.msys-arch }}-cppwinrt mingw-w64-clang-${{ matrix.msys-arch }}-imagemagick mingw-w64-clang-${{ matrix.msys-arch }}-chafa
+          install: git mingw-w64-clang-${{ matrix.msys-arch }}-7zip mingw-w64-clang-${{ matrix.msys-arch }}-cmake mingw-w64-clang-${{ matrix.msys-arch }}-clang mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-loader mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-headers mingw-w64-clang-${{ matrix.msys-arch }}-opencl-icd mingw-w64-clang-${{ matrix.msys-arch }}-opencl-headers mingw-w64-clang-${{ matrix.msys-arch }}-cppwinrt mingw-w64-clang-${{ matrix.msys-arch }}-imagemagick mingw-w64-clang-${{ matrix.msys-arch }}-chafa mingw-w64-clang-${{ matrix.msys-arch }}-directx-headers
 
       - name: print msys version
         run: uname -a
