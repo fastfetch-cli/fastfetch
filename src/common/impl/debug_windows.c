@@ -32,3 +32,19 @@ const char* ffDebugNtStatus(NTSTATUS status)
 {
     return ffDebugWin32Error(RtlNtStatusToDosError(status));
 }
+
+static inline DWORD HRESULTToWin32Error(HRESULT hr)
+{
+    if (SUCCEEDED(hr))
+        return ERROR_SUCCESS;
+
+    if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
+        return HRESULT_CODE(hr);
+
+    return ERROR_INTERNAL_ERROR;
+}
+
+const char* ffDebugHResult(HRESULT hr)
+{
+    return ffDebugWin32Error(HRESULTToWin32Error(hr));
+}
