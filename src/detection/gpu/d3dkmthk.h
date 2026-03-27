@@ -96,6 +96,13 @@ typedef struct _D3DKMT_CLOSEADAPTER
     D3DKMT_HANDLE   hAdapter;   // in: adapter handle
 } D3DKMT_CLOSEADAPTER;
 
+typedef struct _D3DKMT_SEGMENTSIZEINFO
+{
+    D3DKMT_ALIGN64 ULONGLONG           DedicatedVideoMemorySize;
+    D3DKMT_ALIGN64 ULONGLONG           DedicatedSystemMemorySize;
+    D3DKMT_ALIGN64 ULONGLONG           SharedSystemMemorySize;
+} D3DKMT_SEGMENTSIZEINFO;
+
 typedef struct _D3DKMT_ADAPTERTYPE
 {
     union
@@ -179,6 +186,7 @@ typedef struct _D3DKMT_QUERY_ADAPTER_UNIQUE_GUID
 
 typedef enum _KMTQUERYADAPTERINFOTYPE
 {
+    KMTQAITYPE_GETSEGMENTSIZE            = 3,
     KMTQAITYPE_ADAPTERGUID               = 4,
     KMTQAITYPE_ADAPTERADDRESS            = 6,
     KMTQAITYPE_ADAPTERREGISTRYINFO       = 8,
