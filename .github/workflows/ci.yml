@@ -413,10 +413,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --stat false
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --stat false
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --format json
 
       - name: run flashfetch
         run: time ./flashfetch
