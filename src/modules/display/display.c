@@ -367,8 +367,8 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         }
         yyjson_mut_obj_add_uint(doc, output, "dpi", item->dpi);
 
-        uint32_t scaledWidth = item->width * 96 / item->dpi;
-        uint32_t scaledHeight = item->height * 96 / item->dpi;
+        uint32_t scaledWidth = (item->width * 96 + item->dpi / 2) / item->dpi;
+        uint32_t scaledHeight = (item->height * 96 + item->dpi / 2) / item->dpi;
         yyjson_mut_val* scaled = yyjson_mut_obj_add_obj(doc, obj, "scaled");
         yyjson_mut_obj_add_uint(doc, scaled, "width", scaledWidth);
         yyjson_mut_obj_add_uint(doc, scaled, "height", scaledHeight);
