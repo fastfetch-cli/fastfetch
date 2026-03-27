@@ -26,7 +26,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 
     IMMDeviceEnumerator* FF_AUTO_RELEASE_COM_OBJECT pEnum = NULL;
 
-    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_IMMDeviceEnumerator, (void **)&pEnum)))
+    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pEnum))))
         return "CoCreateInstance(CLSID_MMDeviceEnumerator) failed";
 
     LPWSTR FF_COTASK_AUTO_FREE mainDeviceId = NULL;
