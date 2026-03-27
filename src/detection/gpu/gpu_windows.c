@@ -491,10 +491,14 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
                 FF_DEBUG("Intel GPU type determined: %s", gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
             }
-            else
+            else if (ffIsWindows10OrGreater())
             {
-                FF_DEBUG("Unable to determine GPU type");
+                const char* ffGPUDetectTypeWithDXCore(LUID adapterLuid, FFGPUResult* gpu);
+                FF_MAYBE_UNUSED const char* error = ffGPUDetectTypeWithDXCore(*(LUID*)&adapterLuid, gpu);
+                FF_DEBUG("DXCore GPU type detection result: %s", error ?: "Success");
             }
+            else
+                FF_DEBUG("Unable to determine GPU type");
         }
 
         FF_DEBUG("Completed processing GPU #%d - Vendor: %s, Name: %s, Type: %d", deviceCount, gpu->vendor.chars, gpu->name.chars, gpu->type);

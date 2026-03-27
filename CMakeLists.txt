@@ -1056,6 +1056,7 @@ elseif(WIN32)
         src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
+        src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
