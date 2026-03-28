@@ -45,8 +45,8 @@ bool ffPrintDisplay(FFDisplayOptions* options)
             }
             else
             {
-                uint32_t scaledWidth = result->width * 96 / result->dpi;
-                uint32_t scaledHeight = result->height * 96 / result->dpi;
+                uint32_t scaledWidth = (result->width * 96 + result->dpi / 2) / result->dpi;
+                uint32_t scaledHeight = (result->height * 96 + result->dpi / 2) / result->dpi;
                 ffStrbufAppendF(&buffer, "%ix%i", scaledWidth, scaledHeight);
             }
 
