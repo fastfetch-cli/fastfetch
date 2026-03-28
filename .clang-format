@@ -1,0 +1,66 @@
+BasedOnStyle: LLVM
+Language: Cpp
+
+UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 4
+
+ColumnLimit: 0
+ReflowComments: true
+
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeElse: false
+  BeforeCatch: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+IndentExternBlock: NoIndent
+
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+InsertBraces: true
+
+PointerAlignment: Left
+DerivePointerAlignment: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpaceAfterCStyleCast: true
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+SpacesInContainerLiterals: true
+
+SortIncludes: Never
+IndentPPDirectives: AfterHash
+PPIndentWidth: 4
+
+IndentCaseLabels: true
+
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: DontAlign
+
+BinPackParameters: false
+BinPackArguments: false
+AlignAfterOpenBracket: DontAlign
+BracedInitializerIndentWidth: 4
+
+ForEachMacros:
+  - FF_LIST_FOR_EACH
+  - yyjson_obj_foreach
+  - yyjson_arr_foreach
+  - yyjson_mut_obj_foreach
+  - yyjson_mut_arr_foreach
+
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
