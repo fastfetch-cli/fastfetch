@@ -103,8 +103,8 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
-        uint32_t scaledWidth = result->width * 96 / result->dpi;
-        uint32_t scaledHeight = result->height * 96 / result->dpi;
+        uint32_t scaledWidth = (result->width * 96 + result->dpi / 2) / result->dpi;
+        uint32_t scaledHeight = (result->height * 96 + result->dpi / 2) / result->dpi;
         double scaleFactor = (double) result->dpi / 96.;
 
         if(options->moduleArgs.outputFormat.length == 0)
