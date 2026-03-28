@@ -335,6 +335,27 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus)
                 FF_DEBUG("Failed to query temperature for adapter #%u: %s", i, strerror(errno));
         }
 
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+        {
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+            {
+                // 0000:00:02.0 is reserved for Intel integrated graphics
+                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            }
+        }
+
         FF_DEBUG("Adapter #%u summary: name='%s', vendor='%s', type=%u, deviceId=%lu",
             i,
             gpu->name.length ? gpu->name.chars : "unknown",

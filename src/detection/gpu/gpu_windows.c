@@ -486,11 +486,26 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)
         {
             FF_DEBUG("Using fallback GPU type detection");
-            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
             {
-                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-                FF_DEBUG("Intel GPU type determined: %s", gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
             }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+            {
+                // 0000:00:02.0 is reserved for Intel integrated graphics
+                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            }
+
+            if (gpu->type != FF_GPU_TYPE_UNKNOWN)
+                FF_DEBUG("Determined GPU type based on vendor (%s) and name: %u", gpu->vendor.chars, gpu->type);
             else if (ffIsWindows10OrGreater())
             {
                 const char* ffGPUDetectTypeWithDXCore(LUID adapterLuid, FFGPUResult* gpu);
@@ -498,7 +513,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 FF_DEBUG("DXCore GPU type detection result: %s", error ?: "Success");
             }
             else
-                FF_DEBUG("Unable to determine GPU type");
+                FF_DEBUG("Unable to determine GPU type by any method for this adapter");
         }
 
         FF_DEBUG("Completed processing GPU #%d - Vendor: %s, Name: %s, Type: %d", deviceCount, gpu->vendor.chars, gpu->name.chars, gpu->type);
