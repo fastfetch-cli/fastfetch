@@ -1,3 +1,5 @@
+#include <ctype.h>
+#include <stdlib.h>
 #include "packages.h"
 #include "common/io.h"
 #include "common/parsing.h"
@@ -451,12 +453,39 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir)
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
+static void getPackageCountsEmerge(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+{
+    uint32_t total = countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    if (total == 0)
+        return;
+
+    uint32_t world = 0;
+    {
+        uint32_t baseDirLen = baseDir->length;
+        ffStrbufAppendS(baseDir, "/var/lib/portage/world");
+        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+        if (ffReadFileBuffer(baseDir->chars, &content))
+        {
+            world = ffStrbufCountC(&content, '\n');
+            if (!ffStrbufEndsWithC(&content, '\n'))
+                ++world;
+        }
+        ffStrbufSubstrBefore(baseDir, baseDirLen);
+    }
+
+    if (world > total)
+        world = total;
+
+    packageCounts->emergeWorld += world;
+    packageCounts->emergeSystem += total - world;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
     if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
-    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) getPackageCountsEmerge(baseDir, packageCounts);
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpakPackages(baseDir, "/var/lib");
     if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);

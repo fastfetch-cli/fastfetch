@@ -12,7 +12,8 @@ typedef struct FFPackagesResult
     uint32_t brewCask;
     uint32_t choco;
     uint32_t dpkg;
-    uint32_t emerge;
+    uint32_t emergeSystem;
+    uint32_t emergeWorld;
     uint32_t eopkg;
     uint32_t flatpakSystem;
     uint32_t flatpakUser;
@@ -48,7 +49,7 @@ typedef struct FFPackagesResult
     uint32_t winget;
     uint32_t xbps;
 
-    uint32_t all; //Make sure this goes last
+    uint32_t all; // Make sure this goes last among package counter fields
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;

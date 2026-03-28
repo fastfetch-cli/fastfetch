@@ -17,6 +17,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         return false;
     }
 
+    uint32_t emergeAll = counts.emergeWorld + counts.emergeSystem;
     uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
     uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
     uint32_t brewAll = counts.brew + counts.brewCask;
@@ -60,7 +61,15 @@ bool ffPrintPackages(FFPackagesOptions* options)
         };
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
-        FF_PRINT_PACKAGE(emerge)
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(emerge);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(emergeWorld, "emerge-world")
+            FF_PRINT_PACKAGE_NAME(emergeSystem, "emerge-system")
+        }
         FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
         if (options->combined)
@@ -159,7 +168,8 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(counts.pacmanBranch, "pacman-branch"),
             FF_ARG(counts.dpkg, "dpkg"),
             FF_ARG(counts.rpm, "rpm"),
-            FF_ARG(counts.emerge, "emerge"),
+            FF_ARG(counts.emergeWorld, "emerge-world"),
+            FF_ARG(counts.emergeSystem, "emerge-system"),
             FF_ARG(counts.eopkg, "eopkg"),
             FF_ARG(counts.xbps, "xbps"),
             FF_ARG(counts.nixSystem, "nix-system"),
@@ -203,6 +213,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_ARG(brewAll, "brew-all"),
             FF_ARG(guixAll, "guix-all"),
             FF_ARG(hpkgAll, "hpkg-all"),
+            FF_ARG(emergeAll, "emerge-all"),
         }));
     }
 
@@ -407,7 +418,8 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(brewCask)
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
-    FF_APPEND_PACKAGE_COUNT(emerge)
+    FF_APPEND_PACKAGE_COUNT(emergeSystem)
+    FF_APPEND_PACKAGE_COUNT(emergeWorld)
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
     FF_APPEND_PACKAGE_COUNT(flatpakUser)
@@ -473,7 +485,8 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Pacman branch on manjaro", "pacman-branch"},
         {"Number of dpkg packages", "dpkg"},
         {"Number of rpm packages", "rpm"},
-        {"Number of emerge packages", "emerge"},
+        {"Number of @world emerge set packages", "emerge-world"},
+        {"Number of non-world emerge set packages", "emerge-system"},
         {"Number of eopkg packages", "eopkg"},
         {"Number of xbps packages", "xbps"},
         {"Number of nix-system packages", "nix-system"},
@@ -517,5 +530,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Total number of all brew packages", "brew-all"},
         {"Total number of all guix packages", "guix-all"},
         {"Total number of all hpkg packages", "hpkg-all"},
+        {"Total number of all emerge packages", "emerge-all"},
     }))
 };
