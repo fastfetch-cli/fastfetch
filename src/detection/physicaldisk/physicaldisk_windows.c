@@ -152,7 +152,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
             // DiskInfo and RemovableDiskInfo have the same structures. TapeInfo doesn't.
             if (gmt->DeviceType != FILE_DEVICE_TAPE)
             {
-                __typeof__(gmt->MediaInfo[0].DeviceSpecific.DiskInfo)* diskInfo = &gmt->MediaInfo[0].DeviceSpecific.DiskInfo;
+                __auto_type diskInfo = &gmt->MediaInfo[0].DeviceSpecific.DiskInfo;
                 if (diskInfo->MediaCharacteristics & MEDIA_READ_ONLY)
                     device->type |= FF_PHYSICALDISK_TYPE_READONLY;
                 else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE)
@@ -162,7 +162,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
             }
             else
             {
-                __typeof__(gmt->MediaInfo[0].DeviceSpecific.TapeInfo)* tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
+                __auto_type tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
                 if (tapeInfo->MediaCharacteristics & MEDIA_READ_ONLY)
                     device->type |= FF_PHYSICALDISK_TYPE_READONLY;
                 else if (tapeInfo->MediaCharacteristics & MEDIA_READ_WRITE)
@@ -216,6 +216,18 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             _ultow(idev, pNum, 10);
 
             if (!detectPhysicalDisk(szCdrom, result, options))
+                break;
+        }
+    }
+
+    {
+        wchar_t szTape[32] = L"\\\\.\\Tape";
+        wchar_t* pNum = szTape + strlen("\\\\.\\Tape");
+        for (uint32_t idev = 0; ; ++idev)
+        {
+            _ultow(idev, pNum, 10);
+
+            if (!detectPhysicalDisk(szTape, result, options))
                 break;
         }
     }

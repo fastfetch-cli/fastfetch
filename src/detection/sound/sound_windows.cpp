@@ -1,8 +1,9 @@
 extern "C" {
     #include "sound.h"
-    #include "common/windows/unicode.h"
 }
+#include "common/windows/unicode.hpp"
 #include "common/windows/com.hpp"
+#include "common/windows/variant.hpp"
 
 #include <initguid.h>
 #include <mmdeviceapi.h>
@@ -25,7 +26,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 
     IMMDeviceEnumerator* FF_AUTO_RELEASE_COM_OBJECT pEnum = NULL;
 
-    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_IMMDeviceEnumerator, (void **)&pEnum)))
+    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pEnum))))
         return "CoCreateInstance(CLSID_MMDeviceEnumerator) failed";
 
     LPWSTR FF_COTASK_AUTO_FREE mainDeviceId = NULL;
@@ -76,10 +77,9 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         ffStrbufInitStatic(&device->platformApi, "Core Audio APIs");
 
         {
-            PROPVARIANT __attribute__((__cleanup__(PropVariantClear))) friendlyName;
-            PropVariantInit(&friendlyName);
+            FFPropVariant friendlyName;
             if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_FriendlyName, &friendlyName)))
-                ffStrbufSetWS(&device->name, friendlyName.pwszVal);
+                ffStrbufSetWSV(&device->name, friendlyName.get<std::wstring_view>());
         }
 
         IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume;

@@ -9,7 +9,7 @@ static void verify(const char* format, const char* arg, const char* expected, in
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY formatter = ffStrbufCreateStatic(format);
     const FFformatarg arguments[] = {
-        { .type = FF_FORMAT_ARG_TYPE_STRING, arg }
+        { .type = FF_ARG_TYPE_STRING, arg }
     };
     ffParseFormatString(&result, &formatter, 1, arguments);
     if (!ffStrbufEqualS(&result, expected))

@@ -89,7 +89,7 @@ FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
     static void ffTimeInitQpcMultiplier(void)
     {
         LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
+        RtlQueryPerformanceFrequency(&frequency);
         ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
     }
 #endif

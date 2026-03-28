@@ -15,8 +15,8 @@ static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, ui
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_MOUSE_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(device->name, "name"),
-            FF_FORMAT_ARG(device->serial, "serial"),
+            FF_ARG(device->name, "name"),
+            FF_ARG(device->serial, "serial"),
         }));
     }
 }

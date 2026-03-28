@@ -1,5 +1,6 @@
 #include "common/FFstrbuf.h"
 #include "common/mallocHelper.h"
+#include "common/stringUtils.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -914,4 +915,45 @@ bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLeng
     }
 
     return false;
+}
+
+bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf)
+{
+    assert(strbuf);
+
+    if (strbuf->length < 4)
+        return false;
+
+    // Static string must be converted first.
+    assert(strbuf->allocated > 0);
+
+    bool changed = false;
+    uint32_t read = 0;
+    uint32_t write = 0;
+
+    while (read < strbuf->length)
+    {
+        if (
+            read + 3 < strbuf->length &&
+            strbuf->chars[read] == '\\' &&
+            strbuf->chars[read + 1] == 'x'
+        )
+        {
+            int8_t hi = ffHexCharToInt(strbuf->chars[read + 2]);
+            int8_t lo = ffHexCharToInt(strbuf->chars[read + 3]);
+            if (hi >= 0 && lo >= 0)
+            {
+                strbuf->chars[write++] = (char) ((hi << 4) | lo);
+                read += 4;
+                changed = true;
+                continue;
+            }
+        }
+
+        strbuf->chars[write++] = strbuf->chars[read++];
+    }
+
+    strbuf->length = write;
+    strbuf->chars[write] = '\0';
+    return changed;
 }

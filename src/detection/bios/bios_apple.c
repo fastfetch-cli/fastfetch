@@ -29,20 +29,18 @@ const char* ffDetectBios(FFBiosResult* bios)
     if (!device)
         return "IODeviceTree:/ not found";
 
-    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceProps = NULL;
-    if(IORegistryEntryCreateCFProperties(device, &deviceProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        return "IORegistryEntryCreateCFProperties(device) failed";
-
-    ffCfDictGetString(deviceProps, CFSTR("manufacturer"), &bios->vendor);
-    ffCfDictGetString(deviceProps, CFSTR("time-stamp"), &bios->date);
+    FF_CFTYPE_AUTO_RELEASE CFDataRef manufacturer = IORegistryEntryCreateCFProperty(device, CFSTR("manufacturer"), kCFAllocatorDefault, kNilOptions);
+    ffCfStrGetString(manufacturer, &bios->vendor);
+    FF_CFTYPE_AUTO_RELEASE CFDataRef timeStamp = IORegistryEntryCreateCFProperty(device, CFSTR("time-stamp"), kCFAllocatorDefault, kNilOptions);
+    ffCfStrGetString(timeStamp, &bios->date);
 
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceChosen = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (deviceChosen)
     {
-        FF_CFTYPE_AUTO_RELEASE CFStringRef systemFirmWareVersion = IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("system-firmware-version"), kCFAllocatorDefault, kNilOptions);
-        if (systemFirmWareVersion)
+        FF_CFTYPE_AUTO_RELEASE CFStringRef systemFirmwareVersion = IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("system-firmware-version"), kCFAllocatorDefault, kNilOptions);
+        if (systemFirmwareVersion)
         {
-            ffCfStrGetString(systemFirmWareVersion, &bios->version);
+            ffCfStrGetString(systemFirmwareVersion, &bios->version);
             uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
             if (index != bios->version.length)
             {

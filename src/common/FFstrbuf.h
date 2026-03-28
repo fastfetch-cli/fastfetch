@@ -230,6 +230,7 @@ static inline void ffStrbufInitMoveS(FFstrbuf* strbuf, char* heapStr)
     ffStrbufInitMoveNS(strbuf, (uint32_t) strlen(heapStr), heapStr);
 }
 
+// Despite the name, this function resets strbuf to the initial/unallocated state
 static inline void ffStrbufDestroy(FFstrbuf* strbuf)
 {
     if(strbuf->allocated > 0)
@@ -626,5 +627,8 @@ static inline bool ffStrbufSeparatedContainIgnCase(const FFstrbuf* strbuf, const
 {
     return ffStrbufSeparatedContainIgnCaseNS(strbuf, comp->length, comp->chars, separator);
 }
+
+// Returns true if the strbuf is modified
+bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf);
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))

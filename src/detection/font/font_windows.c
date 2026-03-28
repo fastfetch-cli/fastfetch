@@ -1,5 +1,6 @@
 #include "font.h"
 #include "common/windows/unicode.h"
+#include "common/windows/registry.h"
 
 #include <windows.h>
 
@@ -25,17 +26,36 @@ static void generateString(FFFontResult* font)
 
 const char* ffDetectFontImpl(FFFontResult* result)
 {
-    NONCLIENTMETRICSW info = { .cbSize = sizeof(info) };
-    if(!SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0))
-        return "SystemParametersInfoW(SPI_GETNONCLIENTMETRICS) failed";
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
+    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop\\WindowMetrics", &hKey, NULL))
+        return "ffRegOpenKeyForRead(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
 
-    LOGFONTW* fonts[4] = { &info.lfCaptionFont, &info.lfMenuFont, &info.lfMessageFont, &info.lfStatusFont };
+    LOGFONTW fonts[4];
+    FFArgBuffer fontBuffers[4] = {
+        { .data = &fonts[0], .length = sizeof(fonts[0]) },
+        { .data = &fonts[1], .length = sizeof(fonts[1]) },
+        { .data = &fonts[2], .length = sizeof(fonts[2]) },
+        { .data = &fonts[3], .length = sizeof(fonts[3]) },
+    };
 
-    for(uint32_t i = 0; i < ARRAY_SIZE(fonts); ++i)
+    if (!ffRegReadValues(hKey, 4, (FFRegValueArg[]) {
+        FF_ARG(fontBuffers[0], L"CaptionFont"),
+        FF_ARG(fontBuffers[1], L"MenuFont"),
+        FF_ARG(fontBuffers[2], L"MessageFont"),
+        FF_ARG(fontBuffers[3], L"StatusFont"),
+    }, NULL))
+        return "ffRegReadValues(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
+
+    for (uint32_t i = 0; i < ARRAY_SIZE(fonts); ++i)
     {
-        ffStrbufSetWS(&result->fonts[i], fonts[i]->lfFaceName);
-        if(fonts[i]->lfHeight < 0)
-            ffStrbufAppendF(&result->fonts[i], " (%dpt)", (int)-fonts[i]->lfHeight);
+        if (fontBuffers[i].length != sizeof(LOGFONTW))
+            continue; // Invalid data, skip
+
+        LOGFONTW* logFont = &fonts[i];
+
+        ffStrbufSetWS(&result->fonts[i], logFont->lfFaceName);
+        if (logFont->lfHeight < 0)
+            ffStrbufAppendF(&result->fonts[i], " (%dpt)", (int)-logFont->lfHeight);
     }
 
     generateString(result);

@@ -12,7 +12,7 @@ static void waylandZwlrTransformListener(void* data, FF_MAYBE_UNUSED struct zwlr
 static void waylandZwlrScaleListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, wl_fixed_t scale)
 {
     WaylandDisplay* wldata = (WaylandDisplay*) data;
-    wldata->scale = wl_fixed_to_double(scale);
+    wldata->dpi = (uint32_t) scale * 3 / 8; // wl_fixed_to_double(scale) * 96;
 }
 
 typedef struct WaylandZwlrMode
@@ -125,7 +125,6 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandZwlrMode));
     WaylandDisplay display = {
         .parent = wldata,
-        .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
         .name = ffStrbufCreate(),
@@ -146,8 +145,7 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
-        (uint32_t) (display.width / display.scale + 0.5),
-        (uint32_t) (display.height / display.scale + 0.5),
+        (uint32_t) display.dpi,
         (uint32_t) display.preferredWidth,
         (uint32_t) display.preferredHeight,
         display.preferredRefreshRate / 1000.0,

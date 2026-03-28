@@ -21,9 +21,9 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     {
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(result->modelName, "name"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(result->modelName, "name"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -106,21 +106,21 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffDurationAppendNum((uint32_t) result->timeRemaining, &timeStr);
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-            FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
-            FF_FORMAT_ARG(result->modelName, "model-name"),
-            FF_FORMAT_ARG(result->technology, "technology"),
-            FF_FORMAT_ARG(capacityNum, "capacity"),
-            FF_FORMAT_ARG(result->status, "status"),
-            FF_FORMAT_ARG(tempStr, "temperature"),
-            FF_FORMAT_ARG(result->cycleCount, "cycle-count"),
-            FF_FORMAT_ARG(result->serial, "serial"),
-            FF_FORMAT_ARG(result->manufactureDate, "manufacture-date"),
-            FF_FORMAT_ARG(capacityBar, "capacity-bar"),
-            FF_FORMAT_ARG(days, "time-days"),
-            FF_FORMAT_ARG(hours, "time-hours"),
-            FF_FORMAT_ARG(minutes, "time-minutes"),
-            FF_FORMAT_ARG(seconds, "time-seconds"),
-            FF_FORMAT_ARG(timeStr, "time-formatted"),
+            FF_ARG(result->manufacturer, "manufacturer"),
+            FF_ARG(result->modelName, "model-name"),
+            FF_ARG(result->technology, "technology"),
+            FF_ARG(capacityNum, "capacity"),
+            FF_ARG(result->status, "status"),
+            FF_ARG(tempStr, "temperature"),
+            FF_ARG(result->cycleCount, "cycle-count"),
+            FF_ARG(result->serial, "serial"),
+            FF_ARG(result->manufactureDate, "manufacture-date"),
+            FF_ARG(capacityBar, "capacity-bar"),
+            FF_ARG(days, "time-days"),
+            FF_ARG(hours, "time-hours"),
+            FF_ARG(minutes, "time-minutes"),
+            FF_ARG(seconds, "time-seconds"),
+            FF_ARG(timeStr, "time-formatted"),
         }));
     }
 }

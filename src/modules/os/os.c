@@ -70,9 +70,9 @@ bool ffPrintOS(FFOSOptions* options)
     else
     {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-            FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
-            FF_FORMAT_ARG(os->name, "name"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(instance.state.platform.sysinfo.name, "sysname"),
+            FF_ARG(os->name, "name"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -98,19 +98,19 @@ bool ffPrintOS(FFOSOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-            FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
-            FF_FORMAT_ARG(os->name, "name"),
-            FF_FORMAT_ARG(os->prettyName, "pretty-name"),
-            FF_FORMAT_ARG(os->id, "id"),
-            FF_FORMAT_ARG(os->idLike, "id-like"),
-            FF_FORMAT_ARG(os->variant, "variant"),
-            FF_FORMAT_ARG(os->variantID, "variant-id"),
-            FF_FORMAT_ARG(os->version, "version"),
-            FF_FORMAT_ARG(os->versionID, "version-id"),
-            FF_FORMAT_ARG(os->codename, "codename"),
-            FF_FORMAT_ARG(os->buildID, "build-id"),
-            FF_FORMAT_ARG(instance.state.platform.sysinfo.architecture, "arch"),
-            FF_FORMAT_ARG(instance.state.platform.sysinfo.release, "kernel-release"),
+            FF_ARG(instance.state.platform.sysinfo.name, "sysname"),
+            FF_ARG(os->name, "name"),
+            FF_ARG(os->prettyName, "pretty-name"),
+            FF_ARG(os->id, "id"),
+            FF_ARG(os->idLike, "id-like"),
+            FF_ARG(os->variant, "variant"),
+            FF_ARG(os->variantID, "variant-id"),
+            FF_ARG(os->version, "version"),
+            FF_ARG(os->versionID, "version-id"),
+            FF_ARG(os->codename, "codename"),
+            FF_ARG(os->buildID, "build-id"),
+            FF_ARG(instance.state.platform.sysinfo.architecture, "arch"),
+            FF_ARG(instance.state.platform.sysinfo.release, "kernel-release"),
         }));
     }
 

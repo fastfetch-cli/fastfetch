@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.60.0
+    VERSION 2.61.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -89,7 +89,6 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR Ope
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
@@ -107,7 +106,7 @@ option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `pyt
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
-    option(ENABLE_WIN7_COMPAT "Enable Windows 7 compatibility" OFF)
+    option(ENABLE_WIN81_COMPAT "Enable legacy Windows compatibility (Windows 8.1 and later; Windows 7 unsupported)" ON)
 endif()
 if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
@@ -159,7 +158,7 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
-if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
+if(WIN32 OR Haiku)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -168,8 +167,8 @@ endif()
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id")
 
-    if(ENABLE_WIN7_COMPAT)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--subsystem,console,--major-os-version,6,--minor-os-version,1")
+    if(ENABLE_WIN81_COMPAT)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--subsystem,console,--major-os-version,6,--minor-os-version,3")
     else()
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--subsystem,console,--major-os-version,10,--minor-os-version,0")
     endif()
@@ -305,7 +304,8 @@ if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids
                         RESULT_VARIABLE PYTHON_PCIIDS_RETCODE)
         if(NOT PYTHON_PCIIDS_RETCODE EQUAL 0)
             file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
-            message(FATAL_ERROR "Failed to generate 'fastfetch_pciids.c.inc'")
+            message(WARNING "Failed to generate 'fastfetch_pciids.c.inc'")
+            set(ENABLE_EMBEDDED_PCIIDS OFF)
         endif()
     else()
         message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
@@ -325,7 +325,8 @@ if(ENABLE_EMBEDDED_AMDGPUIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_amd
                         RESULT_VARIABLE PYTHON_AMDGPUIDS_RETCODE)
         if(NOT PYTHON_AMDGPUIDS_RETCODE EQUAL 0)
             file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc")
-            message(FATAL_ERROR "Failed to generate 'fastfetch_amdgpuids.c.inc'")
+            message(WARNING "Failed to generate 'fastfetch_amdgpuids.c.inc'")
+            set(ENABLE_EMBEDDED_AMDGPUIDS OFF)
         endif()
     else()
         message(WARNING "Python3 is not found, 'fastfetch_amdgpuids.c.inc' will not be generated")
@@ -413,6 +414,7 @@ set(LIBFASTFETCH_SRC
     src/detection/editor/editor.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
+    src/detection/host/host_mac.c
     src/detection/media/media.c
     src/detection/netio/netio.c
     src/detection/opencl/opencl.c
@@ -559,9 +561,9 @@ if(LINUX)
         src/detection/gpu/gpu_linux.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
+        src/detection/gpu/gpu_wsl.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
-        src/detection/host/host_mac.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_linux.c
@@ -720,7 +722,6 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
-        src/detection/host/host_mac.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
@@ -947,14 +948,11 @@ elseif(APPLE)
         src/common/apple/osascript.m
         src/common/apple/smc_temps.c
         src/detection/battery/battery_apple.c
-        src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
         src/detection/bluetoothradio/bluetoothradio_apple.m
-        src/detection/board/board_apple.c
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
@@ -962,14 +960,11 @@ elseif(APPLE)
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
-        src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
-        src/detection/host/host_apple.c
-        src/detection/host/host_mac.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
@@ -1005,6 +1000,24 @@ elseif(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
     )
+    # CMAKE_SYSTEM_PROCESSOR has been normalized before
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bios/bios_windows.c
+            src/detection/board/board_windows.c
+            src/detection/chassis/chassis_windows.c
+            src/detection/host/host_windows.c
+            src/detection/physicalmemory/physicalmemory_linux.c
+        )
+    else()
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bios/bios_apple.c
+            src/detection/board/board_apple.c
+            src/detection/chassis/chassis_apple.c
+            src/detection/host/host_apple.c
+            src/detection/physicalmemory/physicalmemory_apple.m
+        )
+    endif()
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/impl/io_windows.c
@@ -1043,7 +1056,7 @@ elseif(WIN32)
         src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/host/host_mac.c
+        src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
@@ -1313,11 +1326,6 @@ elseif(GNU)
    )
 endif()
 
-if(ENABLE_DIRECTX_HEADERS)
-    message(STATUS "Enabling DirectX headers for WSL")
-    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
-endif()
-
 # Proprietary GPU driver APIs
 if(LINUX OR FreeBSD OR WIN32)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
@@ -1463,10 +1471,10 @@ if(WIN32)
         target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MSVC_MSIZE=1)
     endif()
 
-    if(ENABLE_WIN7_COMPAT)
-        target_compile_definitions(libfastfetch PUBLIC FF_WIN7_COMPAT=1)
+    if(ENABLE_WIN81_COMPAT)
+        target_compile_definitions(libfastfetch PUBLIC FF_WIN81_COMPAT=1)
     else()
-        target_compile_definitions(libfastfetch PUBLIC FF_WIN7_COMPAT=0)
+        target_compile_definitions(libfastfetch PUBLIC FF_WIN81_COMPAT=0)
     endif()
 else()
     check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
@@ -1659,10 +1667,6 @@ ff_lib_enable(ELF
     "libelf"
     "libelf"
 )
-ff_lib_enable(DIRECTX_HEADERS
-    "DirectX-Headers"
-    "DirectX-Headers"
-)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
@@ -1738,7 +1742,7 @@ elseif(WIN32)
         PRIVATE "winbrand"
         PRIVATE "secur32"
     )
-    if(NOT ENABLE_WIN7_COMPAT)
+    if(NOT ENABLE_WIN81_COMPAT)
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
         )

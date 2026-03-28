@@ -23,7 +23,7 @@ bool ffPrintWeather(FFWeatherOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(result, "result"),
+            FF_ARG(result, "result"),
         }));
     }
 

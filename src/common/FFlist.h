@@ -106,6 +106,15 @@ static inline void ffListClear(FFlist* list)
     list->length = 0;
 }
 
+static inline void ffListReserve(FFlist* list, uint32_t newCapacity)
+{
+    if (__builtin_expect(newCapacity <= list->capacity, false))
+        return;
+
+    list->data = (uint8_t*) realloc(list->data, (size_t) newCapacity * list->elementSize);
+    list->capacity = newCapacity;
+}
+
 #define FF_LIST_FOR_EACH(itemType, itemVarName, listVar) \
     assert(sizeof(itemType) == (listVar).elementSize); \
     for(itemType* itemVarName = (itemType*)(listVar).data; \

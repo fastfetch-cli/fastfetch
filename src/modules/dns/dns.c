@@ -47,7 +47,7 @@ bool ffPrintDNS(FFDNSOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(buf, "result"),
+            FF_ARG(buf, "result"),
         }));
     }
 

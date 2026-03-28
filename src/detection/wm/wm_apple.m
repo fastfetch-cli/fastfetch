@@ -27,13 +27,19 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
         const char* comm = proc->kp_proc.p_comm;
 
         if(
-            !ffStrEqualsIgnCase(comm, "spectacle") &&
-            !ffStrEqualsIgnCase(comm, "amethyst") &&
-            !ffStrEqualsIgnCase(comm, "kwm") &&
-            !ffStrEqualsIgnCase(comm, "chunkwm") &&
-            !ffStrEqualsIgnCase(comm, "yabai") &&
-            !ffStrEqualsIgnCase(comm, "aerospace") &&
-            !ffStrEqualsIgnCase(comm, "rectangle")
+            !ffStrEqualsIgnCase(comm, "rectangle") && // 28.6k
+            !ffStrEqualsIgnCase(comm, "yabai") && // 28.4k
+            !ffStrEqualsIgnCase(comm, "aerospace") && // 19.6k
+            !ffStrEqualsIgnCase(comm, "amethyst") && // 16k
+            !ffStrEqualsIgnCase(comm, "glazewm") && // 11.6k
+
+            #if 0
+            // Unmaintained
+            !ffStrEqualsIgnCase(comm, "spectacle") && // 13.6k
+            !ffStrEqualsIgnCase(comm, "chunkwm") && // repo deleted; was https://github.com/koekeishiya/chunkwm
+            !ffStrEqualsIgnCase(comm, "kwm") && // repo deleted; was https://github.com/koekeishiya/kwm
+            #endif
+            true
         ) continue;
 
         if (instance.config.general.detectVersion)

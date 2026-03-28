@@ -18,6 +18,9 @@ def main(keep_vendor_list: set, pci_ids_path: str):
     with open(pci_ids_path, 'r') as f:
         full_text = f.read()
 
+    if full_text == '':
+        sys.exit(f'Error: {pci_ids_path} file is empty')
+
     dev_list_text = full_text[:full_text.rfind('\n\n\n')]  # remove known classes
     for line in dev_list_text.split('\n'):
         if not line or line[0] == '#':

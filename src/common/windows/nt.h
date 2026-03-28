@@ -14,8 +14,6 @@ enum {
     SystemSecureBootInformation = 146,
 };
 
-#define D3DKMT_ALIGN64 __attribute__((aligned(8)))
-
 typedef struct _PROCESSOR_POWER_INFORMATION {
     ULONG Number;
     ULONG MaxMhz;
@@ -25,7 +23,7 @@ typedef struct _PROCESSOR_POWER_INFORMATION {
     ULONG CurrentIdleState;
 } PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
 
-NTSTATUS NTAPI NtPowerInformation(
+NTSYSAPI NTSTATUS NTAPI NtPowerInformation(
     IN POWER_INFORMATION_LEVEL InformationLevel,
     IN PVOID InputBuffer OPTIONAL,
     IN ULONG InputBufferLength,
@@ -33,221 +31,11 @@ NTSTATUS NTAPI NtPowerInformation(
     IN ULONG OutputBufferLength);
 
 
-NTSTATUS NTAPI RtlGetVersion(
+NTSYSAPI NTSTATUS NTAPI RtlGetVersion(
     _Inout_ PRTL_OSVERSIONINFOW lpVersionInformation
 );
 
-#if __has_include(<d3dkmthk.h>)
-#include <d3dkmthk.h>
-#else
-typedef UINT D3DKMT_HANDLE;
-
-typedef struct _D3DKMT_OPENADAPTERFROMLUID
-{
-    LUID            AdapterLuid;
-    D3DKMT_HANDLE   hAdapter;
-} D3DKMT_OPENADAPTERFROMLUID;
-EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTOpenAdapterFromLuid(_Inout_ CONST D3DKMT_OPENADAPTERFROMLUID*);
-
-typedef struct _D3DKMT_CLOSEADAPTER
-{
-    D3DKMT_HANDLE   hAdapter;   // in: adapter handle
-} D3DKMT_CLOSEADAPTER;
-EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTCloseAdapter(_In_ CONST D3DKMT_CLOSEADAPTER*);
-
-typedef struct _D3DKMT_ADAPTERTYPE
-{
-    union
-    {
-        struct
-        {
-            UINT   RenderSupported              :  1; // WDDM 1.2, Windows 8
-            UINT   DisplaySupported             :  1;
-            UINT   SoftwareDevice               :  1;
-            UINT   PostDevice                   :  1;
-            UINT   HybridDiscrete               :  1; // WDDM 1.3, Windows 8.1
-            UINT   HybridIntegrated             :  1;
-            UINT   IndirectDisplayDevice        :  1;
-            UINT   Paravirtualized              :  1; // WDDM 2.3, Windows 10 Fall Creators Update (version 1709)
-            UINT   ACGSupported                 :  1;
-            UINT   SupportSetTimingsFromVidPn   :  1;
-            UINT   Detachable                   :  1;
-            UINT   ComputeOnly                  :  1; // WDDM 2.6, Windows 10 May 2019 Update (Version 1903)
-            UINT   Prototype                    :  1;
-            UINT   RuntimePowerManagement       :  1; // WDDM 2.9, Windows 10 Insider Preview "Iron"
-            UINT   Reserved                     : 18;
-        };
-        UINT Value;
-    };
-} D3DKMT_ADAPTERTYPE;
-
-typedef enum _KMTQUERYADAPTERINFOTYPE
-{
-    KMTQAITYPE_ADAPTERTYPE = 15,  // WDDM 1.2, Windows 8
-    KMTQAITYPE_NODEMETADATA = 25, // WDDM 2.0, Windows 10
-} KMTQUERYADAPTERINFOTYPE;
-typedef struct _D3DKMT_QUERYADAPTERINFO
-{
-    D3DKMT_HANDLE           hAdapter;
-    KMTQUERYADAPTERINFOTYPE Type;
-    VOID*                   pPrivateDriverData;
-    UINT                    PrivateDriverDataSize;
-} D3DKMT_QUERYADAPTERINFO;
-EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryAdapterInfo(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
-
-typedef enum _D3DKMT_QUERYSTATISTICS_TYPE
-{
-    D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER       = 10, // WDDM 2.4, Windows 10 April 2018 Update (version 1803)
-    D3DKMT_QUERYSTATISTICS_NODE2                  = 18, // WDDM 3.1, Windows 11 2022 Update (version 22H2)
-} D3DKMT_QUERYSTATISTICS_TYPE;
-typedef struct _D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER
-{
-    ULONG PhysicalAdapterIndex;
-} D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER;
-typedef struct _D3DKMT_QUERYSTATISTICS_QUERY_NODE2
-{
-    UINT16 PhysicalAdapterIndex;
-    UINT16 NodeOrdinal;
-} D3DKMT_QUERYSTATISTICS_QUERY_NODE2;
-typedef struct _D3DKMT_ADAPTER_PERFDATA
-{
-    UINT32          PhysicalAdapterIndex;   // in: The physical adapter index, in an LDA chain
-    D3DKMT_ALIGN64 ULONGLONG MemoryFrequency;        // out: Clock frequency of the memory in hertz
-    D3DKMT_ALIGN64 ULONGLONG MaxMemoryFrequency;     // out: Max memory clock frequency
-    D3DKMT_ALIGN64 ULONGLONG MaxMemoryFrequencyOC;   // out: Clock frequency of the memory while overclocked in hertz.
-    D3DKMT_ALIGN64 ULONGLONG MemoryBandwidth;        // out: Amount of memory transferred in bytes
-    D3DKMT_ALIGN64 ULONGLONG PCIEBandwidth;          // out: Amount of memory transferred over PCI-E in bytes
-    ULONG           FanRPM;                 // out: Fan rpm
-    ULONG           Power;                  // out: Power draw of the adapter in tenths of a percentage
-    ULONG           Temperature;            // out: Temperature in deci-Celsius 1 = 0.1C
-    UCHAR           PowerStateOverride;     // out: Overrides dxgkrnls power view of linked adapters.
-} D3DKMT_ADAPTER_PERFDATA;
-typedef struct _D3DKMT_ADAPTER_PERFDATACAPS
-{
-    UINT32      PhysicalAdapterIndex;   // in: The physical adapter index, in an LDA chain
-    D3DKMT_ALIGN64 ULONGLONG MaxMemoryBandwidth;     // out: Max memory bandwidth in bytes for 1 second
-    D3DKMT_ALIGN64 ULONGLONG MaxPCIEBandwidth;       // out: Max pcie bandwidth in bytes for 1 second
-    ULONG       MaxFanRPM;              // out: Max fan rpm
-    ULONG       TemperatureMax;         // out: Max temperature before damage levels
-    ULONG       TemperatureWarning;     // out: The temperature level where throttling begins.
-} D3DKMT_ADAPTER_PERFDATACAPS;
-
-#define DXGK_MAX_GPUVERSION_NAME_LENGTH 32
-typedef struct _D3DKMT_GPUVERSION
-{
-    UINT32          PhysicalAdapterIndex;                             // in: The physical adapter index, in an LDA chain
-    WCHAR           BiosVersion[DXGK_MAX_GPUVERSION_NAME_LENGTH];     //out: The gpu bios version
-    WCHAR           GpuArchitecture[DXGK_MAX_GPUVERSION_NAME_LENGTH]; //out: The gpu architectures name.
-} D3DKMT_GPUVERSION;
-typedef struct _D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION
-{
-    D3DKMT_ADAPTER_PERFDATA      AdapterPerfData;
-    D3DKMT_ADAPTER_PERFDATACAPS  AdapterPerfDataCaps;
-    D3DKMT_GPUVERSION            GpuVersion;
-} D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION;
-typedef struct _D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION {
-    D3DKMT_ALIGN64 UINT64                         Reserved[34];
-} D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION;
-typedef struct _D3DKMT_NODE_PERFDATA
-{
-    UINT32          NodeOrdinal;            // in: Node ordinal of the requested engine.
-    UINT32          PhysicalAdapterIndex;   // in: The physical adapter index, in an LDA chain
-    D3DKMT_ALIGN64 ULONGLONG Frequency;     // out: Clock frequency of the engine in hertz
-    D3DKMT_ALIGN64 ULONGLONG MaxFrequency;  // out: Max engine clock frequency
-    D3DKMT_ALIGN64 ULONGLONG MaxFrequencyOC;// out: Max engine over clock frequency
-    ULONG           Voltage;                // out: Voltage of the engine in milli volts mV
-    ULONG           VoltageMax;             // out: Max voltage levels in milli volts.
-    ULONG           VoltageMaxOC;           // out: Max voltage level while overclocked in milli volts.
-    // WDDM 2.5
-    D3DKMT_ALIGN64 ULONGLONG MaxTransitionLatency;   // out: Max transition latency to change the frequency in 100 nanoseconds
-} D3DKMT_NODE_PERFDATA;
-typedef struct _D3DKMT_QUERYSTATISTICS_NODE_INFORMATION {
-    D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION GlobalInformation; //Global statistics
-    D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION SystemInformation; //Statistics for system thread
-    D3DKMT_NODE_PERFDATA                            NodePerfData;
-    UINT32                                          Reserved[3];
-} D3DKMT_QUERYSTATISTICS_NODE_INFORMATION;
-typedef union _D3DKMT_QUERYSTATISTICS_RESULT
-{
-    D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION PhysAdapterInformation;
-    D3DKMT_QUERYSTATISTICS_NODE_INFORMATION NodeInformation;
-    uint8_t Padding[776];
-} D3DKMT_QUERYSTATISTICS_RESULT;
-typedef struct _D3DKMT_QUERYSTATISTICS
-{
-    D3DKMT_QUERYSTATISTICS_TYPE   Type;        // in: type of data requested
-    LUID                          AdapterLuid; // in: adapter to get export / statistics from
-    HANDLE*                       hProcess;    // in: process to get statistics for, if required for this query type
-    D3DKMT_QUERYSTATISTICS_RESULT QueryResult; // out: requested data
-
-    union
-    {
-        D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER QueryPhysAdapter; // in: id of physical adapter to get statistics for
-        D3DKMT_QUERYSTATISTICS_QUERY_NODE2 QueryNode2; // in: id of node to get statistics for
-    };
-} D3DKMT_QUERYSTATISTICS;
-static_assert(sizeof(D3DKMT_QUERYSTATISTICS) ==
-    #if _WIN64
-    0x328
-    #else
-    0x320
-    #endif
-, "D3DKMT_QUERYSTATISTICS structure size mismatch");
-EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKMT_QUERYSTATISTICS*);
-
-#define DXGK_MAX_METADATA_NAME_LENGTH 32
-typedef enum
-{
-    DXGK_ENGINE_TYPE_OTHER,
-    DXGK_ENGINE_TYPE_3D,
-    DXGK_ENGINE_TYPE_VIDEO_DECODE,
-    DXGK_ENGINE_TYPE_VIDEO_ENCODE,
-    DXGK_ENGINE_TYPE_VIDEO_PROCESSING,
-    DXGK_ENGINE_TYPE_SCENE_ASSEMBLY,
-    DXGK_ENGINE_TYPE_COPY,
-    DXGK_ENGINE_TYPE_OVERLAY,
-    DXGK_ENGINE_TYPE_CRYPTO,
-    DXGK_ENGINE_TYPE_VIDEO_CODEC,
-    DXGK_ENGINE_TYPE_MAX
-} DXGK_ENGINE_TYPE;
-typedef struct _DXGK_NODEMETADATA_FLAGS
-{
-    union
-    {
-        struct
-        {
-            UINT ContextSchedulingSupported :  1; // WDDM 2.2
-            UINT RingBufferFenceRelease     :  1; // WDDM 2.5
-            UINT SupportTrackedWorkload     :  1;
-            UINT UserModeSubmission         :  1;
-            UINT SupportBuildTestCommandBuffer :  1; // WDDM 3.2
-            UINT Reserved                   : 11;
-            UINT MaxInFlightHwQueueBuffers  : 16;
-        };
-        UINT32 Value;
-    };
-} DXGK_NODEMETADATA_FLAGS;
-typedef struct _DXGK_NODEMETADATA
-{
-    DXGK_ENGINE_TYPE EngineType;
-    WCHAR            FriendlyName[DXGK_MAX_METADATA_NAME_LENGTH];
-    DXGK_NODEMETADATA_FLAGS Flags; // WDDM 2.2
-    BOOLEAN          GpuMmuSupported; // WDDM 2.0 ???
-    BOOLEAN          IoMmuSupported;
-} __attribute__((packed))  DXGK_NODEMETADATA;
-typedef struct _D3DKMT_NODEMETADATA
-{
-    _In_ UINT NodeOrdinalAndAdapterIndex;     // WDDMv2: High word is physical adapter index, low word is node ordinal
-    _Out_ DXGK_NODEMETADATA NodeData;
-} __attribute__((packed))  D3DKMT_NODEMETADATA;
-static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structure size mismatch");
-
-#endif
-
-NTSYSCALLAPI
-NTSTATUS
-NTAPI
-NtQueryDirectoryFile(
+NTSYSAPI NTSTATUS NTAPI NtQueryDirectoryFile(
     IN HANDLE FileHandle,
     IN HANDLE Event OPTIONAL,
     IN PIO_APC_ROUTINE ApcRoutine OPTIONAL,
@@ -288,7 +76,7 @@ typedef struct _CURDIR
     HANDLE Handle;
 } CURDIR, *PCURDIR;
 
-PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
+NTSYSAPI PIMAGE_NT_HEADERS NTAPI RtlImageNtHeader(IN PVOID BaseOfImage);
 
 /**
  * The SECTION_IMAGE_INFORMATION structure contains detailed information about an image section.
@@ -394,6 +182,7 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
 );
 
 NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
+NTSTATUS NTAPI RtlStringFromGUIDEx(IN GUID* Guid, OUT PCUNICODE_STRING GuidString, _In_ BOOLEAN AllocateGuidString);
 
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION
 {
@@ -426,7 +215,7 @@ typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION
     _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
 } SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
 
-NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
+NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
 /**
  * The KSYSTEM_TIME structure represents interrupt time, system time, and time zone bias.
@@ -443,6 +232,20 @@ typedef struct _KSYSTEM_TIME
  * that may be reported by the system.
  */
 #define PROCESSOR_FEATURE_MAX 64
+
+/**
+ * The ALTERNATIVE_ARCHITECTURE_TYPE enumeration specifies the hardware
+ * architecture variant used by the system.
+ *
+ * \remarks NEC98x86 represents the NEC PC-98 architecture,
+ * supported only on very early Windows releases.
+ */
+typedef enum _ALTERNATIVE_ARCHITECTURE_TYPE
+{
+    StandardDesign,
+    NEC98x86,
+    EndAlternatives
+} ALTERNATIVE_ARCHITECTURE_TYPE;
 
 /**
  * The KUSER_SHARED_DATA structure contains information shared with user-mode.
@@ -632,6 +435,196 @@ typedef struct _KUSER_SHARED_DATA
 
     BOOLEAN ProcessorFeatures[PROCESSOR_FEATURE_MAX];
 
+
+    //
+    // Reserved fields - do not use.
+    //
+
+    ULONG MaximumUserModeAddressDeprecated; // Deprecated, use SystemBasicInformation instead.
+    ULONG SystemRangeStartDeprecated; // Deprecated, use SystemRangeStartInformation instead.
+
+    //
+    // Time slippage while in debugger.
+    //
+
+    volatile ULONG TimeSlip;
+
+    //
+    // Alternative system architecture, e.g., NEC PC98xx on x86.
+    //
+
+    ALTERNATIVE_ARCHITECTURE_TYPE AlternativeArchitecture;
+
+    //
+    // Boot sequence, incremented for each boot attempt by the OS loader.
+    //
+
+    ULONG BootId;
+
+    //
+    // If the system is an evaluation unit, the following field contains the
+    // date and time that the evaluation unit expires. A value of 0 indicates
+    // that there is no expiration. A non-zero value is the UTC absolute time
+    // that the system expires.
+    //
+
+    LARGE_INTEGER SystemExpirationDate;
+
+    //
+    // Suite support.
+    //
+    // N.B. This field must be accessed via the RtlGetSuiteMask API for
+    //      an accurate result.
+    //
+
+    ULONG SuiteMask;
+
+    //
+    // TRUE if a kernel debugger is connected/enabled.
+    //
+
+    BOOLEAN KdDebuggerEnabled;
+
+    //
+    // Mitigation policies.
+    //
+
+    union
+    {
+        UCHAR MitigationPolicies;
+        struct
+        {
+            UCHAR NXSupportPolicy : 2;
+            UCHAR SEHValidationPolicy : 2;
+            UCHAR CurDirDevicesSkippedForDlls : 2;
+            UCHAR Reserved : 2;
+        };
+    };
+
+    //
+    // Measured duration of a single processor yield, in cycles. This is used by
+    // lock packages to determine how many times to spin waiting for a state
+    // change before blocking.
+    //
+
+    USHORT CyclesPerYield;
+
+    //
+    // Current console session Id. Always zero on non-TS systems.
+    //
+    // N.B. This field must be accessed via the RtlGetActiveConsoleId API for an
+    //      accurate result.
+    //
+
+    volatile ULONG ActiveConsoleId;
+
+    //
+    // Force-dismounts cause handles to become invalid. Rather than always
+    // probe handles, a serial number of dismounts is maintained that clients
+    // can use to see if they need to probe handles.
+    //
+
+    volatile ULONG DismountCount;
+
+    //
+    // This field indicates the status of the 64-bit COM+ package on the
+    // system. It indicates whether the Intermediate Language (IL) COM+
+    // images need to use the 64-bit COM+ runtime or the 32-bit COM+ runtime.
+    //
+
+    ULONG ComPlusPackage;
+
+    //
+    // Time in tick count for system-wide last user input across all terminal
+    // sessions. For MP performance, it is not updated all the time (e.g. once
+    // a minute per session). It is used for idle detection.
+    //
+
+    ULONG LastSystemRITEventTickCount;
+
+    //
+    // Number of physical pages in the system. This can dynamically change as
+    // physical memory can be added or removed from a running system.  This
+    // cell is too small to hold the non-truncated value on very large memory
+    // machines so code that needs the full value should access
+    // FullNumberOfPhysicalPages instead.
+    //
+
+    ULONG NumberOfPhysicalPages;
+
+    //
+    // True if the system was booted in safe boot mode.
+    //
+
+    BOOLEAN SafeBootMode;
+
+    //
+    // Virtualization flags.
+    //
+
+    union
+    {
+        UCHAR VirtualizationFlags;
+
+#if defined(_ARM64_)
+
+        //
+        // N.B. Keep this bitfield in sync with the one in arc.w.
+        //
+
+        struct
+        {
+            UCHAR ArchStartedInEl2 : 1;
+            UCHAR QcSlIsSupported : 1;
+            UCHAR : 6;
+        };
+
+#endif
+
+    };
+
+    //
+    // Reserved (available for reuse).
+    //
+
+    UCHAR Reserved12[2];
+
+    //
+    // This is a packed bitfield that contains various flags concerning
+    // the system state. They must be manipulated using interlocked
+    // operations.
+    //
+    // N.B. DbgMultiSessionSku must be accessed via the RtlIsMultiSessionSku
+    //      API for an accurate result
+    //
+
+    union
+    {
+        ULONG SharedDataFlags;
+        struct
+        {
+            //
+            // The following bit fields are for the debugger only. Do not use.
+            // Use the bit definitions instead.
+            //
+
+            ULONG DbgErrorPortPresent       : 1;
+            ULONG DbgElevationEnabled       : 1;
+            ULONG DbgVirtEnabled            : 1;
+            ULONG DbgInstallerDetectEnabled : 1;
+            ULONG DbgLkgEnabled             : 1;
+            ULONG DbgDynProcessorEnabled    : 1;
+            ULONG DbgConsoleBrokerEnabled   : 1;
+            ULONG DbgSecureBootEnabled      : 1;
+            ULONG DbgMultiSessionSku        : 1;
+            ULONG DbgMultiUsersInSessionSku : 1;
+            ULONG DbgStateSeparationEnabled : 1;
+            ULONG DbgSplitTokenEnabled      : 1;
+            ULONG DbgShadowAdminEnabled     : 1;
+            ULONG SpareBits                 : 19;
+        };
+    };
+
     // ... more fields follow, but we don't need them
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
 
@@ -641,7 +634,9 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 {
     #if _WIN64
 
-    return *(uint64_t*) pTime;
+    // This is safe even if pTime is not 8-byte aligned
+    // See https://learn.microsoft.com/en-us/windows/win32/winprog64/fault-alignments
+    return *(const volatile uint64_t*) pTime;
 
     #else
 
@@ -659,7 +654,7 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 
 static inline bool ffIsWindows10OrGreater()
 {
-    #if FF_WIN7_COMPAT
+    #if FF_WIN81_COMPAT
     return SharedUserData->NtMajorVersion >= 10;
     #else
     return true;
@@ -670,3 +665,722 @@ static inline bool ffIsWindows11OrGreater()
 {
     return ffIsWindows10OrGreater() && SharedUserData->NtBuildNumber >= 22000;
 }
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
+    _In_ HANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _Out_ PHANDLE TokenHandle
+);
+NTSYSAPI NTSTATUS NTAPI NtAdjustPrivilegesToken(
+    _In_ HANDLE TokenHandle,
+    _In_ BOOLEAN DisableAllPrivileges,
+    _In_opt_ PTOKEN_PRIVILEGES NewState,
+    _In_ ULONG BufferLength,
+    _Out_writes_bytes_to_opt_(BufferLength, *ReturnLength) PTOKEN_PRIVILEGES PreviousState,
+    _Out_opt_ PULONG ReturnLength
+);
+NTSYSAPI NTSTATUS NTAPI NtQueryInformationToken(
+    _In_ HANDLE TokenHandle,
+    _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
+    _Out_writes_bytes_to_opt_(TokenInformationLength, *ReturnLength) PVOID TokenInformation,
+    _In_ ULONG TokenInformationLength,
+    _Out_ PULONG ReturnLength
+);
+#define NtCurrentProcessToken() ((HANDLE)(LONG_PTR)-4) // for NtQueryInformationToken only; Windows 8+
+
+NTSYSAPI NTSTATUS NTAPI NtReadFile(
+    _In_ HANDLE FileHandle,
+    _In_opt_ HANDLE Event,
+    _In_opt_ PIO_APC_ROUTINE ApcRoutine,
+    _In_opt_ PVOID ApcContext,
+    _Out_ PIO_STATUS_BLOCK IoStatusBlock,
+    _Out_writes_bytes_(Length) PVOID Buffer,
+    _In_ ULONG Length,
+    _In_opt_ PLARGE_INTEGER ByteOffset,
+    _In_opt_ PULONG Key
+);
+
+NTSYSAPI NTSTATUS NTAPI NtCreateEvent(
+    _Out_ PHANDLE EventHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _In_ EVENT_TYPE EventType,
+    _In_ BOOLEAN InitialState
+);
+
+NTSYSAPI NTSTATUS NTAPI NtQueryAttributesFile(
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _Out_ PFILE_BASIC_INFORMATION FileInformation
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUnicodeToUTF8N(
+    _Out_writes_bytes_to_(UTF8StringMaxByteCount, *UTF8StringActualByteCount) PCHAR UTF8StringDestination,
+    _In_ ULONG UTF8StringMaxByteCount,
+    _Out_opt_ PULONG UTF8StringActualByteCount,
+    _In_reads_bytes_(UnicodeStringByteCount) PCWCH UnicodeStringSource,
+    _In_ ULONG UnicodeStringByteCount
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlUTF8ToUnicodeN(
+    _Out_writes_bytes_to_(UnicodeStringMaxByteCount, *UnicodeStringActualByteCount) PWSTR UnicodeStringDestination,
+    _In_ ULONG UnicodeStringMaxByteCount,
+    _Out_opt_ PULONG UnicodeStringActualByteCount,
+    _In_reads_bytes_(UTF8StringByteCount) PCCH UTF8StringSource,
+    _In_ ULONG UTF8StringByteCount
+);
+
+#define RTL_MAX_DRIVE_LETTERS 32
+typedef struct _RTL_DRIVE_LETTER_CURDIR
+{
+    USHORT Flags;
+    USHORT Length;
+    ULONG TimeStamp;
+    STRING DosPath;
+} RTL_DRIVE_LETTER_CURDIR, *PRTL_DRIVE_LETTER_CURDIR;
+
+typedef struct _RTL_USER_PROCESS_PARAMETERS_FULL
+{
+    ULONG MaximumLength;
+    ULONG Length;
+
+    ULONG Flags;
+    ULONG DebugFlags;
+
+    HANDLE ConsoleHandle;
+    ULONG ConsoleFlags;
+    HANDLE StandardInput;
+    HANDLE StandardOutput;
+    HANDLE StandardError;
+
+    CURDIR CurrentDirectory;
+    UNICODE_STRING DllPath;
+    UNICODE_STRING ImagePathName;
+    UNICODE_STRING CommandLine;
+    PVOID Environment;
+
+    ULONG StartingX;
+    ULONG StartingY;
+    ULONG CountX;
+    ULONG CountY;
+    ULONG CountCharsX;
+    ULONG CountCharsY;
+    ULONG FillAttribute;
+
+    ULONG WindowFlags;
+    ULONG ShowWindowFlags;
+    UNICODE_STRING WindowTitle;
+    UNICODE_STRING DesktopInfo;
+    UNICODE_STRING ShellInfo;
+    UNICODE_STRING RuntimeData;
+    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[RTL_MAX_DRIVE_LETTERS];
+
+    // Windows Vista
+    ULONG_PTR EnvironmentSize;
+    // Windows 7
+    ULONG_PTR EnvironmentVersion;
+
+    // Windows 8
+    PVOID PackageDependencyData;
+    ULONG ProcessGroupId;
+
+    // ...
+} RTL_USER_PROCESS_PARAMETERS_FULL, *PRTL_USER_PROCESS_PARAMETERS_FULL;
+
+typedef struct KERNEL_CALLBACK_TABLE* PKERNEL_CALLBACK_TABLE;
+typedef struct API_SET_NAMESPACE* PAPI_SET_NAMESPACE;
+typedef struct RTL_BITMAP* PRTL_BITMAP;
+typedef struct SILO_USER_SHARED_DATA* PSILO_USER_SHARED_DATA;
+typedef struct CPTABLEINFO* PCPTABLEINFO;
+typedef struct NLSTABLEINFO* PNLSTABLEINFO;
+typedef struct GDI_HANDLE_ENTRY* PGDI_HANDLE_ENTRY;
+
+typedef struct _PEB_FULL
+{
+    //
+    // The process was cloned with an inherited address space.
+    //
+    BOOLEAN InheritedAddressSpace;
+
+    //
+    // The process has image file execution options (IFEO).
+    //
+    BOOLEAN ReadImageFileExecOptions;
+
+    //
+    // The process has a debugger attached.
+    //
+    BOOLEAN BeingDebugged;
+
+    union
+    {
+        BOOLEAN BitField;
+        struct
+        {
+            BOOLEAN ImageUsesLargePages : 1;            // The process uses large image regions (4 MB).
+            BOOLEAN IsProtectedProcess : 1;             // The process is a protected process.
+            BOOLEAN IsImageDynamicallyRelocated : 1;    // The process image base address was relocated.
+            BOOLEAN SkipPatchingUser32Forwarders : 1;   // The process skipped forwarders for User32.dll functions. 1 for 64-bit, 0 for 32-bit.
+            BOOLEAN IsPackagedProcess : 1;              // The process is a packaged store process (APPX/MSIX).
+            BOOLEAN IsAppContainerProcess : 1;          // The process has an AppContainer token.
+            BOOLEAN IsProtectedProcessLight : 1;        // The process is a protected process (light).
+            BOOLEAN IsLongPathAwareProcess : 1;         // The process is long path aware.
+        };
+    };
+
+    //
+    // Handle to a mutex for synchronization.
+    //
+    HANDLE Mutant;
+
+    //
+    // Pointer to the base address of the process image.
+    //
+    PVOID ImageBaseAddress;
+
+    //
+    // Pointer to the process loader data.
+    //
+    PPEB_LDR_DATA Ldr;
+
+    //
+    // Pointer to the process parameters.
+    //
+    PRTL_USER_PROCESS_PARAMETERS_FULL ProcessParameters;
+
+    //
+    // Reserved.
+    //
+    PVOID SubSystemData;
+
+    //
+    // Pointer to the process default heap.
+    //
+    PVOID ProcessHeap;
+
+    //
+    // Pointer to a critical section used to synchronize access to the PEB.
+    //
+    PRTL_CRITICAL_SECTION FastPebLock;
+
+    //
+    // Pointer to a singly linked list used by ATL.
+    //
+    PSLIST_HEADER AtlThunkSListPtr;
+
+    //
+    // Handle to the Image File Execution Options key.
+    //
+    HANDLE IFEOKey;
+
+    //
+    // Cross process flags.
+    //
+    union
+    {
+        ULONG CrossProcessFlags;
+        struct
+        {
+            ULONG ProcessInJob : 1;                 // The process is part of a job.
+            ULONG ProcessInitializing : 1;          // The process is initializing.
+            ULONG ProcessUsingVEH : 1;              // The process is using VEH.
+            ULONG ProcessUsingVCH : 1;              // The process is using VCH.
+            ULONG ProcessUsingFTH : 1;              // The process is using FTH.
+            ULONG ProcessPreviouslyThrottled : 1;   // The process was previously throttled.
+            ULONG ProcessCurrentlyThrottled : 1;    // The process is currently throttled.
+            ULONG ProcessImagesHotPatched : 1;      // The process images are hot patched. // RS5
+            ULONG ReservedBits0 : 24;
+        };
+    };
+
+    //
+    // User32 KERNEL_CALLBACK_TABLE (ntuser.h)
+    //
+    union
+    {
+        PKERNEL_CALLBACK_TABLE KernelCallbackTable;
+        PVOID UserSharedInfoPtr;
+    };
+
+    //
+    // Reserved.
+    //
+    ULONG SystemReserved;
+
+    //
+    // Pointer to the Active Template Library (ATL) singly linked list (32-bit)
+    //
+    ULONG AtlThunkSListPtr32;
+
+    //
+    // Pointer to the API Set Schema.
+    //
+    PAPI_SET_NAMESPACE ApiSetMap;
+
+    //
+    // Counter for TLS expansion.
+    //
+    ULONG TlsExpansionCounter;
+
+    //
+    // Pointer to the TLS bitmap.
+    //
+    PRTL_BITMAP TlsBitmap;
+
+    //
+    // Bits for the TLS bitmap.
+    //
+    ULONG TlsBitmapBits[2];
+
+    //
+    // Reserved for CSRSS.
+    //
+    PVOID ReadOnlySharedMemoryBase;
+
+    //
+    // Pointer to the USER_SHARED_DATA for the current SILO.
+    //
+    PSILO_USER_SHARED_DATA SharedData;
+
+    //
+    // Reserved for CSRSS.
+    //
+    PVOID* ReadOnlyStaticServerData;
+
+    //
+    // Pointer to the ANSI code page data.
+    //
+    PCPTABLEINFO AnsiCodePageData;
+
+    //
+    // Pointer to the OEM code page data.
+    //
+    PCPTABLEINFO OemCodePageData;
+
+    //
+    // Pointer to the Unicode case table data.
+    //
+    PNLSTABLEINFO UnicodeCaseTableData;
+
+    //
+    // The total number of system processors.
+    //
+    ULONG NumberOfProcessors;
+
+    //
+    // Global flags for the system.
+    //
+    union
+    {
+        ULONG NtGlobalFlag;
+        struct
+        {
+            ULONG StopOnException : 1;          // FLG_STOP_ON_EXCEPTION
+            ULONG ShowLoaderSnaps : 1;          // FLG_SHOW_LDR_SNAPS
+            ULONG DebugInitialCommand : 1;      // FLG_DEBUG_INITIAL_COMMAND
+            ULONG StopOnHungGUI : 1;            // FLG_STOP_ON_HUNG_GUI
+            ULONG HeapEnableTailCheck : 1;      // FLG_HEAP_ENABLE_TAIL_CHECK
+            ULONG HeapEnableFreeCheck : 1;      // FLG_HEAP_ENABLE_FREE_CHECK
+            ULONG HeapValidateParameters : 1;   // FLG_HEAP_VALIDATE_PARAMETERS
+            ULONG HeapValidateAll : 1;          // FLG_HEAP_VALIDATE_ALL
+            ULONG ApplicationVerifier : 1;      // FLG_APPLICATION_VERIFIER
+            ULONG MonitorSilentProcessExit : 1; // FLG_MONITOR_SILENT_PROCESS_EXIT
+            ULONG PoolEnableTagging : 1;        // FLG_POOL_ENABLE_TAGGING
+            ULONG HeapEnableTagging : 1;        // FLG_HEAP_ENABLE_TAGGING
+            ULONG UserStackTraceDb : 1;         // FLG_USER_STACK_TRACE_DB
+            ULONG KernelStackTraceDb : 1;       // FLG_KERNEL_STACK_TRACE_DB
+            ULONG MaintainObjectTypeList : 1;   // FLG_MAINTAIN_OBJECT_TYPELIST
+            ULONG HeapEnableTagByDll : 1;       // FLG_HEAP_ENABLE_TAG_BY_DLL
+            ULONG DisableStackExtension : 1;    // FLG_DISABLE_STACK_EXTENSION
+            ULONG EnableCsrDebug : 1;           // FLG_ENABLE_CSRDEBUG
+            ULONG EnableKDebugSymbolLoad : 1;   // FLG_ENABLE_KDEBUG_SYMBOL_LOAD
+            ULONG DisablePageKernelStacks : 1;  // FLG_DISABLE_PAGE_KERNEL_STACKS
+            ULONG EnableSystemCritBreaks : 1;   // FLG_ENABLE_SYSTEM_CRIT_BREAKS
+            ULONG HeapDisableCoalescing : 1;    // FLG_HEAP_DISABLE_COALESCING
+            ULONG EnableCloseExceptions : 1;    // FLG_ENABLE_CLOSE_EXCEPTIONS
+            ULONG EnableExceptionLogging : 1;   // FLG_ENABLE_EXCEPTION_LOGGING
+            ULONG EnableHandleTypeTagging : 1;  // FLG_ENABLE_HANDLE_TYPE_TAGGING
+            ULONG HeapPageAllocs : 1;           // FLG_HEAP_PAGE_ALLOCS
+            ULONG DebugInitialCommandEx : 1;    // FLG_DEBUG_INITIAL_COMMAND_EX
+            ULONG DisableDbgPrint : 1;          // FLG_DISABLE_DBGPRINT
+            ULONG CritSecEventCreation : 1;     // FLG_CRITSEC_EVENT_CREATION
+            ULONG LdrTopDown : 1;               // FLG_LDR_TOP_DOWN
+            ULONG EnableHandleExceptions : 1;   // FLG_ENABLE_HANDLE_EXCEPTIONS
+            ULONG DisableProtDlls : 1;          // FLG_DISABLE_PROTDLLS
+        } NtGlobalFlags;
+    };
+
+    //
+    // Timeout for critical sections.
+    //
+    LARGE_INTEGER CriticalSectionTimeout;
+
+    //
+    // Reserved size for heap segments.
+    //
+    SIZE_T HeapSegmentReserve;
+
+    //
+    // Committed size for heap segments.
+    //
+    SIZE_T HeapSegmentCommit;
+
+    //
+    // Threshold for decommitting total free heap.
+    //
+    SIZE_T HeapDeCommitTotalFreeThreshold;
+
+    //
+    // Threshold for decommitting free heap blocks.
+    //
+    SIZE_T HeapDeCommitFreeBlockThreshold;
+
+    //
+    // Number of process heaps.
+    //
+    ULONG NumberOfHeaps;
+
+    //
+    // Maximum number of process heaps.
+    //
+    ULONG MaximumNumberOfHeaps;
+
+    //
+    // Pointer to an array of process heaps. ProcessHeaps is initialized
+    // to point to the first free byte after the PEB and MaximumNumberOfHeaps
+    // is computed from the page size used to hold the PEB, less the fixed
+    // size of this data structure.
+    //
+    PVOID* ProcessHeaps;
+
+    //
+    // Pointer to the system GDI shared handle table.
+    //
+    PGDI_HANDLE_ENTRY GdiSharedHandleTable;
+
+    //
+    // Pointer to the process starter helper.
+    //
+    PVOID ProcessStarterHelper;
+
+    //
+    // The maximum number of GDI function calls during batch operations (GdiSetBatchLimit)
+    //
+    ULONG GdiDCAttributeList;
+
+    //
+    // Pointer to the loader lock critical section.
+    //
+    PRTL_CRITICAL_SECTION LoaderLock;
+
+    //
+    // Major version of the operating system.
+    //
+    ULONG OSMajorVersion;
+
+    //
+    // Minor version of the operating system.
+    //
+    ULONG OSMinorVersion;
+
+    //
+    // Build number of the operating system.
+    //
+    USHORT OSBuildNumber;
+
+    //
+    // CSD version of the operating system.
+    //
+    USHORT OSCSDVersion;
+
+    //
+    // Platform ID of the operating system.
+    //
+    ULONG OSPlatformId;
+
+    //
+    // Subsystem version of the current process image (PE Headers).
+    //
+    ULONG ImageSubsystem;
+
+    //
+    // Major version of the current process image subsystem (PE Headers).
+    //
+    ULONG ImageSubsystemMajorVersion;
+
+    //
+    // Minor version of the current process image subsystem (PE Headers).
+    //
+    ULONG ImageSubsystemMinorVersion;
+
+    // ...
+} PEB_FULL, *PPEB_FULL;
+
+typedef struct _TEB_FULL
+{
+    //
+    // Thread Information Block (TIB) contains the thread's stack, base and limit addresses, the current stack pointer, and the exception list.
+    //
+    NT_TIB NtTib;
+
+    //
+    // Reserved.
+    //
+    PVOID EnvironmentPointer;
+
+    //
+    // Client ID for this thread.
+    //
+    CLIENT_ID ClientId;
+
+    //
+    // A handle to an active Remote Procedure Call (RPC) if the thread is currently involved in an RPC operation.
+    //
+    PVOID ActiveRpcHandle;
+
+    //
+    // A pointer to the __declspec(thread) local storage array.
+    //
+    PVOID ThreadLocalStoragePointer;
+
+    //
+    // A pointer to the Process Environment Block (PEB), which contains information about the process.
+    //
+    PPEB_FULL ProcessEnvironmentBlock;
+
+    //
+    // The previous Win32 error value for this thread.
+    //
+    ULONG LastErrorValue;
+
+    //
+    // The number of critical sections currently owned by this thread.
+    //
+    ULONG CountOfOwnedCriticalSections;
+
+    //
+    // Reserved.
+    //
+    PVOID CsrClientThread;
+
+    //
+    // Reserved for win32k.sys
+    //
+    PVOID Win32ThreadInfo;
+
+    //
+    // Reserved for user32.dll
+    //
+    ULONG User32Reserved[26];
+
+    //
+    // Reserved for winsrv.dll
+    //
+    ULONG UserReserved[5];
+
+    //
+    // Reserved.
+    //
+    PVOID WOW32Reserved;
+
+    //
+    // The LCID of the current thread. (Kernel32!GetThreadLocale)
+    //
+    LCID CurrentLocale;
+} TEB_FULL, *PTEB_FULL;
+
+static inline PTEB_FULL ffGetTeb()
+{
+    return (PTEB_FULL) NtCurrentTeb();
+}
+
+static inline PPEB_FULL ffGetPeb()
+{
+    return ffGetTeb()->ProcessEnvironmentBlock;
+}
+
+NTSYSAPI NTSTATUS NTAPI RtlExpandEnvironmentStrings(
+    _In_opt_ PVOID Environment,
+    _In_reads_(SourceLength) PCWSTR Source,
+    _In_ SIZE_T SourceLength,
+    _Out_writes_(DestinationLength) PWSTR Destination,
+    _In_ SIZE_T DestinationLength,
+    _Out_opt_ PSIZE_T ReturnLength
+);
+
+NTSYSAPI NTSTATUS NTAPI NtOpenKey(
+    _Out_ PHANDLE KeyHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ POBJECT_ATTRIBUTES ObjectAttributes
+);
+
+typedef enum _KEY_VALUE_INFORMATION_CLASS
+{
+    KeyValueBasicInformation, // KEY_VALUE_BASIC_INFORMATION
+    KeyValueFullInformation, // KEY_VALUE_FULL_INFORMATION
+    KeyValuePartialInformation, // KEY_VALUE_PARTIAL_INFORMATION
+    KeyValueFullInformationAlign64, // KEY_VALUE_FULL_INFORMATION_ALIGN64
+    KeyValuePartialInformationAlign64,  // KEY_VALUE_PARTIAL_INFORMATION_ALIGN64
+    KeyValueLayerInformation, // KEY_VALUE_LAYER_INFORMATION
+    MaxKeyValueInfoClass
+} KEY_VALUE_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryValueKey(
+    _In_ HANDLE KeyHandle,
+    _In_ PCUNICODE_STRING ValueName,
+    _In_ KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyValueInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+NTSYSAPI NTSTATUS NTAPI RtlOpenCurrentUser(
+    _In_ ACCESS_MASK DesiredAccess,
+    _Out_ PHANDLE CurrentUserKey
+);
+
+typedef struct _KEY_VALUE_PARTIAL_INFORMATION
+{
+    ULONG TitleIndex;
+    ULONG Type;
+    ULONG DataLength;
+    _Field_size_bytes_(DataLength) UCHAR Data[];
+} KEY_VALUE_PARTIAL_INFORMATION, *PKEY_VALUE_PARTIAL_INFORMATION;
+
+typedef enum _KEY_INFORMATION_CLASS
+{
+    KeyBasicInformation, // KEY_BASIC_INFORMATION
+    KeyNodeInformation, // KEY_NODE_INFORMATION
+    KeyFullInformation, // KEY_FULL_INFORMATION
+    KeyNameInformation, // KEY_NAME_INFORMATION
+    KeyCachedInformation, // KEY_CACHED_INFORMATION
+    KeyFlagsInformation, // KEY_FLAGS_INFORMATION
+    KeyVirtualizationInformation, // KEY_VIRTUALIZATION_INFORMATION
+    KeyHandleTagsInformation, // KEY_HANDLE_TAGS_INFORMATION
+    KeyTrustInformation, // KEY_TRUST_INFORMATION
+    KeyLayerInformation, // KEY_LAYER_INFORMATION
+    MaxKeyInfoClass
+} KEY_INFORMATION_CLASS;
+
+NTSYSAPI NTSTATUS NTAPI NtEnumerateKey(
+    _In_ HANDLE KeyHandle,
+    _In_ ULONG Index,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+typedef struct _KEY_BASIC_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;                    // Number of 100-nanosecond intervals since this key or any of its values changed.
+    ULONG TitleIndex;                               // Reserved // A legacy field originally intended for use with localization such as an index of a resource table.
+    ULONG NameLength;                               // The size, in bytes, of the key name string in the Name array.
+    _Field_size_bytes_(NameLength) WCHAR Name[];   // The name of the registry key. This string is not null-terminated.
+} KEY_BASIC_INFORMATION, *PKEY_BASIC_INFORMATION;
+
+typedef struct _KEY_FULL_INFORMATION
+{
+    LARGE_INTEGER LastWriteTime;
+    ULONG TitleIndex;
+    ULONG ClassOffset;
+    ULONG ClassLength;
+    ULONG SubKeys;
+    ULONG MaxNameLength;
+    ULONG MaxClassLength;
+    ULONG Values;
+    ULONG MaxValueNameLength;
+    ULONG MaxValueDataLength;
+    WCHAR Class[];
+} KEY_FULL_INFORMATION, *PKEY_FULL_INFORMATION;
+
+NTSYSAPI NTSTATUS NTAPI NtQueryKey(
+    _In_ HANDLE KeyHandle,
+    _In_ KEY_INFORMATION_CLASS KeyInformationClass,
+    _Out_writes_bytes_to_opt_(Length, *ResultLength) PVOID KeyInformation,
+    _In_ ULONG Length,
+    _Out_ PULONG ResultLength
+);
+
+NTSYSAPI NTSTATUS NTAPI NtOpenProcess(
+    _Out_ PHANDLE ProcessHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_ PCOBJECT_ATTRIBUTES ObjectAttributes,
+    _In_opt_ PCLIENT_ID ClientId
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrLoadDll(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrUnloadDll(
+    _In_ PVOID DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetDllHandle(
+    _In_opt_ PCWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PCUNICODE_STRING DllName,
+    _Out_ PVOID *DllHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
+    _In_ PVOID DllHandle,
+    _In_opt_ PCANSI_STRING ProcedureName,
+    _In_opt_ ULONG ProcedureNumber,
+    _Out_ PVOID *ProcedureAddress
+);
+
+typedef enum _SECTION_INHERIT {
+    ViewShare = 1,
+    ViewUnmap = 2
+} SECTION_INHERIT;
+
+NTSYSAPI NTSTATUS NTAPI NtCreateSection(
+    _Out_ PHANDLE SectionHandle,
+    _In_ ACCESS_MASK DesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _In_opt_ PLARGE_INTEGER MaximumSize,
+    _In_ ULONG SectionPageProtection,
+    _In_ ULONG AllocationAttributes,
+    _In_opt_ HANDLE FileHandle
+);
+
+NTSYSAPI NTSTATUS NTAPI NtMapViewOfSection(
+    _In_ HANDLE SectionHandle,
+    _In_ HANDLE ProcessHandle,
+    _Inout_ _At_(*BaseAddress, _Readable_bytes_(*ViewSize) _Writable_bytes_(*ViewSize) _Post_readable_byte_size_(*ViewSize)) PVOID *BaseAddress,
+    _In_ ULONG_PTR ZeroBits,
+    _In_ SIZE_T CommitSize,
+    _Inout_opt_ PLARGE_INTEGER SectionOffset,
+    _Inout_ PSIZE_T ViewSize,
+    _In_ SECTION_INHERIT InheritDisposition,
+    _In_ ULONG AllocationType,
+    _In_ ULONG PageProtection
+);
+
+NTSYSAPI NTSTATUS NTAPI NtUnmapViewOfSection(
+    _In_ HANDLE ProcessHandle,
+    _In_opt_ PVOID BaseAddress
+);
+
+NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceCounter(
+    _Out_ PLARGE_INTEGER PerformanceCounter
+);
+
+NTSYSAPI LOGICAL NTAPI RtlQueryPerformanceFrequency(
+    _Out_ PLARGE_INTEGER PerformanceFrequency
+);
+
+NTSYSAPI NTSTATUS NTAPI NtCancelIoFileEx(
+    _In_ HANDLE FileHandle,
+    _In_opt_ PIO_STATUS_BLOCK IoRequestToCancel,
+    _Out_ PIO_STATUS_BLOCK IoStatusBlock
+);
+
+NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
+    _In_opt_ HANDLE ProcessHandle,
+    _In_ NTSTATUS ExitStatus
+);

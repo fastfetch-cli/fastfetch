@@ -43,10 +43,10 @@ bool ffPrintVulkan(FFVulkanOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(vulkan->driver, "driver"),
-            FF_FORMAT_ARG(vulkan->apiVersion, "api-version"),
-            FF_FORMAT_ARG(vulkan->conformanceVersion, "conformance-version"),
-            FF_FORMAT_ARG(vulkan->instanceVersion, "instance-version"),
+            FF_ARG(vulkan->driver, "driver"),
+            FF_ARG(vulkan->apiVersion, "api-version"),
+            FF_ARG(vulkan->conformanceVersion, "conformance-version"),
+            FF_ARG(vulkan->instanceVersion, "instance-version"),
         }));
     }
 

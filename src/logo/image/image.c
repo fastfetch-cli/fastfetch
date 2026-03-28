@@ -407,17 +407,7 @@ static bool printImageKittyDirect(bool printError)
 #include <sys/ioctl.h>
 #else
 #include <wincon.h>
-
-static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
-{
-    char* result = _fullpath(resolved_name, file_name, _MAX_PATH);
-    if(result)
-    {
-        resolved_name[1] = resolved_name[0]; // Drive Name
-        resolved_name[0] = '/';
-    }
-    return result;
-}
+#include "common/path.h"
 #endif
 
 #ifdef FF_HAVE_ZLIB
@@ -960,8 +950,8 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData)
 {
     #ifdef _WIN32
 
-    CONSOLE_FONT_INFO cfi;
-    if(GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) // Only works for ConHost
+    CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
+    if(GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) // Only works for ConHost
     {
         requestData->characterPixelWidth = cfi.dwFontSize.X;
         requestData->characterPixelHeight = cfi.dwFontSize.Y;
@@ -1002,7 +992,8 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     ffStrbufAppendS(&requestData.cacheDir, "fastfetch/images");
 
     ffStrbufEnsureFree(&requestData.cacheDir, PATH_MAX);
-    if(realpath(instance.config.logo.source.chars, requestData.cacheDir.chars + requestData.cacheDir.length) == NULL)
+    char* filePath = requestData.cacheDir.chars + requestData.cacheDir.length;
+    if(realpath(instance.config.logo.source.chars, filePath) == NULL)
     {
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
@@ -1010,6 +1001,12 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
             fputs("Logo: Querying realpath of the image source failed\n", stderr);
         return false;
     }
+
+    #ifdef _WIN32
+    filePath[1] = filePath[0]; // Drive Name
+    filePath[0] = '/';
+    #endif
+
     ffStrbufRecalculateLength(&requestData.cacheDir);
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
     ffStrbufAppendF(&requestData.cacheDir, "%u*%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);

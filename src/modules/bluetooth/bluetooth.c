@@ -46,12 +46,12 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
             ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(device->name, "name"),
-            FF_FORMAT_ARG(device->address, "address"),
-            FF_FORMAT_ARG(device->type, "type"),
-            FF_FORMAT_ARG(percentageNum, "battery-percentage"),
-            FF_FORMAT_ARG(device->connected, "connected"),
-            FF_FORMAT_ARG(percentageBar, "battery-percentage-bar"),
+            FF_ARG(device->name, "name"),
+            FF_ARG(device->address, "address"),
+            FF_ARG(device->type, "type"),
+            FF_ARG(percentageNum, "battery-percentage"),
+            FF_ARG(device->connected, "connected"),
+            FF_ARG(percentageBar, "battery-percentage-bar"),
         }));
     }
 }

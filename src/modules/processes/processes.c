@@ -24,7 +24,7 @@ bool ffPrintProcesses(FFProcessesOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(numProcesses, "result")
+            FF_ARG(numProcesses, "result")
         }));
     }
 

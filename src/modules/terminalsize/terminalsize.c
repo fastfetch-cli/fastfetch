@@ -29,10 +29,10 @@ bool ffPrintTerminalSize(FFTerminalSizeOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result.rows, "rows"),
-            FF_FORMAT_ARG(result.columns, "columns"),
-            FF_FORMAT_ARG(result.width, "width"),
-            FF_FORMAT_ARG(result.height, "height"),
+            FF_ARG(result.rows, "rows"),
+            FF_ARG(result.columns, "columns"),
+            FF_ARG(result.width, "width"),
+            FF_ARG(result.height, "height"),
         }));
     }
     return true;

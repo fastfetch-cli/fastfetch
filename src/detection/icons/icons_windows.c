@@ -3,10 +3,14 @@
 
 const char* ffDetectIcons(FFIconsResult* result)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
        !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))
-        return "ffRegOpenKeyForRead(Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\{NewStartPanel|ClassicStartMenu}) failed";
+    {
+        // If the key doesn't exist, it means that the user never changed the default settings.
+        ffStrbufSetStatic(&result->icons2, "Recycle Bin");
+        return NULL;
+    }
 
     // Whether these icons are hidden
     uint32_t ThisPC = 1, UsersFiles = 1, RemoteNetwork = 1, RecycleBin = 0 /* Shown by default */, ControlPanel = 1;

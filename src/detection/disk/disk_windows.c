@@ -1,5 +1,6 @@
 #include "disk.h"
 #include "common/io.h"
+#include "common/time.h"
 #include "common/windows/unicode.h"
 #include "common/windows/nt.h"
 
@@ -101,7 +102,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             if (fsVolume->VolumeLabelLength > 0)
                 ffStrbufSetNWS(&disk->name, fsVolume->VolumeLabelLength / sizeof(WCHAR), fsVolume->VolumeLabel);
             if (fsVolume->VolumeCreationTime.QuadPart)
-                disk->createTime = ((uint64_t) fsVolume->VolumeCreationTime.QuadPart - 116444736000000000ull) / 10000ull;
+                disk->createTime = ffFileTimeToUnixMs((uint64_t) fsVolume->VolumeCreationTime.QuadPart);
         }
 
         if (fsAttr)

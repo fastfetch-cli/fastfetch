@@ -11,10 +11,12 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-
 #elif __sun
 #include <libdevinfo.h>
 #include <sys/sunddi.h>
+#elif __APPLE__
+#include "common/apple/cf_helpers.h"
+#include <IOKit/IOKitLib.h>
 #endif
 
 typedef struct FFSmbiosBios
@@ -90,8 +92,12 @@ const char* ffDetectBios(FFBiosResult* bios)
     }
     di_fini(rootNode);
     #elif __HAIKU__ || __OpenBSD__
-    // Currently SMBIOS detection is supported in legancy BIOS only
+    // Currently SMBIOS detection is supported in legacy BIOS only
     ffStrbufSetStatic(&bios->type, "BIOS");
+    #elif __APPLE__
+    // Intel Macs use UEFI from day one
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceEfi = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/efi");
+    ffStrbufSetStatic(&bios->type, deviceEfi ? "UEFI" : "BIOS");
     #endif
 
     return NULL;

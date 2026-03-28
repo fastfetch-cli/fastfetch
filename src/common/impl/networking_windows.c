@@ -24,19 +24,19 @@ static const char* initWsaData(WSADATA* wsaData)
     }
 
     //Dummy socket needed for WSAIoctl
-    SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    SOCKET sockfd = WSASocketW(AF_INET, SOCK_STREAM, 0, NULL, 0, 0);
     if(sockfd == INVALID_SOCKET) {
-        FF_DEBUG("socket(AF_INET, SOCK_STREAM) failed");
+        FF_DEBUG("WSASocketW(AF_INET, SOCK_STREAM) failed");
         WSACleanup();
-        return "socket(AF_INET, SOCK_STREAM) failed";
+        return "WSASocketW(AF_INET, SOCK_STREAM) failed";
     }
 
     DWORD dwBytes;
     GUID guid = WSAID_CONNECTEX;
     if(WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                    &guid, sizeof(guid),
-                    &ConnectEx, sizeof(ConnectEx),
-                    &dwBytes, NULL, NULL) != 0) {
+                &guid, sizeof(guid),
+                &ConnectEx, sizeof(ConnectEx),
+                &dwBytes, NULL, NULL) != 0) {
         FF_DEBUG("WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed");
         closesocket(sockfd);
         WSACleanup();
@@ -92,26 +92,33 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         return "initWsaData() failed before";
     }
 
-    struct addrinfo* addr;
-    struct addrinfo hints = {
+    ADDRINFOW* addr;
+    ADDRINFOW hints = {
+        .ai_flags = AI_NUMERICSERV,
         .ai_family = state->ipv6 ? AF_INET6 : AF_INET,
         .ai_socktype = SOCK_STREAM,
-        .ai_flags = AI_NUMERICSERV,
     };
 
-    FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
-    if(getaddrinfo(host, "80", &hints, &addr) != 0)
+    wchar_t hostW[256];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(hostW, (ULONG) sizeof(hostW), NULL, host, (ULONG) strlen(host) + 1)))
     {
-        FF_DEBUG("getaddrinfo() failed");
-        return "getaddrinfo() failed";
+        FF_DEBUG("Failed to convert host to wide string: %s", host);
+        return "Failed to convert host to wide string";
     }
 
-    state->sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
+    if(GetAddrInfoW(hostW, L"80", &hints, &addr) != 0)
+    {
+        FF_DEBUG("GetAddrInfoW() failed");
+        return "GetAddrInfoW() failed";
+    }
+
+    state->sockfd = WSASocketW(addr->ai_family, addr->ai_socktype, addr->ai_protocol, NULL, 0, 0);
     if(state->sockfd == INVALID_SOCKET)
     {
-        FF_DEBUG("socket() failed");
-        freeaddrinfo(addr);
-        return "socket() failed";
+        FF_DEBUG("WSASocketW() failed");
+        FreeAddrInfoW(addr);
+        return "WSASocketW() failed";
     }
 
     DWORD flag = 1;
@@ -143,7 +150,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     {
         FF_DEBUG("bind() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
-        freeaddrinfo(addr);
+        FreeAddrInfoW(addr);
         state->sockfd = INVALID_SOCKET;
         return "bind() failed";
     }
@@ -156,7 +163,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     if (state->overlapped.hEvent == WSA_INVALID_EVENT) {
         FF_DEBUG("WSACreateEvent() failed");
         closesocket(state->sockfd);
-        freeaddrinfo(addr);
+        FreeAddrInfoW(addr);
         state->sockfd = INVALID_SOCKET;
         return "WSACreateEvent() failed";
     }
@@ -200,7 +207,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int)addr->ai_addrlen,
                           state->command.chars, state->command.length, &sent, &state->overlapped);
 
-    freeaddrinfo(addr);
+    FreeAddrInfoW(addr);
     addr = NULL;
 
     if(!result)
@@ -251,7 +258,8 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             } else {
                 FF_DEBUG("WSAWaitForMultipleEvents failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
             }
-            CancelIo((HANDLE) state->sockfd);
+            if (CancelIoEx((HANDLE) state->sockfd, &state->overlapped))
+                WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, 10, TRUE);
             WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             ffStrbufDestroy(&state->command);
@@ -279,6 +287,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         // Not a critical error, continue anyway
     }
 
+    if (shutdown(state->sockfd, SD_SEND) == SOCKET_ERROR)
+    {
+        FF_DEBUG("Failed to shutdown socket send: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        // Not a critical error, continue anyway
+    }
+
     if(timeout > 0)
     {
         FF_DEBUG("Setting receive timeout: %u ms", timeout);
@@ -302,10 +316,14 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
                  ++recvCount, buffer->length, ffStrbufGetFree(buffer));
 
-        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, (int)ffStrbufGetFree(buffer), 0);
+        DWORD received = 0, recvFlags = 0;
+        int recvResult = WSARecv(state->sockfd, &(WSABUF) {
+            .buf = buffer->chars + buffer->length,
+            .len = (ULONG) ffStrbufGetFree(buffer),
+        }, 1, &received, &recvFlags, NULL, NULL);
 
-        if (received <= 0) {
-            if (received == 0) {
+        if (recvResult == SOCKET_ERROR || received == 0) {
+            if (recvResult == 0 && received == 0) {
                 FF_DEBUG("Connection closed (received=0)");
             } else {
                 FF_DEBUG("Reception failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
@@ -316,7 +334,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         buffer->length += (uint32_t) received;
         buffer->chars[buffer->length] = '\0';
 
-        FF_DEBUG("Successfully received %zd bytes of data, total: %u bytes", received, buffer->length);
+        FF_DEBUG("Successfully received %u bytes of data, total: %u bytes", (unsigned) received, buffer->length);
 
         // Check if HTTP header end marker is found
         if (headerEnd == 0) {

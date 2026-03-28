@@ -1,12 +1,12 @@
 #include "FFPlatform_private.h"
 #include "common/io.h"
 #include "common/library.h"
-#include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/windows/nt.h"
 
+#include <stdalign.h>
 #include <windows.h>
 #include <shlobj.h>
 #include <sddl.h>
@@ -17,20 +17,32 @@
 static void getExePath(FFPlatform* platform)
 {
     wchar_t exePathW[MAX_PATH];
-    DWORD exePathWLen = GetModuleFileNameW(NULL, exePathW, MAX_PATH);
-    if (exePathWLen == 0 || exePathWLen >= MAX_PATH) return;
 
-    FF_AUTO_CLOSE_FD HANDLE hPath = CreateFileW(exePathW, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    FF_AUTO_CLOSE_FD HANDLE hPath = CreateFileW(
+        ffGetPeb()->ProcessParameters->ImagePathName.Buffer,
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS,
+        NULL);
     if (hPath != INVALID_HANDLE_VALUE)
     {
-        DWORD len = GetFinalPathNameByHandleW(hPath, exePathW, MAX_PATH, FILE_NAME_OPENED);
+        DWORD len = GetFinalPathNameByHandleW(hPath, exePathW, MAX_PATH, FILE_NAME_NORMALIZED);
         if (len > 0 && len < MAX_PATH)
-            exePathWLen = len;
+        {
+            ffStrbufSetNWS(&platform->exePath, len, exePathW);
+            if (ffStrbufStartsWithS(&platform->exePath, "\\\\?\\"))
+                ffStrbufSubstrAfter(&platform->exePath, 3);
+        }
     }
 
-    ffStrbufSetNWS(&platform->exePath, exePathWLen, exePathW);
-    if (ffStrbufStartsWithS(&platform->exePath, "\\\\?\\"))
-        ffStrbufSubstrAfter(&platform->exePath, 3);
+    if (platform->exePath.length == 0)
+    {
+        PCUNICODE_STRING imagePathName = &ffGetPeb()->ProcessParameters->ImagePathName;
+        ffStrbufSetNWS(&platform->exePath, imagePathName->Length / sizeof(wchar_t), imagePathName->Buffer);
+    }
+
     ffStrbufReplaceAllC(&platform->exePath, '\\', '/');
 }
 
@@ -145,30 +157,18 @@ static void getUserName(FFPlatform* platform)
 
     size = ARRAY_SIZE(buffer);
     if (GetUserNameW(buffer, &size)) // GetUserNameExW(10002)?
-    {
         ffStrbufSetWS(&platform->userName, buffer);
-
-        size = 0;
-        DWORD refDomainSize = 0;
-        SID_NAME_USE sidNameUse = SidTypeUnknown;
-        LookupAccountNameW(NULL, buffer, NULL, &size, NULL, &refDomainSize, &sidNameUse);
-        if (size > 0)
-        {
-            FF_AUTO_FREE PSID sid = (PSID) malloc(size);
-            FF_AUTO_FREE LPWSTR refDomain = (LPWSTR) malloc(refDomainSize * sizeof(wchar_t));
-            if (LookupAccountNameW(NULL, buffer, sid, &size, refDomain, &refDomainSize, &sidNameUse))
-            {
-                LPWSTR sidString;
-                if (ConvertSidToStringSidW(sid, &sidString))
-                {
-                    ffStrbufSetWS(&platform->sid, sidString);
-                    LocalFree(sidString);
-                }
-            }
-        }
-    }
     else
         ffStrbufSetS(&platform->userName, getenv("USERNAME"));
+
+    alignas(TOKEN_USER) char buf[SECURITY_MAX_SID_SIZE + sizeof(TOKEN_USER)];
+    if (NT_SUCCESS(NtQueryInformationToken(NtCurrentProcessToken(), TokenUser, buf, sizeof(buf), &size)))
+    {
+        TOKEN_USER* tokenUser = (TOKEN_USER*) buf;
+        UNICODE_STRING sidString = { .Buffer = buffer, .Length = 0, .MaximumLength = sizeof(buffer) };
+        if (NT_SUCCESS(RtlConvertSidToUnicodeString(&sidString, tokenUser->User.Sid, FALSE)))
+            ffStrbufSetNWS(&platform->sid, sidString.Length / sizeof(wchar_t), sidString.Buffer);
+    }
 }
 
 static void getHostName(FFPlatform* platform)
@@ -199,7 +199,7 @@ static void getUserShell(FFPlatform* platform)
 static const char* detectWine(void)
 {
     const char * __cdecl wine_get_version(void);
-    HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
+    void* hntdll = ffLibraryGetModule(L"ntdll.dll");
     if (!hntdll) return NULL;
     FF_LIBRARY_LOAD_SYMBOL_LAZY(hntdll, wine_get_version);
     if (!ffwine_get_version) return NULL;
@@ -208,30 +208,28 @@ static const char* detectWine(void)
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
         return;
 
     uint32_t ubr = 0;
-    ffRegReadUint(hKey, L"UBR", &ubr, NULL);
+    ffRegReadValues(hKey, 2, (FFRegValueArg[]) {
+        FF_ARG(ubr, L"UBR"),
+        FF_ARG(info->version, L"BuildLabEx"),
+    }, NULL);
 
-    ffStrbufAppendF(&info->release,
+    PPEB_FULL peb = ffGetPeb();
+
+    ffStrbufSetF(&info->release,
         "%u.%u.%u.%u",
-        (unsigned) SharedUserData->NtMajorVersion,
-        (unsigned) SharedUserData->NtMinorVersion,
-        (unsigned) SharedUserData->NtBuildNumber,
+        (unsigned) peb->OSMajorVersion,
+        (unsigned) peb->OSMinorVersion,
+        (unsigned) peb->OSBuildNumber,
         (unsigned) ubr);
-
-    ffRegReadStrbuf(hKey, L"BuildLabEx", &info->version, NULL);
 
     const char* wineVersion = detectWine();
     if (wineVersion)
-    {
-        if (instance.config.general.detectVersion)
-            ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
-        else
-            ffStrbufSetStatic(&info->name, "Wine");
-    }
+        ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
     else
         ffStrbufSetStatic(&info->name, "WIN32_NT");
 }
@@ -303,12 +301,7 @@ static void getSystemArchitecture(FFPlatformSysinfo* info)
 
 static void getCwd(FFPlatform* platform)
 {
-    #if _WIN64
-    static_assert(
-        offsetof(RTL_USER_PROCESS_PARAMETERS, Reserved2[5]) == 0x38,
-        "CurrentDirectory should be at offset 0x38 in RTL_USER_PROCESS_PARAMETERS. Structure layout mismatch detected.");
-    #endif
-    PCURDIR cwd = (PCURDIR) &NtCurrentTeb()->ProcessEnvironmentBlock->ProcessParameters->Reserved2[5];
+    PCURDIR cwd = &ffGetPeb()->ProcessParameters->CurrentDirectory;
     ffStrbufSetNWS(&platform->cwd, cwd->DosPath.Length / sizeof(WCHAR), cwd->DosPath.Buffer);
     ffStrbufReplaceAllC(&platform->cwd, '\\', '/');
     ffStrbufEnsureEndsWithC(&platform->cwd, '/');
@@ -316,7 +309,7 @@ static void getCwd(FFPlatform* platform)
 
 void ffPlatformInitImpl(FFPlatform* platform)
 {
-    platform->pid = (uint32_t) GetCurrentProcessId();
+    platform->pid = (uint32_t) (uintptr_t) ffGetTeb()->ClientId.UniqueProcess;
     getExePath(platform);
     getCwd(platform);
     getHomeDir(platform);

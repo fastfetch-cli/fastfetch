@@ -1,6 +1,13 @@
 #include "fastfetch.h"
 #include "common/library.h"
 
+#if _WIN32
+#include "common/debug.h"
+#include "common/windows/nt.h"
+#include <errno.h>
+#include <ntstatus.h>
+#endif
+
 #ifndef FF_DISABLE_DLOPEN
 
 #include <stdarg.h>
@@ -36,7 +43,7 @@ static void* libraryLoad(const char* path, int maxVersion)
     if (pathLen == instance.state.platform.exePath.length)
         return result;
 
-    char absPath[MAX_PATH + 1];
+    char absPath[MAX_PATH * 2];
     strcpy(mempcpy(absPath, instance.state.platform.exePath.chars, pathLen + 1), path);
     return dlopen(absPath, FF_DLOPEN_FLAGS);
 
@@ -91,4 +98,82 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...)
     return result;
 }
 
+#endif
+
+#if _WIN32
+
+void* dlopen(const char* path, FF_MAYBE_UNUSED int mode)
+{
+    wchar_t pathW[MAX_PATH + 1];
+    ULONG pathWBytes = 0;
+
+    NTSTATUS status = RtlUTF8ToUnicodeN(pathW, sizeof(pathW), &pathWBytes, path, (uint32_t)strlen(path) + 1);
+    if (!NT_SUCCESS(status))
+    {
+        FF_DEBUG("RtlUTF8ToUnicodeN failed for path %s with status 0x%08lX: %s", path, status, ffDebugNtStatus(status));
+        return NULL;
+    }
+
+    PVOID module = NULL;
+    status = LdrLoadDll(NULL, NULL, &(UNICODE_STRING) {
+        .Length = (USHORT) pathWBytes - sizeof(wchar_t), // Exclude null terminator
+        .MaximumLength = (USHORT) pathWBytes,
+        .Buffer = pathW,
+    }, &module);
+
+    if (!NT_SUCCESS(status))
+    {
+        FF_DEBUG("LdrLoadDll failed for path %s with status 0x%08lX: %s", path, status, ffDebugNtStatus(status));
+        return NULL;
+    }
+
+    return module;
+}
+
+int dlclose(void* handle)
+{
+    NTSTATUS status = LdrUnloadDll(handle);
+    if (!NT_SUCCESS(status))
+    {
+        FF_DEBUG("LdrUnloadDll failed for handle %p with status 0x%08lX: %s", handle, status, ffDebugNtStatus(status));
+        return -1;
+    }
+    return 0;
+}
+
+void* dlsym(void* handle, const char* symbol)
+{
+    void* address;
+    USHORT symbolBytes = (USHORT) strlen(symbol) + 1;
+    NTSTATUS status = LdrGetProcedureAddress(handle, &(ANSI_STRING) {
+        .Length = symbolBytes - sizeof(char),
+        .MaximumLength = symbolBytes,
+        .Buffer = (char*) symbol,
+    }, 0, &address);
+    if (!NT_SUCCESS(status))
+    {
+        FF_DEBUG("LdrGetProcedureAddress failed for symbol %s with status 0x%08lX: %s", symbol, status, ffDebugNtStatus(status));
+        return NULL;
+    }
+    return address;
+}
+
+void* ffLibraryGetModule(const wchar_t* libraryFileName)
+{
+    assert(libraryFileName != NULL && "Use \"ffGetPeb()->ImageBaseAddress\" instead");
+
+    void* module = NULL;
+    USHORT libraryFileNameBytes = (USHORT) (wcslen(libraryFileName) * sizeof(wchar_t)) + sizeof(wchar_t);
+    NTSTATUS status = LdrGetDllHandle(NULL, NULL, &(UNICODE_STRING) {
+        .Length = libraryFileNameBytes - sizeof(wchar_t),
+        .MaximumLength = libraryFileNameBytes,
+        .Buffer = (wchar_t*) libraryFileName,
+    }, &module);
+    if (!NT_SUCCESS(status))
+    {
+        FF_DEBUG("LdrGetDllHandle failed for library %ls with status 0x%08lX: %s", libraryFileName, status, ffDebugNtStatus(status));
+        return NULL;
+    }
+    return module;
+}
 #endif

@@ -20,9 +20,9 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     {
         ffStrbufClear(&buffer);
         FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(result->name, "name"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(result->name, "name"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -80,19 +80,19 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
         ffSizeAppendNum(result->sectorSize, &sectorSizePretty);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-            FF_FORMAT_ARG(result->name, "name"),
-            FF_FORMAT_ARG(result->uuid, "uuid"),
-            FF_FORMAT_ARG(result->devices, "devices"),
-            FF_FORMAT_ARG(result->features, "features"),
-            FF_FORMAT_ARG(usedPretty, "used"),
-            FF_FORMAT_ARG(allocatedPretty, "allocated"),
-            FF_FORMAT_ARG(totalPretty, "total"),
-            FF_FORMAT_ARG(usedPercentageNum, "used-percentage"),
-            FF_FORMAT_ARG(allocatedPercentageNum, "allocated-percentage"),
-            FF_FORMAT_ARG(usedPercentageBar, "used-percentage-bar"),
-            FF_FORMAT_ARG(allocatedPercentageBar, "allocated-percentage-bar"),
-            FF_FORMAT_ARG(nodeSizePretty, "node-size"),
-            FF_FORMAT_ARG(sectorSizePretty, "sector-size"),
+            FF_ARG(result->name, "name"),
+            FF_ARG(result->uuid, "uuid"),
+            FF_ARG(result->devices, "devices"),
+            FF_ARG(result->features, "features"),
+            FF_ARG(usedPretty, "used"),
+            FF_ARG(allocatedPretty, "allocated"),
+            FF_ARG(totalPretty, "total"),
+            FF_ARG(usedPercentageNum, "used-percentage"),
+            FF_ARG(allocatedPercentageNum, "allocated-percentage"),
+            FF_ARG(usedPercentageBar, "used-percentage-bar"),
+            FF_ARG(allocatedPercentageBar, "allocated-percentage-bar"),
+            FF_ARG(nodeSizePretty, "node-size"),
+            FF_ARG(sectorSizePretty, "sector-size"),
         }));
     }
 }

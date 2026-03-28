@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/mallocHelper.h"
 #include "common/processing.h"
 #include "common/io.h"
 #include "common/windows/unicode.h"
@@ -85,7 +86,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
     PROCESS_INFORMATION piProcInfo = {};
-    STARTUPINFOA siStartInfo = {
+    STARTUPINFOW siStartInfo = {
         .cb = sizeof(siStartInfo),
         .dwFlags = STARTF_USESTDHANDLES,
     };
@@ -100,12 +101,19 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         siStartInfo.hStdError = ffGetNullFD();
     }
 
-    FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
-    argvToCmdline(argv, &cmdline);
+    FF_AUTO_FREE wchar_t* cmdline = NULL;
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        argvToCmdline(argv, &buf);
+        uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
+        cmdline = malloc(cmdlineBytes);
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, NULL, buf.chars, buf.length + 1)))
+            return "RtlUTF8ToUnicodeN() failed";
+    }
 
-    BOOL success = CreateProcessA(
+    BOOL success = CreateProcessW(
         NULL,          // application name
-        cmdline.chars, // command line
+        cmdline,       // command line
         NULL,          // process security attributes
         NULL,          // primary thread security attributes
         TRUE,          // handles are inherited
@@ -116,20 +124,31 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         &piProcInfo    // receives PROCESS_INFORMATION
     );
 
-    CloseHandle(hChildPipeWrite);
+    NtClose(hChildPipeWrite);
     if(!success)
     {
         if (GetLastError() == ERROR_FILE_NOT_FOUND)
             return "command not found";
-        return "CreateProcessA() failed";
+        return "CreateProcessW() failed";
     }
 
-    CloseHandle(piProcInfo.hThread); // we don't need the thread handle
+    NtClose(piProcInfo.hThread); // we don't need the thread handle
     outHandle->pid   = piProcInfo.hProcess;
     outHandle->pipeRead  = hChildPipeRead;
     hChildPipeRead = INVALID_HANDLE_VALUE; // ownership transferred, don't close it
 
     return NULL;
+}
+
+static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE hReadEvent, IO_STATUS_BLOCK* piosb)
+{
+    IO_STATUS_BLOCK cancelIosb = {};
+    if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb)))
+    {
+        if (hReadEvent)
+            NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
+    }
+    NtTerminateProcess(hProcess, 1);
 }
 
 const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
@@ -140,56 +159,59 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
     int32_t timeout = instance.config.general.processingTimeout;
     FF_AUTO_CLOSE_FD HANDLE hProcess = handle->pid;
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = handle->pipeRead;
+    FF_AUTO_CLOSE_FD HANDLE hReadEvent = NULL;
     handle->pid = INVALID_HANDLE_VALUE;
     handle->pipeRead = INVALID_HANDLE_VALUE;
 
+    if (timeout >= 0 && !NT_SUCCESS(NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, NULL, SynchronizationEvent, FALSE)))
+        return "NtCreateEvent() failed";
+
     char str[FF_PIPE_BUFSIZ];
-    DWORD nRead = 0;
-    OVERLAPPED overlapped = {};
-    // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
+    uint32_t nRead = 0;
+    IO_STATUS_BLOCK iosb = {};
     do
     {
-        if (!ReadFile(hChildPipeRead, str, sizeof(str), &nRead, &overlapped))
+        NTSTATUS status = NtReadFile(
+            hChildPipeRead,
+            hReadEvent,
+            NULL,
+            NULL,
+            &iosb,
+            str,
+            (ULONG) sizeof(str),
+            NULL,
+            NULL
+        );
+        if (status == STATUS_PENDING)
         {
-            switch (GetLastError())
+            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }))
             {
-            case ERROR_IO_PENDING:
-                #if !FF_WIN7_COMPAT
-                if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, timeout < 0 ? INFINITE : (DWORD) timeout, FALSE))
-                #else
-                // To support Windows 7
-                if (timeout >= 0 && WaitForSingleObject(hChildPipeRead, (DWORD) timeout) != WAIT_OBJECT_0)
-                {
-                    CancelIo(hChildPipeRead);
-                    TerminateProcess(hProcess, 1);
-                    return "WaitForSingleObject(hChildPipeRead) failed or timeout (try increasing --processing-timeout)";
-                }
-
-                if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))
-                #endif
-                {
-                    if (GetLastError() == ERROR_BROKEN_PIPE)
-                        return NULL;
-
-                    CancelIo(hChildPipeRead);
-                    TerminateProcess(hProcess, 1);
-                    return "GetOverlappedResult"
-                        #if !FF_WIN7_COMPAT
-                        "Ex"
-                        #endif
-                        "(hChildPipeRead) failed";
-                }
+            case STATUS_WAIT_0:
+                status = iosb.Status;
                 break;
 
-            case ERROR_BROKEN_PIPE:
-                goto exit;
+            case STATUS_TIMEOUT:
+            {
+                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
+                return "NtReadFile(hChildPipeRead) timed out";
+            }
 
             default:
-                CancelIo(hChildPipeRead);
-                TerminateProcess(hProcess, 1);
-                return "ReadFile(hChildPipeRead) failed";
+                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
+                return "NtWaitForSingleObject(hReadEvent) failed";
             }
         }
+
+        if (status == STATUS_PIPE_BROKEN || status == STATUS_END_OF_FILE)
+            goto exit;
+
+        if (!NT_SUCCESS(status))
+        {
+            terminateChildProcess(hProcess, hChildPipeRead, NULL, &iosb);
+            return "NtReadFile(hChildPipeRead) failed";
+        }
+
+        nRead = (uint32_t) iosb.Information;
         ffStrbufAppendNS(buffer, nRead, str);
     } while (nRead > 0);
 
@@ -212,12 +234,14 @@ exit:
 
 bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
 {
-    FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
-        ? NtCurrentProcess()
-        : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-
-    if (hProcess == NULL)
-        return false;
+    FF_AUTO_CLOSE_FD HANDLE hProcess = NtCurrentProcess();
+    if(pid != 0)
+    {
+        if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
+            .Length = sizeof(OBJECT_ATTRIBUTES),
+        }, &(CLIENT_ID) { .UniqueProcess = (HANDLE)(uintptr_t) pid })))
+            return false;
+    }
 
     if(ppid)
     {

@@ -110,19 +110,19 @@ bool ffPrintWifi(FFWifiOptions* options)
                 ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
 
             FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(item->inf.description, "inf-desc"),
-                FF_FORMAT_ARG(item->inf.status, "inf-status"),
-                FF_FORMAT_ARG(item->conn.status, "status"),
-                FF_FORMAT_ARG(item->conn.ssid, "ssid"),
-                FF_FORMAT_ARG(item->conn.bssid, "bssid"),
-                FF_FORMAT_ARG(item->conn.protocol, "protocol"),
-                FF_FORMAT_ARG(percentNum, "signal-quality"),
-                FF_FORMAT_ARG(item->conn.rxRate, "rx-rate"),
-                FF_FORMAT_ARG(item->conn.txRate, "tx-rate"),
-                FF_FORMAT_ARG(item->conn.security, "security"),
-                FF_FORMAT_ARG(percentBar, "signal-quality-bar"),
-                FF_FORMAT_ARG(item->conn.channel, "channel"),
-                FF_FORMAT_ARG(bandStr, "band"),
+                FF_ARG(item->inf.description, "inf-desc"),
+                FF_ARG(item->inf.status, "inf-status"),
+                FF_ARG(item->conn.status, "status"),
+                FF_ARG(item->conn.ssid, "ssid"),
+                FF_ARG(item->conn.bssid, "bssid"),
+                FF_ARG(item->conn.protocol, "protocol"),
+                FF_ARG(percentNum, "signal-quality"),
+                FF_ARG(item->conn.rxRate, "rx-rate"),
+                FF_ARG(item->conn.txRate, "tx-rate"),
+                FF_ARG(item->conn.security, "security"),
+                FF_ARG(percentBar, "signal-quality-bar"),
+                FF_ARG(item->conn.channel, "channel"),
+                FF_ARG(bandStr, "band"),
             }));
         }
     }

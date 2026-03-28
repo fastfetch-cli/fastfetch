@@ -19,6 +19,13 @@ typedef struct FFBlockConfig
     uint8_t range[2];
 } FFBlockConfig;
 
+typedef enum __attribute__((__packed__)) FFColorsBrightness
+{
+    FF_COLORS_BRIGHTNESS_DEFAULT,
+    FF_COLORS_BRIGHTNESS_NORMAL,
+    FF_COLORS_BRIGHTNESS_LIGHT,
+} FFColorsBrightness;
+
 typedef struct FFColorsOptions
 {
     FFModuleArgs moduleArgs;
@@ -26,6 +33,7 @@ typedef struct FFColorsOptions
     FFColorsSymbol symbol;
     uint32_t paddingLeft;
     FFBlockConfig block;
+    FFColorsBrightness brightness;
 } FFColorsOptions;
 
 static_assert(sizeof(FFColorsOptions) <= FF_OPTION_MAX_SIZE, "FFColorsOptions size exceeds maximum allowed size");

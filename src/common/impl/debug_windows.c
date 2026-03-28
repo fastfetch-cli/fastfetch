@@ -10,7 +10,7 @@ const char* ffDebugWin32Error(DWORD errorCode)
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
         (DWORD) errorCode,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        0,
         buffer,
         sizeof(buffer),
         NULL);
@@ -19,10 +19,32 @@ const char* ffDebugWin32Error(DWORD errorCode)
         snprintf(buffer, sizeof(buffer), "Unknown error code (%lu)", errorCode);
     } else {
         // Remove trailing newline
-        if (buffer[len - 1] == '\n') buffer[len - 1] = '\0';
-        if (buffer[len - 2] == '\r') buffer[len - 2] = '\0';
-        snprintf(buffer + len - 2, sizeof(buffer) - len + 2, " (%lu)", errorCode);
+        while (len > 0 && (buffer[len - 1] == '\r' || buffer[len - 1] == '\n')) {
+            buffer[--len] = '\0';
+        }
+        snprintf(buffer + len, sizeof(buffer) - len + 2, " (%lu)", errorCode);
     }
 
     return buffer;
+}
+
+const char* ffDebugNtStatus(NTSTATUS status)
+{
+    return ffDebugWin32Error(RtlNtStatusToDosError(status));
+}
+
+static inline DWORD HRESULTToWin32Error(HRESULT hr)
+{
+    if (SUCCEEDED(hr))
+        return ERROR_SUCCESS;
+
+    if (HRESULT_FACILITY(hr) == FACILITY_WIN32)
+        return HRESULT_CODE(hr);
+
+    return ERROR_INTERNAL_ERROR;
+}
+
+const char* ffDebugHResult(HRESULT hr)
+{
+    return ffDebugWin32Error(HRESULTToWin32Error(hr));
 }

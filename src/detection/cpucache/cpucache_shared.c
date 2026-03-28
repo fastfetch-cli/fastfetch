@@ -37,9 +37,12 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
     if (!data)
         return "Cache information is not found in SMBIOS data";
 
-    for (; data->Header.Type == FF_SMBIOS_TYPE_CACHE_INFO;
-           data = (const FFSmbiosCacheInfo*) ffSmbiosNextEntry(&data->Header))
+    const FFSmbiosCacheInfo* endOfTable = (const FFSmbiosCacheInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_END_OF_TABLE];
+    for (; data != endOfTable; data = (const FFSmbiosCacheInfo*) ffSmbiosNextEntry(&data->Header))
     {
+        if (data->Header.Type != FF_SMBIOS_TYPE_CACHE_INFO)
+            continue;
+
         bool enabled = !!(data->CacheConfiguration & (1 << 7));
         if (!enabled)
             continue;

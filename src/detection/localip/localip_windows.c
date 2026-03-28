@@ -99,11 +99,10 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             continue;
         }
 
-        char name[128];
-        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, ARRAY_SIZE(name), NULL, NULL);
-        FF_DEBUG("Adapter %u name: '%s'", (unsigned)adapter->IfIndex, name);
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(adapter->FriendlyName);
+        FF_DEBUG("Adapter %u name: '%s'", (unsigned)adapter->IfIndex, name.chars);
 
-        if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
         {
             FF_DEBUG("Skipping adapter %u (name doesn't match prefix '%.*s')",
                      (unsigned)adapter->IfIndex, (int)options->namePrefix.length, options->namePrefix.chars);
@@ -121,10 +120,10 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         }
 
         processedCount++;
-        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned)adapter->IfIndex, name);
+        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned)adapter->IfIndex, name.chars);
 
         FFLocalIpResult* item = (FFLocalIpResult*) ffListAdd(results);
-        ffStrbufInitS(&item->name, name);
+        ffStrbufInitMove(&item->name, &name);
         ffStrbufInit(&item->ipv4);
         ffStrbufInit(&item->ipv6);
         ffStrbufInit(&item->mac);
@@ -176,19 +175,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
 
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
-                char addressBuffer[INET_ADDRSTRLEN + 6];
-                inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
+                char addressBuffer[INET_ADDRSTRLEN + 10];
+                char* end = RtlIpv4AddressToStringA(&ipv4->sin_addr, addressBuffer);
 
                 if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
-                {
-                    size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 6, "/%u", (unsigned) ifa->OnLinkPrefixLength);
-                }
+                    end += snprintf(end, 10, "/%u", (unsigned) ifa->OnLinkPrefixLength);
 
                 FF_DEBUG("Adding IPv4 address: %s (isDefaultRoute=%s)", addressBuffer, isDefaultRoute ? "true" : "false");
 
                 if (item->ipv4.length) ffStrbufAppendC(&item->ipv4, ',');
-                ffStrbufAppendS(&item->ipv4, addressBuffer);
+                ffStrbufAppendNS(&item->ipv4, (uint32_t) (end - addressBuffer), addressBuffer);
                 if (isDefaultRoute) item->defaultRoute |= FF_LOCALIP_TYPE_IPV4_BIT;
 
                 ipv4Count++;
@@ -224,19 +220,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     continue;
                 }
 
-                char addressBuffer[INET6_ADDRSTRLEN + 6];
-                inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+                char addressBuffer[INET6_ADDRSTRLEN + 10];
+                char* end = RtlIpv6AddressToStringA(&ipv6->sin6_addr, addressBuffer);
 
                 if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
-                {
-                    size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 6, "/%u", (unsigned) ifa->OnLinkPrefixLength);
-                }
+                    end += snprintf(end, 10, "/%u", (unsigned) ifa->OnLinkPrefixLength);
 
                 FF_DEBUG("Adding IPv6 address: %s (isDefaultRoute=%s)", addressBuffer, isDefaultRoute ? "true" : "false");
 
                 if (item->ipv6.length) ffStrbufAppendC(&item->ipv6, ',');
-                ffStrbufAppendS(&item->ipv6, addressBuffer);
+                ffStrbufAppendNS(&item->ipv6, (uint32_t) (end - addressBuffer), addressBuffer);
                 if (isDefaultRoute) item->defaultRoute |= FF_LOCALIP_TYPE_IPV6_BIT;
 
                 ipv6Count++;

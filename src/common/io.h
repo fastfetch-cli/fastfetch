@@ -7,6 +7,7 @@
     #include <fileapi.h>
     #include <handleapi.h>
     #include <io.h>
+    #include "common/windows/nt.h"
     typedef HANDLE FFNativeFD;
     #define FF_INVALID_FD INVALID_HANDLE_VALUE
 #else
@@ -15,12 +16,58 @@
     #include <sys/stat.h>
     #include <errno.h>
     #include <limits.h>
+    #include <fcntl.h>
     typedef int FFNativeFD;
     #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
     // one safe way to read correct data is reading the whole file in a single read syscall
     #define PROC_FILE_BUFFSIZ (32 * 1024)
 #endif
+
+#ifdef _WIN32
+    #ifndef O_CLOEXEC
+        #define O_CLOEXEC 0
+    #endif
+    #ifndef O_RDONLY
+        #define O_RDONLY 0
+    #endif
+    #ifndef O_DIRECTORY
+        #define O_DIRECTORY 0200000
+    #endif
+
+// Only O_RDONLY is supported
+HANDLE openat(HANDLE dfd, const char* fileName, int oflag);
+HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
+#endif
+
+
+static inline bool ffIsValidNativeFD(FFNativeFD fd)
+{
+    #ifndef _WIN32
+        return fd >= 0;
+    #else
+        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
+        return fd != INVALID_HANDLE_VALUE && fd != NULL;
+    #endif
+}
+
+FF_C_NONNULL(1)
+static inline bool wrapClose(FFNativeFD* pfd)
+{
+    assert(pfd);
+
+    if (!ffIsValidNativeFD(*pfd))
+        return false;
+
+    #ifndef _WIN32
+        close(*pfd);
+    #else
+        NtClose(*pfd);
+    #endif
+
+    return true;
+}
+#define FF_AUTO_CLOSE_FD __attribute__((__cleanup__(wrapClose)))
 
 static inline FFNativeFD FFUnixFD2NativeFD(int unixfd)
 {
@@ -71,17 +118,60 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
     #endif
 }
 
-FF_C_NONNULL(1, 3)
-ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
-FF_C_NONNULL(2, 4)
-ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data);
-
 FF_C_NONNULL(2)
 bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
+
+FF_C_NONNULL(1, 3)
+static inline ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
+{
+    FFNativeFD FF_AUTO_CLOSE_FD fd =
+    #ifndef _WIN32
+        open(fileName, O_RDONLY | O_CLOEXEC);
+    #else
+        CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    #endif
+
+    if (!ffIsValidNativeFD(fd))
+        return -1;
+
+    return ffReadFDData(fd, dataSize, data);
+}
+
+FF_C_NONNULL(2, 4)
+static inline ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data)
+{
+    FFNativeFD FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if (!ffIsValidNativeFD(fd))
+        return -1;
+
+    return ffReadFDData(fd, dataSize, data);
+}
+
 FF_C_NONNULL(1, 2)
-bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
+static inline bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
+{
+    FFNativeFD FF_AUTO_CLOSE_FD fd =
+    #ifndef _WIN32
+        open(fileName, O_RDONLY | O_CLOEXEC);
+    #else
+        CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    #endif
+
+    if (!ffIsValidNativeFD(fd))
+        return false;
+
+    return ffAppendFDBuffer(fd, buffer);
+}
+
 FF_C_NONNULL(2, 3)
-bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
+static inline bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer)
+{
+    FFNativeFD FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if (!ffIsValidNativeFD(fd))
+        return false;
+
+    return ffAppendFDBuffer(fd, buffer);
+}
 
 FF_C_NONNULL(2)
 static inline bool ffReadFDBuffer(FFNativeFD fd, FFstrbuf* buffer)
@@ -117,7 +207,11 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
 {
     #ifdef _WIN32
 
-    DWORD attr = GetFileAttributesA(path);
+    wchar_t wPath[MAX_PATH];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(wPath, (ULONG) sizeof(wPath), NULL, path, (ULONG)strlen(path) + 1)))
+        return false;
+
+    DWORD attr = GetFileAttributesW(wPath);
 
     if(attr == INVALID_FILE_ATTRIBUTES)
         return false;
@@ -178,34 +272,6 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 void ffListFilesRecursively(const char* path, bool pretty);
 
-static inline bool ffIsValidNativeFD(FFNativeFD fd)
-{
-    #ifndef _WIN32
-        return fd >= 0;
-    #else
-        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
-        return fd != INVALID_HANDLE_VALUE && fd != NULL;
-    #endif
-}
-
-FF_C_NONNULL(1)
-static inline bool wrapClose(FFNativeFD* pfd)
-{
-    assert(pfd);
-
-    if (!ffIsValidNativeFD(*pfd))
-        return false;
-
-    #ifndef _WIN32
-        close(*pfd);
-    #else
-        CloseHandle(*pfd);
-    #endif
-
-    return true;
-}
-#define FF_AUTO_CLOSE_FD __attribute__((__cleanup__(wrapClose)))
-
 FF_C_NONNULL(1)
 static inline bool wrapFclose(FILE** pfile)
 {
@@ -257,9 +323,3 @@ static inline bool ffSearchUserConfigFile(const FFlist* configDirs, const char* 
 
 FFNativeFD ffGetNullFD(void);
 bool ffRemoveFile(const char* fileName);
-
-#ifdef _WIN32
-// Only O_RDONLY is supported
-HANDLE openat(HANDLE dfd, const char* fileName, bool directory);
-HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
-#endif

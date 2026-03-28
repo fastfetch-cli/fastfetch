@@ -40,12 +40,12 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(result->watts, "watts"),
-                FF_FORMAT_ARG(result->name, "name"),
-                FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
-                FF_FORMAT_ARG(result->modelName, "model-name"),
-                FF_FORMAT_ARG(result->description, "description"),
-                FF_FORMAT_ARG(result->serial, "serial"),
+                FF_ARG(result->watts, "watts"),
+                FF_ARG(result->name, "name"),
+                FF_ARG(result->manufacturer, "manufacturer"),
+                FF_ARG(result->modelName, "model-name"),
+                FF_ARG(result->description, "description"),
+                FF_ARG(result->serial, "serial"),
             }));
         }
 

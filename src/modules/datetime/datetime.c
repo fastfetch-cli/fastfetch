@@ -67,29 +67,29 @@ static void printDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     strftime(result.timezoneName, sizeof(result.timezoneName), "%Z", tm);
 
     FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-        FF_FORMAT_ARG(result.year, "year"), // 1
-        FF_FORMAT_ARG(result.yearShort, "year-short"), // 2
-        FF_FORMAT_ARG(result.month, "month"), // 3
-        FF_FORMAT_ARG(result.monthPretty, "month-pretty"), // 4
-        FF_FORMAT_ARG(result.monthName, "month-name"), // 5
-        FF_FORMAT_ARG(result.monthNameShort, "month-name-short"), // 6
-        FF_FORMAT_ARG(result.week, "week"), // 7
-        FF_FORMAT_ARG(result.weekday, "weekday"), // 8
-        FF_FORMAT_ARG(result.weekdayShort, "weekday-short"), // 9
-        FF_FORMAT_ARG(result.dayInYear, "day-in-year"), // 10
-        FF_FORMAT_ARG(result.dayInMonth, "day-in-month"), // 11
-        FF_FORMAT_ARG(result.dayInWeek, "day-in-week"), // 12
-        FF_FORMAT_ARG(result.hour, "hour"), // 13
-        FF_FORMAT_ARG(result.hourPretty, "hour-pretty"), // 14
-        FF_FORMAT_ARG(result.hour12, "hour-12"), // 15
-        FF_FORMAT_ARG(result.hour12Pretty, "hour-12-pretty"), // 16
-        FF_FORMAT_ARG(result.minute, "minute"), // 17
-        FF_FORMAT_ARG(result.minutePretty, "minute-pretty"), // 18
-        FF_FORMAT_ARG(result.second, "second"), // 19
-        FF_FORMAT_ARG(result.secondPretty, "second-pretty"), // 20
-        FF_FORMAT_ARG(result.offsetFromUtc, "offset-from-utc"), // 21
-        FF_FORMAT_ARG(result.timezoneName, "timezone-name"), // 22
-        FF_FORMAT_ARG(result.dayPretty, "day-pretty"), // 23
+        FF_ARG(result.year, "year"), // 1
+        FF_ARG(result.yearShort, "year-short"), // 2
+        FF_ARG(result.month, "month"), // 3
+        FF_ARG(result.monthPretty, "month-pretty"), // 4
+        FF_ARG(result.monthName, "month-name"), // 5
+        FF_ARG(result.monthNameShort, "month-name-short"), // 6
+        FF_ARG(result.week, "week"), // 7
+        FF_ARG(result.weekday, "weekday"), // 8
+        FF_ARG(result.weekdayShort, "weekday-short"), // 9
+        FF_ARG(result.dayInYear, "day-in-year"), // 10
+        FF_ARG(result.dayInMonth, "day-in-month"), // 11
+        FF_ARG(result.dayInWeek, "day-in-week"), // 12
+        FF_ARG(result.hour, "hour"), // 13
+        FF_ARG(result.hourPretty, "hour-pretty"), // 14
+        FF_ARG(result.hour12, "hour-12"), // 15
+        FF_ARG(result.hour12Pretty, "hour-12-pretty"), // 16
+        FF_ARG(result.minute, "minute"), // 17
+        FF_ARG(result.minutePretty, "minute-pretty"), // 18
+        FF_ARG(result.second, "second"), // 19
+        FF_ARG(result.secondPretty, "second-pretty"), // 20
+        FF_ARG(result.offsetFromUtc, "offset-from-utc"), // 21
+        FF_ARG(result.timezoneName, "timezone-name"), // 22
+        FF_ARG(result.dayPretty, "day-pretty"), // 23
     }));
 }
 

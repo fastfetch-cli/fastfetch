@@ -35,9 +35,9 @@ bool ffPrintDE(FFDEOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result->deProcessName, "process-name"),
-            FF_FORMAT_ARG(result->dePrettyName, "pretty-name"),
-            FF_FORMAT_ARG(version, "version")
+            FF_ARG(result->deProcessName, "process-name"),
+            FF_ARG(result->dePrettyName, "pretty-name"),
+            FF_ARG(version, "version")
         }));
     }
 

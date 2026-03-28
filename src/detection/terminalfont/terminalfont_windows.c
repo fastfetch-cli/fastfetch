@@ -268,18 +268,34 @@ static void detectConEmu(FFTerminalFontResult* terminalFont)
 
 static void detectWarp(FFTerminalFontResult* terminalFont)
 {
-    FF_HKEY_AUTO_DESTROY key = NULL;
+    FF_AUTO_CLOSE_FD HANDLE key = NULL;
     if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Warp.dev\\Warp", &key, &terminalFont->error))
         return;
 
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
-    if (!ffRegReadStrbuf(key, L"FontName", &fontName, NULL))
+    if (ffRegReadValues(key, 2, (FFRegValueArg[]) {
+        FF_ARG(fontName, L"FontName"),
+        FF_ARG(fontSize, L"FontSize")
+    }, &terminalFont->error))
+    {
+        ffStrbufTrim(&fontName, '"');
+        ffStrbufAppendS(&fontSize, "px");
+    }
+    else
+    {
         ffStrbufSetS(&fontName, "Hack");
-    if (!ffRegReadStrbuf(key, L"FontSize", &fontSize, &terminalFont->error))
-        ffStrbufSetS(&fontSize, "13");
+        ffStrbufSetS(&fontSize, "13.0px");
+    }
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    FFstrbuf* fontWeight = (FFstrbuf*) ffListAdd(&terminalFont->font.styles);
+    ffStrbufInit(fontWeight);
+    if (ffRegReadStrbuf(key, L"FontWeight", fontWeight, NULL))
+        ffStrbufTrim(fontWeight, '"');
+    else
+        ffStrbufSetStatic(fontWeight, "Normal");
 }
 
 bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)

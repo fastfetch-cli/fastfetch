@@ -18,6 +18,7 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "None") &&
         !ffStrbufIgnCaseEqualS(value, "System Name") &&
         !ffStrbufIgnCaseEqualS(value, "System Version") &&
+        !ffStrbufIgnCaseEqualS(value, "System SKU#") &&
         !ffStrbufIgnCaseEqualS(value, "Default string") &&
         !ffStrbufIgnCaseEqualS(value, "Undefined") &&
         !ffStrbufIgnCaseEqualS(value, "Not Specified") &&
@@ -32,10 +33,28 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
         !ffStrbufIgnCaseEqualS(value, "N/A") &&
         !ffStrbufIgnCaseEqualS(value, "Unknown") &&
-        !ffStrbufIgnCaseEqualS(value, "Standard") &&
-        !ffStrbufIgnCaseEqualS(value, "0x0000")
+        !ffStrbufIgnCaseEqualS(value, "Standard") && ({
+            // Some SMBIOS implementations use "0x0000" to indicate an unset value, even for strings.
+            bool zero = ffStrbufStartsWithS(value, "0x0");
+            if (zero)
+            {
+                for (size_t i = 2; i < value->length; i++)
+                {
+                    char c = value->chars[i];
+                    if (c != '0')
+                    {
+                        zero = false;
+                        break;
+                    }
+                }
+            }
+            !zero;
+        })
     ;
 }
+
+static bool smbiosTableInitialized = false;
+static FFSmbiosHeaderTable smbiosTable;
 
 const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
 {
@@ -50,6 +69,74 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
         p ++;
 
     return (const FFSmbiosHeader*) (p + 1);
+}
+
+static bool parseSmbiosTable(const uint8_t* data, uint32_t length)
+{
+    const FFSmbiosHeader* endOfTable = NULL;
+
+    FF_DEBUG("Parsing SMBIOS table structures with length %u bytes", length);
+    FF_MAYBE_UNUSED int structureCount = 0, totalCount = 0;
+    for (
+        const FFSmbiosHeader* header = (const FFSmbiosHeader*) data;
+        (const uint8_t*) header + sizeof(FFSmbiosHeader) < (const uint8_t*) data + length;
+        header = ffSmbiosNextEntry(header)
+    )
+    {
+        ++totalCount;
+        endOfTable = header;
+
+        // This doesn't verify the entire structure (e.g. string section can still be truncated),
+        // but at least ensures the formatted section is valid and prevents infinite loops
+        // when the table is severely malformed.
+        if (__builtin_expect((const uint8_t*) header + header->Length > (const uint8_t*) data + length, false))
+        {
+            FF_DEBUG("Truncated SMBIOS structure at offset 0x%lx: length %u is too small",
+                (unsigned long)((const uint8_t*) header - data), header->Length);
+            break;
+        }
+
+        if (header->Type < FF_SMBIOS_TYPE_END_OF_TABLE)
+        {
+            if (!smbiosTable[header->Type])
+            {
+                smbiosTable[header->Type] = header;
+                FF_DEBUG("Found SMBIOS structure type %u, handle 0x%04X, length %u",
+                    header->Type, header->Handle, header->Length);
+                structureCount++;
+            }
+            else
+            {
+                FF_DEBUG("Duplicate SMBIOS structure type %u, handle 0x%04X, length %u",
+                    header->Type, header->Handle, header->Length);
+            }
+        }
+        else if (header->Type == FF_SMBIOS_TYPE_END_OF_TABLE)
+        {
+            FF_DEBUG("Reached SMBIOS end of type %u, handle 0x%04X, length %u",
+                header->Type, header->Handle, header->Length);
+            break;
+        }
+        else
+        {
+            FF_DEBUG("Found custom SMBIOS structure type %u, handle 0x%04X, length %u; ignoring",
+                header->Type, header->Handle, header->Length);
+        }
+    }
+
+    if (!endOfTable)
+    {
+        FF_DEBUG("No SMBIOS structures found in table");
+        return false;
+    }
+
+    FF_DEBUG("Parsed %d/%d SMBIOS structures, end-of-table (Type 127) %s",
+        structureCount,
+        totalCount,
+        endOfTable->Type == FF_SMBIOS_TYPE_END_OF_TABLE ? "found." : "not found! SMBIOS data may be malformed.");
+    smbiosTable[FF_SMBIOS_TYPE_END_OF_TABLE] = endOfTable;
+
+    return true;
 }
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__) || defined(__GNU__)
@@ -71,17 +158,30 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     #define loff_t off_t
 #endif
 
+#ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
-    if (ffReadFileBuffer(devicesPath, buffer))
+    // /sys/class/dmi/id/* are all pseudo-files with very small content
+    // so reading the whole file at once is efficient
+    ffStrbufEnsureFixedLengthFree(buffer, 127);
+
+    ssize_t len = ffReadFileData(devicesPath, buffer->allocated - 1, buffer->chars);
+    if (len > 0)
     {
+        assert(len < buffer->allocated);
+        buffer->chars[len] = '\0';
+        buffer->length = (uint32_t) len;
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
             return true;
     }
 
-    if (ffReadFileBuffer(classPath, buffer))
+    len = ffReadFileData(classPath, buffer->allocated - 1, buffer->chars);
+    if (len > 0)
     {
+        assert(len < buffer->allocated);
+        buffer->chars[len] = '\0';
+        buffer->length = (uint32_t) len;
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
             return true;
@@ -90,6 +190,7 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     ffStrbufClear(buffer);
     return false;
 }
+#endif
 
 typedef struct FFSmbios20EntryPoint
 {
@@ -137,10 +238,10 @@ typedef union FFSmbiosEntryPoint
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
     static FFstrbuf buffer;
-    static FFSmbiosHeaderTable table;
 
-    if (buffer.chars == NULL)
+    if (!smbiosTableInitialized)
     {
+        smbiosTableInitialized = true;
         FF_DEBUG("Initializing SMBIOS buffer");
         ffStrbufInit(&buffer);
         #if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__ && !__GNU__
@@ -401,29 +502,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         }
         #endif
 
-        FF_DEBUG("Parsing SMBIOS table structures");
-        FF_MAYBE_UNUSED int structureCount = 0;
-        for (
-            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer.chars;
-            (const uint8_t*) header < (const uint8_t*) buffer.chars + buffer.length;
-            header = ffSmbiosNextEntry(header)
-        )
-        {
-            if (header->Type < FF_SMBIOS_TYPE_END_OF_TABLE)
-            {
-                if (!table[header->Type]) {
-                    table[header->Type] = header;
-                    FF_DEBUG("Found SMBIOS structure type %u, handle 0x%04X, length %u",
-                        header->Type, header->Handle, header->Length);
-                    structureCount++;
-                }
-            }
-            else if (header->Type == FF_SMBIOS_TYPE_END_OF_TABLE) {
-                FF_DEBUG("Reached end-of-table marker");
-                break;
-            }
-        }
-        FF_DEBUG("Parsed %d SMBIOS structures", structureCount);
+        if (!parseSmbiosTable((const uint8_t*) buffer.chars, buffer.length))
+            ffStrbufClear(&buffer);
     }
 
     if (buffer.length == 0) {
@@ -431,7 +511,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         return NULL;
     }
 
-    return &table;
+    return &smbiosTable;
 }
 #elif defined(_WIN32)
 #include "common/windows/nt.h"
@@ -451,10 +531,10 @@ typedef struct FFRawSmbiosData
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
     static SYSTEM_FIRMWARE_TABLE_INFORMATION* buffer;
-    static FFSmbiosHeaderTable table;
 
-    if (!buffer)
+    if (!smbiosTableInitialized)
     {
+        smbiosTableInitialized = true;
         FF_DEBUG("Initializing Windows SMBIOS buffer");
 
         FF_DEBUG("Querying system firmware table size with signature 'RSMB'");
@@ -491,31 +571,70 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         FF_DEBUG("Successfully retrieved SMBIOS data: version %u.%u, length %u bytes",
             rawData->SMBIOSMajorVersion, rawData->SMBIOSMinorVersion, rawData->Length);
 
-        FF_DEBUG("Parsing SMBIOS table structures");
-        FF_MAYBE_UNUSED int structureCount = 0;
-        for (
-            const FFSmbiosHeader* header = (const FFSmbiosHeader*) rawData->SMBIOSTableData;
-            (const uint8_t*) header < rawData->SMBIOSTableData + rawData->Length;
-            header = ffSmbiosNextEntry(header)
-        )
+        if (!parseSmbiosTable(rawData->SMBIOSTableData, rawData->Length))
         {
-            if (header->Type < FF_SMBIOS_TYPE_END_OF_TABLE)
-            {
-                if (!table[header->Type]) {
-                    table[header->Type] = header;
-                    FF_DEBUG("Found SMBIOS structure type %u, handle 0x%04X, length %u",
-                        header->Type, header->Handle, header->Length);
-                    structureCount++;
-                }
-            }
-            else if (header->Type == FF_SMBIOS_TYPE_END_OF_TABLE) {
-                FF_DEBUG("Reached end-of-table marker");
-                break;
-            }
+            free(buffer);
+            buffer = NULL;
+            return NULL;
         }
-        FF_DEBUG("Parsed %d SMBIOS structures", structureCount);
     }
 
-    return &table;
+    if (!buffer) {
+        FF_DEBUG("No valid SMBIOS data available");
+        return NULL;
+    }
+    return &smbiosTable;
+}
+#elif defined(__APPLE__)
+#include "common/apple/cf_helpers.h"
+
+const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
+{
+    static CFDataRef smbiosDataBuffer;
+
+    if (!smbiosTableInitialized)
+    {
+        smbiosTableInitialized = true;
+        FF_DEBUG("Initializing SMBIOS buffer on Apple platform");
+
+        FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t registryEntry = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMBIOS"));
+
+        if (!registryEntry)
+        {
+            FF_DEBUG("IOServiceGetMatchingService() failed to find AppleSMBIOS");
+            return NULL;
+        }
+
+        FF_DEBUG("AppleSMBIOS service found, retrieving SMBIOS data");
+        smbiosDataBuffer = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("SMBIOS"), kCFAllocatorDefault, kNilOptions);
+        if (!smbiosDataBuffer)
+        {
+            FF_DEBUG("IORegistryEntryCreateCFProperty() failed to get SMBIOS data");
+            return NULL;
+        }
+        if (CFGetTypeID(smbiosDataBuffer) != CFDataGetTypeID())
+        {
+            FF_DEBUG("Unexpected SMBIOS data type: expected CFData");
+            CFRelease(smbiosDataBuffer);
+            smbiosDataBuffer = NULL;
+            return NULL;
+        }
+
+        FF_DEBUG("Successfully retrieved SMBIOS data: %lu bytes", CFDataGetLength(smbiosDataBuffer));
+        if (!parseSmbiosTable((const uint8_t*) CFDataGetBytePtr(smbiosDataBuffer), (uint32_t) CFDataGetLength(smbiosDataBuffer)))
+        {
+            CFRelease(smbiosDataBuffer);
+            smbiosDataBuffer = NULL;
+            return NULL;
+        }
+    }
+
+    if (!smbiosDataBuffer)
+    {
+        FF_DEBUG("No valid SMBIOS data available");
+        return NULL;
+    }
+
+    return &smbiosTable;
 }
 #endif

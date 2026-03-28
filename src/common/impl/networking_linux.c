@@ -108,8 +108,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                 #else
                 "sendto()"
                 #endif
-                " %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
-                sent, errno, strerror(errno));
+                " %s (sent=%zd, %s)", errno == 0 ? "succeeded" : "was in progress", sent, strerror(errno));
             freeaddrinfo(state->addr);
             state->addr = NULL;
             ffStrbufDestroy(&state->command);
@@ -122,7 +121,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
             #else
             "sendto()"
             #endif
-            " failed: %s (errno=%d)", strerror(errno), errno);
+            " failed: %s", strerror(errno));
         #ifdef __APPLE__
         return "connectx() failed";
         #else
@@ -143,7 +142,7 @@ static const char* connectAndSend(FFNetworkingState* state)
     FF_DEBUG("Attempting connect() to server...");
     if(connect(state->sockfd, state->addr->ai_addr, state->addr->ai_addrlen) == -1)
     {
-        FF_DEBUG("connect() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("connect() failed: %s", strerror(errno));
         ret = "connect() failed";
         goto error;
     }
@@ -152,7 +151,7 @@ static const char* connectAndSend(FFNetworkingState* state)
     FF_DEBUG("Attempting to send %u bytes of data...", state->command.length);
     if(send(state->sockfd, state->command.chars, state->command.length, 0) < 0)
     {
-        FF_DEBUG("send() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("send() failed: %s", strerror(errno));
         ret = "send() failed";
         goto error;
     }
@@ -227,7 +226,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     state->sockfd = socket(state->addr->ai_family, state->addr->ai_socktype, state->addr->ai_protocol);
     if(state->sockfd == -1)
     {
-        FF_DEBUG("socket() failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG("socket() failed: %s", strerror(errno));
         ret = "socket() failed";
         goto error;
     }
@@ -399,7 +398,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         }
         else if (pollRes == -1)
         {
-            FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
+            FF_DEBUG("poll() failed: %s", strerror(errno));
             close(state->sockfd);
             state->sockfd = -1;
             return "poll() failed";
@@ -416,6 +415,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
     #endif
+
+    if (shutdown(state->sockfd, SHUT_WR) == -1)
+    {
+        FF_DEBUG("Failed to shutdown socket send: %s", strerror(errno));
+        // Not a critical error, continue anyway
+    }
 
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
@@ -434,7 +439,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             if (received == 0) {
                 FF_DEBUG("Connection closed (received=0)");
             } else {
-                FF_DEBUG("Reception failed: %s (errno=%d)", strerror(errno), errno);
+                FF_DEBUG("Reception failed: %s", strerror(errno));
             }
             break;
         }

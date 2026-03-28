@@ -1,3 +1,34 @@
+# 2.61.0
+
+Changes:
+* Support for Windows 7 and 8 has been removed.
+    * Windows 8.1 is now the oldest version supported by fastfetch.
+* The GPU module on WSL no longer relies on `DXCore`.
+    * The `directx-headers` dependency is no longer required.
+    * Fastfetch on Linux is now pure C; a C++ compiler is no longer required.
+    * GPU type detection is now slightly less accurate, but detection speed should be slightly faster.
+* The GPU module on Windows now uses `DXCore` for more accurate GPU type detection (requires Windows 10 or later).
+    * This feature is built only when `DXCore` headers are available, which requires installing `mingw-w64-<msystem>-x86_64-directx-headers` on MSYS2.
+
+Features:
+* Adds a `brightness` option for color display configuration (#2238, Colors)
+* Adds support for detecting Bluetooth keyboards on Linux (#2220, Keyboard)
+* Adds support for detecting GlazeWM (WM, macOS)
+* Adds a `showEmptySlots` option to display empty memory slots on Linux (#2222, PhysicalMemory)
+* Adds marketing product name detection on Asahi Linux (Host, Linux)
+* Adds support for new M5 Mac models (Host, macOS)
+* Improves SMBIOS robustness by validating malformed data and improving error handling
+* Improves reliability when terminating child processes (Processing, Windows)
+* Improves Intel Mac support by querying SMBIOS data directly (Global, macOS)
+* Includes numerous internal cleanups and optimizations
+
+Bugfixes:
+* Fixes missing memory devices on some machines (PhysicalMemory)
+* Fixes CPUCache deduplication for shared caches (#2228, CPUCache, Linux)
+* Fixes WM version reporting for niri (#2218, WM, Linux)
+* Fixes SSID decoding issues from `iw` output (Wifi, Linux)
+* Fixes the CMD code page being changed after running fastfetch on Windows (#2245, Windows)
+
 # 2.60.0
 
 Changes:

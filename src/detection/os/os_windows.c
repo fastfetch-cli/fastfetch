@@ -10,7 +10,7 @@ PWSTR WINAPI BrandingFormatString(PCWSTR format);
 
 static bool getCodeName(FFOSResult* os)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
         return false;
 
@@ -39,13 +39,9 @@ void ffDetectOSImpl(FFOSResult* os)
 
     if(os->variant.length == 0) // Windows PE?
     {
-        wchar_t buf[128];
-        DWORD bufSize = (DWORD) sizeof(buf); // with trailing '\0'
-        if(RegGetValueW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"ProductName", RRF_RT_REG_SZ, NULL, buf, &bufSize) == ERROR_SUCCESS)
-        {
-            assert(bufSize >= sizeof(wchar_t));
-            ffStrbufSetNWS(&os->variant, bufSize / sizeof(wchar_t) - 1, buf);
-        }
+        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
+        if(ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
+            ffRegReadStrbuf(hKey, L"ProductName", &os->variant, NULL);
     }
 
     ffStrbufSet(&os->prettyName, &os->variant);

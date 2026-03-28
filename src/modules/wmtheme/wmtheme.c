@@ -23,7 +23,7 @@ bool ffPrintWMTheme(FFWMThemeOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(themeOrError, "result"),
+            FF_ARG(themeOrError, "result"),
         }));
     }
 

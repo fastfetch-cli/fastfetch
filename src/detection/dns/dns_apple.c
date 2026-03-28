@@ -15,7 +15,7 @@ static const char* detectDnsFromConf(const char* path, FFDNSOptions* options, FF
     FF_AUTO_CLOSE_FILE FILE* file = fopen(path, "r");
     if (!file)
     {
-        FF_DEBUG("Failed to open %s: %m", path);
+        FF_DEBUG("Failed to open %s: %s", path, strerror(errno));
         return "fopen(path, r) failed";
     }
 

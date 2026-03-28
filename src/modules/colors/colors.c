@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/textModifier.h"
+#include "common/color.h"
 #include "common/stringUtils.h"
 #include "logo/logo.h"
 #include "modules/colors/colors.h"
@@ -23,20 +24,23 @@ bool ffPrintColors(FFColorsOptions* options)
 
     if (options->symbol == FF_COLORS_SYMBOL_BLOCK || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
     {
-        // 3%d: Set the foreground color
-        for(uint8_t i = options->block.range[0]; i <= min(options->block.range[1], 7); i++)
+        if (options->brightness != FF_COLORS_BRIGHTNESS_LIGHT)
         {
-            if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+            // 3%d: Set the foreground color
+            for(uint8_t i = options->block.range[0]; i <= min(options->block.range[1], 7); i++)
             {
-                if (!instance.config.display.pipe)
-                    ffStrbufAppendF(&result, "\e[3%dm", i);
-                for (uint8_t j = 0; j < options->block.width; j++)
-                    ffStrbufAppendS(&result, "█");
-            }
-            else
-            {
-                ffStrbufAppendF(&result, "\e[4%dm", i);
-                ffStrbufAppendNC(&result, options->block.width, ' ');
+                if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+                {
+                    if (!instance.config.display.pipe)
+                        ffStrbufAppendF(&result, "\e[3%dm", i);
+                    for (uint8_t j = 0; j < options->block.width; j++)
+                        ffStrbufAppendS(&result, "█");
+                }
+                else
+                {
+                    ffStrbufAppendF(&result, "\e[4%dm", i);
+                    ffStrbufAppendNC(&result, options->block.width, ' ');
+                }
             }
         }
         if (result.length > 0)
@@ -64,20 +68,23 @@ bool ffPrintColors(FFColorsOptions* options)
         }
         #endif
 
-        // 9%d: Set the foreground to the bright color
-        for(uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
+        if (options->brightness != FF_COLORS_BRIGHTNESS_NORMAL)
         {
-            if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+            // 9%d: Set the foreground to the bright color
+            for (uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
             {
-                if(!instance.config.display.pipe)
-                    ffStrbufAppendF(&result, "\e[9%dm", i - 8);
-                for (uint8_t j = 0; j < options->block.width; j++)
-                    ffStrbufAppendS(&result, "█");
-            }
-            else
-            {
-                ffStrbufAppendF(&result, "\e[10%dm", i - 8);
-                ffStrbufAppendNC(&result, options->block.width, ' ');
+                if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+                {
+                    if(!instance.config.display.pipe)
+                        ffStrbufAppendF(&result, "\e[9%dm", i - 8);
+                    for (uint8_t j = 0; j < options->block.width; j++)
+                        ffStrbufAppendS(&result, "█");
+                }
+                else
+                {
+                    ffStrbufAppendF(&result, "\e[10%dm", i - 8);
+                    ffStrbufAppendNC(&result, options->block.width, ' ');
+                }
             }
         }
     }
@@ -93,11 +100,23 @@ bool ffPrintColors(FFColorsOptions* options)
             case FF_COLORS_SYMBOL_STAR: symbol = "★ "; break;
             default: symbol = "███ "; break;
         }
-        for (int i = 8; i >= 1; --i)
+        if (options->brightness == FF_COLORS_BRIGHTNESS_DEFAULT)
         {
-            if (!instance.config.display.pipe)
-                ffStrbufAppendF(&result, "\e[3%dm", i);
-            ffStrbufAppendS(&result, symbol);
+            for (int i = 8; i >= 1; --i)
+            {
+                if (!instance.config.display.pipe)
+                    ffStrbufAppendF(&result, "\e[" FF_COLOR_FG_256 "%dm", i);
+                ffStrbufAppendS(&result, symbol);
+            }
+        }
+        else
+        {
+            for (int i = 0; i <= 7; ++i)
+            {
+                if (!instance.config.display.pipe)
+                    ffStrbufAppendF(&result, "\e[%c%dm", options->brightness == FF_COLORS_BRIGHTNESS_NORMAL ? '3' : '9', i);
+                ffStrbufAppendS(&result, symbol);
+            }
         }
         ffStrbufTrimRight(&result, ' ');
     }
@@ -112,9 +131,9 @@ bool ffPrintColors(FFColorsOptions* options)
             flag = true;
         }
 
-        if(options->paddingLeft > 0)
+        if (options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
-        if(!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
+        if (!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
             ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         ffStrbufPutTo(&result, stdout);
     }
@@ -197,6 +216,22 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "brightness"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "default", FF_COLORS_BRIGHTNESS_DEFAULT },
+                { "normal", FF_COLORS_BRIGHTNESS_NORMAL },
+                { "light", FF_COLORS_BRIGHTNESS_LIGHT },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            else
+                options->brightness = (FFColorsBrightness) value;
+            continue;
+        }
+
         ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -240,6 +275,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
         .width = 3,
         .range = { 0, 15 },
     };
+    options->brightness = FF_COLORS_BRIGHTNESS_DEFAULT;
 }
 
 void ffDestroyColorsOptions(FFColorsOptions* options)

@@ -116,12 +116,14 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 physicalHeight = (uint32_t) (size.height + 0.5);
             }
 
+            uint32_t pixelWidth = (uint32_t) CGDisplayModeGetPixelWidth(mode);
+            uint32_t pixelHeight = (uint32_t) CGDisplayModeGetPixelHeight(mode);
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
-                (uint32_t)CGDisplayModeGetPixelWidth(mode),
-                (uint32_t)CGDisplayModeGetPixelHeight(mode),
+                pixelWidth,
+                pixelHeight,
                 refreshRate,
-                (uint32_t)CGDisplayModeGetWidth(mode),
-                (uint32_t)CGDisplayModeGetHeight(mode),
+                pixelHeight * 96 / (uint32_t)CGDisplayModeGetHeight(mode),
                 preferredWidth,
                 preferredHeight,
                 preferredRefreshRate,

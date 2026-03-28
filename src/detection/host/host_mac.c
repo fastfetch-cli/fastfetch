@@ -107,6 +107,14 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
     else if(ffStrbufStartsWithS(hwModel, "Mac"))
     {
         const char* version = hwModel->chars + strlen("Mac");
+        if(ffStrEquals(version, "17,9"))        return "MacBook Pro (14-inch, M5 Pro, 2026)";
+        if(ffStrEquals(version, "17,8"))        return "MacBook Pro (16-inch, M5 Pro, 2026)";
+        if(ffStrEquals(version, "17,7"))        return "MacBook Pro (14-inch, M5 Max, 2026)";
+        if(ffStrEquals(version, "17,6"))        return "MacBook Pro (16-inch, M5 Max, 2026)";
+        if(ffStrEquals(version, "17,5"))        return "MacBook Neo (13-inch, A18 Pro, 2026)";
+        if(ffStrEquals(version, "17,4"))        return "MacBook Air (15-inch, M5, 2026)";
+        if(ffStrEquals(version, "17,3"))        return "MacBook Air (13-inch, M5, 2026)";
+        if(ffStrEquals(version, "17,2"))        return "MacBook Pro (14-inch, M5, 2025)";
         if(ffStrEquals(version, "16,13"))       return "MacBook Air (15-inch, M4, 2025)";
         if(ffStrEquals(version, "16,12"))       return "MacBook Air (13-inch, M4, 2025)";
         if(ffStrEquals(version, "16,11") ||

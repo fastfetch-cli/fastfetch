@@ -22,10 +22,10 @@ static void formatKey(const FFDiskIOOptions* options, FFDiskIOResult* dev, uint3
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]){
-            FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(dev->name, "name"),
-            FF_FORMAT_ARG(dev->devPath, "dev-path"),
-            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_ARG(index, "index"),
+            FF_ARG(dev->name, "name"),
+            FF_ARG(dev->devPath, "dev-path"),
+            FF_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -75,14 +75,14 @@ bool ffPrintDiskIO(FFDiskIOOptions* options)
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-                FF_FORMAT_ARG(buffer, "size-read"),
-                FF_FORMAT_ARG(buffer2, "size-written"),
-                FF_FORMAT_ARG(dev->name, "name"),
-                FF_FORMAT_ARG(dev->devPath, "dev-path"),
-                FF_FORMAT_ARG(dev->bytesRead, "bytes-read"),
-                FF_FORMAT_ARG(dev->bytesWritten, "bytes-written"),
-                FF_FORMAT_ARG(dev->readCount, "read-count"),
-                FF_FORMAT_ARG(dev->writeCount, "write-count"),
+                FF_ARG(buffer, "size-read"),
+                FF_ARG(buffer2, "size-written"),
+                FF_ARG(dev->name, "name"),
+                FF_ARG(dev->devPath, "dev-path"),
+                FF_ARG(dev->bytesRead, "bytes-read"),
+                FF_ARG(dev->bytesWritten, "bytes-written"),
+                FF_ARG(dev->readCount, "read-count"),
+                FF_ARG(dev->writeCount, "write-count"),
             }));
         }
         ++index;

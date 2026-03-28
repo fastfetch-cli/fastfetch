@@ -3,7 +3,6 @@
 #include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
 
-#include <winternl.h>
 #include <windows.h>
 #include <hidsdi.h>
 
@@ -159,7 +158,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                 OVERLAPPED overlapped = { };
                 DWORD nBytes;
                 if (ReadFile(hHidFile, reportBuffer, caps.InputReportByteLength, &nBytes, &overlapped) ||
-                    (WaitForSingleObject(hHidFile, FF_IO_TERM_RESP_WAIT_MS) == WAIT_OBJECT_0 && GetOverlappedResult(hHidFile, &overlapped, &nBytes, FALSE)))
+                    GetOverlappedResultEx(hHidFile, &overlapped, &nBytes, FF_IO_TERM_RESP_WAIT_MS, TRUE))
                 {
                     if (rdi.hid.dwVendorId == 0x054C)
                     {

@@ -1035,6 +1035,29 @@ int main(void)
         ffStrbufDestroy(&strbuf);
     }
 
+    // decode hex escape sequences
+    {
+        ffStrbufSetS(&strbuf, "Basic\\x20data\\x20partition");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == true);
+        VERIFY(ffStrbufEqualS(&strbuf, "Basic data partition"));
+
+        ffStrbufSetS(&strbuf, "\\x41\\x42\\x43");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == true);
+        VERIFY(ffStrbufEqualS(&strbuf, "ABC"));
+
+        ffStrbufSetS(&strbuf, "abc\\x4");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\x4"));
+
+        ffStrbufSetS(&strbuf, "abc\\xZZ");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\xZZ"));
+
+        ffStrbufSetS(&strbuf, "abc\\x2G");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\x2G"));
+    }
+
     //setS
     ffStrbufInitStatic(&strbuf, "STATIC");
     ffStrbufSetS(&strbuf, "DYNAMIC");

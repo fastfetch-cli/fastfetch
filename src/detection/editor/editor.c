@@ -7,14 +7,6 @@
 
 #include <stdlib.h>
 
-#ifdef _WIN32
-static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
-{
-    assert(resolved_name != NULL);
-    return _fullpath(resolved_name, file_name, _MAX_PATH);
-}
-#endif
-
 static bool extractNvimVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32_t len, void* userdata)
 {
     if (!ffStrStartsWith(str, "NVIM v")) return true;

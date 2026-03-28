@@ -1,9 +1,19 @@
 #include "displayserver.h"
-#include "common/windows/unicode.h"
 #include "common/edidHelper.h"
+#include "common/windows/registry.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 #include <shellscalingapi.h>
+
+static inline void freeArgBuffer(FFArgBuffer* buffer)
+{
+    if (buffer->data)
+        free(buffer->data);
+    buffer->data = NULL;
+    buffer->length = 0;
+}
+#define FF_AUTO_FREE_ARG_BUFFER __attribute__((__cleanup__(freeArgBuffer)))
 
 // http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
 BOOL WINAPI IsThreadDesktopComposited();
@@ -11,23 +21,6 @@ BOOL WINAPI GetDpiForMonitorInternal(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
-    #if FF_WIN7_COMPAT
-    static __typeof__(GetDpiForMonitorInternal)* ffGetDpiForMonitor;
-    if (!ffGetDpiForMonitor)
-    {
-        HMODULE user32 = GetModuleHandleW(L"user32.dll");
-        if (user32)
-        {
-            // GetDpiForMonitorInternal (returns BOOL) is in user32, while GetDpiForMonitor (returns HRESULT) is in shcore.
-            // Both are available since Windows 8.1. Not sure why Microsoft decided to put them in different DLLs, but whatever.
-            // Use GetDpiForMonitorInternal for loading one less dll
-            ffGetDpiForMonitor = (void*) GetProcAddress(user32, "GetDpiForMonitorInternal");
-        }
-    }
-    #else
-    #define ffGetDpiForMonitor GetDpiForMonitorInternal
-    #endif
-
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = ARRAY_SIZE(paths);
     DISPLAYCONFIG_MODE_INFO modes[256];
@@ -46,15 +39,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
             const DISPLAYCONFIG_PATH_INFO* path = &paths[i];
             const DISPLAYCONFIG_SOURCE_MODE* sourceMode = &modes[path->sourceInfo.modeInfoIdx].sourceMode;
 
-            DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
-                .header = {
-                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
-                    .size = sizeof(sourceName),
-                    .adapterId = path->sourceInfo.adapterId,
-                    .id = path->sourceInfo.id,
-                },
-            };
-
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             uint32_t physicalWidth = 0, physicalHeight = 0;
 
@@ -66,9 +50,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     .id = path->targetInfo.id,
                 },
             };
-            uint8_t edidData[1024];
-            DWORD edidLength = 0;
-
+            FF_AUTO_FREE_ARG_BUFFER FFArgBuffer edid = {};
             if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
             {
                 wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
@@ -86,16 +68,17 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 wcscpy(pRegPath, L"Device Parameters");
 
-                edidLength = ARRAY_SIZE(edidData);
-                if (RegGetValueW(HKEY_LOCAL_MACHINE, regPath, L"EDID", RRF_RT_REG_BINARY, NULL, edidData, &edidLength) == ERROR_SUCCESS &&
-                    edidLength > 0 && edidLength % 128 == 0)
+                FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
+                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL) &&
+                    ffRegReadData(hKey, L"EDID", &edid, NULL) &&
+                    ffEdidIsValid(edid.data, edid.length))
                 {
-                    ffEdidGetName(edidData, &name);
-                    ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                    ffEdidGetName(edid.data, &name);
+                    ffEdidGetPhysicalSize(edid.data, &physicalWidth, &physicalHeight);
                 }
                 else
                 {
-                    edidLength = 0;
+                    edid.length = 0;
                     if (targetName.flags.friendlyNameFromEdid)
                         ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
                     else
@@ -109,17 +92,6 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             uint32_t width = sourceMode->width;
             uint32_t height = sourceMode->height;
-            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
-                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
-            {
-                uint32_t temp = width;
-                width = height;
-                height = temp;
-                temp = physicalWidth;
-                physicalWidth = physicalHeight;
-                physicalHeight = temp;
-            }
-
             uint32_t rotation;
             switch (path->targetInfo.rotation)
             {
@@ -145,15 +117,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
             }
 
             uint32_t systemDpi = 0;
-
-            if (ffGetDpiForMonitor)
+            HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
+            if (hMonitor)
             {
-                HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
-                if (hMonitor)
-                {
-                    UINT ignored;
-                    ffGetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
-                }
+                UINT ignored;
+                GetDpiForMonitorInternal(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
             }
 
             if (systemDpi == 0)
@@ -164,12 +132,19 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 ReleaseDC(NULL, hdc);
             }
 
+            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
+                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
+            {
+                uint32_t temp = width;
+                width = height;
+                height = temp;
+            }
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                width * 96 / systemDpi,
-                height * 96 / systemDpi,
+                systemDpi,
                 preferredMode.width,
                 preferredMode.height,
                 preferredRefreshRate,
@@ -181,7 +156,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
                     ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 sourceMode->position.x == 0 && sourceMode->position.y == 0,
-                path->sourceInfo.id,
+                (uintptr_t) hMonitor,
                 physicalWidth,
                 physicalHeight,
                 "GDI"
@@ -230,8 +205,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     else
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
                 }
-                if (edidLength > 0)
-                    ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
+                if (edid.length > 0)
+                    ffEdidGetSerialAndManufactureDate(edid.data, &display->serial, &display->manufactureYear, &display->manufactureWeek);
                 display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }
         }
