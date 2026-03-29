@@ -6,7 +6,7 @@
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
 
-void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage) {
+void printSwap(FFSwapOptions* options, uint8_t index, uint32_t totalCount, FFSwapResult* storage) {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if (options->moduleArgs.key.length == 0) {
@@ -45,7 +45,7 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage) {
                 ffStrbufAppendC(&str, ' ');
             }
             if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
-                ffStrbufAppendS(&str, "Disabled");
+                ffStrbufAppendS(&str, totalCount ? "Unused" : "Disabled");
             } else {
                 ffPercentAppendNum(&str, 0, options->percent, str.length > 0, &options->moduleArgs);
             }
@@ -94,11 +94,11 @@ bool ffPrintSwap(FFSwapOptions* options) {
         return false;
     }
 
-    if (options->separate) {
+    if (options->separate && result.length > 0) {
         uint8_t index = 0;
         FF_LIST_FOR_EACH (FFSwapResult, storage, result) {
             ++index;
-            printSwap(options, index, storage);
+            printSwap(options, index, result.length, storage);
         }
     } else {
         FFSwapResult total = {
@@ -108,7 +108,7 @@ bool ffPrintSwap(FFSwapOptions* options) {
             total.bytesUsed += storage->bytesUsed;
             total.bytesTotal += storage->bytesTotal;
         }
-        printSwap(options, 0, &total);
+        printSwap(options, 0, result.length, &total);
         ffStrbufDestroy(&total.name);
     }
 
