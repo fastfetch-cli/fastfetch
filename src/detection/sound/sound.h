@@ -4,8 +4,7 @@
 
 #define FF_SOUND_VOLUME_UNKNOWN 255
 
-typedef struct FFSoundDevice
-{
+typedef struct FFSoundDevice {
     FFstrbuf identifier;
     FFstrbuf name;
     FFstrbuf platformApi;

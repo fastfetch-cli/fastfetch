@@ -3,10 +3,11 @@
 
 #include <private/drivers/poke.h>
 
-const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
-{
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus) {
     FF_AUTO_CLOSE_FD int pokefd = open(POKE_DEVICE_FULLNAME, O_RDWR | O_CLOEXEC);
-    if (pokefd < 0) return "open(POKE_DEVICE_FULLNAME) failed";
+    if (pokefd < 0) {
+        return "open(POKE_DEVICE_FULLNAME) failed";
+    }
 
     pci_info dev;
     pci_info_args cmd = {
@@ -14,15 +15,16 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         .info = &dev,
     };
 
-    for (cmd.index = 0; ioctl(pokefd, POKE_GET_NTH_PCI_INFO, &cmd, sizeof(cmd)) == B_OK && cmd.status == B_OK; ++cmd.index)
-    {
-        if (dev.class_base != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
+    for (cmd.index = 0; ioctl(pokefd, POKE_GET_NTH_PCI_INFO, &cmd, sizeof(cmd)) == B_OK && cmd.status == B_OK; ++cmd.index) {
+        if (dev.class_base != 0x03 /*PCI_BASE_CLASS_DISPLAY*/) {
             continue;
+        }
 
-        if (dev.function > 0 && dev.class_sub == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+        if (dev.function > 0 && dev.class_sub == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/) {
             continue; // Likely an auxiliary display controller (#2034)
+        }
 
-        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev.vendor_id));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
@@ -36,11 +38,13 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->deviceId = ffGPUPciAddr2Id(0, dev.bus, dev.device, dev.function);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
             ffGPUQueryAmdGpuName(dev.device_id, dev.revision, gpu);
+        }
 
-        if (gpu->name.length == 0)
+        if (gpu->name.length == 0) {
             ffGPUFillVendorAndName(dev.class_sub, dev.vendor_id, dev.device_id, gpu);
+        }
     }
 
     return NULL;

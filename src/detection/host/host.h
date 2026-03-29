@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/host/option.h"
 
-typedef struct FFHostResult
-{
+typedef struct FFHostResult {
     FFstrbuf family;
     FFstrbuf name;
     FFstrbuf version;

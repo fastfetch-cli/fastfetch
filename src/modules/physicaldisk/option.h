@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFPhysicalDiskOptions
-{
+typedef struct FFPhysicalDiskOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;

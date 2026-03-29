@@ -3,22 +3,21 @@
 #include "common/io.h"
 #include "common/stringUtils.h"
 
-const char* ffDetectProcesses(uint32_t* result)
-{
+const char* ffDetectProcesses(uint32_t* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
-    if(dir == NULL)
+    if (dir == NULL) {
         return "opendir(\"/proc\") failed";
+    }
 
     uint32_t num = 0;
 
     struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL)
-    {
+    while ((entry = readdir(dir)) != NULL) {
         if (
-        #ifdef _DIRENT_HAVE_D_TYPE
-                (entry->d_type == DT_DIR || entry->d_type == DT_UNKNOWN) &&
-        #endif
-                ffCharIsDigit(entry->d_name[0]))
+#ifdef _DIRENT_HAVE_D_TYPE
+            (entry->d_type == DT_DIR || entry->d_type == DT_UNKNOWN) &&
+#endif
+            ffCharIsDigit(entry->d_name[0]))
             ++num;
     }
 

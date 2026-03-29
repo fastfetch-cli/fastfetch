@@ -8,18 +8,19 @@
 #include <Drivers.h>
 #include <sys/ioctl.h>
 
-static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* result)
-{
+static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* result) {
     FF_AUTO_CLOSE_FD int rawfd = open(path->chars, O_RDONLY | O_CLOEXEC);
-    if (rawfd < 0) return "detectDisk: open(rawfd) failed";
+    if (rawfd < 0) {
+        return "detectDisk: open(rawfd) failed";
+    }
 
     device_geometry geometry;
-    if (ioctl(rawfd, B_GET_GEOMETRY, &geometry, sizeof(geometry)) < 0)
+    if (ioctl(rawfd, B_GET_GEOMETRY, &geometry, sizeof(geometry)) < 0) {
         return "ioctl(B_GET_GEOMETRY) failed";
+    }
 
     char name[B_OS_NAME_LENGTH];
-    if (ioctl(rawfd, B_GET_DEVICE_NAME, name, sizeof(name)) != 0)
-    {
+    if (ioctl(rawfd, B_GET_DEVICE_NAME, name, sizeof(name)) != 0) {
         // ioctl reports `not a tty` for NVME drives for some reason
         snprintf(name, sizeof(name), "Unknown %s drive", diskType);
     }
@@ -39,49 +40,53 @@ static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* resu
     return NULL;
 }
 
-static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFlist* result)
-{
+static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFlist* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(path->chars);
-    if (!dir) return "detectDiskType: opendir() failed";
+    if (!dir) {
+        return "detectDiskType: opendir() failed";
+    }
     uint32_t baseLen = path->length;
 
     struct dirent* entry;
-    while((entry = readdir(dir)))
-    {
-        if (entry->d_name[0] == '.') continue;
+    while ((entry = readdir(dir))) {
+        if (entry->d_name[0] == '.') {
+            continue;
+        }
         ffStrbufAppendC(path, '/');
         ffStrbufAppendS(path, entry->d_name);
 
         struct stat st;
-        if (stat(path->chars, &st) != 0)
-        {
+        if (stat(path->chars, &st) != 0) {
             ffStrbufSubstrBefore(path, baseLen);
             continue;
         }
 
-        if (S_ISDIR(st.st_mode))
+        if (S_ISDIR(st.st_mode)) {
             searchRawDeviceFile(path, diskType, result);
-        else if (ffStrEquals(entry->d_name, "raw"))
+        } else if (ffStrEquals(entry->d_name, "raw")) {
             detectDisk(path, diskType, result);
+        }
 
         ffStrbufSubstrBefore(path, baseLen);
     }
     return NULL;
 }
 
-const char* ffDetectPhysicalDisk(FFlist* result, FF_MAYBE_UNUSED FFPhysicalDiskOptions* options)
-{
+const char* ffDetectPhysicalDisk(FFlist* result, FF_MAYBE_UNUSED FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/disk");
-    if (!dir) return "opendir(/dev/disk) failed";
+    if (!dir) {
+        return "opendir(/dev/disk) failed";
+    }
 
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateA(64);
     ffStrbufAppendS(&path, "/dev/disk/");
     uint32_t baseLen = path.length;
 
     struct dirent* entry;
-    while((entry = readdir(dir)))
-    {
-        if (entry->d_name[0] == '.' || ffStrEquals(entry->d_name, "virtual")) continue;
+    while ((entry = readdir(dir))) {
+        if (entry->d_name[0] == '.' || ffStrEquals(entry->d_name, "virtual")) {
+            continue;
+        }
         ffStrbufAppendS(&path, entry->d_name);
         searchRawDeviceFile(&path, entry->d_name, result);
         ffStrbufSubstrBefore(&path, baseLen);

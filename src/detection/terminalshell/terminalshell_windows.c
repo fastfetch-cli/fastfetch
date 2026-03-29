@@ -19,32 +19,22 @@
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
-static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
-{
+static uint32_t getShellInfo(FFShellResult* result, uint32_t pid) {
     uint32_t ppid = 0;
     bool gui = false;
 
-    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui))
-    {
+    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui)) {
         ffStrbufSet(&result->prettyName, &result->processName);
-        if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+        if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe")) {
             ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
+        }
 
-        //Common programs that are between terminal and own process, but are not the shell
+        // Common programs that are between terminal and own process, but are not the shell
         if (
-            !gui && (
-            ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "lldb-dap")      ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
-            ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || // scoop warps the real binaries with a "shim" exe
-            ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
-            ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
-            ffStrbufContainIgnCaseS(&result->prettyName, "time")        ||
-            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
-        )) {
+            !gui && (ffStrbufIgnCaseEqualS(&result->prettyName, "sudo") || ffStrbufIgnCaseEqualS(&result->prettyName, "su") || ffStrbufIgnCaseEqualS(&result->prettyName, "gdb") || ffStrbufIgnCaseEqualS(&result->prettyName, "lldb") || ffStrbufIgnCaseEqualS(&result->prettyName, "lldb-dap") || ffStrbufIgnCaseEqualS(&result->prettyName, "python") || // python on windows generates shim executables
+                        ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch") ||                                                                                                                                                                                                                                                                          // scoop warps the real binaries with a "shim" exe
+                        ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch") || ffStrbufContainIgnCaseS(&result->prettyName, "debug") || ffStrbufContainIgnCaseS(&result->prettyName, "time") || ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC")                                                                                             // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
+                        )) {
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
@@ -55,16 +45,14 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 
         result->pid = pid;
 
-        if (gui)
-        {
+        if (gui) {
             // Started without shell
             // In this case, terminal process will be created by fastfetch itself.
             ppid = 0;
-            if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+            if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")) {
                 ffStrbufSetS(&result->prettyName, "Windows Explorer");
-        }
-        else
-        {
+            }
+        } else {
             result->ppid = ppid;
         }
 
@@ -73,101 +61,92 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
     return ppid;
 }
 
-static void setShellInfoDetails(FFShellResult* result)
-{
-    if(ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh"))
+static void setShellInfoDetails(FFShellResult* result) {
+    if (ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh")) {
         ffStrbufSetS(&result->prettyName, "PowerShell");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "powershell"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "powershell")) {
         ffStrbufSetS(&result->prettyName, "Windows PowerShell");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise")) {
         ffStrbufSetS(&result->prettyName, "Windows PowerShell ISE");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "cmd"))
-    {
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "cmd")) {
         ffStrbufSetS(&result->prettyName, "CMD");
 
-        if (instance.config.general.detectVersion)
-        {
+        if (instance.config.general.detectVersion) {
             FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;
-            while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, result->pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
+            while (!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, result->pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
 
-            if(snapshot)
-            {
+            if (snapshot) {
                 MODULEENTRY32W module;
                 module.dwSize = sizeof(module);
-                for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
-                {
-                    if(wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0)
-                    {
+                for (BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module)) {
+                    if (wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0) {
                         FF_STRBUF_AUTO_DESTROY clinkVersion = ffStrbufCreate();
-                        if (ffGetFileVersion(module.szExePath, NULL, &clinkVersion))
+                        if (ffGetFileVersion(module.szExePath, NULL, &clinkVersion)) {
                             ffStrbufAppendF(&result->prettyName, " (with Clink %s)", clinkVersion.chars);
-                        else
+                        } else {
                             ffStrbufAppendS(&result->prettyName, " (with Clink)");
+                        }
                         break;
                     }
                 }
             }
         }
-    }
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "nu"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "nu")) {
         ffStrbufSetS(&result->prettyName, "nushell");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")) {
         ffStrbufSetS(&result->prettyName, "Windows Explorer");
+    }
 }
 
-static bool getTerminalFromEnv(FFTerminalResult* result)
-{
-    if(
+static bool getTerminalFromEnv(FFTerminalResult* result) {
+    if (
         result->processName.length > 0 &&
-        ffStrbufIgnCaseCompS(&result->processName, "explorer") != 0
-    ) return false;
+        ffStrbufIgnCaseCompS(&result->processName, "explorer") != 0) {
+        return false;
+    }
 
     const char* term = getenv("ConEmuPID");
 
-    if(term)
-    {
-        //ConEmu
+    if (term) {
+        // ConEmu
         uint32_t pid = (uint32_t) strtoul(term, NULL, 10);
         result->pid = pid;
-        if(ffProcessGetInfoWindows(pid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
-        {
+        if (ffProcessGetInfoWindows(pid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL)) {
             ffStrbufSet(&result->prettyName, &result->processName);
-            if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+            if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe")) {
                 ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
+            }
             return true;
-        }
-        else
-        {
+        } else {
             term = "ConEmu";
         }
     }
 
-    //SSH
-    if(getenv("SSH_TTY") != NULL)
+    // SSH
+    if (getenv("SSH_TTY") != NULL) {
         term = getenv("SSH_TTY");
+    }
 
-    //Windows Terminal
-    if(!term && (
-        getenv("WT_SESSION") != NULL ||
-        getenv("WT_PROFILE_ID") != NULL
-    )) term = "WindowsTerminal";
+    // Windows Terminal
+    if (!term && (getenv("WT_SESSION") != NULL || getenv("WT_PROFILE_ID") != NULL)) {
+        term = "WindowsTerminal";
+    }
 
-    //Alacritty
-    if(!term && (
-        getenv("ALACRITTY_SOCKET") != NULL ||
-        getenv("ALACRITTY_LOG") != NULL ||
-        getenv("ALACRITTY_WINDOW_ID") != NULL
-    )) term = "Alacritty";
+    // Alacritty
+    if (!term && (getenv("ALACRITTY_SOCKET") != NULL || getenv("ALACRITTY_LOG") != NULL || getenv("ALACRITTY_WINDOW_ID") != NULL)) {
+        term = "Alacritty";
+    }
 
-    if(!term)
+    if (!term) {
         term = getenv("TERM_PROGRAM");
+    }
 
-    //Normal Terminal
-    if(!term)
+    // Normal Terminal
+    if (!term) {
         term = getenv("TERM");
+    }
 
-    if(term)
-    {
+    if (term) {
         ffStrbufSetS(&result->processName, term);
         ffStrbufSetS(&result->prettyName, term);
         ffStrbufSetS(&result->exe, term);
@@ -178,33 +157,27 @@ static bool getTerminalFromEnv(FFTerminalResult* result)
     return false;
 }
 
-static bool detectDefaultTerminal(FFTerminalResult* result)
-{
+static bool detectDefaultTerminal(FFTerminalResult* result) {
     wchar_t regPath[128] = L"SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\";
     wchar_t* uuid = regPath + strlen("SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\");
     DWORD bufSize = 80;
-    if (RegGetValueW(HKEY_CURRENT_USER, L"Console\\%%Startup", L"DelegationTerminal", RRF_RT_REG_SZ, NULL, uuid, &bufSize) == ERROR_SUCCESS)
-    {
-        if(wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0 || // Let Windows decide
-            wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0) // Conhost
+    if (RegGetValueW(HKEY_CURRENT_USER, L"Console\\%%Startup", L"DelegationTerminal", RRF_RT_REG_SZ, NULL, uuid, &bufSize) == ERROR_SUCCESS) {
+        if (wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0 || // Let Windows decide
+            wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)   // Conhost
         {
             goto conhost;
         }
 
         FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-        if(ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL))
-        {
+        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL)) {
             FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-            if(ffRegGetSubKey(hKey, 0, &path, NULL))
-            {
-                if (ffStrbufStartsWithS(&path, "Microsoft.WindowsTerminal"))
-                {
+            if (ffRegGetSubKey(hKey, 0, &path, NULL)) {
+                if (ffStrbufStartsWithS(&path, "Microsoft.WindowsTerminal")) {
                     ffStrbufSetS(&result->processName, "WindowsTerminal.exe");
                     ffStrbufSetS(&result->prettyName, "WindowsTerminal");
 
                     PWSTR programFiles = NULL;
-                    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, NULL, &programFiles)))
-                    {
+                    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, NULL, &programFiles))) {
                         ffStrbufSetWS(&result->exe, programFiles);
                         CoTaskMemFree(programFiles);
                         programFiles = NULL;
@@ -213,13 +186,10 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
                         ffStrbufAppend(&result->exe, &path);
                         ffStrbufAppendS(&result->exe, "\\WindowsTerminal.exe");
 
-                        if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
-                        {
+                        if (ffPathExists(result->exe.chars, FF_PATHTYPE_FILE)) {
                             result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
                             ffStrbufSet(&result->exePath, &result->exe);
-                        }
-                        else
-                        {
+                        } else {
                             ffStrbufDestroy(&result->exe);
                             ffStrbufInitMove(&result->exe, &path);
                             result->exeName = "";
@@ -234,14 +204,13 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
 conhost:;
     ULONG_PTR conhostPid = 0;
     ULONG size;
-    if(NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0)
-    {
+    if (NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessConsoleHostProcess, &conhostPid, sizeof(conhostPid), &size)) && conhostPid != 0) {
         // For Windows Terminal, it reports the PID of OpenConsole
-        if(ffProcessGetInfoWindows((uint32_t) conhostPid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
-        {
+        if (ffProcessGetInfoWindows((uint32_t) conhostPid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL)) {
             ffStrbufSet(&result->prettyName, &result->processName);
-            if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+            if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe")) {
                 ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
+            }
             return true;
         }
     }
@@ -250,10 +219,8 @@ conhost:;
     return false;
 }
 
-static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
-{
-    if (getenv("MSYSTEM"))
-    {
+static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid) {
+    if (getenv("MSYSTEM")) {
         // Don't try to detect terminals in MSYS shell
         // It won't work because MSYS doesn't follow process tree of native Windows programs
         return 0;
@@ -262,11 +229,9 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
     uint32_t ppid = 0;
     bool gui;
 
-    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui))
-    {
-        if (!gui)
-        {
-            //We are in nested shell
+    while (pid != 0 && ffProcessGetInfoWindows(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &gui)) {
+        if (!gui) {
+            // We are in nested shell
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
@@ -277,13 +242,13 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
         }
 
         ffStrbufSet(&result->prettyName, &result->processName);
-        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+        if (ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe")) {
             ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
+        }
 
-        if(ffStrbufIgnCaseEqualS(&result->prettyName, "sihost")           ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")        ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "wininit")
-        ) {
+        if (ffStrbufIgnCaseEqualS(&result->prettyName, "sihost") ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "explorer") ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "wininit")) {
             // A CUI program created by Windows Explorer will spawn a conhost as its child.
             // However the conhost process is just a placeholder;
             // The true terminal can be Windows Terminal or others.
@@ -293,9 +258,7 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
             ffStrbufClear(&result->exePath);
             result->exeName = "";
             return 0;
-        }
-        else
-        {
+        } else {
             result->pid = pid;
             result->ppid = ppid;
         }
@@ -305,36 +268,33 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
     return ppid;
 }
 
-static void setTerminalInfoDetails(FFTerminalResult* result)
-{
-    if(ffStrbufIgnCaseEqualS(&result->prettyName, "WindowsTerminal"))
-        ffStrbufSetStatic(&result->prettyName, ffStrbufContainIgnCaseS(&result->exe, ".WindowsTerminalPreview_")
-            ? "Windows Terminal Preview"
-            : "Windows Terminal"
-        );
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "conhost"))
+static void setTerminalInfoDetails(FFTerminalResult* result) {
+    if (ffStrbufIgnCaseEqualS(&result->prettyName, "WindowsTerminal")) {
+        ffStrbufSetStatic(&result->prettyName, ffStrbufContainIgnCaseS(&result->exe, ".WindowsTerminalPreview_") ? "Windows Terminal Preview" : "Windows Terminal");
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "conhost")) {
         ffStrbufSetStatic(&result->prettyName, "Windows Console");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "Code"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "Code")) {
         ffStrbufSetStatic(&result->prettyName, "Visual Studio Code");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")) {
         ffStrbufSetStatic(&result->prettyName, "Windows Explorer");
-    else if(ffStrbufEqualS(&result->prettyName, "wezterm-gui"))
+    } else if (ffStrbufEqualS(&result->prettyName, "wezterm-gui")) {
         ffStrbufSetStatic(&result->prettyName, "WezTerm");
-    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "sshd") || ffStrbufStartsWithIgnCaseS(&result->prettyName, "sshd-"))
-    {
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "sshd") || ffStrbufStartsWithIgnCaseS(&result->prettyName, "sshd-")) {
         const char* tty = getenv("SSH_TTY");
-        if (tty) ffStrbufSetS(&result->prettyName, tty);
+        if (tty) {
+            ffStrbufSetS(&result->prettyName, tty);
+        }
     }
 }
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
-const FFShellResult* ffDetectShell(void)
-{
+const FFShellResult* ffDetectShell(void) {
     static FFShellResult result;
     static bool init = false;
-    if(init)
+    if (init) {
         return &result;
+    }
     init = true;
 
     ffStrbufInit(&result.processName);
@@ -348,34 +308,37 @@ const FFShellResult* ffDetectShell(void)
     result.tty = -1;
 
     uint32_t ppid;
-    if(!ffProcessGetInfoWindows(0, &ppid, NULL, NULL, NULL, NULL, NULL))
+    if (!ffProcessGetInfoWindows(0, &ppid, NULL, NULL, NULL, NULL, NULL)) {
         return &result;
+    }
 
     const char* ignoreParent = getenv("FFTS_IGNORE_PARENT");
-    if (ignoreParent && ffStrEquals(ignoreParent, "1"))
+    if (ignoreParent && ffStrEquals(ignoreParent, "1")) {
         ffProcessGetInfoWindows(ppid, &ppid, NULL, NULL, NULL, NULL, NULL);
+    }
 
     ppid = getShellInfo(&result, ppid);
 
-    if (result.processName.length > 0)
-    {
+    if (result.processName.length > 0) {
         setShellInfoDetails(&result);
         char tmp[MAX_PATH];
         strcpy(tmp, result.exeName);
         char* ext = strrchr(tmp, '.');
-        if (ext) *ext = '\0';
+        if (ext) {
+            *ext = '\0';
+        }
         fftsGetShellVersion(result.exePath.length > 0 ? &result.exePath : &result.exe, tmp, &result.version);
     }
 
     return &result;
 }
 
-const FFTerminalResult* ffDetectTerminal(void)
-{
+const FFTerminalResult* ffDetectTerminal(void) {
     static FFTerminalResult result;
     static bool init = false;
-    if(init)
+    if (init) {
         return &result;
+    }
     init = true;
 
     ffStrbufInit(&result.processName);
@@ -389,16 +352,18 @@ const FFTerminalResult* ffDetectTerminal(void)
     result.ppid = 0;
 
     uint32_t ppid = ffDetectShell()->ppid;
-    if(ppid)
+    if (ppid) {
         getTerminalInfo(&result, ppid);
+    }
 
-    if(result.processName.length == 0)
+    if (result.processName.length == 0) {
         getTerminalFromEnv(&result);
-    if(result.processName.length == 0)
+    }
+    if (result.processName.length == 0) {
         detectDefaultTerminal(&result);
+    }
 
-    if(result.processName.length > 0)
-    {
+    if (result.processName.length > 0) {
         setTerminalInfoDetails(&result);
         fftsGetTerminalVersion(&result.processName, result.exePath.length > 0 ? &result.exePath : &result.exe, &result.version);
     }

@@ -4,7 +4,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
-//Return error info if failed, NULL otherwise
+// Return error info if failed, NULL otherwise
 const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result);
 const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result);
 const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result);
@@ -17,24 +17,23 @@ const char* ffCfDictGetData(CFDictionaryRef dict, CFStringRef key, uint32_t offs
 const char* ffCfDictGetDataAsString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result);
 const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result);
 
-static inline CFNumberRef ffCfCreateInt(int value)
-{
+static inline CFNumberRef ffCfCreateInt(int value) {
     return CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &value);
 }
 
-static inline void cfReleaseWrapper(void* type)
-{
+static inline void cfReleaseWrapper(void* type) {
     assert(type);
-    if (*(CFTypeRef*) type)
+    if (*(CFTypeRef*) type) {
         CFRelease(*(CFTypeRef*) type);
+    }
 }
 
 #define FF_CFTYPE_AUTO_RELEASE __attribute__((__cleanup__(cfReleaseWrapper)))
 
-static inline void wrapIoObjectRelease(io_object_t* service)
-{
+static inline void wrapIoObjectRelease(io_object_t* service) {
     assert(service);
-    if (*service)
+    if (*service) {
         IOObjectRelease(*service);
+    }
 }
 #define FF_IOOBJECT_AUTO_RELEASE __attribute__((__cleanup__(wrapIoObjectRelease)))

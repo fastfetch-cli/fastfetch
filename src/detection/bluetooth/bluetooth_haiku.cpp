@@ -5,13 +5,14 @@ extern "C" {
 
 #include <bluetooth/LocalDevice.h>
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
-{
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
     using namespace Bluetooth;
     FF_SUPPRESS_IO();
 
     LocalDevice* dev = LocalDevice::GetLocalDevice();
-    if (!dev) return NULL;
+    if (!dev) {
+        return NULL;
+    }
 
     BString devClass;
     dev->GetDeviceClass().DumpDeviceClass(devClass);

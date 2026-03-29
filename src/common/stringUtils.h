@@ -5,102 +5,93 @@
 #include <string.h>
 #include <ctype.h>
 
-static inline bool ffStrSet(const char* str)
-{
-    if(str == NULL)
+static inline bool ffStrSet(const char* str) {
+    if (str == NULL) {
         return false;
+    }
 
-    while(isspace(*str))
+    while (isspace(*str)) {
         str++;
+    }
 
     return *str != '\0';
 }
 
-
-static inline bool ffStrStartsWithIgnCase(const char* str, const char* compareTo)
-{
+static inline bool ffStrStartsWithIgnCase(const char* str, const char* compareTo) {
     return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
 }
 
-static inline bool ffStrEqualsIgnCase(const char* str, const char* compareTo)
-{
+static inline bool ffStrEqualsIgnCase(const char* str, const char* compareTo) {
     return strcasecmp(str, compareTo) == 0;
 }
 
-static inline bool ffStrStartsWith(const char* str, const char* compareTo)
-{
+static inline bool ffStrStartsWith(const char* str, const char* compareTo) {
     return strncmp(str, compareTo, strlen(compareTo)) == 0;
 }
 
-static inline bool ffStrEndsWith(const char* str, const char* compareTo)
-{
+static inline bool ffStrEndsWith(const char* str, const char* compareTo) {
     size_t strLength = strlen(str);
     size_t compareToLength = strlen(compareTo);
-    if (strLength < compareToLength)
+    if (strLength < compareToLength) {
         return false;
+    }
     return memcmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
 }
 
-static inline bool ffStrEndsWithIgnCase(const char* str, const char* compareTo)
-{
+static inline bool ffStrEndsWithIgnCase(const char* str, const char* compareTo) {
     size_t strLength = strlen(str);
     size_t compareToLength = strlen(compareTo);
-    if (strLength < compareToLength)
+    if (strLength < compareToLength) {
         return false;
+    }
     return strncasecmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
 }
 
-static inline bool ffStrEquals(const char* str, const char* compareTo)
-{
+static inline bool ffStrEquals(const char* str, const char* compareTo) {
     return strcmp(str, compareTo) == 0;
 }
 
-static inline bool ffStrContains(const char* str, const char* compareTo)
-{
+static inline bool ffStrContains(const char* str, const char* compareTo) {
     return strstr(str, compareTo) != NULL;
 }
 
-static inline bool ffStrContainsIgnCase(const char* str, const char* compareTo)
-{
+static inline bool ffStrContainsIgnCase(const char* str, const char* compareTo) {
     return strcasestr(str, compareTo) != NULL;
 }
 
-static inline bool ffStrContainsC(const char* str, char compareTo)
-{
+static inline bool ffStrContainsC(const char* str, char compareTo) {
     return strchr(str, compareTo) != NULL;
 }
 
-static inline bool ffCharIsEnglishAlphabet(char c)
-{
+static inline bool ffCharIsEnglishAlphabet(char c) {
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
-static inline bool ffCharIsDigit(char c)
-{
+static inline bool ffCharIsDigit(char c) {
     return '0' <= c && c <= '9';
 }
 
-static inline bool ffCharIsHexDigit(char c)
-{
+static inline bool ffCharIsHexDigit(char c) {
     return ffCharIsDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
 }
 
-static inline int8_t ffHexCharToInt(char c)
-{
-    if (ffCharIsDigit(c))
+static inline int8_t ffHexCharToInt(char c) {
+    if (ffCharIsDigit(c)) {
         return (int8_t) (c - '0');
-    else if ('a' <= c && c <= 'f')
+    } else if ('a' <= c && c <= 'f') {
         return (int8_t) (c - 'a' + 10);
-    else if ('A' <= c && c <= 'F')
+    } else if ('A' <= c && c <= 'F') {
         return (int8_t) (c - 'A' + 10);
-    else
+    } else {
         return -1;
+    }
 }
 
 // Copies at most (dstBufSiz - 1) bytes from src to dst; dst is always null-terminated
-static inline char* ffStrCopy(char* __restrict__ dst, const char* __restrict__ src, size_t dstBufSiz)
-{
-    if (__builtin_expect(dst == NULL, false) || dstBufSiz == 0) return dst;
+static inline char* ffStrCopy(char* __restrict__ dst, const char* __restrict__ src, size_t dstBufSiz) {
+    if (__builtin_expect(dst == NULL, false) || dstBufSiz == 0) {
+        return dst;
+    }
 
     size_t len = strnlen(src, dstBufSiz - 1);
     memcpy(dst, src, len);

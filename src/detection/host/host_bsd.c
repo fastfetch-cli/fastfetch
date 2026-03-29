@@ -2,8 +2,7 @@
 #include "common/settings.h"
 #include "common/smbiosHelper.h"
 
-const char* ffDetectHost(FFHostResult* host)
-{
+const char* ffDetectHost(FFHostResult* host) {
     ffSettingsGetFreeBSDKenv("smbios.system.product", &host->name);
     ffCleanUpSmbiosValue(&host->name);
     ffSettingsGetFreeBSDKenv("smbios.system.family", &host->family);
@@ -19,9 +18,9 @@ const char* ffDetectHost(FFHostResult* host)
     ffSettingsGetFreeBSDKenv("smbios.system.maker", &host->vendor);
     ffCleanUpSmbiosValue(&host->vendor);
 
-    #ifdef __x86_64__
+#ifdef __x86_64__
     ffHostDetectMac(host);
-    #endif
+#endif
 
     return NULL;
 }

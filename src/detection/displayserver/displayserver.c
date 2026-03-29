@@ -16,10 +16,10 @@ FFDisplayResult* ffdsAppendDisplay(
     uint64_t id,
     uint32_t physicalWidth,
     uint32_t physicalHeight,
-    const char* platformApi)
-{
-    if(width == 0 || height == 0)
+    const char* platformApi) {
+    if (width == 0 || height == 0) {
         return NULL;
+    }
 
     FFDisplayResult* display = (FFDisplayResult*) ffListAdd(&result->displays);
     display->width = width;
@@ -50,11 +50,9 @@ FFDisplayResult* ffdsAppendDisplay(
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer()
-{
+const FFDisplayServerResult* ffConnectDisplayServer() {
     static FFDisplayServerResult result;
-    if (result.displays.elementSize == 0)
-    {
+    if (result.displays.elementSize == 0) {
         ffStrbufInit(&result.wmProcessName);
         ffStrbufInit(&result.wmPrettyName);
         ffStrbufInit(&result.wmProtocolName);

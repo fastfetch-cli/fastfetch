@@ -2,19 +2,20 @@
 
 #ifdef __cplusplus
 
-#include <unknwn.h>
+#    include <unknwn.h>
 
 const char* ffInitCom(void);
 
-static inline void ffReleaseComObject(void* ppUnknown)
-{
+static inline void ffReleaseComObject(void* ppUnknown) {
     IUnknown* pUnknown = *(IUnknown**) ppUnknown;
-    if (pUnknown) pUnknown->Release();
+    if (pUnknown) {
+        pUnknown->Release();
+    }
 }
 
-#define FF_AUTO_RELEASE_COM_OBJECT __attribute__((__cleanup__(ffReleaseComObject)))
+#    define FF_AUTO_RELEASE_COM_OBJECT __attribute__((__cleanup__(ffReleaseComObject)))
 
 #else
-    // Win32 COM headers requires C++ compiler
-    #error Must be included in C++ source file
+// Win32 COM headers requires C++ compiler
+#    error Must be included in C++ source file
 #endif

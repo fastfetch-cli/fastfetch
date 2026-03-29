@@ -3,8 +3,8 @@
 #include "fastfetch.h"
 
 #ifndef _WIN32
-    #include <net/if.h>
-    #include <netinet/in.h>
+#    include <net/if.h>
+#    include <netinet/in.h>
 #endif
 
 typedef enum __attribute__((__packed__)) FFNetifDefaultRouteResultStatus {
@@ -16,10 +16,10 @@ typedef enum __attribute__((__packed__)) FFNetifDefaultRouteResultStatus {
 typedef struct FFNetifDefaultRouteResult {
     uint32_t ifIndex;
 
-    #ifndef _WIN32
+#ifndef _WIN32
     char ifName[IF_NAMESIZE + 1];
     uint32_t preferredSourceAddrV4;
-    #endif
+#endif
     enum FFNetifDefaultRouteResultStatus status;
 } FFNetifDefaultRouteResult;
 

@@ -24,47 +24,53 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <wayland-util.h>
+#    include <stdlib.h>
+#    include <stdint.h>
+#    include <wayland-util.h>
 
 extern const struct wl_interface wl_output_interface;
 extern const struct wl_interface zxdg_output_v1_interface;
 
-static const struct wl_interface *xdg_output_unstable_v1_types[] = {
-	NULL,
-	NULL,
-	&zxdg_output_v1_interface,
-	NULL, // &wl_output_interface,
+static const struct wl_interface* xdg_output_unstable_v1_types[] = {
+    NULL,
+    NULL,
+    &zxdg_output_v1_interface,
+    NULL, // &wl_output_interface,
 };
 
 static const struct wl_message zxdg_output_manager_v1_requests[] = {
-	{ "destroy", "", xdg_output_unstable_v1_types + 0 },
-	{ "get_xdg_output", "no", xdg_output_unstable_v1_types + 2 },
+    {"destroy", "", xdg_output_unstable_v1_types + 0},
+    {"get_xdg_output", "no", xdg_output_unstable_v1_types + 2},
 };
 
 WL_EXPORT const struct wl_interface zxdg_output_manager_v1_interface = {
-	"zxdg_output_manager_v1", 3,
-	2, zxdg_output_manager_v1_requests,
-	0, NULL,
+    "zxdg_output_manager_v1",
+    3,
+    2,
+    zxdg_output_manager_v1_requests,
+    0,
+    NULL,
 };
 
 static const struct wl_message zxdg_output_v1_requests[] = {
-	{ "destroy", "", xdg_output_unstable_v1_types + 0 },
+    {"destroy", "", xdg_output_unstable_v1_types + 0},
 };
 
 static const struct wl_message zxdg_output_v1_events[] = {
-	{ "logical_position", "ii", xdg_output_unstable_v1_types + 0 },
-	{ "logical_size", "ii", xdg_output_unstable_v1_types + 0 },
-	{ "done", "", xdg_output_unstable_v1_types + 0 },
-	{ "name", "2s", xdg_output_unstable_v1_types + 0 },
-	{ "description", "2s", xdg_output_unstable_v1_types + 0 },
+    {"logical_position", "ii", xdg_output_unstable_v1_types + 0},
+    {"logical_size", "ii", xdg_output_unstable_v1_types + 0},
+    {"done", "", xdg_output_unstable_v1_types + 0},
+    {"name", "2s", xdg_output_unstable_v1_types + 0},
+    {"description", "2s", xdg_output_unstable_v1_types + 0},
 };
 
 WL_EXPORT const struct wl_interface zxdg_output_v1_interface = {
-	"zxdg_output_v1", 3,
-	1, zxdg_output_v1_requests,
-	5, zxdg_output_v1_events,
+    "zxdg_output_v1",
+    3,
+    1,
+    zxdg_output_v1_requests,
+    5,
+    zxdg_output_v1_events,
 };
 
 #endif

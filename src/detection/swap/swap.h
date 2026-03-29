@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/swap/option.h"
 
-typedef struct FFSwapResult
-{
+typedef struct FFSwapResult {
     FFstrbuf name;
     uint64_t bytesUsed;
     uint64_t bytesTotal;

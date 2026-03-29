@@ -2,8 +2,7 @@
 
 #include "fastfetch.h"
 
-typedef struct FFpropquery
-{
+typedef struct FFpropquery {
     const char* start;
     FFstrbuf* buffer;
 } FFpropquery;
@@ -15,42 +14,34 @@ bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uin
 
 bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer);
 
-static inline bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer)
-{
+static inline bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer) {
     return ffParsePropLinePointer(&line, start, buffer);
 }
 
-static inline bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileValues(filename, 1, (FFpropquery[]){{start, buffer}});
+static inline bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer) {
+    return ffParsePropFileValues(filename, 1, (FFpropquery[]) {{start, buffer}});
 }
 
-static inline bool ffParsePropFileHome(const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileHomeValues(relativeFile, 1, (FFpropquery[]){{start, buffer}});
+static inline bool ffParsePropFileHome(const char* relativeFile, const char* start, FFstrbuf* buffer) {
+    return ffParsePropFileHomeValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
 }
 
-static inline bool ffParsePropFileList(const FFlist* list, const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileListValues(list, relativeFile, 1, (FFpropquery[]){{start, buffer}});
+static inline bool ffParsePropFileList(const FFlist* list, const char* relativeFile, const char* start, FFstrbuf* buffer) {
+    return ffParsePropFileListValues(list, relativeFile, 1, (FFpropquery[]) {{start, buffer}});
 }
 
-static inline bool ffParsePropFileConfigValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
-{
+static inline bool ffParsePropFileConfigValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries) {
     return ffParsePropFileListValues(&instance.state.platform.configDirs, relativeFile, numQueries, queries);
 }
 
-static inline bool ffParsePropFileConfig(const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileConfigValues(relativeFile, 1, (FFpropquery[]){{start, buffer}});
+static inline bool ffParsePropFileConfig(const char* relativeFile, const char* start, FFstrbuf* buffer) {
+    return ffParsePropFileConfigValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
 }
 
-static inline bool ffParsePropFileDataValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries)
-{
+static inline bool ffParsePropFileDataValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries) {
     return ffParsePropFileListValues(&instance.state.platform.dataDirs, relativeFile, numQueries, queries);
 }
 
-static inline bool ffParsePropFileData(const char* relativeFile, const char* start, FFstrbuf* buffer)
-{
-    return ffParsePropFileDataValues(relativeFile, 1, (FFpropquery[]){{start, buffer}});
+static inline bool ffParsePropFileData(const char* relativeFile, const char* start, FFstrbuf* buffer) {
+    return ffParsePropFileDataValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
 }

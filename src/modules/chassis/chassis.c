@@ -4,8 +4,7 @@
 #include "detection/chassis/chassis.h"
 #include "modules/chassis/chassis.h"
 
-bool ffPrintChassis(FFChassisOptions* options)
-{
+bool ffPrintChassis(FFChassisOptions* options) {
     bool success = false;
 
     FFChassisResult result;
@@ -16,34 +15,30 @@ bool ffPrintChassis(FFChassisOptions* options)
 
     const char* error = ffDetectChassis(&result);
 
-    if(error)
-    {
+    if (error) {
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
-    if(result.type.length == 0)
-    {
+    if (result.type.length == 0) {
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "chassis_type is not set by O.E.M.");
         goto exit;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.type, stdout);
-        if (result.version.length)
+        if (result.version.length) {
             printf(" (%s)", result.version.chars);
+        }
         putchar('\n');
-    }
-    else
-    {
+    } else {
         FF_PRINT_FORMAT_CHECKED(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_ARG(result.type, "type"),
-            FF_ARG(result.vendor, "vendor"),
-            FF_ARG(result.version, "version"),
-            FF_ARG(result.serial, "serial"),
-        }));
+                                                                                                            FF_ARG(result.type, "type"),
+                                                                                                            FF_ARG(result.vendor, "vendor"),
+                                                                                                            FF_ARG(result.version, "version"),
+                                                                                                            FF_ARG(result.serial, "serial"),
+                                                                                                        }));
     }
     success = true;
 
@@ -55,26 +50,23 @@ exit:
     return success;
 }
 
-void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
-{
+void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFChassisResult result;
     ffStrbufInit(&result.type);
@@ -84,14 +76,12 @@ bool ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjs
 
     const char* error = ffDetectChassis(&result);
 
-    if (error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         goto exit;
     }
 
-    if(result.type.length == 0)
-    {
+    if (result.type.length == 0) {
         yyjson_mut_obj_add_str(doc, module, "error", "chassis_type is not set by O.E.M.");
         goto exit;
     }
@@ -111,13 +101,11 @@ exit:
     return success;
 }
 
-void ffInitChassisOptions(FFChassisOptions* options)
-{
+void ffInitChassisOptions(FFChassisOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyChassisOptions(FFChassisOptions* options)
-{
+void ffDestroyChassisOptions(FFChassisOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 

@@ -6,14 +6,12 @@
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
 
-bool ffPrintUptime(FFUptimeOptions* options)
-{
+bool ffPrintUptime(FFUptimeOptions* options) {
     FFUptimeResult result = {};
 
     const char* error = ffDetectUptime(&result);
 
-    if(error)
-    {
+    if (error) {
         ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
@@ -22,13 +20,10 @@ bool ffPrintUptime(FFUptimeOptions* options)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     ffDurationAppendNum((uptime + 500) / 1000, &buffer);
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&buffer, stdout);
-    }
-    else
-    {
+    } else {
         uint32_t milliseconds = (uint32_t) (uptime % 1000);
         uptime /= 1000;
         uint32_t seconds = (uint32_t) (uptime % 60);
@@ -41,48 +36,33 @@ bool ffPrintUptime(FFUptimeOptions* options)
 
         FFTimeGetAgeResult age = ffTimeGetAge(result.bootTime, ffTimeGetNow());
 
-        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(days, "days"),
-            FF_ARG(hours, "hours"),
-            FF_ARG(minutes, "minutes"),
-            FF_ARG(seconds, "seconds"),
-            FF_ARG(milliseconds, "milliseconds"),
-            {FF_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"},
-            FF_ARG(age.years, "years"),
-            FF_ARG(age.daysOfYear, "days-of-year"),
-            FF_ARG(age.yearsFraction, "years-fraction"),
-            FF_ARG(buffer, "formatted")
-        }));
+        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(days, "days"), FF_ARG(hours, "hours"), FF_ARG(minutes, "minutes"), FF_ARG(seconds, "seconds"), FF_ARG(milliseconds, "milliseconds"), {FF_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"}, FF_ARG(age.years, "years"), FF_ARG(age.daysOfYear, "days-of-year"), FF_ARG(age.yearsFraction, "years-fraction"), FF_ARG(buffer, "formatted")}));
     }
 
     return true;
 }
 
-void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
-{
+void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFUptimeResult result;
     const char* error = ffDetectUptime(&result);
 
-    if(error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return false;
     }
@@ -94,13 +74,11 @@ bool ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
     return true;
 }
 
-void ffInitUptimeOptions(FFUptimeOptions* options)
-{
+void ffInitUptimeOptions(FFUptimeOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyUptimeOptions(FFUptimeOptions* options)
-{
+void ffDestroyUptimeOptions(FFUptimeOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -124,5 +102,4 @@ FFModuleBaseInfo ffUptimeModuleInfo = {
         {"Days of year after boot", "days-of-year"},
         {"Years fraction after boot", "years-fraction"},
         {"Formatted uptime", "formatted"},
-    }))
-};
+    }))};

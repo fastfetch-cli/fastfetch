@@ -3,10 +3,10 @@
 #include "common/FFstrbuf.h"
 
 bool ffIsSmbiosValueSet(FFstrbuf* value);
-static inline void ffCleanUpSmbiosValue(FFstrbuf* value)
-{
-    if (!ffIsSmbiosValueSet(value))
+static inline void ffCleanUpSmbiosValue(FFstrbuf* value) {
+    if (!ffIsSmbiosValueSet(value)) {
         ffStrbufClear(value);
+    }
 }
 
 // https://github.com/KunYi/DumpSMBIOS
@@ -20,7 +20,7 @@ typedef enum __attribute__((__packed__)) FFSmbiosType // : uint8_t
     FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE = 3,
     FF_SMBIOS_TYPE_PROCESSOR_INFO = 4,
     FF_SMBIOS_TYPE_MEMORY_CONTROLLER_INFO = 5, // obsolete
-    FF_SMBIOS_TYPE_MEMORY_MODULE_INFO = 6, // obsolete
+    FF_SMBIOS_TYPE_MEMORY_MODULE_INFO = 6,     // obsolete
     FF_SMBIOS_TYPE_CACHE_INFO = 7,
     FF_SMBIOS_TYPE_PORT_CONNECTOR_INFO = 8,
     FF_SMBIOS_TYPE_SYSTEM_SLOTS = 9,
@@ -68,8 +68,7 @@ typedef enum __attribute__((__packed__)) FFSmbiosType // : uint8_t
 } FFSmbiosType;
 static_assert(sizeof(FFSmbiosType) == 1, "FFSmbiosType should be 1 byte");
 
-typedef struct FFSmbiosHeader
-{
+typedef struct FFSmbiosHeader {
     // Type of SMBIOS structure. Do NOT test `Type == FF_SMBIOS_END_OF_TABLE` to determine the end of the table,
     // as malformed tables may be missing the end-of-table marker.
     // **Use FFSmbiosHeaderTable[FF_SMBIOS_TYPE_END_OF_TABLE] pointer instead.**
@@ -83,12 +82,13 @@ typedef struct FFSmbiosHeader
 } __attribute__((__packed__)) FFSmbiosHeader;
 static_assert(sizeof(FFSmbiosHeader) == 4, "FFSmbiosHeader should be 4 bytes");
 
-static inline const char* ffSmbiosLocateString(const char* start, uint8_t index /* start from 1 */)
-{
-    if (index == 0 || *start == '\0')
+static inline const char* ffSmbiosLocateString(const char* start, uint8_t index /* start from 1 */) {
+    if (index == 0 || *start == '\0') {
         return NULL;
-    while (--index)
+    }
+    while (--index) {
         start += strlen(start) + 1;
+    }
     return start;
 }
 

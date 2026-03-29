@@ -5,8 +5,7 @@
 
 #define FF_BATTERY_TEMP_UNSET (-DBL_MAX)
 
-typedef struct FFBatteryResult
-{
+typedef struct FFBatteryResult {
     FFstrbuf manufacturer;
     FFstrbuf manufactureDate;
     FFstrbuf modelName;

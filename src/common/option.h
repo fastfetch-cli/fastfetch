@@ -6,23 +6,20 @@ struct yyjson_val;
 struct yyjson_mut_doc;
 struct yyjson_mut_val;
 
-typedef struct FFModuleFormatArg
-{
+typedef struct FFModuleFormatArg {
     const char* desc;
     const char* name;
 } FFModuleFormatArg;
 
-typedef struct FFModuleFormatArgList
-{
+typedef struct FFModuleFormatArgList {
     FFModuleFormatArg* args;
     uint32_t count;
 } FFModuleFormatArgList;
 
-#define FF_FORMAT_ARG_LIST(list) { .args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg) }
+#define FF_FORMAT_ARG_LIST(list) {.args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg)}
 
 // Must be the first field of FFModuleOptions
-typedef struct FFModuleBaseInfo
-{
+typedef struct FFModuleBaseInfo {
     const char* name;
     const char* description;
     // A dirty polymorphic implementation in C.
@@ -32,15 +29,14 @@ typedef struct FFModuleBaseInfo
 
     void (*initOptions)(void* options);
     void (*destroyOptions)(void* options);
-    void (*parseJsonObject)(void* options, struct yyjson_val *module);
-    bool (*printModule)(void* options); // true on success
+    void (*parseJsonObject)(void* options, struct yyjson_val* module);
+    bool (*printModule)(void* options);                                                                   // true on success
     bool (*generateJsonResult)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module); // true on success
     void (*generateJsonConfig)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* obj);
     FFModuleFormatArgList formatArgs;
 } FFModuleBaseInfo;
 
-typedef enum __attribute__((__packed__)) FFModuleKeyType
-{
+typedef enum __attribute__((__packed__)) FFModuleKeyType {
     FF_MODULE_KEY_TYPE_NONE = 0,
     FF_MODULE_KEY_TYPE_STRING = 1 << 0,
     FF_MODULE_KEY_TYPE_ICON = 1 << 1,
@@ -54,8 +50,7 @@ typedef enum __attribute__((__packed__)) FFModuleKeyType
     FF_MODULE_KEY_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFModuleKeyType;
 
-typedef struct FFModuleArgs
-{
+typedef struct FFModuleArgs {
     FFstrbuf key;
     FFstrbuf keyColor;
     FFstrbuf keyIcon;
@@ -64,8 +59,7 @@ typedef struct FFModuleArgs
     uint32_t keyWidth;
 } FFModuleArgs;
 
-typedef struct FFKeyValuePair
-{
+typedef struct FFKeyValuePair {
     const char* key;
     int value;
 } FFKeyValuePair;
@@ -77,14 +71,12 @@ FF_C_NODISCARD int32_t ffOptionParseInt32(const char* argumentKey, const char* v
 FF_C_NODISCARD int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]);
 FF_C_NODISCARD bool ffOptionParseBoolean(const char* str);
 void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer);
-static inline void ffOptionParseColor(const char* value, FFstrbuf* buffer)
-{
+static inline void ffOptionParseColor(const char* value, FFstrbuf* buffer) {
     ffStrbufClear(buffer);
     ffOptionParseColorNoClear(value, buffer);
 }
 
-static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon)
-{
+static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon) {
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->keyColor);
     ffStrbufInitStatic(&args->keyIcon, icon);
@@ -93,8 +85,7 @@ static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon)
     args->keyWidth = 0;
 }
 
-static inline void ffOptionDestroyModuleArg(FFModuleArgs* args)
-{
+static inline void ffOptionDestroyModuleArg(FFModuleArgs* args) {
     ffStrbufDestroy(&args->key);
     ffStrbufDestroy(&args->keyColor);
     ffStrbufDestroy(&args->keyIcon);

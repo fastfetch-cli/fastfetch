@@ -6,14 +6,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-__attribute__((__noreturn__))
-static void testFailed(const FFlist* list, const char* expression, int lineNo)
-{
+__attribute__((__noreturn__)) static void testFailed(const FFlist* list, const char* expression, int lineNo) {
     fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stderr);
     fprintf(stderr, "[%d] %s, list:", lineNo, expression);
-    for (uint32_t i = 0; i < list->length; ++i)
-    {
-        fprintf(stderr, "%u ", *(uint32_t*)ffListGet(list, i));
+    for (uint32_t i = 0; i < list->length; ++i) {
+        fprintf(stderr, "%u ", *(uint32_t*) ffListGet(list, i));
     }
     fputc('\n', stderr);
     fputs(FASTFETCH_TEXT_MODIFIER_RESET, stderr);
@@ -21,19 +18,18 @@ static void testFailed(const FFlist* list, const char* expression, int lineNo)
     exit(1);
 }
 
-static bool numEqualsAdapter(const void* first, const void* second)
-{
-    return *(uint32_t*)first == *(uint32_t*)second;
+static bool numEqualsAdapter(const void* first, const void* second) {
+    return *(uint32_t*) first == *(uint32_t*) second;
 }
 
-#define VERIFY(expression) if(!(expression)) testFailed(&list, #expression, __LINE__)
+#define VERIFY(expression) \
+    if (!(expression)) testFailed(&list, #expression, __LINE__)
 
-int main(void)
-{
+int main(void) {
     FFlist list;
     uint32_t n = 0;
 
-    //initA
+    // initA
 
     ffListInit(&list, sizeof(uint32_t));
 
@@ -41,44 +37,42 @@ int main(void)
     VERIFY(list.capacity == 0);
     VERIFY(list.length == 0);
 
-    //forEach
-    FF_LIST_FOR_EACH(uint32_t, item, list)
+    // forEach
+    FF_LIST_FOR_EACH (uint32_t, item, list) {
         VERIFY(false);
+    }
 
-    //shift
+    // shift
     VERIFY(!ffListShift(&list, &n));
     VERIFY(list.length == 0);
 
-    //pop
+    // pop
     VERIFY(!ffListPop(&list, &n));
     VERIFY(list.length == 0);
 
-    //add
-    for (uint32_t i = 1; i <= FF_LIST_DEFAULT_ALLOC + 1; ++i)
-    {
-        *(uint32_t*)ffListAdd(&list) = i;
+    // add
+    for (uint32_t i = 1; i <= FF_LIST_DEFAULT_ALLOC + 1; ++i) {
+        *(uint32_t*) ffListAdd(&list) = i;
 
         VERIFY(list.elementSize == sizeof(uint32_t));
         VERIFY(list.length == i);
 
-        if(i <= FF_LIST_DEFAULT_ALLOC)
-        {
+        if (i <= FF_LIST_DEFAULT_ALLOC) {
             VERIFY(list.capacity == FF_LIST_DEFAULT_ALLOC);
-        }
-        else
-        {
+        } else {
             VERIFY(list.capacity == FF_LIST_DEFAULT_ALLOC * 2);
         }
 
-        VERIFY(*(uint32_t*)ffListGet(&list, 0) == 1);
-        VERIFY(*(uint32_t*)ffListGet(&list, i - 1) == i);
+        VERIFY(*(uint32_t*) ffListGet(&list, 0) == 1);
+        VERIFY(*(uint32_t*) ffListGet(&list, i - 1) == i);
     }
     VERIFY(list.length == FF_LIST_DEFAULT_ALLOC + 1);
 
     uint32_t sum = 0;
-    //forEach
-    FF_LIST_FOR_EACH(uint32_t, item, list)
+    // forEach
+    FF_LIST_FOR_EACH (uint32_t, item, list) {
         sum += *item;
+    }
     VERIFY(sum == (1 + FF_LIST_DEFAULT_ALLOC + 1) * (FF_LIST_DEFAULT_ALLOC + 1) / 2);
 
     // ffListFirstIndexComp
@@ -93,21 +87,21 @@ int main(void)
     n = 999;
     VERIFY(!ffListContains(&list, &n, numEqualsAdapter));
 
-    //shift
+    // shift
     VERIFY(ffListShift(&list, &n));
     VERIFY(n == 1);
     VERIFY(list.length == FF_LIST_DEFAULT_ALLOC);
     VERIFY(*(uint32_t*) ffListGet(&list, 0) == 2);
     VERIFY(*(uint32_t*) ffListGet(&list, list.length - 1) == FF_LIST_DEFAULT_ALLOC + 1);
 
-    //pop
+    // pop
     VERIFY(ffListPop(&list, &n));
     VERIFY(n == FF_LIST_DEFAULT_ALLOC + 1);
     VERIFY(list.length == FF_LIST_DEFAULT_ALLOC - 1);
     VERIFY(*(uint32_t*) ffListGet(&list, 0) == 2);
     VERIFY(*(uint32_t*) ffListGet(&list, list.length - 1) == FF_LIST_DEFAULT_ALLOC);
 
-    //Destroy
+    // Destroy
     ffListDestroy(&list);
 
     VERIFY(list.elementSize == sizeof(uint32_t));
@@ -121,6 +115,6 @@ int main(void)
         VERIFY(test.length == 0);
     }
 
-    //Success
-    puts("\033[32mAll tests passed!"FASTFETCH_TEXT_MODIFIER_RESET);
+    // Success
+    puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

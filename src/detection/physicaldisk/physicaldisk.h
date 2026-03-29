@@ -3,8 +3,7 @@
 
 #define FF_PHYSICALDISK_TEMP_UNSET (-DBL_MAX)
 
-typedef enum __attribute__((__packed__)) FFPhysicalDiskType
-{
+typedef enum __attribute__((__packed__)) FFPhysicalDiskType {
     FF_PHYSICALDISK_TYPE_NONE = 0,
 
     // If neither is set, it's unknown
@@ -21,8 +20,7 @@ typedef enum __attribute__((__packed__)) FFPhysicalDiskType
 } FFPhysicalDiskType;
 static_assert(sizeof(FFPhysicalDiskType) == sizeof(uint8_t), "");
 
-typedef struct FFPhysicalDiskResult
-{
+typedef struct FFPhysicalDiskResult {
     FFstrbuf name;
     FFstrbuf interconnect;
     FFstrbuf serial;

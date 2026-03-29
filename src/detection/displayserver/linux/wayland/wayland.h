@@ -2,23 +2,21 @@
 
 #ifdef FF_HAVE_WAYLAND
 
-#include "common/library.h"
-#include "common/stringUtils.h"
+#    include "common/library.h"
+#    include "common/stringUtils.h"
 
-#include <wayland-client.h>
+#    include <wayland-client.h>
 
-#include "../displayserver_linux.h"
+#    include "../displayserver_linux.h"
 
-typedef enum __attribute__((__packed__)) WaylandProtocolType
-{
+typedef enum __attribute__((__packed__)) WaylandProtocolType {
     FF_WAYLAND_PROTOCOL_TYPE_NONE,
     FF_WAYLAND_PROTOCOL_TYPE_GLOBAL,
     FF_WAYLAND_PROTOCOL_TYPE_ZWLR,
     FF_WAYLAND_PROTOCOL_TYPE_KDE,
 } WaylandProtocolType;
 
-typedef struct WaylandData
-{
+typedef struct WaylandData {
     FFDisplayServerResult* result;
     FF_LIBRARY_SYMBOL(wl_proxy_marshal_constructor_versioned)
     FF_LIBRARY_SYMBOL(wl_proxy_add_listener)
@@ -31,8 +29,7 @@ typedef struct WaylandData
     struct wl_proxy* zxdgOutputManager;
 } WaylandData;
 
-typedef struct WaylandDisplay
-{
+typedef struct WaylandDisplay {
     WaylandData* parent;
     void* internal;
     int32_t width;
@@ -59,23 +56,22 @@ typedef struct WaylandDisplay
     uint8_t bitDepth;
 } WaylandDisplay;
 
-inline static void stubListener(void* data, ...)
-{
+inline static void stubListener(void* data, ...) {
     (void) data;
 }
 
-inline static uint64_t ffWaylandGenerateIdFromName(const char* name)
-{
+inline static uint64_t ffWaylandGenerateIdFromName(const char* name) {
     uint64_t id = 0;
     size_t len = strlen(name);
-    if (len > sizeof(id))
+    if (len > sizeof(id)) {
         memcpy(&id, name + (len - sizeof(id)), sizeof(id)); // copy the last 8 bytes
-    else if (len > 0)
+    } else if (len > 0) {
         memcpy(&id, name, len);
+    }
     return id;
 }
 
-void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name);
+void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char* name);
 void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description);
 // Modifies content of display. Don't call this function when calling ffdsAppendDisplay
 uint32_t ffWaylandHandleRotation(WaylandDisplay* display);

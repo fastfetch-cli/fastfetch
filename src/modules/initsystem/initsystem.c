@@ -6,8 +6,7 @@
 
 #define FF_INITSYSTEM_DISPLAY_NAME "Init System"
 
-bool ffPrintInitSystem(FFInitSystemOptions* options)
-{
+bool ffPrintInitSystem(FFInitSystemOptions* options) {
     bool success = false;
     FFInitSystemResult result = {
         .name = ffStrbufCreate(),
@@ -18,29 +17,26 @@ bool ffPrintInitSystem(FFInitSystemOptions* options)
 
     const char* error = ffDetectInitSystem(&result);
 
-    if(error)
-    {
+    if (error) {
         ffPrintError(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.name, stdout);
-        if (result.version.length)
+        if (result.version.length) {
             printf(" %s\n", result.version.chars);
-        else
+        } else {
             putchar('\n');
-    }
-    else
-    {
+        }
+    } else {
         FF_PRINT_FORMAT_CHECKED(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_ARG(result.name, "name"),
-            FF_ARG(result.exe, "exe"),
-            FF_ARG(result.version, "version"),
-            FF_ARG(result.pid, "pid"),
-        }));
+                                                                                                                FF_ARG(result.name, "name"),
+                                                                                                                FF_ARG(result.exe, "exe"),
+                                                                                                                FF_ARG(result.version, "version"),
+                                                                                                                FF_ARG(result.pid, "pid"),
+                                                                                                            }));
     }
     success = true;
 
@@ -52,26 +48,23 @@ exit:
     return success;
 }
 
-void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* module)
-{
+void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFInitSystemResult result = {
         .name = ffStrbufCreate(),
@@ -82,8 +75,7 @@ bool ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options
 
     const char* error = ffDetectInitSystem(&result);
 
-    if (error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         goto exit;
     }
@@ -102,13 +94,11 @@ exit:
     return success;
 }
 
-void ffInitInitSystemOptions(FFInitSystemOptions* options)
-{
+void ffInitInitSystemOptions(FFInitSystemOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
 }
 
-void ffDestroyInitSystemOptions(FFInitSystemOptions* options)
-{
+void ffDestroyInitSystemOptions(FFInitSystemOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -126,5 +116,4 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         {"Init system exe path", "exe"},
         {"Init system version path", "version"},
         {"Init system pid", "pid"},
-    }))
-};
+    }))};

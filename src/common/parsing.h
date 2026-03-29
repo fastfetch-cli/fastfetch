@@ -4,15 +4,13 @@
 
 #include <stdint.h>
 
-typedef struct FFVersion
-{
+typedef struct FFVersion {
     uint32_t major;
     uint32_t minor;
     uint32_t patch;
 } FFVersion;
 
-typedef struct FFColorRangeConfig
-{
+typedef struct FFColorRangeConfig {
     uint8_t green;
     uint8_t yellow;
 } FFColorRangeConfig;

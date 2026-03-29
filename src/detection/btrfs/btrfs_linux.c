@@ -5,132 +5,141 @@
 
 enum { uuidLen = (uint32_t) __builtin_strlen("00000000-0000-0000-0000-000000000000") };
 
-static const char* enumerateDevices(FFBtrfsResult* item, int dfd, FFstrbuf* buffer)
-{
+static const char* enumerateDevices(FFBtrfsResult* item, int dfd, FFstrbuf* buffer) {
     int subfd = openat(dfd, "devices", O_RDONLY | O_CLOEXEC | O_DIRECTORY);
-    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/devices\") == -1";
+    if (subfd < 0) {
+        return "openat(\"/sys/fs/btrfs/UUID/devices\") == -1";
+    }
 
     FF_AUTO_CLOSE_DIR DIR* dirp = fdopendir(subfd);
-    if(dirp == NULL)
-    {
+    if (dirp == NULL) {
         close(subfd);
         return "fdopendir(\"/sys/fs/btrfs/UUID/devices\") == NULL";
     }
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
-    {
-        if (entry->d_name[0] == '.')
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] == '.') {
             continue;
+        }
 
-        if (item->devices.length)
+        if (item->devices.length) {
             ffStrbufAppendC(&item->devices, ',');
+        }
         ffStrbufAppendS(&item->devices, entry->d_name);
 
         char path[sizeof(entry->d_name) + sizeof("/size") + 1];
         snprintf(path, ARRAY_SIZE(path), "%s/size", entry->d_name);
 
-        if (ffReadFileBufferRelative(subfd, path, buffer))
+        if (ffReadFileBufferRelative(subfd, path, buffer)) {
             item->totalSize += ffStrbufToUInt(buffer, 0) * 512;
+        }
     }
 
     return NULL;
 }
 
-static const char* enumerateFeatures(FFBtrfsResult* item, int dfd)
-{
+static const char* enumerateFeatures(FFBtrfsResult* item, int dfd) {
     int subfd = openat(dfd, "features", O_RDONLY | O_CLOEXEC | O_DIRECTORY);
-    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/features\") == -1";
+    if (subfd < 0) {
+        return "openat(\"/sys/fs/btrfs/UUID/features\") == -1";
+    }
 
     FF_AUTO_CLOSE_DIR DIR* dirp = fdopendir(subfd);
-    if(dirp == NULL)
+    if (dirp == NULL) {
         return "fdopendir(\"/sys/fs/btrfs/UUID/features\") == NULL";
+    }
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
-    {
-        if (entry->d_name[0] == '.')
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] == '.') {
             continue;
-        if (item->features.length)
+        }
+        if (item->features.length) {
             ffStrbufAppendC(&item->features, ',');
+        }
         ffStrbufAppendS(&item->features, entry->d_name);
     }
 
     return NULL;
 }
 
-static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buffer)
-{
+static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buffer) {
     FF_AUTO_CLOSE_FD int subfd = openat(dfd, "allocation", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
-    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/allocation\") == -1";
+    if (subfd < 0) {
+        return "openat(\"/sys/fs/btrfs/UUID/allocation\") == -1";
+    }
 
-    if (ffReadFileBufferRelative(subfd, "global_rsv_size", buffer))
+    if (ffReadFileBufferRelative(subfd, "global_rsv_size", buffer)) {
         item->globalReservationTotal = ffStrbufToUInt(buffer, 0);
-    else
+    } else {
         return "ffReadFileBuffer(\"/sys/fs/btrfs/UUID/allocation/global_rsv_size\") == NULL";
+    }
 
-    if (ffReadFileBufferRelative(subfd, "global_rsv_reserved", buffer))
+    if (ffReadFileBufferRelative(subfd, "global_rsv_reserved", buffer)) {
         item->globalReservationUsed = ffStrbufToUInt(buffer, 0);
+    }
     item->globalReservationUsed = item->globalReservationTotal - item->globalReservationUsed;
 
-    #define FF_BTRFS_DETECT_PROFILE(_index, _type, _profile, _copies) \
-        else if (faccessat(subfd, _type "/" _profile "/", F_OK, 0) == 0) { \
-            item->allocation[_index].profile = _profile; \
-            item->allocation[_index].copies = _copies; \
-        }
+#define FF_BTRFS_DETECT_PROFILE(_index, _type, _profile, _copies)      \
+    else if (faccessat(subfd, _type "/" _profile "/", F_OK, 0) == 0) { \
+        item->allocation[_index].profile = _profile;                   \
+        item->allocation[_index].copies = _copies;                     \
+    }
 
-    #define FF_BTRFS_DETECT_TYPE(_index, _type) \
-    do { \
-        item->allocation[_index].type = _type; \
+#define FF_BTRFS_DETECT_TYPE(_index, _type)                                \
+    do {                                                                   \
+        item->allocation[_index].type = _type;                             \
         if (ffReadFileBufferRelative(subfd, _type "/total_bytes", buffer)) \
-            item->allocation[_index].total = ffStrbufToUInt(buffer, 0); \
-        \
-        if (ffReadFileBufferRelative(subfd, _type "/bytes_used", buffer)) \
-            item->allocation[_index].used = ffStrbufToUInt(buffer, 0); \
-        \
-        if (false) {} \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "single", 1) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "dup", 2) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid0", 1) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1", 2) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid10", 2) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c3", 3) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c4", 4) \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid5", 1) /* (n-1)/n */ \
-        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid6", 1) /* (n-2)/n */ \
-        else { \
-            item->allocation[_index].profile = "unknown"; \
-            item->allocation[_index].copies = 1; \
-        } \
+            item->allocation[_index].total = ffStrbufToUInt(buffer, 0);    \
+                                                                           \
+        if (ffReadFileBufferRelative(subfd, _type "/bytes_used", buffer))  \
+            item->allocation[_index].used = ffStrbufToUInt(buffer, 0);     \
+                                                                           \
+        if (false) {}                                                      \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "single", 1)                \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "dup", 2)                   \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid0", 1)                 \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1", 2)                 \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid10", 2)                \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c3", 3)               \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c4", 4)               \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid5", 1) /* (n-1)/n */   \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid6", 1) /* (n-2)/n */   \
+        else {                                                             \
+            item->allocation[_index].profile = "unknown";                  \
+            item->allocation[_index].copies = 1;                           \
+        }                                                                  \
     } while (0)
 
     FF_BTRFS_DETECT_TYPE(0, "data");
     FF_BTRFS_DETECT_TYPE(1, "metadata");
     FF_BTRFS_DETECT_TYPE(2, "system");
 
-    #undef FF_BTRFS_DETECT_TYPE
+#undef FF_BTRFS_DETECT_TYPE
 
     return NULL;
 }
 
-const char* ffDetectBtrfs(FFlist* result)
-{
+const char* ffDetectBtrfs(FFlist* result) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/fs/btrfs/");
-    if(dirp == NULL)
+    if (dirp == NULL) {
         return "opendir(\"/sys/fs/btrfs\") == NULL";
+    }
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
-    {
-        if (entry->d_name[0] == '.')
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] == '.') {
             continue;
-        if (strlen(entry->d_name) != uuidLen)
+        }
+        if (strlen(entry->d_name) != uuidLen) {
             continue;
+        }
 
         FFBtrfsResult* item = ffListAdd(result);
-        (*item) = (FFBtrfsResult){
+        (*item) = (FFBtrfsResult) {
             .uuid = ffStrbufCreateNS(uuidLen, entry->d_name),
             .name = ffStrbufCreate(),
             .devices = ffStrbufCreate(),
@@ -138,23 +147,29 @@ const char* ffDetectBtrfs(FFlist* result)
         };
 
         FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
-        if (dfd < 0) continue;
+        if (dfd < 0) {
+            continue;
+        }
 
-        if (ffAppendFileBufferRelative(dfd, "label", &item->name))
+        if (ffAppendFileBufferRelative(dfd, "label", &item->name)) {
             ffStrbufTrimRightSpace(&item->name);
+        }
 
         enumerateDevices(item, dfd, &buffer);
 
         enumerateFeatures(item, dfd);
 
-        if (ffReadFileBufferRelative(dfd, "generation", &buffer))
+        if (ffReadFileBufferRelative(dfd, "generation", &buffer)) {
             item->generation = (uint32_t) ffStrbufToUInt(&buffer, 0);
+        }
 
-        if (ffReadFileBufferRelative(dfd, "nodesize", &buffer))
+        if (ffReadFileBufferRelative(dfd, "nodesize", &buffer)) {
             item->nodeSize = (uint32_t) ffStrbufToUInt(&buffer, 0);
+        }
 
-        if (ffReadFileBufferRelative(dfd, "sectorsize", &buffer))
+        if (ffReadFileBufferRelative(dfd, "sectorsize", &buffer)) {
             item->sectorSize = (uint32_t) ffStrbufToUInt(&buffer, 0);
+        }
 
         detectAllocation(item, dfd, &buffer);
     }

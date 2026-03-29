@@ -7,35 +7,34 @@
 #include <net/if_mib.h>
 #include <sys/sysctl.h>
 
-const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
-{
-    int mib[] = {CTL_NET, PF_LINK, NETLINK_GENERIC,
-        options->defaultRouteOnly ? IFMIB_IFDATA : IFMIB_IFALLDATA,
-        options->defaultRouteOnly ? (int) ffNetifGetDefaultRouteV4()->ifIndex : 0,
-        IFDATA_GENERAL};
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
+    int mib[] = {CTL_NET, PF_LINK, NETLINK_GENERIC, options->defaultRouteOnly ? IFMIB_IFDATA : IFMIB_IFALLDATA, options->defaultRouteOnly ? (int) ffNetifGetDefaultRouteV4()->ifIndex : 0, IFDATA_GENERAL};
 
     size_t bufSize = 0;
-    if (sysctl(mib, ARRAY_SIZE(mib), NULL, &bufSize, 0, 0) < 0)
+    if (sysctl(mib, ARRAY_SIZE(mib), NULL, &bufSize, 0, 0) < 0) {
         return "sysctl(mib, ARRAY_SIZE(mib), NULL, &bufSize, 0, 0) failed";
+    }
 
     assert(bufSize % sizeof(struct ifmibdata) == 0);
 
     FF_AUTO_FREE struct ifmibdata* buf = (struct ifmibdata*) malloc(bufSize);
-    if (sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) < 0)
+    if (sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) < 0) {
         return "sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) failed";
+    }
 
     size_t ifCount = bufSize / sizeof(struct ifmibdata);
 
     const char* defaultRouteIfName = ffNetifGetDefaultRouteV4()->ifName;
 
-    for (size_t i = 0; i < ifCount; i++)
-    {
+    for (size_t i = 0; i < ifCount; i++) {
         struct ifmibdata* mibdata = &buf[i];
-        if (!(mibdata->ifmd_flags & IFF_RUNNING) || (mibdata->ifmd_flags & IFF_NOARP))
+        if (!(mibdata->ifmd_flags & IFF_RUNNING) || (mibdata->ifmd_flags & IFF_NOARP)) {
             continue;
+        }
 
-        if (options->namePrefix.length && strncmp(mibdata->ifmd_name, options->namePrefix.chars, options->namePrefix.length) != 0)
+        if (options->namePrefix.length && strncmp(mibdata->ifmd_name, options->namePrefix.chars, options->namePrefix.length) != 0) {
             continue;
+        }
 
         FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
         *counters = (FFNetIOResult) {

@@ -2,8 +2,7 @@
 
 #include "common/argType.h"
 
-typedef struct FFformatarg
-{
+typedef struct FFformatarg {
     FFArgType type;
     const void* value;
     const char* name; // argument name, must start with an alphabet

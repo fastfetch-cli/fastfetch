@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/publicip/option.h"
 
-typedef struct FFPublicIpResult
-{
+typedef struct FFPublicIpResult {
     FFstrbuf ip;
     FFstrbuf location;
 } FFPublicIpResult;

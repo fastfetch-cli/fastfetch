@@ -5,14 +5,12 @@
 
 #define FF_CPU_TEMP_UNSET (-DBL_MAX)
 
-typedef struct FFCPUCore
-{
+typedef struct FFCPUCore {
     uint32_t freq;
     uint32_t count;
 } FFCPUCore;
 
-typedef struct FFCPUResult
-{
+typedef struct FFCPUResult {
     FFstrbuf name;
     FFstrbuf vendor;
     const char* march; // Microarchitecture
@@ -24,7 +22,7 @@ typedef struct FFCPUResult
     uint16_t numaNodes;
 
     uint32_t frequencyBase; // GHz
-    uint32_t frequencyMax; // GHz
+    uint32_t frequencyMax;  // GHz
 
     FFCPUCore coreTypes[16]; // number of P cores, E cores, etc.
 

@@ -3,15 +3,13 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum __attribute__((__packed__)) FFSoundType
-{
+typedef enum __attribute__((__packed__)) FFSoundType {
     FF_SOUND_TYPE_MAIN,
     FF_SOUND_TYPE_ACTIVE,
     FF_SOUND_TYPE_ALL,
 } FFSoundType;
 
-typedef struct FFSoundOptions
-{
+typedef struct FFSoundOptions {
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;

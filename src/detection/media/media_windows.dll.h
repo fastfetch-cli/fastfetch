@@ -2,8 +2,7 @@
 
 #define FF_MEDIA_WIN_RESULT_BUFLEN 256
 
-typedef struct FFWinrtMediaResult
-{
+typedef struct FFWinrtMediaResult {
     wchar_t playerId[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t playerName[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t song[FF_MEDIA_WIN_RESULT_BUFLEN];
@@ -14,4 +13,5 @@ typedef struct FFWinrtMediaResult
 } FFWinrtMediaResult;
 
 __attribute__((__dllexport__))
-const char* ffWinrtDetectMedia(FFWinrtMediaResult* result, bool saveCover);
+const char*
+ffWinrtDetectMedia(FFWinrtMediaResult* result, bool saveCover);

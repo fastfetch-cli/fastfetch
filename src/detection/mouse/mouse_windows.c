@@ -10,32 +10,37 @@
 #include <cfgmgr32.h>
 #include <devpkey.h>
 
-const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
-{
+const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
     UINT nDevices = 0;
-    if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST)))
+    if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST))) {
         return "GetRawInputDeviceList(NULL) failed";
-    if (nDevices == 0)
+    }
+    if (nDevices == 0) {
         return "No HID devices found";
+    }
     RAWINPUTDEVICELIST* FF_AUTO_FREE pRawInputDeviceList = (RAWINPUTDEVICELIST*) malloc(sizeof(RAWINPUTDEVICELIST) * nDevices);
-    if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1)
+    if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1) {
         return "GetRawInputDeviceList(pRawInputDeviceList) failed";
+    }
 
-    for (UINT i = 0; i < nDevices; ++i)
-    {
-        if (pRawInputDeviceList[i].dwType != RIM_TYPEMOUSE) continue;
+    for (UINT i = 0; i < nDevices; ++i) {
+        if (pRawInputDeviceList[i].dwType != RIM_TYPEMOUSE) {
+            continue;
+        }
 
         HANDLE hDevice = pRawInputDeviceList[i].hDevice;
 
         RID_DEVICE_INFO rdi;
         UINT rdiSize = sizeof(rdi);
-        if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICEINFO, &rdi, &rdiSize) == (UINT) -1)
+        if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICEINFO, &rdi, &rdiSize) == (UINT) -1) {
             continue;
+        }
 
         WCHAR devName[MAX_PATH];
         UINT nameSize = MAX_PATH;
-        if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICENAME, devName, &nameSize) == (UINT) -1)
+        if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICENAME, devName, &nameSize) == (UINT) -1) {
             continue;
+        }
 
         FFMouseDevice* device = (FFMouseDevice*) ffListAdd(devices);
         ffStrbufInit(&device->serial);
@@ -44,35 +49,35 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
         wchar_t buffer[MAX_PATH];
 
         HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, 0 /* must be 0 instead of GENERIC_READ */, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-        if (hHidFile != INVALID_HANDLE_VALUE)
-        {
-            if (HidD_GetProductString(hHidFile, buffer, (ULONG) sizeof(buffer)))
+        if (hHidFile != INVALID_HANDLE_VALUE) {
+            if (HidD_GetProductString(hHidFile, buffer, (ULONG) sizeof(buffer))) {
                 ffStrbufSetWS(&device->name, buffer);
+            }
 
-            if (HidD_GetSerialNumberString(hHidFile, buffer, sizeof(buffer)))
+            if (HidD_GetSerialNumberString(hHidFile, buffer, sizeof(buffer))) {
                 ffStrbufSetWS(&device->serial, buffer);
+            }
         }
 
-        if (!device->name.length)
-        {
+        if (!device->name.length) {
             // https://stackoverflow.com/a/64321096/9976392
             DEVPROPTYPE propertyType;
             ULONG propertySize = sizeof(buffer);
 
-            if (CM_Get_Device_Interface_PropertyW(devName, &DEVPKEY_Device_InstanceId, &propertyType, (PBYTE) buffer, &propertySize, 0) == CR_SUCCESS)
-            {
+            if (CM_Get_Device_Interface_PropertyW(devName, &DEVPKEY_Device_InstanceId, &propertyType, (PBYTE) buffer, &propertySize, 0) == CR_SUCCESS) {
                 DEVINST devInst;
-                if (CM_Locate_DevNodeW(&devInst, buffer, CM_LOCATE_DEVNODE_NORMAL) == CR_SUCCESS)
-                {
+                if (CM_Locate_DevNodeW(&devInst, buffer, CM_LOCATE_DEVNODE_NORMAL) == CR_SUCCESS) {
                     propertySize = sizeof(buffer);
-                    if (CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_NAME, &propertyType, (PBYTE) buffer, &propertySize, 0) == CR_SUCCESS)
+                    if (CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_NAME, &propertyType, (PBYTE) buffer, &propertySize, 0) == CR_SUCCESS) {
                         ffStrbufSetWS(&device->name, buffer);
+                    }
                 }
             }
         }
 
-        if (!device->name.length)
+        if (!device->name.length) {
             ffStrbufSetF(&device->name, "Unknown device %04X-%04X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
+        }
     }
 
     return NULL;

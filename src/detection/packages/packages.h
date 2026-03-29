@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/packages/option.h"
 
-typedef struct FFPackagesResult
-{
+typedef struct FFPackagesResult {
     uint32_t amSystem;
     uint32_t amUser;
     uint32_t apk;
@@ -48,7 +47,7 @@ typedef struct FFPackagesResult
     uint32_t winget;
     uint32_t xbps;
 
-    uint32_t all; //Make sure this goes last
+    uint32_t all; // Make sure this goes last
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;

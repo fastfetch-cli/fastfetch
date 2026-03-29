@@ -5,67 +5,58 @@
 #include "detection/version/version.h"
 #include "modules/version/version.h"
 
-bool ffPrintVersion(FFVersionOptions* options)
-{
+bool ffPrintVersion(FFVersionOptions* options) {
     FFVersionResult* result = &ffVersionResult;
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
-    }
-    else
-    {
+    } else {
         FFLibcResult libcResult;
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-        if (!ffDetectLibc(&libcResult))
-        {
+        if (!ffDetectLibc(&libcResult)) {
             ffStrbufSetS(&buf, libcResult.name);
-            if (libcResult.version)
-            {
+            if (libcResult.version) {
                 ffStrbufAppendC(&buf, ' ');
                 ffStrbufAppendS(&buf, libcResult.version);
             }
         }
 
         const char* buildType = result->debugMode ? "debug" : "release";
-        FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(result->projectName, "project-name"),
-            FF_ARG(result->version, "version"),
-            FF_ARG(result->versionTweak, "version-tweak"),
-            FF_ARG(buildType, "build-type"),
-            FF_ARG(result->sysName, "sysname"),
-            FF_ARG(result->architecture, "arch"),
-            FF_ARG(result->cmakeBuiltType, "cmake-built-type"),
-            FF_ARG(result->compileTime, "compile-time"),
-            FF_ARG(result->compiler, "compiler"),
-            FF_ARG(buf, "libc"),
-        }));
+        FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                            FF_ARG(result->projectName, "project-name"),
+                                                                                                            FF_ARG(result->version, "version"),
+                                                                                                            FF_ARG(result->versionTweak, "version-tweak"),
+                                                                                                            FF_ARG(buildType, "build-type"),
+                                                                                                            FF_ARG(result->sysName, "sysname"),
+                                                                                                            FF_ARG(result->architecture, "arch"),
+                                                                                                            FF_ARG(result->cmakeBuiltType, "cmake-built-type"),
+                                                                                                            FF_ARG(result->compileTime, "compile-time"),
+                                                                                                            FF_ARG(result->compiler, "compiler"),
+                                                                                                            FF_ARG(buf, "libc"),
+                                                                                                        }));
     }
 
     return true;
 }
 
-void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
-{
+void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFVersionResult* result = &ffVersionResult;
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -80,15 +71,11 @@ bool ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
     yyjson_mut_obj_add_bool(doc, obj, "debugMode", result->debugMode);
 
     FFLibcResult libcResult;
-    if (ffDetectLibc(&libcResult))
-    {
+    if (ffDetectLibc(&libcResult)) {
         yyjson_mut_obj_add_null(doc, obj, "libc");
-    }
-    else
-    {
+    } else {
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreateS(libcResult.name);
-        if (libcResult.version)
-        {
+        if (libcResult.version) {
             ffStrbufAppendC(&buf, ' ');
             ffStrbufAppendS(&buf, libcResult.version);
         }
@@ -98,13 +85,11 @@ bool ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
     return true;
 }
 
-void ffInitVersionOptions(FFVersionOptions* options)
-{
+void ffInitVersionOptions(FFVersionOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyVersionOptions(FFVersionOptions* options)
-{
+void ffDestroyVersionOptions(FFVersionOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -128,5 +113,4 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         {"Date time when compiling", "compile-time"},
         {"Compiler used when compiling", "compiler"},
         {"Libc used when compiling", "libc"},
-    }))
-};
+    }))};

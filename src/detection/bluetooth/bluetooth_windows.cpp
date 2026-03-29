@@ -1,84 +1,88 @@
-extern "C"
-{
+extern "C" {
 #include "bluetooth.h"
 }
 #include "common/windows/wmi.hpp"
 #include "common/windows/unicode.hpp"
 #include "common/windows/util.hpp"
 
-extern "C"
-const char* ffBluetoothDetectBattery(FFlist* devices)
-{
+extern "C" const char* ffBluetoothDetectBattery(FFlist* devices) {
     FFWmiQuery query(L"SELECT __PATH FROM Win32_PnPEntity WHERE Service = 'BthHFEnum'", nullptr, FFWmiNamespace::CIMV2);
-    if(!query)
+    if (!query) {
         return "Query WMI service failed";
+    }
 
     IWbemClassObject* pInParams = nullptr;
     on_scope_exit releaseInParams([&] { pInParams && pInParams->Release(); });
     {
         IWbemClassObject* pnpEntityClass = nullptr;
 
-        if (FAILED(query.pService->GetObjectW(bstr_t(L"Win32_PnPEntity"), 0, nullptr, &pnpEntityClass, nullptr)))
+        if (FAILED(query.pService->GetObjectW(bstr_t(L"Win32_PnPEntity"), 0, nullptr, &pnpEntityClass, nullptr))) {
             return "Failed to get PnP entity class";
+        }
         on_scope_exit releasePnpEntityClass([&] { pnpEntityClass && pnpEntityClass->Release(); });
 
-        if (FAILED(pnpEntityClass->GetMethod(bstr_t(L"GetDeviceProperties"), 0, &pInParams, NULL)))
+        if (FAILED(pnpEntityClass->GetMethod(bstr_t(L"GetDeviceProperties"), 0, &pInParams, NULL))) {
             return "Failed to get GetDeviceProperties method";
+        }
 
-        FFWmiVariant devicePropertyKeys({ L"{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2", L"DEVPKEY_Bluetooth_DeviceAddress" });
-        if (FAILED(pInParams->Put(L"devicePropertyKeys", 0, &devicePropertyKeys, CIM_FLAG_ARRAY | CIM_STRING)))
+        FFWmiVariant devicePropertyKeys({L"{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2", L"DEVPKEY_Bluetooth_DeviceAddress"});
+        if (FAILED(pInParams->Put(L"devicePropertyKeys", 0, &devicePropertyKeys, CIM_FLAG_ARRAY | CIM_STRING))) {
             return "Failed to put devicePropertyKeys";
+        }
     }
 
-    while (FFWmiRecord record = query.next())
-    {
+    while (FFWmiRecord record = query.next()) {
         IWbemCallResult* pCallResult = nullptr;
 
-        if (FAILED(query.pService->ExecMethod(record.get(L"__PATH").bstrVal, bstr_t(L"GetDeviceProperties"), 0, nullptr, pInParams, nullptr, &pCallResult)))
+        if (FAILED(query.pService->ExecMethod(record.get(L"__PATH").bstrVal, bstr_t(L"GetDeviceProperties"), 0, nullptr, pInParams, nullptr, &pCallResult))) {
             continue;
+        }
         on_scope_exit releaseCallResult([&] { pCallResult && pCallResult->Release(); });
 
         IWbemClassObject* pResultObject = nullptr;
-        if (FAILED(pCallResult->GetResultObject((LONG) WBEM_INFINITE, &pResultObject)))
+        if (FAILED(pCallResult->GetResultObject((LONG) WBEM_INFINITE, &pResultObject))) {
             continue;
+        }
         on_scope_exit releaseResultObject([&] { pResultObject && pResultObject->Release(); });
 
         VARIANT propArray;
-        if (FAILED(pResultObject->Get(L"deviceProperties", 0, &propArray, nullptr, nullptr)))
+        if (FAILED(pResultObject->Get(L"deviceProperties", 0, &propArray, nullptr, nullptr))) {
             continue;
+        }
         on_scope_exit releasePropArray([&] { VariantClear(&propArray); });
 
         if (propArray.vt != (VT_ARRAY | VT_UNKNOWN) ||
             (propArray.parray->fFeatures & FADF_UNKNOWN) == 0 ||
             propArray.parray->cDims != 1 ||
-            propArray.parray->rgsabound[0].cElements != 2
-        )
+            propArray.parray->rgsabound[0].cElements != 2) {
             continue;
+        }
 
         uint8_t batt = 0;
-        for (LONG i = 0; i < 2; i++)
-        {
+        for (LONG i = 0; i < 2; i++) {
             IWbemClassObject* object = nullptr;
-            if (FAILED(SafeArrayGetElement(propArray.parray, &i, &object)))
+            if (FAILED(SafeArrayGetElement(propArray.parray, &i, &object))) {
                 continue;
+            }
 
             FFWmiRecord rec(object);
             auto data = rec.get(L"Data");
-            if (data.vt == VT_EMPTY)
+            if (data.vt == VT_EMPTY) {
                 break;
+            }
 
-            if (i == 0)
+            if (i == 0) {
                 batt = data.get<uint8_t>();
-            else
-            {
+            } else {
                 FF_STRBUF_AUTO_DESTROY addr = ffStrbufCreateWSV(data.get<std::wstring_view>()); // MAC address without colon
-                if (__builtin_expect(addr.length != 12, 0))
+                if (__builtin_expect(addr.length != 12, 0)) {
                     continue;
+                }
 
-                FF_LIST_FOR_EACH(FFBluetoothResult, bt, *devices)
-                {
-                    if (bt->address.length != 12 + 5)
+                FF_LIST_FOR_EACH (FFBluetoothResult, bt, *devices) {
+                    if (bt->address.length != 12 + 5) {
                         continue;
+                    }
 
                     if (addr.chars[0] == bt->address.chars[0] &&
                         addr.chars[1] == bt->address.chars[1] &&
@@ -91,8 +95,7 @@ const char* ffBluetoothDetectBattery(FFlist* devices)
                         addr.chars[8] == bt->address.chars[12] &&
                         addr.chars[9] == bt->address.chars[13] &&
                         addr.chars[10] == bt->address.chars[15] &&
-                        addr.chars[11] == bt->address.chars[16])
-                    {
+                        addr.chars[11] == bt->address.chars[16]) {
                         bt->battery = batt;
                         break;
                     }

@@ -3,31 +3,33 @@
 
 #include <IOKit/IOKitLib.h>
 
-const char* ffDetectBios(FFBiosResult* bios)
-{
-    #ifndef __aarch64__
+const char* ffDetectBios(FFBiosResult* bios) {
+#ifndef __aarch64__
 
-    //https://github.com/osquery/osquery/blob/master/osquery/tables/system/darwin/smbios_tables.cpp
-    //For Intel
+    // https://github.com/osquery/osquery/blob/master/osquery/tables/system/darwin/smbios_tables.cpp
+    // For Intel
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceRom = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/rom");
-    if (!deviceRom)
+    if (!deviceRom) {
         return "IODeviceTree:/rom not found";
+    }
 
     FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceRomProps = NULL;
-    if(IORegistryEntryCreateCFProperties(deviceRom, &deviceRomProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+    if (IORegistryEntryCreateCFProperties(deviceRom, &deviceRomProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
         return "IORegistryEntryCreateCFProperties(deviceRom) failed";
+    }
 
     ffCfDictGetString(deviceRomProps, CFSTR("vendor"), &bios->vendor);
     ffCfDictGetString(deviceRomProps, CFSTR("version"), &bios->version);
     ffCfDictGetString(deviceRomProps, CFSTR("release-date"), &bios->date);
     ffStrbufSetStatic(&bios->type, "UEFI");
 
-    #else
+#else
 
-    //For arm64
+    // For arm64
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t device = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/");
-    if (!device)
+    if (!device) {
         return "IODeviceTree:/ not found";
+    }
 
     FF_CFTYPE_AUTO_RELEASE CFDataRef manufacturer = IORegistryEntryCreateCFProperty(device, CFSTR("manufacturer"), kCFAllocatorDefault, kNilOptions);
     ffCfStrGetString(manufacturer, &bios->vendor);
@@ -35,23 +37,21 @@ const char* ffDetectBios(FFBiosResult* bios)
     ffCfStrGetString(timeStamp, &bios->date);
 
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceChosen = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
-    if (deviceChosen)
-    {
+    if (deviceChosen) {
         FF_CFTYPE_AUTO_RELEASE CFStringRef systemFirmwareVersion = IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("system-firmware-version"), kCFAllocatorDefault, kNilOptions);
-        if (systemFirmwareVersion)
-        {
+        if (systemFirmwareVersion) {
             ffCfStrGetString(systemFirmwareVersion, &bios->version);
             uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
-            if (index != bios->version.length)
-            {
+            if (index != bios->version.length) {
                 ffStrbufAppendNS(&bios->type, index, bios->version.chars);
                 ffStrbufRemoveSubstr(&bios->version, 0, index + 1);
             }
         }
     }
-    if (!bios->type.length)
+    if (!bios->type.length) {
         ffStrbufSetStatic(&bios->type, "iBoot");
-    #endif
+    }
+#endif
 
     return NULL;
 }

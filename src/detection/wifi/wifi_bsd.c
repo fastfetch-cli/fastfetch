@@ -8,21 +8,19 @@
 #include <net/if_media.h>
 #include <net80211/ieee80211_ioctl.h>
 
-const char* ffDetectWifi(FFlist* result)
-{
+const char* ffDetectWifi(FFlist* result) {
     struct if_nameindex* infs = if_nameindex();
-    if(!infs) {
+    if (!infs) {
         return "if_nameindex() failed";
     }
 
     FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sock < 0) {
+    if (sock < 0) {
         if_freenameindex(infs);
         return "socket() failed";
     }
 
-    for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
-    {
+    for (struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i) {
         if (!ffStrStartsWith(i->if_name, "wlan")) {
             continue;
         }
@@ -70,8 +68,7 @@ const char* ffDetectWifi(FFlist* result)
         ireq.i_len = sizeof(bssid);
 
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
-            ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X",
-                         bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+            ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
         }
 
         struct ieee80211_channel curchan = {};
@@ -83,23 +80,24 @@ const char* ffDetectWifi(FFlist* result)
             item->conn.channel = curchan.ic_ieee;
             item->conn.frequency = curchan.ic_freq;
 
-            #ifdef IEEE80211_IS_CHAN_HE // for future use
-            if (IEEE80211_IS_CHAN_HE(&curchan))
+#ifdef IEEE80211_IS_CHAN_HE // for future use
+            if (IEEE80211_IS_CHAN_HE(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
-            else
-            #endif
-            if (IEEE80211_IS_CHAN_VHT(&curchan))
+            } else
+#endif
+                if (IEEE80211_IS_CHAN_VHT(&curchan))
                 ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
-            else if (IEEE80211_IS_CHAN_HT(&curchan))
+            else if (IEEE80211_IS_CHAN_HT(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
-            else if (IEEE80211_IS_CHAN_ANYG(&curchan))
+            } else if (IEEE80211_IS_CHAN_ANYG(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11g");
-            else if (IEEE80211_IS_CHAN_B(&curchan))
+            } else if (IEEE80211_IS_CHAN_B(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11b");
-            else if (IEEE80211_IS_CHAN_A(&curchan))
+            } else if (IEEE80211_IS_CHAN_A(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11a");
-            else if (IEEE80211_IS_CHAN_FHSS(&curchan))
+            } else if (IEEE80211_IS_CHAN_FHSS(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11 (FHSS)");
+            }
         }
 
         union {
@@ -114,7 +112,8 @@ const char* ffDetectWifi(FFlist* result)
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
             struct ieee80211req_sta_info* sta = stareq.req.info;
             if (sta->isi_len != 0) {
-                item->conn.signalQuality = (sta->isi_rssi >= -50 ? 100 : sta->isi_rssi <= -100 ? 0 : (sta->isi_rssi + 100) * 2);
+                item->conn.signalQuality = (sta->isi_rssi >= -50 ? 100 : sta->isi_rssi <= -100 ? 0
+                                                                                               : (sta->isi_rssi + 100) * 2);
                 item->conn.rxRate = sta->isi_txmbps * 0.5;
             }
         }
@@ -124,27 +123,27 @@ const char* ffDetectWifi(FFlist* result)
         ireq.i_len = 0;
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
             switch (ireq.i_val) {
-            case IEEE80211_AUTH_NONE:
-                ffStrbufSetStatic(&item->conn.security, "Insecure");
-                break;
-            case IEEE80211_AUTH_OPEN:
-                ffStrbufSetStatic(&item->conn.security, "Open");
-                break;
-            case IEEE80211_AUTH_SHARED:
-                ffStrbufSetStatic(&item->conn.security, "Shared");
-                break;
-            case IEEE80211_AUTH_8021X:
-                ffStrbufSetStatic(&item->conn.security, "8021X");
-                break;
-            case IEEE80211_AUTH_AUTO:
-                ffStrbufSetStatic(&item->conn.security, "Auto");
-                break;
-            case IEEE80211_AUTH_WPA:
-                ffStrbufSetStatic(&item->conn.security, "WPA");
-                break;
-            default:
-                ffStrbufSetF(&item->conn.security, "Unknown (%d)", ireq.i_val);
-                break;
+                case IEEE80211_AUTH_NONE:
+                    ffStrbufSetStatic(&item->conn.security, "Insecure");
+                    break;
+                case IEEE80211_AUTH_OPEN:
+                    ffStrbufSetStatic(&item->conn.security, "Open");
+                    break;
+                case IEEE80211_AUTH_SHARED:
+                    ffStrbufSetStatic(&item->conn.security, "Shared");
+                    break;
+                case IEEE80211_AUTH_8021X:
+                    ffStrbufSetStatic(&item->conn.security, "8021X");
+                    break;
+                case IEEE80211_AUTH_AUTO:
+                    ffStrbufSetStatic(&item->conn.security, "Auto");
+                    break;
+                case IEEE80211_AUTH_WPA:
+                    ffStrbufSetStatic(&item->conn.security, "WPA");
+                    break;
+                default:
+                    ffStrbufSetF(&item->conn.security, "Unknown (%d)", ireq.i_val);
+                    break;
             }
         }
     }

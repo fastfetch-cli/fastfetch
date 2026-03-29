@@ -9,8 +9,7 @@ typedef enum __attribute__((__packed__)) FFDNSShowType {
     FF_DNS_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFDNSShowType;
 
-typedef struct FFDNSOptions
-{
+typedef struct FFDNSOptions {
     FFModuleArgs moduleArgs;
 
     FFDNSShowType showType;

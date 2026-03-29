@@ -3,8 +3,7 @@
 #include "common/io.h"
 #include "detection/version/version.h"
 
-void ffPlatformInit(FFPlatform* platform)
-{
+void ffPlatformInit(FFPlatform* platform) {
     ffStrbufInit(&platform->homeDir);
     ffStrbufInit(&platform->cacheDir);
     ffListInit(&platform->configDirs, sizeof(FFstrbuf));
@@ -17,9 +16,9 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->hostName);
     ffStrbufInit(&platform->userShell);
 
-    #ifdef _WIN32
+#ifdef _WIN32
     ffStrbufInit(&platform->sid);
-    #endif
+#endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;
 
@@ -30,24 +29,27 @@ void ffPlatformInit(FFPlatform* platform)
 
     ffPlatformInitImpl(platform);
 
-    if(info->name.length == 0)
+    if (info->name.length == 0) {
         ffStrbufSetStatic(&info->name, ffVersionResult.sysName);
+    }
 
-    if(info->architecture.length == 0)
+    if (info->architecture.length == 0) {
         ffStrbufSetStatic(&info->architecture, ffVersionResult.architecture);
+    }
 }
 
-void ffPlatformDestroy(FFPlatform* platform)
-{
+void ffPlatformDestroy(FFPlatform* platform) {
     ffStrbufDestroy(&platform->homeDir);
     ffStrbufDestroy(&platform->cacheDir);
 
-    FF_LIST_FOR_EACH(FFstrbuf, dir, platform->configDirs)
+    FF_LIST_FOR_EACH (FFstrbuf, dir, platform->configDirs) {
         ffStrbufDestroy(dir);
+    }
     ffListDestroy(&platform->configDirs);
 
-    FF_LIST_FOR_EACH(FFstrbuf, dir, platform->dataDirs)
+    FF_LIST_FOR_EACH (FFstrbuf, dir, platform->dataDirs) {
         ffStrbufDestroy(dir);
+    }
     ffListDestroy(&platform->dataDirs);
     ffStrbufDestroy(&platform->exePath);
     ffStrbufDestroy(&platform->cwd);
@@ -57,9 +59,9 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&platform->userShell);
     ffStrbufDestroy(&platform->fullUserName);
 
-    #ifdef _WIN32
+#ifdef _WIN32
     ffStrbufDestroy(&platform->sid);
-    #endif
+#endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;
     ffStrbufDestroy(&info->architecture);
@@ -68,23 +70,24 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&info->version);
 }
 
-void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path)
-{
-    if (!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
+void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path) {
+    if (!ffPathExists(path, FF_PATHTYPE_DIRECTORY)) {
         return;
+    }
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&buffer, '/');
-    if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+    if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
         ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+    }
 }
 
-void ffPlatformPathAddHome(FFlist* dirs, const FFPlatform* platform, const char* suffix)
-{
+void ffPlatformPathAddHome(FFlist* dirs, const FFPlatform* platform, const char* suffix) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateA(64);
     ffStrbufAppend(&buffer, &platform->homeDir);
     ffStrbufAppendS(&buffer, suffix);
     ffStrbufEnsureEndsWithC(&buffer, '/');
-    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
         ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+    }
 }

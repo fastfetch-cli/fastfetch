@@ -4,22 +4,20 @@
 #include "common/io.h"
 
 #ifdef FF_HAVE_FREETYPE
-    #include "common/library.h"
-    #include <ft2build.h>
-    #include FT_FREETYPE_H
+#    include "common/library.h"
+#    include <ft2build.h>
+#    include FT_FREETYPE_H
 #endif
 
 #define FF_TERMUX_FONT_PATH FASTFETCH_TARGET_DIR_HOME "/.termux/font.ttf"
 
-const char* detectTermux(FFTerminalFontResult* terminalFont)
-{
-    if(!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE))
-    {
+const char* detectTermux(FFTerminalFontResult* terminalFont) {
+    if (!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE)) {
         ffFontInitCopy(&terminalFont->font, "monospace");
         return NULL;
     }
 
-    #ifdef FF_HAVE_FREETYPE
+#ifdef FF_HAVE_FREETYPE
 
     FF_LIBRARY_LOAD_MESSAGE(freetype, "libfreetype" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(freetype, FT_Init_FreeType);
@@ -31,14 +29,12 @@ const char* detectTermux(FFTerminalFontResult* terminalFont)
     FT_Face face = NULL;
     const char* error = NULL;
 
-    if(ffFT_Init_FreeType(&library))
-    {
+    if (ffFT_Init_FreeType(&library)) {
         error = "FT_Init_FreeType() failed";
         goto exit;
     }
 
-    if(ffFT_New_Face(library, FF_TERMUX_FONT_PATH, 0, &face))
-    {
+    if (ffFT_New_Face(library, FF_TERMUX_FONT_PATH, 0, &face)) {
         error = "FT_NEW_Face(" FF_TERMUX_FONT_PATH ") failed";
         goto exit;
     }
@@ -46,25 +42,27 @@ const char* detectTermux(FFTerminalFontResult* terminalFont)
     ffFontInitCopy(&terminalFont->font, face->family_name);
 
 exit:
-    if(face) ffFT_Done_Face(face);
-    if(library) ffFT_Done_FreeType(library);
+    if (face) {
+        ffFT_Done_Face(face);
+    }
+    if (library) {
+        ffFT_Done_FreeType(library);
+    }
 
     return error;
 
-    #else
+#else
 
     FF_UNUSED(terminalFont);
     return "Fastfetch was built without freetype2 support";
 
-    #endif
+#endif
 }
 
-bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
-{
-    if(ffStrbufEqualS(&terminal->processName, "com.termux"))
+bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont) {
+    if (ffStrbufEqualS(&terminal->processName, "com.termux")) {
         ffStrbufSetS(&terminalFont->error, detectTermux(terminalFont));
-    else
-    {
+    } else {
         bool ffDetectTerminalFontPlatformLinux(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
         return ffDetectTerminalFontPlatformLinux(terminal, terminalFont);
     }

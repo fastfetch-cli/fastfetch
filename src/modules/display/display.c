@@ -7,63 +7,50 @@
 
 #include <math.h>
 
-static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
-{
+static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b) {
     return ffStrbufComp(&a->name, &b->name);
 }
 
-static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b)
-{
+static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b) {
     return -ffStrbufComp(&a->name, &b->name);
 }
 
-bool ffPrintDisplay(FFDisplayOptions* options)
-{
+bool ffPrintDisplay(FFDisplayOptions* options) {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
-    if(dsResult->displays.length == 0)
-    {
+    if (dsResult->displays.length == 0) {
         ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
         return false;
     }
 
-    if (options->order != FF_DISPLAY_ORDER_NONE)
-    {
+    if (options->order != FF_DISPLAY_ORDER_NONE) {
         ffListSort((FFlist*) &dsResult->displays, (void*) (options->order == FF_DISPLAY_ORDER_ASC ? sortByNameAsc : sortByNameDesc));
     }
 
-    if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
-    {
+    if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE) {
         ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
-        {
-            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT)
-            {
+        FF_LIST_FOR_EACH (FFDisplayResult, result, dsResult->displays) {
+            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT) {
                 ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
-            }
-            else
-            {
+            } else {
                 uint32_t scaledWidth = (result->width * 96 + result->dpi / 2) / result->dpi;
                 uint32_t scaledHeight = (result->height * 96 + result->dpi / 2) / result->dpi;
                 ffStrbufAppendF(&buffer, "%ix%i", scaledWidth, scaledHeight);
             }
 
-            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT)
-            {
-                if (result->refreshRate > 0)
-                {
+            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT) {
+                if (result->refreshRate > 0) {
                     const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "";
-                    if (options->preciseRefreshRate)
+                    if (options->preciseRefreshRate) {
                         ffStrbufAppendF(&buffer, " @ %g%sHz", result->refreshRate, space);
-                    else
+                    } else {
                         ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
+                    }
                 }
                 ffStrbufAppendS(&buffer, ", ");
-            }
-            else
-            {
+            } else {
                 ffStrbufAppendC(&buffer, ' ');
             }
         }
@@ -75,30 +62,28 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
-    for(uint32_t i = 0; i < dsResult->displays.length; i++)
-    {
+    for (uint32_t i = 0; i < dsResult->displays.length; i++) {
         FFDisplayResult* result = FF_LIST_GET(FFDisplayResult, dsResult->displays, i);
         uint32_t moduleIndex = dsResult->displays.length == 1 ? 0 : i + 1;
-        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "Built-in" : "External";
+        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "Built-in"
+                                                                                                                           : "External";
 
         ffStrbufClear(&key);
-        if(options->moduleArgs.key.length == 0)
-        {
-            if (result->name.length)
+        if (options->moduleArgs.key.length == 0) {
+            if (result->name.length) {
                 ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
-            else if (moduleIndex > 0)
+            } else if (moduleIndex > 0) {
                 ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
-            else
+            } else {
                 ffStrbufAppendS(&key, FF_DISPLAY_MODULE_NAME);
-        }
-        else
-        {
+            }
+        } else {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
-                FF_ARG(moduleIndex, "index"),
-                FF_ARG(result->name, "name"),
-                FF_ARG(displayType, "type"),
-                FF_ARG(options->moduleArgs.keyIcon, "icon"),
-            }));
+                                                                               FF_ARG(moduleIndex, "index"),
+                                                                               FF_ARG(result->name, "name"),
+                                                                               FF_ARG(displayType, "type"),
+                                                                               FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           }));
         }
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -107,180 +92,172 @@ bool ffPrintDisplay(FFDisplayOptions* options)
         uint32_t scaledHeight = (result->height * 96 + result->dpi / 2) / result->dpi;
         double scaleFactor = (double) result->dpi / 96.;
 
-        if(options->moduleArgs.outputFormat.length == 0)
-        {
+        if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
 
-            if(result->dpi != 96)
-            {
+            if (result->dpi != 96) {
                 ffStrbufAppendS(&buffer, " @ ");
                 ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
                 ffStrbufAppendC(&buffer, 'x');
             }
 
-            if (inch > 1)
+            if (inch > 1) {
                 ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
+            }
 
-            if(result->refreshRate > 0)
-            {
+            if (result->refreshRate > 0) {
                 ffStrbufAppendS(&buffer, ", ");
-                if(options->preciseRefreshRate)
+                if (options->preciseRefreshRate) {
                     ffStrbufAppendDouble(&buffer, result->refreshRate, 3, false);
-                else
+                } else {
                     ffStrbufAppendSInt(&buffer, (int) (result->refreshRate + 0.5));
+                }
                 ffStrbufAppendS(&buffer, instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "Hz" : " Hz");
             }
 
             bool flag = false;
-            if (result->type != FF_DISPLAY_TYPE_UNKNOWN)
-            {
+            if (result->type != FF_DISPLAY_TYPE_UNKNOWN) {
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in" : " [External");
                 flag = true;
             }
 
-            if (result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED)
-            {
+            if (result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED) {
                 ffStrbufAppendS(&buffer, flag ? ", HDR" : " [HDR");
                 flag = true;
             }
 
-            if (flag)
+            if (flag) {
                 ffStrbufAppendS(&buffer, "]");
+            }
 
-            if(moduleIndex > 0 && result->primary)
+            if (moduleIndex > 0 && result->primary) {
                 ffStrbufAppendS(&buffer, " *");
+            }
 
             ffStrbufPutTo(&buffer, stdout);
             ffStrbufClear(&buffer);
-        }
-        else
-        {
+        } else {
             double ppi = inch == 0 ? 0 : sqrt(result->width * result->width + result->height * result->height) / inch;
             bool hdrEnabled = result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
             bool hdrCompatible = result->hdrStatus == FF_DISPLAY_HDR_STATUS_SUPPORTED || result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
             uint32_t iInch = (uint32_t) (inch + 0.5), iPpi = (uint32_t) (ppi + 0.5);
 
             char refreshRate[16];
-            if(result->refreshRate > 0)
-            {
-                if(options->preciseRefreshRate)
+            if (result->refreshRate > 0) {
+                if (options->preciseRefreshRate) {
                     snprintf(refreshRate, ARRAY_SIZE(refreshRate), "%g", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
-                else
+                } else {
                     snprintf(refreshRate, ARRAY_SIZE(refreshRate), "%i", (uint32_t) (result->refreshRate + 0.5));
-            }
-            else
+                }
+            } else {
                 refreshRate[0] = 0;
+            }
 
             char preferredRefreshRate[16];
-            if(result->preferredRefreshRate > 0)
-            {
-                if(options->preciseRefreshRate)
+            if (result->preferredRefreshRate > 0) {
+                if (options->preciseRefreshRate) {
                     snprintf(preferredRefreshRate, ARRAY_SIZE(preferredRefreshRate), "%g", ((int) (result->preferredRefreshRate * 1000 + 0.5)) / 1000.0);
-                else
+                } else {
                     snprintf(preferredRefreshRate, ARRAY_SIZE(preferredRefreshRate), "%i", (uint32_t) (result->preferredRefreshRate + 0.5));
-            }
-            else
+                }
+            } else {
                 preferredRefreshRate[0] = 0;
+            }
 
             char buf[32];
-            if (result->serial)
-            {
+            if (result->serial) {
                 const uint8_t* nums = (uint8_t*) &result->serial;
                 snprintf(buf, ARRAY_SIZE(buf), "%2X-%2X-%2X-%2X", nums[0], nums[1], nums[2], nums[3]);
-            }
-            else
+            } else {
                 buf[0] = '\0';
+            }
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
-                FF_ARG(result->width, "width"),
-                FF_ARG(result->height, "height"),
-                FF_ARG(refreshRate, "refresh-rate"),
-                FF_ARG(scaledWidth, "scaled-width"),
-                FF_ARG(scaledHeight, "scaled-height"),
-                FF_ARG(result->name, "name"),
-                FF_ARG(displayType, "type"),
-                FF_ARG(result->rotation, "rotation"),
-                FF_ARG(result->primary, "is-primary"),
-                FF_ARG(result->physicalWidth, "physical-width"),
-                FF_ARG(result->physicalHeight, "physical-height"),
-                FF_ARG(iInch, "inch"),
-                FF_ARG(iPpi, "ppi"),
-                FF_ARG(result->bitDepth, "bit-depth"),
-                FF_ARG(hdrEnabled, "hdr-enabled"),
-                FF_ARG(result->manufactureYear, "manufacture-year"),
-                FF_ARG(result->manufactureWeek, "manufacture-week"),
-                FF_ARG(buf, "serial"),
-                FF_ARG(result->platformApi, "platform-api"),
-                FF_ARG(hdrCompatible, "hdr-compatible"),
-                FF_ARG(scaleFactor, "scale-factor"),
-                FF_ARG(result->preferredWidth, "preferred-width"),
-                FF_ARG(result->preferredHeight, "preferred-height"),
-                FF_ARG(preferredRefreshRate, "preferred-refresh-rate"),
-                FF_ARG(result->dpi, "dpi"),
-            }));
+                                                                                                         FF_ARG(result->width, "width"),
+                                                                                                         FF_ARG(result->height, "height"),
+                                                                                                         FF_ARG(refreshRate, "refresh-rate"),
+                                                                                                         FF_ARG(scaledWidth, "scaled-width"),
+                                                                                                         FF_ARG(scaledHeight, "scaled-height"),
+                                                                                                         FF_ARG(result->name, "name"),
+                                                                                                         FF_ARG(displayType, "type"),
+                                                                                                         FF_ARG(result->rotation, "rotation"),
+                                                                                                         FF_ARG(result->primary, "is-primary"),
+                                                                                                         FF_ARG(result->physicalWidth, "physical-width"),
+                                                                                                         FF_ARG(result->physicalHeight, "physical-height"),
+                                                                                                         FF_ARG(iInch, "inch"),
+                                                                                                         FF_ARG(iPpi, "ppi"),
+                                                                                                         FF_ARG(result->bitDepth, "bit-depth"),
+                                                                                                         FF_ARG(hdrEnabled, "hdr-enabled"),
+                                                                                                         FF_ARG(result->manufactureYear, "manufacture-year"),
+                                                                                                         FF_ARG(result->manufactureWeek, "manufacture-week"),
+                                                                                                         FF_ARG(buf, "serial"),
+                                                                                                         FF_ARG(result->platformApi, "platform-api"),
+                                                                                                         FF_ARG(hdrCompatible, "hdr-compatible"),
+                                                                                                         FF_ARG(scaleFactor, "scale-factor"),
+                                                                                                         FF_ARG(result->preferredWidth, "preferred-width"),
+                                                                                                         FF_ARG(result->preferredHeight, "preferred-height"),
+                                                                                                         FF_ARG(preferredRefreshRate, "preferred-refresh-rate"),
+                                                                                                         FF_ARG(result->dpi, "dpi"),
+                                                                                                     }));
         }
     }
 
     return true;
 }
 
-void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
-{
+void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
-        if (unsafe_yyjson_equals_str(key, "compactType"))
-        {
-            if (yyjson_is_null(val))
+        if (unsafe_yyjson_equals_str(key, "compactType")) {
+            if (yyjson_is_null(val)) {
                 options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-            else
-            {
+            } else {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                    { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                    { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                    {},
-                });
-                if (error)
+                                                                           {"none", FF_DISPLAY_COMPACT_TYPE_NONE},
+                                                                           {"original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT},
+                                                                           {"scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT},
+                                                                           {"original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT},
+                                                                           {"scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT},
+                                                                           {},
+                                                                       });
+                if (error) {
                     ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
-                else
+                } else {
                     options->compactType = (FFDisplayCompactType) value;
+                }
             }
             continue;
         }
 
-        if (unsafe_yyjson_equals_str(key, "preciseRefreshRate"))
-        {
+        if (unsafe_yyjson_equals_str(key, "preciseRefreshRate")) {
             options->preciseRefreshRate = yyjson_get_bool(val);
             continue;
         }
 
-        if (unsafe_yyjson_equals_str(key, "order"))
-        {
-            if (yyjson_is_null(val))
+        if (unsafe_yyjson_equals_str(key, "order")) {
+            if (yyjson_is_null(val)) {
                 options->order = FF_DISPLAY_ORDER_NONE;
-            else
-            {
+            } else {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                    { "asc", FF_DISPLAY_ORDER_ASC },
-                    { "desc", FF_DISPLAY_ORDER_DESC },
-                    { "none", FF_DISPLAY_ORDER_NONE },
-                    {},
-                });
-                if (error)
+                                                                           {"asc", FF_DISPLAY_ORDER_ASC},
+                                                                           {"desc", FF_DISPLAY_ORDER_DESC},
+                                                                           {"none", FF_DISPLAY_ORDER_NONE},
+                                                                           {},
+                                                                       });
+                if (error) {
                     ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
-                else
+                } else {
                     options->order = (FFDisplayOrder) value;
+                }
             }
             continue;
         }
@@ -289,12 +266,10 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    switch ((int) options->compactType)
-    {
+    switch ((int) options->compactType) {
         case FF_DISPLAY_COMPACT_TYPE_NONE:
             yyjson_mut_obj_add_str(doc, module, "compactType", "none");
             break;
@@ -314,8 +289,7 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
 
     yyjson_mut_obj_add_bool(doc, module, "preciseRefreshRate", options->preciseRefreshRate);
 
-    switch (options->order)
-    {
+    switch (options->order) {
         case FF_DISPLAY_ORDER_NONE:
             yyjson_mut_obj_add_null(doc, module, "order");
             break;
@@ -328,19 +302,16 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
     }
 }
 
-bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
-    if(dsResult->displays.length == 0)
-    {
+    if (dsResult->displays.length == 0) {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect display");
         return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-    FF_LIST_FOR_EACH(FFDisplayResult, item, dsResult->displays)
-    {
+    FF_LIST_FOR_EACH (FFDisplayResult, item, dsResult->displays) {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_uint(doc, obj, "id", item->id);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
@@ -351,19 +322,20 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_uint(doc, output, "height", item->height);
         yyjson_mut_obj_add_real(doc, output, "refreshRate", item->refreshRate);
 
-        if (item->drrStatus == FF_DISPLAY_DRR_STATUS_UNKNOWN)
+        if (item->drrStatus == FF_DISPLAY_DRR_STATUS_UNKNOWN) {
             yyjson_mut_obj_add_null(doc, output, "drrStatus");
-        else switch (item->drrStatus)
-        {
-            case FF_DISPLAY_DRR_STATUS_DISABLED:
-                yyjson_mut_obj_add_str(doc, output, "drrStatus", "Disabled");
-                break;
-            case FF_DISPLAY_DRR_STATUS_ENABLED:
-                yyjson_mut_obj_add_str(doc, output, "drrStatus", "Enabled");
-                break;
-            default:
-                yyjson_mut_obj_add_str(doc, output, "drrStatus", "Unknown");
-                break;
+        } else {
+            switch (item->drrStatus) {
+                case FF_DISPLAY_DRR_STATUS_DISABLED:
+                    yyjson_mut_obj_add_str(doc, output, "drrStatus", "Disabled");
+                    break;
+                case FF_DISPLAY_DRR_STATUS_ENABLED:
+                    yyjson_mut_obj_add_str(doc, output, "drrStatus", "Enabled");
+                    break;
+                default:
+                    yyjson_mut_obj_add_str(doc, output, "drrStatus", "Unknown");
+                    break;
+            }
         }
         yyjson_mut_obj_add_uint(doc, output, "dpi", item->dpi);
 
@@ -384,26 +356,26 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
         yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
-        if (item->hdrStatus == FF_DISPLAY_HDR_STATUS_UNKNOWN)
+        if (item->hdrStatus == FF_DISPLAY_HDR_STATUS_UNKNOWN) {
             yyjson_mut_obj_add_null(doc, obj, "hdrStatus");
-        else switch (item->hdrStatus)
-        {
-            case FF_DISPLAY_HDR_STATUS_UNSUPPORTED:
-                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unsupported");
-                break;
-            case FF_DISPLAY_HDR_STATUS_SUPPORTED:
-                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Supported");
-                break;
-            case FF_DISPLAY_HDR_STATUS_ENABLED:
-                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Enabled");
-                break;
-            default:
-                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unknown");
-                break;
+        } else {
+            switch (item->hdrStatus) {
+                case FF_DISPLAY_HDR_STATUS_UNSUPPORTED:
+                    yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unsupported");
+                    break;
+                case FF_DISPLAY_HDR_STATUS_SUPPORTED:
+                    yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Supported");
+                    break;
+                case FF_DISPLAY_HDR_STATUS_ENABLED:
+                    yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Enabled");
+                    break;
+                default:
+                    yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unknown");
+                    break;
+            }
         }
 
-        switch (item->type)
-        {
+        switch (item->type) {
             case FF_DISPLAY_TYPE_BUILTIN:
                 yyjson_mut_obj_add_str(doc, obj, "type", "Builtin");
                 break;
@@ -415,21 +387,19 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
                 break;
         }
 
-        if (item->manufactureYear)
-        {
+        if (item->manufactureYear) {
             yyjson_mut_val* manufactureDate = yyjson_mut_obj_add_obj(doc, obj, "manufactureDate");
             yyjson_mut_obj_add_uint(doc, manufactureDate, "year", item->manufactureYear);
             yyjson_mut_obj_add_uint(doc, manufactureDate, "week", item->manufactureWeek);
-        }
-        else
-        {
+        } else {
             yyjson_mut_obj_add_null(doc, obj, "manufactureDate");
         }
 
-        if (item->serial)
+        if (item->serial) {
             yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
-        else
+        } else {
             yyjson_mut_obj_add_null(doc, obj, "serial");
+        }
 
         yyjson_mut_obj_add_str(doc, obj, "platformApi", item->platformApi);
     }
@@ -437,16 +407,14 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     return true;
 }
 
-void ffInitDisplayOptions(FFDisplayOptions* options)
-{
+void ffInitDisplayOptions(FFDisplayOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
     options->order = FF_DISPLAY_ORDER_NONE;
 }
 
-void ffDestroyDisplayOptions(FFDisplayOptions* options)
-{
+void ffDestroyDisplayOptions(FFDisplayOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -485,5 +453,4 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         {"Screen preferred height (in pixels)", "preferred-height"},
         {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
         {"DPI", "dpi"},
-    }))
-};
+    }))};

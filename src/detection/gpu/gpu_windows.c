@@ -20,20 +20,18 @@ const uint32_t regDriverKeyPrefixLength = (uint32_t) __builtin_strlen("SYSTEM\\C
 
 #define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
 
-static inline void wrapRegCloseKey(HKEY* phKey)
-{
-    if(*phKey)
+static inline void wrapRegCloseKey(HKEY* phKey) {
+    if (*phKey) {
         RegCloseKey(*phKey);
+    }
 }
 #define FF_HKEY_AUTO_DESTROY __attribute__((__cleanup__(wrapRegCloseKey)))
 
-const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
-{
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus) {
     FF_DEBUG("Starting GPU detection");
 
     ULONG devIdListSize = 0;
-    if (CM_Get_Device_ID_List_SizeW(&devIdListSize, GUID_DEVCLASS_DISPLAY_STRING, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS || devIdListSize <= 1)
-    {
+    if (CM_Get_Device_ID_List_SizeW(&devIdListSize, GUID_DEVCLASS_DISPLAY_STRING, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS || devIdListSize <= 1) {
         FF_DEBUG("No display devices found, list size: %lu", devIdListSize);
         return "No display devices found";
     }
@@ -42,33 +40,30 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     FF_AUTO_FREE DEVINSTID_W devIdList = malloc(devIdListSize * sizeof(*devIdList));
 
-    if (CM_Get_Device_ID_ListW(GUID_DEVCLASS_DISPLAY_STRING, devIdList, devIdListSize, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS)
-    {
+    if (CM_Get_Device_ID_ListW(GUID_DEVCLASS_DISPLAY_STRING, devIdList, devIdListSize, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS) {
         FF_DEBUG("CM_Get_Device_ID_ListW failed");
         return "CM_Get_Device_ID_ListW failed";
     }
 
     FF_MAYBE_UNUSED int deviceCount = 0;
-    for (wchar_t* devId = devIdList; *devId; devId += wcslen(devId) + 1)
-    {
+    for (wchar_t* devId = devIdList; *devId; devId += wcslen(devId) + 1) {
         FF_DEBUG("Processing device ID: %ls", devId);
 
         DEVINST devInst = 0;
 
-        if (CM_Locate_DevNodeW(&devInst, devId, CM_LOCATE_DEVNODE_NORMAL) != CR_SUCCESS)
-        {
+        if (CM_Locate_DevNodeW(&devInst, devId, CM_LOCATE_DEVNODE_NORMAL) != CR_SUCCESS) {
             FF_DEBUG("Failed to get device instance ID or locate device node");
             continue;
         }
         FF_DEBUG("Device instance ID: %lu", devInst);
 
-        for (wchar_t* p = devId; *p; p++)
-        {
-            if (*p >= L'a' && *p <= L'z')
+        for (wchar_t* p = devId; *p; p++) {
+            if (*p >= L'a' && *p <= L'z') {
                 *p -= L'a' - L'A';
+            }
         }
 
-        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
         deviceCount++;
         FF_DEBUG("Added GPU #%d to list", deviceCount);
 
@@ -87,37 +82,28 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
-        if (swscanf(devId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
-        {
+        if (swscanf(devId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4) {
             FF_DEBUG("Parsed PCI IDs - Vendor: 0x%x, Device: 0x%x, SubSystem: 0x%x, Rev: 0x%x", vendorId, deviceId, subSystemId, revId);
             ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
-        }
-        else
-        {
+        } else {
             FF_DEBUG("Failed to parse PCI device information from instance ID");
         }
 
         uint32_t pciBus = 0, pciAddr = 0, pciDev = 0, pciFunc = 0;
 
         ULONG pciBufLen = sizeof(pciBus);
-        if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_BUSNUMBER, NULL, &pciBus, &pciBufLen, 0) == CR_SUCCESS)
-        {
+        if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_BUSNUMBER, NULL, &pciBus, &pciBufLen, 0) == CR_SUCCESS) {
             pciBufLen = sizeof(pciAddr);
-            if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_ADDRESS, NULL, &pciAddr, &pciBufLen, 0) == CR_SUCCESS)
-            {
+            if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_ADDRESS, NULL, &pciAddr, &pciBufLen, 0) == CR_SUCCESS) {
                 pciDev = (pciAddr >> 16) & 0xFFFF;
                 pciFunc = pciAddr & 0xFFFF;
                 gpu->deviceId = ffGPUPciAddr2Id(0, pciBus, pciDev, pciFunc);
                 pciAddr = 1; // Set to 1 to indicate that the device is a PCI device
                 FF_DEBUG("PCI location - Bus: %u, Device: %u, Function: %u, DeviceID: %llu", pciBus, pciDev, pciFunc, gpu->deviceId);
-            }
-            else
-            {
+            } else {
                 FF_DEBUG("Failed to get PCI address");
             }
-        }
-        else
-        {
+        } else {
             FF_DEBUG("Failed to get PCI bus number");
         }
 
@@ -130,164 +116,130 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         FF_DEBUG("Get device description as device name");
         bufferLen = sizeof(buffer);
-        if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_DEVICEDESC, NULL, buffer, &bufferLen, 0) == CR_SUCCESS)
-        {
+        if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_DEVICEDESC, NULL, buffer, &bufferLen, 0) == CR_SUCCESS) {
             ffStrbufSetWS(&gpu->name, buffer);
             FF_DEBUG("Found device description: %s", gpu->name.chars);
-        }
-        else
-        {
+        } else {
             FF_DEBUG("Failed to get device description");
         }
 
-        if (wcsncmp(devId, L"SWD\\", 4) == 0 || wcsncmp(devId, L"ROOT\\DISPLAY\\", 13) == 0)
-        {
+        if (wcsncmp(devId, L"SWD\\", 4) == 0 || wcsncmp(devId, L"ROOT\\DISPLAY\\", 13) == 0) {
             FF_DEBUG("Skipping virtual devices to avoid duplicates");
             continue;
         }
 
-        if (CM_Open_DevNode_Key(devInst, KEY_QUERY_VALUE, 0, RegDisposition_OpenExisting, &hVideoIdKey, CM_REGISTRY_HARDWARE) == CR_SUCCESS)
-        {
+        if (CM_Open_DevNode_Key(devInst, KEY_QUERY_VALUE, 0, RegDisposition_OpenExisting, &hVideoIdKey, CM_REGISTRY_HARDWARE) == CR_SUCCESS) {
             FF_DEBUG("Opened device node registry key");
             bufferLen = sizeof(buffer);
             if (RegGetValueW(hVideoIdKey, NULL, L"VideoID", RRF_RT_REG_SZ, NULL, buffer, &bufferLen) == ERROR_SUCCESS &&
-                bufferLen == (FF_GUID_STRLEN + 1) * sizeof(wchar_t))
-            {
+                bufferLen == (FF_GUID_STRLEN + 1) * sizeof(wchar_t)) {
                 FF_DEBUG("Found VideoID: %ls", buffer);
                 wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, buffer, FF_GUID_STRLEN);
                 FF_AUTO_CLOSE_FD HANDLE hDirectxKey = NULL;
-                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL))
-                {
+                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL)) {
                     FF_DEBUG("Opened DirectX registry key");
 
-                    if (gpu->vendor.length == 0)
-                    {
+                    if (gpu->vendor.length == 0) {
                         uint32_t vendorId = 0;
-                        if(ffRegReadUint(hDirectxKey, L"VendorId", &vendorId, NULL) && vendorId)
-                        {
+                        if (ffRegReadUint(hDirectxKey, L"VendorId", &vendorId, NULL) && vendorId) {
                             FF_DEBUG("Found vendor ID from DirectX registry: 0x%x", vendorId);
                             ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
                         }
                     }
 
-                    if (gpu->name.length == 0)
-                    {
+                    if (gpu->name.length == 0) {
                         FF_DEBUG("Trying to get GPU name from DirectX registry");
-                        if (ffRegReadStrbuf(hDirectxKey, L"Description", &gpu->name, NULL))
+                        if (ffRegReadStrbuf(hDirectxKey, L"Description", &gpu->name, NULL)) {
                             FF_DEBUG("Found GPU description: %s", gpu->name.chars);
+                        }
                     }
 
-                    if (ffRegReadUint64(hDirectxKey, L"DedicatedVideoMemory", &gpu->dedicated.total, NULL))
+                    if (ffRegReadUint64(hDirectxKey, L"DedicatedVideoMemory", &gpu->dedicated.total, NULL)) {
                         FF_DEBUG("Found dedicated video memory: %llu bytes", gpu->dedicated.total);
+                    }
 
-                    if (ffRegReadUint64(hDirectxKey, L"DedicatedSystemMemory", &gpu->shared.total, NULL))
-                    {
+                    if (ffRegReadUint64(hDirectxKey, L"DedicatedSystemMemory", &gpu->shared.total, NULL)) {
                         FF_DEBUG("Found dedicated system memory: %llu bytes", gpu->shared.total);
                         uint64_t sharedSystemMemory = 0;
-                        if (ffRegReadUint64(hDirectxKey, L"SharedSystemMemory", &sharedSystemMemory, NULL))
-                        {
+                        if (ffRegReadUint64(hDirectxKey, L"SharedSystemMemory", &sharedSystemMemory, NULL)) {
                             gpu->shared.total += sharedSystemMemory;
                             FF_DEBUG("Added shared system memory: %llu bytes, total shared: %llu bytes", sharedSystemMemory, gpu->shared.total);
                         }
                     }
 
-                    if (ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL))
-                    {
+                    if (ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL)) {
                         FF_DEBUG("Found adapter LUID: %llu", adapterLuid);
-                        if (!gpu->deviceId) gpu->deviceId = ffGPUGeneral2Id(adapterLuid);
+                        if (!gpu->deviceId) {
+                            gpu->deviceId = ffGPUGeneral2Id(adapterLuid);
+                        }
                     }
 
                     uint32_t featureLevel = 0;
-                    if(ffRegReadUint(hDirectxKey, L"MaxD3D12FeatureLevel", &featureLevel, NULL) && featureLevel)
-                    {
+                    if (ffRegReadUint(hDirectxKey, L"MaxD3D12FeatureLevel", &featureLevel, NULL) && featureLevel) {
                         FF_DEBUG("Found D3D12 feature level: 0x%x", featureLevel);
                         ffStrbufSetF(&gpu->platformApi, "Direct3D 12.%u", (featureLevel & 0x0F00) >> 8);
-                    }
-                    else if(ffRegReadUint(hDirectxKey, L"MaxD3D11FeatureLevel", &featureLevel, NULL) && featureLevel)
-                    {
+                    } else if (ffRegReadUint(hDirectxKey, L"MaxD3D11FeatureLevel", &featureLevel, NULL) && featureLevel) {
                         FF_DEBUG("Found D3D11 feature level: 0x%x", featureLevel);
                         ffStrbufSetF(&gpu->platformApi, "Direct3D 11.%u", (featureLevel & 0x0F00) >> 8);
                     }
 
                     uint64_t driverVersion = 0;
-                    if(ffRegReadUint64(hDirectxKey, L"DriverVersion", &driverVersion, NULL) && driverVersion)
-                    {
+                    if (ffRegReadUint64(hDirectxKey, L"DriverVersion", &driverVersion, NULL) && driverVersion) {
                         FF_DEBUG("Found driver version: %llu", driverVersion);
-                        ffStrbufSetF(&gpu->driver, "%u.%u.%u.%u",
-                            (unsigned) (driverVersion >> 48) & 0xFFFF,
-                            (unsigned) (driverVersion >> 32) & 0xFFFF,
-                            (unsigned) (driverVersion >> 16) & 0xFFFF,
-                            (unsigned) (driverVersion >> 0) & 0xFFFF
-                        );
+                        ffStrbufSetF(&gpu->driver, "%u.%u.%u.%u", (unsigned) (driverVersion >> 48) & 0xFFFF, (unsigned) (driverVersion >> 32) & 0xFFFF, (unsigned) (driverVersion >> 16) & 0xFFFF, (unsigned) (driverVersion >> 0) & 0xFFFF);
                     }
-                }
-                else
-                {
+                } else {
                     FF_DEBUG("Failed to open DirectX registry key");
                 }
-            }
-            else
-            {
+            } else {
                 FF_DEBUG("Failed to get VideoID or invalid buffer length");
             }
-        }
-        else
-        {
+        } else {
             FF_DEBUG("Failed to open device node registry key");
         }
 
-        if (gpu->vendor.length == 0 || gpu->name.length == 0 || gpu->driver.length == 0 || gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET)
-        {
+        if (gpu->vendor.length == 0 || gpu->name.length == 0 || gpu->driver.length == 0 || gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET) {
             FF_DEBUG("Trying fallback registry method for vendor/name etc.");
             bufferLen = sizeof(buffer);
             if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_DRIVER, NULL, buffer, &bufferLen, 0) == CR_SUCCESS &&
-                bufferLen == (FF_GUID_STRLEN + strlen("\\0000") + 1) * 2)
-            {
+                bufferLen == (FF_GUID_STRLEN + strlen("\\0000") + 1) * 2) {
                 FF_DEBUG("Found driver GUID: %ls", buffer);
                 wmemcpy(regDriverKey + regDriverKeyPrefixLength, buffer, FF_GUID_STRLEN + strlen("\\0000"));
                 FF_AUTO_CLOSE_FD HANDLE hRegDriverKey = NULL;
-                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDriverKey, &hRegDriverKey, NULL))
-                {
+                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDriverKey, &hRegDriverKey, NULL)) {
                     FF_DEBUG("Opened driver registry key");
 
-                    if (gpu->vendor.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"ProviderName", &gpu->vendor, NULL))
-                    {
+                    if (gpu->vendor.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"ProviderName", &gpu->vendor, NULL)) {
                         FF_DEBUG("Found provider name: %s", gpu->vendor.chars);
-                        if (ffStrbufContainS(&gpu->vendor, "Intel"))
+                        if (ffStrbufContainS(&gpu->vendor, "Intel")) {
                             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-                        else if (ffStrbufContainS(&gpu->vendor, "NVIDIA"))
+                        } else if (ffStrbufContainS(&gpu->vendor, "NVIDIA")) {
                             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-                        else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
+                        } else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI")) {
                             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+                        }
                     }
-                    if (gpu->name.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"DriverDesc", &gpu->name, NULL))
+                    if (gpu->name.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"DriverDesc", &gpu->name, NULL)) {
                         FF_DEBUG("Found driver description: %s", gpu->name.chars);
-                    if (gpu->driver.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"DriverVersion", &gpu->driver, NULL))
+                    }
+                    if (gpu->driver.length == 0 && ffRegReadStrbuf(hRegDriverKey, L"DriverVersion", &gpu->driver, NULL)) {
                         FF_DEBUG("Found driver version: %s", gpu->driver.chars);
-                    if (gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET)
-                    {
-                        if (!ffRegReadUint64(hRegDriverKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
-                        {
+                    }
+                    if (gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET) {
+                        if (!ffRegReadUint64(hRegDriverKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL)) {
                             uint32_t memorySize = 0;
-                            if (ffRegReadUint(hRegDriverKey, L"HardwareInformation.MemorySize", &memorySize, NULL))
-                            {
+                            if (ffRegReadUint(hRegDriverKey, L"HardwareInformation.MemorySize", &memorySize, NULL)) {
                                 gpu->dedicated.total = memorySize;
                                 FF_DEBUG("Found memory size from hardware info: %u bytes", memorySize);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             FF_DEBUG("Found qwMemorySize from hardware info: %llu bytes", gpu->dedicated.total);
                         }
                     }
-                }
-                else
-                {
+                } else {
                     FF_DEBUG("Failed to open driver registry key");
                 }
-            }
-            else
-            {
+            } else {
                 FF_DEBUG("Failed to get driver GUID or invalid buffer length");
             }
         }
@@ -295,14 +247,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
         const char* dllName;
 
-        if (options->driverSpecific && getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName))
-        {
+        if (options->driverSpecific && getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName)) {
             FF_DEBUG("Calling driver-specific detection function for vendor: %s, DLL: %s", gpu->vendor.chars, dllName);
             FF_MAYBE_UNUSED const char* error = detectFn(
                 &(FFGpuDriverCondition) {
-                    .type = (deviceId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID : 0)
-                            | (adapterLuid > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0)
-                            | (pciAddr > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
+                    .type = (deviceId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID : 0) | (adapterLuid > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0) | (pciAddr > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
                     .pciDeviceId = {
                         .deviceId = deviceId,
                         .vendorId = vendorId,
@@ -317,7 +266,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     },
                     .luid = adapterLuid,
                 },
-                (FFGpuDriverResult){
+                (FFGpuDriverResult) {
                     .index = &gpu->index,
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->driverSpecific ? &gpu->dedicated : NULL,
@@ -329,21 +278,16 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .name = &gpu->name,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 },
-                dllName
-            );
+                dllName);
             FF_DEBUG("Driver-specific detection completed: %s", error ?: "Success");
-        }
-        else if (options->driverSpecific)
-        {
+        } else if (options->driverSpecific) {
             FF_DEBUG("No driver-specific detection function found for vendor: %s", gpu->vendor.chars);
         }
 
-        if (gpu->type == FF_GPU_TYPE_UNKNOWN && adapterLuid > 0)
-        {
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN && adapterLuid > 0) {
             FF_DEBUG("Trying to determine GPU type using D3DKMT APIs");
-            D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = { .AdapterLuid = *(LUID*)&adapterLuid };
-            if (NT_SUCCESS(D3DKMTOpenAdapterFromLuid(&openAdapterFromLuid)))
-            {
+            D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = {.AdapterLuid = *(LUID*) &adapterLuid};
+            if (NT_SUCCESS(D3DKMTOpenAdapterFromLuid(&openAdapterFromLuid))) {
                 FF_DEBUG("Successfully opened adapter from LUID");
 
                 D3DKMT_ADAPTERTYPE adapterType = {};
@@ -353,24 +297,20 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .pPrivateDriverData = &adapterType,
                     .PrivateDriverDataSize = sizeof(adapterType),
                 };
-                if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo)))
-                {
+                if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo))) {
                     FF_DEBUG("Queried adapter type - HybridDiscrete: %d, HybridIntegrated: %d", adapterType.HybridDiscrete, adapterType.HybridIntegrated);
-                    if (adapterType.HybridDiscrete)
+                    if (adapterType.HybridDiscrete) {
                         gpu->type = FF_GPU_TYPE_DISCRETE;
-                    else if (adapterType.HybridIntegrated)
+                    } else if (adapterType.HybridIntegrated) {
                         gpu->type = FF_GPU_TYPE_INTEGRATED;
-                }
-                else
-                {
+                    }
+                } else {
                     FF_DEBUG("Failed to query adapter type");
                 }
 
-                if (gpu->frequency == FF_GPU_FREQUENCY_UNSET && ffIsWindows11OrGreater())
-                {
+                if (gpu->frequency == FF_GPU_FREQUENCY_UNSET && ffIsWindows11OrGreater()) {
                     FF_DEBUG("Trying to get GPU frequency information");
-                    for (ULONG nodeIdx = 0; ; nodeIdx++)
-                    {
+                    for (ULONG nodeIdx = 0;; nodeIdx++) {
                         D3DKMT_NODEMETADATA nodeMetadata = {
                             .NodeOrdinalAndAdapterIndex = (0 << 16) | nodeIdx,
                         };
@@ -380,78 +320,65 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             .pPrivateDriverData = &nodeMetadata,
                             .PrivateDriverDataSize = sizeof(nodeMetadata),
                         };
-                        if (!NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo)))
-                        {
+                        if (!NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo))) {
                             FF_DEBUG("No more nodes to query (index %lu)", nodeIdx);
                             break;
                         }
-                        if (nodeMetadata.NodeData.EngineType != DXGK_ENGINE_TYPE_3D)
-                        {
+                        if (nodeMetadata.NodeData.EngineType != DXGK_ENGINE_TYPE_3D) {
                             FF_DEBUG("Skipping node %lu (not 3D engine)", nodeIdx);
                             continue;
                         }
 
                         D3DKMT_QUERYSTATISTICS queryStatistics = {
                             .Type = D3DKMT_QUERYSTATISTICS_NODE2, // Windows 11 (22H2) and later
-                            .AdapterLuid = *(LUID*)&adapterLuid,
-                            .QueryNode2 = { .PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx },
+                            .AdapterLuid = *(LUID*) &adapterLuid,
+                            .QueryNode2 = {.PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx},
                         };
-                        if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
-                        {
+                        if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) {
                             gpu->frequency = (uint32_t) (queryStatistics.QueryResult.NodeInformation.NodePerfData.MaxFrequency / 1000 / 1000);
                             FF_DEBUG("Found GPU frequency: %u MHz", gpu->frequency);
                             break;
-                        }
-                        else
-                        {
+                        } else {
                             FF_DEBUG("Failed to query node statistics for node %lu", nodeIdx);
                         }
                     }
                 }
 
-                D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
+                D3DKMT_CLOSEADAPTER closeAdapter = {.hAdapter = openAdapterFromLuid.hAdapter};
                 (void) D3DKMTCloseAdapter(&closeAdapter);
                 openAdapterFromLuid.hAdapter = (D3DKMT_HANDLE) {};
                 FF_DEBUG("Closed adapter handle");
-            }
-            else
-            {
+            } else {
                 FF_DEBUG("Failed to open adapter from LUID");
             }
 
-            if (options->temp && gpu->temperature == FF_GPU_TEMP_UNSET && ffIsWindows10OrGreater())
-            {
+            if (options->temp && gpu->temperature == FF_GPU_TEMP_UNSET && ffIsWindows10OrGreater()) {
                 FF_DEBUG("Trying to get GPU temperature");
                 D3DKMT_QUERYSTATISTICS queryStatistics = {
                     .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER, // Windows 10 (1803) and later
-                    .AdapterLuid = *(LUID*)&adapterLuid,
-                    .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
+                    .AdapterLuid = *(LUID*) &adapterLuid,
+                    .QueryPhysAdapter = {.PhysicalAdapterIndex = 0},
                 };
                 if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)) &&
-                    queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0)
-                {
+                    queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0) {
                     gpu->temperature = queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature / 10.0;
                     FF_DEBUG("Found GPU temperature: %.1f°C", gpu->temperature);
-                }
-                else
-                {
+                } else {
                     FF_DEBUG("Failed to get GPU temperature or temperature is 0");
                 }
             }
 
-            if (options->driverSpecific && gpu->dedicated.used == FF_GPU_VMEM_SIZE_UNSET && ffIsWindows11OrGreater())
-            {
+            if (options->driverSpecific && gpu->dedicated.used == FF_GPU_VMEM_SIZE_UNSET && ffIsWindows11OrGreater()) {
                 FF_DEBUG("Trying to get used video memory from D3DKMT method");
                 D3DKMT_QUERYSTATISTICS queryStatistics = {
                     .Type = D3DKMT_QUERYSTATISTICS_SEGMENT_GROUP_USAGE,
-                    .AdapterLuid = *(LUID*)&adapterLuid,
+                    .AdapterLuid = *(LUID*) &adapterLuid,
                     .QuerySegmentGroupUsage = {
                         .PhysicalAdapterIndex = 0,
                         .SegmentGroup = D3DKMT_MEMORY_SEGMENT_GROUP_LOCAL,
                     },
                 };
-                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
-                {
+                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) {
                     D3DKMT_QUERYSTATISTICS_MEMORY_USAGE* info = &queryStatistics.QueryResult.SegmentGroupUsageInformation;
                     uint64_t used = info->AllocatedBytes + info->ModifiedBytes + info->StandbyBytes;
                     uint64_t total = used + info->FreeBytes + info->ZeroBytes;
@@ -459,15 +386,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->dedicated.total = total;
 
                     FF_DEBUG("Found local memory size %llu / %llu", used, total);
-                }
-                else
-                {
+                } else {
                     FF_DEBUG("Failed to query segment group usage for local memory");
                 }
 
                 queryStatistics.QuerySegmentGroupUsage.SegmentGroup = D3DKMT_MEMORY_SEGMENT_GROUP_NON_LOCAL;
-                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
-                {
+                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) {
                     D3DKMT_QUERYSTATISTICS_MEMORY_USAGE* info = &queryStatistics.QueryResult.SegmentGroupUsageInformation;
                     uint64_t used = info->AllocatedBytes + info->ModifiedBytes + info->StandbyBytes;
                     uint64_t total = used + info->FreeBytes + info->ZeroBytes;
@@ -475,45 +399,38 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->shared.total = total;
 
                     FF_DEBUG("Found non-local memory size %llu / %llu", used, total);
-                }
-                else
-                {
+                } else {
                     FF_DEBUG("Failed to query segment group usage for non-local memory");
                 }
             }
         }
 
-        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
-        {
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN) {
             FF_DEBUG("Using fallback GPU type detection");
-            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
-            {
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA) {
                 if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
                     ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla")) {
                     gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
-            {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                }
+            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS) {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT ")) {
                     gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
-            {
+                }
+            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
                 // 0000:00:02.0 is reserved for Intel integrated graphics
                 gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
             }
 
-            if (gpu->type != FF_GPU_TYPE_UNKNOWN)
+            if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
                 FF_DEBUG("Determined GPU type based on vendor (%s) and name: %u", gpu->vendor.chars, gpu->type);
-            else if (ffIsWindows10OrGreater())
-            {
-                const char* ffGPUDetectTypeWithDXCore(LUID adapterLuid, FFGPUResult* gpu);
-                FF_MAYBE_UNUSED const char* error = ffGPUDetectTypeWithDXCore(*(LUID*)&adapterLuid, gpu);
+            } else if (ffIsWindows10OrGreater()) {
+                const char* ffGPUDetectTypeWithDXCore(LUID adapterLuid, FFGPUResult * gpu);
+                FF_MAYBE_UNUSED const char* error = ffGPUDetectTypeWithDXCore(*(LUID*) &adapterLuid, gpu);
                 FF_DEBUG("DXCore GPU type detection result: %s", error ?: "Success");
-            }
-            else
+            } else {
                 FF_DEBUG("Unable to determine GPU type by any method for this adapter");
+            }
         }
 
         FF_DEBUG("Completed processing GPU #%d - Vendor: %s, Name: %s, Type: %d", deviceCount, gpu->vendor.chars, gpu->name.chars, gpu->type);

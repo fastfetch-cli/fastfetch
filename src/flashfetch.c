@@ -4,13 +4,12 @@
 #include "logo/logo.h"
 #include "modules/modules.h"
 
-#define MODULE_OPTION(name) \
+#define MODULE_OPTION(name)                                                       \
     __attribute__((cleanup(ffDestroy##name##Options))) FF##name##Options options; \
     ffInit##name##Options(&options);
 
 // A dirty replicate of neofetch; demonstration only.
-int main(void)
-{
+int main(void) {
     ffInitInstance(); // Init everything
 
     // Modify global config here if needed

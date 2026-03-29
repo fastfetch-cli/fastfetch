@@ -4,15 +4,13 @@
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-typedef enum __attribute__((__packed__)) FFLogoImageResult
-{
-    FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
-    FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version
-    FF_LOGO_IMAGE_RESULT_RUN_ERROR   //Failed to load / convert image, cancel whole sixel code
+typedef enum __attribute__((__packed__)) FFLogoImageResult {
+    FF_LOGO_IMAGE_RESULT_SUCCESS,    // Logo printed
+    FF_LOGO_IMAGE_RESULT_INIT_ERROR, // Failed to load library, try again with next IM version
+    FF_LOGO_IMAGE_RESULT_RUN_ERROR   // Failed to load / convert image, cancel whole sixel code
 } FFLogoImageResult;
 
-typedef struct FFLogoRequestData
-{
+typedef struct FFLogoRequestData {
     FFLogoType type;
     FFstrbuf cacheDir;
 
@@ -26,10 +24,9 @@ typedef struct FFLogoRequestData
     uint32_t logoCharacterWidth;
 } FFLogoRequestData;
 
-typedef struct FFIMData
-{
+typedef struct FFIMData {
     void* library;
-    void*(*resizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
+    void* (*resizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
 } FFIMData;
 
 FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFIMData* imData);
@@ -41,6 +38,6 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData);
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK6
-#include <math.h>
+#    include <math.h>
 FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData);
 #endif

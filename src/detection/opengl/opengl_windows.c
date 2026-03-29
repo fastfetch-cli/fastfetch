@@ -6,8 +6,7 @@
 #include <windows.h>
 #include <GL/gl.h>
 
-typedef struct WGLData
-{
+typedef struct WGLData {
     FF_LIBRARY_SYMBOL(glGetString)
     FF_LIBRARY_SYMBOL(wglMakeCurrent)
     FF_LIBRARY_SYMBOL(wglCreateContext)
@@ -16,23 +15,24 @@ typedef struct WGLData
 
 void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
-static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HDC hdc, HGLRC context)
-{
-    if(wglData->ffwglMakeCurrent(hdc, context) == FALSE)
+static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HDC hdc, HGLRC context) {
+    if (wglData->ffwglMakeCurrent(hdc, context) == FALSE) {
         return "wglMakeCurrent() failed";
+    }
     ffOpenGLHandleResult(result, wglData->ffglGetString);
     ffStrbufSetStatic(&result->library, "WGL 1.0");
-    if(wglData->ffwglMakeCurrent(NULL, NULL) == FALSE)
+    if (wglData->ffwglMakeCurrent(NULL, NULL) == FALSE) {
         return "wglMakeCurrent(NULL, NULL) failed";
+    }
     return NULL;
 }
 
-static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result, HWND hWnd)
-{
+static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result, HWND hWnd) {
     HDC hdc = GetDC(hWnd);
 
-    if(hdc == NULL)
+    if (hdc == NULL) {
         return "GetDC() failed";
+    }
 
     PIXELFORMATDESCRIPTOR pfd = {
         .nSize = sizeof(PIXELFORMATDESCRIPTOR),
@@ -41,24 +41,20 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
         .iPixelType = PFD_TYPE_RGBA,
         .cColorBits = 32,
         .cDepthBits = 24,
-        .iLayerType = PFD_MAIN_PLANE
-    };
+        .iLayerType = PFD_MAIN_PLANE};
     int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-    if(pixelFormat == 0)
-    {
+    if (pixelFormat == 0) {
         ReleaseDC(hWnd, hdc);
         return "ChoosePixelFormat() failed";
     }
 
-    if(SetPixelFormat(hdc, pixelFormat, &pfd) == FALSE)
-    {
+    if (SetPixelFormat(hdc, pixelFormat, &pfd) == FALSE) {
         ReleaseDC(hWnd, hdc);
         return "SetPixelFormat() failed";
     }
 
     HGLRC context = wglData->ffwglCreateContext(hdc);
-    if(context == NULL)
-    {
+    if (context == NULL) {
         ReleaseDC(hWnd, hdc);
         return "wglCreateContext() failed";
     }
@@ -71,8 +67,7 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
     return error;
 }
 
-static const char* wglDetectOpenGL(FFOpenGLResult* result)
-{
+static const char* wglDetectOpenGL(FFOpenGLResult* result) {
     FF_LIBRARY_LOAD_MESSAGE(opengl32, "opengl32" FF_LIBRARY_EXTENSION, 1);
 
     WGLData data = {};
@@ -87,16 +82,18 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result)
     WNDCLASSW wc = {
         .lpfnWndProc = DefWindowProcW,
         .hInstance = hInstance,
-        .hbrBackground = (HBRUSH)COLOR_BACKGROUND,
+        .hbrBackground = (HBRUSH) COLOR_BACKGROUND,
         .lpszClassName = L"ogl_version_check",
         .style = CS_OWNDC,
     };
-    if(!RegisterClassW(&wc))
+    if (!RegisterClassW(&wc)) {
         return "RegisterClassW() failed";
+    }
 
     HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, NULL, NULL, hInstance, NULL);
-    if(!hWnd)
+    if (!hWnd) {
         return "CreateWindowW() failed";
+    }
 
     const char* error = wglHandlePixelFormat(&data, result, hWnd);
 
@@ -106,20 +103,17 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result)
     return error;
 }
 
-
-const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
-{
-    if (options->library == FF_OPENGL_LIBRARY_AUTO)
+const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result) {
+    if (options->library == FF_OPENGL_LIBRARY_AUTO) {
         return wglDetectOpenGL(result);
-    else if (options->library == FF_OPENGL_LIBRARY_EGL)
-    {
-        #if __has_include(<EGL/egl.h>)
-        const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
+    } else if (options->library == FF_OPENGL_LIBRARY_EGL) {
+#if __has_include(<EGL/egl.h>)
+        const char* ffOpenGLDetectByEGL(FFOpenGLResult * result);
         return ffOpenGLDetectByEGL(result);
-        #else
+#else
         return "fastfetch was compiled without egl support";
-        #endif
-    }
-    else
+#endif
+    } else {
         return "Unsupported OpenGL library";
+    }
 }

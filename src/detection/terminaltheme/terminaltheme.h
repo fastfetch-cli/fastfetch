@@ -3,16 +3,14 @@
 #include "fastfetch.h"
 #include "modules/terminaltheme/option.h"
 
-typedef struct FFTerminalThemeColor
-{
+typedef struct FFTerminalThemeColor {
     uint16_t r;
     uint16_t g;
     uint16_t b;
     bool dark;
 } FFTerminalThemeColor;
 
-typedef struct FFTerminalThemeResult
-{
+typedef struct FFTerminalThemeResult {
     FFTerminalThemeColor fg;
     FFTerminalThemeColor bg;
 } FFTerminalThemeResult;

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
+ssize_t getline(char** lineptr, size_t* n, FILE* stream) {
     ssize_t pos = -1;
     int c;
 
@@ -28,13 +28,13 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
     }
 
     pos = 0;
-    while(c != EOF) {
-        if ((size_t)(pos + 1) >= *n) {
+    while (c != EOF) {
+        if ((size_t) (pos + 1) >= *n) {
             size_t new_size = *n + (*n >> 2);
             if (new_size < 128) {
                 new_size = 128;
             }
-            char *new_ptr = realloc(*lineptr, new_size);
+            char* new_ptr = realloc(*lineptr, new_size);
             if (new_ptr == NULL) {
                 pos = -1;
                 goto exit;
@@ -43,7 +43,7 @@ ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
             *lineptr = new_ptr;
         }
 
-        ((char *)(*lineptr))[pos ++] = (char)c;
+        ((char*) (*lineptr))[pos++] = (char) c;
         if (c == '\n') {
             break;
         }

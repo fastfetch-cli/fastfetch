@@ -3,43 +3,47 @@
 #include "common/FFstrbuf.h"
 
 #ifndef _WIN32
-#include <sys/types.h> // pid_t
+#    include <sys/types.h> // pid_t
 #endif
 
 typedef struct FFProcessHandle {
-    #if _WIN32
-    void* pid; // HANDLE
+#if _WIN32
+    void* pid;      // HANDLE
     void* pipeRead; // HANDLE
-    #else
+#else
     pid_t pid;
     int pipeRead;
-    #endif
+#endif
 } FFProcessHandle;
 
 const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle);
 const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer); // Destroys handle internally
 
-static inline const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[])
-{
+static inline const char* ffProcessAppendStdOut(FFstrbuf* buffer, char* const argv[]) {
     FFProcessHandle handle;
     const char* error = ffProcessSpawn(argv, false, &handle);
-    if (error) return error;
+    if (error) {
+        return error;
+    }
 
     error = ffProcessReadOutput(&handle, buffer);
-    if (!error)
+    if (!error) {
         ffStrbufTrimRightSpace(buffer);
+    }
     return error;
 }
 
-static inline const char* ffProcessAppendStdErr(FFstrbuf* buffer, char* const argv[])
-{
+static inline const char* ffProcessAppendStdErr(FFstrbuf* buffer, char* const argv[]) {
     FFProcessHandle handle;
     const char* error = ffProcessSpawn(argv, true, &handle);
-    if (error) return error;
+    if (error) {
+        return error;
+    }
 
     error = ffProcessReadOutput(&handle, buffer);
-    if (!error)
+    if (!error) {
         ffStrbufTrimRightSpace(buffer);
+    }
     return error;
 }
 

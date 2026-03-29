@@ -4,8 +4,7 @@
 #include "detection/host/host.h"
 #include "modules/host/host.h"
 
-bool ffPrintHost(FFHostOptions* options)
-{
+bool ffPrintHost(FFHostOptions* options) {
     bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);
@@ -17,45 +16,42 @@ bool ffPrintHost(FFHostOptions* options)
     ffStrbufInit(&host.vendor);
 
     const char* error = ffDetectHost(&host);
-    if(error)
-    {
+    if (error) {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
-    if(host.name.length == 0 && host.family.length == 0)
-    {
+    if (host.name.length == 0 && host.family.length == 0) {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "neither product_family nor product_name is set by O.E.M.");
         goto exit;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if(host.name.length > 0)
+        if (host.name.length > 0) {
             ffStrbufAppend(&output, &host.name);
-        else
+        } else {
             ffStrbufAppend(&output, &host.family);
+        }
 
-        if(host.version.length > 0)
+        if (host.version.length > 0) {
             ffStrbufAppendF(&output, " (%s)", host.version.chars);
+        }
 
         ffStrbufPutTo(&output, stdout);
-    }
-    else
-    {
+    } else {
         FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_ARG(host.family, "family"),
-            FF_ARG(host.name, "name"),
-            FF_ARG(host.version, "version"),
-            FF_ARG(host.sku, "sku"),
-            FF_ARG(host.vendor, "vendor"),
-            FF_ARG(host.serial, "serial"),
-            FF_ARG(host.uuid, "uuid"),
-        }));
+                                                                                                         FF_ARG(host.family, "family"),
+                                                                                                         FF_ARG(host.name, "name"),
+                                                                                                         FF_ARG(host.version, "version"),
+                                                                                                         FF_ARG(host.sku, "sku"),
+                                                                                                         FF_ARG(host.vendor, "vendor"),
+                                                                                                         FF_ARG(host.serial, "serial"),
+                                                                                                         FF_ARG(host.uuid, "uuid"),
+                                                                                                     }));
     }
     success = true;
 
@@ -71,26 +67,23 @@ exit:
     return success;
 }
 
-void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
-{
+void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);
@@ -102,14 +95,12 @@ bool ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     ffStrbufInit(&host.vendor);
 
     const char* error = ffDetectHost(&host);
-    if (error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         goto exit;
     }
 
-    if (host.family.length == 0 && host.name.length == 0)
-    {
+    if (host.family.length == 0 && host.name.length == 0) {
         yyjson_mut_obj_add_str(doc, module, "error", "neither product_family nor product_name is set by O.E.M.");
         goto exit;
     }
@@ -136,13 +127,11 @@ exit:
     return success;
 }
 
-void ffInitHostOptions(FFHostOptions* options)
-{
+void ffInitHostOptions(FFHostOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
 }
 
-void ffDestroyHostOptions(FFHostOptions* options)
-{
+void ffDestroyHostOptions(FFHostOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -163,5 +152,4 @@ FFModuleBaseInfo ffHostModuleInfo = {
         {"Product vendor", "vendor"},
         {"Product serial number", "serial"},
         {"Product uuid", "uuid"},
-    }))
-};
+    }))};

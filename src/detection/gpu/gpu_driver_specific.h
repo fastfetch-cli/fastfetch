@@ -2,16 +2,14 @@
 
 #include "gpu.h"
 
-typedef enum __attribute__((__packed__)) FFGpuDriverConditionType
-{
+typedef enum __attribute__((__packed__)) FFGpuDriverConditionType {
     FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID = 1 << 0,
     FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID = 1 << 1,
     FF_GPU_DRIVER_CONDITION_TYPE_LUID = 1 << 2,
     FF_GPU_DRIVER_CONDITION_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFGpuDriverConditionType;
 
-typedef struct FFGpuDriverPciDeviceId
-{
+typedef struct FFGpuDriverPciDeviceId {
     uint32_t deviceId;
     uint32_t vendorId;
     uint32_t subSystemId;
@@ -19,8 +17,7 @@ typedef struct FFGpuDriverPciDeviceId
 } FFGpuDriverPciDeviceId;
 
 // Use pciBusId if not NULL; use pciDeviceId otherwise
-typedef struct FFGpuDriverCondition
-{
+typedef struct FFGpuDriverCondition {
     FFGpuDriverConditionType type;
     FFGpuDriverPciBusId pciBusId;
     FFGpuDriverPciDeviceId pciDeviceId;
@@ -28,8 +25,7 @@ typedef struct FFGpuDriverCondition
 } FFGpuDriverCondition;
 
 // detect x if not NULL
-typedef struct FFGpuDriverResult
-{
+typedef struct FFGpuDriverResult {
     uint32_t* index;
     double* temp;
     FFGPUMemory* memory;
@@ -47,48 +43,40 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
 const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 
-FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName)
-{
-    if (vendor == FF_GPU_VENDOR_NAME_NVIDIA)
-    {
+FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName) {
+    if (vendor == FF_GPU_VENDOR_NAME_NVIDIA) {
         *pDetectFn = ffDetectNvidiaGpuInfo;
-        #ifdef _WIN32
+#ifdef _WIN32
         *pDllName = "nvml.dll";
-        #else
+#else
         *pDllName = "libnvidia-ml.so";
-        #endif
-    }
-    else if (vendor == FF_GPU_VENDOR_NAME_MTHREADS)
-    {
+#endif
+    } else if (vendor == FF_GPU_VENDOR_NAME_MTHREADS) {
         *pDetectFn = ffDetectMthreadsGpuInfo;
-        #ifdef _WIN32
+#ifdef _WIN32
         *pDllName = "mtml.dll";
-        #else
+#else
         *pDllName = "libmtml.so";
-        #endif
+#endif
     }
-    #ifdef _WIN32
-    else if (vendor == FF_GPU_VENDOR_NAME_INTEL)
-    {
+#ifdef _WIN32
+    else if (vendor == FF_GPU_VENDOR_NAME_INTEL) {
         *pDetectFn = ffDetectIntelGpuInfo;
-        #ifdef _WIN64
-            *pDllName = "ControlLib.dll";
-        #else
-            *pDllName = "ControlLib32.dll";
-        #endif
-    }
-    else if (vendor == FF_GPU_VENDOR_NAME_AMD)
-    {
+#    ifdef _WIN64
+        *pDllName = "ControlLib.dll";
+#    else
+        *pDllName = "ControlLib32.dll";
+#    endif
+    } else if (vendor == FF_GPU_VENDOR_NAME_AMD) {
         *pDetectFn = ffDetectAmdGpuInfo;
-        #ifdef _WIN64
-            *pDllName = "atiadlxx.dll";
-        #else
-            *pDllName = "atiadlxy.dll";
-        #endif
+#    ifdef _WIN64
+        *pDllName = "atiadlxx.dll";
+#    else
+        *pDllName = "atiadlxy.dll";
+#    endif
     }
-    #endif
-    else
-    {
+#endif
+    else {
         *pDetectFn = NULL;
         *pDllName = NULL;
         return false;

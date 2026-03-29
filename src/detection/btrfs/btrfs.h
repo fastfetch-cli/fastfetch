@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/btrfs/option.h"
 
-typedef struct FFBtrfsDiskUsage
-{
+typedef struct FFBtrfsDiskUsage {
     uint64_t total;
     uint64_t used;
     const char* type;
@@ -12,8 +11,7 @@ typedef struct FFBtrfsDiskUsage
     uint8_t copies;
 } FFBtrfsDiskUsage;
 
-typedef struct FFBtrfsResult
-{
+typedef struct FFBtrfsResult {
     FFstrbuf name;
     FFstrbuf uuid;
     FFstrbuf devices;

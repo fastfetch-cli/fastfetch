@@ -6,27 +6,27 @@
 #include <stddef.h>
 
 #ifdef __APPLE__
-#define st_mtim st_mtimespec
+#    define st_mtim st_mtimespec
 #endif
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options);
 
-const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options)
-{
+const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options) {
     ffDetectPackagesImpl(result, options);
 
-    for(uint32_t i = 0; i < offsetof(FFPackagesResult, all) / sizeof(uint32_t); ++i)
-        result->all += ((uint32_t *)result)[i];
+    for (uint32_t i = 0; i < offsetof(FFPackagesResult, all) / sizeof(uint32_t); ++i) {
+        result->all += ((uint32_t*) result)[i];
+    }
 
-    if (result->all == 0)
+    if (result->all == 0) {
         return "No packages from known package managers found";
+    }
 
     return NULL;
 }
 
-bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result)
-{
-    #ifndef _WIN32
+bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result) {
+#ifndef _WIN32
     struct stat st;
     if (stat(filePath, &st) < 0) // file doesn't exist or isn't accessible
     {
@@ -34,11 +34,12 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
         return true;
     }
 
-    if (__builtin_expect(st.st_mtim.tv_sec <= 0, false))
+    if (__builtin_expect(st.st_mtim.tv_sec <= 0, false)) {
         return false;
+    }
 
     uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000ull + (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
-    #else
+#else
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (handle == INVALID_HANDLE_VALUE) // file doesn't exist or isn't accessible
@@ -50,23 +51,22 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
     uint64_t mtime_current;
     FILE_BASIC_INFORMATION fileInfo;
     IO_STATUS_BLOCK iosb;
-    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation)))
+    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation))) {
         return false;
+    }
 
     mtime_current = ffFileTimeToUnixMs((uint64_t) fileInfo.LastWriteTime.QuadPart);
-    #endif
+#endif
 
     ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);
     ffStrbufEnsureEndsWithC(cacheDir, '/');
     ffStrbufAppendF(cacheDir, "fastfetch/packages/%s.txt", packageId);
 
-    if (ffReadFileBuffer(cacheDir->chars, cacheContent))
-    {
+    if (ffReadFileBuffer(cacheDir->chars, cacheContent)) {
         uint64_t mtime_cached;
         uint32_t num_cached;
         if (sscanf(cacheContent->chars, "%" SCNu64 " %" SCNu32, &mtime_cached, &num_cached) == 2 &&
-            mtime_cached == mtime_current && num_cached > 0)
-        {
+            mtime_cached == mtime_current && num_cached > 0) {
             *result = num_cached;
             return true;
         }
@@ -77,46 +77,46 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
     return false;
 }
 
-bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements)
-{
-    if (__builtin_expect(cacheContent->length == 0, false))
+bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements) {
+    if (__builtin_expect(cacheContent->length == 0, false)) {
         return false;
+    }
 
     ffStrbufAppendF(cacheContent, "%" PRIu32, num_elements);
     return ffWriteFileBuffer(cacheDir->chars, cacheContent);
 }
 
 #ifndef _WIN32
-uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
-{
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
-    if(dirp == NULL)
+    if (dirp == NULL) {
         return 0;
+    }
 
     uint32_t num_elements = 0;
 
-    struct dirent *entry;
-    while((entry = readdir(dirp)) != NULL)
-    {
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL) {
         bool ok = false;
 
-        if (entry->d_name[0] != '.')
-        {
-#if !defined(__sun) && !defined(__HAIKU__)
-            if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
+        if (entry->d_name[0] != '.') {
+#    if !defined(__sun) && !defined(__HAIKU__)
+            if (entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK) {
                 ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
-            else
-#endif
+            } else
+#    endif
             {
                 struct stat stbuf;
-                if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0)
+                if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0) {
                     ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+                }
             }
         }
 
-        if(ok) ++num_elements;
+        if (ok) {
+            ++num_elements;
+        }
     }
-
 
     return num_elements;
 }

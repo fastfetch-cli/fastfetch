@@ -4,8 +4,7 @@
 #include "common/font.h"
 #include "modules/font/option.h"
 
-typedef struct FFTerminalFontResult
-{
+typedef struct FFTerminalFontResult {
     FFstrbuf error;
     FFfont font;
     FFfont fallback;

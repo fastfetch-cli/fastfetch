@@ -5,8 +5,7 @@
 #include "detection/editor/editor.h"
 #include "modules/editor/editor.h"
 
-bool ffPrintEditor(FFEditorOptions* options)
-{
+bool ffPrintEditor(FFEditorOptions* options) {
     FFEditorResult result = {
         .type = "Unknown",
         .name = ffStrbufCreate(),
@@ -16,36 +15,30 @@ bool ffPrintEditor(FFEditorOptions* options)
     };
     const char* error = ffDetectEditor(&result);
 
-    if (error)
-    {
+    if (error) {
         ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
-    if (options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        if (result.exe.length)
-        {
+        if (result.exe.length) {
             ffStrbufWriteTo(&result.exe, stdout);
-            if (result.version.length)
+            if (result.version.length) {
                 printf(" %s", result.version.chars);
-        }
-        else
-        {
+            }
+        } else {
             ffStrbufWriteTo(&result.name, stdout);
         }
         putchar('\n');
-    }
-    else
-    {
-        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(result.type, "type"),
-            FF_ARG(result.name, "name"),
-            FF_ARG(result.exe, "exe-name"),
-            FF_ARG(result.path, "path"),
-            FF_ARG(result.version, "version"),
-        }));
+    } else {
+        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                           FF_ARG(result.type, "type"),
+                                                                                                           FF_ARG(result.name, "name"),
+                                                                                                           FF_ARG(result.exe, "exe-name"),
+                                                                                                           FF_ARG(result.path, "path"),
+                                                                                                           FF_ARG(result.version, "version"),
+                                                                                                       }));
     }
 
     ffStrbufDestroy(&result.name);
@@ -56,26 +49,23 @@ bool ffPrintEditor(FFEditorOptions* options)
     return true;
 }
 
-void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
-{
+void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),
@@ -84,8 +74,7 @@ bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 
     const char* error = ffDetectEditor(&result);
 
-    if (error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return false;
     }
@@ -105,13 +94,11 @@ bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     return true;
 }
 
-void ffInitEditorOptions(FFEditorOptions* options)
-{
+void ffInitEditorOptions(FFEditorOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
 }
 
-void ffDestroyEditorOptions(FFEditorOptions* options)
-{
+void ffDestroyEditorOptions(FFEditorOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -130,5 +117,4 @@ FFModuleBaseInfo ffEditorModuleInfo = {
         {"Exe name of real path", "exe-name"},
         {"Full path of real path", "path"},
         {"Version", "version"},
-    }))
-};
+    }))};

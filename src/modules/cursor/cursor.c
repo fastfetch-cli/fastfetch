@@ -4,8 +4,7 @@
 #include "detection/cursor/cursor.h"
 #include "modules/cursor/cursor.h"
 
-bool ffPrintCursor(FFCursorOptions* options)
-{
+bool ffPrintCursor(FFCursorOptions* options) {
     bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
@@ -14,33 +13,31 @@ bool ffPrintCursor(FFCursorOptions* options)
 
     ffDetectCursor(&result);
 
-    if(result.error.length)
+    if (result.error.length) {
         ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result.error.chars);
-    else
-    {
+    } else {
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursors");
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursor");
         ffStrbufTrimRight(&result.theme, '_');
         ffStrbufTrimRight(&result.theme, '-');
-        if(result.theme.length == 0)
+        if (result.theme.length == 0) {
             ffStrbufAppendS(&result.theme, "default");
+        }
 
-        if(options->moduleArgs.outputFormat.length == 0)
-        {
+        if (options->moduleArgs.outputFormat.length == 0) {
             ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&result.theme, stdout);
 
-            if(result.size.length > 0 && !ffStrbufEqualS(&result.size, "0"))
+            if (result.size.length > 0 && !ffStrbufEqualS(&result.size, "0")) {
                 printf(" (%spx)", result.size.chars);
+            }
 
             putchar('\n');
-        }
-        else
-        {
+        } else {
             FF_PRINT_FORMAT_CHECKED(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-                FF_ARG(result.theme, "theme"),
-                FF_ARG(result.size, "size"),
-            }));
+                                                                                                               FF_ARG(result.theme, "theme"),
+                                                                                                               FF_ARG(result.size, "size"),
+                                                                                                           }));
         }
 
         success = true;
@@ -53,26 +50,23 @@ bool ffPrintCursor(FFCursorOptions* options)
     return success;
 }
 
-void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
-{
+void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
@@ -81,12 +75,9 @@ bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
 
     ffDetectCursor(&result);
 
-    if (result.error.length)
-    {
+    if (result.error.length) {
         yyjson_mut_obj_add_strbuf(doc, module, "error", &result.error);
-    }
-    else
-    {
+    } else {
         yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
         yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
         yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
@@ -100,13 +91,11 @@ bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
     return success;
 }
 
-void ffInitCursorOptions(FFCursorOptions* options)
-{
+void ffInitCursorOptions(FFCursorOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
 }
 
-void ffDestroyCursorOptions(FFCursorOptions* options)
-{
+void ffDestroyCursorOptions(FFCursorOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 

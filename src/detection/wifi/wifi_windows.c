@@ -8,41 +8,39 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch"
 
-static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result)
-{
+static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result) {
     switch (state) {
-    case wlan_interface_state_not_ready:
-        ffStrbufAppendS(result, "Not ready");
-        break;
-    case wlan_interface_state_connected:
-        ffStrbufAppendS(result, "Connected");
-        break;
-    case wlan_interface_state_ad_hoc_network_formed:
-        ffStrbufAppendS(result, "Ad hoc network formed");
-        break;
-    case wlan_interface_state_disconnecting:
-        ffStrbufAppendS(result, "Disconnecting");
-        break;
-    case wlan_interface_state_disconnected:
-        ffStrbufAppendS(result, "Disconnected");
-        break;
-    case wlan_interface_state_associating:
-        ffStrbufAppendS(result, "Associating");
-        break;
-    case wlan_interface_state_discovering:
-        ffStrbufAppendS(result, "Discovering");
-        break;
-    case wlan_interface_state_authenticating:
-        ffStrbufAppendS(result, "Authenticating");
-        break;
-    default:
-        ffStrbufAppendS(result, "Unknown");
-        break;
+        case wlan_interface_state_not_ready:
+            ffStrbufAppendS(result, "Not ready");
+            break;
+        case wlan_interface_state_connected:
+            ffStrbufAppendS(result, "Connected");
+            break;
+        case wlan_interface_state_ad_hoc_network_formed:
+            ffStrbufAppendS(result, "Ad hoc network formed");
+            break;
+        case wlan_interface_state_disconnecting:
+            ffStrbufAppendS(result, "Disconnecting");
+            break;
+        case wlan_interface_state_disconnected:
+            ffStrbufAppendS(result, "Disconnected");
+            break;
+        case wlan_interface_state_associating:
+            ffStrbufAppendS(result, "Associating");
+            break;
+        case wlan_interface_state_discovering:
+            ffStrbufAppendS(result, "Discovering");
+            break;
+        case wlan_interface_state_authenticating:
+            ffStrbufAppendS(result, "Authenticating");
+            break;
+        default:
+            ffStrbufAppendS(result, "Unknown");
+            break;
     }
 }
 
-const char* ffDetectWifi(FFlist* result)
-{
+const char* ffDetectWifi(FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(wlanapi, "wlanapi" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanOpenHandle)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanEnumInterfaces)
@@ -56,23 +54,20 @@ const char* ffDetectWifi(FFlist* result)
     WLAN_INTERFACE_INFO_LIST* ifList = NULL;
     const char* error = NULL;
 
-    if(ffWlanOpenHandle(2, NULL, &curVersion, &hClient) != ERROR_SUCCESS)
-    {
+    if (ffWlanOpenHandle(2, NULL, &curVersion, &hClient) != ERROR_SUCCESS) {
         error = "WlanOpenHandle() failed";
         goto exit;
     }
 
-    if(ffWlanEnumInterfaces(hClient, NULL, &ifList) != ERROR_SUCCESS)
-    {
+    if (ffWlanEnumInterfaces(hClient, NULL, &ifList) != ERROR_SUCCESS) {
         error = "WlanEnumInterfaces() failed";
         goto exit;
     }
 
-    for(uint32_t index = 0; index < ifList->dwNumberOfItems; ++index)
-    {
-        WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*)&ifList->InterfaceInfo[index];
+    for (uint32_t index = 0; index < ifList->dwNumberOfItems; ++index) {
+        WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*) &ifList->InterfaceInfo[index];
 
-        FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
+        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
         ffStrbufInitWS(&item->inf.description, ifInfo->strInterfaceDescription);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
@@ -88,33 +83,35 @@ const char* ffDetectWifi(FFlist* result)
 
         convertIfStateToString(ifInfo->isState, &item->inf.status);
 
-        if(ifInfo->isState != wlan_interface_state_connected)
+        if (ifInfo->isState != wlan_interface_state_connected) {
             continue;
+        }
 
         WLAN_CONNECTION_ATTRIBUTES* connInfo = NULL;
         DWORD bufSize = sizeof(*connInfo);
         WLAN_OPCODE_VALUE_TYPE opCode = wlan_opcode_value_type_query_only;
 
-        if(ffWlanQueryInterface(hClient,
-            &ifInfo->InterfaceGuid,
-            wlan_intf_opcode_current_connection,
-            NULL,
-            &bufSize,
-            (PVOID*)&connInfo,
-            &opCode) != ERROR_SUCCESS
-        ) continue;
+        if (ffWlanQueryInterface(hClient,
+                &ifInfo->InterfaceGuid,
+                wlan_intf_opcode_current_connection,
+                NULL,
+                &bufSize,
+                (PVOID*) &connInfo,
+                &opCode) != ERROR_SUCCESS) {
+            continue;
+        }
 
         convertIfStateToString(connInfo->isState, &item->conn.status);
         ffStrbufAppendNS(&item->conn.ssid,
             connInfo->wlanAssociationAttributes.dot11Ssid.uSSIDLength,
-            (const char *)connInfo->wlanAssociationAttributes.dot11Ssid.ucSSID);
+            (const char*) connInfo->wlanAssociationAttributes.dot11Ssid.ucSSID);
 
-        for (size_t i = 0; i < sizeof(connInfo->wlanAssociationAttributes.dot11Bssid); i++)
+        for (size_t i = 0; i < sizeof(connInfo->wlanAssociationAttributes.dot11Bssid); i++) {
             ffStrbufAppendF(&item->conn.bssid, "%.2X:", connInfo->wlanAssociationAttributes.dot11Bssid[i]);
+        }
         ffStrbufTrimRight(&item->conn.bssid, ':');
 
-        switch (connInfo->wlanAssociationAttributes.dot11PhyType)
-        {
+        switch (connInfo->wlanAssociationAttributes.dot11PhyType) {
             case dot11_phy_type_fhss:
                 ffStrbufAppendS(&item->conn.protocol, "802.11 (FHSS)");
                 break;
@@ -149,7 +146,7 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufAppendS(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
-                ffStrbufAppendF(&item->conn.protocol, "Unknown (%u)", (unsigned)connInfo->wlanAssociationAttributes.dot11PhyType);
+                ffStrbufAppendF(&item->conn.protocol, "Unknown (%u)", (unsigned) connInfo->wlanAssociationAttributes.dot11PhyType);
                 break;
         }
 
@@ -157,10 +154,8 @@ const char* ffDetectWifi(FFlist* result)
         item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate / 1000.;
         item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate / 1000.;
 
-        if(connInfo->wlanSecurityAttributes.bSecurityEnabled)
-        {
-            switch (connInfo->wlanSecurityAttributes.dot11AuthAlgorithm)
-            {
+        if (connInfo->wlanSecurityAttributes.bSecurityEnabled) {
+            switch (connInfo->wlanSecurityAttributes.dot11AuthAlgorithm) {
                 case DOT11_AUTH_ALGO_80211_OPEN:
                     ffStrbufAppendS(&item->conn.security, "802.11 Open");
                     break;
@@ -195,24 +190,25 @@ const char* ffDetectWifi(FFlist* result)
                     ffStrbufAppendS(&item->conn.security, "WPA3-ENT");
                     break;
                 default:
-                    ffStrbufAppendF(&item->conn.security, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
+                    ffStrbufAppendF(&item->conn.security, "Unknown (%u)", (unsigned) connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
                     break;
             }
-            if(connInfo->wlanSecurityAttributes.bOneXEnabled)
+            if (connInfo->wlanSecurityAttributes.bOneXEnabled) {
                 ffStrbufAppendS(&item->conn.security, " 802.11X");
-        }
-        else
+            }
+        } else {
             ffStrbufAppendS(&item->conn.security, "Insecure");
+        }
 
         WLAN_BSS_LIST* bssList = NULL;
         if (ffWlanGetNetworkBssList(hClient,
-            &ifInfo->InterfaceGuid,
-            &connInfo->wlanAssociationAttributes.dot11Ssid,
-            connInfo->wlanAssociationAttributes.dot11BssType,
-            connInfo->wlanSecurityAttributes.bSecurityEnabled,
-            NULL,
-            &bssList) == ERROR_SUCCESS && bssList->dwNumberOfItems > 0
-        ) {
+                &ifInfo->InterfaceGuid,
+                &connInfo->wlanAssociationAttributes.dot11Ssid,
+                connInfo->wlanAssociationAttributes.dot11BssType,
+                connInfo->wlanSecurityAttributes.bSecurityEnabled,
+                NULL,
+                &bssList) == ERROR_SUCCESS &&
+            bssList->dwNumberOfItems > 0) {
             item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
             ffWlanFreeMemory(bssList);
         }
@@ -221,22 +217,25 @@ const char* ffDetectWifi(FFlist* result)
 
         ULONG* channelNumber = 0;
         bufSize = sizeof(*channelNumber);
-        if(ffWlanQueryInterface(hClient,
-            &ifInfo->InterfaceGuid,
-            wlan_intf_opcode_channel_number,
-            NULL,
-            &bufSize,
-            (PVOID*)&channelNumber,
-            &opCode) == ERROR_SUCCESS
-        ) {
+        if (ffWlanQueryInterface(hClient,
+                &ifInfo->InterfaceGuid,
+                wlan_intf_opcode_channel_number,
+                NULL,
+                &bufSize,
+                (PVOID*) &channelNumber,
+                &opCode) == ERROR_SUCCESS) {
             item->conn.channel = (uint16_t) *channelNumber;
             ffWlanFreeMemory(channelNumber);
         }
     }
 
 exit:
-    if(ifList) ffWlanFreeMemory(ifList);
-    if(hClient) ffWlanCloseHandle(hClient, NULL);
+    if (ifList) {
+        ffWlanFreeMemory(ifList);
+    }
+    if (hClient) {
+        ffWlanCloseHandle(hClient, NULL);
+    }
     return error;
 }
 

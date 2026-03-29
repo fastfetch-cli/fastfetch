@@ -2,8 +2,8 @@
 #include "common/stringUtils.h"
 
 #ifdef FF_HAVE_DBUS
-#include "common/dbus.h"
-#include "common/io.h"
+#    include "common/dbus.h"
+#    include "common/io.h"
 
 /* Example dbus reply, striped to only the relevant parts:
 array [                                                     //root
@@ -45,103 +45,108 @@ array [                                                     //root
 ]
 */
 
-static bool detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
+static bool detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device) {
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY) {
         return true;
+    }
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING) {
         return true;
+    }
 
     const char* deviceProperty;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &deviceProperty);
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
-    if(ffStrEquals(deviceProperty, "Address"))
+    if (ffStrEquals(deviceProperty, "Address")) {
         ffDBusGetString(dbus, &dictIter, &device->address);
-    else if(ffStrEquals(deviceProperty, "Name"))
+    } else if (ffStrEquals(deviceProperty, "Name")) {
         ffDBusGetString(dbus, &dictIter, &device->name);
-    else if(ffStrEquals(deviceProperty, "Icon"))
+    } else if (ffStrEquals(deviceProperty, "Icon")) {
         ffDBusGetString(dbus, &dictIter, &device->type);
-    else if(ffStrEquals(deviceProperty, "Percentage"))
-    {
+    } else if (ffStrEquals(deviceProperty, "Percentage")) {
         uint32_t percentage;
-        if (ffDBusGetUint(dbus, &dictIter, &percentage))
+        if (ffDBusGetUint(dbus, &dictIter, &percentage)) {
             device->battery = (uint8_t) percentage;
-    }
-    else if(ffStrEquals(deviceProperty, "Connected"))
+        }
+    } else if (ffStrEquals(deviceProperty, "Connected")) {
         ffDBusGetBool(dbus, &dictIter, &device->connected);
-    else if(ffStrEquals(deviceProperty, "Paired"))
-    {
+    } else if (ffStrEquals(deviceProperty, "Paired")) {
         bool paired = true;
         ffDBusGetBool(dbus, &dictIter, &paired);
-        if (!paired) return false;
+        if (!paired) {
+            return false;
+        }
     }
     return true;
 }
 
-static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
+static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothResult* device) {
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY) {
         return;
+    }
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING) {
         return;
+    }
 
     const char* propertyType;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &propertyType);
 
-    if(!ffStrContains(propertyType, ".Device") && !ffStrContains(propertyType, ".Battery"))
+    if (!ffStrContains(propertyType, ".Device") && !ffStrContains(propertyType, ".Battery")) {
         return; // We don't care about other properties
+    }
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY)
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY) {
         return;
+    }
 
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    do
-    {
+    do {
         bool shouldContinue = detectBluetoothValue(dbus, &arrayIter, device);
-        if (!shouldContinue)
-        {
+        if (!shouldContinue) {
             ffStrbufClear(&device->name);
             break;
         }
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
-static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
+static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter) {
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY) {
         return NULL;
+    }
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_OBJECT_PATH)
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_OBJECT_PATH) {
         return NULL;
+    }
 
     const char* objectPath;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &objectPath);
 
     // We don't want adapter objects
-    if(!ffStrContains(objectPath, "/dev_"))
+    if (!ffStrContains(objectPath, "/dev_")) {
         return NULL;
+    }
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY)
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY) {
         return NULL;
+    }
 
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
@@ -153,56 +158,53 @@ static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbu
     device->battery = 0;
     device->connected = false;
 
-    do
-    {
+    do {
         detectBluetoothProperty(dbus, &arrayIter, device);
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 
     return device;
 }
 
-static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter, int32_t connectedCount)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
+static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter, int32_t connectedCount) {
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY) {
         return;
+    }
 
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &arrayIter);
 
-    do
-    {
+    do {
         FFBluetoothResult* device = detectBluetoothObject(devices, dbus, &arrayIter);
 
-        if (device)
-        {
-            if(device->name.length == 0 || (connectedCount > 0 && !device->connected))
-            {
+        if (device) {
+            if (device->name.length == 0 || (connectedCount > 0 && !device->connected)) {
                 ffStrbufDestroy(&device->name);
                 ffStrbufDestroy(&device->address);
                 ffStrbufDestroy(&device->type);
                 --devices->length;
             }
 
-            if (device->connected && --connectedCount == 0)
+            if (device->connected && --connectedCount == 0) {
                 break;
+            }
         }
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
-static const char* detectBluetooth(FFlist* devices, int32_t connectedCount)
-{
+static const char* detectBluetooth(FFlist* devices, int32_t connectedCount) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
-    if(error)
+    if (error) {
         return error;
+    }
 
     DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", NULL, NULL);
-    if(!managedObjects)
+    if (!managedObjects) {
         return "Failed to call GetManagedObjects";
+    }
 
     DBusMessageIter rootIter;
-    if(!dbus.lib->ffdbus_message_iter_init(managedObjects, &rootIter))
-    {
+    if (!dbus.lib->ffdbus_message_iter_init(managedObjects, &rootIter)) {
         dbus.lib->ffdbus_message_unref(managedObjects);
         return "Failed to get root iterator of GetManagedObjects";
     }
@@ -213,18 +215,18 @@ static const char* detectBluetooth(FFlist* devices, int32_t connectedCount)
     return NULL;
 }
 
-static uint32_t connectedDevices(void)
-{
+static uint32_t connectedDevices(void) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
-    if(dirp == NULL)
+    if (dirp == NULL) {
         return 0;
+    }
 
     uint32_t result = 0;
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
-    {
-        if (strchr(entry->d_name, ':') != NULL)
+    while ((entry = readdir(dirp)) != NULL) {
+        if (strchr(entry->d_name, ':') != NULL) {
             ++result;
+        }
     }
 
     return result;
@@ -232,19 +234,18 @@ static uint32_t connectedDevices(void)
 
 #endif
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */)
-{
-    #ifdef FF_HAVE_DBUS
-        int32_t connectedCount = -1;
-        if (!options->showDisconnected)
-        {
-            connectedCount = (int32_t) connectedDevices();
-            if (connectedCount == 0)
-                return NULL;
+const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */) {
+#ifdef FF_HAVE_DBUS
+    int32_t connectedCount = -1;
+    if (!options->showDisconnected) {
+        connectedCount = (int32_t) connectedDevices();
+        if (connectedCount == 0) {
+            return NULL;
         }
+    }
 
-        return detectBluetooth(devices, connectedCount);
-    #else
-        return "Fastfetch was compiled without DBus support";
-    #endif
+    return detectBluetooth(devices, connectedCount);
+#else
+    return "Fastfetch was compiled without DBus support";
+#endif
 }

@@ -6,8 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
-{
+const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result) {
     char path[] = "/dev/ttyCX";
     for (char i = '0'; i <= '9'; ++i) {
         path[strlen("/dev/ttyC")] = i;
@@ -15,10 +14,12 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
         FF_AUTO_CLOSE_FD int devfd = open(path, O_RDONLY | O_CLOEXEC);
 
         if (devfd < 0) {
-            if (errno == EACCES && i == '0')
+            if (errno == EACCES && i == '0') {
                 return "Permission denied when opening tty device";
-            if (errno == ENOENT)
+            }
+            if (errno == ENOENT) {
                 break;
+            }
             continue;
         }
 
@@ -26,8 +27,9 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
             .param = WSDISPLAYIO_PARAM_BRIGHTNESS,
         };
 
-        if (ioctl(devfd, WSDISPLAYIO_GETPARAM, &param) < 0)
+        if (ioctl(devfd, WSDISPLAYIO_GETPARAM, &param) < 0) {
             continue;
+        }
 
         FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
         ffStrbufInitF(&brightness->name, "ttyC%c", i);

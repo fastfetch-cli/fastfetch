@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <wayland-client.h>
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -69,7 +69,7 @@ struct zwlr_output_manager_v1;
 struct zwlr_output_mode_v1;
 
 #ifndef ZWLR_OUTPUT_MANAGER_V1_INTERFACE
-#define ZWLR_OUTPUT_MANAGER_V1_INTERFACE
+#    define ZWLR_OUTPUT_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_manager_v1 zwlr_output_manager_v1
  * @section page_iface_zwlr_output_manager_v1_desc Description
@@ -138,7 +138,7 @@ struct zwlr_output_mode_v1;
 extern const struct wl_interface zwlr_output_manager_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_HEAD_V1_INTERFACE
-#define ZWLR_OUTPUT_HEAD_V1_INTERFACE
+#    define ZWLR_OUTPUT_HEAD_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_head_v1 zwlr_output_head_v1
  * @section page_iface_zwlr_output_head_v1_desc Description
@@ -179,7 +179,7 @@ extern const struct wl_interface zwlr_output_manager_v1_interface;
 extern const struct wl_interface zwlr_output_head_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_MODE_V1_INTERFACE
-#define ZWLR_OUTPUT_MODE_V1_INTERFACE
+#    define ZWLR_OUTPUT_MODE_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_mode_v1 zwlr_output_mode_v1
  * @section page_iface_zwlr_output_mode_v1_desc Description
@@ -210,7 +210,7 @@ extern const struct wl_interface zwlr_output_head_v1_interface;
 extern const struct wl_interface zwlr_output_mode_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
-#define ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
+#    define ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_configuration_v1 zwlr_output_configuration_v1
  * @section page_iface_zwlr_output_configuration_v1_desc Description
@@ -245,7 +245,7 @@ extern const struct wl_interface zwlr_output_mode_v1_interface;
 extern const struct wl_interface zwlr_output_configuration_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
-#define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
+#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_configuration_head_v1 zwlr_output_configuration_head_v1
  * @section page_iface_zwlr_output_configuration_head_v1_desc Description
@@ -271,58 +271,59 @@ extern const struct wl_interface zwlr_output_configuration_head_v1_interface;
  * @struct zwlr_output_manager_v1_listener
  */
 struct zwlr_output_manager_v1_listener {
-	/**
-	 * introduce a new head
-	 *
-	 * This event introduces a new head. This happens whenever a new
-	 * head appears (e.g. a monitor is plugged in) or after the output
-	 * manager is bound.
-	 */
-	void (*head)(void *data,
-		     struct zwlr_output_manager_v1 *zwlr_output_manager_v1,
-		     struct zwlr_output_head_v1 *head);
-	/**
-	 * sent all information about current configuration
-	 *
-	 * This event is sent after all information has been sent after
-	 * binding to the output manager object and after any subsequent
-	 * changes. This applies to child head and mode objects as well. In
-	 * other words, this event is sent whenever a head or mode is
-	 * created or destroyed and whenever one of their properties has
-	 * been changed. Not all state is re-sent each time the current
-	 * configuration changes: only the actual changes are sent.
-	 *
-	 * This allows changes to the output configuration to be seen as
-	 * atomic, even if they happen via multiple events.
-	 *
-	 * A serial is sent to be used in a future create_configuration
-	 * request.
-	 * @param serial current configuration serial
-	 */
-	void (*done)(void *data,
-		     struct zwlr_output_manager_v1 *zwlr_output_manager_v1,
-		     uint32_t serial);
-	/**
-	 * the compositor has finished with the manager
-	 *
-	 * This event indicates that the compositor is done sending
-	 * manager events. The compositor will destroy the object
-	 * immediately after sending this event, so it will become invalid
-	 * and the client should release any resources associated with it.
-	 */
-	void (*finished)(void *data,
-			 struct zwlr_output_manager_v1 *zwlr_output_manager_v1);
+    /**
+     * introduce a new head
+     *
+     * This event introduces a new head. This happens whenever a new
+     * head appears (e.g. a monitor is plugged in) or after the output
+     * manager is bound.
+     */
+    void (*head)(void* data,
+        struct zwlr_output_manager_v1* zwlr_output_manager_v1,
+        struct zwlr_output_head_v1* head);
+    /**
+     * sent all information about current configuration
+     *
+     * This event is sent after all information has been sent after
+     * binding to the output manager object and after any subsequent
+     * changes. This applies to child head and mode objects as well. In
+     * other words, this event is sent whenever a head or mode is
+     * created or destroyed and whenever one of their properties has
+     * been changed. Not all state is re-sent each time the current
+     * configuration changes: only the actual changes are sent.
+     *
+     * This allows changes to the output configuration to be seen as
+     * atomic, even if they happen via multiple events.
+     *
+     * A serial is sent to be used in a future create_configuration
+     * request.
+     * @param serial current configuration serial
+     */
+    void (*done)(void* data,
+        struct zwlr_output_manager_v1* zwlr_output_manager_v1,
+        uint32_t serial);
+    /**
+     * the compositor has finished with the manager
+     *
+     * This event indicates that the compositor is done sending
+     * manager events. The compositor will destroy the object
+     * immediately after sending this event, so it will become invalid
+     * and the client should release any resources associated with it.
+     */
+    void (*finished)(void* data,
+        struct zwlr_output_manager_v1* zwlr_output_manager_v1);
 };
 
 /**
  * @ingroup iface_zwlr_output_manager_v1
  */
 static inline int
-zwlr_output_manager_v1_add_listener(struct zwlr_output_manager_v1 *zwlr_output_manager_v1,
-				    const struct zwlr_output_manager_v1_listener *listener, void *data)
-{
-	return wl_proxy_add_listener((struct wl_proxy *) zwlr_output_manager_v1,
-				     (void (**)(void)) listener, data);
+zwlr_output_manager_v1_add_listener(struct zwlr_output_manager_v1* zwlr_output_manager_v1,
+    const struct zwlr_output_manager_v1_listener* listener,
+    void* data) {
+    return wl_proxy_add_listener((struct wl_proxy*) zwlr_output_manager_v1,
+        (void (**)(void)) listener,
+        data);
 }
 
 #define ZWLR_OUTPUT_MANAGER_V1_CREATE_CONFIGURATION 0
@@ -352,29 +353,25 @@ zwlr_output_manager_v1_add_listener(struct zwlr_output_manager_v1 *zwlr_output_m
 
 /** @ingroup iface_zwlr_output_manager_v1 */
 static inline void
-zwlr_output_manager_v1_set_user_data(struct zwlr_output_manager_v1 *zwlr_output_manager_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zwlr_output_manager_v1, user_data);
+zwlr_output_manager_v1_set_user_data(struct zwlr_output_manager_v1* zwlr_output_manager_v1, void* user_data) {
+    wl_proxy_set_user_data((struct wl_proxy*) zwlr_output_manager_v1, user_data);
 }
 
 /** @ingroup iface_zwlr_output_manager_v1 */
-static inline void *
-zwlr_output_manager_v1_get_user_data(struct zwlr_output_manager_v1 *zwlr_output_manager_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zwlr_output_manager_v1);
+static inline void*
+zwlr_output_manager_v1_get_user_data(struct zwlr_output_manager_v1* zwlr_output_manager_v1) {
+    return wl_proxy_get_user_data((struct wl_proxy*) zwlr_output_manager_v1);
 }
 
 static inline uint32_t
-zwlr_output_manager_v1_get_version(struct zwlr_output_manager_v1 *zwlr_output_manager_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_manager_v1);
+zwlr_output_manager_v1_get_version(struct zwlr_output_manager_v1* zwlr_output_manager_v1) {
+    return wl_proxy_get_version((struct wl_proxy*) zwlr_output_manager_v1);
 }
 
 /** @ingroup iface_zwlr_output_manager_v1 */
 static inline void
-zwlr_output_manager_v1_destroy(struct zwlr_output_manager_v1 *zwlr_output_manager_v1)
-{
-	wl_proxy_destroy((struct wl_proxy *) zwlr_output_manager_v1);
+zwlr_output_manager_v1_destroy(struct zwlr_output_manager_v1* zwlr_output_manager_v1) {
+    wl_proxy_destroy((struct wl_proxy*) zwlr_output_manager_v1);
 }
 
 // /**
@@ -411,16 +408,16 @@ zwlr_output_manager_v1_destroy(struct zwlr_output_manager_v1 *zwlr_output_manage
 // }
 
 #ifndef ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
-#define ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
+#    define ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
 enum zwlr_output_head_v1_adaptive_sync_state {
-	/**
-	 * adaptive sync is disabled
-	 */
-	ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED = 0,
-	/**
-	 * adaptive sync is enabled
-	 */
-	ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED = 1,
+    /**
+     * adaptive sync is disabled
+     */
+    ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_DISABLED = 0,
+    /**
+     * adaptive sync is enabled
+     */
+    ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENABLED = 1,
 };
 #endif /* ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM */
 
@@ -429,253 +426,254 @@ enum zwlr_output_head_v1_adaptive_sync_state {
  * @struct zwlr_output_head_v1_listener
  */
 struct zwlr_output_head_v1_listener {
-	/**
-	 * head name
-	 *
-	 * This event describes the head name.
-	 *
-	 * The naming convention is compositor defined, but limited to
-	 * alphanumeric characters and dashes (-). Each name is unique
-	 * among all wlr_output_head objects, but if a wlr_output_head
-	 * object is destroyed the same name may be reused later. The names
-	 * will also remain consistent across sessions with the same
-	 * hardware and software configuration.
-	 *
-	 * Examples of names include 'HDMI-A-1', 'WL-1', 'X11-1', etc.
-	 * However, do not assume that the name is a reflection of an
-	 * underlying DRM connector, X11 connection, etc.
-	 *
-	 * If this head matches a wl_output, the wl_output.name event must
-	 * report the same name.
-	 *
-	 * The name event is sent after a wlr_output_head object is
-	 * created. This event is only sent once per object, and the name
-	 * does not change over the lifetime of the wlr_output_head object.
-	 */
-	void (*name)(void *data,
-		     struct zwlr_output_head_v1 *zwlr_output_head_v1,
-		     const char *name);
-	/**
-	 * head description
-	 *
-	 * This event describes a human-readable description of the head.
-	 *
-	 * The description is a UTF-8 string with no convention defined for
-	 * its contents. Examples might include 'Foocorp 11" Display' or
-	 * 'Virtual X11 output via :1'. However, do not assume that the
-	 * name is a reflection of the make, model, serial of the
-	 * underlying DRM connector or the display name of the underlying
-	 * X11 connection, etc.
-	 *
-	 * If this head matches a wl_output, the wl_output.description
-	 * event must report the same name.
-	 *
-	 * The description event is sent after a wlr_output_head object is
-	 * created. This event is only sent once per object, and the
-	 * description does not change over the lifetime of the
-	 * wlr_output_head object.
-	 */
-	void (*description)(void *data,
-			    struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			    const char *description);
-	/**
-	 * head physical size
-	 *
-	 * This event describes the physical size of the head. This event
-	 * is only sent if the head has a physical size (e.g. is not a
-	 * projector or a virtual device).
-	 *
-	 * The physical size event is sent after a wlr_output_head object
-	 * is created. This event is only sent once per object, and the
-	 * physical size does not change over the lifetime of the
-	 * wlr_output_head object.
-	 * @param width width in millimeters of the output
-	 * @param height height in millimeters of the output
-	 */
-	void (*physical_size)(void *data,
-			      struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			      int32_t width,
-			      int32_t height);
-	/**
-	 * introduce a mode
-	 *
-	 * This event introduces a mode for this head. It is sent once
-	 * per supported mode.
-	 */
-	void (*mode)(void *data,
-		     struct zwlr_output_head_v1 *zwlr_output_head_v1,
-		     struct zwlr_output_mode_v1 *mode);
-	/**
-	 * head is enabled or disabled
-	 *
-	 * This event describes whether the head is enabled. A disabled
-	 * head is not mapped to a region of the global compositor space.
-	 *
-	 * When a head is disabled, some properties (current_mode,
-	 * position, transform and scale) are irrelevant.
-	 * @param enabled zero if disabled, non-zero if enabled
-	 */
-	void (*enabled)(void *data,
-			struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			int32_t enabled);
-	/**
-	 * current mode
-	 *
-	 * This event describes the mode currently in use for this head.
-	 * It is only sent if the output is enabled.
-	 */
-	void (*current_mode)(void *data,
-			     struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			     struct zwlr_output_mode_v1 *mode);
-	/**
-	 * current position
-	 *
-	 * This events describes the position of the head in the global
-	 * compositor space. It is only sent if the output is enabled.
-	 * @param x x position within the global compositor space
-	 * @param y y position within the global compositor space
-	 */
-	void (*position)(void *data,
-			 struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			 int32_t x,
-			 int32_t y);
-	/**
-	 * current transformation
-	 *
-	 * This event describes the transformation currently applied to
-	 * the head. It is only sent if the output is enabled.
-	 */
-	void (*transform)(void *data,
-			  struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			  int32_t transform);
-	/**
-	 * current scale
-	 *
-	 * This events describes the scale of the head in the global
-	 * compositor space. It is only sent if the output is enabled.
-	 */
-	void (*scale)(void *data,
-		      struct zwlr_output_head_v1 *zwlr_output_head_v1,
-		      wl_fixed_t scale);
-	/**
-	 * the head has disappeared
-	 *
-	 * This event indicates that the head is no longer available. The
-	 * head object becomes inert. Clients should send a destroy request
-	 * and release any resources associated with it.
-	 */
-	void (*finished)(void *data,
-			 struct zwlr_output_head_v1 *zwlr_output_head_v1);
-	/**
-	 * head manufacturer
-	 *
-	 * This event describes the manufacturer of the head.
-	 *
-	 * Together with the model and serial_number events the purpose is
-	 * to allow clients to recognize heads from previous sessions and
-	 * for example load head-specific configurations back.
-	 *
-	 * It is not guaranteed this event will be ever sent. A reason for
-	 * that can be that the compositor does not have information about
-	 * the make of the head or the definition of a make is not sensible
-	 * in the current setup, for example in a virtual session. Clients
-	 * can still try to identify the head by available information from
-	 * other events but should be aware that there is an increased risk
-	 * of false positives.
-	 *
-	 * If sent, the make event is sent after a wlr_output_head object
-	 * is created and only sent once per object. The make does not
-	 * change over the lifetime of the wlr_output_head object.
-	 *
-	 * It is not recommended to display the make string in UI to users.
-	 * For that the string provided by the description event should be
-	 * preferred.
-	 * @since 2
-	 */
-	void (*make)(void *data,
-		     struct zwlr_output_head_v1 *zwlr_output_head_v1,
-		     const char *make);
-	/**
-	 * head model
-	 *
-	 * This event describes the model of the head.
-	 *
-	 * Together with the make and serial_number events the purpose is
-	 * to allow clients to recognize heads from previous sessions and
-	 * for example load head-specific configurations back.
-	 *
-	 * It is not guaranteed this event will be ever sent. A reason for
-	 * that can be that the compositor does not have information about
-	 * the model of the head or the definition of a model is not
-	 * sensible in the current setup, for example in a virtual session.
-	 * Clients can still try to identify the head by available
-	 * information from other events but should be aware that there is
-	 * an increased risk of false positives.
-	 *
-	 * If sent, the model event is sent after a wlr_output_head object
-	 * is created and only sent once per object. The model does not
-	 * change over the lifetime of the wlr_output_head object.
-	 *
-	 * It is not recommended to display the model string in UI to
-	 * users. For that the string provided by the description event
-	 * should be preferred.
-	 * @since 2
-	 */
-	void (*model)(void *data,
-		      struct zwlr_output_head_v1 *zwlr_output_head_v1,
-		      const char *model);
-	/**
-	 * head serial number
-	 *
-	 * This event describes the serial number of the head.
-	 *
-	 * Together with the make and model events the purpose is to allow
-	 * clients to recognize heads from previous sessions and for
-	 * example load head- specific configurations back.
-	 *
-	 * It is not guaranteed this event will be ever sent. A reason for
-	 * that can be that the compositor does not have information about
-	 * the serial number of the head or the definition of a serial
-	 * number is not sensible in the current setup. Clients can still
-	 * try to identify the head by available information from other
-	 * events but should be aware that there is an increased risk of
-	 * false positives.
-	 *
-	 * If sent, the serial number event is sent after a wlr_output_head
-	 * object is created and only sent once per object. The serial
-	 * number does not change over the lifetime of the wlr_output_head
-	 * object.
-	 *
-	 * It is not recommended to display the serial_number string in UI
-	 * to users. For that the string provided by the description event
-	 * should be preferred.
-	 * @since 2
-	 */
-	void (*serial_number)(void *data,
-			      struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			      const char *serial_number);
-	/**
-	 * current adaptive sync state
-	 *
-	 * This event describes whether adaptive sync is currently
-	 * enabled for the head or not. Adaptive sync is also known as
-	 * Variable Refresh Rate or VRR.
-	 * @since 4
-	 */
-	void (*adaptive_sync)(void *data,
-			      struct zwlr_output_head_v1 *zwlr_output_head_v1,
-			      uint32_t state);
+    /**
+     * head name
+     *
+     * This event describes the head name.
+     *
+     * The naming convention is compositor defined, but limited to
+     * alphanumeric characters and dashes (-). Each name is unique
+     * among all wlr_output_head objects, but if a wlr_output_head
+     * object is destroyed the same name may be reused later. The names
+     * will also remain consistent across sessions with the same
+     * hardware and software configuration.
+     *
+     * Examples of names include 'HDMI-A-1', 'WL-1', 'X11-1', etc.
+     * However, do not assume that the name is a reflection of an
+     * underlying DRM connector, X11 connection, etc.
+     *
+     * If this head matches a wl_output, the wl_output.name event must
+     * report the same name.
+     *
+     * The name event is sent after a wlr_output_head object is
+     * created. This event is only sent once per object, and the name
+     * does not change over the lifetime of the wlr_output_head object.
+     */
+    void (*name)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        const char* name);
+    /**
+     * head description
+     *
+     * This event describes a human-readable description of the head.
+     *
+     * The description is a UTF-8 string with no convention defined for
+     * its contents. Examples might include 'Foocorp 11" Display' or
+     * 'Virtual X11 output via :1'. However, do not assume that the
+     * name is a reflection of the make, model, serial of the
+     * underlying DRM connector or the display name of the underlying
+     * X11 connection, etc.
+     *
+     * If this head matches a wl_output, the wl_output.description
+     * event must report the same name.
+     *
+     * The description event is sent after a wlr_output_head object is
+     * created. This event is only sent once per object, and the
+     * description does not change over the lifetime of the
+     * wlr_output_head object.
+     */
+    void (*description)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        const char* description);
+    /**
+     * head physical size
+     *
+     * This event describes the physical size of the head. This event
+     * is only sent if the head has a physical size (e.g. is not a
+     * projector or a virtual device).
+     *
+     * The physical size event is sent after a wlr_output_head object
+     * is created. This event is only sent once per object, and the
+     * physical size does not change over the lifetime of the
+     * wlr_output_head object.
+     * @param width width in millimeters of the output
+     * @param height height in millimeters of the output
+     */
+    void (*physical_size)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        int32_t width,
+        int32_t height);
+    /**
+     * introduce a mode
+     *
+     * This event introduces a mode for this head. It is sent once
+     * per supported mode.
+     */
+    void (*mode)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        struct zwlr_output_mode_v1* mode);
+    /**
+     * head is enabled or disabled
+     *
+     * This event describes whether the head is enabled. A disabled
+     * head is not mapped to a region of the global compositor space.
+     *
+     * When a head is disabled, some properties (current_mode,
+     * position, transform and scale) are irrelevant.
+     * @param enabled zero if disabled, non-zero if enabled
+     */
+    void (*enabled)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        int32_t enabled);
+    /**
+     * current mode
+     *
+     * This event describes the mode currently in use for this head.
+     * It is only sent if the output is enabled.
+     */
+    void (*current_mode)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        struct zwlr_output_mode_v1* mode);
+    /**
+     * current position
+     *
+     * This events describes the position of the head in the global
+     * compositor space. It is only sent if the output is enabled.
+     * @param x x position within the global compositor space
+     * @param y y position within the global compositor space
+     */
+    void (*position)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        int32_t x,
+        int32_t y);
+    /**
+     * current transformation
+     *
+     * This event describes the transformation currently applied to
+     * the head. It is only sent if the output is enabled.
+     */
+    void (*transform)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        int32_t transform);
+    /**
+     * current scale
+     *
+     * This events describes the scale of the head in the global
+     * compositor space. It is only sent if the output is enabled.
+     */
+    void (*scale)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        wl_fixed_t scale);
+    /**
+     * the head has disappeared
+     *
+     * This event indicates that the head is no longer available. The
+     * head object becomes inert. Clients should send a destroy request
+     * and release any resources associated with it.
+     */
+    void (*finished)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1);
+    /**
+     * head manufacturer
+     *
+     * This event describes the manufacturer of the head.
+     *
+     * Together with the model and serial_number events the purpose is
+     * to allow clients to recognize heads from previous sessions and
+     * for example load head-specific configurations back.
+     *
+     * It is not guaranteed this event will be ever sent. A reason for
+     * that can be that the compositor does not have information about
+     * the make of the head or the definition of a make is not sensible
+     * in the current setup, for example in a virtual session. Clients
+     * can still try to identify the head by available information from
+     * other events but should be aware that there is an increased risk
+     * of false positives.
+     *
+     * If sent, the make event is sent after a wlr_output_head object
+     * is created and only sent once per object. The make does not
+     * change over the lifetime of the wlr_output_head object.
+     *
+     * It is not recommended to display the make string in UI to users.
+     * For that the string provided by the description event should be
+     * preferred.
+     * @since 2
+     */
+    void (*make)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        const char* make);
+    /**
+     * head model
+     *
+     * This event describes the model of the head.
+     *
+     * Together with the make and serial_number events the purpose is
+     * to allow clients to recognize heads from previous sessions and
+     * for example load head-specific configurations back.
+     *
+     * It is not guaranteed this event will be ever sent. A reason for
+     * that can be that the compositor does not have information about
+     * the model of the head or the definition of a model is not
+     * sensible in the current setup, for example in a virtual session.
+     * Clients can still try to identify the head by available
+     * information from other events but should be aware that there is
+     * an increased risk of false positives.
+     *
+     * If sent, the model event is sent after a wlr_output_head object
+     * is created and only sent once per object. The model does not
+     * change over the lifetime of the wlr_output_head object.
+     *
+     * It is not recommended to display the model string in UI to
+     * users. For that the string provided by the description event
+     * should be preferred.
+     * @since 2
+     */
+    void (*model)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        const char* model);
+    /**
+     * head serial number
+     *
+     * This event describes the serial number of the head.
+     *
+     * Together with the make and model events the purpose is to allow
+     * clients to recognize heads from previous sessions and for
+     * example load head- specific configurations back.
+     *
+     * It is not guaranteed this event will be ever sent. A reason for
+     * that can be that the compositor does not have information about
+     * the serial number of the head or the definition of a serial
+     * number is not sensible in the current setup. Clients can still
+     * try to identify the head by available information from other
+     * events but should be aware that there is an increased risk of
+     * false positives.
+     *
+     * If sent, the serial number event is sent after a wlr_output_head
+     * object is created and only sent once per object. The serial
+     * number does not change over the lifetime of the wlr_output_head
+     * object.
+     *
+     * It is not recommended to display the serial_number string in UI
+     * to users. For that the string provided by the description event
+     * should be preferred.
+     * @since 2
+     */
+    void (*serial_number)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        const char* serial_number);
+    /**
+     * current adaptive sync state
+     *
+     * This event describes whether adaptive sync is currently
+     * enabled for the head or not. Adaptive sync is also known as
+     * Variable Refresh Rate or VRR.
+     * @since 4
+     */
+    void (*adaptive_sync)(void* data,
+        struct zwlr_output_head_v1* zwlr_output_head_v1,
+        uint32_t state);
 };
 
 /**
  * @ingroup iface_zwlr_output_head_v1
  */
 static inline int
-zwlr_output_head_v1_add_listener(struct zwlr_output_head_v1 *zwlr_output_head_v1,
-				 const struct zwlr_output_head_v1_listener *listener, void *data)
-{
-	return wl_proxy_add_listener((struct wl_proxy *) zwlr_output_head_v1,
-				     (void (**)(void)) listener, data);
+zwlr_output_head_v1_add_listener(struct zwlr_output_head_v1* zwlr_output_head_v1,
+    const struct zwlr_output_head_v1_listener* listener,
+    void* data) {
+    return wl_proxy_add_listener((struct wl_proxy*) zwlr_output_head_v1,
+        (void (**)(void)) listener,
+        data);
 }
 
 #define ZWLR_OUTPUT_HEAD_V1_RELEASE 0
@@ -744,29 +742,25 @@ zwlr_output_head_v1_add_listener(struct zwlr_output_head_v1 *zwlr_output_head_v1
 
 /** @ingroup iface_zwlr_output_head_v1 */
 static inline void
-zwlr_output_head_v1_set_user_data(struct zwlr_output_head_v1 *zwlr_output_head_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zwlr_output_head_v1, user_data);
+zwlr_output_head_v1_set_user_data(struct zwlr_output_head_v1* zwlr_output_head_v1, void* user_data) {
+    wl_proxy_set_user_data((struct wl_proxy*) zwlr_output_head_v1, user_data);
 }
 
 /** @ingroup iface_zwlr_output_head_v1 */
-static inline void *
-zwlr_output_head_v1_get_user_data(struct zwlr_output_head_v1 *zwlr_output_head_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zwlr_output_head_v1);
+static inline void*
+zwlr_output_head_v1_get_user_data(struct zwlr_output_head_v1* zwlr_output_head_v1) {
+    return wl_proxy_get_user_data((struct wl_proxy*) zwlr_output_head_v1);
 }
 
 static inline uint32_t
-zwlr_output_head_v1_get_version(struct zwlr_output_head_v1 *zwlr_output_head_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_head_v1);
+zwlr_output_head_v1_get_version(struct zwlr_output_head_v1* zwlr_output_head_v1) {
+    return wl_proxy_get_version((struct wl_proxy*) zwlr_output_head_v1);
 }
 
 /** @ingroup iface_zwlr_output_head_v1 */
 static inline void
-zwlr_output_head_v1_destroy(struct zwlr_output_head_v1 *zwlr_output_head_v1)
-{
-	wl_proxy_destroy((struct wl_proxy *) zwlr_output_head_v1);
+zwlr_output_head_v1_destroy(struct zwlr_output_head_v1* zwlr_output_head_v1) {
+    wl_proxy_destroy((struct wl_proxy*) zwlr_output_head_v1);
 }
 
 // /**
@@ -787,57 +781,58 @@ zwlr_output_head_v1_destroy(struct zwlr_output_head_v1 *zwlr_output_head_v1)
  * @struct zwlr_output_mode_v1_listener
  */
 struct zwlr_output_mode_v1_listener {
-	/**
-	 * mode size
-	 *
-	 * This event describes the mode size. The size is given in
-	 * physical hardware units of the output device. This is not
-	 * necessarily the same as the output size in the global compositor
-	 * space. For instance, the output may be scaled or transformed.
-	 * @param width width of the mode in hardware units
-	 * @param height height of the mode in hardware units
-	 */
-	void (*size)(void *data,
-		     struct zwlr_output_mode_v1 *zwlr_output_mode_v1,
-		     int32_t width,
-		     int32_t height);
-	/**
-	 * mode refresh rate
-	 *
-	 * This event describes the mode's fixed vertical refresh rate.
-	 * It is only sent if the mode has a fixed refresh rate.
-	 * @param refresh vertical refresh rate in mHz
-	 */
-	void (*refresh)(void *data,
-			struct zwlr_output_mode_v1 *zwlr_output_mode_v1,
-			int32_t refresh);
-	/**
-	 * mode is preferred
-	 *
-	 * This event advertises this mode as preferred.
-	 */
-	void (*preferred)(void *data,
-			  struct zwlr_output_mode_v1 *zwlr_output_mode_v1);
-	/**
-	 * the mode has disappeared
-	 *
-	 * This event indicates that the mode is no longer available. The
-	 * mode object becomes inert. Clients should send a destroy request
-	 * and release any resources associated with it.
-	 */
-	void (*finished)(void *data,
-			 struct zwlr_output_mode_v1 *zwlr_output_mode_v1);
+    /**
+     * mode size
+     *
+     * This event describes the mode size. The size is given in
+     * physical hardware units of the output device. This is not
+     * necessarily the same as the output size in the global compositor
+     * space. For instance, the output may be scaled or transformed.
+     * @param width width of the mode in hardware units
+     * @param height height of the mode in hardware units
+     */
+    void (*size)(void* data,
+        struct zwlr_output_mode_v1* zwlr_output_mode_v1,
+        int32_t width,
+        int32_t height);
+    /**
+     * mode refresh rate
+     *
+     * This event describes the mode's fixed vertical refresh rate.
+     * It is only sent if the mode has a fixed refresh rate.
+     * @param refresh vertical refresh rate in mHz
+     */
+    void (*refresh)(void* data,
+        struct zwlr_output_mode_v1* zwlr_output_mode_v1,
+        int32_t refresh);
+    /**
+     * mode is preferred
+     *
+     * This event advertises this mode as preferred.
+     */
+    void (*preferred)(void* data,
+        struct zwlr_output_mode_v1* zwlr_output_mode_v1);
+    /**
+     * the mode has disappeared
+     *
+     * This event indicates that the mode is no longer available. The
+     * mode object becomes inert. Clients should send a destroy request
+     * and release any resources associated with it.
+     */
+    void (*finished)(void* data,
+        struct zwlr_output_mode_v1* zwlr_output_mode_v1);
 };
 
 /**
  * @ingroup iface_zwlr_output_mode_v1
  */
 static inline int
-zwlr_output_mode_v1_add_listener(struct zwlr_output_mode_v1 *zwlr_output_mode_v1,
-				 const struct zwlr_output_mode_v1_listener *listener, void *data)
-{
-	return wl_proxy_add_listener((struct wl_proxy *) zwlr_output_mode_v1,
-				     (void (**)(void)) listener, data);
+zwlr_output_mode_v1_add_listener(struct zwlr_output_mode_v1* zwlr_output_mode_v1,
+    const struct zwlr_output_mode_v1_listener* listener,
+    void* data) {
+    return wl_proxy_add_listener((struct wl_proxy*) zwlr_output_mode_v1,
+        (void (**)(void)) listener,
+        data);
 }
 
 #define ZWLR_OUTPUT_MODE_V1_RELEASE 0
@@ -866,29 +861,25 @@ zwlr_output_mode_v1_add_listener(struct zwlr_output_mode_v1 *zwlr_output_mode_v1
 
 /** @ingroup iface_zwlr_output_mode_v1 */
 static inline void
-zwlr_output_mode_v1_set_user_data(struct zwlr_output_mode_v1 *zwlr_output_mode_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zwlr_output_mode_v1, user_data);
+zwlr_output_mode_v1_set_user_data(struct zwlr_output_mode_v1* zwlr_output_mode_v1, void* user_data) {
+    wl_proxy_set_user_data((struct wl_proxy*) zwlr_output_mode_v1, user_data);
 }
 
 /** @ingroup iface_zwlr_output_mode_v1 */
-static inline void *
-zwlr_output_mode_v1_get_user_data(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zwlr_output_mode_v1);
+static inline void*
+zwlr_output_mode_v1_get_user_data(struct zwlr_output_mode_v1* zwlr_output_mode_v1) {
+    return wl_proxy_get_user_data((struct wl_proxy*) zwlr_output_mode_v1);
 }
 
 static inline uint32_t
-zwlr_output_mode_v1_get_version(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_mode_v1);
+zwlr_output_mode_v1_get_version(struct zwlr_output_mode_v1* zwlr_output_mode_v1) {
+    return wl_proxy_get_version((struct wl_proxy*) zwlr_output_mode_v1);
 }
 
 /** @ingroup iface_zwlr_output_mode_v1 */
 static inline void
-zwlr_output_mode_v1_destroy(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
-{
-	wl_proxy_destroy((struct wl_proxy *) zwlr_output_mode_v1);
+zwlr_output_mode_v1_destroy(struct zwlr_output_mode_v1* zwlr_output_mode_v1) {
+    wl_proxy_destroy((struct wl_proxy*) zwlr_output_mode_v1);
 }
 
 // /**
@@ -905,20 +896,20 @@ zwlr_output_mode_v1_destroy(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
 // }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
-#define ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
+#    define ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
 enum zwlr_output_configuration_v1_error {
-	/**
-	 * head has been configured twice
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ALREADY_CONFIGURED_HEAD = 1,
-	/**
-	 * head has not been configured
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_UNCONFIGURED_HEAD = 2,
-	/**
-	 * request sent after configuration has been applied or tested
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ALREADY_USED = 3,
+    /**
+     * head has been configured twice
+     */
+    ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ALREADY_CONFIGURED_HEAD = 1,
+    /**
+     * head has not been configured
+     */
+    ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_UNCONFIGURED_HEAD = 2,
+    /**
+     * request sent after configuration has been applied or tested
+     */
+    ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ALREADY_USED = 3,
 };
 #endif /* ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM */
 
@@ -927,59 +918,60 @@ enum zwlr_output_configuration_v1_error {
  * @struct zwlr_output_configuration_v1_listener
  */
 struct zwlr_output_configuration_v1_listener {
-	/**
-	 * configuration changes succeeded
-	 *
-	 * Sent after the compositor has successfully applied the changes
-	 * or tested them.
-	 *
-	 * Upon receiving this event, the client should destroy this
-	 * object.
-	 *
-	 * If the current configuration has changed, events to describe the
-	 * changes will be sent followed by a wlr_output_manager.done
-	 * event.
-	 */
-	void (*succeeded)(void *data,
-			  struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1);
-	/**
-	 * configuration changes failed
-	 *
-	 * Sent if the compositor rejects the changes or failed to apply
-	 * them. The compositor should revert any changes made by the apply
-	 * request that triggered this event.
-	 *
-	 * Upon receiving this event, the client should destroy this
-	 * object.
-	 */
-	void (*failed)(void *data,
-		       struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1);
-	/**
-	 * configuration has been cancelled
-	 *
-	 * Sent if the compositor cancels the configuration because the
-	 * state of an output changed and the client has outdated
-	 * information (e.g. after an output has been hotplugged).
-	 *
-	 * The client can create a new configuration with a newer serial
-	 * and try again.
-	 *
-	 * Upon receiving this event, the client should destroy this
-	 * object.
-	 */
-	void (*cancelled)(void *data,
-			  struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1);
+    /**
+     * configuration changes succeeded
+     *
+     * Sent after the compositor has successfully applied the changes
+     * or tested them.
+     *
+     * Upon receiving this event, the client should destroy this
+     * object.
+     *
+     * If the current configuration has changed, events to describe the
+     * changes will be sent followed by a wlr_output_manager.done
+     * event.
+     */
+    void (*succeeded)(void* data,
+        struct zwlr_output_configuration_v1* zwlr_output_configuration_v1);
+    /**
+     * configuration changes failed
+     *
+     * Sent if the compositor rejects the changes or failed to apply
+     * them. The compositor should revert any changes made by the apply
+     * request that triggered this event.
+     *
+     * Upon receiving this event, the client should destroy this
+     * object.
+     */
+    void (*failed)(void* data,
+        struct zwlr_output_configuration_v1* zwlr_output_configuration_v1);
+    /**
+     * configuration has been cancelled
+     *
+     * Sent if the compositor cancels the configuration because the
+     * state of an output changed and the client has outdated
+     * information (e.g. after an output has been hotplugged).
+     *
+     * The client can create a new configuration with a newer serial
+     * and try again.
+     *
+     * Upon receiving this event, the client should destroy this
+     * object.
+     */
+    void (*cancelled)(void* data,
+        struct zwlr_output_configuration_v1* zwlr_output_configuration_v1);
 };
 
 /**
  * @ingroup iface_zwlr_output_configuration_v1
  */
 static inline int
-zwlr_output_configuration_v1_add_listener(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1,
-					  const struct zwlr_output_configuration_v1_listener *listener, void *data)
-{
-	return wl_proxy_add_listener((struct wl_proxy *) zwlr_output_configuration_v1,
-				     (void (**)(void)) listener, data);
+zwlr_output_configuration_v1_add_listener(struct zwlr_output_configuration_v1* zwlr_output_configuration_v1,
+    const struct zwlr_output_configuration_v1_listener* listener,
+    void* data) {
+    return wl_proxy_add_listener((struct wl_proxy*) zwlr_output_configuration_v1,
+        (void (**)(void)) listener,
+        data);
 }
 
 #define ZWLR_OUTPUT_CONFIGURATION_V1_ENABLE_HEAD 0
@@ -1024,22 +1016,19 @@ zwlr_output_configuration_v1_add_listener(struct zwlr_output_configuration_v1 *z
 
 /** @ingroup iface_zwlr_output_configuration_v1 */
 static inline void
-zwlr_output_configuration_v1_set_user_data(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zwlr_output_configuration_v1, user_data);
+zwlr_output_configuration_v1_set_user_data(struct zwlr_output_configuration_v1* zwlr_output_configuration_v1, void* user_data) {
+    wl_proxy_set_user_data((struct wl_proxy*) zwlr_output_configuration_v1, user_data);
 }
 
 /** @ingroup iface_zwlr_output_configuration_v1 */
-static inline void *
-zwlr_output_configuration_v1_get_user_data(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zwlr_output_configuration_v1);
+static inline void*
+zwlr_output_configuration_v1_get_user_data(struct zwlr_output_configuration_v1* zwlr_output_configuration_v1) {
+    return wl_proxy_get_user_data((struct wl_proxy*) zwlr_output_configuration_v1);
 }
 
 static inline uint32_t
-zwlr_output_configuration_v1_get_version(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1);
+zwlr_output_configuration_v1_get_version(struct zwlr_output_configuration_v1* zwlr_output_configuration_v1) {
+    return wl_proxy_get_version((struct wl_proxy*) zwlr_output_configuration_v1);
 }
 
 // /**
@@ -1130,38 +1119,38 @@ zwlr_output_configuration_v1_get_version(struct zwlr_output_configuration_v1 *zw
 // }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
-#define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
+#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
 enum zwlr_output_configuration_head_v1_error {
-	/**
-	 * property has already been set
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ALREADY_SET = 1,
-	/**
-	 * mode doesn't belong to head
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_MODE = 2,
-	/**
-	 * mode is invalid
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_CUSTOM_MODE = 3,
-	/**
-	 * transform value outside enum
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_TRANSFORM = 4,
-	/**
-	 * scale negative or zero
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_SCALE = 5,
-	/**
-	 * invalid enum value used in the set_adaptive_sync request
-	 * @since 4
-	 */
-	ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE = 6,
+    /**
+     * property has already been set
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ALREADY_SET = 1,
+    /**
+     * mode doesn't belong to head
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_MODE = 2,
+    /**
+     * mode is invalid
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_CUSTOM_MODE = 3,
+    /**
+     * transform value outside enum
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_TRANSFORM = 4,
+    /**
+     * scale negative or zero
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_SCALE = 5,
+    /**
+     * invalid enum value used in the set_adaptive_sync request
+     * @since 4
+     */
+    ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE = 6,
 };
 /**
  * @ingroup iface_zwlr_output_configuration_head_v1
  */
-#define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE_SINCE_VERSION 4
+#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE_SINCE_VERSION 4
 #endif /* ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM */
 
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_MODE 0
@@ -1170,7 +1159,6 @@ enum zwlr_output_configuration_head_v1_error {
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_TRANSFORM 3
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_SCALE 4
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_ADAPTIVE_SYNC 5
-
 
 /**
  * @ingroup iface_zwlr_output_configuration_head_v1
@@ -1199,29 +1187,25 @@ enum zwlr_output_configuration_head_v1_error {
 
 /** @ingroup iface_zwlr_output_configuration_head_v1 */
 static inline void
-zwlr_output_configuration_head_v1_set_user_data(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zwlr_output_configuration_head_v1, user_data);
+zwlr_output_configuration_head_v1_set_user_data(struct zwlr_output_configuration_head_v1* zwlr_output_configuration_head_v1, void* user_data) {
+    wl_proxy_set_user_data((struct wl_proxy*) zwlr_output_configuration_head_v1, user_data);
 }
 
 /** @ingroup iface_zwlr_output_configuration_head_v1 */
-static inline void *
-zwlr_output_configuration_head_v1_get_user_data(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zwlr_output_configuration_head_v1);
+static inline void*
+zwlr_output_configuration_head_v1_get_user_data(struct zwlr_output_configuration_head_v1* zwlr_output_configuration_head_v1) {
+    return wl_proxy_get_user_data((struct wl_proxy*) zwlr_output_configuration_head_v1);
 }
 
 static inline uint32_t
-zwlr_output_configuration_head_v1_get_version(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1);
+zwlr_output_configuration_head_v1_get_version(struct zwlr_output_configuration_head_v1* zwlr_output_configuration_head_v1) {
+    return wl_proxy_get_version((struct wl_proxy*) zwlr_output_configuration_head_v1);
 }
 
 /** @ingroup iface_zwlr_output_configuration_head_v1 */
 static inline void
-zwlr_output_configuration_head_v1_destroy(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1)
-{
-	wl_proxy_destroy((struct wl_proxy *) zwlr_output_configuration_head_v1);
+zwlr_output_configuration_head_v1_destroy(struct zwlr_output_configuration_head_v1* zwlr_output_configuration_head_v1) {
+    wl_proxy_destroy((struct wl_proxy*) zwlr_output_configuration_head_v1);
 }
 
 // /**
@@ -1301,7 +1285,7 @@ zwlr_output_configuration_head_v1_destroy(struct zwlr_output_configuration_head_
 // 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_ADAPTIVE_SYNC, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, state);
 // }
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

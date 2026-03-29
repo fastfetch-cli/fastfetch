@@ -4,66 +4,58 @@
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/terminal/terminal.h"
 
-bool ffPrintTerminal(FFTerminalOptions* options)
-{
+bool ffPrintTerminal(FFTerminalOptions* options) {
     const FFTerminalResult* result = ffDetectTerminal();
 
-    if(result->processName.length == 0)
-    {
+    if (result->processName.length == 0) {
         ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect terminal");
         return false;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        if(result->version.length)
+        if (result->version.length) {
             printf("%s %s\n", result->prettyName.chars, result->version.chars);
-        else
+        } else {
             ffStrbufPutTo(&result->prettyName, stdout);
-    }
-    else
-    {
-        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(result->processName, "process-name"),
-            FF_ARG(result->exe, "exe"),
-            FF_ARG(result->exeName, "exe-name"),
-            FF_ARG(result->pid, "pid"),
-            FF_ARG(result->prettyName, "pretty-name"),
-            FF_ARG(result->version, "version"),
-            FF_ARG(result->exePath, "exe-path"),
-            FF_ARG(result->tty, "tty"),
-        }));
+        }
+    } else {
+        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                             FF_ARG(result->processName, "process-name"),
+                                                                                                             FF_ARG(result->exe, "exe"),
+                                                                                                             FF_ARG(result->exeName, "exe-name"),
+                                                                                                             FF_ARG(result->pid, "pid"),
+                                                                                                             FF_ARG(result->prettyName, "pretty-name"),
+                                                                                                             FF_ARG(result->version, "version"),
+                                                                                                             FF_ARG(result->exePath, "exe-path"),
+                                                                                                             FF_ARG(result->tty, "tty"),
+                                                                                                         }));
     }
 
     return true;
 }
 
-void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
-{
+void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFTerminalResult* result = ffDetectTerminal();
 
-    if(result->processName.length == 0)
-    {
+    if (result->processName.length == 0) {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect terminal");
         return false;
     }
@@ -82,13 +74,11 @@ bool ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     return true;
 }
 
-void ffInitTerminalOptions(FFTerminalOptions* options)
-{
+void ffInitTerminalOptions(FFTerminalOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyTerminalOptions(FFTerminalOptions* options)
-{
+void ffDestroyTerminalOptions(FFTerminalOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
@@ -110,5 +100,4 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         {"Terminal version", "version"},
         {"Terminal full exe path", "exe-path"},
         {"Terminal tty / pts used", "tty"},
-    }))
-};
+    }))};
