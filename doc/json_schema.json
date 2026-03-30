@@ -611,7 +611,7 @@
                                 },
                                 {
                                     "const": "command-raw",
-                                    "decription": "Command to generate text data, printed as is"
+                                    "description": "Command to generate text data, printed as is"
                                 },
                                 {
                                     "const": "sixel",
