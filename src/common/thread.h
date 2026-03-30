@@ -109,9 +109,7 @@ static inline bool ffThreadJoin(FFThreadType thread, FF_MAYBE_UNUSED uint32_t ti
 #else // FF_HAVE_THREADS
 #    define FF_THREAD_MUTEX_INITIALIZER 0
 typedef char FFThreadMutex;
-static inline void ffThreadMutexLock(FFThreadMutex* mutex) {
-    FF_UNUSED(mutex)
-}
-static inline void ffThreadMutexUnlock(FFThreadMutex* mutex){FF_UNUSED(mutex)}
+static inline void ffThreadMutexLock(FF_MAYBE_UNUSED FFThreadMutex* mutex) {}
+static inline void ffThreadMutexUnlock(FF_MAYBE_UNUSED FFThreadMutex* mutex) {}
 #    define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType)
 #endif // FF_HAVE_THREADS
