@@ -198,4 +198,5 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
         {"Current brightness value", "current"},
         {"Screen brightness (percentage bar)", "percentage-bar"},
         {"Is built-in screen", "is-builtin"},
-    }))};
+    }))
+};

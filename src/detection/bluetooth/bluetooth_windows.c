@@ -14,12 +14,14 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindDeviceClose)
 
     BLUETOOTH_DEVICE_INFO btdi = {
-        .dwSize = sizeof(btdi)};
+        .dwSize = sizeof(btdi)
+    };
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&(BLUETOOTH_DEVICE_SEARCH_PARAMS) {
                                                                   .fReturnConnected = TRUE,
                                                                   .fReturnRemembered = options->showDisconnected,
                                                                   .fReturnAuthenticated = options->showDisconnected,
-                                                                  .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS)},
+                                                                  .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS)
+                                                              },
         &btdi);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {

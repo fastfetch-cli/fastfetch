@@ -15,7 +15,8 @@ const char* enablePrivilege(const wchar_t* privilege) {
     TOKEN_PRIVILEGES tp = {
         .PrivilegeCount = 1,
         .Privileges = {
-            (LUID_AND_ATTRIBUTES) {.Attributes = SE_PRIVILEGE_ENABLED}},
+            (LUID_AND_ATTRIBUTES) {.Attributes = SE_PRIVILEGE_ENABLED}
+        },
     };
     if (!LookupPrivilegeValueW(NULL, privilege, &tp.Privileges[0].Luid)) {
         return "LookupPrivilegeValue() failed";

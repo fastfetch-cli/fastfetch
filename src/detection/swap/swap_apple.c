@@ -13,7 +13,7 @@ const char* ffDetectSwap(FFlist* result) {
     if (xsw.xsu_total == 0) {
         if (!__builtin_available(macOS 26.0, *)) {
             if (ffSysctlGetInt("vm.compressor_mode", 4) <= 2) { // No longer available in macOS 26.0
-                return NULL; // Swap is disabled
+                return NULL;                                    // Swap is disabled
             }
         }
     }

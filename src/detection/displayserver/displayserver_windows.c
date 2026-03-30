@@ -106,7 +106,8 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                     .size = sizeof(preferredMode),
                     .adapterId = path->targetInfo.adapterId,
                     .id = path->targetInfo.id,
-                }};
+                }
+            };
             double preferredRefreshRate = 0;
             if (DisplayConfigGetDeviceInfo(&preferredMode.header) == ERROR_SUCCESS) {
                 DISPLAYCONFIG_RATIONAL freq = preferredMode.targetMode.targetVideoSignalInfo.vSyncFreq;
@@ -161,7 +162,8 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                         .size = sizeof(advColorInfo2),
                         .adapterId = path->targetInfo.adapterId,
                         .id = path->targetInfo.id,
-                    }};
+                    }
+                };
                 if (DisplayConfigGetDeviceInfo(&advColorInfo2.header) == ERROR_SUCCESS) {
                     if (advColorInfo2.highDynamicRangeUserEnabled) {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
@@ -178,7 +180,8 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                             .size = sizeof(advColorInfo),
                             .adapterId = path->targetInfo.adapterId,
                             .id = path->targetInfo.id,
-                        }};
+                        }
+                    };
                     if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS) {
                         if (advColorInfo.advancedColorEnabled) {
                             display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;

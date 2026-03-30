@@ -564,7 +564,8 @@ static bool logoTryKnownType(void) {
                                                                "/bin/sh", "-c",
 #endif
                                                                options->source.chars,
-                                                               NULL});
+                                                               NULL
+                                                           });
 
         if (error) {
             if (instance.config.display.showErrors) {

@@ -174,4 +174,5 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         {"Battery percentage number", "battery-percentage"},
         {"Is connected", "connected"},
         {"Battery percentage bar", "battery-percentage-bar"},
-    }))};
+    }))
+};

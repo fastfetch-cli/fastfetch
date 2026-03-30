@@ -145,4 +145,5 @@ FFModuleBaseInfo ffVulkanModuleInfo = {
         {"API version", "api-version"},
         {"Conformance version", "conformance-version"},
         {"Instance version", "instance-version"},
-    }))};
+    }))
+};

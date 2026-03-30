@@ -668,11 +668,13 @@ typedef unsigned short oss_peaks_t[MAX_PEAK_CHANNELS];
  * Again, DO NOT USE the following two macros.  They are here for SOURCE
  * COMPATIBILITY ONLY.
  */
-#define SOUND_DEVICE_LABELS { \
-    "Vol  ", "Bass ", "Treble", "Synth", "Pcm  ", "Speaker ", "Line ", "Mic  ", "CD   ", "Mix  ", "Pcm2 ", "Rec  ", "IGain", "OGain", "Aux1", "Aux2", "Aux3", "Digital1", "Digital2", "Digital3", "Phone", "Mono", "Video", "Radio", "Depth", "Rear", "Center", "Side"}
+#define SOUND_DEVICE_LABELS {                                                                                                                                                                                                                                          \
+    "Vol  ", "Bass ", "Treble", "Synth", "Pcm  ", "Speaker ", "Line ", "Mic  ", "CD   ", "Mix  ", "Pcm2 ", "Rec  ", "IGain", "OGain", "Aux1", "Aux2", "Aux3", "Digital1", "Digital2", "Digital3", "Phone", "Mono", "Video", "Radio", "Depth", "Rear", "Center", "Side" \
+}
 
-#define SOUND_DEVICE_NAMES { \
-    "vol", "bass", "treble", "synth", "pcm", "speaker", "line", "mic", "cd", "mix", "pcm2", "rec", "igain", "ogain", "aux1", "aux2", "aux3", "dig1", "dig2", "dig3", "phone", "mono", "video", "radio", "depth", "rear", "center", "side"}
+#define SOUND_DEVICE_NAMES {                                                                                                                                                                                                              \
+    "vol", "bass", "treble", "synth", "pcm", "speaker", "line", "mic", "cd", "mix", "pcm2", "rec", "igain", "ogain", "aux1", "aux2", "aux3", "dig1", "dig2", "dig3", "phone", "mono", "video", "radio", "depth", "rear", "center", "side" \
+}
 
 #define MIXER_READ(dev) __OSSIOR('M', dev, int)
 #define MIXER_WRITE(dev) __OSSIOWR('M', dev, int)

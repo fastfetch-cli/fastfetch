@@ -256,4 +256,5 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Processor package count", "packages"},
         {"CPU microarchitecture", "march"},
         {"NUMA node count", "numa-nodes"},
-    }))};
+    }))
+};

@@ -64,7 +64,8 @@ bool ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     bool success = false;
     FFIconsResult result = {
         .icons1 = ffStrbufCreate(),
-        .icons2 = ffStrbufCreate()};
+        .icons2 = ffStrbufCreate()
+    };
     const char* error = ffDetectIcons(&result);
 
     if (error) {
@@ -104,4 +105,5 @@ FFModuleBaseInfo ffIconsModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Icons part 1", "icons1"},
         {"Icons part 2", "icons2"},
-    }))};
+    }))
+};

@@ -117,4 +117,5 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
         {"Firmware file name", "firmware-name"},
         {"Is secure boot enabled", "secure-boot"},
         {"Boot order", "order"},
-    }))};
+    }))
+};

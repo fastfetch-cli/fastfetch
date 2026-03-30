@@ -109,4 +109,5 @@ FFModuleBaseInfo ffFontModuleInfo = {
         {"Font 3", "font3"},
         {"Font 4", "font4"},
         {"Combined fonts for display", "combined"},
-    }))};
+    }))
+};

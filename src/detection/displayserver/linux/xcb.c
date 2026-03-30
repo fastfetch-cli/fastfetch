@@ -246,7 +246,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
     xcb_randr_output_iterator_t outputIterator = {
         .index = 0,
         .data = data->ffxcb_randr_monitor_info_outputs(monitor),
-        .rem = data->ffxcb_randr_monitor_info_outputs_length(monitor)};
+        .rem = data->ffxcb_randr_monitor_info_outputs_length(monitor)
+    };
 
     FF_AUTO_FREE xcb_get_atom_name_reply_t* nameReply = data->ffxcb_get_atom_name_reply(
         data->connection,

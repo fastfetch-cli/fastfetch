@@ -520,4 +520,5 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Total number of all brew packages", "brew-all"},
         {"Total number of all guix packages", "guix-all"},
         {"Total number of all hpkg packages", "hpkg-all"},
-    }))};
+    }))
+};

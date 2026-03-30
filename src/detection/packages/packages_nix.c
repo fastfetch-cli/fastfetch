@@ -128,7 +128,8 @@ static uint32_t getNixPackagesImpl(char* path) {
         FFstrbuf line = {
             .allocated = 0,
             .length = lineLength,
-            .chars = output.chars + i - lineLength};
+            .chars = output.chars + i - lineLength
+        };
         if (isValidNixPkg(&line)) {
             count++;
         }

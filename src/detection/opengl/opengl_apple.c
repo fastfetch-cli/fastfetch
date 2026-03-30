@@ -37,7 +37,8 @@ static const char* cglHandlePixelFormat(FFOpenGLResult* result, CGLPixelFormatOb
 const char* cglDetectOpenGL(FFOpenGLResult* result) {
     CGLPixelFormatObj pixelFormat;
     CGLPixelFormatAttribute attrs[] = {
-        kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core, kCGLPFAAccelerated, 0};
+        kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute) kCGLOGLPVersion_3_2_Core, kCGLPFAAccelerated, 0
+    };
 
     GLint num;
     if (CGLChoosePixelFormat(attrs, &pixelFormat, &num) != kCGLNoError) {

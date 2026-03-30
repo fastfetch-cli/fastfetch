@@ -60,7 +60,8 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
     HANDLE hRadio = NULL;
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstRadio(&(BLUETOOTH_FIND_RADIO_PARAMS) {
-                                                                 .dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS)},
+                                                                 .dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS)
+                                                             },
         &hRadio);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {

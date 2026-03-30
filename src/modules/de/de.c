@@ -94,4 +94,5 @@ FFModuleBaseInfo ffDEModuleInfo = {
         {"DE process name", "process-name"},
         {"DE pretty name", "pretty-name"},
         {"DE version", "version"},
-    }))};
+    }))
+};

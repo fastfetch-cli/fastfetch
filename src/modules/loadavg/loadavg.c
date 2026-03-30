@@ -160,4 +160,5 @@ FFModuleBaseInfo ffLoadavgModuleInfo = {
         {"Load average over 1min", "loadavg1"},
         {"Load average over 5min", "loadavg2"},
         {"Load average over 15min", "loadavg3"},
-    }))};
+    }))
+};

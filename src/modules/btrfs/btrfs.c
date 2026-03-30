@@ -220,4 +220,5 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
         {"Allocated percentage bar", "allocated-percentage-bar"},
         {"Node size", "node-size"},
         {"Sector size", "sector-size"},
-    }))};
+    }))
+};

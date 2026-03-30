@@ -131,4 +131,5 @@ FFModuleBaseInfo ffMemoryModuleInfo = {
         {"Total size", "total"},
         {"Percentage used (num)", "percentage"},
         {"Percentage used (bar)", "percentage-bar"},
-    }))};
+    }))
+};

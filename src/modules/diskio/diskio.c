@@ -189,4 +189,5 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         {"Size of data written [per second] (in bytes)", "bytes-written"},
         {"Number of reads", "read-count"},
         {"Number of writes", "write-count"},
-    }))};
+    }))
+};

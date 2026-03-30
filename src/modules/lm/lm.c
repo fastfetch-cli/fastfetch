@@ -118,4 +118,5 @@ FFModuleBaseInfo ffLMModuleInfo = {
         {"LM service", "service"},
         {"LM type", "type"},
         {"LM version", "version"},
-    }))};
+    }))
+};

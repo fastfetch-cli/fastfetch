@@ -163,4 +163,5 @@ FFModuleBaseInfo ffCommandModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Command result", "result"},
-    }))};
+    }))
+};

@@ -202,4 +202,5 @@ FFModuleBaseInfo ffUsersModuleInfo = {
         {"Years integer after login", "years"},
         {"Days of year after login", "days-of-year"},
         {"Years fraction after login", "years-fraction"},
-    }))};
+    }))
+};

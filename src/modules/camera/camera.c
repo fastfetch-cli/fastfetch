@@ -130,4 +130,5 @@ FFModuleBaseInfo ffCameraModuleInfo = {
         {"Identifier", "id"},
         {"Width (in px)", "width"},
         {"Height (in px)", "height"},
-    }))};
+    }))
+};

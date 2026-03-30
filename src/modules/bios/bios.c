@@ -144,4 +144,5 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         {"Bios vendor", "vendor"},
         {"Bios version", "version"},
         {"Firmware type", "type"},
-    }))};
+    }))
+};

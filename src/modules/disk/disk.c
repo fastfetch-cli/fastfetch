@@ -486,4 +486,5 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         {"Years fraction after creation", "years-fraction"},
         {"Size free", "size-free"},
         {"Size available", "size-available"},
-    }))};
+    }))
+};

@@ -117,4 +117,5 @@ FFModuleBaseInfo ffEditorModuleInfo = {
         {"Exe name of real path", "exe-name"},
         {"Full path of real path", "path"},
         {"Version", "version"},
-    }))};
+    }))
+};

@@ -247,7 +247,8 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
-        .global_remove = (void*) stubListener};
+        .global_remove = (void*) stubListener
+    };
 
     data.ffwl_proxy_add_listener(registry, (void (**)(void)) &registry_listener, &data);
     data.ffwl_display_roundtrip(data.display);

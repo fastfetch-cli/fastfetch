@@ -210,7 +210,8 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     struct addrinfo hints = {
         .ai_family = state->ipv6 ? AF_INET6 : AF_INET,
         .ai_socktype = SOCK_STREAM,
-        .ai_flags = AI_NUMERICSERV};
+        .ai_flags = AI_NUMERICSERV
+    };
 
     FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
     // Use AI_NUMERICSERV flag to indicate the service is a numeric port, reducing parsing time
@@ -377,7 +378,8 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     {
         int pollRes = poll(&(struct pollfd) {
                                .fd = state->sockfd,
-                               .events = POLLIN},
+                               .events = POLLIN
+                           },
             1,
             timeout > 0 ? (int) timeout : -1);
         if (pollRes == 0) {

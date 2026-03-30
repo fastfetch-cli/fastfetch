@@ -10,6 +10,7 @@ ColumnLimit: 0
 ReflowComments: true
 
 BreakBeforeBraces: Attach
+BreakBeforeCloseBracketBracedList: true
 BraceWrapping:
   AfterControlStatement: false
   AfterEnum: false

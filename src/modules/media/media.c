@@ -195,4 +195,5 @@ FFModuleBaseInfo ffMediaModuleInfo = {
         {"Artist name", "artist"},
         {"Album name", "album"},
         {"Status", "status"},
-    }))};
+    }))
+};

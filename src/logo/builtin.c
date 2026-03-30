@@ -5383,7 +5383,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_BLACK,
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_YELLOW,
-        }},
+        }
+    },
     // Xenia
     {
         .names = {"Xenia"},

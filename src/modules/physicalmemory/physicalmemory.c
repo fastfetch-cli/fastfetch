@@ -192,4 +192,5 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         {"Part number", "part-number"},
         {"True if ECC enabled", "is-ecc-enabled"},
         {"True if a memory module is installed in the slot", "is-installed"},
-    }))};
+    }))
+};

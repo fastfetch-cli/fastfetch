@@ -41,7 +41,8 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
         .iPixelType = PFD_TYPE_RGBA,
         .cColorBits = 32,
         .cDepthBits = 24,
-        .iLayerType = PFD_MAIN_PLANE};
+        .iLayerType = PFD_MAIN_PLANE
+    };
     int pixelFormat = ChoosePixelFormat(hdc, &pfd);
     if (pixelFormat == 0) {
         ReleaseDC(hWnd, hdc);

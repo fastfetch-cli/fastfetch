@@ -77,4 +77,5 @@ FFModuleBaseInfo ffLocaleModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateLocaleJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Locale code", "result"},
-    }))};
+    }))
+};

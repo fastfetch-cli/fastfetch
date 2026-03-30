@@ -249,4 +249,5 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         {"Device kind (Read-only or Read-write)", "readonly-type"},
         {"Product revision", "revision"},
         {"Device temperature (formatted)", "temperature"},
-    }))};
+    }))
+};

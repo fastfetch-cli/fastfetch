@@ -7,7 +7,8 @@
 bool ffPrintTheme(FFThemeOptions* options) {
     FFThemeResult result = {
         .theme1 = ffStrbufCreate(),
-        .theme2 = ffStrbufCreate()};
+        .theme2 = ffStrbufCreate()
+    };
     const char* error = ffDetectTheme(&result);
 
     if (error) {
@@ -58,7 +59,8 @@ void ffGenerateThemeJsonConfig(FFThemeOptions* options, yyjson_mut_doc* doc, yyj
 bool ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFThemeResult result = {
         .theme1 = ffStrbufCreate(),
-        .theme2 = ffStrbufCreate()};
+        .theme2 = ffStrbufCreate()
+    };
     const char* error = ffDetectTheme(&result);
 
     if (error) {
@@ -96,4 +98,5 @@ FFModuleBaseInfo ffThemeModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Theme part 1", "theme1"},
         {"Theme part 2", "theme2"},
-    }))};
+    }))
+};

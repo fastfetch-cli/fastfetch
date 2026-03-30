@@ -100,4 +100,5 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         {"Terminal version", "version"},
         {"Terminal full exe path", "exe-path"},
         {"Terminal tty / pts used", "tty"},
-    }))};
+    }))
+};

@@ -230,4 +230,5 @@ FFModuleBaseInfo ffSoundModuleInfo = {
         {"Identifier", "identifier"},
         {"Volume (in percentage bar)", "volume-percentage-bar"},
         {"Platform API used", "platform-api"},
-    }))};
+    }))
+};

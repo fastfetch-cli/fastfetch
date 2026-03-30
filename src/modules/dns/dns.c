@@ -144,4 +144,5 @@ FFModuleBaseInfo ffDNSModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateDNSJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"DNS result", "result"},
-    }))};
+    }))
+};

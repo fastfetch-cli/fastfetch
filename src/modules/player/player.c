@@ -122,4 +122,5 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         {"Player name", "name"},
         {"Player Identifier", "id"},
         {"URL name", "url"},
-    }))};
+    }))
+};

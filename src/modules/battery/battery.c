@@ -273,4 +273,5 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         {"Battery time remaining minutes", "time-minutes"},
         {"Battery time remaining seconds", "time-seconds"},
         {"Battery time remaining (formatted)", "time-formatted"},
-    }))};
+    }))
+};

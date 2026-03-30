@@ -7,7 +7,8 @@
 bool ffPrintTPM(FFTPMOptions* options) {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
-        .description = ffStrbufCreate()};
+        .description = ffStrbufCreate()
+    };
     const char* error = ffDetectTPM(&result);
 
     if (error) {
@@ -54,7 +55,8 @@ void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_
 bool ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
-        .description = ffStrbufCreate()};
+        .description = ffStrbufCreate()
+    };
     const char* error = ffDetectTPM(&result);
 
     if (error) {
@@ -92,4 +94,5 @@ FFModuleBaseInfo ffTPMModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"TPM device version", "version"},
         {"TPM general description", "description"},
-    }))};
+    }))
+};

@@ -101,4 +101,5 @@ FFModuleBaseInfo ffWeatherModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateWeatherJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Weather result", "result"},
-    }))};
+    }))
+};

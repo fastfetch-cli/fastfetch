@@ -71,4 +71,5 @@ FFModuleBaseInfo ffWMThemeModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateWMThemeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"WM theme", "result"},
-    }))};
+    }))
+};

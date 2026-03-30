@@ -198,4 +198,5 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         {"CPU usage (percentage bar, average)", "avg-bar"},
         {"CPU usage (percentage bar, maximum)", "max-bar"},
         {"CPU usage (percentage bar, minimum)", "min-bar"},
-    }))};
+    }))
+};

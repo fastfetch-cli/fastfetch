@@ -236,4 +236,5 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         {"Connection signal quality (percentage bar)", "signal-quality-bar"},
         {"Connection channel number", "channel"},
         {"Connection channel band in GHz", "band"},
-    }))};
+    }))
+};

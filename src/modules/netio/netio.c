@@ -220,4 +220,5 @@ FFModuleBaseInfo ffNetIOModuleInfo = {
         {"Number of errors sent [per second]", "tx-errors"},
         {"Number of packets dropped when receiving [per second]", "rx-drops"},
         {"Number of packets dropped when sending [per second]", "tx-drops"},
-    }))};
+    }))
+};

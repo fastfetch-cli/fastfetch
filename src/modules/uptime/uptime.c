@@ -102,4 +102,5 @@ FFModuleBaseInfo ffUptimeModuleInfo = {
         {"Days of year after boot", "days-of-year"},
         {"Years fraction after boot", "years-fraction"},
         {"Formatted uptime", "formatted"},
-    }))};
+    }))
+};

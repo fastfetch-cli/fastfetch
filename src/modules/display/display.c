@@ -453,4 +453,5 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         {"Screen preferred height (in pixels)", "preferred-height"},
         {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
         {"DPI", "dpi"},
-    }))};
+    }))
+};

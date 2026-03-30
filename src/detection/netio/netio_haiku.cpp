@@ -44,7 +44,8 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
             .rxErrors = stats.receive.errors,
             .txErrors = stats.send.errors,
             .rxDrops = stats.receive.dropped,
-            .txDrops = stats.send.dropped};
+            .txDrops = stats.send.dropped
+        };
     }
 
     return NULL;

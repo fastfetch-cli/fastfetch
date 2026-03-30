@@ -99,12 +99,14 @@ static const char* detectVulkan(FFVulkanResult* result) {
                                               .engineVersion = projectVersion,
 
                                               // We need to request 1.1 to get physicalDeviceDriverProperties
-                                              .apiVersion = instanceVersion.minor >= 1 ? VK_API_VERSION_1_1 : VK_API_VERSION_1_0},
+                                              .apiVersion = instanceVersion.minor >= 1 ? VK_API_VERSION_1_1 : VK_API_VERSION_1_0
+                                          },
                                           .enabledLayerCount = 0,
                                           .ppEnabledLayerNames = NULL,
                                           .enabledExtensionCount = 0,
                                           .ppEnabledExtensionNames = NULL,
-                                          .flags = 0},
+                                          .flags = 0
+                                      },
         NULL,
         &vkInstance);
     if (res != VK_SUCCESS) {

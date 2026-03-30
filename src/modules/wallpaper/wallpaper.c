@@ -86,4 +86,5 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"File name", "file-name"},
         {"Full path", "full-path"},
-    }))};
+    }))
+};

@@ -176,4 +176,5 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         {"Offset from UTC in the ISO 8601 format", "offset-from-utc"},
         {"Locale-dependent timezone name or abbreviation", "timezone-name"},
         {"Day in month with leading zero", "day-pretty"},
-    }))};
+    }))
+};

@@ -142,7 +142,8 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 
     // Initialize overlapped structure with WSA event for asynchronous I/O
     state->overlapped = (OVERLAPPED) {
-        .hEvent = WSACreateEvent()};
+        .hEvent = WSACreateEvent()
+    };
 
     if (state->overlapped.hEvent == WSA_INVALID_EVENT) {
         FF_DEBUG("WSACreateEvent() failed");

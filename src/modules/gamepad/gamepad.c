@@ -202,4 +202,5 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         {"Serial number", "serial"},
         {"Battery percentage num", "battery-percentage"},
         {"Battery percentage bar", "battery-percentage-bar"},
-    }))};
+    }))
+};
