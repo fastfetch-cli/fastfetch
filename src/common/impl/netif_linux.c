@@ -7,6 +7,19 @@
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 
+static bool ffNetifGetNetlinkPortId(int sock_fd, uint32_t* pid) {
+    struct sockaddr_nl addr = {};
+    socklen_t addrLen = sizeof(addr);
+    if (getsockname(sock_fd, (struct sockaddr*) &addr, &addrLen) < 0) {
+        FF_DEBUG("Failed to query netlink socket address: %s", strerror(errno));
+        return false;
+    }
+
+    *pid = addr.nl_pid;
+    FF_DEBUG("Netlink port ID: %u", *pid);
+    return true;
+}
+
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     FF_DEBUG("Starting IPv4 default route detection");
 
@@ -16,9 +29,6 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         return false;
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
-
-    uint32_t pid = instance.state.platform.pid;
-    FF_DEBUG("Process PID: %u", pid);
 
     // Bind socket
     struct sockaddr_nl addr = {
@@ -32,6 +42,11 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         return false;
     }
     FF_DEBUG("Successfully bound socket");
+
+    uint32_t pid;
+    if (!ffNetifGetNetlinkPortId(sock_fd, &pid)) {
+        return false;
+    }
 
     struct __attribute__((__packed__)) {
         struct nlmsghdr nlh;
@@ -228,9 +243,6 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
 
-    uint32_t pid = instance.state.platform.pid;
-    FF_DEBUG("Process PID: %u", pid);
-
     // Bind socket
     struct sockaddr_nl addr = {
         .nl_family = AF_NETLINK,
@@ -243,6 +255,11 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
         return false;
     }
     FF_DEBUG("Successfully bound socket");
+
+    uint32_t pid;
+    if (!ffNetifGetNetlinkPortId(sock_fd, &pid)) {
+        return false;
+    }
 
     struct __attribute__((__packed__)) {
         struct nlmsghdr nlh;
