@@ -92,8 +92,8 @@ static const char* smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t* i
 
 // Provides key info, using a cache to dramatically improve the energy impact of smcFanControl
 static const char* smcGetKeyInfo(io_connect_t conn, const uint32_t key, SmcKeyData_keyInfo_t* key_info) {
-    SmcKeyData_t inputStructure = {0};
-    SmcKeyData_t outputStructure = {0};
+    SmcKeyData_t inputStructure = { 0 };
+    SmcKeyData_t outputStructure = { 0 };
 
     inputStructure.key = key;
     inputStructure.data8 = kSmcCmdReadKeyInfo;
@@ -108,8 +108,8 @@ static const char* smcGetKeyInfo(io_connect_t conn, const uint32_t key, SmcKeyDa
 }
 
 static const char* smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcVal_t* val) {
-    SmcKeyData_t inputStructure = {0};
-    SmcKeyData_t outputStructure = {0};
+    SmcKeyData_t inputStructure = { 0 };
+    SmcKeyData_t outputStructure = { 0 };
 
     inputStructure.key = smcStrtoul(key, 4, 16);
     strcpy(val->key, key);
@@ -148,7 +148,7 @@ static const char* smcOpen(io_connect_t* conn) {
 }
 
 static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, double* value) {
-    SmcVal_t val = {0};
+    SmcVal_t val = { 0 };
     const char* error = smcReadSmcVal(conn, key, &val);
     if (error != NULL) {
         return error;

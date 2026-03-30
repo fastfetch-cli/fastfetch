@@ -115,8 +115,8 @@ FFModuleBaseInfo ffLMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLMJsonResult,
     .generateJsonConfig = (void*) ffGenerateLMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"LM service", "service"},
-        {"LM type", "type"},
-        {"LM version", "version"},
+        { "LM service", "service" },
+        { "LM type", "type" },
+        { "LM version", "version" },
     }))
 };

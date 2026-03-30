@@ -92,7 +92,7 @@ FFModuleBaseInfo ffTPMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTPMJsonResult,
     .generateJsonConfig = (void*) ffGenerateTPMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"TPM device version", "version"},
-        {"TPM general description", "description"},
+        { "TPM device version", "version" },
+        { "TPM general description", "description" },
     }))
 };

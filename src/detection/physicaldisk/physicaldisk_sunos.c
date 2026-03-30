@@ -71,7 +71,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
     if (rootNode == DI_NODE_NIL) {
         return "di_init() failed";
     }
-    di_walk_minor(rootNode, DDI_NT_BLOCK, DI_WALK_CLDFIRST, &(struct FFWalkTreeBundle) {options, result}, (void*) walkDevTree);
+    di_walk_minor(rootNode, DDI_NT_BLOCK, DI_WALK_CLDFIRST, &(struct FFWalkTreeBundle) { options, result }, (void*) walkDevTree);
     di_fini(rootNode);
 
     return NULL;

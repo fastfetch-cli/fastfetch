@@ -7,7 +7,7 @@
 #include <sys/sensors.h>
 
 static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) {
-    int mib[5] = {CTL_HW, HW_SENSORS, 0, SENSOR_TEMP, 0};
+    int mib[5] = { CTL_HW, HW_SENSORS, 0, SENSOR_TEMP, 0 };
 
     for (mib[2] = 0; mib[2] < 1024; mib[2]++) {
         struct sensordev sensordev;

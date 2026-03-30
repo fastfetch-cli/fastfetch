@@ -129,8 +129,8 @@ FFModuleBaseInfo ffOpenCLModuleInfo = {
     .generateJsonResult = (void*) ffGenerateOpenCLJsonResult,
     .generateJsonConfig = (void*) ffGenerateOpenCLJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Platform version", "version"},
-        {"Platform name", "name"},
-        {"Platform vendor", "vendor"},
+        { "Platform version", "version" },
+        { "Platform name", "name" },
+        { "Platform vendor", "vendor" },
     }))
 };

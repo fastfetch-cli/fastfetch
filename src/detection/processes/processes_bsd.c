@@ -11,7 +11,7 @@
 #endif
 
 const char* ffDetectProcesses(uint32_t* result) {
-    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_PROC};
+    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_PROC };
     size_t length;
 
     if (sysctl(request, ARRAY_SIZE(request), NULL, &length, NULL, 0) != 0) {

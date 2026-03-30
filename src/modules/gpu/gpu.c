@@ -230,11 +230,11 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
         if (unsafe_yyjson_equals_str(key, "detectionMethod")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"auto", FF_GPU_DETECTION_METHOD_AUTO},
-                                                                       {"pci", FF_GPU_DETECTION_METHOD_PCI},
-                                                                       {"vulkan", FF_GPU_DETECTION_METHOD_VULKAN},
-                                                                       {"opencl", FF_GPU_DETECTION_METHOD_OPENCL},
-                                                                       {"opengl", FF_GPU_DETECTION_METHOD_OPENGL},
+                                                                       { "auto", FF_GPU_DETECTION_METHOD_AUTO },
+                                                                       { "pci", FF_GPU_DETECTION_METHOD_PCI },
+                                                                       { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
+                                                                       { "opencl", FF_GPU_DETECTION_METHOD_OPENCL },
+                                                                       { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
                                                                        {},
                                                                    });
             if (error) {
@@ -251,10 +251,10 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
             } else {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                           {"none", FF_GPU_TYPE_NONE},
-                                                                           {"unknown", FF_GPU_TYPE_UNKNOWN},
-                                                                           {"integrated", FF_GPU_TYPE_INTEGRATED},
-                                                                           {"discrete", FF_GPU_TYPE_DISCRETE},
+                                                                           { "none", FF_GPU_TYPE_NONE },
+                                                                           { "unknown", FF_GPU_TYPE_UNKNOWN },
+                                                                           { "integrated", FF_GPU_TYPE_INTEGRATED },
+                                                                           { "discrete", FF_GPU_TYPE_DISCRETE },
                                                                            {},
                                                                        });
                 if (error) {
@@ -444,8 +444,8 @@ void ffInitGPUOptions(FFGPUOptions* options) {
         ;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_NONE;
-    options->tempConfig = (FFColorRangeConfig) {60, 80};
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options) {
@@ -462,25 +462,25 @@ FFModuleBaseInfo ffGPUModuleInfo = {
     .generateJsonResult = (void*) ffGenerateGPUJsonResult,
     .generateJsonConfig = (void*) ffGenerateGPUJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"GPU vendor", "vendor"},
-        {"GPU name", "name"},
-        {"GPU driver", "driver"},
-        {"GPU temperature", "temperature"},
-        {"GPU core count", "core-count"},
-        {"GPU type", "type"},
-        {"GPU total dedicated memory", "dedicated-total"},
-        {"GPU used dedicated memory", "dedicated-used"},
-        {"GPU total shared memory", "shared-total"},
-        {"GPU used shared memory", "shared-used"},
-        {"The platform API used when detecting the GPU", "platform-api"},
-        {"Current frequency in GHz", "frequency"},
-        {"GPU vendor specific index", "index"},
-        {"Dedicated memory usage percentage num", "dedicated-percentage-num"},
-        {"Dedicated memory usage percentage bar", "dedicated-percentage-bar"},
-        {"Shared memory usage percentage num", "shared-percentage-num"},
-        {"Shared memory usage percentage bar", "shared-percentage-bar"},
-        {"Core usage percentage num", "core-usage-num"},
-        {"Core usage percentage bar", "core-usage-bar"},
-        {"Memory type (Windows only)", "memory-type"},
+        { "GPU vendor", "vendor" },
+        { "GPU name", "name" },
+        { "GPU driver", "driver" },
+        { "GPU temperature", "temperature" },
+        { "GPU core count", "core-count" },
+        { "GPU type", "type" },
+        { "GPU total dedicated memory", "dedicated-total" },
+        { "GPU used dedicated memory", "dedicated-used" },
+        { "GPU total shared memory", "shared-total" },
+        { "GPU used shared memory", "shared-used" },
+        { "The platform API used when detecting the GPU", "platform-api" },
+        { "Current frequency in GHz", "frequency" },
+        { "GPU vendor specific index", "index" },
+        { "Dedicated memory usage percentage num", "dedicated-percentage-num" },
+        { "Dedicated memory usage percentage bar", "dedicated-percentage-bar" },
+        { "Shared memory usage percentage num", "shared-percentage-num" },
+        { "Shared memory usage percentage bar", "shared-percentage-bar" },
+        { "Core usage percentage num", "core-usage-num" },
+        { "Core usage percentage bar", "core-usage-bar" },
+        { "Memory type (Windows only)", "memory-type" },
     })),
 };

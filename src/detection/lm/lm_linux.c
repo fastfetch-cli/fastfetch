@@ -10,9 +10,9 @@
 #define FF_SYSTEMD_USERS_PATH "/run/systemd/users/"
 
 static const char* getGdmVersion(FFstrbuf* version) {
-    const char* error = ffProcessAppendStdOut(version, (char* const[]) {"gdm", "--version", NULL});
+    const char* error = ffProcessAppendStdOut(version, (char* const[]) { "gdm", "--version", NULL });
     if (error || version->length == 0) {
-        error = ffProcessAppendStdOut(version, (char* const[]) {"gdm3", "--version", NULL});
+        error = ffProcessAppendStdOut(version, (char* const[]) { "gdm3", "--version", NULL });
         if (error || version->length == 0) {
             return "Failed to get GDM version";
         }
@@ -24,7 +24,7 @@ static const char* getGdmVersion(FFstrbuf* version) {
 }
 
 static const char* getSshdVersion(FFstrbuf* version) {
-    const char* error = ffProcessAppendStdErr(version, (char* const[]) {"sshd", "-V", NULL});
+    const char* error = ffProcessAppendStdErr(version, (char* const[]) { "sshd", "-V", NULL });
     if (error) {
         return error;
     }
@@ -87,7 +87,7 @@ static const char* getSddmVersion(FF_MAYBE_UNUSED FFstrbuf* version) {
 #endif
 
 static const char* getXfwmVersion(FFstrbuf* version) {
-    const char* error = ffProcessAppendStdOut(version, (char* const[]) {"xfwm4", "--version", NULL});
+    const char* error = ffProcessAppendStdOut(version, (char* const[]) { "xfwm4", "--version", NULL });
     if (error) {
         return error;
     }
@@ -100,7 +100,7 @@ static const char* getXfwmVersion(FFstrbuf* version) {
 }
 
 static const char* getLightdmVersion(FFstrbuf* version) {
-    const char* error = ffProcessAppendStdErr(version, (char* const[]) {"lightdm", "--version", NULL});
+    const char* error = ffProcessAppendStdErr(version, (char* const[]) { "lightdm", "--version", NULL });
     if (error) {
         return error;
     }
@@ -124,7 +124,7 @@ const char* ffDetectLM(FFLMResult* result) {
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use
         if (!ffParsePropFileValues(path.chars, 1, (FFpropquery[]) {
-                                                      {"DISPLAY=", &sessionId},
+                                                      { "DISPLAY=", &sessionId },
                                                   })) {
             return "Failed to get $XDG_SESSION_ID";
         }
@@ -135,8 +135,8 @@ const char* ffDetectLM(FFLMResult* result) {
 
     // WARNING: This is private data. Do not parse
     if (!ffParsePropFileValues(path.chars, 2, (FFpropquery[]) {
-                                                  {"SERVICE=", &result->service},
-                                                  {"TYPE=", &result->type},
+                                                  { "SERVICE=", &result->service },
+                                                  { "TYPE=", &result->type },
                                               })) {
         return "Failed to parse " FF_SYSTEMD_SESSIONS_PATH "$XDG_SESSION_ID";
     }

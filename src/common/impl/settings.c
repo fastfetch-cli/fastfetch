@@ -22,11 +22,11 @@ static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, const G
     if (variant == NULL) {
         result = FF_VARIANT_NULL;
     } else if (type == FF_VARIANT_TYPE_STRING) {
-        result = (FFvariant) {.strValue = variantGetters->ffg_variant_dup_string(variant, NULL)}; // Dup string, so that variant itself can be freed
+        result = (FFvariant) { .strValue = variantGetters->ffg_variant_dup_string(variant, NULL) }; // Dup string, so that variant itself can be freed
     } else if (type == FF_VARIANT_TYPE_BOOL) {
-        result = (FFvariant) {.boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true};
+        result = (FFvariant) { .boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true };
     } else if (type == FF_VARIANT_TYPE_INT) {
-        result = (FFvariant) {.intValue = variantGetters->ffg_variant_get_int32(variant)};
+        result = (FFvariant) { .intValue = variantGetters->ffg_variant_get_int32(variant) };
     } else {
         result = FF_VARIANT_NULL;
     }
@@ -223,7 +223,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
         int32_t value;
         if (ffDBusGetInt(&dbus, &rootIterator, &value)) {
             dbus.lib->ffdbus_message_unref(reply);
-            return (FFvariant) {.intValue = value};
+            return (FFvariant) { .intValue = value };
         }
         return FF_VARIANT_NULL;
     }
@@ -232,7 +232,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
         FFstrbuf value = ffStrbufCreate();
         if (ffDBusGetString(&dbus, &rootIterator, &value)) {
             dbus.lib->ffdbus_message_unref(reply);
-            return (FFvariant) {.strValue = value.chars}; // Leaks value.chars
+            return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
         }
         return FF_VARIANT_NULL;
     }
@@ -241,7 +241,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
         bool value;
         if (ffDBusGetBool(&dbus, &rootIterator, &value)) {
             dbus.lib->ffdbus_message_unref(reply);
-            return (FFvariant) {.boolValue = value, .boolValueSet = true};
+            return (FFvariant) { .boolValue = value, .boolValueSet = true };
         }
     }
 
@@ -295,7 +295,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
             int32_t value;
             if (ffDBusGetInt(&dbus, &dictIterator, &value)) {
                 dbus.lib->ffdbus_message_unref(reply);
-                return (FFvariant) {.intValue = value};
+                return (FFvariant) { .intValue = value };
             }
             return FF_VARIANT_NULL;
         }
@@ -304,7 +304,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
             FFstrbuf value = ffStrbufCreate();
             if (ffDBusGetString(&dbus, &dictIterator, &value)) {
                 dbus.lib->ffdbus_message_unref(reply);
-                return (FFvariant) {.strValue = value.chars}; // Leaks value.chars
+                return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
             }
             return FF_VARIANT_NULL;
         }
@@ -313,7 +313,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
             bool value;
             if (ffDBusGetBool(&dbus, &dictIterator, &value)) {
                 dbus.lib->ffdbus_message_unref(reply);
-                return (FFvariant) {.boolValue = value, .boolValueSet = true};
+                return (FFvariant) { .boolValue = value, .boolValueSet = true };
             }
         }
 

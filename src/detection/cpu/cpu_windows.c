@@ -24,7 +24,7 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
         .Identifier = {
             // Thermal Zone Information
             // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib\_V2Providers\{383487a6-3676-4870-a4e7-d45b30c35629}\{52bc5412-dac2-449c-8bc2-96443888fe6b}
-            .CounterSetGuid = {0x52bc5412, 0xdac2, 0x449c, {0x8b, 0xc2, 0x96, 0x44, 0x38, 0x88, 0xfe, 0x6b}},
+            .CounterSetGuid = { 0x52bc5412, 0xdac2, 0x449c, { 0x8b, 0xc2, 0x96, 0x44, 0x38, 0x88, 0xfe, 0x6b } },
             .Size = sizeof(querySpec),
             .CounterId = PERF_WILDCARD_COUNTER,
             .InstanceId = PERF_WILDCARD_COUNTER,

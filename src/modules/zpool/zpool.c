@@ -184,7 +184,7 @@ bool ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
 
 void ffInitZpoolOptions(FFZpoolOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyZpoolOptions(FFZpoolOptions* options) {
@@ -201,18 +201,18 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,
     .generateJsonConfig = (void*) ffGenerateZpoolJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Zpool name", "name"},
-        {"Zpool guid", "guid"},
-        {"Zpool state", "state"},
-        {"Size used", "used"},
-        {"Size allocated", "allocated"},
-        {"Size total", "total"},
-        {"Size used percentage num", "used-percentage"},
-        {"Size allocated percentage num", "allocated-percentage"},
-        {"Fragmentation percentage num", "fragmentation-percentage"},
-        {"Size used percentage bar", "used-percentage-bar"},
-        {"Size allocated percentage bar", "allocated-percentage-bar"},
-        {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
-        {"Is read-only", "is-readonly"},
+        { "Zpool name", "name" },
+        { "Zpool guid", "guid" },
+        { "Zpool state", "state" },
+        { "Size used", "used" },
+        { "Size allocated", "allocated" },
+        { "Size total", "total" },
+        { "Size used percentage num", "used-percentage" },
+        { "Size allocated percentage num", "allocated-percentage" },
+        { "Fragmentation percentage num", "fragmentation-percentage" },
+        { "Size used percentage bar", "used-percentage-bar" },
+        { "Size allocated percentage bar", "allocated-percentage-bar" },
+        { "Fragmentation percentage bar", "fragmentation-percentage-bar" },
+        { "Is read-only", "is-readonly" },
     }))
 };

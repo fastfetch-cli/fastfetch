@@ -221,7 +221,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options) {
 
     ffStrbufInit(&options->namePrefix);
     options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) {50, 70};
+    options->tempConfig = (FFColorRangeConfig) { 50, 70 };
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options) {
@@ -239,15 +239,15 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
     .generateJsonResult = (void*) ffGeneratePhysicalDiskJsonResult,
     .generateJsonConfig = (void*) ffGeneratePhysicalDiskJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Device size (formatted)", "size"},
-        {"Device name", "name"},
-        {"Device interconnect type", "interconnect"},
-        {"Device raw file path", "dev-path"},
-        {"Serial number", "serial"},
-        {"Device kind (SSD or HDD)", "physical-type"},
-        {"Device kind (Removable or Fixed)", "removable-type"},
-        {"Device kind (Read-only or Read-write)", "readonly-type"},
-        {"Product revision", "revision"},
-        {"Device temperature (formatted)", "temperature"},
+        { "Device size (formatted)", "size" },
+        { "Device name", "name" },
+        { "Device interconnect type", "interconnect" },
+        { "Device raw file path", "dev-path" },
+        { "Serial number", "serial" },
+        { "Device kind (SSD or HDD)", "physical-type" },
+        { "Device kind (Removable or Fixed)", "removable-type" },
+        { "Device kind (Read-only or Read-write)", "readonly-type" },
+        { "Product revision", "revision" },
+        { "Device temperature (formatted)", "temperature" },
     }))
 };

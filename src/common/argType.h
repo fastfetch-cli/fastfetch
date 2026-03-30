@@ -26,7 +26,7 @@ typedef enum __attribute__((__packed__)) FFArgType {
     FF_ARG_TYPE_BUFFER,
 } FFArgType;
 
-#define FF_ARG(variable, var_name) {_Generic((variable),                                    \
+#define FF_ARG(variable, var_name) { _Generic((variable),                                   \
         uint32_t: FF_ARG_TYPE_UINT,                                                         \
         uint64_t: FF_ARG_TYPE_UINT64,                                                       \
         uint16_t: FF_ARG_TYPE_UINT16,                                                       \
@@ -41,4 +41,4 @@ typedef enum __attribute__((__packed__)) FFArgType {
         bool: FF_ARG_TYPE_BOOL,                                                             \
         FFArgBuffer: FF_ARG_TYPE_BUFFER),                                                   \
     _Generic((variable), char*: (variable), const char*: (variable), default: &(variable)), \
-    (var_name)}
+    (var_name) }

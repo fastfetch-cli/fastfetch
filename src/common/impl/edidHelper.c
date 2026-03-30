@@ -118,7 +118,7 @@ bool ffEdidIsValid(const uint8_t edid[128], uint32_t length) {
         return false;
     }
 
-    static const uint8_t edidHeader[] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
+    static const uint8_t edidHeader[] = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00 };
     if (memcmp(edid, edidHeader, sizeof(edidHeader)) != 0) {
         return false;
     }

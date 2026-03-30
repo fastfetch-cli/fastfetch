@@ -84,7 +84,7 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
     .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,
     .generateJsonConfig = (void*) ffGenerateWallpaperJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"File name", "file-name"},
-        {"Full path", "full-path"},
+        { "File name", "file-name" },
+        { "Full path", "full-path" },
     }))
 };

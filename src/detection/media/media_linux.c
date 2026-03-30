@@ -80,7 +80,7 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                             if (i + 2 >= path.length) {
                                 break;
                             }
-                            char str[] = {path.chars[i + 1], path.chars[i + 2], 0};
+                            char str[] = { path.chars[i + 1], path.chars[i + 2], 0 };
                             char* end = NULL;
                             const char decodedChar = (char) strtoul(str, &end, 16);
                             if (end == &str[2]) {
@@ -155,7 +155,7 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
                     if (fileName[1] == 0 || fileName[2] == 0) {
                         break;
                     }
-                    char str[] = {fileName[1], fileName[2], 0};
+                    char str[] = { fileName[1], fileName[2], 0 };
                     ffStrbufAppendC(&result->song, (char) strtoul(str, NULL, 16));
                     fileName += 2;
                 }

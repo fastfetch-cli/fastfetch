@@ -49,22 +49,22 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             }
         } else if (ffStrEqualsIgnCase(subKey, "type")) {
             options->type = (FFLogoType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                           {"auto", FF_LOGO_TYPE_AUTO},
-                                                                           {"builtin", FF_LOGO_TYPE_BUILTIN},
-                                                                           {"small", FF_LOGO_TYPE_SMALL},
-                                                                           {"file", FF_LOGO_TYPE_FILE},
-                                                                           {"file-raw", FF_LOGO_TYPE_FILE_RAW},
-                                                                           {"data", FF_LOGO_TYPE_DATA},
-                                                                           {"data-raw", FF_LOGO_TYPE_DATA_RAW},
-                                                                           {"command-raw", FF_LOGO_TYPE_COMMAND_RAW},
-                                                                           {"sixel", FF_LOGO_TYPE_IMAGE_SIXEL},
-                                                                           {"kitty", FF_LOGO_TYPE_IMAGE_KITTY},
-                                                                           {"kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT},
-                                                                           {"kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT},
-                                                                           {"iterm", FF_LOGO_TYPE_IMAGE_ITERM},
-                                                                           {"chafa", FF_LOGO_TYPE_IMAGE_CHAFA},
-                                                                           {"raw", FF_LOGO_TYPE_IMAGE_RAW},
-                                                                           {"none", FF_LOGO_TYPE_NONE},
+                                                                           { "auto", FF_LOGO_TYPE_AUTO },
+                                                                           { "builtin", FF_LOGO_TYPE_BUILTIN },
+                                                                           { "small", FF_LOGO_TYPE_SMALL },
+                                                                           { "file", FF_LOGO_TYPE_FILE },
+                                                                           { "file-raw", FF_LOGO_TYPE_FILE_RAW },
+                                                                           { "data", FF_LOGO_TYPE_DATA },
+                                                                           { "data-raw", FF_LOGO_TYPE_DATA_RAW },
+                                                                           { "command-raw", FF_LOGO_TYPE_COMMAND_RAW },
+                                                                           { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
+                                                                           { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
+                                                                           { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
+                                                                           { "kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT },
+                                                                           { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
+                                                                           { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
+                                                                           { "raw", FF_LOGO_TYPE_IMAGE_RAW },
+                                                                           { "none", FF_LOGO_TYPE_NONE },
                                                                            {},
                                                                        });
         } else if (ffStrStartsWithIgnCase(subKey, "color-") && subKey[6] != '\0' && subKey[7] == '\0') // matches "--logo-color-*"
@@ -107,9 +107,9 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             exit(477);
         } else if (ffStrEqualsIgnCase(subKey, "position")) {
             options->position = (FFLogoPosition) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                   {"left", FF_LOGO_POSITION_LEFT},
-                                                                                   {"right", FF_LOGO_POSITION_RIGHT},
-                                                                                   {"top", FF_LOGO_POSITION_TOP},
+                                                                                   { "left", FF_LOGO_POSITION_LEFT },
+                                                                                   { "right", FF_LOGO_POSITION_RIGHT },
+                                                                                   { "top", FF_LOGO_POSITION_TOP },
                                                                                    {},
                                                                                });
         } else {
@@ -163,27 +163,27 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             ffOptionParseString(key, value, &options->chafaSymbols);
         } else if (ffStrEqualsIgnCase(subKey, "canvas-mode")) {
             options->chafaCanvasMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                    {"TRUECOLOR", 0},
-                                                                                    {"INDEXED_256", 1},
-                                                                                    {"INDEXED_240", 2},
-                                                                                    {"INDEXED_16", 3},
-                                                                                    {"FGBG_BGFG", 4},
-                                                                                    {"FGBG", 5},
-                                                                                    {"INDEXED_8", 6},
-                                                                                    {"INDEXED_16_8", 7},
+                                                                                    { "TRUECOLOR", 0 },
+                                                                                    { "INDEXED_256", 1 },
+                                                                                    { "INDEXED_240", 2 },
+                                                                                    { "INDEXED_16", 3 },
+                                                                                    { "FGBG_BGFG", 4 },
+                                                                                    { "FGBG", 5 },
+                                                                                    { "INDEXED_8", 6 },
+                                                                                    { "INDEXED_16_8", 7 },
                                                                                     {},
                                                                                 });
         } else if (ffStrEqualsIgnCase(subKey, "color-space")) {
             options->chafaColorSpace = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                    {"RGB", 0},
-                                                                                    {"DIN99D", 1},
+                                                                                    { "RGB", 0 },
+                                                                                    { "DIN99D", 1 },
                                                                                     {},
                                                                                 });
         } else if (ffStrEqualsIgnCase(subKey, "dither-mode")) {
             options->chafaDitherMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                    {"NONE", 0},
-                                                                                    {"ORDERED", 1},
-                                                                                    {"DIFFUSION", 2},
+                                                                                    { "NONE", 0 },
+                                                                                    { "ORDERED", 1 },
+                                                                                    { "DIFFUSION", 2 },
                                                                                     {},
                                                                                 });
         } else {
@@ -232,22 +232,22 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         if (unsafe_yyjson_equals_str(key, "type")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"auto", FF_LOGO_TYPE_AUTO},
-                                                                       {"builtin", FF_LOGO_TYPE_BUILTIN},
-                                                                       {"small", FF_LOGO_TYPE_SMALL},
-                                                                       {"file", FF_LOGO_TYPE_FILE},
-                                                                       {"file-raw", FF_LOGO_TYPE_FILE_RAW},
-                                                                       {"data", FF_LOGO_TYPE_DATA},
-                                                                       {"data-raw", FF_LOGO_TYPE_DATA_RAW},
-                                                                       {"command-raw", FF_LOGO_TYPE_COMMAND_RAW},
-                                                                       {"sixel", FF_LOGO_TYPE_IMAGE_SIXEL},
-                                                                       {"kitty", FF_LOGO_TYPE_IMAGE_KITTY},
-                                                                       {"kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT},
-                                                                       {"kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT},
-                                                                       {"iterm", FF_LOGO_TYPE_IMAGE_ITERM},
-                                                                       {"chafa", FF_LOGO_TYPE_IMAGE_CHAFA},
-                                                                       {"raw", FF_LOGO_TYPE_IMAGE_RAW},
-                                                                       {"none", FF_LOGO_TYPE_NONE},
+                                                                       { "auto", FF_LOGO_TYPE_AUTO },
+                                                                       { "builtin", FF_LOGO_TYPE_BUILTIN },
+                                                                       { "small", FF_LOGO_TYPE_SMALL },
+                                                                       { "file", FF_LOGO_TYPE_FILE },
+                                                                       { "file-raw", FF_LOGO_TYPE_FILE_RAW },
+                                                                       { "data", FF_LOGO_TYPE_DATA },
+                                                                       { "data-raw", FF_LOGO_TYPE_DATA_RAW },
+                                                                       { "command-raw", FF_LOGO_TYPE_COMMAND_RAW },
+                                                                       { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
+                                                                       { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
+                                                                       { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
+                                                                       { "kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT },
+                                                                       { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
+                                                                       { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
+                                                                       { "raw", FF_LOGO_TYPE_IMAGE_RAW },
+                                                                       { "none", FF_LOGO_TYPE_NONE },
                                                                        {},
                                                                    });
 
@@ -326,9 +326,9 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         } else if (unsafe_yyjson_equals_str(key, "position")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"left", FF_LOGO_POSITION_LEFT},
-                                                                       {"top", FF_LOGO_POSITION_TOP},
-                                                                       {"right", FF_LOGO_POSITION_RIGHT},
+                                                                       { "left", FF_LOGO_POSITION_LEFT },
+                                                                       { "top", FF_LOGO_POSITION_TOP },
+                                                                       { "right", FF_LOGO_POSITION_RIGHT },
                                                                        {},
                                                                    });
 
@@ -356,14 +356,14 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             if (canvasMode) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(canvasMode, &value, (FFKeyValuePair[]) {
-                                                                                  {"TRUECOLOR", 0},
-                                                                                  {"INDEXED_256", 1},
-                                                                                  {"INDEXED_240", 2},
-                                                                                  {"INDEXED_16", 3},
-                                                                                  {"FGBG_BGFG", 4},
-                                                                                  {"FGBG", 5},
-                                                                                  {"INDEXED_8", 6},
-                                                                                  {"INDEXED_16_8", 7},
+                                                                                  { "TRUECOLOR", 0 },
+                                                                                  { "INDEXED_256", 1 },
+                                                                                  { "INDEXED_240", 2 },
+                                                                                  { "INDEXED_16", 3 },
+                                                                                  { "FGBG_BGFG", 4 },
+                                                                                  { "FGBG", 5 },
+                                                                                  { "INDEXED_8", 6 },
+                                                                                  { "INDEXED_16_8", 7 },
                                                                                   {},
                                                                               });
 
@@ -377,8 +377,8 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             if (colorSpace) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(colorSpace, &value, (FFKeyValuePair[]) {
-                                                                                  {"RGB", 0},
-                                                                                  {"DIN99D", 1},
+                                                                                  { "RGB", 0 },
+                                                                                  { "DIN99D", 1 },
                                                                                   {},
                                                                               });
 
@@ -392,9 +392,9 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             if (ditherMode) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(ditherMode, &value, (FFKeyValuePair[]) {
-                                                                                  {"NONE", 0},
-                                                                                  {"ORDERED", 1},
-                                                                                  {"DIFFUSION", 2},
+                                                                                  { "NONE", 0 },
+                                                                                  { "ORDERED", 1 },
+                                                                                  { "DIFFUSION", 2 },
                                                                                   {},
                                                                               });
 

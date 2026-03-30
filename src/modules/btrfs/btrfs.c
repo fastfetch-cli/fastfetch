@@ -190,7 +190,7 @@ bool ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
 
 void ffInitBtrfsOptions(FFBtrfsOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyBtrfsOptions(FFBtrfsOptions* options) {
@@ -207,18 +207,18 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,
     .generateJsonConfig = (void*) ffGenerateBtrfsJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name / Label", "name"},
-        {"UUID", "uuid"},
-        {"Associated devices", "devices"},
-        {"Enabled features", "features"},
-        {"Size used", "used"},
-        {"Size allocated", "allocated"},
-        {"Size total", "total"},
-        {"Used percentage num", "used-percentage"},
-        {"Allocated percentage num", "allocated-percentage"},
-        {"Used percentage bar", "used-percentage-bar"},
-        {"Allocated percentage bar", "allocated-percentage-bar"},
-        {"Node size", "node-size"},
-        {"Sector size", "sector-size"},
+        { "Name / Label", "name" },
+        { "UUID", "uuid" },
+        { "Associated devices", "devices" },
+        { "Enabled features", "features" },
+        { "Size used", "used" },
+        { "Size allocated", "allocated" },
+        { "Size total", "total" },
+        { "Used percentage num", "used-percentage" },
+        { "Allocated percentage num", "allocated-percentage" },
+        { "Used percentage bar", "used-percentage-bar" },
+        { "Allocated percentage bar", "allocated-percentage-bar" },
+        { "Node size", "node-size" },
+        { "Sector size", "sector-size" },
     }))
 };

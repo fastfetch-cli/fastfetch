@@ -67,9 +67,9 @@ void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module) {
         if (unsafe_yyjson_equals_str(key, "showType")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"both", FF_DNS_TYPE_BOTH},
-                                                                       {"ipv4", FF_DNS_TYPE_IPV4_BIT},
-                                                                       {"ipv6", FF_DNS_TYPE_IPV6_BIT},
+                                                                       { "both", FF_DNS_TYPE_BOTH },
+                                                                       { "ipv4", FF_DNS_TYPE_IPV4_BIT },
+                                                                       { "ipv6", FF_DNS_TYPE_IPV6_BIT },
                                                                        {},
                                                                    });
             if (error) {
@@ -143,6 +143,6 @@ FFModuleBaseInfo ffDNSModuleInfo = {
     .generateJsonResult = (void*) ffGenerateDNSJsonResult,
     .generateJsonConfig = (void*) ffGenerateDNSJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"DNS result", "result"},
+        { "DNS result", "result" },
     }))
 };

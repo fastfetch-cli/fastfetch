@@ -141,9 +141,9 @@ FFModuleBaseInfo ffVulkanModuleInfo = {
     .generateJsonResult = (void*) ffGenerateVulkanJsonResult,
     .generateJsonConfig = (void*) ffGenerateVulkanJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Driver name", "driver"},
-        {"API version", "api-version"},
-        {"Conformance version", "conformance-version"},
-        {"Instance version", "instance-version"},
+        { "Driver name", "driver" },
+        { "API version", "api-version" },
+        { "Conformance version", "conformance-version" },
+        { "Instance version", "instance-version" },
     }))
 };

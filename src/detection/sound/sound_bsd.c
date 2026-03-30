@@ -29,7 +29,7 @@ const char* ffDetectSound(FFlist* devices) {
 
     char path[] = "/dev/mixer0";
 
-    struct oss_sysinfo info = {.nummixers = 9};
+    struct oss_sysinfo info = { .nummixers = 9 };
 
     for (int idev = 0; idev <= info.nummixers; ++idev) {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
@@ -58,7 +58,7 @@ const char* ffDetectSound(FFlist* devices) {
         ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask);
 #endif
 
-        struct oss_card_info ci = {.card = idev};
+        struct oss_card_info ci = { .card = idev };
         if (ioctl(fd, SNDCTL_CARDINFO, &ci) < 0) {
             continue;
         }

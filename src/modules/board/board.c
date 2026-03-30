@@ -117,9 +117,9 @@ FFModuleBaseInfo ffBoardModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBoardJsonResult,
     .generateJsonConfig = (void*) ffGenerateBoardJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Board name", "name"},
-        {"Board vendor", "vendor"},
-        {"Board version", "version"},
-        {"Board serial number", "serial"},
+        { "Board name", "name" },
+        { "Board vendor", "vendor" },
+        { "Board version", "version" },
+        { "Board serial number", "serial" },
     }))
 };

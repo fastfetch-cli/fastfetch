@@ -110,7 +110,7 @@ bool ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
 
 void ffInitMemoryOptions(FFMemoryOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyMemoryOptions(FFMemoryOptions* options) {
@@ -127,9 +127,9 @@ FFModuleBaseInfo ffMemoryModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,
     .generateJsonConfig = (void*) ffGenerateMemoryJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Used size", "used"},
-        {"Total size", "total"},
-        {"Percentage used (num)", "percentage"},
-        {"Percentage used (bar)", "percentage-bar"},
+        { "Used size", "used" },
+        { "Total size", "total" },
+        { "Percentage used (num)", "percentage" },
+        { "Percentage used (bar)", "percentage-bar" },
     }))
 };

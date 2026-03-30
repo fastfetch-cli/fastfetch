@@ -27,16 +27,16 @@ void ffSizeAppendNum(uint64_t bytes, FFstrbuf* result) {
     const FFOptionsDisplay* options = &instance.config.display;
     switch (options->sizeBinaryPrefix) {
         case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
-            appendNum(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
+            appendNum(result, bytes, 1024, (const char*[]) { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL });
             break;
         case FF_SIZE_BINARY_PREFIX_TYPE_SI:
-            appendNum(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
+            appendNum(result, bytes, 1000, (const char*[]) { "B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL });
             break;
         case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
-            appendNum(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
+            appendNum(result, bytes, 1024, (const char*[]) { "B", "KB", "MB", "GB", "TB", NULL });
             break;
         default:
-            appendNum(result, bytes, 1024, (const char*[]) {"B", NULL});
+            appendNum(result, bytes, 1024, (const char*[]) { "B", NULL });
             break;
     }
 }

@@ -55,6 +55,7 @@ BinPackParameters: false
 BinPackArguments: false
 AlignAfterOpenBracket: DontAlign
 BracedInitializerIndentWidth: 4
+Cpp11BracedListStyle: Block
 
 ForEachMacros:
   - FF_LIST_FOR_EACH

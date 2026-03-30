@@ -277,7 +277,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
 #        define ki_comm kp_comm
 #    endif
 
-    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
+    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId };
     size_t length = 0;
 
     if (sysctl(request, ARRAY_SIZE(request), NULL, &length, NULL, 0) != 0) {
@@ -420,7 +420,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
         }
     }
 #elif __NetBSD__
-    int request[] = {CTL_KERN, KERN_PROC2, KERN_PROC_UID, (int) userId, sizeof(struct kinfo_proc2), INT_MAX};
+    int request[] = { CTL_KERN, KERN_PROC2, KERN_PROC_UID, (int) userId, sizeof(struct kinfo_proc2), INT_MAX };
 
     size_t size = 0;
     if (sysctl(request, ARRAY_SIZE(request), NULL, &size, NULL, 0) != 0) {

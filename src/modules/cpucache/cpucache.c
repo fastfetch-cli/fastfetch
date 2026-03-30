@@ -232,7 +232,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,
     .generateJsonConfig = (void*) ffGenerateCPUCacheJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Separate result", "result"},
-        {"Sum result", "sum"},
+        { "Separate result", "result" },
+        { "Sum result", "sum" },
     }))
 };

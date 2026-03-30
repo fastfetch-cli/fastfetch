@@ -100,7 +100,7 @@ static void detectGTKFromSettings(FFGTKResult* result) {
 }
 
 static void detectGTKFromConfigFile(const char* filename, FFGTKResult* result) {
-    ffParsePropFileValues(filename, 5, (FFpropquery[]) {{"gtk-theme-name =", &result->theme}, {"gtk-icon-theme-name =", &result->icons}, {"gtk-font-name =", &result->font}, {"gtk-cursor-theme-name =", &result->cursor}, {"gtk-cursor-theme-size =", &result->cursorSize}});
+    ffParsePropFileValues(filename, 5, (FFpropquery[]) { { "gtk-theme-name =", &result->theme }, { "gtk-icon-theme-name =", &result->icons }, { "gtk-font-name =", &result->font }, { "gtk-cursor-theme-name =", &result->cursor }, { "gtk-cursor-theme-size =", &result->cursorSize } });
 }
 
 static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFGTKResult* result) {

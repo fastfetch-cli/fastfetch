@@ -119,11 +119,11 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
     .generateJsonResult = (void*) ffGeneratePowerAdapterJsonResult,
     .generateJsonConfig = (void*) ffGeneratePowerAdapterJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Power adapter watts", "watts"},
-        {"Power adapter name", "name"},
-        {"Power adapter manufacturer", "manufacturer"},
-        {"Power adapter model", "model"},
-        {"Power adapter description", "description"},
-        {"Power adapter serial number", "serial"},
+        { "Power adapter watts", "watts" },
+        { "Power adapter name", "name" },
+        { "Power adapter manufacturer", "manufacturer" },
+        { "Power adapter model", "model" },
+        { "Power adapter description", "description" },
+        { "Power adapter serial number", "serial" },
     }))
 };

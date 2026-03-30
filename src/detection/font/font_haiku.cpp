@@ -11,7 +11,7 @@ const char* ffDetectFontImpl(FFFontResult* result);
 }
 
 static void generateString(FFFontResult* font) {
-    const char* types[] = {"Plain", "Menu", "Bold", "Mono"};
+    const char* types[] = { "Plain", "Menu", "Bold", "Mono" };
     for (uint32_t i = 0; i < ARRAY_SIZE(types); ++i) {
         if (i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i])) {
             if (i > 0) {

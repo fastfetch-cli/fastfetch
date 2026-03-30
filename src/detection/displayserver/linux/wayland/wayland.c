@@ -49,7 +49,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
     size_t size = 4096;
     ffStrbufEnsureFixedLengthFree(&result->wmProcessName, (uint32_t) size);
 
-    if (sysctl((int[]) {CTL_KERN, KERN_PROC, KERN_PROC_ARGS, ucred.cr_pid}, 4, result->wmProcessName.chars, &size, NULL, 0) != 0) {
+    if (sysctl((int[]) { CTL_KERN, KERN_PROC, KERN_PROC_ARGS, ucred.cr_pid }, 4, result->wmProcessName.chars, &size, NULL, 0) != 0) {
         return false;
     }
     result->wmProcessName.length = (uint32_t) size - 1;

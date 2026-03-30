@@ -119,7 +119,7 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
     .generateJsonResult = (void*) ffGeneratePublicIpJsonResult,
     .generateJsonConfig = (void*) ffGeneratePublicIpJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Public IP address", "ip"},
-        {"Location", "location"},
+        { "Public IP address", "ip" },
+        { "Location", "location" },
     }))
 };

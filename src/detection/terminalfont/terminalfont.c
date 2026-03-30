@@ -18,8 +18,8 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont) {
 
     do {
         FFpropquery fontQueryToml[] = {
-            {"normal =", &fontNormal},
-            {"size =", &fontSize},
+            { "normal =", &fontNormal },
+            { "size =", &fontSize },
         };
 
         // alacritty parses config files in this order
@@ -143,7 +143,7 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont) {
 
     if (fontName.length == 0) {
         ffStrbufAppendS(&fontName, "VGA default kernel font ");
-        ffProcessAppendStdOut(&fontName, (char* const[]) {"showconsolefont", "--info", NULL});
+        ffProcessAppendStdOut(&fontName, (char* const[]) { "showconsolefont", "--info", NULL });
 
         ffStrbufTrimRight(&fontName, ' ');
     }
@@ -193,8 +193,8 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
             ffParsePropLines(buf.chars, "font_size: ", &fontSize);
         } else {
             FFpropquery fontQuery[] = {
-                {"font_family ", &fontName},
-                {"font_size ", &fontSize},
+                { "font_family ", &fontName },
+                { "font_size ", &fontSize },
             };
 
             ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
@@ -223,7 +223,7 @@ static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result) {
 
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]) {cli.chars, "ls-fonts", "--text", "a", NULL}));
+    ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]) { cli.chars, "ls-fonts", "--text", "a", NULL }));
     if (result->error.length) {
         return false;
     }
@@ -247,8 +247,8 @@ static bool detectTabby(FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
-        {"font: ", &fontName},
-        {"fontSize: ", &fontSize},
+        { "font: ", &fontName },
+        { "fontSize: ", &fontSize },
     };
 
     if (!ffParsePropFileConfigValues("tabby/config.yaml", 2, fontQuery)) {
@@ -269,7 +269,7 @@ static bool detectTabby(FFTerminalFontResult* result) {
 
 static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if (ffProcessAppendStdOut(&buf, (char* const[]) {exe->chars, "font-locator", NULL})) {
+    if (ffProcessAppendStdOut(&buf, (char* const[]) { exe->chars, "font-locator", NULL })) {
         ffStrbufAppendS(&result->error, "`contour font-locator` failed");
         return false;
     }
@@ -297,8 +297,8 @@ static bool detectRio(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQueryToml[] = {
-        {"family =", &fontName},
-        {"size =", &fontSize},
+        { "family =", &fontName },
+        { "size =", &fontSize },
     };
 
     ffParsePropFileConfigValues("rio/config.toml", 2, fontQueryToml);

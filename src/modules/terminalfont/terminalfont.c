@@ -114,9 +114,9 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTerminalFontJsonResult,
     .generateJsonConfig = (void*) ffGenerateTerminalFontJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Terminal font combined", "combined"},
-        {"Terminal font name", "name"},
-        {"Terminal font size", "size"},
-        {"Terminal font styles", "styles"},
+        { "Terminal font combined", "combined" },
+        { "Terminal font name", "name" },
+        { "Terminal font size", "size" },
+        { "Terminal font styles", "styles" },
     })),
 };

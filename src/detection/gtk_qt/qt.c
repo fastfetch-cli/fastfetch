@@ -127,7 +127,7 @@ static void detectPlasma(FFQtResult* result) {
 }
 
 static void detectLXQt(FFQtResult* result) {
-    ffParsePropFileConfigValues("lxqt/lxqt.conf", 3, (FFpropquery[]) {{"style = ", &result->widgetStyle}, {"icon_theme = ", &result->icons}, {"font = ", &result->font}});
+    ffParsePropFileConfigValues("lxqt/lxqt.conf", 3, (FFpropquery[]) { { "style = ", &result->widgetStyle }, { "icon_theme = ", &result->icons }, { "font = ", &result->font } });
 
     ffParsePropFileConfig("pcmanfm-qt/lxqt/settings.conf", "Wallpaper=", &result->wallpaper);
 }
@@ -140,7 +140,7 @@ static void detectQtCt(char qver, FFQtResult* result) {
 
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
 
-    ffParsePropFileConfigValues(file, 3, (FFpropquery[]) {{"style=", &result->widgetStyle}, {"icon_theme=", &result->icons}, {"general=", &font}});
+    ffParsePropFileConfigValues(file, 3, (FFpropquery[]) { { "style=", &result->widgetStyle }, { "icon_theme=", &result->icons }, { "general=", &font } });
 
     if (ffStrbufStartsWithC(&font, '@')) {
         // See QVariant notes on https://doc.qt.io/qt-5/qsettings.html and
@@ -153,7 +153,7 @@ static void detectQtCt(char qver, FFQtResult* result) {
 
         while (*p) {
             if (p[0] == '\\' && p[1] == 'x' && isxdigit(p[2]) && isxdigit(p[3]) && isxdigit(p[4]) && isxdigit(p[5])) {
-                uint32_t codepoint = (uint32_t) strtoul((char[]) {p[2], p[3], p[4], p[5], '\0'}, NULL, 16);
+                uint32_t codepoint = (uint32_t) strtoul((char[]) { p[2], p[3], p[4], p[5], '\0' }, NULL, 16);
                 ffStrbufAppendUtf32CodePoint(&result->font, codepoint);
                 p += 6;
             } else {
@@ -168,7 +168,7 @@ static void detectQtCt(char qver, FFQtResult* result) {
 
 static void detectKvantum(FFQtResult* result) {
     ffParsePropFileConfigValues("Kvantum/kvantum.kvconfig", 1, (FFpropquery[]) {
-                                                                   {"theme=", &result->widgetStyle},
+                                                                   { "theme=", &result->widgetStyle },
                                                                });
 }
 

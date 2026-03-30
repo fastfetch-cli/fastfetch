@@ -118,9 +118,9 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
     .generateJsonResult = (void*) ffGeneratePlayerJsonResult,
     .generateJsonConfig = (void*) ffGeneratePlayerJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Pretty player name", "player"},
-        {"Player name", "name"},
-        {"Player Identifier", "id"},
-        {"URL name", "url"},
+        { "Pretty player name", "player" },
+        { "Player name", "name" },
+        { "Player Identifier", "id" },
+        { "URL name", "url" },
     }))
 };

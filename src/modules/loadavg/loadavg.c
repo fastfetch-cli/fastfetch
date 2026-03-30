@@ -7,7 +7,7 @@
 #include "modules/loadavg/loadavg.h"
 
 bool ffPrintLoadavg(FFLoadavgOptions* options) {
-    double result[3] = {0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0};
+    double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
 
     const char* error = ffDetectLoadavg(result);
     if (error) {
@@ -119,7 +119,7 @@ void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc,
 }
 
 bool ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    double result[3] = {0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0};
+    double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
 
     const char* error = ffDetectLoadavg(result);
     if (error) {
@@ -138,7 +138,7 @@ bool ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
 void ffInitLoadavgOptions(FFLoadavgOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->ndigits = 2;
     options->compact = true;
 }
@@ -157,8 +157,8 @@ FFModuleBaseInfo ffLoadavgModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,
     .generateJsonConfig = (void*) ffGenerateLoadavgJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Load average over 1min", "loadavg1"},
-        {"Load average over 5min", "loadavg2"},
-        {"Load average over 15min", "loadavg3"},
+        { "Load average over 1min", "loadavg1" },
+        { "Load average over 5min", "loadavg2" },
+        { "Load average over 15min", "loadavg3" },
     }))
 };

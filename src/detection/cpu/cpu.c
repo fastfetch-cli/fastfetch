@@ -291,7 +291,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
 // #include <arm/cpu_capabilities_public.h> // Not available in macOS 14-
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
-    uint64_t caps[2] = {0}; // 80-bit capability mask, split into two 64-bit values
+    uint64_t caps[2] = { 0 }; // 80-bit capability mask, split into two 64-bit values
     size_t size = sizeof(caps);
 
     if (sysctlbyname("hw.optional.arm.caps", caps, &size, NULL, 0) != 0) {

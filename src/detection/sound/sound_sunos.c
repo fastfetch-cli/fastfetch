@@ -29,7 +29,7 @@ const char* ffDetectSound(FFlist* devices) {
 
     FF_STRBUF_AUTO_DESTROY sndstat = ffStrbufCreate();
 
-    struct oss_sysinfo info = {.nummixers = 9};
+    struct oss_sysinfo info = { .nummixers = 9 };
 
     // The implementation is very different from *BSD's. They call it OSS4
     for (int idev = 0; idev < info.nummixers; ++idev) {
@@ -55,12 +55,12 @@ const char* ffDetectSound(FFlist* devices) {
 
         int volume = -1;
         for (int iext = 0; iext < mi.nrext; ++iext) {
-            struct oss_mixext me = {.dev = mi.dev, .ctrl = iext};
+            struct oss_mixext me = { .dev = mi.dev, .ctrl = iext };
             if (ioctl(fd, SNDCTL_MIX_EXTINFO, &me) < 0) {
                 continue;
             }
             if (me.flags & MIXF_PCMVOL) {
-                struct oss_mixer_value mv = {.dev = mi.dev, .ctrl = iext, .timestamp = me.timestamp};
+                struct oss_mixer_value mv = { .dev = mi.dev, .ctrl = iext, .timestamp = me.timestamp };
                 if (ioctl(fd, SNDCTL_MIX_READ, &mv) >= 0) {
                     mv.value -= me.minvalue;
                     me.maxvalue -= me.minvalue;

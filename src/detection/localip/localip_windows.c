@@ -7,7 +7,7 @@
 #include "common/debug.h"
 #include "localip.h"
 
-#define FF_LOCALIP_NIFLAG(name) {IP_ADAPTER_##name, #name}
+#define FF_LOCALIP_NIFLAG(name) { IP_ADAPTER_##name, #name }
 
 static const FFLocalIpNIFlag niFlagOptions[] = {
     FF_LOCALIP_NIFLAG(DDNS_ENABLED),

@@ -98,13 +98,13 @@ FFModuleBaseInfo ffShellModuleInfo = {
     .generateJsonResult = (void*) ffGenerateShellJsonResult,
     .generateJsonConfig = (void*) ffGenerateShellJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Shell process name", "process-name"},
-        {"The first argument of the command line when running the shell", "exe"},
-        {"Shell base name of arg0", "exe-name"},
-        {"Shell version", "version"},
-        {"Shell pid", "pid"},
-        {"Shell pretty name", "pretty-name"},
-        {"Shell full exe path", "exe-path"},
-        {"Shell tty used", "tty"},
+        { "Shell process name", "process-name" },
+        { "The first argument of the command line when running the shell", "exe" },
+        { "Shell base name of arg0", "exe-name" },
+        { "Shell version", "version" },
+        { "Shell pid", "pid" },
+        { "Shell pretty name", "pretty-name" },
+        { "Shell full exe path", "exe-path" },
+        { "Shell tty used", "tty" },
     }))
 };

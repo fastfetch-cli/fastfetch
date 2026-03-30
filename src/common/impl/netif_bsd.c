@@ -43,7 +43,7 @@ get_rt_address(struct rt_msghdr* rtm, int desired) {
 }
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
-    int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY};
+    int mib[6] = { CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY };
     size_t needed;
 
     if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0 || needed == 0) {
@@ -84,7 +84,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 }
 
 bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
-    int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET6, NET_RT_FLAGS, RTF_GATEWAY};
+    int mib[6] = { CTL_NET, PF_ROUTE, 0, AF_INET6, NET_RT_FLAGS, RTF_GATEWAY };
     size_t needed;
 
     if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0 || needed == 0) {

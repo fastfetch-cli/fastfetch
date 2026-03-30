@@ -149,7 +149,7 @@ static void getUserName(FFPlatform* platform) {
     alignas(TOKEN_USER) char buf[SECURITY_MAX_SID_SIZE + sizeof(TOKEN_USER)];
     if (NT_SUCCESS(NtQueryInformationToken(NtCurrentProcessToken(), TokenUser, buf, sizeof(buf), &size))) {
         TOKEN_USER* tokenUser = (TOKEN_USER*) buf;
-        UNICODE_STRING sidString = {.Buffer = buffer, .Length = 0, .MaximumLength = sizeof(buffer)};
+        UNICODE_STRING sidString = { .Buffer = buffer, .Length = 0, .MaximumLength = sizeof(buffer) };
         if (NT_SUCCESS(RtlConvertSidToUnicodeString(&sidString, tokenUser->User.Sid, FALSE))) {
             ffStrbufSetNWS(&platform->sid, sidString.Length / sizeof(wchar_t), sidString.Buffer);
         }

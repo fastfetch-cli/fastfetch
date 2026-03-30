@@ -5,7 +5,7 @@
 #include <windows.h>
 
 static void generateString(FFFontResult* font) {
-    const char* types[] = {"Caption", "Menu", "Message", "Status"};
+    const char* types[] = { "Caption", "Menu", "Message", "Status" };
     for (uint32_t i = 0; i < ARRAY_SIZE(types); ++i) {
         if (i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i])) {
             if (i > 0) {
@@ -28,10 +28,10 @@ const char* ffDetectFontImpl(FFFontResult* result) {
 
     LOGFONTW fonts[4];
     FFArgBuffer fontBuffers[4] = {
-        {.data = &fonts[0], .length = sizeof(fonts[0])},
-        {.data = &fonts[1], .length = sizeof(fonts[1])},
-        {.data = &fonts[2], .length = sizeof(fonts[2])},
-        {.data = &fonts[3], .length = sizeof(fonts[3])},
+        { .data = &fonts[0], .length = sizeof(fonts[0]) },
+        { .data = &fonts[1], .length = sizeof(fonts[1]) },
+        { .data = &fonts[2], .length = sizeof(fonts[2]) },
+        { .data = &fonts[3], .length = sizeof(fonts[3]) },
     };
 
     if (!ffRegReadValues(hKey, 4, (FFRegValueArg[]) {

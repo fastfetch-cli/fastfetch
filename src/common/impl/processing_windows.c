@@ -141,7 +141,7 @@ static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE
     IO_STATUS_BLOCK cancelIosb = {};
     if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb))) {
         if (hReadEvent) {
-            NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) {.QuadPart = -100000}); // wait for cancellation to complete
+            NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
         }
     }
     NtTerminateProcess(hProcess, 1);
@@ -177,7 +177,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
             NULL,
             NULL);
         if (status == STATUS_PENDING) {
-            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) {.QuadPart = (int64_t) timeout * -10000})) {
+            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 })) {
                 case STATUS_WAIT_0:
                     status = iosb.Status;
                     break;
@@ -228,7 +228,7 @@ bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFst
         if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
                                                                                         .Length = sizeof(OBJECT_ATTRIBUTES),
                                                                                     },
-                &(CLIENT_ID) {.UniqueProcess = (HANDLE) (uintptr_t) pid}))) {
+                &(CLIENT_ID) { .UniqueProcess = (HANDLE) (uintptr_t) pid }))) {
             return false;
         }
     }

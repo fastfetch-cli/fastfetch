@@ -177,7 +177,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
                 uint32_t rta_data = *(uint32_t*) RTA_DATA(rta);
                 switch (rta->rta_type) {
                     case RTA_DST:
-                        FF_DEBUG("Unexpected RTA_DST: %s (len=%u)", inet_ntoa((struct in_addr) {.s_addr = rta_data}), rtm->rtm_dst_len);
+                        FF_DEBUG("Unexpected RTA_DST: %s (len=%u)", inet_ntoa((struct in_addr) { .s_addr = rta_data }), rtm->rtm_dst_len);
                         goto next;
                     case RTA_OIF:
                         entry.ifindex = rta_data;

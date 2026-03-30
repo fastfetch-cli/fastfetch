@@ -85,7 +85,7 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
         }
 
         {
-            uint8_t i2cIn[4] = {0x82, 0x01, 0x10 /* luminance */};
+            uint8_t i2cIn[4] = { 0x82, 0x01, 0x10 /* luminance */ };
             i2cIn[3] = 0x6e ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2];
 
             for (uint32_t i = 0; i < 2; ++i) {
@@ -185,7 +185,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                     continue;
                 }
 
-                uint8_t i2cIn[] = {0x51, 0x82, 0x01, 0x10 /* luminance */, 0};
+                uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
                 i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
 
                 IOI2CRequest request = {

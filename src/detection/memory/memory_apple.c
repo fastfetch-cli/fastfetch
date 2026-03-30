@@ -14,7 +14,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
         return "Failed to read hw.memsize_usable";
     }
 #else
-    if (sysctl((int[]) {CTL_HW, HW_MEMSIZE}, 2, &ram->bytesTotal, &length, NULL, 0) != 0) {
+    if (sysctl((int[]) { CTL_HW, HW_MEMSIZE }, 2, &ram->bytesTotal, &length, NULL, 0) != 0) {
         return "Failed to read hw.memsize";
     }
 #endif

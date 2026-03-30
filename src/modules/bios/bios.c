@@ -139,10 +139,10 @@ FFModuleBaseInfo ffBiosModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,
     .generateJsonConfig = (void*) ffGenerateBiosJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Bios date", "date"},
-        {"Bios release", "release"},
-        {"Bios vendor", "vendor"},
-        {"Bios version", "version"},
-        {"Firmware type", "type"},
+        { "Bios date", "date" },
+        { "Bios release", "release" },
+        { "Bios vendor", "vendor" },
+        { "Bios version", "version" },
+        { "Firmware type", "type" },
     }))
 };

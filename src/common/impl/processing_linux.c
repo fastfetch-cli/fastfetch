@@ -169,7 +169,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
 
     for (;;) {
         if (timeout >= 0) {
-            struct pollfd pollfd = {childPipeFd, POLLIN, 0};
+            struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
             int pollret = poll(&pollfd, 1, timeout);
             if (pollret == 0) {
                 kill(childPid, SIGTERM);
@@ -277,7 +277,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 #elif defined(__APPLE__)
 
     size_t len = 0;
-    int mibs[] = {CTL_KERN, KERN_PROCARGS2, pid};
+    int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
     if (sysctl(mibs, ARRAY_SIZE(mibs), NULL, &len, NULL, 0) == 0) { // try get arg0
         // don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
         len++;
@@ -340,7 +340,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     static_assert(ARG_MAX > PATH_MAX, "");
 
-    if (exePath && sysctl((int[]) {CTL_KERN,
+    if (exePath && sysctl((int[]) { CTL_KERN,
 #    if __FreeBSD__
                               KERN_PROC,
                               KERN_PROC_PATHNAME,
@@ -360,7 +360,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     size = ARG_MAX;
     if (sysctl(
-            (int[]) {CTL_KERN,
+            (int[]) { CTL_KERN,
 #    if __FreeBSD__
                 KERN_PROC,
                 KERN_PROC_ARGS,
@@ -542,7 +542,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     struct kinfo_proc proc;
     size_t size = sizeof(proc);
     if (sysctl(
-            (int[]) {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid}, 4, &proc, &size, NULL, 0)) {
+            (int[]) { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid }, 4, &proc, &size, NULL, 0)) {
         return "sysctl(KERN_PROC_PID) failed";
     }
 
@@ -568,7 +568,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     struct kinfo_proc proc;
     size_t size = sizeof(proc);
     if (sysctl(
-            (int[]) {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid}, 4, &proc, &size, NULL, 0)) {
+            (int[]) { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid }, 4, &proc, &size, NULL, 0)) {
         return "sysctl(KERN_PROC_PID) failed";
     }
 
@@ -594,7 +594,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     struct kinfo_proc2 proc;
     size_t size = sizeof(proc);
     if (sysctl(
-            (int[]) {CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid, sizeof(proc), 1}, 6, &proc, &size, NULL, 0) != 0) {
+            (int[]) { CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid, sizeof(proc), 1 }, 6, &proc, &size, NULL, 0) != 0) {
         return "sysctl(KERN_PROC_PID) failed";
     }
 

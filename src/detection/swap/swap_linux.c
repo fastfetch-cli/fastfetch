@@ -58,7 +58,7 @@ static const char* detectByProcSwaps(FFlist* result) {
         ffStrbufInitA(&swap->name, nameLen);
         for (size_t i = 0; i < nameLen; ++i) {
             if (name[i] == '\\') {
-                char octal[4] = {name[i + 1], name[i + 2], name[i + 3], '\0'};
+                char octal[4] = { name[i + 1], name[i + 2], name[i + 3], '\0' };
                 ffStrbufAppendC(&swap->name, (char) strtol(octal, NULL, 8));
                 i += 3;
             } else {

@@ -206,7 +206,7 @@ bool ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 void ffInitWifiOptions(FFWifiOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFPercentageModuleConfig) {75, 50, 0};
+    options->percent = (FFPercentageModuleConfig) { 75, 50, 0 };
 }
 
 void ffDestroyWifiOptions(FFWifiOptions* options) {
@@ -223,18 +223,18 @@ FFModuleBaseInfo ffWifiModuleInfo = {
     .generateJsonResult = (void*) ffGenerateWifiJsonResult,
     .generateJsonConfig = (void*) ffGenerateWifiJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Interface description", "inf-desc"},
-        {"Interface status", "inf-status"},
-        {"Connection status", "status"},
-        {"Connection SSID", "ssid"},
-        {"Connection BSSID", "bssid"},
-        {"Connection protocol", "protocol"},
-        {"Connection signal quality (percentage num)", "signal-quality"},
-        {"Connection RX rate", "rx-rate"},
-        {"Connection TX rate", "tx-rate"},
-        {"Connection Security algorithm", "security"},
-        {"Connection signal quality (percentage bar)", "signal-quality-bar"},
-        {"Connection channel number", "channel"},
-        {"Connection channel band in GHz", "band"},
+        { "Interface description", "inf-desc" },
+        { "Interface status", "inf-status" },
+        { "Connection status", "status" },
+        { "Connection SSID", "ssid" },
+        { "Connection BSSID", "bssid" },
+        { "Connection protocol", "protocol" },
+        { "Connection signal quality (percentage num)", "signal-quality" },
+        { "Connection RX rate", "rx-rate" },
+        { "Connection TX rate", "tx-rate" },
+        { "Connection Security algorithm", "security" },
+        { "Connection signal quality (percentage bar)", "signal-quality-bar" },
+        { "Connection channel number", "channel" },
+        { "Connection channel band in GHz", "band" },
     }))
 };

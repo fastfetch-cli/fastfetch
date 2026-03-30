@@ -168,7 +168,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
     {
         int value;
-        drm_i915_getparam_t getparam = {.param = I915_PARAM_EU_TOTAL, .value = &value};
+        drm_i915_getparam_t getparam = { .param = I915_PARAM_EU_TOTAL, .value = &value };
         if (ioctl(fd, DRM_IOCTL_I915_GETPARAM, &getparam) >= 0) {
             gpu->coreCount = value;
         }

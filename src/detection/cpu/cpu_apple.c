@@ -92,7 +92,7 @@ static const char* detectFrequency(FFCPUResult* cpu) {
     if (cpu->frequencyBase == 0) {
         unsigned current = 0;
         size_t size = sizeof(current);
-        if (sysctl((int[]) {CTL_HW, HW_CPU_FREQ}, 2, &current, &size, NULL, 0) == 0) {
+        if (sysctl((int[]) { CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0) {
             cpu->frequencyBase = (uint32_t) (current / 1000 / 1000);
         }
     }

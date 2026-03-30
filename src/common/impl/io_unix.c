@@ -164,7 +164,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
 // Give the terminal some time to respond
 #ifndef __APPLE__
-    if (poll(&(struct pollfd) {.fd = ftty, .events = POLLIN}, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0) {
+    if (poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0) {
         return "poll(/dev/tty) timeout or failed";
     }
 #else
@@ -174,7 +174,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         fd_set rd;
         FD_ZERO(&rd);
         FD_SET(ftty, &rd);
-        if (select(ftty + 1, &rd, NULL, NULL, &(struct timeval) {.tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000}) <= 0) {
+        if (select(ftty + 1, &rd, NULL, NULL, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0) {
             return "select(/dev/tty) timeout or failed";
         }
     }

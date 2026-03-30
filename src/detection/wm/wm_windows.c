@@ -54,7 +54,7 @@ static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE
     if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
                                                                                     .Length = sizeof(OBJECT_ATTRIBUTES),
                                                                                 },
-            &(CLIENT_ID) {.UniqueProcess = (HANDLE) (uintptr_t) processId}))) {
+            &(CLIENT_ID) { .UniqueProcess = (HANDLE) (uintptr_t) processId }))) {
         return false;
     }
 

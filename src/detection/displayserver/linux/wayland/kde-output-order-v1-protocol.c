@@ -17,12 +17,12 @@ static const struct wl_interface* kde_output_order_v1_types[] = {
 };
 
 static const struct wl_message kde_output_order_v1_requests[] = {
-    {"destroy", "", kde_output_order_v1_types + 0},
+    { "destroy", "", kde_output_order_v1_types + 0 },
 };
 
 static const struct wl_message kde_output_order_v1_events[] = {
-    {"output", "s", kde_output_order_v1_types + 0},
-    {"done", "", kde_output_order_v1_types + 0},
+    { "output", "s", kde_output_order_v1_types + 0 },
+    { "done", "", kde_output_order_v1_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_order_v1_interface = {

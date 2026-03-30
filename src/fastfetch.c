@@ -637,8 +637,8 @@ static void parseCommand(FFdata* data, char* key, char* value) {
         }
     } else if (ffStrEqualsIgnCase(key, "--format")) {
         if (!!ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                {"default", false},
-                                                {"json", true},
+                                                { "default", false },
+                                                { "json", true },
                                                 {},
                                             })) {
             enableJsonOutput(data);

@@ -176,7 +176,7 @@ void ffInitGamepadOptions(FFGamepadOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
 
     ffListInit(&options->ignores, sizeof(FFstrbuf));
-    options->percent = (FFPercentageModuleConfig) {50, 20, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 
 void ffDestroyGamepadOptions(FFGamepadOptions* options) {
@@ -198,9 +198,9 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
     .generateJsonResult = (void*) ffGenerateGamepadJsonResult,
     .generateJsonConfig = (void*) ffGenerateGamepadJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name", "name"},
-        {"Serial number", "serial"},
-        {"Battery percentage num", "battery-percentage"},
-        {"Battery percentage bar", "battery-percentage-bar"},
+        { "Name", "name" },
+        { "Serial number", "serial" },
+        { "Battery percentage num", "battery-percentage" },
+        { "Battery percentage bar", "battery-percentage-bar" },
     }))
 };

@@ -96,7 +96,7 @@ FFModuleBaseInfo ffThemeModuleInfo = {
     .generateJsonResult = (void*) ffGenerateThemeJsonResult,
     .generateJsonConfig = (void*) ffGenerateThemeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Theme part 1", "theme1"},
-        {"Theme part 2", "theme2"},
+        { "Theme part 1", "theme1" },
+        { "Theme part 2", "theme2" },
     }))
 };

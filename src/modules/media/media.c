@@ -190,10 +190,10 @@ FFModuleBaseInfo ffMediaModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,
     .generateJsonConfig = (void*) ffGenerateMediaJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Pretty media name", "combined"},
-        {"Media name", "title"},
-        {"Artist name", "artist"},
-        {"Album name", "album"},
-        {"Status", "status"},
+        { "Pretty media name", "combined" },
+        { "Media name", "title" },
+        { "Artist name", "artist" },
+        { "Album name", "album" },
+        { "Status", "status" },
     }))
 };

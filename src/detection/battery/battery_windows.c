@@ -38,7 +38,7 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
             continue;
         }
 
-        BATTERY_QUERY_INFORMATION bqi = {.InformationLevel = BatteryInformation};
+        BATTERY_QUERY_INFORMATION bqi = { .InformationLevel = BatteryInformation };
 
         DWORD dwWait = 0;
         DWORD dwOut;
@@ -47,7 +47,7 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
             continue;
         }
 
-        BATTERY_INFORMATION bi = {0};
+        BATTERY_INFORMATION bi = { 0 };
         if (!DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), &bi, sizeof(bi), &dwOut, NULL)) {
             continue;
         }
@@ -131,7 +131,7 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
 
         {
             BATTERY_STATUS bs;
-            BATTERY_WAIT_STATUS bws = {.BatteryTag = bqi.BatteryTag};
+            BATTERY_WAIT_STATUS bws = { .BatteryTag = bqi.BatteryTag };
             if (DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_STATUS, &bws, sizeof(bws), &bs, sizeof(bs), &dwOut, NULL) && bs.Capacity != BATTERY_UNKNOWN_CAPACITY && bi.FullChargedCapacity != 0) {
                 battery->capacity = bs.Capacity * 100.0 / bi.FullChargedCapacity;
             } else {

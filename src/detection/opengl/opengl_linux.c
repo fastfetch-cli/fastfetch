@@ -98,7 +98,7 @@ static const char* glxHandleVisualInfo(FFOpenGLResult* result, GLXData* data) {
 }
 
 static const char* glxHandleDisplay(FFOpenGLResult* result, GLXData* data) {
-    data->visualInfo = data->ffglXChooseVisual(data->display, DefaultScreen(data->display), (int[]) {None});
+    data->visualInfo = data->ffglXChooseVisual(data->display, DefaultScreen(data->display), (int[]) { None });
     if (data->visualInfo == NULL) {
         return "glXChooseVisual returned NULL";
     }

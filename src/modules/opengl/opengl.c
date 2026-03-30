@@ -52,9 +52,9 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module) {
         if (unsafe_yyjson_equals_str(key, "library")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"auto", FF_OPENGL_LIBRARY_AUTO},
-                                                                       {"egl", FF_OPENGL_LIBRARY_EGL},
-                                                                       {"glx", FF_OPENGL_LIBRARY_GLX},
+                                                                       { "auto", FF_OPENGL_LIBRARY_AUTO },
+                                                                       { "egl", FF_OPENGL_LIBRARY_EGL },
+                                                                       { "glx", FF_OPENGL_LIBRARY_GLX },
                                                                        {},
                                                                    });
             if (error) {
@@ -136,10 +136,10 @@ FFModuleBaseInfo ffOpenGLModuleInfo = {
     .generateJsonResult = (void*) ffGenerateOpenGLJsonResult,
     .generateJsonConfig = (void*) ffGenerateOpenGLJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"OpenGL version", "version"},
-        {"OpenGL renderer", "renderer"},
-        {"OpenGL vendor", "vendor"},
-        {"OpenGL shading language version", "slv"},
-        {"OpenGL library used", "library"},
+        { "OpenGL version", "version" },
+        { "OpenGL renderer", "renderer" },
+        { "OpenGL vendor", "vendor" },
+        { "OpenGL shading language version", "slv" },
+        { "OpenGL library used", "library" },
     }))
 };

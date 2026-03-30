@@ -16,7 +16,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 const char* ffDetectWifi(FFlist* result) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    if (ffProcessAppendStdOut(&buffer, (char* const[]) {FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, NULL})) {
+    if (ffProcessAppendStdOut(&buffer, (char* const[]) { FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, NULL })) {
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
     }
 

@@ -172,7 +172,7 @@ bool ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->waitTime = 200;
 }
 
@@ -190,13 +190,13 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCPUUsageJsonResult,
     .generateJsonConfig = (void*) ffGenerateCPUUsageJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"CPU usage (percentage num, average)", "avg"},
-        {"CPU usage (percentage num, maximum)", "max"},
-        {"CPU core index of maximum usage", "max-index"},
-        {"CPU usage (percentage num, minimum)", "min"},
-        {"CPU core index of minimum usage", "min-index"},
-        {"CPU usage (percentage bar, average)", "avg-bar"},
-        {"CPU usage (percentage bar, maximum)", "max-bar"},
-        {"CPU usage (percentage bar, minimum)", "min-bar"},
+        { "CPU usage (percentage num, average)", "avg" },
+        { "CPU usage (percentage num, maximum)", "max" },
+        { "CPU core index of maximum usage", "max-index" },
+        { "CPU usage (percentage num, minimum)", "min" },
+        { "CPU core index of minimum usage", "min-index" },
+        { "CPU usage (percentage bar, average)", "avg-bar" },
+        { "CPU usage (percentage bar, maximum)", "max-bar" },
+        { "CPU usage (percentage bar, minimum)", "min-bar" },
     }))
 };

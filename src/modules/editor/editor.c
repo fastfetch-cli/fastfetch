@@ -112,10 +112,10 @@ FFModuleBaseInfo ffEditorModuleInfo = {
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,
     .generateJsonConfig = (void*) ffGenerateEditorJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Type (Visual / Editor)", "type"},
-        {"Name", "name"},
-        {"Exe name of real path", "exe-name"},
-        {"Full path of real path", "path"},
-        {"Version", "version"},
+        { "Type (Visual / Editor)", "type" },
+        { "Name", "name" },
+        { "Exe name of real path", "exe-name" },
+        { "Full path of real path", "path" },
+        { "Version", "version" },
     }))
 };

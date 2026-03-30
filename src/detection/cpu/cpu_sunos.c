@@ -4,7 +4,7 @@
 #include <kstat.h>
 
 static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t* kc, FFCPUResult* cpu) {
-    const char* possibleModules[] = {"temperature", "cpu_temp", "acpi_thermal", NULL};
+    const char* possibleModules[] = { "temperature", "cpu_temp", "acpi_thermal", NULL };
 
     if (options->tempSensor.length > 0) {
         possibleModules[0] = options->tempSensor.chars;
@@ -36,7 +36,7 @@ static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t
 
 static const char* detectCPUTempByIpmiTool(FFCPUResult* cpu) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {"ipmitool", "-c", "sdr", "list", NULL});
+    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) { "ipmitool", "-c", "sdr", "list", NULL });
 
     if (error) {
         return error;

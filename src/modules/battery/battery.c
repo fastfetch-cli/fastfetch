@@ -236,8 +236,8 @@ bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 void ffInitBatteryOptions(FFBatteryOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) {60, 80};
-    options->percent = (FFPercentageModuleConfig) {50, 20, 0};
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 
 #ifdef _WIN32
     options->useSetupApi = false;
@@ -258,20 +258,20 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBatteryJsonResult,
     .generateJsonConfig = (void*) ffGenerateBatteryJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Battery manufacturer", "manufacturer"},
-        {"Battery model name", "model-name"},
-        {"Battery technology", "technology"},
-        {"Battery capacity (percentage num)", "capacity"},
-        {"Battery status", "status"},
-        {"Battery temperature (formatted)", "temperature"},
-        {"Battery cycle count", "cycle-count"},
-        {"Battery serial number", "serial"},
-        {"Battery manufactor date", "manufacture-date"},
-        {"Battery capacity (percentage bar)", "capacity-bar"},
-        {"Battery time remaining days", "time-days"},
-        {"Battery time remaining hours", "time-hours"},
-        {"Battery time remaining minutes", "time-minutes"},
-        {"Battery time remaining seconds", "time-seconds"},
-        {"Battery time remaining (formatted)", "time-formatted"},
+        { "Battery manufacturer", "manufacturer" },
+        { "Battery model name", "model-name" },
+        { "Battery technology", "technology" },
+        { "Battery capacity (percentage num)", "capacity" },
+        { "Battery status", "status" },
+        { "Battery temperature (formatted)", "temperature" },
+        { "Battery cycle count", "cycle-count" },
+        { "Battery serial number", "serial" },
+        { "Battery manufactor date", "manufacture-date" },
+        { "Battery capacity (percentage bar)", "capacity-bar" },
+        { "Battery time remaining days", "time-days" },
+        { "Battery time remaining hours", "time-hours" },
+        { "Battery time remaining minutes", "time-minutes" },
+        { "Battery time remaining seconds", "time-seconds" },
+        { "Battery time remaining (formatted)", "time-formatted" },
     }))
 };

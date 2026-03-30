@@ -104,10 +104,10 @@ FFModuleBaseInfo ffFontModuleInfo = {
     .generateJsonResult = (void*) ffGenerateFontJsonResult,
     .generateJsonConfig = (void*) ffGenerateFontJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Font 1", "font1"},
-        {"Font 2", "font2"},
-        {"Font 3", "font3"},
-        {"Font 4", "font4"},
-        {"Combined fonts for display", "combined"},
+        { "Font 1", "font1" },
+        { "Font 2", "font2" },
+        { "Font 3", "font3" },
+        { "Font 4", "font4" },
+        { "Combined fonts for display", "combined" },
     }))
 };

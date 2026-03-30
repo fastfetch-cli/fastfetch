@@ -112,9 +112,9 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
     .generateJsonResult = (void*) ffGenerateInitSystemJsonResult,
     .generateJsonConfig = (void*) ffGenerateInitSystemJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Init system name", "name"},
-        {"Init system exe path", "exe"},
-        {"Init system version path", "version"},
-        {"Init system pid", "pid"},
+        { "Init system name", "name" },
+        { "Init system exe path", "exe" },
+        { "Init system version path", "version" },
+        { "Init system pid", "pid" },
     }))
 };

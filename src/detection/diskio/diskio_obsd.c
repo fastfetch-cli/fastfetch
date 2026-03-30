@@ -6,7 +6,7 @@
 #include <sys/sysctl.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
-    int mib[] = {CTL_HW, HW_DISKSTATS};
+    int mib[] = { CTL_HW, HW_DISKSTATS };
     size_t len;
     if (sysctl(mib, ARRAY_SIZE(mib), NULL, &len, NULL, 0) < 0) {
         return "sysctl({HW_DISKSTATS}, NULL) failed";

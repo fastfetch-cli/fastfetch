@@ -16,7 +16,7 @@ typedef struct FFModuleFormatArgList {
     uint32_t count;
 } FFModuleFormatArgList;
 
-#define FF_FORMAT_ARG_LIST(list) {.args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg)}
+#define FF_FORMAT_ARG_LIST(list) { .args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg) }
 
 // Must be the first field of FFModuleOptions
 typedef struct FFModuleBaseInfo {

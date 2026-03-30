@@ -25,7 +25,7 @@ extern "C" const char* ffBluetoothDetectBattery(FFlist* devices) {
             return "Failed to get GetDeviceProperties method";
         }
 
-        FFWmiVariant devicePropertyKeys({L"{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2", L"DEVPKEY_Bluetooth_DeviceAddress"});
+        FFWmiVariant devicePropertyKeys({ L"{104EA319-6EE2-4701-BD47-8DDBF425BBE5} 2", L"DEVPKEY_Bluetooth_DeviceAddress" });
         if (FAILED(pInParams->Put(L"devicePropertyKeys", 0, &devicePropertyKeys, CIM_FLAG_ARRAY | CIM_STRING))) {
             return "Failed to put devicePropertyKeys";
         }

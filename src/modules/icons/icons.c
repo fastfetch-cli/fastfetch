@@ -103,7 +103,7 @@ FFModuleBaseInfo ffIconsModuleInfo = {
     .generateJsonResult = (void*) ffGenerateIconsJsonResult,
     .generateJsonConfig = (void*) ffGenerateIconsJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Icons part 1", "icons1"},
-        {"Icons part 2", "icons2"},
+        { "Icons part 1", "icons1" },
+        { "Icons part 2", "icons2" },
     }))
 };

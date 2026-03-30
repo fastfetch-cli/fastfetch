@@ -18,7 +18,7 @@ bool ffPrintProcesses(FFProcessesOptions* options) {
 
         printf("%u\n", numProcesses);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(numProcesses, "result")}));
+        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(numProcesses, "result") }));
     }
 
     return true;
@@ -72,6 +72,5 @@ FFModuleBaseInfo ffProcessesModuleInfo = {
     .generateJsonResult = (void*) ffGenerateProcessesJsonResult,
     .generateJsonConfig = (void*) ffGenerateProcessesJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Process count", "result"}
-    }))
+        { "Process count", "result" } }))
 };

@@ -71,11 +71,11 @@ FFModuleBaseInfo ffKernelModuleInfo = {
     .generateJsonResult = (void*) ffGenerateKernelJsonResult,
     .generateJsonConfig = (void*) ffGenerateKernelJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Sysname", "sysname"},
-        {"Release", "release"},
-        {"Version", "version"},
-        {"Architecture", "arch"},
-        {"Display version", "display-version"},
-        {"Page size", "page-size"},
+        { "Sysname", "sysname" },
+        { "Release", "release" },
+        { "Version", "version" },
+        { "Architecture", "arch" },
+        { "Display version", "display-version" },
+        { "Page size", "page-size" },
     }))
 };

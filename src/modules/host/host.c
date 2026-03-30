@@ -145,12 +145,12 @@ FFModuleBaseInfo ffHostModuleInfo = {
     .generateJsonResult = (void*) ffGenerateHostJsonResult,
     .generateJsonConfig = (void*) ffGenerateHostJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Product family", "family"},
-        {"Product name", "name"},
-        {"Product version", "version"},
-        {"Product sku", "sku"},
-        {"Product vendor", "vendor"},
-        {"Product serial number", "serial"},
-        {"Product uuid", "uuid"},
+        { "Product family", "family" },
+        { "Product name", "name" },
+        { "Product version", "version" },
+        { "Product sku", "sku" },
+        { "Product vendor", "vendor" },
+        { "Product serial number", "serial" },
+        { "Product uuid", "uuid" },
     }))
 };

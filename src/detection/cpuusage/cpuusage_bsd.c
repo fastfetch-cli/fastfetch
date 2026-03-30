@@ -14,9 +14,9 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     size_t neededLength = 0;
 #if __OpenBSD__ || __NetBSD__
 #    ifdef KERN_CPTIME
-    int ctls[] = {CTL_KERN, KERN_CPTIME};
+    int ctls[] = { CTL_KERN, KERN_CPTIME };
 #    else
-    int ctls[] = {CTL_KERN, KERN_CP_TIME};
+    int ctls[] = { CTL_KERN, KERN_CP_TIME };
 #    endif
     if (sysctl(ctls, 2, NULL, &neededLength, NULL, 0) != 0) {
         return "sysctl({CTL_KERN, KERN_CPTIME}, 2, NULL) failed";

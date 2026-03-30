@@ -193,7 +193,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         uint32_t sensorCount = ARRAY_SIZE(sensors);
         if (igclData.ffctlEnumTemperatureSensors(device, &sensorCount, sensors) == CTL_RESULT_SUCCESS && sensorCount > 0) {
             for (uint32_t iSensor = 0; iSensor < sensorCount; iSensor++) {
-                ctl_temp_properties_t props = {.Size = sizeof(props)};
+                ctl_temp_properties_t props = { .Size = sizeof(props) };
                 // The official sample code does not set Version
                 // https://github.com/intel/drivers.gpu.control-library/blob/1bbacbf3814f2fd0d2b930cdf42fad83f3628db9/Samples/Telemetry_Samples/Sample_TelemetryAPP.cpp#L256
                 if (igclData.ffctlTemperatureGetProperties(sensors[iSensor], &props) == CTL_RESULT_SUCCESS) {
@@ -211,7 +211,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         uint32_t domainCount = ARRAY_SIZE(domains);
         if (igclData.ffctlEnumFrequencyDomains(device, &domainCount, domains) == CTL_RESULT_SUCCESS && domainCount > 0) {
             double maxValue = 0;
-            ctl_freq_properties_t props = {.Size = sizeof(props), .Version = 0};
+            ctl_freq_properties_t props = { .Size = sizeof(props), .Version = 0 };
             for (uint32_t iDomain = 0; iDomain < domainCount; iDomain++) {
                 if (igclData.ffctlFrequencyGetProperties(domains[iDomain], &props) == CTL_RESULT_SUCCESS) {
                     if (props.type == CTL_FREQ_DOMAIN_GPU && props.max > maxValue) {

@@ -75,7 +75,7 @@ static const char* getHyprland(FFstrbuf* result) {
     }
     FF_DEBUG("Failed to extract version from binary strings, trying --version option");
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {buffer.chars, "--version", NULL}) == NULL) {
+    if (ffProcessAppendStdOut(result, (char* const[]) { buffer.chars, "--version", NULL }) == NULL) {
         // Hyprland 0.48.1 built from branch  at commit 29e2e59...
         // Date: ...
         // Tag: v0.48.1, commits: 5937
@@ -121,7 +121,7 @@ static const char* getSway(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "--version", NULL}) == NULL) { // sway version 1.10
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // sway version 1.10
         ffStrbufSubstrAfterLastC(result, ' ');
         ffStrbufTrimRightSpace(result);
         return NULL;
@@ -142,7 +142,7 @@ static const char* getLabwc(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "--version", NULL}) == NULL) { // labwc 0.9.0 (+xwayland +nls +rsvg +libsfdo)
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // labwc 0.9.0 (+xwayland +nls +rsvg +libsfdo)
         ffStrbufSubstrAfterFirstC(result, ' ');
         ffStrbufSubstrBeforeFirstC(result, ' ');
         return NULL;
@@ -152,7 +152,7 @@ static const char* getLabwc(FFstrbuf* result) {
 }
 
 static const char* getNiri(FFstrbuf* result) {
-    if (ffProcessAppendStdOut(result, (char* const[]) {"niri", "--version", NULL}) == NULL) { // niri 25.11 (commit b35bcae)
+    if (ffProcessAppendStdOut(result, (char* const[]) { "niri", "--version", NULL }) == NULL) { // niri 25.11 (commit b35bcae)
         ffStrbufSubstrAfterFirstC(result, ' ');
         ffStrbufSubstrBeforeLastC(result, '(');
         ffStrbufTrimRightSpace(result);
@@ -205,7 +205,7 @@ static const char* getI3(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "--version", NULL}) == NULL) { // i3 version 1.10 C 2009...
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // i3 version 1.10 C 2009...
         ffStrbufSubstrAfterFirstS(result, "version ");
         ffStrbufSubstrBeforeFirstC(result, ' ');
         return NULL;
@@ -226,7 +226,7 @@ static const char* getCtwm(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "--version", NULL}) == NULL) { // ctwm version 4.0.1\n...
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // ctwm version 4.0.1\n...
         ffStrbufSubstrBeforeFirstC(result, '\n');
         ffStrbufSubstrAfterLastC(result, ' ');
         return NULL;
@@ -247,7 +247,7 @@ static const char* getFvwm(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "-version", NULL}) == NULL) { // [FVWM][main]: fvwm Version 2.2.5\n...
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "-version", NULL }) == NULL) { // [FVWM][main]: fvwm Version 2.2.5\n...
         ffStrbufSubstrBeforeFirstC(result, '\n');
         ffStrbufSubstrAfterLastC(result, ' ');
         return NULL;
@@ -268,7 +268,7 @@ static const char* getOpenbox(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) {path.chars, "--version", NULL}) == NULL) { // Openbox 3.6.1\n...
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // Openbox 3.6.1\n...
         ffStrbufSubstrBeforeFirstC(result, '\n');
         ffStrbufSubstrAfterLastC(result, ' ');
         return NULL;

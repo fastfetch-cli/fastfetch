@@ -102,9 +102,9 @@ FFModuleBaseInfo ffTerminalThemeModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTerminalThemeJsonResult,
     .generateJsonConfig = (void*) ffGenerateTerminalThemeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Terminal foreground color", "fg-color"},
-        {"Terminal foreground type (Dark / Light)", "fg-type"},
-        {"Terminal background color", "bg-color"},
-        {"Terminal background type (Dark / Light)", "bg-type"},
+        { "Terminal foreground color", "fg-color" },
+        { "Terminal foreground type (Dark / Light)", "fg-type" },
+        { "Terminal background color", "bg-color" },
+        { "Terminal background type (Dark / Light)", "bg-type" },
     }))
 };

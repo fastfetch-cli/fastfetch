@@ -85,9 +85,9 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTerminalSizeJsonResult,
     .generateJsonConfig = (void*) ffGenerateTerminalSizeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Terminal rows", "rows"},
-        {"Terminal columns", "columns"},
-        {"Terminal width (in pixels)", "width"},
-        {"Terminal height (in pixels)", "height"},
+        { "Terminal rows", "rows" },
+        { "Terminal columns", "columns" },
+        { "Terminal width (in pixels)", "width" },
+        { "Terminal height (in pixels)", "height" },
     })),
 };

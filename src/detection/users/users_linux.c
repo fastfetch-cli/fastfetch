@@ -28,10 +28,10 @@ bool detectUserBySystemd(const FFstrbuf* pathUsers, FFlist* users) {
 
     // WARNING: This is private data. Do not parse
     if (!ffParsePropFileValues(pathUsers->chars, 4, (FFpropquery[]) {
-                                                        {"NAME=", &userName},
-                                                        {"STATE=", &state},
-                                                        {"REALTIME=", &loginTime},
-                                                        {"ONLINE_SESSIONS=", &sessions},
+                                                        { "NAME=", &userName },
+                                                        { "STATE=", &state },
+                                                        { "REALTIME=", &loginTime },
+                                                        { "ONLINE_SESSIONS=", &sessions },
                                                     }) ||
         !ffStrbufEqualS(&state, "active")) {
         return false;
@@ -65,10 +65,10 @@ bool detectUserBySystemd(const FFstrbuf* pathUsers, FFlist* users) {
 
         // WARNING: This is private data. Do not parse
         if (ffParsePropFileValues(pathSessions.chars, 4, (FFpropquery[]) {
-                                                             {"REMOTE_HOST=", &remoteHost},
-                                                             {"TTY=", &tty},
-                                                             {"SERVICE=", &service},
-                                                             {"REALTIME=", &loginTime},
+                                                             { "REMOTE_HOST=", &remoteHost },
+                                                             { "TTY=", &tty },
+                                                             { "SERVICE=", &service },
+                                                             { "REALTIME=", &loginTime },
                                                          }) &&
             !ffStrbufEqualS(&service, "systemd-user")) {
             if (remoteHost.length) {

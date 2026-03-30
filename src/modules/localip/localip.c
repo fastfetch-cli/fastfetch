@@ -193,11 +193,11 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module) {
             } else if (yyjson_is_str(val)) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                           {"auto", FF_LOCALIP_IPV6_TYPE_AUTO},
-                                                                           {"gua", FF_LOCALIP_IPV6_TYPE_GUA_BIT},
-                                                                           {"ula", FF_LOCALIP_IPV6_TYPE_ULA_BIT},
-                                                                           {"lla", FF_LOCALIP_IPV6_TYPE_LLA_BIT},
-                                                                           {"unknown", FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT},
+                                                                           { "auto", FF_LOCALIP_IPV6_TYPE_AUTO },
+                                                                           { "gua", FF_LOCALIP_IPV6_TYPE_GUA_BIT },
+                                                                           { "ula", FF_LOCALIP_IPV6_TYPE_ULA_BIT },
+                                                                           { "lla", FF_LOCALIP_IPV6_TYPE_LLA_BIT },
+                                                                           { "unknown", FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT },
                                                                            {},
                                                                        });
                 if (error) {
@@ -431,13 +431,13 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLocalIpJsonResult,
     .generateJsonConfig = (void*) ffGenerateLocalIpJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"IPv4 address", "ipv4"},
-        {"IPv6 address", "ipv6"},
-        {"MAC address", "mac"},
-        {"Interface name", "ifname"},
-        {"Is default route", "is-default-route"},
-        {"MTU size in bytes", "mtu"},
-        {"Link speed (formatted)", "speed"},
-        {"Interface flags", "flags"},
+        { "IPv4 address", "ipv4" },
+        { "IPv6 address", "ipv6" },
+        { "MAC address", "mac" },
+        { "Interface name", "ifname" },
+        { "Is default route", "is-default-route" },
+        { "MTU size in bytes", "mtu" },
+        { "Link speed (formatted)", "speed" },
+        { "Interface flags", "flags" },
     }))
 };

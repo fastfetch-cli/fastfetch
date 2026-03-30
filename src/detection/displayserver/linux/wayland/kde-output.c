@@ -45,7 +45,7 @@ static void waylandKdeModeListener(void* data, FF_MAYBE_UNUSED struct kde_output
     }
 
     WaylandKdeMode* newMode = ffListAdd((FFlist*) wldata->internal);
-    *newMode = (WaylandKdeMode) {.pMode = mode};
+    *newMode = (WaylandKdeMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandKdeCurrentModeListener`
     wldata->parent->ffwl_proxy_add_listener((struct wl_proxy*) mode, (void (**)(void)) &modeListener, newMode);

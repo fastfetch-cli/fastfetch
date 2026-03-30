@@ -68,7 +68,7 @@ static bool createSubfolders(wchar_t* fileName) {
     // Rooted path on current drive: \foo\bar
     else if (ptr[0] == L'\\') {
         UNICODE_STRING* dosPath = &ffGetPeb()->ProcessParameters->CurrentDirectory.DosPath;
-        wchar_t driveRoot[] = {dosPath->Buffer[0], L':', L'\\', L'\0'};
+        wchar_t driveRoot[] = { dosPath->Buffer[0], L':', L'\\', L'\0' };
         hRoot = CreateFileW(
             driveRoot,
             FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
@@ -409,7 +409,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     }
 
     while (true) {
-        if (NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) {.QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000}) != STATUS_WAIT_0) {
+        if (NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 }) != STATUS_WAIT_0) {
             SetConsoleMode(hInput, inputMode);
             return "NtWaitForSingleObject() failed or timeout";
         }

@@ -51,7 +51,7 @@ static void waylandZwlrModeListener(void* data, FF_MAYBE_UNUSED struct zwlr_outp
     }
 
     WaylandZwlrMode* newMode = ffListAdd((FFlist*) wldata->internal);
-    *newMode = (WaylandZwlrMode) {.pMode = mode};
+    *newMode = (WaylandZwlrMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandZwlrCurrentModeListener`
     wldata->parent->ffwl_proxy_add_listener((struct wl_proxy*) mode, (void (**)(void)) &modeListener, newMode);

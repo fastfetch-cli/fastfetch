@@ -151,7 +151,7 @@ bool ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
 void ffInitBluetoothOptions(FFBluetoothOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->showDisconnected = false;
-    options->percent = (FFPercentageModuleConfig) {50, 20, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options) {
@@ -168,11 +168,11 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBluetoothJsonResult,
     .generateJsonConfig = (void*) ffGenerateBluetoothJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name", "name"},
-        {"Address", "address"},
-        {"Type", "type"},
-        {"Battery percentage number", "battery-percentage"},
-        {"Is connected", "connected"},
-        {"Battery percentage bar", "battery-percentage-bar"},
+        { "Name", "name" },
+        { "Address", "address" },
+        { "Type", "type" },
+        { "Battery percentage number", "battery-percentage" },
+        { "Is connected", "connected" },
+        { "Battery percentage bar", "battery-percentage-bar" },
     }))
 };

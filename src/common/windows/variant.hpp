@@ -72,7 +72,7 @@ struct FFBaseVariant : TVariant {
             if (this->vt == VT_LPWSTR) {
                 return this->bstrVal;
             } else {
-                return {this->bstrVal, SysStringLen(this->bstrVal)};
+                return { this->bstrVal, SysStringLen(this->bstrVal) };
             }
         }
 

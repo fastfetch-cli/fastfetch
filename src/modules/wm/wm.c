@@ -129,10 +129,10 @@ FFModuleBaseInfo ffWMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateWMJsonResult,
     .generateJsonConfig = (void*) ffGenerateWMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"WM process name", "process-name"},
-        {"WM pretty name", "pretty-name"},
-        {"WM protocol name", "protocol-name"},
-        {"WM plugin name", "plugin-name"},
-        {"WM version", "version"},
+        { "WM process name", "process-name" },
+        { "WM pretty name", "pretty-name" },
+        { "WM protocol name", "protocol-name" },
+        { "WM plugin name", "plugin-name" },
+        { "WM version", "version" },
     }))
 };

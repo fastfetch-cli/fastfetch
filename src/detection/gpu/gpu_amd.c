@@ -255,7 +255,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_DEBUG("Using Overdrive8 API (odVersion=%d)", odVersion);
 
         if (result.frequency) {
-            ADLOD8CurrentSetting currentSetting = {.count = OD8_COUNT};
+            ADLOD8CurrentSetting currentSetting = { .count = OD8_COUNT };
             int status = adlData.ffADL2_Overdrive8_Current_Setting_Get(adlData.apiHandle, device->iAdapterIndex, &currentSetting);
             FF_DEBUG("ADL2_Overdrive8_Current_Setting_Get returned %s (%d)", ffAdlStatusToString(status), status);
             if (status == ADL_OK) {

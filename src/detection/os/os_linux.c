@@ -13,26 +13,26 @@
 
 static bool parseLsbRelease(const char* fileName, FFOSResult* result) {
     return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {
-                                                  {"DISTRIB_ID =", &result->id},
-                                                  {"DISTRIB_DESCRIPTION =", &result->prettyName},
-                                                  {"DISTRIB_RELEASE =", &result->version},
-                                                  {"DISTRIB_CODENAME =", &result->codename},
+                                                  { "DISTRIB_ID =", &result->id },
+                                                  { "DISTRIB_DESCRIPTION =", &result->prettyName },
+                                                  { "DISTRIB_RELEASE =", &result->version },
+                                                  { "DISTRIB_CODENAME =", &result->codename },
                                               });
 }
 
 static bool parseOsRelease(const char* fileName, FFOSResult* result) {
     return ffParsePropFileValues(fileName, 11, (FFpropquery[]) {
-                                                   {"PRETTY_NAME =", &result->prettyName},
-                                                   {"NAME =", &result->name},
-                                                   {"ID =", &result->id},
-                                                   {"ID_LIKE =", &result->idLike},
-                                                   {"VARIANT =", &result->variant},
-                                                   {"VARIANT_ID =", &result->variantID},
-                                                   {"VERSION =", &result->version},
-                                                   {"VERSION_ID =", &result->versionID},
-                                                   {"VERSION_CODENAME =", &result->codename},
-                                                   {"CODENAME =", &result->codename},
-                                                   {"BUILD_ID =", &result->buildID},
+                                                   { "PRETTY_NAME =", &result->prettyName },
+                                                   { "NAME =", &result->name },
+                                                   { "ID =", &result->id },
+                                                   { "ID_LIKE =", &result->idLike },
+                                                   { "VARIANT =", &result->variant },
+                                                   { "VARIANT_ID =", &result->variantID },
+                                                   { "VERSION =", &result->version },
+                                                   { "VERSION_ID =", &result->versionID },
+                                                   { "VERSION_CODENAME =", &result->codename },
+                                                   { "CODENAME =", &result->codename },
+                                                   { "BUILD_ID =", &result->buildID },
                                                });
 }
 
@@ -228,9 +228,9 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result) {
         FF_STRBUF_AUTO_DESTROY sub = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY rc = ffStrbufCreate();
         if (ffParsePropFileValues("/boot/dietpi/.version", 3, (FFpropquery[]) {
-                                                                  {"G_DIETPI_VERSION_CORE=", &core},
-                                                                  {"G_DIETPI_VERSION_SUB=", &sub},
-                                                                  {"G_DIETPI_VERSION_RC=", &rc},
+                                                                  { "G_DIETPI_VERSION_CORE=", &core },
+                                                                  { "G_DIETPI_VERSION_SUB=", &sub },
+                                                                  { "G_DIETPI_VERSION_RC=", &rc },
                                                               })) {
             ffStrbufAppendF(&result->prettyName, " %s.%s.%s", core.chars, sub.chars, rc.chars);
         }

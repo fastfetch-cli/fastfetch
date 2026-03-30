@@ -378,8 +378,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     {
         int pollRes = poll(&(struct pollfd) {
                                .fd = state->sockfd,
-                               .events = POLLIN
-                           },
+                               .events = POLLIN },
             1,
             timeout > 0 ? (int) timeout : -1);
         if (pollRes == 0) {

@@ -26,7 +26,7 @@ bool ffPrintCommand(FFCommandOptions* options) {
                 ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
                 puts(line);
             } else {
-                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(line, "result")}));
+                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
             }
         }
     } else {
@@ -34,7 +34,7 @@ bool ffPrintCommand(FFCommandOptions* options) {
             ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufPutTo(&result, stdout);
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(result, "result")}));
+            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
         }
     }
 
@@ -162,6 +162,6 @@ FFModuleBaseInfo ffCommandModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCommandJsonResult,
     .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Command result", "result"},
+        { "Command result", "result" },
     }))
 };

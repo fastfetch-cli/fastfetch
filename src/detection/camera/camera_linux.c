@@ -34,7 +34,7 @@ const char* ffDetectCamera(FFlist* result) {
             continue;
         }
 
-        struct v4l2_format fmt = {.type = V4L2_BUF_TYPE_VIDEO_CAPTURE};
+        struct v4l2_format fmt = { .type = V4L2_BUF_TYPE_VIDEO_CAPTURE };
         if (ioctl(fd, VIDIOC_G_FMT, &fmt) < 0) {
             continue;
         }

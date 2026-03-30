@@ -158,7 +158,7 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
     .generateJsonResult = (void*) ffGenerateKeyboardJsonResult,
     .generateJsonConfig = (void*) ffGenerateKeyboardJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name", "name"},
-        {"Serial number", "serial"},
+        { "Name", "name" },
+        { "Serial number", "serial" },
     }))
 };

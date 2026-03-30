@@ -32,41 +32,41 @@ static FFTerminalThemeColor fgbgToColor(int num) {
     // https://github.com/dalance/termbg/blob/13c478a433fa182e65c401d26a1e7792a7f7f453/src/lib.rs#L251
     switch (num) {
         case 0:
-            return (FFTerminalThemeColor) {0, 0, 0, false}; // black
+            return (FFTerminalThemeColor) { 0, 0, 0, false }; // black
         case 1:
-            return (FFTerminalThemeColor) {205, 0, 0, false}; // red
+            return (FFTerminalThemeColor) { 205, 0, 0, false }; // red
         case 2:
-            return (FFTerminalThemeColor) {0, 205, 0, false}; // green
+            return (FFTerminalThemeColor) { 0, 205, 0, false }; // green
         case 3:
-            return (FFTerminalThemeColor) {205, 205, 0, false}; // yellow
+            return (FFTerminalThemeColor) { 205, 205, 0, false }; // yellow
         case 4:
-            return (FFTerminalThemeColor) {0, 0, 238, false}; // blue
+            return (FFTerminalThemeColor) { 0, 0, 238, false }; // blue
         case 5:
-            return (FFTerminalThemeColor) {205, 0, 205, false}; // magenta
+            return (FFTerminalThemeColor) { 205, 0, 205, false }; // magenta
         case 6:
-            return (FFTerminalThemeColor) {0, 205, 205, false}; // cyan
+            return (FFTerminalThemeColor) { 0, 205, 205, false }; // cyan
         case 7:
-            return (FFTerminalThemeColor) {229, 229, 229, false}; // white
+            return (FFTerminalThemeColor) { 229, 229, 229, false }; // white
 
         case 8:
-            return (FFTerminalThemeColor) {127, 127, 127, false}; // bright black
+            return (FFTerminalThemeColor) { 127, 127, 127, false }; // bright black
         case 9:
-            return (FFTerminalThemeColor) {255, 0, 0, false}; // bright red
+            return (FFTerminalThemeColor) { 255, 0, 0, false }; // bright red
         case 10:
-            return (FFTerminalThemeColor) {0, 255, 0, false}; // bright green
+            return (FFTerminalThemeColor) { 0, 255, 0, false }; // bright green
         case 11:
-            return (FFTerminalThemeColor) {255, 255, 0, false}; // bright yellow
+            return (FFTerminalThemeColor) { 255, 255, 0, false }; // bright yellow
         case 12:
-            return (FFTerminalThemeColor) {92, 92, 255, false}; // bright blue
+            return (FFTerminalThemeColor) { 92, 92, 255, false }; // bright blue
         case 13:
-            return (FFTerminalThemeColor) {255, 0, 255, false}; // bright magenta
+            return (FFTerminalThemeColor) { 255, 0, 255, false }; // bright magenta
         case 14:
-            return (FFTerminalThemeColor) {0, 255, 255, false}; // bright cyan
+            return (FFTerminalThemeColor) { 0, 255, 255, false }; // bright cyan
         case 15:
-            return (FFTerminalThemeColor) {255, 255, 255, false}; // bright white
+            return (FFTerminalThemeColor) { 255, 255, 255, false }; // bright white
 
         default:
-            return (FFTerminalThemeColor) {0, 0, 0, false}; // invalid
+            return (FFTerminalThemeColor) { 0, 0, 0, false }; // invalid
     }
 }
 

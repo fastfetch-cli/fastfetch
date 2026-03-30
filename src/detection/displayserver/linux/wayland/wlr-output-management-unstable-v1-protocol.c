@@ -63,14 +63,14 @@ static const struct wl_interface* wlr_output_management_unstable_v1_types[] = {
 };
 
 static const struct wl_message zwlr_output_manager_v1_requests[] = {
-    {"create_configuration", "nu", wlr_output_management_unstable_v1_types + 3},
-    {"stop", "", wlr_output_management_unstable_v1_types + 0},
+    { "create_configuration", "nu", wlr_output_management_unstable_v1_types + 3 },
+    { "stop", "", wlr_output_management_unstable_v1_types + 0 },
 };
 
 static const struct wl_message zwlr_output_manager_v1_events[] = {
-    {"head", "n", wlr_output_management_unstable_v1_types + 5},
-    {"done", "u", wlr_output_management_unstable_v1_types + 0},
-    {"finished", "", wlr_output_management_unstable_v1_types + 0},
+    { "head", "n", wlr_output_management_unstable_v1_types + 5 },
+    { "done", "u", wlr_output_management_unstable_v1_types + 0 },
+    { "finished", "", wlr_output_management_unstable_v1_types + 0 },
 };
 
 WL_PRIVATE const struct wl_interface zwlr_output_manager_v1_interface = {
@@ -83,24 +83,24 @@ WL_PRIVATE const struct wl_interface zwlr_output_manager_v1_interface = {
 };
 
 static const struct wl_message zwlr_output_head_v1_requests[] = {
-    {"release", "3", wlr_output_management_unstable_v1_types + 0},
+    { "release", "3", wlr_output_management_unstable_v1_types + 0 },
 };
 
 static const struct wl_message zwlr_output_head_v1_events[] = {
-    {"name", "s", wlr_output_management_unstable_v1_types + 0},
-    {"description", "s", wlr_output_management_unstable_v1_types + 0},
-    {"physical_size", "ii", wlr_output_management_unstable_v1_types + 0},
-    {"mode", "n", wlr_output_management_unstable_v1_types + 6},
-    {"enabled", "i", wlr_output_management_unstable_v1_types + 0},
-    {"current_mode", "o", wlr_output_management_unstable_v1_types + 7},
-    {"position", "ii", wlr_output_management_unstable_v1_types + 0},
-    {"transform", "i", wlr_output_management_unstable_v1_types + 0},
-    {"scale", "f", wlr_output_management_unstable_v1_types + 0},
-    {"finished", "", wlr_output_management_unstable_v1_types + 0},
-    {"make", "2s", wlr_output_management_unstable_v1_types + 0},
-    {"model", "2s", wlr_output_management_unstable_v1_types + 0},
-    {"serial_number", "2s", wlr_output_management_unstable_v1_types + 0},
-    {"adaptive_sync", "4u", wlr_output_management_unstable_v1_types + 0},
+    { "name", "s", wlr_output_management_unstable_v1_types + 0 },
+    { "description", "s", wlr_output_management_unstable_v1_types + 0 },
+    { "physical_size", "ii", wlr_output_management_unstable_v1_types + 0 },
+    { "mode", "n", wlr_output_management_unstable_v1_types + 6 },
+    { "enabled", "i", wlr_output_management_unstable_v1_types + 0 },
+    { "current_mode", "o", wlr_output_management_unstable_v1_types + 7 },
+    { "position", "ii", wlr_output_management_unstable_v1_types + 0 },
+    { "transform", "i", wlr_output_management_unstable_v1_types + 0 },
+    { "scale", "f", wlr_output_management_unstable_v1_types + 0 },
+    { "finished", "", wlr_output_management_unstable_v1_types + 0 },
+    { "make", "2s", wlr_output_management_unstable_v1_types + 0 },
+    { "model", "2s", wlr_output_management_unstable_v1_types + 0 },
+    { "serial_number", "2s", wlr_output_management_unstable_v1_types + 0 },
+    { "adaptive_sync", "4u", wlr_output_management_unstable_v1_types + 0 },
 };
 
 WL_PRIVATE const struct wl_interface zwlr_output_head_v1_interface = {
@@ -113,14 +113,14 @@ WL_PRIVATE const struct wl_interface zwlr_output_head_v1_interface = {
 };
 
 static const struct wl_message zwlr_output_mode_v1_requests[] = {
-    {"release", "3", wlr_output_management_unstable_v1_types + 0},
+    { "release", "3", wlr_output_management_unstable_v1_types + 0 },
 };
 
 static const struct wl_message zwlr_output_mode_v1_events[] = {
-    {"size", "ii", wlr_output_management_unstable_v1_types + 0},
-    {"refresh", "i", wlr_output_management_unstable_v1_types + 0},
-    {"preferred", "", wlr_output_management_unstable_v1_types + 0},
-    {"finished", "", wlr_output_management_unstable_v1_types + 0},
+    { "size", "ii", wlr_output_management_unstable_v1_types + 0 },
+    { "refresh", "i", wlr_output_management_unstable_v1_types + 0 },
+    { "preferred", "", wlr_output_management_unstable_v1_types + 0 },
+    { "finished", "", wlr_output_management_unstable_v1_types + 0 },
 };
 
 WL_PRIVATE const struct wl_interface zwlr_output_mode_v1_interface = {
@@ -133,17 +133,17 @@ WL_PRIVATE const struct wl_interface zwlr_output_mode_v1_interface = {
 };
 
 static const struct wl_message zwlr_output_configuration_v1_requests[] = {
-    {"enable_head", "no", wlr_output_management_unstable_v1_types + 8},
-    {"disable_head", "o", wlr_output_management_unstable_v1_types + 10},
-    {"apply", "", wlr_output_management_unstable_v1_types + 0},
-    {"test", "", wlr_output_management_unstable_v1_types + 0},
-    {"destroy", "", wlr_output_management_unstable_v1_types + 0},
+    { "enable_head", "no", wlr_output_management_unstable_v1_types + 8 },
+    { "disable_head", "o", wlr_output_management_unstable_v1_types + 10 },
+    { "apply", "", wlr_output_management_unstable_v1_types + 0 },
+    { "test", "", wlr_output_management_unstable_v1_types + 0 },
+    { "destroy", "", wlr_output_management_unstable_v1_types + 0 },
 };
 
 static const struct wl_message zwlr_output_configuration_v1_events[] = {
-    {"succeeded", "", wlr_output_management_unstable_v1_types + 0},
-    {"failed", "", wlr_output_management_unstable_v1_types + 0},
-    {"cancelled", "", wlr_output_management_unstable_v1_types + 0},
+    { "succeeded", "", wlr_output_management_unstable_v1_types + 0 },
+    { "failed", "", wlr_output_management_unstable_v1_types + 0 },
+    { "cancelled", "", wlr_output_management_unstable_v1_types + 0 },
 };
 
 WL_PRIVATE const struct wl_interface zwlr_output_configuration_v1_interface = {
@@ -156,12 +156,12 @@ WL_PRIVATE const struct wl_interface zwlr_output_configuration_v1_interface = {
 };
 
 static const struct wl_message zwlr_output_configuration_head_v1_requests[] = {
-    {"set_mode", "o", wlr_output_management_unstable_v1_types + 11},
-    {"set_custom_mode", "iii", wlr_output_management_unstable_v1_types + 0},
-    {"set_position", "ii", wlr_output_management_unstable_v1_types + 0},
-    {"set_transform", "i", wlr_output_management_unstable_v1_types + 0},
-    {"set_scale", "f", wlr_output_management_unstable_v1_types + 0},
-    {"set_adaptive_sync", "4u", wlr_output_management_unstable_v1_types + 0},
+    { "set_mode", "o", wlr_output_management_unstable_v1_types + 11 },
+    { "set_custom_mode", "iii", wlr_output_management_unstable_v1_types + 0 },
+    { "set_position", "ii", wlr_output_management_unstable_v1_types + 0 },
+    { "set_transform", "i", wlr_output_management_unstable_v1_types + 0 },
+    { "set_scale", "f", wlr_output_management_unstable_v1_types + 0 },
+    { "set_adaptive_sync", "4u", wlr_output_management_unstable_v1_types + 0 },
 };
 
 WL_PRIVATE const struct wl_interface zwlr_output_configuration_head_v1_interface = {

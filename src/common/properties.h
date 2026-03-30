@@ -19,15 +19,15 @@ static inline bool ffParsePropLine(const char* line, const char* start, FFstrbuf
 }
 
 static inline bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer) {
-    return ffParsePropFileValues(filename, 1, (FFpropquery[]) {{start, buffer}});
+    return ffParsePropFileValues(filename, 1, (FFpropquery[]) { { start, buffer } });
 }
 
 static inline bool ffParsePropFileHome(const char* relativeFile, const char* start, FFstrbuf* buffer) {
-    return ffParsePropFileHomeValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
+    return ffParsePropFileHomeValues(relativeFile, 1, (FFpropquery[]) { { start, buffer } });
 }
 
 static inline bool ffParsePropFileList(const FFlist* list, const char* relativeFile, const char* start, FFstrbuf* buffer) {
-    return ffParsePropFileListValues(list, relativeFile, 1, (FFpropquery[]) {{start, buffer}});
+    return ffParsePropFileListValues(list, relativeFile, 1, (FFpropquery[]) { { start, buffer } });
 }
 
 static inline bool ffParsePropFileConfigValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries) {
@@ -35,7 +35,7 @@ static inline bool ffParsePropFileConfigValues(const char* relativeFile, uint32_
 }
 
 static inline bool ffParsePropFileConfig(const char* relativeFile, const char* start, FFstrbuf* buffer) {
-    return ffParsePropFileConfigValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
+    return ffParsePropFileConfigValues(relativeFile, 1, (FFpropquery[]) { { start, buffer } });
 }
 
 static inline bool ffParsePropFileDataValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries) {
@@ -43,5 +43,5 @@ static inline bool ffParsePropFileDataValues(const char* relativeFile, uint32_t 
 }
 
 static inline bool ffParsePropFileData(const char* relativeFile, const char* start, FFstrbuf* buffer) {
-    return ffParsePropFileDataValues(relativeFile, 1, (FFpropquery[]) {{start, buffer}});
+    return ffParsePropFileDataValues(relativeFile, 1, (FFpropquery[]) { { start, buffer } });
 }

@@ -161,7 +161,7 @@ FFModuleBaseInfo ffMouseModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMouseJsonResult,
     .generateJsonConfig = (void*) ffGenerateMouseJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Mouse name", "name"},
-        {"Mouse serial number", "serial"},
+        { "Mouse name", "name" },
+        { "Mouse serial number", "serial" },
     }))
 };

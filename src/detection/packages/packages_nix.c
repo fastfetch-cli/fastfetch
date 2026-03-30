@@ -101,7 +101,7 @@ static uint32_t getNixPackagesImpl(char* path) {
     FF_STRBUF_AUTO_DESTROY cacheHash = ffStrbufCreateA(64);
     uint32_t count = 0;
 
-    ffProcessAppendStdOut(&hash, (char* const[]) {"nix-store", "--query", "--hash", path, NULL});
+    ffProcessAppendStdOut(&hash, (char* const[]) { "nix-store", "--query", "--hash", path, NULL });
 
     if (checkNixCache(&cacheDir, &cacheHash, &count) && ffStrbufEqual(&hash, &cacheHash)) {
         return count;
@@ -115,7 +115,7 @@ static uint32_t getNixPackagesImpl(char* path) {
 
     FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(1024);
 
-    ffProcessAppendStdOut(&output, (char* const[]) {"nix-store", "--query", "--requisites", path, NULL});
+    ffProcessAppendStdOut(&output, (char* const[]) { "nix-store", "--query", "--requisites", path, NULL });
 
     uint32_t lineLength = 0;
     for (uint32_t i = 0; i < output.length; i++) {

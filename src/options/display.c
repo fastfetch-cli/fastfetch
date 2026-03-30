@@ -83,9 +83,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (spaceBeforeUnit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
-                                                                                       {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                       {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                       {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                        {},
                                                                                    });
                 if (error) {
@@ -101,7 +101,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* maxPrefix = yyjson_obj_get(val, "maxPrefix");
             if (maxPrefix) {
                 int value;
-                const char* error = ffJsonConfigParseEnum(maxPrefix, &value, (FFKeyValuePair[]) {{"B", 0}, {"kB", 1}, {"MB", 2}, {"GB", 3}, {"TB", 4}, {"PB", 5}, {"EB", 6}, {"ZB", 7}, {"YB", 8}, {}});
+                const char* error = ffJsonConfigParseEnum(maxPrefix, &value, (FFKeyValuePair[]) { { "B", 0 }, { "kB", 1 }, { "MB", 2 }, { "GB", 3 }, { "TB", 4 }, { "PB", 5 }, { "EB", 6 }, { "ZB", 7 }, { "YB", 8 }, {} });
                 if (error) {
                     return error;
                 }
@@ -112,9 +112,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (binaryPrefix) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(binaryPrefix, &value, (FFKeyValuePair[]) {
-                                                                                    {"iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC},
-                                                                                    {"si", FF_SIZE_BINARY_PREFIX_TYPE_SI},
-                                                                                    {"jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC},
+                                                                                    { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC },
+                                                                                    { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI },
+                                                                                    { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC },
                                                                                     {},
                                                                                 });
                 if (error) {
@@ -139,9 +139,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (spaceBeforeUnit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
-                                                                                       {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                       {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                       {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                        {},
                                                                                    });
                 if (error) {
@@ -158,14 +158,14 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (unit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(unit, &value, (FFKeyValuePair[]) {
-                                                                            {"DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT},
-                                                                            {"D", FF_TEMPERATURE_UNIT_DEFAULT},
-                                                                            {"CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS},
-                                                                            {"C", FF_TEMPERATURE_UNIT_CELSIUS},
-                                                                            {"FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT},
-                                                                            {"F", FF_TEMPERATURE_UNIT_FAHRENHEIT},
-                                                                            {"KELVIN", FF_TEMPERATURE_UNIT_KELVIN},
-                                                                            {"K", FF_TEMPERATURE_UNIT_KELVIN},
+                                                                            { "DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT },
+                                                                            { "D", FF_TEMPERATURE_UNIT_DEFAULT },
+                                                                            { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+                                                                            { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+                                                                            { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                                                                            { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                                                                            { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+                                                                            { "K", FF_TEMPERATURE_UNIT_KELVIN },
                                                                             {},
                                                                         });
                 if (error) {
@@ -212,9 +212,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (spaceBeforeUnit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
-                                                                                       {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                       {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                       {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                        {},
                                                                                    });
                 if (error) {
@@ -273,9 +273,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (spaceBeforeUnit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
-                                                                                       {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                       {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                       {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                        {},
                                                                                    });
                 if (error) {
@@ -427,9 +427,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                     } else {
                         int value;
                         const char* error = ffJsonConfigParseEnum(trailingZeros, &value, (FFKeyValuePair[]) {
-                                                                                             {"default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT},
-                                                                                             {"always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS},
-                                                                                             {"never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER},
+                                                                                             { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
+                                                                                             { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+                                                                                             { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
                                                                                              {},
                                                                                          });
                         if (error) {
@@ -453,7 +453,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 yyjson_val* type = yyjson_obj_get(val, "type");
                 if (type) {
                     int value;
-                    const char* error = ffJsonConfigParseEnum(type, &value, (FFKeyValuePair[]) {{"none", FF_MODULE_KEY_TYPE_NONE}, {"string", FF_MODULE_KEY_TYPE_STRING}, {"icon", FF_MODULE_KEY_TYPE_ICON}, {"both", FF_MODULE_KEY_TYPE_BOTH}, {"both-0", FF_MODULE_KEY_TYPE_BOTH_0}, {"both-1", FF_MODULE_KEY_TYPE_BOTH_1}, {"both-2", FF_MODULE_KEY_TYPE_BOTH_2}, {"both-3", FF_MODULE_KEY_TYPE_BOTH_3}, {"both-4", FF_MODULE_KEY_TYPE_BOTH_4}, {}});
+                    const char* error = ffJsonConfigParseEnum(type, &value, (FFKeyValuePair[]) { { "none", FF_MODULE_KEY_TYPE_NONE }, { "string", FF_MODULE_KEY_TYPE_STRING }, { "icon", FF_MODULE_KEY_TYPE_ICON }, { "both", FF_MODULE_KEY_TYPE_BOTH }, { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 }, { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 }, { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 }, { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 }, { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 }, {} });
                     if (error) {
                         return error;
                     }
@@ -501,9 +501,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             if (spaceBeforeUnit) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
-                                                                                       {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                       {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                       {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                        {},
                                                                                    });
                 if (error) {
@@ -589,7 +589,7 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         if (ffStrEqualsIgnCase(subkey, "width")) {
             options->keyWidth = (uint16_t) ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subkey, "type")) {
-            options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {{"none", FF_MODULE_KEY_TYPE_NONE}, {"string", FF_MODULE_KEY_TYPE_STRING}, {"icon", FF_MODULE_KEY_TYPE_ICON}, {"both", FF_MODULE_KEY_TYPE_BOTH}, {"both-0", FF_MODULE_KEY_TYPE_BOTH_0}, {"both-1", FF_MODULE_KEY_TYPE_BOTH_1}, {"both-2", FF_MODULE_KEY_TYPE_BOTH_2}, {"both-3", FF_MODULE_KEY_TYPE_BOTH_3}, {"both-4", FF_MODULE_KEY_TYPE_BOTH_4}, {}});
+            options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "none", FF_MODULE_KEY_TYPE_NONE }, { "string", FF_MODULE_KEY_TYPE_STRING }, { "icon", FF_MODULE_KEY_TYPE_ICON }, { "both", FF_MODULE_KEY_TYPE_BOTH }, { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 }, { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 }, { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 }, { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 }, { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "padding-left")) {
             options->keyPaddingLeft = (uint16_t) ffOptionParseUInt32(key, value);
         } else {
@@ -606,9 +606,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             options->durationAbbreviation = ffOptionParseBoolean(value);
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                         {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                                         {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                                         {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                                         { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                                         { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                                         { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                                          {},
                                                                                                      });
         } else {
@@ -617,16 +617,16 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     } else if (ffStrStartsWithIgnCase(key, "--size-")) {
         const char* subkey = key + strlen("--size-");
         if (ffStrEqualsIgnCase(subkey, "binary-prefix")) {
-            options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {{"iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC}, {"si", FF_SIZE_BINARY_PREFIX_TYPE_SI}, {"jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC}, {}});
+            options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC }, { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI }, { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
             options->sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subkey, "max-prefix")) {
-            options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {{"B", 0}, {"kB", 1}, {"MB", 2}, {"GB", 3}, {"TB", 4}, {"PB", 5}, {"EB", 6}, {"ZB", 7}, {"YB", 8}, {}});
+            options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "B", 0 }, { "kB", 1 }, { "MB", 2 }, { "GB", 3 }, { "TB", 4 }, { "PB", 5 }, { "EB", 6 }, { "ZB", 7 }, { "YB", 8 }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                     {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                                     {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                                     {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                                     { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                                     { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                                     { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                                      {},
                                                                                                  });
         } else {
@@ -636,14 +636,14 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         const char* subkey = key + strlen("--temp-");
         if (ffStrEqualsIgnCase(subkey, "unit")) {
             options->tempUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                      {"DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT},
-                                                                                      {"D", FF_TEMPERATURE_UNIT_DEFAULT},
-                                                                                      {"CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS},
-                                                                                      {"C", FF_TEMPERATURE_UNIT_CELSIUS},
-                                                                                      {"FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT},
-                                                                                      {"F", FF_TEMPERATURE_UNIT_FAHRENHEIT},
-                                                                                      {"KELVIN", FF_TEMPERATURE_UNIT_KELVIN},
-                                                                                      {"K", FF_TEMPERATURE_UNIT_KELVIN},
+                                                                                      { "DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT },
+                                                                                      { "D", FF_TEMPERATURE_UNIT_DEFAULT },
+                                                                                      { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+                                                                                      { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+                                                                                      { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                                                                                      { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                                                                                      { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+                                                                                      { "K", FF_TEMPERATURE_UNIT_KELVIN },
                                                                                       {},
                                                                                   });
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
@@ -656,9 +656,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->tempColorRed);
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                     {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                                     {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                                     {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                                     { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                                     { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                                     { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                                      {},
                                                                                                  });
         } else {
@@ -678,9 +678,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->percentColorRed);
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                        {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                                        {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                                        {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                                        { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                                        { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                                        { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                                         {},
                                                                                                     });
         } else if (ffStrEqualsIgnCase(subkey, "width")) {
@@ -692,9 +692,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         options->fractionNdigits = (int8_t) ffOptionParseInt32(key, value);
     } else if (ffStrEqualsIgnCase(key, "--fraction-trailing-zeros")) {
         options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                         {"default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT},
-                                                                                                         {"always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS},
-                                                                                                         {"never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER},
+                                                                                                         { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
+                                                                                                         { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+                                                                                                         { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
                                                                                                          {},
                                                                                                      });
     } else if (ffStrEqualsIgnCase(key, "--no-buffer")) {
@@ -736,9 +736,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                                                                                                     {"default", FF_SPACE_BEFORE_UNIT_DEFAULT},
-                                                                                                     {"always", FF_SPACE_BEFORE_UNIT_ALWAYS},
-                                                                                                     {"never", FF_SPACE_BEFORE_UNIT_NEVER},
+                                                                                                     { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                                     { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                                     { "never", FF_SPACE_BEFORE_UNIT_NEVER },
                                                                                                      {},
                                                                                                  });
         } else {

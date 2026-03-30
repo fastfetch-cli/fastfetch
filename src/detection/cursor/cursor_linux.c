@@ -30,7 +30,7 @@ static bool detectCursorGTK(FFCursorResult* result) {
 }
 
 static void detectCursorFromConfigFile(const char* relativeFilePath, const char* themeStart, const char* themeDefault, const char* sizeStart, const char* sizeDefault, FFCursorResult* result) {
-    if (ffParsePropFileConfigValues(relativeFilePath, 2, (FFpropquery[]) {{themeStart, &result->theme}, {sizeStart, &result->size}})) {
+    if (ffParsePropFileConfigValues(relativeFilePath, 2, (FFpropquery[]) { { themeStart, &result->theme }, { sizeStart, &result->size } })) {
         if (result->theme.length == 0) {
             ffStrbufAppendS(&result->theme, themeDefault);
         }
@@ -46,7 +46,7 @@ static void detectCursorFromConfigFile(const char* relativeFilePath, const char*
 }
 
 static bool detectCursorFromXResources(FFCursorResult* result) {
-    ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {{"Xcursor.theme :", &result->theme}, {"Xcursor.size :", &result->size}});
+    ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) { { "Xcursor.theme :", &result->theme }, { "Xcursor.size :", &result->size } });
 
     return result->theme.length > 0;
 }

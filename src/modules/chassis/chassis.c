@@ -119,9 +119,9 @@ FFModuleBaseInfo ffChassisModuleInfo = {
     .generateJsonResult = (void*) ffGenerateChassisJsonResult,
     .generateJsonConfig = (void*) ffGenerateChassisJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Chassis type", "type"},
-        {"Chassis vendor", "vendor"},
-        {"Chassis version", "version"},
-        {"Chassis serial number", "serial"},
+        { "Chassis type", "type" },
+        { "Chassis vendor", "vendor" },
+        { "Chassis version", "version" },
+        { "Chassis serial number", "serial" },
     })),
 };

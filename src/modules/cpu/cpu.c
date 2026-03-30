@@ -225,7 +225,7 @@ void ffInitCPUOptions(FFCPUOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufInit(&options->tempSensor);
     options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) {60, 80};
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->showPeCoreCount = false;
 }
 
@@ -244,17 +244,17 @@ FFModuleBaseInfo ffCPUModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCPUJsonResult,
     .generateJsonConfig = (void*) ffGenerateCPUJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name", "name"},
-        {"Vendor", "vendor"},
-        {"Physical core count", "cores-physical"},
-        {"Logical core count", "cores-logical"},
-        {"Online core count", "cores-online"},
-        {"Base frequency (formatted)", "freq-base"},
-        {"Max frequency (formatted)", "freq-max"},
-        {"Temperature (formatted)", "temperature"},
-        {"Logical core count grouped by frequency", "core-types"},
-        {"Processor package count", "packages"},
-        {"CPU microarchitecture", "march"},
-        {"NUMA node count", "numa-nodes"},
+        { "Name", "name" },
+        { "Vendor", "vendor" },
+        { "Physical core count", "cores-physical" },
+        { "Logical core count", "cores-logical" },
+        { "Online core count", "cores-online" },
+        { "Base frequency (formatted)", "freq-base" },
+        { "Max frequency (formatted)", "freq-max" },
+        { "Temperature (formatted)", "temperature" },
+        { "Logical core count grouped by frequency", "core-types" },
+        { "Processor package count", "packages" },
+        { "CPU microarchitecture", "march" },
+        { "NUMA node count", "numa-nodes" },
     }))
 };

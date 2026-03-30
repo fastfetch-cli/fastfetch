@@ -109,7 +109,7 @@ FFModuleBaseInfo ffCursorModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCursorJsonResult,
     .generateJsonConfig = (void*) ffGenerateCursorJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Cursor theme", "theme"},
-        {"Cursor size", "size"},
+        { "Cursor theme", "theme" },
+        { "Cursor size", "size" },
     })),
 };

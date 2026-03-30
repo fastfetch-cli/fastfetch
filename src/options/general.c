@@ -39,9 +39,9 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             if (yyjson_is_str(val)) {
                 int value;
                 const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                           {"sysfs-only", FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY},
-                                                                           {"false", FF_DS_FORCE_DRM_TYPE_FALSE},
-                                                                           {"true", FF_DS_FORCE_DRM_TYPE_TRUE},
+                                                                           { "sysfs-only", FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY },
+                                                                           { "false", FF_DS_FORCE_DRM_TYPE_FALSE },
+                                                                           { "true", FF_DS_FORCE_DRM_TYPE_TRUE },
                                                                            {},
                                                                        });
                 if (error) {

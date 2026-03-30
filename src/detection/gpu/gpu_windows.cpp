@@ -55,7 +55,7 @@ extern "C" const char* ffGPUDetectTypeWithDXCore(LUID adapterLuid, FFGPUResult* 
         return "Failed to get adapter by LUID";
     }
 
-    on_scope_exit releaseAdapter{[adapter] { adapter->Release(); }};
+    on_scope_exit releaseAdapter{ [adapter] { adapter->Release(); } };
 
     bool isIntegrated = false;
     hr = adapter->GetProperty(DXCoreAdapterProperty::IsIntegrated, sizeof(isIntegrated), &isIntegrated);

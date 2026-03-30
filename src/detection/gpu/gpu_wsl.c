@@ -91,7 +91,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus) {
 
         const char* vendorStr = NULL;
 
-        D3DKMT_QUERY_DEVICE_IDS deviceIds = {.PhysicalAdapterIndex = 0};
+        D3DKMT_QUERY_DEVICE_IDS deviceIds = { .PhysicalAdapterIndex = 0 };
         if (NT_SUCCESS(D3DKMTQueryAdapterInfo(dxg, &(D3DKMT_QUERYADAPTERINFO) {
                                                        .hAdapter = adapter->hAdapter,
                                                        .Type = KMTQAITYPE_PHYSICALADAPTERDEVICEIDS,
@@ -274,7 +274,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus) {
                 D3DKMT_QUERYSTATISTICS queryStatistics = {
                     .Type = D3DKMT_QUERYSTATISTICS_NODE2,
                     .AdapterLuid = adapter->AdapterLuid,
-                    .QueryNode2 = {.PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx},
+                    .QueryNode2 = { .PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx },
                 };
                 if (NT_SUCCESS(D3DKMTQueryStatistics(dxg, &queryStatistics))) {
                     gpu->frequency = (uint32_t) (queryStatistics.QueryResult.NodeInformation.NodePerfData.MaxFrequency / 1000 / 1000);
@@ -290,7 +290,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus) {
             D3DKMT_QUERYSTATISTICS queryStatistics = {
                 .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER,
                 .AdapterLuid = adapter->AdapterLuid,
-                .QueryPhysAdapter = {.PhysicalAdapterIndex = 0},
+                .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
             };
             if (NT_SUCCESS(D3DKMTQueryStatistics(dxg, &queryStatistics)) &&
                 queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0) {
@@ -325,7 +325,7 @@ const char* ffGPUDetectWsl2(const FFGPUOptions* options, FFlist* gpus) {
             (unsigned) gpu->type,
             (unsigned long) gpu->deviceId);
 
-        if (NT_SUCCESS(D3DKMTCloseAdapter(dxg, &(D3DKMT_CLOSEADAPTER) {.hAdapter = adapter->hAdapter}))) {
+        if (NT_SUCCESS(D3DKMTCloseAdapter(dxg, &(D3DKMT_CLOSEADAPTER) { .hAdapter = adapter->hAdapter }))) {
             FF_DEBUG("Closed adapter #%u successfully", i);
         } else {
             FF_DEBUG("Failed to close adapter #%u: %s", i, strerror(errno));

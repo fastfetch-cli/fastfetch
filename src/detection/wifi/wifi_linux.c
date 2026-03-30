@@ -231,7 +231,7 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer) {
     const char* error = NULL;
     FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
     FF_DEBUG("Executing 'iw dev %s link'", item->inf.description.chars);
-    if ((error = ffProcessAppendStdOut(&output, (char* const[]) {"iw", "dev", item->inf.description.chars, "link", NULL}))) {
+    if ((error = ffProcessAppendStdOut(&output, (char* const[]) { "iw", "dev", item->inf.description.chars, "link", NULL }))) {
         FF_DEBUG("iw command execution failed: %s", error);
         return error;
     }

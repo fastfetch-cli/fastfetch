@@ -18,7 +18,7 @@ typedef union FFvariant {
     };
 } FFvariant;
 
-#define FF_VARIANT_NULL ((FFvariant) {.strValue = NULL})
+#define FF_VARIANT_NULL ((FFvariant) { .strValue = NULL })
 
 FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type);
 FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type);

@@ -65,7 +65,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     }
 
     {
-        struct timeval timeout = {1, 0};
+        struct timeval timeout = { 1, 0 };
         setsockopt(pfRoute, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, sizeof(timeout));
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, sizeof(timeout));
     }
@@ -138,7 +138,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     }
 
     {
-        struct timeval timeout = {1, 0};
+        struct timeval timeout = { 1, 0 };
         setsockopt(pfRoute, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, sizeof(timeout));
         setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, sizeof(timeout));
     }

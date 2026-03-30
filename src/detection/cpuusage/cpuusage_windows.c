@@ -49,7 +49,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
             .Identifier = {
                 // Processor Information GUID
                 // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib\_V2Providers\{383487a6-3676-4870-a4e7-d45b30c35629}\{b4fc721a-0378-476f-89ba-a5a79f810b36}
-                .CounterSetGuid = {0xb4fc721a, 0x0378, 0x476f, {0x89, 0xba, 0xa5, 0xa7, 0x9f, 0x81, 0x0b, 0x36}},
+                .CounterSetGuid = { 0xb4fc721a, 0x0378, 0x476f, { 0x89, 0xba, 0xa5, 0xa7, 0x9f, 0x81, 0x0b, 0x36 } },
                 .Size = sizeof(querySpec),
                 .CounterId = PERF_WILDCARD_COUNTER, // https://learn.microsoft.com/en-us/windows/win32/perfctrs/using-the-perflib-functions-to-consume-counter-data
                 .InstanceId = PERF_WILDCARD_COUNTER,

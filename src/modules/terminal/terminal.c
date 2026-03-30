@@ -92,13 +92,13 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTerminalJsonResult,
     .generateJsonConfig = (void*) ffGenerateTerminalJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Terminal process name", "process-name"},
-        {"The first argument of the command line when running the terminal", "exe"},
-        {"Terminal base name of arg0", "exe-name"},
-        {"Terminal pid", "pid"},
-        {"Terminal pretty name", "pretty-name"},
-        {"Terminal version", "version"},
-        {"Terminal full exe path", "exe-path"},
-        {"Terminal tty / pts used", "tty"},
+        { "Terminal process name", "process-name" },
+        { "The first argument of the command line when running the terminal", "exe" },
+        { "Terminal base name of arg0", "exe-name" },
+        { "Terminal pid", "pid" },
+        { "Terminal pretty name", "pretty-name" },
+        { "Terminal version", "version" },
+        { "Terminal full exe path", "exe-path" },
+        { "Terminal tty / pts used", "tty" },
     }))
 };

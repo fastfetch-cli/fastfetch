@@ -173,7 +173,7 @@ bool ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
 
 void ffInitSwapOptions(FFSwapOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
-    options->percent = (FFPercentageModuleConfig) {50, 80, 0};
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->separate = false;
 }
 
@@ -191,10 +191,10 @@ FFModuleBaseInfo ffSwapModuleInfo = {
     .generateJsonResult = (void*) ffGenerateSwapJsonResult,
     .generateJsonConfig = (void*) ffGenerateSwapJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Used size", "used"},
-        {"Total size", "total"},
-        {"Percentage used (num)", "percentage"},
-        {"Percentage used (bar)", "percentage-bar"},
-        {"Name", "name"},
+        { "Used size", "used" },
+        { "Total size", "total" },
+        { "Percentage used (num)", "percentage" },
+        { "Percentage used (bar)", "percentage-bar" },
+        { "Name", "name" },
     }))
 };

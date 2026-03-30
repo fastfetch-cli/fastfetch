@@ -286,7 +286,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN && adapterLuid > 0) {
             FF_DEBUG("Trying to determine GPU type using D3DKMT APIs");
-            D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = {.AdapterLuid = *(LUID*) &adapterLuid};
+            D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = { .AdapterLuid = *(LUID*) &adapterLuid };
             if (NT_SUCCESS(D3DKMTOpenAdapterFromLuid(&openAdapterFromLuid))) {
                 FF_DEBUG("Successfully opened adapter from LUID");
 
@@ -332,7 +332,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         D3DKMT_QUERYSTATISTICS queryStatistics = {
                             .Type = D3DKMT_QUERYSTATISTICS_NODE2, // Windows 11 (22H2) and later
                             .AdapterLuid = *(LUID*) &adapterLuid,
-                            .QueryNode2 = {.PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx},
+                            .QueryNode2 = { .PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx },
                         };
                         if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) {
                             gpu->frequency = (uint32_t) (queryStatistics.QueryResult.NodeInformation.NodePerfData.MaxFrequency / 1000 / 1000);
@@ -344,7 +344,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     }
                 }
 
-                D3DKMT_CLOSEADAPTER closeAdapter = {.hAdapter = openAdapterFromLuid.hAdapter};
+                D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
                 (void) D3DKMTCloseAdapter(&closeAdapter);
                 openAdapterFromLuid.hAdapter = (D3DKMT_HANDLE) {};
                 FF_DEBUG("Closed adapter handle");
@@ -357,7 +357,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 D3DKMT_QUERYSTATISTICS queryStatistics = {
                     .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER, // Windows 10 (1803) and later
                     .AdapterLuid = *(LUID*) &adapterLuid,
-                    .QueryPhysAdapter = {.PhysicalAdapterIndex = 0},
+                    .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
                 };
                 if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)) &&
                     queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0) {

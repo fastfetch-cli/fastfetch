@@ -112,10 +112,10 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,
     .generateJsonConfig = (void*) ffGenerateBootmgrJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name / description", "name"},
-        {"Firmware file path", "firmware-path"},
-        {"Firmware file name", "firmware-name"},
-        {"Is secure boot enabled", "secure-boot"},
-        {"Boot order", "order"},
+        { "Name / description", "name" },
+        { "Firmware file path", "firmware-path" },
+        { "Firmware file name", "firmware-name" },
+        { "Is secure boot enabled", "secure-boot" },
+        { "Boot order", "order" },
     }))
 };

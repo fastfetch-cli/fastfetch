@@ -50,7 +50,7 @@ static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     }
 
     if (result->length == 0) {
-        if (ffProcessAppendStdOut(result, (char* const[]) {"plasmashell", "--version", NULL}) == NULL) { // plasmashell 5.27.5
+        if (ffProcessAppendStdOut(result, (char* const[]) { "plasmashell", "--version", NULL }) == NULL) { // plasmashell 5.27.5
             ffStrbufSubstrAfterLastC(result, ' ');
         }
     }
@@ -74,7 +74,7 @@ static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     getGnomeByDbus(result);
 
     if (result->length == 0) {
-        if (ffProcessAppendStdOut(result, (char* const[]) {"gnome-shell", "--version", NULL}) == NULL) { // GNOME Shell 44.1
+        if (ffProcessAppendStdOut(result, (char* const[]) { "gnome-shell", "--version", NULL }) == NULL) { // GNOME Shell 44.1
             ffStrbufSubstrAfterLastC(result, ' ');
         }
     }
@@ -88,7 +88,7 @@ static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) 
     }
 
     if (result->length == 0) {
-        if (ffProcessAppendStdOut(result, (char* const[]) {"cinnamon", "--version", NULL}) == NULL) { // Cinnamon 6.2.2
+        if (ffProcessAppendStdOut(result, (char* const[]) { "cinnamon", "--version", NULL }) == NULL) { // Cinnamon 6.2.2
             ffStrbufSubstrAfterLastC(result, ' ');
         }
     }
@@ -99,12 +99,12 @@ static void getMate(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY micro = ffStrbufCreate();
 
-    ffParsePropFileDataValues("mate-about/mate-version.xml", 3, (FFpropquery[]) {{"<platform>", &major}, {"<minor>", &minor}, {"<micro>", &micro}});
+    ffParsePropFileDataValues("mate-about/mate-version.xml", 3, (FFpropquery[]) { { "<platform>", &major }, { "<minor>", &minor }, { "<micro>", &micro } });
 
     ffParseSemver(result, &major, &minor, &micro);
 
     if (result->length == 0) {
-        ffProcessAppendStdOut(result, (char* const[]) {"mate-session", "--version", NULL});
+        ffProcessAppendStdOut(result, (char* const[]) { "mate-session", "--version", NULL });
 
         ffStrbufSubstrAfterFirstC(result, ' ');
         ffStrbufTrim(result, ' ');
@@ -129,7 +129,7 @@ static void getXFCE4(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
 
     if (result->length == 0) {
         // This is somewhat slow
-        ffProcessAppendStdOut(result, (char* const[]) {"xfce4-session", "--version", NULL});
+        ffProcessAppendStdOut(result, (char* const[]) { "xfce4-session", "--version", NULL });
 
         ffStrbufSubstrBeforeFirstC(result, ')');
         ffStrbufSubstrAfterLastC(result, ' ');
@@ -149,7 +149,7 @@ static void getLXQt(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
 
     if (result->length == 0) {
         // This is really, really, really slow. Thank you, LXQt developers
-        ffProcessAppendStdOut(result, (char* const[]) {"lxqt-session", "-v", NULL});
+        ffProcessAppendStdOut(result, (char* const[]) { "lxqt-session", "-v", NULL });
 
         result->length = 0; // don't set '\0' byte
         ffParsePropLines(result->chars, "liblxqt", result);
@@ -192,7 +192,7 @@ static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* opt
     }
 
     ffStrbufClear(&path);
-    if (ffProcessAppendStdOut(&path, (char* const[]) {"tde-config", "--version", NULL}) == NULL) {
+    if (ffProcessAppendStdOut(&path, (char* const[]) { "tde-config", "--version", NULL }) == NULL) {
         ffParsePropLines(path.chars, "TDE: ", result);
         return NULL;
     }
@@ -201,7 +201,7 @@ static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* opt
 }
 
 static const char* getCosmic(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
-    if (ffProcessAppendStdOut(result, (char* const[]) {"cosmic-comp", "--version", NULL}) == NULL) {
+    if (ffProcessAppendStdOut(result, (char* const[]) { "cosmic-comp", "--version", NULL }) == NULL) {
         // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
         ffStrbufSubstrAfterFirstC(result, ' ');
         ffStrbufSubstrBeforeFirstC(result, ' ');

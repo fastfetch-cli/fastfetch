@@ -151,7 +151,7 @@ int main(void) {
 
     // removeStrings
 
-    ffStrbufRemoveStrings(&strbuf, 3, (const char*[]) {"23", "45", "9"});
+    ffStrbufRemoveStrings(&strbuf, 3, (const char*[]) { "23", "45", "9" });
 
     VERIFY(strbuf.length == 2);
     VERIFY(strcmp(strbuf.chars, "16") == 0);

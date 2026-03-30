@@ -60,8 +60,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
     HANDLE hRadio = NULL;
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstRadio(&(BLUETOOTH_FIND_RADIO_PARAMS) {
-                                                                 .dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS)
-                                                             },
+                                                                 .dwSize = sizeof(BLUETOOTH_FIND_RADIO_PARAMS) },
         &hRadio);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {
@@ -81,7 +80,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         FFBluetoothRadioResult* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, blri.localInfo.name);
 
-        BLUETOOTH_ADDRESS_STRUCT addr = {.ullLong = blri.localInfo.address};
+        BLUETOOTH_ADDRESS_STRUCT addr = { .ullLong = blri.localInfo.address };
         ffStrbufInitF(&device->address, "%02X:%02X:%02X:%02X:%02X:%02X", addr.rgBytes[5], addr.rgBytes[4], addr.rgBytes[3], addr.rgBytes[2], addr.rgBytes[1], addr.rgBytes[0]);
 
         device->lmpVersion = blri.radioInfo.lmpVersion;

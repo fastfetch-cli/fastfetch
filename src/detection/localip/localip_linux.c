@@ -46,7 +46,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 }
 #endif
 
-#define FF_LOCALIP_NIFLAG(name) {IFF_##name, #name}
+#define FF_LOCALIP_NIFLAG(name) { IFF_##name, #name }
 
 static const FFLocalIpNIFlag niFlagOptions[] = {
     FF_LOCALIP_NIFLAG(UP),
@@ -567,7 +567,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT) {
 #ifdef __linux__
-                    struct ethtool_cmd edata = {.cmd = ETHTOOL_GSET};
+                    struct ethtool_cmd edata = { .cmd = ETHTOOL_GSET };
                     ifr.ifr_data = (void*) &edata;
                     if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0) {
                         iface->speed = (edata.speed_hi << 16) | edata.speed;

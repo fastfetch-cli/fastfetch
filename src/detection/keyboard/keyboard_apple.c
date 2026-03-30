@@ -23,7 +23,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
         return "IOHIDManagerOpen() failed";
     }
 
-    CFDictionaryRef FF_CFTYPE_AUTO_RELEASE matching1 = CFDictionaryCreate(kCFAllocatorDefault, (const void**) (CFStringRef[]) {CFSTR(kIOHIDDeviceUsagePageKey), CFSTR(kIOHIDDeviceUsageKey)}, (const void**) (CFNumberRef[]) {ffCfCreateInt(kHIDPage_GenericDesktop), ffCfCreateInt(kHIDUsage_GD_Keyboard)}, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryRef FF_CFTYPE_AUTO_RELEASE matching1 = CFDictionaryCreate(kCFAllocatorDefault, (const void**) (CFStringRef[]) { CFSTR(kIOHIDDeviceUsagePageKey), CFSTR(kIOHIDDeviceUsageKey) }, (const void**) (CFNumberRef[]) { ffCfCreateInt(kHIDPage_GenericDesktop), ffCfCreateInt(kHIDUsage_GD_Keyboard) }, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     IOHIDManagerSetDeviceMatching(manager, matching1);
 
     CFSetRef FF_CFTYPE_AUTO_RELEASE set = IOHIDManagerCopyDevices(manager);

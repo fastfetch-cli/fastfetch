@@ -124,11 +124,11 @@ FFModuleBaseInfo ffCameraModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCameraJsonResult,
     .generateJsonConfig = (void*) ffGenerateCameraJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Device name", "name"},
-        {"Vendor", "vendor"},
-        {"Color space", "colorspace"},
-        {"Identifier", "id"},
-        {"Width (in px)", "width"},
-        {"Height (in px)", "height"},
+        { "Device name", "name" },
+        { "Vendor", "vendor" },
+        { "Color space", "colorspace" },
+        { "Identifier", "id" },
+        { "Width (in px)", "width" },
+        { "Height (in px)", "height" },
     }))
 };

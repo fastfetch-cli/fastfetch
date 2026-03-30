@@ -253,7 +253,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     }
 
     if (result.memory) {
-        nvmlMemory_v2_t memory = {.version = nvmlMemory_v2};
+        nvmlMemory_v2_t memory = { .version = nvmlMemory_v2 };
         if (nvmlData.ffnvmlDeviceGetMemoryInfo_v2(device, &memory) == NVML_SUCCESS) {
             result.memory->total = memory.used + memory.free;
             result.memory->used = memory.used;

@@ -129,9 +129,9 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module) {
         if (unsafe_yyjson_equals_str(key, "soundType")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                                                                       {"main", FF_SOUND_TYPE_MAIN},
-                                                                       {"active", FF_SOUND_TYPE_ACTIVE},
-                                                                       {"all", FF_SOUND_TYPE_ALL},
+                                                                       { "main", FF_SOUND_TYPE_MAIN },
+                                                                       { "active", FF_SOUND_TYPE_ACTIVE },
+                                                                       { "all", FF_SOUND_TYPE_ALL },
                                                                        {},
                                                                    });
             if (error) {
@@ -207,7 +207,7 @@ void ffInitSoundOptions(FFSoundOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFPercentageModuleConfig) {80, 90, 0};
+    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
 }
 
 void ffDestroySoundOptions(FFSoundOptions* options) {
@@ -224,11 +224,11 @@ FFModuleBaseInfo ffSoundModuleInfo = {
     .generateJsonResult = (void*) ffGenerateSoundJsonResult,
     .generateJsonConfig = (void*) ffGenerateSoundJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Is main sound device", "is-main"},
-        {"Device name", "name"},
-        {"Volume (in percentage num)", "volume-percentage"},
-        {"Identifier", "identifier"},
-        {"Volume (in percentage bar)", "volume-percentage-bar"},
-        {"Platform API used", "platform-api"},
+        { "Is main sound device", "is-main" },
+        { "Device name", "name" },
+        { "Volume (in percentage num)", "volume-percentage" },
+        { "Identifier", "identifier" },
+        { "Volume (in percentage bar)", "volume-percentage-bar" },
+        { "Platform API used", "platform-api" },
     }))
 };

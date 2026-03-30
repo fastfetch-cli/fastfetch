@@ -16,7 +16,7 @@ bool ffPrintLocale(FFLocaleOptions* options) {
         ffPrintLogoAndKey(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&locale, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(locale, "result")}));
+        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
     }
 
     return true;
@@ -76,6 +76,6 @@ FFModuleBaseInfo ffLocaleModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLocaleJsonResult,
     .generateJsonConfig = (void*) ffGenerateLocaleJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Locale code", "result"},
+        { "Locale code", "result" },
     }))
 };

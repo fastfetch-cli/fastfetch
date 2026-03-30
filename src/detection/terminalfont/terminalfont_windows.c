@@ -137,7 +137,7 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
     }
 
     if (!error && json.length == 0) {
-        error = ffProcessAppendStdOut(&json, (char* const[]) {"cmd.exe", "/c",
+        error = ffProcessAppendStdOut(&json, (char* const[]) { "cmd.exe", "/c",
                                                  // print the file content directly, so we don't need to handle the difference of Windows and POSIX path
                                                  "if exist %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json "
                                                  "( type %LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json ) "
@@ -146,7 +146,7 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
                                                  "else if exist \"%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json\" "
                                                  "( type %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json ) "
                                                  "else ( call )",
-                                                 NULL});
+                                                 NULL });
     }
 
     if (error) {
@@ -176,8 +176,8 @@ static void detectMintty(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    if (!ffParsePropFileConfigValues("mintty/config", 2, (FFpropquery[]) {{"Font=", &fontName}, {"FontHeight=", &fontSize}})) {
-        ffParsePropFileConfigValues(".minttyrc", 2, (FFpropquery[]) {{"Font=", &fontName}, {"FontHeight=", &fontSize}});
+    if (!ffParsePropFileConfigValues("mintty/config", 2, (FFpropquery[]) { { "Font=", &fontName }, { "FontHeight=", &fontSize } })) {
+        ffParsePropFileConfigValues(".minttyrc", 2, (FFpropquery[]) { { "Font=", &fontName }, { "FontHeight=", &fontSize } });
     }
     if (fontName.length == 0) {
         ffStrbufAppendS(&fontName, "Lucida Console");
@@ -190,7 +190,7 @@ static void detectMintty(FFTerminalFontResult* terminalFont) {
 }
 
 static void detectConhost(FFTerminalFontResult* terminalFont) {
-    CONSOLE_FONT_INFOEX cfi = {.cbSize = sizeof(cfi)};
+    CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
     if (!GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) {
         ffStrbufAppendS(&terminalFont->error, "GetCurrentConsoleFontEx() failed");
         return;
@@ -210,12 +210,12 @@ static void detectConEmu(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    const char* paths[] = {"ConEmuDir", "ConEmuBaseDir", "APPDATA"};
+    const char* paths[] = { "ConEmuDir", "ConEmuBaseDir", "APPDATA" };
     for (uint32_t i = 0; i < ARRAY_SIZE(paths); ++i) {
         ffStrbufSetS(&path, getenv(paths[i]));
         if (path.length > 0) {
             ffStrbufAppendS(&path, "/ConEmu.xml");
-            if (ffParsePropFileValues(path.chars, 2, (FFpropquery[]) {{"<value name=\"FontName\" type=\"string\" data=\"", &fontName}, {"<value name=\"FontSize\" type=\"ulong\" data=\"", &fontSize}})) {
+            if (ffParsePropFileValues(path.chars, 2, (FFpropquery[]) { { "<value name=\"FontName\" type=\"string\" data=\"", &fontName }, { "<value name=\"FontSize\" type=\"ulong\" data=\"", &fontSize } })) {
                 break;
             }
         }
@@ -249,7 +249,7 @@ static void detectWarp(FFTerminalFontResult* terminalFont) {
 
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
-    if (ffRegReadValues(key, 2, (FFRegValueArg[]) {FF_ARG(fontName, L"FontName"), FF_ARG(fontSize, L"FontSize")}, &terminalFont->error)) {
+    if (ffRegReadValues(key, 2, (FFRegValueArg[]) { FF_ARG(fontName, L"FontName"), FF_ARG(fontSize, L"FontSize") }, &terminalFont->error)) {
         ffStrbufTrim(&fontName, '"');
         ffStrbufAppendS(&fontSize, "px");
     } else {

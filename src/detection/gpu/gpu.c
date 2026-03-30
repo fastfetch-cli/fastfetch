@@ -101,7 +101,7 @@ const char* detectByOpenGL(FFlist* gpus) {
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-        gpu->dedicated = gpu->shared = (FFGPUMemory) {0, 0};
+        gpu->dedicated = gpu->shared = (FFGPUMemory) { 0, 0 };
         gpu->deviceId = 0;
 
         FF_DEBUG("OpenGL reported renderer='%s', vendor='%s', version='%s'",

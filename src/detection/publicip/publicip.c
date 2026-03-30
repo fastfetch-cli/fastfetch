@@ -3,7 +3,7 @@
 
 #define FF_UNITIALIZED ((const char*) (uintptr_t) -1)
 static FFNetworkingState states[2];
-static const char* statuses[2] = {FF_UNITIALIZED, FF_UNITIALIZED};
+static const char* statuses[2] = { FF_UNITIALIZED, FF_UNITIALIZED };
 
 void ffPreparePublicIp(FFPublicIPOptions* options) {
     FFNetworkingState* state = &states[options->ipv6];

@@ -122,7 +122,7 @@ void ffStart(void) {
     if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);
     }
-    struct sigaction action = {.sa_handler = exitSignalHandler};
+    struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);

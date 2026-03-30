@@ -137,14 +137,14 @@ static void detectXFCETerminal(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     const char* path = "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml";
-    bool configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {{"<property name=\"font-use-system\" type=\"bool\" value=\"", &useSysFont}, {"<property name=\"font-name\" type=\"string\" value=\"", &fontName}});
+    bool configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) { { "<property name=\"font-use-system\" type=\"bool\" value=\"", &useSysFont }, { "<property name=\"font-name\" type=\"string\" value=\"", &fontName } });
 
     if (configFound) {
         ffStrbufSubstrBeforeLastC(&useSysFont, '"');
         ffStrbufSubstrBeforeLastC(&fontName, '"');
     } else {
         path = "xfce4/terminal/terminalrc";
-        configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {{"FontUseSystem = ", &useSysFont}, {"FontName = ", &fontName}});
+        configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) { { "FontUseSystem = ", &useSysFont }, { "FontName = ", &fontName } });
     }
 
     if (configFound && (useSysFont.length == 0 || ffStrbufIgnCaseEqualS(&useSysFont, "false"))) {
@@ -239,8 +239,8 @@ static void detectQTerminal(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     ffParsePropFileConfigValues("qterminal.org/qterminal.ini", 2, (FFpropquery[]) {
-                                                                      {"fontFamily=", &fontName},
-                                                                      {"fontSize=", &fontSize},
+                                                                      { "fontFamily=", &fontName },
+                                                                      { "fontSize=", &fontSize },
                                                                   });
 
     if (fontName.length == 0) {
@@ -257,14 +257,14 @@ static void detectXterm(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {
-                                                    {"xterm*faceName:", &fontName},
-                                                    {"xterm*faceSize:", &fontSize},
+                                                    { "xterm*faceName:", &fontName },
+                                                    { "xterm*faceSize:", &fontSize },
                                                 });
 
     if (fontName.length == 0) {
         ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {
-                                                        {"xterm.vt100.faceName:", &fontName},
-                                                        {"xterm.vt100.faceSize:", &fontSize},
+                                                        { "xterm.vt100.faceName:", &fontName },
+                                                        { "xterm.vt100.faceSize:", &fontSize },
                                                     });
     }
 
@@ -365,8 +365,8 @@ static void detectTerminator(FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     if (!ffParsePropFileConfigValues("terminator/config", 2, (FFpropquery[]) {
-                                                                 {"use_system_font =", &useSystemFont},
-                                                                 {"font =", &fontName},
+                                                                 { "use_system_font =", &useSystemFont },
+                                                                 { "font =", &fontName },
                                                              }) ||
         ffStrbufIgnCaseEqualS(&useSystemFont, "True")) {
         FF_AUTO_FREE const char* fontName = getSystemMonospaceFont();
@@ -389,8 +389,8 @@ static void detectWestonTerminal(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY size = ffStrbufCreate();
     ffParsePropFileConfigValues("weston.ini", 2, (FFpropquery[]) {
-                                                     {"font=", &font},
-                                                     {"font-size=", &size},
+                                                     { "font=", &font },
+                                                     { "font-size=", &size },
                                                  });
     if (!font.length) {
         ffStrbufSetStatic(&font, "DejaVu Sans Mono");
@@ -405,10 +405,10 @@ static void detectUrxvt(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     if (!(ffParsePropFileHomeValues(".Xresources", 1, (FFpropquery[]) {
-                                                          {"URxvt.font:", &buffer},
+                                                          { "URxvt.font:", &buffer },
                                                       }) ||
             ffParsePropFileHomeValues(".Xdefaults", 1, (FFpropquery[]) {
-                                                           {"URxvt.font:", &buffer},
+                                                           { "URxvt.font:", &buffer },
                                                        }))) {
         ffStrbufAppendS(&terminalFont->error, "Could not find URxvt.font in .Xresources or .Xdefaults");
         return;
@@ -470,8 +470,8 @@ static void detectHaikuTerminal(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY size = ffStrbufCreate();
     ffParsePropFileConfigValues("Terminal/Default", 2, (FFpropquery[]) {
-                                                           {"\"Half Font Family\" , ", &font},
-                                                           {"\"Half Font Size\" , ", &size},
+                                                           { "\"Half Font Family\" , ", &font },
+                                                           { "\"Half Font Size\" , ", &size },
                                                        });
     if (!font.length) {
         ffStrbufSetStatic(&font, "Noto Sans Mono");

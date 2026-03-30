@@ -36,7 +36,7 @@ bool ffPrintUptime(FFUptimeOptions* options) {
 
         FFTimeGetAgeResult age = ffTimeGetAge(result.bootTime, ffTimeGetNow());
 
-        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {FF_ARG(days, "days"), FF_ARG(hours, "hours"), FF_ARG(minutes, "minutes"), FF_ARG(seconds, "seconds"), FF_ARG(milliseconds, "milliseconds"), {FF_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"}, FF_ARG(age.years, "years"), FF_ARG(age.daysOfYear, "days-of-year"), FF_ARG(age.yearsFraction, "years-fraction"), FF_ARG(buffer, "formatted")}));
+        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(days, "days"), FF_ARG(hours, "hours"), FF_ARG(minutes, "minutes"), FF_ARG(seconds, "seconds"), FF_ARG(milliseconds, "milliseconds"), { FF_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time" }, FF_ARG(age.years, "years"), FF_ARG(age.daysOfYear, "days-of-year"), FF_ARG(age.yearsFraction, "years-fraction"), FF_ARG(buffer, "formatted") }));
     }
 
     return true;
@@ -92,15 +92,15 @@ FFModuleBaseInfo ffUptimeModuleInfo = {
     .generateJsonResult = (void*) ffGenerateUptimeJsonResult,
     .generateJsonConfig = (void*) ffGenerateUptimeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Days after boot", "days"},
-        {"Hours after boot", "hours"},
-        {"Minutes after boot", "minutes"},
-        {"Seconds after boot", "seconds"},
-        {"Milliseconds after boot", "milliseconds"},
-        {"Boot time in local timezone", "boot-time"},
-        {"Years integer after boot", "years"},
-        {"Days of year after boot", "days-of-year"},
-        {"Years fraction after boot", "years-fraction"},
-        {"Formatted uptime", "formatted"},
+        { "Days after boot", "days" },
+        { "Hours after boot", "hours" },
+        { "Minutes after boot", "minutes" },
+        { "Seconds after boot", "seconds" },
+        { "Milliseconds after boot", "milliseconds" },
+        { "Boot time in local timezone", "boot-time" },
+        { "Years integer after boot", "years" },
+        { "Days of year after boot", "days-of-year" },
+        { "Years fraction after boot", "years-fraction" },
+        { "Formatted uptime", "formatted" },
     }))
 };

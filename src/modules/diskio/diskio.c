@@ -181,13 +181,13 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
     .generateJsonResult = (void*) ffGenerateDiskIOJsonResult,
     .generateJsonConfig = (void*) ffGenerateDiskIOJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Size of data read [per second] (formatted)", "size-read"},
-        {"Size of data written [per second] (formatted)", "size-written"},
-        {"Device name", "name"},
-        {"Device raw file path", "dev-path"},
-        {"Size of data read [per second] (in bytes)", "bytes-read"},
-        {"Size of data written [per second] (in bytes)", "bytes-written"},
-        {"Number of reads", "read-count"},
-        {"Number of writes", "write-count"},
+        { "Size of data read [per second] (formatted)", "size-read" },
+        { "Size of data written [per second] (formatted)", "size-written" },
+        { "Device name", "name" },
+        { "Device raw file path", "dev-path" },
+        { "Size of data read [per second] (in bytes)", "bytes-read" },
+        { "Size of data written [per second] (in bytes)", "bytes-written" },
+        { "Number of reads", "read-count" },
+        { "Number of writes", "write-count" },
     }))
 };

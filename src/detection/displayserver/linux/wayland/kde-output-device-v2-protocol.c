@@ -35,12 +35,12 @@ static const struct wl_interface* kde_output_device_v2_types[] = {
 };
 
 static const struct wl_message kde_output_device_registry_v2_requests[] = {
-    {"stop", "21", kde_output_device_v2_types + 0},
+    { "stop", "21", kde_output_device_v2_types + 0 },
 };
 
 static const struct wl_message kde_output_device_registry_v2_events[] = {
-    {"finished", "21", kde_output_device_v2_types + 0},
-    {"output", "21n", kde_output_device_v2_types + 8},
+    { "finished", "21", kde_output_device_v2_types + 0 },
+    { "output", "21n", kde_output_device_v2_types + 8 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_registry_v2_interface = {
@@ -53,47 +53,47 @@ WL_EXPORT const struct wl_interface kde_output_device_registry_v2_interface = {
 };
 
 static const struct wl_message kde_output_device_v2_requests[] = {
-    {"release", "21", kde_output_device_v2_types + 0},
+    { "release", "21", kde_output_device_v2_types + 0 },
 };
 
 static const struct wl_message kde_output_device_v2_events[] = {
-    {"geometry", "iiiiissi", kde_output_device_v2_types + 0},
-    {"current_mode", "o", kde_output_device_v2_types + 9},
-    {"mode", "n", kde_output_device_v2_types + 10},
-    {"done", "", kde_output_device_v2_types + 0},
-    {"scale", "f", kde_output_device_v2_types + 0},
-    {"edid", "s", kde_output_device_v2_types + 0},
-    {"enabled", "i", kde_output_device_v2_types + 0},
-    {"uuid", "s", kde_output_device_v2_types + 0},
-    {"serial_number", "s", kde_output_device_v2_types + 0},
-    {"eisa_id", "s", kde_output_device_v2_types + 0},
-    {"capabilities", "u", kde_output_device_v2_types + 0},
-    {"overscan", "u", kde_output_device_v2_types + 0},
-    {"vrr_policy", "u", kde_output_device_v2_types + 0},
-    {"rgb_range", "u", kde_output_device_v2_types + 0},
-    {"name", "2s", kde_output_device_v2_types + 0},
-    {"high_dynamic_range", "3u", kde_output_device_v2_types + 0},
-    {"sdr_brightness", "3u", kde_output_device_v2_types + 0},
-    {"wide_color_gamut", "3u", kde_output_device_v2_types + 0},
-    {"auto_rotate_policy", "4u", kde_output_device_v2_types + 0},
-    {"icc_profile_path", "5s", kde_output_device_v2_types + 0},
-    {"brightness_metadata", "6uuu", kde_output_device_v2_types + 0},
-    {"brightness_overrides", "6iii", kde_output_device_v2_types + 0},
-    {"sdr_gamut_wideness", "6u", kde_output_device_v2_types + 0},
-    {"color_profile_source", "7u", kde_output_device_v2_types + 0},
-    {"brightness", "8u", kde_output_device_v2_types + 0},
-    {"color_power_tradeoff", "10u", kde_output_device_v2_types + 0},
-    {"dimming", "11u", kde_output_device_v2_types + 0},
-    {"replication_source", "13s", kde_output_device_v2_types + 0},
-    {"ddc_ci_allowed", "14u", kde_output_device_v2_types + 0},
-    {"max_bits_per_color", "15u", kde_output_device_v2_types + 0},
-    {"max_bits_per_color_range", "15uu", kde_output_device_v2_types + 0},
-    {"automatic_max_bits_per_color_limit", "15u", kde_output_device_v2_types + 0},
-    {"edr_policy", "16u", kde_output_device_v2_types + 0},
-    {"sharpness", "17u", kde_output_device_v2_types + 0},
-    {"priority", "18u", kde_output_device_v2_types + 0},
-    {"auto_brightness", "20u", kde_output_device_v2_types + 0},
-    {"removed", "21", kde_output_device_v2_types + 0},
+    { "geometry", "iiiiissi", kde_output_device_v2_types + 0 },
+    { "current_mode", "o", kde_output_device_v2_types + 9 },
+    { "mode", "n", kde_output_device_v2_types + 10 },
+    { "done", "", kde_output_device_v2_types + 0 },
+    { "scale", "f", kde_output_device_v2_types + 0 },
+    { "edid", "s", kde_output_device_v2_types + 0 },
+    { "enabled", "i", kde_output_device_v2_types + 0 },
+    { "uuid", "s", kde_output_device_v2_types + 0 },
+    { "serial_number", "s", kde_output_device_v2_types + 0 },
+    { "eisa_id", "s", kde_output_device_v2_types + 0 },
+    { "capabilities", "u", kde_output_device_v2_types + 0 },
+    { "overscan", "u", kde_output_device_v2_types + 0 },
+    { "vrr_policy", "u", kde_output_device_v2_types + 0 },
+    { "rgb_range", "u", kde_output_device_v2_types + 0 },
+    { "name", "2s", kde_output_device_v2_types + 0 },
+    { "high_dynamic_range", "3u", kde_output_device_v2_types + 0 },
+    { "sdr_brightness", "3u", kde_output_device_v2_types + 0 },
+    { "wide_color_gamut", "3u", kde_output_device_v2_types + 0 },
+    { "auto_rotate_policy", "4u", kde_output_device_v2_types + 0 },
+    { "icc_profile_path", "5s", kde_output_device_v2_types + 0 },
+    { "brightness_metadata", "6uuu", kde_output_device_v2_types + 0 },
+    { "brightness_overrides", "6iii", kde_output_device_v2_types + 0 },
+    { "sdr_gamut_wideness", "6u", kde_output_device_v2_types + 0 },
+    { "color_profile_source", "7u", kde_output_device_v2_types + 0 },
+    { "brightness", "8u", kde_output_device_v2_types + 0 },
+    { "color_power_tradeoff", "10u", kde_output_device_v2_types + 0 },
+    { "dimming", "11u", kde_output_device_v2_types + 0 },
+    { "replication_source", "13s", kde_output_device_v2_types + 0 },
+    { "ddc_ci_allowed", "14u", kde_output_device_v2_types + 0 },
+    { "max_bits_per_color", "15u", kde_output_device_v2_types + 0 },
+    { "max_bits_per_color_range", "15uu", kde_output_device_v2_types + 0 },
+    { "automatic_max_bits_per_color_limit", "15u", kde_output_device_v2_types + 0 },
+    { "edr_policy", "16u", kde_output_device_v2_types + 0 },
+    { "sharpness", "17u", kde_output_device_v2_types + 0 },
+    { "priority", "18u", kde_output_device_v2_types + 0 },
+    { "auto_brightness", "20u", kde_output_device_v2_types + 0 },
+    { "removed", "21", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_v2_interface = {
@@ -106,11 +106,11 @@ WL_EXPORT const struct wl_interface kde_output_device_v2_interface = {
 };
 
 static const struct wl_message kde_output_device_mode_v2_events[] = {
-    {"size", "ii", kde_output_device_v2_types + 0},
-    {"refresh", "i", kde_output_device_v2_types + 0},
-    {"preferred", "", kde_output_device_v2_types + 0},
-    {"removed", "", kde_output_device_v2_types + 0},
-    {"flags", "19u", kde_output_device_v2_types + 0},
+    { "size", "ii", kde_output_device_v2_types + 0 },
+    { "refresh", "i", kde_output_device_v2_types + 0 },
+    { "preferred", "", kde_output_device_v2_types + 0 },
+    { "removed", "", kde_output_device_v2_types + 0 },
+    { "flags", "19u", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_mode_v2_interface = {

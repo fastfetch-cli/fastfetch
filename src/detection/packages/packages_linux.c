@@ -413,8 +413,8 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
     bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]) {
-                                                                  {"DBPath =", &dbPath},
-                                                                  {"RootDir =", &rootDir},
+                                                                  { "DBPath =", &dbPath },
+                                                                  { "RootDir =", &rootDir },
                                                               });
     ffStrbufSubstrBefore(baseDir, baseDirLen);
 
