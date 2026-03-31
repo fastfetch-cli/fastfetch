@@ -610,6 +610,10 @@
                                     "description": "Text data, printed as is"
                                 },
                                 {
+                                    "const": "command-raw",
+                                    "description": "Command to generate text data, printed as is"
+                                },
+                                {
                                     "const": "sixel",
                                     "description": "Image file, printed as sixel codes"
                                 },
