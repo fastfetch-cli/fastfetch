@@ -345,5 +345,9 @@ void ffDetectOSImpl(FFOSResult* os) {
             ffStrbufSetS(&os->idLike, "linuxmint");
         }
     }
+    else if(ffStrbufEqualS(&os->id, "redrose"))
+    {
+        ffStrbufSetStatic(&os->idLike, "redrose");
+    }
 #endif
 }
