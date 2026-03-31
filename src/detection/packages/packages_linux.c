@@ -118,6 +118,21 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDir, const char* dirname, cons
     return sum;
 }
 
+static uint32_t getNumElementsBySuffix(FFstrbuf* baseDir, const char* dirname, const char* suffix) {
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    if (dirp == NULL) return 0;
+    uint32_t count = 0;
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] != '.' && ffStrEndsWithIgnCase(entry->d_name, suffix))
+            ++count;
+    }
+    return count;
+}
+
 static uint32_t getXBPSImpl(FFstrbuf* baseDir) {
     DIR* dir = opendir(baseDir->chars);
     if (dir == NULL) {
@@ -496,6 +511,10 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) {
         packageCounts->amSystem = getAMSystem(baseDir);
+    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_APPIMAGE_BIT)) {
+        packageCounts->appimage += getNumElementsBySuffix(baseDir, "/AppImages", ".appimage");
+        packageCounts->appimage += getNumElementsBySuffix(baseDir, "/Applications", ".appimage");
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) {
         packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");

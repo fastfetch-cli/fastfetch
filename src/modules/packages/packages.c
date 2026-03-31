@@ -109,6 +109,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
             FF_PRINT_PACKAGE_NAME(amSystem, "am")
             FF_PRINT_PACKAGE_NAME(amUser, "appman")
         }
+        FF_PRINT_PACKAGE(appimage)
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
@@ -166,6 +167,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                                                                                                              FF_ARG(counts.pacstall, "pacstall"),
                                                                                                              FF_ARG(counts.mport, "mport"),
                                                                                                              FF_ARG(counts.amUser, "am-user"),
+                                                                                                             FF_ARG(counts.appimage, "appimage"),
                                                                                                              FF_ARG(counts.pkgsrc, "pkgsrc"),
                                                                                                              FF_ARG(counts.hpkgSystem, "hpkg-system"),
                                                                                                              FF_ARG(counts.hpkgUser, "hpkg-user"),
@@ -220,8 +222,9 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                         case 'A':
                             if (false)
                                 ;
-                            FF_TEST_PACKAGE_NAME(APK)
                             FF_TEST_PACKAGE_NAME(AM)
+                            FF_TEST_PACKAGE_NAME(APPIMAGE)
+                            FF_TEST_PACKAGE_NAME(APK)
                             break;
                         case 'B':
                             if (false)
@@ -352,6 +355,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     if (false)
         ;
     FF_TEST_PACKAGE_NAME(AM)
+    FF_TEST_PACKAGE_NAME(APPIMAGE)
     FF_TEST_PACKAGE_NAME(APK)
     FF_TEST_PACKAGE_NAME(BREW)
     FF_TEST_PACKAGE_NAME(CHOCO)
@@ -407,6 +411,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(all)
     FF_APPEND_PACKAGE_COUNT(amSystem)
     FF_APPEND_PACKAGE_COUNT(amUser)
+    FF_APPEND_PACKAGE_COUNT(appimage)
     FF_APPEND_PACKAGE_COUNT(apk)
     FF_APPEND_PACKAGE_COUNT(brew)
     FF_APPEND_PACKAGE_COUNT(brewCask)
@@ -508,6 +513,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of pacstall packages", "pacstall"},
         {"Number of mport packages", "mport"},
         {"Number of am-user (aka appman) packages", "am-user"},
+        {"Number of appimage packages", "appimage"},
         {"Number of pkgsrc packages", "pkgsrc"},
         {"Number of hpkg-system packages", "hpkg-system"},
         {"Number of hpkg-user packages", "hpkg-user"},
