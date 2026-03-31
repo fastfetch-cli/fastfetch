@@ -278,7 +278,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
                 sizeof(entryPoint),
                 (unsigned long) entryAddress);
             if (pread(fd, &entryPoint, sizeof(entryPoint), entryAddress) < 0x10) {
-                FF_DEBUG("pread failed, trying mmap");
+                FF_DEBUG("pread failed: %s. Trying mmap", strerror(errno));
                 // `pread /dev/mem` returns EFAULT in FreeBSD
                 // https://stackoverflow.com/questions/69372330/how-to-read-dev-mem-using-read
                 void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, entryAddress);
