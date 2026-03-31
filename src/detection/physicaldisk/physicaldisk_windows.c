@@ -31,10 +31,17 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
     }
 
     FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+    ffStrbufInit(&device->serial);
+    ffStrbufInit(&device->revision);
+    ffStrbufInit(&device->name);
+    ffStrbufInit(&device->devPath);
+    ffStrbufInit(&device->interconnect);
     device->type = FF_PHYSICALDISK_TYPE_NONE;
+    device->size = 0;
+    device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+
     STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
 
-    ffStrbufInit(&device->name);
     if (sdd->VendorIdOffset != 0) {
         ffStrbufSetS(&device->name, (const char*) sddBuffer + sdd->VendorIdOffset);
         ffStrbufTrim(&device->name, ' ');
@@ -58,14 +65,12 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         return true;
     }
 
-    ffStrbufInitWS(&device->devPath, szDevice);
-    ffStrbufInit(&device->serial);
+    ffStrbufSetWS(&device->devPath, szDevice);
     if (sdd->SerialNumberOffset != 0) {
         ffStrbufSetS(&device->serial, (const char*) sddBuffer + sdd->SerialNumberOffset);
         ffStrbufTrimSpace(&device->serial);
     }
 
-    ffStrbufInit(&device->revision);
     if (sdd->ProductRevisionOffset != 0) {
         ffStrbufSetS(&device->revision, (const char*) sddBuffer + sdd->ProductRevisionOffset);
         ffStrbufTrimRightSpace(&device->revision);
@@ -73,7 +78,6 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
 
     device->type |= sdd->RemovableMedia ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
 
-    ffStrbufInit(&device->interconnect);
     switch (sdd->BusType) {
         case BusTypeUnknown:
             ffStrbufSetStatic(&device->interconnect, "Unknown");
@@ -88,7 +92,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
             ffStrbufSetStatic(&device->interconnect, "ATA");
             break;
         case BusType1394:
-            ffStrbufSetStatic(&device->interconnect, "1394");
+            ffStrbufSetStatic(&device->interconnect, "IEEE 1394");
             break;
         case BusTypeSsa:
             ffStrbufSetStatic(&device->interconnect, "SSA");
@@ -119,12 +123,15 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
             break;
         case BusTypeVirtual:
             ffStrbufSetStatic(&device->interconnect, "Virtual");
+            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
             break;
         case BusTypeFileBackedVirtual:
             ffStrbufSetStatic(&device->interconnect, "File Backed Virtual");
+            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
             break;
         case BusTypeSpaces:
-            ffStrbufSetStatic(&device->interconnect, "Spaces");
+            ffStrbufSetStatic(&device->interconnect, "Storage Spaces");
+            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
             break;
         case BusTypeNvme:
             ffStrbufSetStatic(&device->interconnect, "NVMe");
@@ -135,28 +142,12 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         case BusTypeUfs:
             ffStrbufSetStatic(&device->interconnect, "UFS");
             break;
+        case 0x14 /*BusTypeNvmeof*/:
+            ffStrbufSetStatic(&device->interconnect, "NVMe-oF");
+            break;
         default:
             ffStrbufSetF(&device->interconnect, "Unknown (%d)", (int) sdd->BusType);
             break;
-    }
-
-    {
-        DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
-        if (DeviceIoControl(
-                hDevice,
-                IOCTL_STORAGE_QUERY_PROPERTY,
-                &(STORAGE_PROPERTY_QUERY) {
-                    .PropertyId = StorageDeviceSeekPenaltyProperty,
-                    .QueryType = PropertyStandardQuery,
-                },
-                sizeof(STORAGE_PROPERTY_QUERY),
-                &dspd,
-                sizeof(dspd),
-                &retSize,
-                NULL) &&
-            retSize == sizeof(dspd)) {
-            device->type |= dspd.IncursSeekPenalty ? FF_PHYSICALDISK_TYPE_HDD : FF_PHYSICALDISK_TYPE_SSD;
-        }
     }
 
     {
@@ -211,23 +202,41 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         }
     }
 
-    device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
-    if (options->temp) {
-        STORAGE_TEMPERATURE_DATA_DESCRIPTOR stdd = {};
+    if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL)) {
+        DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
         if (DeviceIoControl(
                 hDevice,
                 IOCTL_STORAGE_QUERY_PROPERTY,
                 &(STORAGE_PROPERTY_QUERY) {
-                    .PropertyId = StorageDeviceTemperatureProperty,
+                    .PropertyId = StorageDeviceSeekPenaltyProperty,
                     .QueryType = PropertyStandardQuery,
                 },
                 sizeof(STORAGE_PROPERTY_QUERY),
-                &stdd,
-                sizeof(stdd),
+                &dspd,
+                sizeof(dspd),
                 &retSize,
                 NULL) &&
-            retSize == sizeof(stdd)) {
-            device->temperature = stdd.TemperatureInfo[0].Temperature;
+            retSize == sizeof(dspd)) {
+            device->type |= dspd.IncursSeekPenalty ? FF_PHYSICALDISK_TYPE_HDD : FF_PHYSICALDISK_TYPE_SSD;
+        }
+
+        if (options->temp) {
+            STORAGE_TEMPERATURE_DATA_DESCRIPTOR stdd = {};
+            if (DeviceIoControl(
+                    hDevice,
+                    IOCTL_STORAGE_QUERY_PROPERTY,
+                    &(STORAGE_PROPERTY_QUERY) {
+                        .PropertyId = StorageDeviceTemperatureProperty,
+                        .QueryType = PropertyStandardQuery,
+                    },
+                    sizeof(STORAGE_PROPERTY_QUERY),
+                    &stdd,
+                    sizeof(stdd),
+                    &retSize,
+                    NULL) &&
+                retSize == sizeof(stdd)) {
+                device->temperature = stdd.TemperatureInfo[0].Temperature;
+            }
         }
     }
 

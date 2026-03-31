@@ -46,7 +46,9 @@ bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options) {
         ffStrbufClear(&buffer);
         ffSizeAppendNum(dev->size, &buffer);
 
-        const char* physicalType = dev->type & FF_PHYSICALDISK_TYPE_HDD
+        const char* physicalType = dev->type & FF_PHYSICALDISK_TYPE_VIRTUAL
+            ? "Virtual"
+            : dev->type & FF_PHYSICALDISK_TYPE_HDD
             ? "HDD"
             : dev->type & FF_PHYSICALDISK_TYPE_SSD
             ? "SSD"
@@ -169,7 +171,9 @@ bool ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
         yyjson_mut_obj_add_strbuf(doc, obj, "devPath", &dev->devPath);
         yyjson_mut_obj_add_strbuf(doc, obj, "interconnect", &dev->interconnect);
 
-        if (dev->type & FF_PHYSICALDISK_TYPE_HDD) {
+        if (dev->type & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+            yyjson_mut_obj_add_str(doc, obj, "kind", "Virtual");
+        } else if (dev->type & FF_PHYSICALDISK_TYPE_HDD) {
             yyjson_mut_obj_add_str(doc, obj, "kind", "HDD");
         } else if (dev->type & FF_PHYSICALDISK_TYPE_SSD) {
             yyjson_mut_obj_add_str(doc, obj, "kind", "SSD");

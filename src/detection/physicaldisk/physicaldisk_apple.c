@@ -77,13 +77,29 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
+        FF_STRBUF_AUTO_DESTROY interconnect = ffStrbufCreate();
+        FFPhysicalDiskType diskType = FF_PHYSICALDISK_TYPE_NONE;
+        FF_CFTYPE_AUTO_RELEASE CFDictionaryRef protocolCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyProtocolCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
+        if (protocolCharacteristics) {
+            if (ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectTypeKey), &interconnect) == NULL) {
+                if (ffStrbufEqualS(&interconnect, kIOPropertyPhysicalInterconnectTypeVirtual)) {
+                    diskType |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+                    FF_STRBUF_AUTO_DESTROY location = ffStrbufCreate();
+                    if (ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectLocationKey), &location) == NULL) {
+                        ffStrbufAppendS(&interconnect, " - ");
+                        ffStrbufAppend(&interconnect, &location);
+                    }
+                }
+            }
+        }
+
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
-        ffStrbufInit(&device->interconnect);
-        device->type = FF_PHYSICALDISK_TYPE_NONE;
+        ffStrbufInitMove(&device->interconnect, &interconnect);
+        device->type = diskType;
         device->size = 0;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 
@@ -109,10 +125,6 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         } else {
             device->size = 0;
         }
-        FF_CFTYPE_AUTO_RELEASE CFDictionaryRef protocolCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyProtocolCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
-        if (protocolCharacteristics) {
-            ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectTypeKey), &device->interconnect);
-        }
 
         FF_CFTYPE_AUTO_RELEASE CFDictionaryRef deviceCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyDeviceCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
         if (deviceCharacteristics) {
@@ -121,18 +133,20 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductRevisionLevelKey), &device->revision);
             ffStrbufTrimRightSpace(&device->revision);
 
-            CFStringRef mediumType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
-            if (mediumType) {
-                if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeSolidStateKey), 0) == 0) {
-                    device->type |= FF_PHYSICALDISK_TYPE_SSD;
-                } else if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeRotationalKey), 0) == 0) {
-                    device->type |= FF_PHYSICALDISK_TYPE_HDD;
+            if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL)) {
+                CFStringRef mediumType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
+                if (mediumType) {
+                    if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeSolidStateKey), 0) == 0) {
+                        device->type |= FF_PHYSICALDISK_TYPE_SSD;
+                    } else if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeRotationalKey), 0) == 0) {
+                        device->type |= FF_PHYSICALDISK_TYPE_HDD;
+                    }
                 }
             }
         }
 
 #ifdef MAC_OS_X_VERSION_10_15
-        if (options->temp) {
+        if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) && options->temp) {
             FF_CFTYPE_AUTO_RELEASE CFBooleanRef nvmeSMARTCapable = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyNVMeSMARTCapableKey), kCFAllocatorDefault, kNilOptions);
             if (nvmeSMARTCapable && CFBooleanGetValue(nvmeSMARTCapable)) {
                 detectSsdTemp(entryPhysical, &device->temperature);
