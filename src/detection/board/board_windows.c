@@ -1,5 +1,5 @@
 #include "board.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 typedef struct FFSmbiosBaseboard {
     FFSmbiosHeader Header;

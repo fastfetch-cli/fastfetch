@@ -2,7 +2,7 @@
 #include "common/windows/registry.h"
 #include "common/windows/nt.h"
 #include "common/mallocHelper.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 #include <windows.h>
 #include "common/windows/perflib_.h"

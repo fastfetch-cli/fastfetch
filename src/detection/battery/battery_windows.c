@@ -4,7 +4,7 @@
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 #include "common/mallocHelper.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 #undef WIN32_LEAN_AND_MEAN
 #include <windows.h>

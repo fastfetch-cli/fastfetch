@@ -1,6 +1,6 @@
 #include "host.h"
 #include "common/settings.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectHost(FFHostResult* host) {
     ffSettingsGetFreeBSDKenv("smbios.system.product", &host->name);

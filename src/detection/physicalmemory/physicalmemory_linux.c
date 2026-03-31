@@ -1,5 +1,5 @@
 #include "physicalmemory.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 // 7.18
 typedef struct FFSmbiosMemoryDevice {

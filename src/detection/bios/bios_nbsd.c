@@ -1,6 +1,6 @@
 #include "bios.h"
 #include "common/sysctl.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBios(FFBiosResult* bios) {
     if (ffSysctlGetString("machdep.dmi.bios-date", &bios->date) == NULL) {

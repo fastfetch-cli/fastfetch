@@ -1,6 +1,6 @@
 #include "bios.h"
 #include "common/io.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBios(FFBiosResult* bios) {
     if (ffGetSmbiosValue("/sys/devices/virtual/dmi/id/bios_date", "/sys/class/dmi/id/bios_date", &bios->date)) {

@@ -1,6 +1,6 @@
 #include "board.h"
 #include "common/io.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBoard(FFBoardResult* board) {
     if (ffGetSmbiosValue("/sys/devices/virtual/dmi/id/board_name", "/sys/class/dmi/id/board_name", &board->name)) {

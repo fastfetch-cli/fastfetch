@@ -1,6 +1,6 @@
 #include "chassis.h"
 #include "common/sysctl.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectChassis(FFChassisResult* chassis) {
     if (ffSysctlGetString("machdep.dmi.chassis-type", &chassis->type) == NULL) {

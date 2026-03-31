@@ -1,5 +1,5 @@
 #include "bios.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 #ifdef _WIN32
 #    include "common/windows/registry.h"

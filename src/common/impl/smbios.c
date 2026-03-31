@@ -1,4 +1,4 @@
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 #include "common/io.h"
 #include "common/unused.h"
 #include "common/mallocHelper.h"

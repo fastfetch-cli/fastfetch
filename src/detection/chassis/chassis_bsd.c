@@ -1,6 +1,6 @@
 #include "chassis.h"
 #include "common/settings.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectChassis(FFChassisResult* result) {
     // Unlike other platforms, `smbios.chassis.type` return display string directly on my machine

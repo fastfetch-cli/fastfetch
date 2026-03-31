@@ -401,7 +401,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/FFstrbuf.c
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
-    src/common/impl/smbiosHelper.c
+    src/common/impl/smbios.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -860,7 +860,7 @@ elseif(OpenBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
-        src/common/impl/smbiosHelper.c
+        src/common/impl/smbios.c
         src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c

@@ -1,5 +1,5 @@
 #include "host.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 typedef struct FFSmbiosSystemInfo {
     FFSmbiosHeader Header;

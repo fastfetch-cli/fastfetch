@@ -1,6 +1,6 @@
 #include "board.h"
 #include "common/settings.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBoard(FFBoardResult* result) {
     ffSettingsGetFreeBSDKenv("smbios.planar.product", &result->name);

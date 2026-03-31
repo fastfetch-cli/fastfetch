@@ -1,6 +1,6 @@
 #include "board.h"
 #include "common/sysctl.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBoard(FFBoardResult* board) {
     if (ffSysctlGetString("machdep.dmi.board-product", &board->name) == NULL) {

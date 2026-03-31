@@ -3,7 +3,7 @@
 #include "common/settings.h"
 #include "common/sysctl.h"
 #include "common/io.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
 const char* ffDetectBios(FFBiosResult* result) {
     ffSettingsGetFreeBSDKenv("smbios.bios.reldate", &result->date);

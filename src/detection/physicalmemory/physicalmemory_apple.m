@@ -1,6 +1,6 @@
 #include "physicalmemory.h"
 #include "common/processing.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 #include "common/stringUtils.h"
 #include "common/apple/cf_helpers.h"
 
