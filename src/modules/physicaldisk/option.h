@@ -16,6 +16,8 @@ typedef enum __attribute__((__packed__)) FFPhysicalDiskType {
     FF_PHYSICALDISK_TYPE_READWRITE = 1 << 5,
     FF_PHYSICALDISK_TYPE_READONLY = 1 << 6,
 
+    FF_PHYSICALDISK_TYPE_UNKNOWN = 1 << 7,
+
     FF_PHYSICALDISK_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFPhysicalDiskType;
 static_assert(sizeof(FFPhysicalDiskType) == sizeof(uint8_t), "");
