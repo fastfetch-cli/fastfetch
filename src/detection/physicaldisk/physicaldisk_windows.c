@@ -13,7 +13,29 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
     }
 
     DWORD retSize;
-    char sddBuffer[4096];
+    FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
+
+    uint64_t size = 0;
+    {
+        alignas(DISK_GEOMETRY_EX) uint8_t dgeBuffer[4096];
+        if (DeviceIoControl(
+                hDevice,
+                IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+                NULL,
+                0,
+                dgeBuffer,
+                sizeof(dgeBuffer),
+                &retSize,
+                NULL)) {
+            const DISK_GEOMETRY_EX* dge = (const DISK_GEOMETRY_EX*) dgeBuffer;
+            size = (uint64_t) dge->DiskSize.QuadPart;
+        }
+    }
+    if (size == 0) {
+        type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+    }
+
+    alignas(STORAGE_DEVICE_DESCRIPTOR) uint8_t sddBuffer[4096];
     if (!DeviceIoControl(
             hDevice,
             IOCTL_STORAGE_QUERY_PROPERTY,
@@ -29,18 +51,87 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         retSize == 0) {
         return true;
     }
+    const STORAGE_DEVICE_DESCRIPTOR* sdd = (const STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
+
+    const char* interconnect;
+    switch (sdd->BusType) {
+        case BusTypeScsi:
+            interconnect = "SCSI";
+            break;
+        case BusTypeAtapi:
+            interconnect = "ATAPI";
+            break;
+        case BusTypeAta:
+            interconnect = "ATA";
+            break;
+        case BusType1394:
+            interconnect = "IEEE 1394";
+            break;
+        case BusTypeSsa:
+            interconnect = "SSA";
+            break;
+        case BusTypeFibre:
+            interconnect = "Fibre";
+            break;
+        case BusTypeUsb:
+            interconnect = "USB";
+            break;
+        case BusTypeRAID:
+            interconnect = "RAID";
+            break;
+        case BusTypeiScsi:
+            interconnect = "iSCSI";
+            break;
+        case BusTypeSas:
+            interconnect = "SAS";
+            break;
+        case BusTypeSata:
+            interconnect = "SATA";
+            break;
+        case BusTypeSd:
+            interconnect = "SD";
+            break;
+        case BusTypeMmc:
+            interconnect = "MMC";
+            break;
+        case BusTypeVirtual:
+            interconnect = "Virtual";
+            type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+            break;
+        case BusTypeFileBackedVirtual:
+            interconnect = "File Backed Virtual";
+            type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+            break;
+        case BusTypeSpaces:
+            interconnect = "Storage Spaces";
+            type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+            break;
+        case BusTypeNvme:
+            interconnect = "NVMe";
+            break;
+        case BusTypeSCM:
+            interconnect = "SCM";
+            break;
+        case BusTypeUfs:
+            interconnect = "UFS";
+            break;
+        case 0x14 /*BusTypeNvmeof*/:
+            interconnect = "NVMe-oF";
+            break;
+        default:
+            interconnect = "Unknown";
+            break;
+    }
 
     FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->revision);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->devPath);
-    ffStrbufInit(&device->interconnect);
-    device->type = FF_PHYSICALDISK_TYPE_NONE;
-    device->size = 0;
+    ffStrbufInitStatic(&device->interconnect, interconnect);
+    device->type = type;
+    device->size = size;
     device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
-
-    STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
 
     if (sdd->VendorIdOffset != 0) {
         ffStrbufSetS(&device->name, (const char*) sddBuffer + sdd->VendorIdOffset);
@@ -78,97 +169,8 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
 
     device->type |= sdd->RemovableMedia ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
 
-    switch (sdd->BusType) {
-        case BusTypeUnknown:
-            ffStrbufSetStatic(&device->interconnect, "Unknown");
-            break;
-        case BusTypeScsi:
-            ffStrbufSetStatic(&device->interconnect, "SCSI");
-            break;
-        case BusTypeAtapi:
-            ffStrbufSetStatic(&device->interconnect, "ATAPI");
-            break;
-        case BusTypeAta:
-            ffStrbufSetStatic(&device->interconnect, "ATA");
-            break;
-        case BusType1394:
-            ffStrbufSetStatic(&device->interconnect, "IEEE 1394");
-            break;
-        case BusTypeSsa:
-            ffStrbufSetStatic(&device->interconnect, "SSA");
-            break;
-        case BusTypeFibre:
-            ffStrbufSetStatic(&device->interconnect, "Fibre");
-            break;
-        case BusTypeUsb:
-            ffStrbufSetStatic(&device->interconnect, "USB");
-            break;
-        case BusTypeRAID:
-            ffStrbufSetStatic(&device->interconnect, "RAID");
-            break;
-        case BusTypeiScsi:
-            ffStrbufSetStatic(&device->interconnect, "iSCSI");
-            break;
-        case BusTypeSas:
-            ffStrbufSetStatic(&device->interconnect, "SAS");
-            break;
-        case BusTypeSata:
-            ffStrbufSetStatic(&device->interconnect, "SATA");
-            break;
-        case BusTypeSd:
-            ffStrbufSetStatic(&device->interconnect, "SD");
-            break;
-        case BusTypeMmc:
-            ffStrbufSetStatic(&device->interconnect, "MMC");
-            break;
-        case BusTypeVirtual:
-            ffStrbufSetStatic(&device->interconnect, "Virtual");
-            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
-            break;
-        case BusTypeFileBackedVirtual:
-            ffStrbufSetStatic(&device->interconnect, "File Backed Virtual");
-            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
-            break;
-        case BusTypeSpaces:
-            ffStrbufSetStatic(&device->interconnect, "Storage Spaces");
-            device->type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
-            break;
-        case BusTypeNvme:
-            ffStrbufSetStatic(&device->interconnect, "NVMe");
-            break;
-        case BusTypeSCM:
-            ffStrbufSetStatic(&device->interconnect, "SCM");
-            break;
-        case BusTypeUfs:
-            ffStrbufSetStatic(&device->interconnect, "UFS");
-            break;
-        case 0x14 /*BusTypeNvmeof*/:
-            ffStrbufSetStatic(&device->interconnect, "NVMe-oF");
-            break;
-        default:
-            ffStrbufSetF(&device->interconnect, "Unknown (%d)", (int) sdd->BusType);
-            break;
-    }
-
     {
-        DISK_GEOMETRY_EX dge = {};
-        if (DeviceIoControl(
-                hDevice,
-                IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
-                NULL,
-                0,
-                &dge,
-                sizeof(dge),
-                &retSize,
-                NULL)) {
-            device->size = (uint64_t) dge.DiskSize.QuadPart;
-        } else {
-            device->size = 0;
-        }
-    }
-
-    {
-        alignas(GET_MEDIA_TYPES) uint8_t buffer[sizeof(GET_MEDIA_TYPES) + sizeof(DEVICE_MEDIA_INFO) * 7] = {};
+        alignas(GET_MEDIA_TYPES) uint8_t buffer[4096];
         GET_MEDIA_TYPES* gmt = (GET_MEDIA_TYPES*) buffer;
         if (DeviceIoControl(
                 hDevice,
@@ -187,9 +189,6 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
                     device->type |= FF_PHYSICALDISK_TYPE_READONLY;
                 } else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE) {
                     device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
-                }
-                if (device->size == 0) {
-                    device->size = (uint64_t) diskInfo->NumberMediaSides * diskInfo->TracksPerCylinder * diskInfo->SectorsPerTrack * diskInfo->BytesPerSector;
                 }
             } else {
                 __auto_type tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
