@@ -27,6 +27,17 @@ static double detectNvmeTemp(int devfd) {
 }
 
 static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOptions* options, FFlist* result) {
+    uint64_t size = 0;
+
+    {
+        char blkSize[32];
+        ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
+        if (fileSize > 0) {
+            blkSize[fileSize] = 0;
+            size = (uint64_t) strtoul(blkSize, NULL, 10) * 512;
+        }
+    }
+
     int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
@@ -75,8 +86,9 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->revision);
     ffStrbufInit(&device->interconnect);
-    device->type = devfd > 0 ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_VIRTUAL;
-    device->size = 0;
+    device->type = (devfd > 0 ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_VIRTUAL) |
+        (size > 0 ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_UNKNOWN);
+    device->size = size;
     device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 
     bool isVirtio = false;
@@ -129,17 +141,6 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 
         if (options->temp) {
             device->temperature = detectNvmeTemp(devfd);
-        }
-    }
-
-    {
-        char blkSize[32];
-        ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
-        if (fileSize > 0) {
-            blkSize[fileSize] = 0;
-            device->size = (uint64_t) strtoul(blkSize, NULL, 10) * 512;
-        } else {
-            device->size = 0;
         }
     }
 
