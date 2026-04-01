@@ -39,13 +39,17 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
-        // Should memory disk (MD) be considered as physical disk?
-        // if (!ffStrEquals(provider->lg_geom->lg_class->lg_name, "DISK"))
-        //    continue;
+        FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
+        if (!ffStrEquals(provider->lg_geom->lg_class->lg_name, "DISK")) {
+            type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+        }
+        uint64_t size = (uint64_t) provider->lg_mediasize;
+        if (size == 0) {
+            type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+        }
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(provider->lg_name);
         FF_STRBUF_AUTO_DESTROY identifier = ffStrbufCreate();
-        FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
         for (struct gconfig* ptr = provider->lg_config.lh_first; ptr; ptr = ptr->lg_config.le_next) {
             if (ffStrEquals(ptr->lg_name, "descr")) {
                 ffStrbufSetS(&name, ptr->lg_val);
@@ -72,24 +76,26 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         ffStrbufTrimSpace(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInit(&device->interconnect);
+        ffStrbufInitMove(&device->name, &name);
+        device->size = size;
+        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK) {
             case DEVSTAT_TYPE_IF_SCSI:
-                ffStrbufAppendS(&device->interconnect, "SCSI");
+                ffStrbufSetStatic(&device->interconnect, "SCSI");
                 break;
             case DEVSTAT_TYPE_IF_IDE:
-                ffStrbufAppendS(&device->interconnect, "IDE");
+                ffStrbufSetStatic(&device->interconnect, "IDE");
                 break;
             case DEVSTAT_TYPE_IF_OTHER:
-                ffStrbufAppendS(&device->interconnect, "OTHER");
+                ffStrbufSetStatic(&device->interconnect, "OTHER");
                 break;
 
             // https://github.com/freebsd/freebsd-src/commit/d282baddb0b029ca8466d23ac51e95c918442535
             case 0x040 /*DEVSTAT_TYPE_IF_NVME*/:
-                ffStrbufAppendS(&device->interconnect, "NVMe");
+                ffStrbufSetStatic(&device->interconnect, "NVMe");
                 break;
         }
-        device->size = (uint64_t) provider->lg_mediasize;
-        ffStrbufInitMove(&device->name, &name);
 
         if (!(device->type & FF_PHYSICALDISK_TYPE_READONLY) && !(device->type & FF_PHYSICALDISK_TYPE_READWRITE)) {
             int acr = 1, acw = 1; // Number of partitions mounted for reading or writing
@@ -99,7 +105,6 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
 
         device->type = type;
-        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
     }
 
     geom_stats_snapshot_free(snap);
