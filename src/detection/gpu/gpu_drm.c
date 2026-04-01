@@ -181,7 +181,7 @@ const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
             .items_ptr = (uintptr_t) &queryItem,
             .num_items = 1,
         };
-        if (ioctl(fd, DRM_IOCTL_I915_QUERY, &query) >= 0) {
+        if (ioctl(fd, DRM_IOCTL_I915_QUERY, &query) >= 0 && queryItem.length > 0) { // #2259
             FF_AUTO_FREE uint8_t* buffer = calloc(1, (size_t) queryItem.length);
             queryItem.data_ptr = (uintptr_t) buffer;
             if (ioctl(fd, DRM_IOCTL_I915_QUERY, &query) >= 0) {
