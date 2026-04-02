@@ -348,7 +348,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: setup alpine linux
-        uses: jirutka/setup-alpine@master
+        uses: jirutka/setup-alpine@ae3b3ddba35054804fc4a3507b519fa7e8152050
 
       - name: install dependencies
         run: |
@@ -515,7 +515,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: run VM
-        uses: cross-platform-actions/action@master
+        uses: cross-platform-actions/action@e3d398ccb5a2c7515317e19d84b92baf2ae5ed71
         with:
           operating_system: freebsd
           architecture: x86-64
@@ -553,7 +553,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: run VM
-        uses: cross-platform-actions/action@master
+        uses: cross-platform-actions/action@e3d398ccb5a2c7515317e19d84b92baf2ae5ed71
         with:
           operating_system: openbsd
           architecture: x86-64
@@ -591,7 +591,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: run VM
-        uses: cross-platform-actions/action@master
+        uses: cross-platform-actions/action@e3d398ccb5a2c7515317e19d84b92baf2ae5ed71
         with:
           operating_system: netbsd
           architecture: x86-64
@@ -664,7 +664,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: run VM
-        uses: cross-platform-actions/action@master
+        uses: cross-platform-actions/action@e3d398ccb5a2c7515317e19d84b92baf2ae5ed71
         with:
           operating_system: haiku
           version: 'r1beta5'
@@ -813,7 +813,7 @@ jobs:
     steps:
       - name: get latest release version
         id: get_version_release
-        uses: pozetroninc/github-action-get-latest-release@master
+        uses: pozetroninc/github-action-get-latest-release@53d33d213ee71c72360e3c829caf7cee94ec21e2
         with:
           repository: ${{ github.repository }}
 
