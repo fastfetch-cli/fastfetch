@@ -6,15 +6,16 @@
 const char* ffSysctlGetString(int mib1, int mib2, FFstrbuf* result) {
     size_t neededLength;
     if (sysctl((int[]) { mib1, mib2 }, 2, NULL, &neededLength, NULL, 0) != 0 || neededLength == 1) { // neededLength is 1 for empty strings, because of the null terminator
-        return "sysctlbyname() failed";
+        return "sysctl() length query failed";
     }
 
     ffStrbufEnsureFree(result, (uint32_t) neededLength - 1);
 
-    if (sysctl((int[]) { mib1, mib2 }, 2, result->chars + result->length, &neededLength, NULL, 0) == 0) {
-        result->length += (uint32_t) neededLength - 1;
+    if (sysctl((int[]) { mib1, mib2 }, 2, result->chars + result->length, &neededLength, NULL, 0) != 0) {
+        return "sysctl() failed to retrieve string data";
     }
 
+    result->length += (uint32_t) neededLength - 1;
     result->chars[result->length] = '\0';
 
     return NULL;
