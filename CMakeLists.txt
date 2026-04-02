@@ -877,7 +877,7 @@ elseif(OpenBSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_obsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -1767,6 +1767,7 @@ elseif(OpenBSD)
         PRIVATE "m"
         PRIVATE "kvm"
         PRIVATE "sndio"
+        PRIVATE "util"
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
