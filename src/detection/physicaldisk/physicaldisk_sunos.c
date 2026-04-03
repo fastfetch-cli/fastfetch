@@ -34,16 +34,31 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
         device->size = 0;
 
         char* buf;
+        bool usb = false;
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-serial-no", &buf) > 0) {
             ffStrbufSetS(&device->serial, buf);
             ffStrbufTrimSpace(&device->serial);
+        } else {
+            di_node_t parent = di_parent_node(node);
+            if (parent != DI_NODE_NIL && di_prop_lookup_strings(DDI_DEV_T_ANY, parent, "usb-serialno", &buf) > 0) {
+                ffStrbufSetS(&device->serial, buf);
+                usb = true;
+            }
         }
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-revision-id", &buf) > 0) {
             ffStrbufSetS(&device->revision, buf);
             ffStrbufTrimRightSpace(&device->revision);
         }
-        if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "class", &buf) > 0) {
+
+        if (usb) {
+            ffStrbufSetStatic(&device->interconnect, "USB");
+        } else if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "class", &buf) > 0) {
             ffStrbufSetS(&device->interconnect, buf);
+        } else {
+            di_node_t parent = di_parent_node(node);
+            if (parent != DI_NODE_NIL && di_prop_lookup_strings(DDI_DEV_T_ANY, parent, "model", &buf) > 0) {
+                ffStrbufSetS(&device->interconnect, buf);
+            }
         }
 
         device->type |= di_prop_find(DDI_DEV_T_ANY, node, "removable-media") ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
