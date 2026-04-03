@@ -200,6 +200,8 @@ bool ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
             yyjson_mut_obj_add_null(doc, obj, "readOnly");
         }
 
+        yyjson_mut_obj_add_bool(doc, obj, "unknown", !!(dev->type & FF_PHYSICALDISK_TYPE_UNKNOWN));
+
         yyjson_mut_obj_add_strbuf(doc, obj, "revision", &dev->revision);
 
         if (dev->temperature != FF_PHYSICALDISK_TEMP_UNSET) {
