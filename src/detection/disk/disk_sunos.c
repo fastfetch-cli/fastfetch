@@ -100,6 +100,7 @@ static void detectStats(FFDisk* disk) {
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
 
     ffStrbufSetS(&disk->name, fs.f_fstr);
+    ffStrbufTrimRightSpace(&disk->name);
 
     disk->createTime = 0;
 }
