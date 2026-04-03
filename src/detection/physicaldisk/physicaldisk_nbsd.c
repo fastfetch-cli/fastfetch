@@ -117,6 +117,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
+#ifdef SINQ_EVPD // Available since NetBSD 11.0
         struct {
             struct scsipi_inquiry_evpd_header header;
             struct scsipi_inquiry_evpd_serial body;
@@ -135,6 +136,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             }
             ffStrbufTrimRight(&device->serial, ' ');
         }
+#endif
 
         struct scsi_mode_parameter_header_6 mode = {};
         req = (scsireq_t) {
