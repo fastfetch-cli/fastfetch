@@ -73,7 +73,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             ffStrbufAppendC(&device->name, ' ');
             ffStrbufAppendNS(&device->name, (uint32_t) ARRAY_SIZE(inquiry.product), inquiry.product);
             ffStrbufTrimRight(&device->name, ' ');
-            ffStrbufSetS(&device->revision, inquiry.revision);
+
+            ffStrbufSetNS(&device->revision, (uint32_t) ARRAY_SIZE(inquiry.revision), inquiry.revision);
             ffStrbufTrimRight(&device->revision, ' ');
             device->type |= inquiry.dev_qual2 & SID_REMOVABLE ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
         }
