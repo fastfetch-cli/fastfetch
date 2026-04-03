@@ -1,4 +1,5 @@
 #include "diskio.h"
+#include "common/io.h"
 #include "common/stringUtils.h"
 #include "common/mallocHelper.h"
 
@@ -19,6 +20,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         return "sysctl({HW_IOSTATS}, stats) failed";
     }
 
+    char path[64] = "/dev/";
+
     for (uint32_t i = 0; i < nDrive; ++i) {
         struct io_sysctl* st = &stats[i];
 
@@ -26,8 +29,16 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
             continue;
         }
 
+        // Skip partitions
+        char* end = ffStrCopy(&path[5], st->name, ARRAY_SIZE(path) - 8);
+        *end++ = 'c';
+        *end = '\0';
+        if (!ffPathExists(path, FF_PATHTYPE_ANY)) {
+            continue;
+        }
+
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInitF(&device->devPath, "/dev/%s", st->name);
+        ffStrbufInitNS(&device->devPath, (uint32_t) (end - path), path);
         ffStrbufInitS(&device->name, st->name);
         device->bytesRead = st->rbytes;
         device->readCount = st->rxfer;
