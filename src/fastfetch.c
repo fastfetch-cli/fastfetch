@@ -62,10 +62,18 @@ static void printCommandFormatHelp(const char* command) {
                 puts("To see how a format string is constructed, take a look at https://github.com/fastfetch-cli/fastfetch/wiki/Format-String-Guide.");
                 puts("The following variables are passed:");
 
+                uint32_t maxWidth = 20;
+                for (unsigned i = 0; i < baseInfo->formatArgs.count; i++) {
+                    uint32_t len = (uint32_t) strlen(baseInfo->formatArgs.args[i].name) + 2;
+                    if (len > maxWidth) {
+                        maxWidth = len;
+                    }
+                }
+
                 for (unsigned i = 0; i < baseInfo->formatArgs.count; i++) {
                     const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
                     ffStrbufSetF(&variable, "{%s}", arg->name);
-                    printf("%20s: %s\n", variable.chars, arg->desc);
+                    printf("%*s: %s\n", (int) maxWidth, variable.chars, arg->desc);
                 }
             } else {
                 fprintf(stderr, "Error: Module '%s' doesn't support output formatting\n", baseInfo->name);
