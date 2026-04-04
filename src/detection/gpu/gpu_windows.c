@@ -350,8 +350,12 @@ ffGPUDetectWsl2
                         .PrivateDriverDataSize = sizeof(nodePerfData),
                     });
                     if (NT_SUCCESS(status)) {
-                        gpu->frequency = (uint32_t) (nodePerfData.MaxFrequency / 1000 / 1000);
-                        FF_DEBUG("Adapter #%u max graphics frequency: %u MHz", i, gpu->frequency);
+                        if (nodePerfData.MaxFrequency != 0) {
+                            gpu->frequency = (uint32_t) (nodePerfData.MaxFrequency / 1000 / 1000);
+                            FF_DEBUG("Adapter #%u max graphics frequency: %u MHz", i, gpu->frequency);
+                        } else {
+                            FF_DEBUG("Adapter #%u does not report max graphics frequency", i);
+                        }
                         break;
                     } else {
                         FF_DEBUG("Failed to query node performance data for adapter #%u node #%u: %s",
@@ -373,8 +377,12 @@ ffGPUDetectWsl2
                     .PrivateDriverDataSize = sizeof(adapterPerfData),
                 });
                 if (NT_SUCCESS(status)) {
-                    gpu->temperature = adapterPerfData.Temperature / 10.0;
-                    FF_DEBUG("Adapter #%u temperature: %.1f°C", i, gpu->temperature);
+                    if (adapterPerfData.Temperature != 0) {
+                        gpu->temperature = adapterPerfData.Temperature / 10.0;
+                        FF_DEBUG("Adapter #%u temperature: %.1f°C", i, gpu->temperature);
+                    } else {
+                        FF_DEBUG("Adapter #%u does not report temperature data", i);
+                    }
                 } else {
                     FF_DEBUG("Failed to query temperature for adapter #%u: %s", i, ffDebugNtStatus(status));
                 }
