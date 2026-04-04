@@ -1,12 +1,79 @@
 #include "detection/gpu/gpu.h"
+#if __linux__
+#    define FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "/usr/lib/wsl/lib/"
+#endif
 #include "detection/gpu/gpu_driver_specific.h"
-#include "common/windows/unicode.h"
 #include "common/debug.h"
 
 #include <inttypes.h>
 #include "d3dkmthk.h"
 
-const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
+#if _WIN32
+#    include "common/windows/unicode.h"
+#else
+#    include <unistd.h>
+#    include <fcntl.h>
+#    include <sys/ioctl.h>
+#    include <uchar.h>
+
+int dxgfd = -2;
+
+static void ffStrbufSetWS(FFstrbuf* strbuf, const char16_t* str) {
+    ffStrbufClear(strbuf);
+
+    mbstate_t state = {};
+    while (*str) {
+        char buf[5];
+        size_t len = c16rtomb(buf, *str, &state);
+        if (len == (size_t) -1) {
+            ffStrbufAppendS(strbuf, "�"); // U+FFFD REPLACEMENT CHARACTER
+        } else if (len > 0) {
+            ffStrbufAppendNS(strbuf, (uint32_t) len, buf);
+        }
+        str++;
+    }
+}
+
+static void closeDxgfd(void) {
+    if (dxgfd >= 0) {
+        close(dxgfd);
+        dxgfd = 0;
+        FF_DEBUG("Closed /dev/dxg file descriptor");
+    }
+}
+
+static inline const char* ffDebugNtStatus(NTSTATUS status) {
+    return status < 0 ? strerror(-status) : "Success";
+}
+#endif
+
+const char*
+#if _WIN32
+ffDetectGPUImpl
+#else
+ffGPUDetectWsl2
+#endif
+    (const FFGPUOptions* options, FFlist* gpus) {
+#if __linux__
+    if (dxgfd == -2) {
+        dxgfd = open("/dev/dxg", O_RDWR); // Windows DXCore/D3DKMT adapter driver for WSL
+        if (dxgfd < 0) {
+            if (errno == ENOENT) {
+                FF_DEBUG("/dev/dxg is not available, WSL DXCore GPU driver not detected");
+                return "No DXCore GPU driver detected (no /dev/dxg)";
+            } else {
+                FF_DEBUG("Failed to open /dev/dxg: %s", strerror(errno));
+                return "Failed to open /dev/dxg";
+            }
+        }
+        FF_DEBUG("Opened /dev/dxg successfully");
+        atexit(closeDxgfd);
+    }
+    if (dxgfd < 0) {
+        return "Failed to open /dev/dxg";
+    }
+#endif
+
     D3DKMT_ADAPTERINFO adapters[64];
     D3DKMT_ENUMADAPTERS2 enumAdapters = {
         .NumAdapters = ARRAY_SIZE(adapters),
@@ -351,6 +418,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
             (uint32_t) gpu->type,
             (uint64_t) gpu->deviceId);
 
+    close_adapter:
         status = D3DKMTCloseAdapter(&(D3DKMT_CLOSEADAPTER) { .hAdapter = adapter->hAdapter });
         if (NT_SUCCESS(status)) {
             FF_DEBUG("Closed adapter #%u successfully", i);

@@ -43,36 +43,40 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
 const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 
+#ifndef FF_GPU_DRIVER_DLLNAME_PATH_PREFIX
+#    define FF_GPU_DRIVER_DLLNAME_PATH_PREFIX
+#endif
+
 FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName) {
     if (vendor == FF_GPU_VENDOR_NAME_NVIDIA) {
         *pDetectFn = ffDetectNvidiaGpuInfo;
 #ifdef _WIN32
-        *pDllName = "nvml.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "nvml.dll";
 #else
-        *pDllName = "libnvidia-ml.so";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "libnvidia-ml.so";
 #endif
     } else if (vendor == FF_GPU_VENDOR_NAME_MTHREADS) {
         *pDetectFn = ffDetectMthreadsGpuInfo;
 #ifdef _WIN32
-        *pDllName = "mtml.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "mtml.dll";
 #else
-        *pDllName = "libmtml.so";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "libmtml.so";
 #endif
     }
 #ifdef _WIN32
     else if (vendor == FF_GPU_VENDOR_NAME_INTEL) {
         *pDetectFn = ffDetectIntelGpuInfo;
 #    ifdef _WIN64
-        *pDllName = "ControlLib.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "ControlLib.dll";
 #    else
-        *pDllName = "ControlLib32.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "ControlLib32.dll";
 #    endif
     } else if (vendor == FF_GPU_VENDOR_NAME_AMD) {
         *pDetectFn = ffDetectAmdGpuInfo;
 #    ifdef _WIN64
-        *pDllName = "atiadlxx.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "atiadlxx.dll";
 #    else
-        *pDllName = "atiadlxy.dll";
+        *pDllName = FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "atiadlxy.dll";
 #    endif
     }
 #endif

@@ -10,6 +10,7 @@
 #else
 #    include <sys/ioctl.h>
 #    include <uchar.h>
+#    include <errno.h>
 
 typedef struct _LUID {
     uint32_t LowPart;
@@ -330,24 +331,26 @@ EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKM
 #    define LX_DXCLOSEADAPTER _IOWR(0x47, 0x15, D3DKMT_CLOSEADAPTER)
 #    define LX_DXQUERYSTATISTICS _IOWR(0x47, 0x43, D3DKMT_QUERYSTATISTICS)
 
-static inline NTSTATUS D3DKMTOpenAdapterFromLuid(int dxgfd, const D3DKMT_OPENADAPTERFROMLUID* params) {
-    return ioctl(dxgfd, LX_DXOPENADAPTERFROMLUID, params);
+extern int dxgfd; // File descriptor for /dev/dxg, initialized in gpu_wsl.c
+
+static inline NTSTATUS D3DKMTOpenAdapterFromLuid(const D3DKMT_OPENADAPTERFROMLUID* params) {
+    return ioctl(dxgfd, LX_DXOPENADAPTERFROMLUID, params) < 0 ? -errno : 0;
 }
 
-static inline NTSTATUS D3DKMTQueryAdapterInfo(int dxgfd, const D3DKMT_QUERYADAPTERINFO* params) {
-    return ioctl(dxgfd, LX_DXQUERYADAPTERINFO, params);
+static inline NTSTATUS D3DKMTQueryAdapterInfo(const D3DKMT_QUERYADAPTERINFO* params) {
+    return ioctl(dxgfd, LX_DXQUERYADAPTERINFO, params) < 0 ? -errno : 0;
 }
 
-static inline NTSTATUS D3DKMTCloseAdapter(int dxgfd, const D3DKMT_CLOSEADAPTER* params) {
-    return ioctl(dxgfd, LX_DXCLOSEADAPTER, params);
+static inline NTSTATUS D3DKMTCloseAdapter(const D3DKMT_CLOSEADAPTER* params) {
+    return ioctl(dxgfd, LX_DXCLOSEADAPTER, params) < 0 ? -errno : 0;
 }
 
-static inline NTSTATUS D3DKMTEnumAdapters2(int dxgfd, D3DKMT_ENUMADAPTERS2* params) {
-    return ioctl(dxgfd, LX_DXENUMADAPTERS2, params);
+static inline NTSTATUS D3DKMTEnumAdapters2(D3DKMT_ENUMADAPTERS2* params) {
+    return ioctl(dxgfd, LX_DXENUMADAPTERS2, params) < 0 ? -errno : 0;
 }
 
-static inline NTSTATUS D3DKMTQueryStatistics(int dxgfd, const D3DKMT_QUERYSTATISTICS* params) {
-    return ioctl(dxgfd, LX_DXQUERYSTATISTICS, params);
+static inline NTSTATUS D3DKMTQueryStatistics(const D3DKMT_QUERYSTATISTICS* params) {
+    return ioctl(dxgfd, LX_DXQUERYSTATISTICS, params) < 0 ? -errno : 0;
 }
 
 #endif
