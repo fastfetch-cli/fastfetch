@@ -15,8 +15,11 @@
 static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/install/using-device-interfaces
     ULONG cchDeviceInterfaces = 0;
-    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&cchDeviceInterfaces, (LPGUID) &GUID_DEVCLASS_BATTERY, NULL, CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
-    if (cr != CR_SUCCESS) {
+    if (CM_Get_Device_Interface_List_SizeW(
+            &cchDeviceInterfaces,
+            (LPGUID) &GUID_DEVCLASS_BATTERY,
+            NULL,
+            CM_GET_DEVICE_INTERFACE_LIST_PRESENT) != CR_SUCCESS) {
         return "CM_Get_Device_Interface_List_SizeW() failed";
     }
 
@@ -25,14 +28,18 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
     }
 
     wchar_t* FF_AUTO_FREE mszDeviceInterfaces = (wchar_t*) malloc(cchDeviceInterfaces * sizeof(wchar_t));
-    cr = CM_Get_Device_Interface_ListW((LPGUID) &GUID_DEVCLASS_BATTERY, NULL, mszDeviceInterfaces, cchDeviceInterfaces, CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
-    if (cr != CR_SUCCESS) {
+    if (CM_Get_Device_Interface_ListW(
+            (LPGUID) &GUID_DEVCLASS_BATTERY,
+            NULL,
+            mszDeviceInterfaces,
+            cchDeviceInterfaces,
+            CM_GET_DEVICE_INTERFACE_LIST_PRESENT) != CR_SUCCESS) {
         return "CM_Get_Device_Interface_ListW() failed";
     }
 
-    for (const wchar_t* pDeviceInterface = mszDeviceInterfaces; *pDeviceInterface; pDeviceInterface += wcslen(pDeviceInterface) + 1) {
+    for (const wchar_t* p = mszDeviceInterfaces; *p; p += wcslen(p) + 1) {
         HANDLE FF_AUTO_CLOSE_FD hBattery =
-            CreateFileW(pDeviceInterface, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+            CreateFileW(p, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
         if (hBattery == INVALID_HANDLE_VALUE) {
             continue;
