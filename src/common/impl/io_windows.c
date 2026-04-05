@@ -281,7 +281,7 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
     }
     len /= sizeof(wchar_t); // convert from bytes to characters
 
-    size_t outLen; // in characters, including null terminator
+    SIZE_T outLen; // in characters, including null terminator
     if (!NT_SUCCESS(RtlExpandEnvironmentStrings(NULL, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen))) {
         return false;
     }
