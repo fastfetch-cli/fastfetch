@@ -74,18 +74,24 @@ ffGPUDetectWsl2
     }
 #endif
 
+#if FF_WIN81_COMPAT
+    D3DKMT_ENUMADAPTERS enumAdapters = {};
+    D3DKMT_ADAPTERINFO* const adapters = enumAdapters.Adapters;
+    NTSTATUS status = D3DKMTEnumAdapters(&enumAdapters);
+#else
     D3DKMT_ADAPTERINFO adapters[64];
     D3DKMT_ENUMADAPTERS2 enumAdapters = {
         .NumAdapters = ARRAY_SIZE(adapters),
         .pAdapters = adapters,
     };
     NTSTATUS status = D3DKMTEnumAdapters2(&enumAdapters);
+#endif
     if (!NT_SUCCESS(status)) {
-        FF_DEBUG("D3DKMTEnumAdapters2 failed: %s", ffDebugNtStatus(status));
+        FF_DEBUG("D3DKMTEnumAdapters(2) failed: %s", ffDebugNtStatus(status));
         return "Failed to enumerate adapters with D3DKMTEnumAdapters2";
     }
 
-    FF_DEBUG("D3DKMTEnumAdapters2 succeeded, adapter count: %" PRIu32, (uint32_t) enumAdapters.NumAdapters);
+    FF_DEBUG("D3DKMTEnumAdapters(2) succeeded, adapter count: %" PRIu32, (uint32_t) enumAdapters.NumAdapters);
 
     for (uint32_t i = 0; i < enumAdapters.NumAdapters; i++) {
         const D3DKMT_ADAPTERINFO* adapter = &adapters[i];

@@ -40,10 +40,10 @@ typedef union {
 } LARGE_INTEGER;
 typedef int32_t NTSTATUS; // 0 for success, -1 for failure
 #    define NT_SUCCESS(Status) ((NTSTATUS) (Status) >= 0)
+#    define _In_range_(low, hi)
 #endif
 
 #define D3DKMT_ALIGN64 __attribute__((aligned(8)))
-#define MAX_ENUM_ADAPTERS 16
 
 typedef struct D3DKMT_HANDLE {
     union {
@@ -67,6 +67,12 @@ typedef struct _D3DKMT_ADAPTERINFO {
     ULONG NumOfSources;
     BOOL bPrecisePresentRegionsPreferred;
 } D3DKMT_ADAPTERINFO;
+
+#define MAX_ENUM_ADAPTERS 16
+typedef struct _D3DKMT_ENUMADAPTERS {
+    _In_range_(0, MAX_ENUM_ADAPTERS) ULONG NumAdapters;
+    D3DKMT_ADAPTERINFO Adapters[MAX_ENUM_ADAPTERS];
+} D3DKMT_ENUMADAPTERS;
 
 typedef struct _D3DKMT_ENUMADAPTERS2 {
     ULONG NumAdapters;             // in/out: On input, the count of the pAdapters array buffer.  On output, the number of adapters enumerated.
@@ -319,7 +325,8 @@ static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structur
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTOpenAdapterFromLuid(_Inout_ CONST D3DKMT_OPENADAPTERFROMLUID*);
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryAdapterInfo(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTCloseAdapter(_In_ CONST D3DKMT_CLOSEADAPTER*);
-EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTEnumAdapters2(_Inout_ D3DKMT_ENUMADAPTERS2*);
+EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTEnumAdapters(_Inout_ CONST D3DKMT_ENUMADAPTERS*);
+EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTEnumAdapters2(_Inout_ CONST D3DKMT_ENUMADAPTERS2*);
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKMT_QUERYSTATISTICS*);
 
 #else
