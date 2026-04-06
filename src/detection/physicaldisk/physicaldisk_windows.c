@@ -2,16 +2,17 @@
 #include "common/io.h"
 #include "common/windows/unicode.h"
 #include "common/mallocHelper.h"
+#include "common/debug.h"
 
 #include <stdalign.h>
 #include <windows.h>
 #include <winioctl.h>
 #include <cfgmgr32.h>
 
-static bool detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice, FFlist* result, FFPhysicalDiskOptions* options) {
+static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice, FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     if (hDevice == INVALID_HANDLE_VALUE) {
-        return false;
+        return "CreateFileW() failed";
     }
 
     DWORD retSize;
@@ -76,7 +77,7 @@ static bool detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice
                     ffStrbufSetStatic(&name, "8-inch Floppy Disk");
                     break;
                 default:
-                    return true; // Unsupported
+                    return "Unsupported media type";
             }
             interconnect = "Floppy Controller";
             type |= FF_PHYSICALDISK_TYPE_HDD | FF_PHYSICALDISK_TYPE_REMOVABLE;
@@ -192,7 +193,7 @@ static bool detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice
     }
 
     if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix)) {
-        return true;
+        return "Name prefix mismatch";
     }
 
     FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
@@ -291,7 +292,7 @@ static bool detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice
         }
     }
 
-    return true;
+    return NULL;
 }
 
 static void detectPhysicalDisksByInterfaceClass(const char* type, const GUID* interfaceClassGuid, FFlist* result, FFPhysicalDiskOptions* options) {
@@ -321,7 +322,13 @@ static void detectPhysicalDisksByInterfaceClass(const char* type, const GUID* in
 
     // MULTI_SZ: "str1\0str2\0...\0\0"
     for (const wchar_t* p = mszDeviceInterfaces; *p; p += wcslen(p) + 1) {
-        detectPhysicalDisk(type, p, result, options);
+        FF_DEBUG("Probing %s: %ls", type, p);
+        FF_MAYBE_UNUSED const char* error = detectPhysicalDisk(type, p, result, options);
+        if (error == NULL) {
+            FF_DEBUG("Detected device \"%s\"", FF_LIST_LAST(FFPhysicalDiskResult, *result)->name.chars);
+        } else {
+            FF_DEBUG("Failed to detect device %s: %s", type, error);
+        }
     }
 }
 
