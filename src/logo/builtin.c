@@ -826,6 +826,16 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // BlinkOS
+    {
+        .names = {"BlinkOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BLINKOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // BlueLight
     {
         .names = { "BlueLight" },
