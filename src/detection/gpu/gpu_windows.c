@@ -10,6 +10,120 @@
 
 #if _WIN32
 #    include "common/windows/unicode.h"
+
+#    if FF_WIN81_COMPAT
+#        include "common/mallocHelper.h"
+#        include <windows.h>
+#        include <cfgmgr32.h>
+#        include <devguid.h>
+
+#        define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
+
+static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_DEVICE_IDS* outDeviceIds) {
+    FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS failed. Attempting queryDeviceIdsFallback: bus=%u device=%u function=%u",
+        adapterAddress.BusNumber,
+        adapterAddress.DeviceNumber,
+        adapterAddress.FunctionNumber);
+
+    if (adapterAddress.BusNumber == -1u) {
+        FF_DEBUG("Invalid adapter address, cannot query device IDs");
+        return false;
+    }
+
+    static FFlist deviceIdsCache;
+    typedef struct {
+        D3DKMT_DEVICE_IDS deviceIds;
+        D3DKMT_ADAPTERADDRESS adapterAddress;
+    } CacheEntry;
+
+    if (deviceIdsCache.elementSize == 0) {
+        ffListInit(&deviceIdsCache, sizeof(CacheEntry));
+
+        ULONG devIdListSize = 0;
+        if (CM_Get_Device_ID_List_SizeW(&devIdListSize, GUID_DEVCLASS_DISPLAY_STRING, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS || devIdListSize <= 1) {
+            FF_DEBUG("No display devices found, list size: %lu", devIdListSize);
+            return false;
+        }
+
+        FF_DEBUG("Found device ID list size: %lu", devIdListSize);
+
+        FF_AUTO_FREE DEVINSTID_W devIdList = malloc(devIdListSize * sizeof(*devIdList));
+
+        if (CM_Get_Device_ID_ListW(GUID_DEVCLASS_DISPLAY_STRING, devIdList, devIdListSize, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS) {
+            FF_DEBUG("CM_Get_Device_ID_ListW failed");
+            return false;
+        }
+
+        for (wchar_t* devId = devIdList; *devId; devId += wcslen(devId) + 1) {
+            FF_DEBUG("Processing device ID: %ls", devId);
+
+            DEVINST devInst = 0;
+
+            if (CM_Locate_DevNodeW(&devInst, devId, CM_LOCATE_DEVNODE_NORMAL) != CR_SUCCESS) {
+                FF_DEBUG("Failed to get device instance ID or locate device node");
+                continue;
+            }
+            FF_DEBUG("Device instance ID: %lu", devInst);
+
+            for (wchar_t* p = devId; *p; p++) {
+                if (*p >= L'a' && *p <= L'z') {
+                    *p -= L'a' - L'A';
+                }
+            }
+
+            if (wcsncmp(devId, L"PCI\\", 4) != 0) {
+                FF_DEBUG("Skipping non-PCI device ID: %ls", devId);
+                continue;
+            }
+
+            uint32_t pciBus = 0;
+
+            ULONG pciBufLen = sizeof(pciBus);
+            if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_BUSNUMBER, NULL, &pciBus, &pciBufLen, 0) == CR_SUCCESS) {
+                uint32_t pciAddr = 0;
+                pciBufLen = sizeof(pciAddr);
+                if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_ADDRESS, NULL, &pciAddr, &pciBufLen, 0) == CR_SUCCESS) {
+                    CacheEntry* entry = FF_LIST_ADD(CacheEntry, deviceIdsCache);
+
+                    entry->deviceIds = (D3DKMT_DEVICE_IDS) {};
+                    // L"PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1\\4&3674a6b9&0&0008"
+                    if (swscanf(devId + 4, L"VEN_%x&DEV_%x&SUBSYS_%4x%4x&REV_%x", &entry->deviceIds.VendorID, &entry->deviceIds.DeviceID, &entry->deviceIds.SubSystemID, &entry->deviceIds.SubVendorID, &entry->deviceIds.RevisionID) >= 2) {
+                        FF_DEBUG("Parsed PCI IDs - Vendor: 0x%04x, Device: 0x%04x, SubVendor: 0x%04x, SubSystem: 0x%04x, Rev: 0x%04x", entry->deviceIds.VendorID, entry->deviceIds.DeviceID, entry->deviceIds.SubVendorID, entry->deviceIds.SubSystemID, entry->deviceIds.RevisionID);
+                        entry->deviceIds.BusType = 1; // D3DBUSTYPE_PCI
+                    } else {
+                        FF_DEBUG("Failed to parse PCI IDs from device ID string");
+                        deviceIdsCache.length--; // remove the cache entry since it's not valid
+                        continue;
+                    }
+
+                    entry->adapterAddress = (D3DKMT_ADAPTERADDRESS) {
+                        .BusNumber = pciBus,
+                        .DeviceNumber = (pciAddr >> 16) & 0xFFFF,
+                        .FunctionNumber = pciAddr & 0xFFFF,
+                    };
+                    FF_DEBUG("Cached device IDs for PCI bus %u: vendor=0x%04x device=0x%04x", pciBus, entry->deviceIds.VendorID, entry->deviceIds.DeviceID);
+                } else {
+                    FF_DEBUG("Failed to get PCI address");
+                }
+            } else {
+                FF_DEBUG("Failed to get PCI bus number");
+            }
+        }
+    }
+
+    FF_LIST_FOR_EACH (CacheEntry, entry, deviceIdsCache) {
+        if (memcmp(&entry->adapterAddress, &adapterAddress, sizeof(adapterAddress)) == 0) {
+            FF_DEBUG("Cache hit for adapter address: bus=%u device=%u function=%u", adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
+            *outDeviceIds = entry->deviceIds;
+            return true;
+        }
+    }
+
+    FF_DEBUG("Cache miss for adapter address: bus=%u device=%u function=%u", adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
+    return false;
+}
+#    endif // FF_WIN81_COMPAT
+
 #else
 #    include <unistd.h>
 #    include <fcntl.h>
@@ -132,27 +246,6 @@ ffGPUDetectWsl2
             ? FF_GPU_TYPE_DISCRETE
             : FF_GPU_TYPE_UNKNOWN;
 
-        const char* vendorStr = NULL;
-
-        D3DKMT_QUERY_DEVICE_IDS deviceIds = { .PhysicalAdapterIndex = 0 };
-        status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
-            .hAdapter = adapter->hAdapter,
-            .Type = KMTQAITYPE_PHYSICALADAPTERDEVICEIDS,
-            .pPrivateDriverData = &deviceIds,
-            .PrivateDriverDataSize = sizeof(deviceIds),
-        });
-        if (NT_SUCCESS(status)) {
-            vendorStr = ffGPUGetVendorString(deviceIds.DeviceIds.VendorID);
-            ffStrbufSetStatic(&gpu->vendor, vendorStr);
-            FF_DEBUG("Adapter #%u vendor/device IDs: vendor=0x%04x device=0x%04x",
-                i,
-                deviceIds.DeviceIds.VendorID,
-                deviceIds.DeviceIds.DeviceID);
-        } else {
-            deviceIds.DeviceIds.VendorID = -1u;
-            FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS query failed for adapter #%u: %s", i, ffDebugNtStatus(status));
-        }
-
         D3DKMT_ADAPTERADDRESS adapterAddress = {};
         status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
             .hAdapter = adapter->hAdapter,
@@ -173,6 +266,29 @@ ffGPUDetectWsl2
             FF_DEBUG("KMTQAITYPE_ADAPTERADDRESS query failed for adapter #%u, fallback to LUID-based deviceId: %s",
                 i,
                 ffDebugNtStatus(status));
+        }
+
+        D3DKMT_QUERY_DEVICE_IDS deviceIds = { .PhysicalAdapterIndex = 0 };
+        status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
+            .hAdapter = adapter->hAdapter,
+            .Type = KMTQAITYPE_PHYSICALADAPTERDEVICEIDS,
+            .pPrivateDriverData = &deviceIds,
+            .PrivateDriverDataSize = sizeof(deviceIds),
+        });
+        if (NT_SUCCESS(status)
+#if FF_WIN81_COMPAT
+            || queryDeviceIdsFallback(adapterAddress, &deviceIds.DeviceIds)
+#endif
+        ) {
+            const char* vendorStr = ffGPUGetVendorString(deviceIds.DeviceIds.VendorID);
+            ffStrbufSetStatic(&gpu->vendor, vendorStr);
+            FF_DEBUG("Adapter #%u vendor/device IDs: vendor=0x%04x device=0x%04x",
+                i,
+                deviceIds.DeviceIds.VendorID,
+                deviceIds.DeviceIds.DeviceID);
+        } else {
+            deviceIds.DeviceIds.VendorID = -1u;
+            FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS query failed for adapter #%u: %s", i, ffDebugNtStatus(status));
         }
 
         D3DKMT_UMD_DRIVER_VERSION umdDriverVersion;
