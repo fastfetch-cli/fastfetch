@@ -18,7 +18,7 @@ extern const char* FF_GPU_VENDOR_NAME_MTHREADS;
 extern const char* FF_GPU_VENDOR_NAME_QUALCOMM;
 extern const char* FF_GPU_VENDOR_NAME_MTK;
 extern const char* FF_GPU_VENDOR_NAME_VMWARE;
-extern const char* FF_GPU_VENDOR_NAME_PARALLEL;
+extern const char* FF_GPU_VENDOR_NAME_PARALLELS;
 extern const char* FF_GPU_VENDOR_NAME_MICROSOFT;
 extern const char* FF_GPU_VENDOR_NAME_REDHAT;
 extern const char* FF_GPU_VENDOR_NAME_ORACLE;

@@ -13,7 +13,7 @@ const char* FF_GPU_VENDOR_NAME_MTHREADS = "Moore Threads";
 const char* FF_GPU_VENDOR_NAME_QUALCOMM = "Qualcomm";
 const char* FF_GPU_VENDOR_NAME_MTK = "MTK";
 const char* FF_GPU_VENDOR_NAME_VMWARE = "VMware";
-const char* FF_GPU_VENDOR_NAME_PARALLEL = "Parallel";
+const char* FF_GPU_VENDOR_NAME_PARALLELS = "Parallels";
 const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
 const char* FF_GPU_VENDOR_NAME_REDHAT = "RedHat";
 const char* FF_GPU_VENDOR_NAME_ORACLE = "Oracle";
@@ -52,7 +52,7 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
         case 0x1af4:
             return FF_GPU_VENDOR_NAME_REDHAT;
         case 0x1ab8:
-            return FF_GPU_VENDOR_NAME_PARALLEL;
+            return FF_GPU_VENDOR_NAME_PARALLELS;
         case 0x1414:
             return FF_GPU_VENDOR_NAME_MICROSOFT;
         case 0x108e:
