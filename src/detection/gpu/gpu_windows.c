@@ -89,7 +89,10 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
                     // L"PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1\\4&3674a6b9&0&0008"
                     if (swscanf(devId + 4, L"VEN_%x&DEV_%x&SUBSYS_%4x%4x&REV_%x", &entry->deviceIds.VendorID, &entry->deviceIds.DeviceID, &entry->deviceIds.SubSystemID, &entry->deviceIds.SubVendorID, &entry->deviceIds.RevisionID) >= 2) {
                         FF_DEBUG("Parsed PCI IDs - Vendor: 0x%04x, Device: 0x%04x, SubVendor: 0x%04x, SubSystem: 0x%04x, Rev: 0x%04x", entry->deviceIds.VendorID, entry->deviceIds.DeviceID, entry->deviceIds.SubVendorID, entry->deviceIds.SubSystemID, entry->deviceIds.RevisionID);
-                        entry->deviceIds.BusType = 1; // D3DBUSTYPE_PCI
+                        // I thought it was DXGKMDT_OPM_BUS_TYPE_PCI, but it turns out to be false
+                        // Who TF knows what 1 actually means. It's just reported by most graphic cards
+                        // And yeah, DXGKMDT_OPM_BUS_TYPE_PCIEXPRESS (3) exists
+                        entry->deviceIds.BusType = 1;
                     } else {
                         FF_DEBUG("Failed to parse PCI IDs from device ID string");
                         deviceIdsCache.length--; // remove the cache entry since it's not valid
