@@ -52,6 +52,7 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
         case 0x1af4:
             return FF_GPU_VENDOR_NAME_REDHAT;
         case 0x1ab8:
+        case 0x05404c42: // PD
             return FF_GPU_VENDOR_NAME_PARALLELS;
         case 0x1414:
             return FF_GPU_VENDOR_NAME_MICROSOFT;

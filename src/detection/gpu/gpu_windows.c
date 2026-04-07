@@ -10,6 +10,7 @@
 
 #if _WIN32
 #    include "common/windows/unicode.h"
+#    include "common/windows/registry.h"
 
 #    if FF_WIN81_COMPAT
 #        include "common/mallocHelper.h"
@@ -126,6 +127,33 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
     return false;
 }
 #    endif // FF_WIN81_COMPAT
+
+static bool queryVendorNameViaRegistry(FFstrbuf* vendor, D3DKMT_HANDLE hAdapter) {
+    // `KMTQAITYPE_QUERY_ADAPTER_UNIQUE_GUID` reports the GUID value used by the adapter's registry key (DirectX and Video)
+
+    GUID guid;
+    NTSTATUS status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
+        .hAdapter = hAdapter,
+        .Type = KMTQAITYPE_QUERY_ADAPTER_UNIQUE_GUID,
+        .pPrivateDriverData = &guid,
+        .PrivateDriverDataSize = sizeof(guid),
+    });
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("Failed to query adapter unique GUID: %s", ffDebugNtStatus(status));
+        return false;
+    }
+
+    wchar_t path[PATH_MAX];
+    swprintf(path, ARRAY_SIZE(path), L"SYSTEM\\CurrentControlSet\\Control\\Video\\{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}\\0000", guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1], guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5], guid.Data4[6], guid.Data4[7]);
+
+    FF_DEBUG("Querying registry: HKEY_LOCAL_MACHINE\\%ls\\ProviderName", path);
+    FF_AUTO_CLOSE_FD HANDLE key = NULL;
+    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, path, &key, NULL)) {
+        return false;
+    }
+
+    return ffRegReadStrbuf(key, L"ProviderName", vendor, NULL);
+}
 
 #else
 #    include <unistd.h>
@@ -249,6 +277,21 @@ ffGPUDetectWsl2
             ? FF_GPU_TYPE_DISCRETE
             : FF_GPU_TYPE_UNKNOWN;
 
+        D3DKMT_DRIVERVERSION wddmVersion = KMT_DRIVERVERSION_WDDM_2_0;
+        status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
+            .hAdapter = adapter->hAdapter,
+            .Type = KMTQAITYPE_DRIVERVERSION,
+            .pPrivateDriverData = &wddmVersion,
+            .PrivateDriverDataSize = sizeof(wddmVersion),
+        });
+        if (NT_SUCCESS(status)) {
+            ffStrbufSetF(&gpu->platformApi, "WDDM %u.%u", (uint32_t) wddmVersion / 1000, ((uint32_t) wddmVersion % 1000) / 100);
+            FF_DEBUG("Adapter #%u WDDM version: %u", i, (uint32_t) wddmVersion);
+        } else {
+            ffStrbufSetStatic(&gpu->platformApi, "WDDM");
+            FF_DEBUG("KMTQAITYPE_DRIVERVERSION query failed for adapter #%u", i);
+        }
+
         D3DKMT_ADAPTERADDRESS adapterAddress = {};
         status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
             .hAdapter = adapter->hAdapter,
@@ -256,7 +299,7 @@ ffGPUDetectWsl2
             .pPrivateDriverData = &adapterAddress,
             .PrivateDriverDataSize = sizeof(adapterAddress),
         });
-        if (NT_SUCCESS(status)) {
+        if (NT_SUCCESS(status) && adapterAddress.FunctionNumber != 0xFFFF /* non-PCI device */) {
             gpu->deviceId = ffGPUPciAddr2Id(0, adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
             FF_DEBUG("Adapter #%u PCI address: bus=%u device=%u function=%u",
                 i,
@@ -283,8 +326,7 @@ ffGPUDetectWsl2
             || queryDeviceIdsFallback(adapterAddress, &deviceIds.DeviceIds)
 #endif
         ) {
-            const char* vendorStr = ffGPUGetVendorString(deviceIds.DeviceIds.VendorID);
-            ffStrbufSetStatic(&gpu->vendor, vendorStr);
+            ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(deviceIds.DeviceIds.VendorID));
             FF_DEBUG("Adapter #%u vendor/device IDs: vendor=0x%04x device=0x%04x",
                 i,
                 deviceIds.DeviceIds.VendorID,
@@ -311,21 +353,6 @@ ffGPUDetectWsl2
             FF_DEBUG("Adapter #%u UMD driver version: %08" PRIX64, i, (uint64_t) umdDriverVersion.DriverVersion.QuadPart);
         } else {
             FF_DEBUG("KMTQAITYPE_UMD_DRIVER_VERSION query failed for adapter #%u: %s", i, ffDebugNtStatus(status));
-        }
-
-        D3DKMT_DRIVERVERSION wddmVersion = KMT_DRIVERVERSION_WDDM_3_0;
-        status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
-            .hAdapter = adapter->hAdapter,
-            .Type = KMTQAITYPE_DRIVERVERSION,
-            .pPrivateDriverData = &wddmVersion,
-            .PrivateDriverDataSize = sizeof(wddmVersion),
-        });
-        if (NT_SUCCESS(status)) {
-            ffStrbufSetF(&gpu->platformApi, "WDDM %u.%u", (uint32_t) wddmVersion / 1000, ((uint32_t) wddmVersion % 1000) / 100);
-            FF_DEBUG("Adapter #%u WDDM version: %u", i, (uint32_t) wddmVersion);
-        } else {
-            ffStrbufSetStatic(&gpu->platformApi, "WDDM");
-            FF_DEBUG("KMTQAITYPE_DRIVERVERSION query failed for adapter #%u", i);
         }
 
         __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
@@ -368,6 +395,15 @@ ffGPUDetectWsl2
         } else if (options->driverSpecific) {
             FF_DEBUG("No driver-specific detection function found for vendor: %s", gpu->vendor.chars);
         }
+
+#if _WIN32
+        // Put this after the driver-specific detection, as `getDriverSpecificDetectionFn` never succeeds
+        if (gpu->vendor.length == 0 && wddmVersion >= KMT_DRIVERVERSION_WDDM_2_4) {
+            // For non-PCI devices
+            FF_DEBUG("Attempting to query vendor name via registry for adapter #%u", i);
+            queryVendorNameViaRegistry(&gpu->vendor, adapter->hAdapter);
+        }
+#endif
 
         if (gpu->name.length == 0) {
             D3DKMT_ADAPTERREGISTRYINFO registryInfo;
@@ -527,6 +563,9 @@ ffGPUDetectWsl2
             } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
                 // 0000:00:02.0 is reserved for Intel integrated graphics
                 gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_VMWARE || gpu->vendor.chars == FF_GPU_VENDOR_NAME_PARALLELS) {
+                // Virtualized GPUs
+                gpu->type = FF_GPU_TYPE_INTEGRATED;
             }
 
             if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
