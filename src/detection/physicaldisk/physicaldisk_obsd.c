@@ -26,6 +26,14 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             *colon = '\0';
         }
 
+        if (options->namePrefix.length && !ffStrbufStartsWith(&(FFstrbuf) {
+                                                                  .chars = diskName,
+                                                                  .length = (uint32_t) len,
+                                                              },
+                                              &options->namePrefix)) {
+            continue;
+        }
+
         char* devPath = NULL;
         FF_AUTO_CLOSE_FD int f = opendev(diskName, O_RDONLY, OPENDEV_PART, &devPath);
         if (f < 0) {
