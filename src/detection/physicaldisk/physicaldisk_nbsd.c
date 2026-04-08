@@ -24,6 +24,14 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
     char* diskName = NULL;
     size_t len = 0;
     while (ffStrbufGetdelim(&diskName, &len, ' ', &diskNames)) {
+        if (options->namePrefix.length && !ffStrbufStartsWith(&(FFstrbuf) {
+                                                                  .chars = diskName,
+                                                                  .length = (uint32_t) len,
+                                                              },
+                                              &options->namePrefix)) {
+            continue;
+        }
+
         char devPath[256];
         FF_AUTO_CLOSE_FD int f = opendisk(diskName, O_RDONLY, devPath, ARRAY_SIZE(devPath), 0);
         if (f < 0) {
@@ -105,6 +113,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             ffStrbufAppendNS(&device->name, (uint32_t) ARRAY_SIZE(inquiry.vendor), inquiry.vendor);
             ffStrbufTrimRight(&device->name, '\0');
             ffStrbufTrimRight(&device->name, ' ');
+            ffStrbufTrimRight(&device->name, ',');
             ffStrbufAppendC(&device->name, ' ');
             ffStrbufAppendNS(&device->name, (uint32_t) ARRAY_SIZE(inquiry.product), inquiry.product);
             ffStrbufTrimRight(&device->name, '\0');

@@ -49,7 +49,7 @@ static void getExePath(FFPlatform* platform) {
                 (pid_t) platform->pid
 #    else
                 KERN_PROC_ARGS,
-                platform->pid,
+                (pid_t) platform->pid,
                 KERN_PROC_PATHNAME
 #    endif
             },
