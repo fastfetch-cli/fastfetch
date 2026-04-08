@@ -3638,6 +3638,16 @@
                                         "description": "Show disks with given name prefix only",
                                         "type": "string"
                                     },
+                                    "hideVirtual": {
+                                        "description": "Hide virtual disks (e.g. loop, RAM or file baked disks)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "hideUnknown": {
+                                        "description": "Hide disks with `size == 0`",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },

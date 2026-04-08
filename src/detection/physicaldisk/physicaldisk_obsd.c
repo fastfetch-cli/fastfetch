@@ -49,17 +49,32 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
-        bool isVirtual = dl.d_type == DTYPE_VND || dl.d_type == DTYPE_RDROOT;
-        bool isUnknown = dl.d_ncylinders == 0;
+        FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
+        if (dl.d_type == DTYPE_VND || dl.d_type == DTYPE_RDROOT) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+                continue;
+            }
+
+            type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+        }
+
+        uint64_t size = DL_GETDSIZE(&dl) * dl.d_secsize;
+        if (size == 0) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                continue;
+            }
+
+            type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+        }
+
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInitS(&device->name, dl.d_packname);
         ffStrbufInitS(&device->devPath, devPath);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInitS(&device->interconnect, dl.d_typename);
-        device->type = (!isVirtual ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_VIRTUAL) |
-            (!isUnknown ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_UNKNOWN);
-        device->size = DL_GETDSIZE(&dl) * dl.d_secsize;
+        device->type = type;
+        device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 
         struct scsi_inquiry_data inquiry = {};

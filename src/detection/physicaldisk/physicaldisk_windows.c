@@ -84,6 +84,10 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         }
     }
     if (size == 0) {
+        if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+            return "Skipping unknown disk with size 0";
+        }
+
         type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
     }
 
@@ -172,6 +176,10 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
                 default:
                     interconnect = "Unknown";
                     break;
+            }
+
+            if (type & FF_PHYSICALDISK_TYPE_VIRTUAL && options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+                return "Skipping virtual disk";
             }
 
             if (sdd->VendorIdOffset != 0) {

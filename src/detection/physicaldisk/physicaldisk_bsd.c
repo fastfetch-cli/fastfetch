@@ -41,10 +41,18 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
         if (!ffStrEquals(provider->lg_geom->lg_class->lg_name, "DISK")) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+                continue;
+            }
+
             type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
         }
         uint64_t size = (uint64_t) provider->lg_mediasize;
         if (size == 0) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                continue;
+            }
+
             type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
         }
 

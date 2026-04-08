@@ -68,7 +68,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             sectorSize = dl.d_secsize;
         }
 
-        bool isVirtual = false;
+        FFPhysicalDiskType type = dl.d_flags & D_REMOVABLE ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
+
         switch (dl.d_type) {
             case DKTYPE_VND:
             case DKTYPE_LD:
@@ -77,21 +78,33 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             case DKTYPE_VINUM:
             case DKTYPE_DM:
             case DKTYPE_RUMPD:
-            case DKTYPE_MD:
-                isVirtual = true;
+            case DKTYPE_MD: {
+                if (options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+                    continue;
+                }
+
+                type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+                break;
+            }
         }
 
-        bool isUnknown = sectorsPerUnit == 0;
+        uint64_t size = sectorsPerUnit * sectorSize;
+        if (size == 0) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                continue;
+            }
+
+            type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+        }
+
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInitS(&device->name, devType ?: dl.d_packname);
         ffStrbufInitS(&device->devPath, devPath);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInitS(&device->interconnect, dktypenames[dl.d_type]);
-        device->type = (!isVirtual ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_VIRTUAL) |
-            (!isUnknown ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_UNKNOWN) |
-            (dl.d_flags & D_REMOVABLE ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED);
-        device->size = sectorsPerUnit * sectorSize;
+        device->type = type;
+        device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 
         if (dict) {

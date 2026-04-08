@@ -11,6 +11,9 @@ struct FFWalkTreeBundle {
 };
 
 static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle* bundle) {
+    FFPhysicalDiskOptions* options = bundle->options;
+    FFlist* result = bundle->disks;
+
     if (di_minor_spectype(minor) != S_IFCHR || !ffStrEquals(di_minor_name(minor), "a,raw")) {
         return DI_WALK_CONTINUE;
     }
@@ -19,19 +22,36 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
     char* vendorId;
     if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-product-id", &productId) > 0 && di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-vendor-id", &vendorId) > 0) {
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateF("%s %s", vendorId, productId);
-        if (bundle->options->namePrefix.length && !ffStrbufStartsWithIgnCase(&name, &bundle->options->namePrefix)) {
+        if (options->namePrefix.length && !ffStrbufStartsWithIgnCase(&name, &options->namePrefix)) {
             return DI_WALK_CONTINUE;
         }
 
-        FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(bundle->disks);
+        int* value;
+
+        FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
+        uint64_t size = 0;
+        int64_t* nblocks;
+        if (di_prop_lookup_int64(DDI_DEV_T_ANY, node, "device-nblocks", &nblocks) > 0) {
+            if (*nblocks == 0) {
+                if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                    return DI_WALK_CONTINUE;
+                }
+
+                type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+            } else if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-blksize", &value) > 0) {
+                size = (uint64_t) ((uint64_t) *nblocks * (uint64_t) *value);
+            }
+        }
+
+        FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInitMove(&device->name, &name);
         ffStrbufInitF(&device->devPath, "/devices%s", di_devfs_path(node));
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInit(&device->interconnect);
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
-        device->type = FF_PHYSICALDISK_TYPE_NONE;
-        device->size = 0;
+        device->type = type;
+        device->size = size;
 
         char* buf;
         bool usb = false;
@@ -63,23 +83,12 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
 
         device->type |= di_prop_find(DDI_DEV_T_ANY, node, "removable-media") ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
 
-        int* value;
         if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-solid-state", &value) > 0) {
             device->type |= *value ? FF_PHYSICALDISK_TYPE_SSD : FF_PHYSICALDISK_TYPE_HDD;
         }
         if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "inquiry-device-type", &value) > 0) {
             device->type |= *value == DTYPE_DIRECT ? FF_PHYSICALDISK_TYPE_READWRITE : *value == DTYPE_RODIRECT ? FF_PHYSICALDISK_TYPE_READONLY
                                                                                                                : 0;
-        }
-
-        int64_t* nblocks;
-        if (di_prop_lookup_int64(DDI_DEV_T_ANY, node, "device-nblocks", &nblocks) > 0) {
-            if (*nblocks == 0) {
-                device->size = 0;
-                device->type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
-            } else if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-blksize", &value) > 0) {
-                device->size = (uint64_t) ((uint64_t) *nblocks * (uint64_t) *value);
-            }
         }
     }
 

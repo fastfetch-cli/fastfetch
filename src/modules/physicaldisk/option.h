@@ -26,6 +26,7 @@ typedef struct FFPhysicalDiskOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;
+    FFPhysicalDiskType hideType;
     bool temp;
     FFColorRangeConfig tempConfig;
 } FFPhysicalDiskOptions;

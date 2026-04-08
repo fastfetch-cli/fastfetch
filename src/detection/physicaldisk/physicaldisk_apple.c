@@ -63,14 +63,6 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
-        uint64_t size = 0;
-        {
-            FF_CFTYPE_AUTO_RELEASE CFNumberRef mediaSize = IORegistryEntryCreateCFProperty(entryMedia, CFSTR(kIOMediaSizeKey), kCFAllocatorDefault, kNilOptions);
-            if (mediaSize) {
-                ffCfNumGetInt64(mediaSize, (int64_t*) &size);
-            }
-        }
-
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryPhysical = 0;
         if (IORegistryEntryGetParentEntry(entryDriver, kIOServicePlane, &entryPhysical) != KERN_SUCCESS) {
             continue;
@@ -85,18 +77,38 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
+        FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
+
         FF_STRBUF_AUTO_DESTROY interconnect = ffStrbufCreate();
-        bool isVirtual = false;
         FF_CFTYPE_AUTO_RELEASE CFDictionaryRef protocolCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyProtocolCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
         if (protocolCharacteristics) {
             if (ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectTypeKey), &interconnect) == NULL) {
                 if (ffStrbufEqualS(&interconnect, kIOPropertyPhysicalInterconnectTypeVirtual)) {
-                    isVirtual = true;
+                    if (options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+                        continue;
+                    }
+
+                    type |= FF_PHYSICALDISK_TYPE_VIRTUAL;
                     FF_STRBUF_AUTO_DESTROY location = ffStrbufCreate();
                     if (ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectLocationKey), &location) == NULL) {
                         ffStrbufAppendS(&interconnect, " - ");
                         ffStrbufAppend(&interconnect, &location);
                     }
+                }
+            }
+        }
+
+        uint64_t size = 0;
+        {
+            FF_CFTYPE_AUTO_RELEASE CFNumberRef mediaSize = IORegistryEntryCreateCFProperty(entryMedia, CFSTR(kIOMediaSizeKey), kCFAllocatorDefault, kNilOptions);
+            if (mediaSize) {
+                ffCfNumGetInt64(mediaSize, (int64_t*) &size);
+                if (size == 0) {
+                    if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                        continue;
+                    }
+
+                    type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
                 }
             }
         }
@@ -107,8 +119,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
         ffStrbufInitMove(&device->interconnect, &interconnect);
-        device->type = (isVirtual ? FF_PHYSICALDISK_TYPE_VIRTUAL : FF_PHYSICALDISK_TYPE_NONE) |
-            (size > 0 ? FF_PHYSICALDISK_TYPE_NONE : FF_PHYSICALDISK_TYPE_UNKNOWN);
+        device->type = type;
         device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 

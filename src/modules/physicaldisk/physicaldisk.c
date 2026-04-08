@@ -2,7 +2,6 @@
 #include "common/jsonconfig.h"
 #include "common/temps.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
 
@@ -139,6 +138,32 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "hideVirtual")) {
+            if (!yyjson_is_bool(val)) {
+                ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideVirtual must be a boolean");
+            } else {
+                if (unsafe_yyjson_is_true(val)) {
+                    options->hideType |= FF_PHYSICALDISK_TYPE_VIRTUAL;
+                } else {
+                    options->hideType &= ~FF_PHYSICALDISK_TYPE_VIRTUAL;
+                }
+            }
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "hideUnknown")) {
+            if (!yyjson_is_bool(val)) {
+                ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideUnknown must be a boolean");
+            } else {
+                if (unsafe_yyjson_is_true(val)) {
+                    options->hideType |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+                } else {
+                    options->hideType &= ~FF_PHYSICALDISK_TYPE_UNKNOWN;
+                }
+            }
+            continue;
+        }
+
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig)) {
             continue;
         }
@@ -228,6 +253,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options) {
     ffStrbufInit(&options->namePrefix);
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 50, 70 };
+    options->hideType = FF_PHYSICALDISK_TYPE_UNKNOWN;
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options) {
