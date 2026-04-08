@@ -14,6 +14,10 @@ const char* ffDetectSwap(FFlist* result) {
         return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
     }
 
+    if (size == 0) {
+        return NULL;
+    }
+
     uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
     for (SYSTEM_PAGEFILE_INFORMATION* current = pstart;; current = (SYSTEM_PAGEFILE_INFORMATION*) ((uint8_t*) current + current->NextEntryOffset)) {
         FFSwapResult* swap = ffListAdd(result);
