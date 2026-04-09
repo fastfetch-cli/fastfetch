@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-static void parsePowerAdapter(int dfd, FF_MAYBE_UNUSED const char* id, FFlist* results) {
+static void parsePowerAdapter(int dfd, const char* id, FFlist* results) {
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
     // type must exist and be "Mains"
