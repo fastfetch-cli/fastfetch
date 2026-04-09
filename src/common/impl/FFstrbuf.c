@@ -247,7 +247,7 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
 
     assert(value != NULL);
 
-    if (strbuf->allocated < length + 1) {
+    if (strbuf->allocated <= length) {
         char* newBuf = malloc(sizeof(char) * (length + 1));
         memcpy(newBuf, value, length);
         if (strbuf->allocated > 0) {
