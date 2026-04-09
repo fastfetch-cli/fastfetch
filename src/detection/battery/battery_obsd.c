@@ -44,11 +44,21 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         ffStrbufAppendS(&battery->status, "Discharging");
     }
 
-    if (info.battery_state == APM_BATT_CRITICAL || info.battery_state == APM_BATT_CHARGING) {
+    if (info.battery_state == APM_BATT_CRITICAL || info.battery_state == APM_BATT_CHARGING || info.battery_state == APM_BATT_UNKNOWN) {
         if (battery->status.length) {
             ffStrbufAppendS(&battery->status, ", ");
         }
-        ffStrbufAppendS(&battery->status, info.battery_state == APM_BATT_CRITICAL ? "Critical" : "Charging");
+        switch (info.battery_state) {
+            case APM_BATT_UNKNOWN:
+                ffStrbufAppendS(&battery->status, "Unknown");
+                break;
+            case APM_BATT_CHARGING:
+                ffStrbufAppendS(&battery->status, "Charging");
+                break;
+            case APM_BATT_CRITICAL:
+                ffStrbufAppendS(&battery->status, "Critical");
+                break;
+        }
     }
 
     return NULL;
