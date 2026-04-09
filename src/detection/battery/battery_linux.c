@@ -1,6 +1,7 @@
 #include "battery.h"
 #include "common/io.h"
 #include "common/stringUtils.h"
+#include "common/debug.h"
 
 #include <dirent.h>
 #include <unistd.h>
@@ -8,76 +9,83 @@
 
 // https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
 
-static bool checkAc(const char* id, FFstrbuf* tmpBuffer) {
-    if (ffStrStartsWith(id, "BAT")) {
-        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/ADP1/online");
-    } else if (ffStrStartsWith(id, "macsmc-battery")) {
-        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/macsmc-ac/online");
-    } else {
-        ffStrbufClear(tmpBuffer);
-    }
-
-    char online = '\0';
-    return ffReadFileData(tmpBuffer->chars, 1, &online) == 1 && online == '1';
-}
-
-static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFlist* results) {
+static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFlist* results, bool* acConnected) {
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
-    // type must exist and be "Battery"
+    // type must exist
     if (!ffReadFileBufferRelative(dfd, "type", &tmpBuffer)) {
-        return;
+        FF_DEBUG("Battery \"%s\": No type file", id);
+        return false;
     }
     ffStrbufTrimRightSpace(&tmpBuffer);
-    if (!ffStrbufIgnCaseEqualS(&tmpBuffer, "Battery")) {
-        return;
+    if (ffStrbufEqualS(&tmpBuffer, "Mains")) {
+        if (*acConnected) {
+            FF_DEBUG("Battery \"%s\": Type is Mains, but AC is already connected", id);
+            return false;
+        }
+
+        char online = '\0';
+        if (ffReadFileDataRelative(dfd, "online", 1, &online) == 1 && online == '1') {
+            *acConnected = true;
+        }
+        FF_DEBUG("Battery \"%s\": Type is Mains, AC Connected: %s", id, *acConnected ? "Yes" : "No");
+        return false;
+    } else if (!ffStrbufEqualS(&tmpBuffer, "Battery")) {
+        FF_DEBUG("Battery \"%s\": Type is not Battery or Mains, but \"%s\"", id, tmpBuffer.chars);
+        return false;
     }
 
     // scope may not exist or must not be "Device"
     if (ffReadFileBufferRelative(dfd, "scope", &tmpBuffer)) {
         ffStrbufTrimRightSpace(&tmpBuffer);
+
+        FF_DEBUG("Battery \"%s\": Scope is \"%s\"", id, tmpBuffer.chars);
+        if (ffStrbufIgnCaseEqualS(&tmpBuffer, "Device")) {
+            return false;
+        }
     }
 
-    if (ffStrbufIgnCaseEqualS(&tmpBuffer, "Device")) {
-        return;
-    }
-
-    // capacity must exist and be not empty
+    // `capacity` must exist
     // This is expensive in my laptop
     if (!ffReadFileBufferRelative(dfd, "capacity", &tmpBuffer)) {
-        return;
+        FF_DEBUG("Battery \"%s\": No capacity file", id);
+        return false;
     }
 
     FFBatteryResult* result = ffListAdd(results);
+    ffStrbufInit(&result->manufacturer);
+    ffStrbufInit(&result->modelName);
+    ffStrbufInit(&result->technology);
+    ffStrbufInit(&result->status);
+    ffStrbufInit(&result->serial);
+    ffStrbufInit(&result->manufactureDate);
     result->capacity = ffStrbufToDouble(&tmpBuffer, 0);
+    result->cycleCount = 0;
+    result->temperature = FF_BATTERY_TEMP_UNSET;
+    result->timeRemaining = -1;
 
     // At this point, we have a battery. Try to get as much values as possible.
 
-    ffStrbufInit(&result->manufacturer);
     if (ffReadFileBufferRelative(dfd, "manufacturer", &result->manufacturer)) {
         ffStrbufTrimRightSpace(&result->manufacturer);
     } else if (ffStrEquals(id, "macsmc-battery")) { // asahi
         ffStrbufSetStatic(&result->manufacturer, "Apple Inc.");
     }
 
-    ffStrbufInit(&result->modelName);
     if (ffReadFileBufferRelative(dfd, "model_name", &result->modelName)) {
         ffStrbufTrimRightSpace(&result->modelName);
     }
 
-    ffStrbufInit(&result->technology);
     if (ffReadFileBufferRelative(dfd, "technology", &result->technology)) {
         ffStrbufTrimRightSpace(&result->technology);
     }
 
-    ffStrbufInit(&result->status);
     if (ffReadFileBufferRelative(dfd, "status", &result->status)) {
         ffStrbufTrimRightSpace(&result->status);
     }
 
     // Unknown, Charging, Discharging, Not charging, Full
 
-    result->timeRemaining = -1;
     if (ffStrbufEqualS(&result->status, "Discharging")) {
         if (ffReadFileBufferRelative(dfd, "time_to_empty_now", &tmpBuffer)) {
             result->timeRemaining = (int32_t) ffStrbufToSInt(&tmpBuffer, 0);
@@ -97,19 +105,9 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
                 }
             }
         }
-
-        if (checkAc(id, &tmpBuffer)) {
-            ffStrbufAppendS(&result->status, ", AC Connected");
-        }
-    } else if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full")) {
-        ffStrbufSetStatic(&result->status, "AC Connected");
-    } else if (ffStrbufEqualS(&result->status, "Charging")) {
-        ffStrbufAppendS(&result->status, ", AC Connected");
-    } else if (ffStrbufEqualS(&result->status, "Unknown")) {
+    } else if (ffStrbufEqualS(&result->status, "Not charging") ||
+               ffStrbufEqualS(&result->status, "Full")) {
         ffStrbufClear(&result->status);
-        if (checkAc(id, &tmpBuffer)) {
-            ffStrbufAppendS(&result->status, "AC Connected");
-        }
     }
 
     if (ffReadFileBufferRelative(dfd, "capacity_level", &tmpBuffer)) {
@@ -123,7 +121,6 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         }
     }
 
-    ffStrbufInit(&result->serial);
     if (ffReadFileBufferRelative(dfd, "serial_number", &result->serial)) {
         ffStrbufTrimRightSpace(&result->serial);
     }
@@ -133,7 +130,6 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         result->cycleCount = cycleCount < 0 || cycleCount > UINT32_MAX ? 0 : (uint32_t) cycleCount;
     }
 
-    ffStrbufInit(&result->manufactureDate);
     if (ffReadFileBufferRelative(dfd, "manufacture_year", &tmpBuffer)) {
         int year = (int) ffStrbufToSInt(&tmpBuffer, 0);
         if (year > 0) {
@@ -151,7 +147,6 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         }
     }
 
-    result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp) {
         if (ffReadFileBufferRelative(dfd, "temp", &tmpBuffer)) {
             result->temperature = ffStrbufToDouble(&tmpBuffer, FF_BATTERY_TEMP_UNSET);
@@ -160,6 +155,10 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
             }
         }
     }
+
+    FF_DEBUG("Battery \"%s\": Capacity: %.2f%%, Status: \"%s\", Time Remaining: %d seconds, Temperature: %.1f°C, Cycle Count: %u",
+             id, result->capacity, result->status.chars, result->timeRemaining, result->temperature, result->cycleCount);
+    return true;
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
@@ -168,6 +167,8 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         return "opendir(\"/sys/class/power_supply/\") == NULL";
     }
 
+    bool acConnected = false;
+
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL) {
         if (entry->d_name[0] == '.') {
@@ -175,8 +176,18 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         }
 
         FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
-        if (dfd > 0) {
-            parseBattery(dfd, entry->d_name, options, results);
+        if (dfd >= 0) {
+            parseBattery(dfd, entry->d_name, options, results, &acConnected);
+        }
+    }
+
+    if (acConnected) {
+        FF_LIST_FOR_EACH(FFBatteryResult, batt, *results) {
+            if (batt->status.length) {
+                ffStrbufAppendS(&batt->status, ", AC Connected");
+            } else {
+                ffStrbufSetStatic(&batt->status, "AC Connected");
+            }
         }
     }
 
