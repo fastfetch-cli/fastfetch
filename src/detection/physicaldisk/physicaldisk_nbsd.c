@@ -90,11 +90,11 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         uint64_t size = sectorsPerUnit * sectorSize;
         if (size == 0) {
-            if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
                 continue;
             }
 
-            type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+            type |= FF_PHYSICALDISK_TYPE_UNUSED;
         }
 
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);

@@ -49,11 +49,11 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
         uint64_t size = (uint64_t) provider->lg_mediasize;
         if (size == 0) {
-            if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+            if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
                 continue;
             }
 
-            type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+            type |= FF_PHYSICALDISK_TYPE_UNUSED;
         }
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(provider->lg_name);

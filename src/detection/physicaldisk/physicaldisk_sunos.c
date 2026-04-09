@@ -33,11 +33,11 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
         int64_t* nblocks;
         if (di_prop_lookup_int64(DDI_DEV_T_ANY, node, "device-nblocks", &nblocks) > 0) {
             if (*nblocks == 0) {
-                if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
                     return DI_WALK_CONTINUE;
                 }
 
-                type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+                type |= FF_PHYSICALDISK_TYPE_UNUSED;
             } else if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-blksize", &value) > 0) {
                 size = (uint64_t) ((uint64_t) *nblocks * (uint64_t) *value);
             }

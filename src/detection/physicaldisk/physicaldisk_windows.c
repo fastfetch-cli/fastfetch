@@ -84,11 +84,11 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         }
     }
     if (size == 0) {
-        if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+        if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
             return "Skipping unknown disk with size 0";
         }
 
-        type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+        type |= FF_PHYSICALDISK_TYPE_UNUSED;
     }
 
     const STORAGE_DEVICE_DESCRIPTOR* sdd = NULL;

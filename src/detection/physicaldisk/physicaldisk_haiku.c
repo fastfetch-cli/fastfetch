@@ -55,11 +55,11 @@ static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFl
             FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
             uint64_t size = (uint64_t) geometry.cylinder_count * geometry.head_count * geometry.sectors_per_track * geometry.bytes_per_sector;
             if (size == 0) {
-                if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+                if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
                     continue;
                 }
 
-                type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+                type |= FF_PHYSICALDISK_TYPE_UNUSED;
             }
 
             FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);

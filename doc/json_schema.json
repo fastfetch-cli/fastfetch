@@ -3643,8 +3643,8 @@
                                         "type": "boolean",
                                         "default": false
                                     },
-                                    "hideUnknown": {
-                                        "description": "Hide disks with `size == 0`",
+                                    "hideUnused": {
+                                        "description": "Hide disks with `size == 0` (likely unused/unconnected)",
                                         "type": "boolean",
                                         "default": true
                                     },

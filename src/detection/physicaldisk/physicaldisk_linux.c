@@ -40,11 +40,11 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 
     FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
     if (size == 0) {
-        if (options->hideType & FF_PHYSICALDISK_TYPE_UNKNOWN) {
+        if (options->hideType & FF_PHYSICALDISK_TYPE_UNUSED) {
             return;
         }
 
-        type |= FF_PHYSICALDISK_TYPE_UNKNOWN;
+        type |= FF_PHYSICALDISK_TYPE_UNUSED;
     }
 
     int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
