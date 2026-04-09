@@ -12,6 +12,14 @@
 static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFlist* results, bool* acConnected) {
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
+    {
+        char present = '\0';
+        if (ffReadFileDataRelative(dfd, "present", 1, &present) && present == '0') {
+            FF_DEBUG("Battery \"%s\": Not present", id);
+            return false;
+        }
+    }
+
     // type must exist
     if (!ffReadFileBufferRelative(dfd, "type", &tmpBuffer)) {
         FF_DEBUG("Battery \"%s\": No type file", id);
