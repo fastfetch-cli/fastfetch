@@ -23,7 +23,7 @@ static void paSinkInfoCallback(pa_context* c, const pa_sink_info* i, int eol, vo
     device->main = false;
 }
 
-static void paServerInfoCallback(FF_MAYBE_UNUSED pa_context* c, const pa_server_info* i, void* userdata) {
+static void paServerInfoCallback(FF_A_UNUSED pa_context* c, const pa_server_info* i, void* userdata) {
     if (!i) {
         return;
     }

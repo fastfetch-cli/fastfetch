@@ -40,7 +40,7 @@ void ffGenerateProcessesJsonConfig(FFProcessesOptions* options, yyjson_mut_doc* 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateProcessesJsonResult(FF_A_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     uint32_t result;
     const char* error = ffDetectProcesses(&result);
 

@@ -62,7 +62,7 @@ void ffGenerateVulkanJsonConfig(FFVulkanOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateVulkanJsonResult(FF_A_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFVulkanResult* result = ffDetectVulkan();
 
     if (result->error) {

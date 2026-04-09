@@ -37,7 +37,7 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
     }
 }
 
-static bool testXfconfWallpaperPropKey(FF_MAYBE_UNUSED void* data, const char* key) {
+static bool testXfconfWallpaperPropKey(FF_A_UNUSED void* data, const char* key) {
     int count = 0;
     sscanf(key, "/backdrop/screen0/monitor%*[^/]/workspace0/last-image%n", &count);
     return count == 0;

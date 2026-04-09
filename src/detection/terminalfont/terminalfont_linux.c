@@ -277,7 +277,7 @@ static void detectXterm(FFTerminalFontResult* terminalFont) {
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-static bool extractStTermFont(const char* str, FF_MAYBE_UNUSED uint32_t len, void* userdata) {
+static bool extractStTermFont(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
     if (!ffStrContains(str, "size=")) {
         return true;
     }

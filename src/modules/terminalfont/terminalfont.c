@@ -58,7 +58,7 @@ void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTerminalFontJsonResult(FF_A_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFTerminalFontResult result;
     ffFontInit(&result.font);

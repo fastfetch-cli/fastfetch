@@ -13,7 +13,7 @@ static inline void freeArgBuffer(FFArgBuffer* buffer) {
     buffer->data = NULL;
     buffer->length = 0;
 }
-#define FF_AUTO_FREE_ARG_BUFFER __attribute__((__cleanup__(freeArgBuffer)))
+#define FF_AUTO_FREE_ARG_BUFFER FF_A_CLEANUP(freeArgBuffer)
 
 // http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
 BOOL WINAPI IsThreadDesktopComposited();

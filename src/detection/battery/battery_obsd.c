@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* result) {
+const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* result) {
     FF_AUTO_CLOSE_FD int devfd = open("/dev/apm", O_RDONLY | O_CLOEXEC);
 
     if (devfd < 0) {

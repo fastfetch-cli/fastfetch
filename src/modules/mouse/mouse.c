@@ -102,7 +102,7 @@ void ffGenerateMouseJsonConfig(FFMouseOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-bool ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateMouseJsonResult(FF_A_UNUSED FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFMouseDevice));
 
     const char* error = ffDetectMouse(&result);

@@ -77,7 +77,7 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
         }
     }
 
-    __attribute__((__cleanup__(ffPerfCloseQueryHandle)))
+    FF_A_CLEANUP(ffPerfCloseQueryHandle)
     HANDLE hQuery = NULL;
 
     if (PerfOpenQueryHandle(NULL, &hQuery) != ERROR_SUCCESS) {
@@ -181,7 +181,7 @@ typedef struct FFSmbiosProcessorInfo {
 
     // 3.6+
     uint16_t ThreadEnabled; // varies
-} __attribute__((__packed__)) FFSmbiosProcessorInfo;
+} FF_A_PACKED FFSmbiosProcessorInfo;
 
 static_assert(offsetof(FFSmbiosProcessorInfo, ThreadEnabled) == 0x30,
     "FFSmbiosProcessorInfo: Wrong struct alignment");

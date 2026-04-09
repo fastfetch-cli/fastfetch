@@ -10,7 +10,7 @@ typedef struct FFArgBuffer {
     uint32_t length;
 } FFArgBuffer;
 
-typedef enum __attribute__((__packed__)) FFArgType {
+typedef enum FF_A_PACKED FFArgType {
     FF_ARG_TYPE_NULL = 0,
     FF_ARG_TYPE_UINT,
     FF_ARG_TYPE_UINT64,

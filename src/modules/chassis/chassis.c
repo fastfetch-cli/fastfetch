@@ -66,7 +66,7 @@ void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateChassisJsonResult(FF_A_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFChassisResult result;
     ffStrbufInit(&result.type);

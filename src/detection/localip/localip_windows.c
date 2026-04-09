@@ -67,7 +67,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         }
     }
 
-    FF_MAYBE_UNUSED int adapterCount = 0, processedCount = 0;
+    FF_A_UNUSED int adapterCount = 0, processedCount = 0;
 
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next) {
@@ -127,7 +127,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         uint32_t typesToAdd = options->showType & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT);
         FF_DEBUG("Types to add for adapter %u: 0x%X", (unsigned) adapter->IfIndex, typesToAdd);
 
-        FF_MAYBE_UNUSED int ipv4Count = 0, ipv6Count = 0;
+        FF_A_UNUSED int ipv4Count = 0, ipv6Count = 0;
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next) {
             FF_DEBUG("Processing unicast address: prefix origin=%d, suffix origin=%d, family=%d, DadState=%d",

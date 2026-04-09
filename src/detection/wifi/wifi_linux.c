@@ -456,7 +456,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item) {
 }
 #endif // FF_HAVE_LINUX_WIRELESS
 
-const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result) {
+const char* ffDetectWifi(FF_A_UNUSED FFlist* result) {
     FF_DEBUG("Starting wifi detection");
     struct if_nameindex* infs = if_nameindex();
     if (!infs) {

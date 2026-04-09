@@ -121,7 +121,7 @@ static const char* detectFromSystemProfiler(FFlist* result)
     return NULL;
 }
 
-FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
+FF_A_UNUSED static const char* detectFromIokit(FFlist* result)
 {
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (!entryDevice)

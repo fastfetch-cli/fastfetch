@@ -20,7 +20,7 @@ static inline void ffWrapFree(const void* pPtr) {
     }
 }
 
-#define FF_AUTO_FREE __attribute__((__cleanup__(ffWrapFree)))
+#define FF_AUTO_FREE FF_A_CLEANUP(ffWrapFree)
 
 // ptr MUST be a malloc'ed pointer
 static inline size_t ffMallocUsableSize(const void* ptr) {

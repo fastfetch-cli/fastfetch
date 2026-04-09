@@ -64,7 +64,7 @@ void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateInitSystemJsonResult(FF_A_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFInitSystemResult result = {
         .name = ffStrbufCreate(),

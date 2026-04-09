@@ -139,7 +139,7 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
 }
 
-bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTitleJsonResult(FF_A_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
 #ifdef _WIN32
     yyjson_mut_obj_add_strbuf(doc, obj, "userId", &instance.state.platform.sid);

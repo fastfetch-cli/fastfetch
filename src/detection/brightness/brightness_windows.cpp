@@ -126,7 +126,7 @@ static bool hasBuiltinDisplay(const FFDisplayServerResult* displayServer) {
     return false;
 }
 
-extern "C" const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result) {
+extern "C" const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 
     if (hasBuiltinDisplay(displayServer)) {

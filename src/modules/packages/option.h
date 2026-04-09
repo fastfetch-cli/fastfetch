@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFPackagesFlags {
+typedef enum FF_A_PACKED FFPackagesFlags {
     FF_PACKAGES_FLAG_NONE = 0,
     FF_PACKAGES_FLAG_APK_BIT = 1ULL << 0,
     FF_PACKAGES_FLAG_BREW_BIT = 1ULL << 1,

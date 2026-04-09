@@ -98,7 +98,7 @@ void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateMonitorJsonResult(FF_A_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     yyjson_mut_obj_add_str(doc, module, "error", "Monitor module is an alias of Display module");
     return false;
 }

@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-static bool extractNvimVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32_t len, void* userdata) {
+static bool extractNvimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "NVIM v")) {
         return true;
     }
@@ -15,7 +15,7 @@ static bool extractNvimVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32
     return false;
 }
 
-static bool extractVimVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32_t len, void* userdata) {
+static bool extractVimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "VIM - Vi IMproved ")) {
         return true;
     }
@@ -24,7 +24,7 @@ static bool extractVimVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32_
     return false;
 }
 
-static bool extractNanoVersionFromBinary(const char* str, FF_MAYBE_UNUSED uint32_t len, void* userdata) {
+static bool extractNanoVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "GNU nano ")) {
         return true;
     }

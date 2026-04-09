@@ -3,7 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum __attribute__((__packed__)) FFSoundType {
+typedef enum FF_A_PACKED FFSoundType {
     FF_SOUND_TYPE_MAIN,
     FF_SOUND_TYPE_ACTIVE,
     FF_SOUND_TYPE_ALL,

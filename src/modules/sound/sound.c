@@ -168,7 +168,7 @@ void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateSoundJsonResult(FF_A_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
     const char* error = ffDetectSound(&result);
 

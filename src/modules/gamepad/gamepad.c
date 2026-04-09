@@ -138,7 +138,7 @@ void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc,
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateGamepadJsonResult(FF_A_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFGamepadDevice));
 
     const char* error = ffDetectGamepad(&result);

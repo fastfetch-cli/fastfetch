@@ -41,6 +41,6 @@ static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* 
     return ffDBusGetMethodReply(dbus, busName, objectPath, "org.freedesktop.DBus.Properties", "GetAll", interface, NULL);
 }
 
-#    define FF_DBUS_AUTO_DESTROY_DATA __attribute__((__cleanup__(ffDBusDestroyData)))
+#    define FF_DBUS_AUTO_DESTROY_DATA FF_A_CLEANUP(ffDBusDestroyData)
 
 #endif // FF_HAVE_DBUS

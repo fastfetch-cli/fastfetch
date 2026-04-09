@@ -11,9 +11,9 @@
 #include <CoreVideo/CVDisplayLink.h>
 
 #ifdef MAC_OS_X_VERSION_10_15
-extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) __attribute__((weak_import));
-extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
-extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
+extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
+extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
+extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
 #else
 #    include <IOKit/graphics/IOGraphicsLib.h>
 #endif

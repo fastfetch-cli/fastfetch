@@ -13,7 +13,7 @@ static inline void ffReleaseComObject(void* ppUnknown) {
     }
 }
 
-#    define FF_AUTO_RELEASE_COM_OBJECT __attribute__((__cleanup__(ffReleaseComObject)))
+#    define FF_AUTO_RELEASE_COM_OBJECT FF_A_CLEANUP(ffReleaseComObject)
 
 #else
 // Win32 COM headers requires C++ compiler

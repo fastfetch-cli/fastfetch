@@ -149,7 +149,7 @@ void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjso
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateWifiJsonResult(FF_A_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
     const char* error = ffDetectWifi(&result);
     if (error) {

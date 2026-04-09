@@ -350,7 +350,7 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 }
 
-bool ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLocalIpJsonResult(FF_A_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
     const char* error = ffDetectLocalIps(options, &results);

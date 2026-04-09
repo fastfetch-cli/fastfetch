@@ -6,7 +6,7 @@
 #include <libgen.h>
 #include <unistd.h>
 
-FF_MAYBE_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata) {
+FF_A_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "systemd ")) {
         return true;
     }

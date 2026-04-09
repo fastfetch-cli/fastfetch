@@ -2,7 +2,7 @@
 
 #include "common/ffdata.h"
 
-typedef enum __attribute__((__packed__)) FFDsForceDrmType {
+typedef enum FF_A_PACKED FFDsForceDrmType {
     FF_DS_FORCE_DRM_TYPE_FALSE = 0,  // Disable
     FF_DS_FORCE_DRM_TYPE_TRUE = 1,   // Try `libdrm`, then `sysfs` if libdrm failed
     FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY, // Use `/sys/class/drm` only

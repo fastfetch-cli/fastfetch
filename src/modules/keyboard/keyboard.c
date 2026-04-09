@@ -99,7 +99,7 @@ void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* do
     }
 }
 
-bool ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateKeyboardJsonResult(FF_A_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFKeyboardDevice));
 
     const char* error = ffDetectKeyboard(&result);

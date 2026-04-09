@@ -113,7 +113,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options) {
 #endif
 }
 
-void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options) {
+void ffOptionsDestroyGeneral(FF_A_UNUSED FFOptionsGeneral* options) {
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     ffStrbufDestroy(&options->playerName);
 #endif

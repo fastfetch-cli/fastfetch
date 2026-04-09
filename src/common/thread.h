@@ -87,7 +87,7 @@ static inline FFThreadType ffThreadCreate(void* (*func)(void*), void* data) {
 static inline void ffThreadDetach(FFThreadType thread) {
     pthread_detach(thread);
 }
-static inline bool ffThreadJoin(FFThreadType thread, FF_MAYBE_UNUSED uint32_t timeout) {
+static inline bool ffThreadJoin(FFThreadType thread, FF_A_UNUSED uint32_t timeout) {
 #        if HAVE_TIMEDJOIN_NP
     if (timeout > 0) {
         struct timespec ts;
@@ -109,7 +109,7 @@ static inline bool ffThreadJoin(FFThreadType thread, FF_MAYBE_UNUSED uint32_t ti
 #else // FF_HAVE_THREADS
 #    define FF_THREAD_MUTEX_INITIALIZER 0
 typedef char FFThreadMutex;
-static inline void ffThreadMutexLock(FF_MAYBE_UNUSED FFThreadMutex* mutex) {}
-static inline void ffThreadMutexUnlock(FF_MAYBE_UNUSED FFThreadMutex* mutex) {}
+static inline void ffThreadMutexLock(FF_A_UNUSED FFThreadMutex* mutex) {}
+static inline void ffThreadMutexUnlock(FF_A_UNUSED FFThreadMutex* mutex) {}
 #    define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType)
 #endif // FF_HAVE_THREADS

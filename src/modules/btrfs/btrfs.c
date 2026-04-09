@@ -146,7 +146,7 @@ void ffGenerateBtrfsJsonConfig(FFBtrfsOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBtrfsJsonResult(FF_A_UNUSED FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBtrfsResult));
 
     const char* error = ffDetectBtrfs(&results);

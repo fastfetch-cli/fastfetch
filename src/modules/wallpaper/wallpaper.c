@@ -54,7 +54,7 @@ void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateWallpaperJsonResult(FF_A_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);
     if (error) {

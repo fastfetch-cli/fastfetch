@@ -27,7 +27,7 @@ typedef struct _BTH_RADIO_INFO {
 
     // LMP version
     UCHAR lmpVersion;
-} __attribute__((__packed__)) BTH_RADIO_INFO;
+} FF_A_PACKED BTH_RADIO_INFO;
 
 typedef struct _BTH_LOCAL_RADIO_INFO {
     // Local BTH_ADDR, class of device, and radio name
@@ -44,7 +44,7 @@ typedef struct _BTH_LOCAL_RADIO_INFO {
 
     // More information about the local radio (LMP, MFG)
     BTH_RADIO_INFO radioInfo;
-} __attribute__((__packed__)) BTH_LOCAL_RADIO_INFO;
+} FF_A_PACKED BTH_LOCAL_RADIO_INFO;
 static_assert(sizeof(BTH_LOCAL_RADIO_INFO) == 292, "BTH_LOCAL_RADIO_INFO should be 292 bytes");
 
 #pragma GCC diagnostic ignored "-Wpointer-sign"

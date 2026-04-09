@@ -157,7 +157,7 @@ void ffGenerateCPUCacheJsonConfig(FFCPUCacheOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-bool ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateCPUCacheJsonResult(FF_A_UNUSED FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFCPUCacheResult result = {
         .caches = {

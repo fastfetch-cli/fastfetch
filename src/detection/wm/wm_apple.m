@@ -86,7 +86,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
     return NULL;
 }
 
-const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
+const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNUSED FFWMOptions* options)
 {
     if (!wmName)
         return "No WM detected";

@@ -76,7 +76,7 @@ void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateCameraJsonResult(FF_A_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
     const char* error = ffDetectCamera(&result);
 

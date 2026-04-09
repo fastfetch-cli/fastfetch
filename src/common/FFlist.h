@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FFcheckmacros.h"
+#include "common/attributes.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -48,7 +48,7 @@ static inline void* ffListGet(const FFlist* list, uint32_t index) {
     return list->data + (index * list->elementSize);
 }
 
-FF_C_NODISCARD static inline uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool (*compFunc)(const void*, const void*)) {
+FF_A_NODISCARD static inline uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool (*compFunc)(const void*, const void*)) {
     for (uint32_t i = 0; i < list->length; i++) {
         if (compFunc(ffListGet(list, i), compElement)) {
             return i;
@@ -109,7 +109,7 @@ static inline void ffListReserve(FFlist* list, uint32_t newCapacity) {
         itemVarName - (itemType*) (listVar).data < (intptr_t) (listVar).length; \
         ++itemVarName)
 
-#define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
+#define FF_LIST_AUTO_DESTROY FFlist FF_A_CLEANUP(ffListDestroy)
 
 #define FF_LIST_GET(itemType, listVar, index)              \
     ({                                                     \

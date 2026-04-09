@@ -4,7 +4,7 @@
 #include "common/parsing.h"
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFPercentageTypeFlags {
+typedef enum FF_A_PACKED FFPercentageTypeFlags {
     FF_PERCENTAGE_TYPE_NONE = 0,
     FF_PERCENTAGE_TYPE_NUM_BIT = 1 << 0,
     FF_PERCENTAGE_TYPE_BAR_BIT = 1 << 1,

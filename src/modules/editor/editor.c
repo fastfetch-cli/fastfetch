@@ -65,7 +65,7 @@ void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateEditorJsonResult(FF_A_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),

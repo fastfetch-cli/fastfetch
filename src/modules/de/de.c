@@ -55,7 +55,7 @@ void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateDEJsonResult(FF_A_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if (result->dePrettyName.length == 0) {

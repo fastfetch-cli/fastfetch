@@ -4,7 +4,7 @@
 #include <OS.h>
 #include <private/shared/cpu_type.h>
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPUResult* cpu) {
+const char* ffDetectCPUImpl(FF_A_UNUSED const FFCPUOptions* options, FFCPUResult* cpu) {
     system_info sysInfo;
     if (get_system_info(&sysInfo) != B_OK) {
         return "get_system_info() failed";

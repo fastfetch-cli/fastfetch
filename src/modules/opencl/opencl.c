@@ -43,7 +43,7 @@ void ffGenerateOpenCLJsonConfig(FFOpenCLOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateOpenCLJsonResult(FF_A_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if (result->error != NULL) {

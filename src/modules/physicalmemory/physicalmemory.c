@@ -124,7 +124,7 @@ void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson
     yyjson_mut_obj_add_bool(doc, module, "showEmptySlots", options->showEmptySlots);
 }
 
-bool ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePhysicalMemoryJsonResult(FF_A_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalMemoryResult));
     const char* error = ffDetectPhysicalMemory(&result);
 

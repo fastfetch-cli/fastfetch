@@ -50,7 +50,7 @@ void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTerminalSizeJsonResult(FF_A_UNUSED FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTerminalSizeResult result;
 
     if (!ffDetectTerminalSize(&result)) {

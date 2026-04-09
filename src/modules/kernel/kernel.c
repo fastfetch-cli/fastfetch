@@ -40,7 +40,7 @@ void ffGenerateKernelJsonConfig(FFKernelOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateKernelJsonResult(FF_A_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFPlatformSysinfo* info = &instance.state.platform.sysinfo;
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");

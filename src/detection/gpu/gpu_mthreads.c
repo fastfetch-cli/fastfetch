@@ -29,7 +29,7 @@ struct FFMtmlData {
     MtmlSystem* sys;
 } mtmlData;
 
-FF_MAYBE_UNUSED static void shutdownMtml(void) {
+FF_A_UNUSED static void shutdownMtml(void) {
     mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
 }
 

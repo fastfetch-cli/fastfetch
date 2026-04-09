@@ -148,7 +148,7 @@ void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateZpoolJsonResult(FF_A_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFZpoolResult));
 
     const char* error = ffDetectZpool(&results);

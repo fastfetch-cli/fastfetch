@@ -83,7 +83,7 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateHostJsonResult(FF_A_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);

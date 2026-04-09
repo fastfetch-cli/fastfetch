@@ -1,14 +1,13 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "common/FFcheckmacros.h"
 
 #ifndef FF_DISABLE_DLOPEN
 
 #    if defined(_WIN32)
 #        define FF_DLOPEN_FLAGS 0
-FF_C_NODISCARD void* dlopen(const char* path, int mode);
-FF_C_NODISCARD void* dlsym(void* handle, const char* symbol);
+FF_A_NODISCARD void* dlopen(const char* path, int mode);
+FF_A_NODISCARD void* dlsym(void* handle, const char* symbol);
 int dlclose(void* handle);
 #    else
 #        include <dlfcn.h>
@@ -37,7 +36,7 @@ static inline void ffLibraryUnload(void** handle) {
         __typeof__(&symbolName) ff##symbolName;
 
 #    define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...)                                                  \
-        void* __attribute__((__cleanup__(ffLibraryUnload))) libraryObjectName = ffLibraryLoad(__VA_ARGS__, NULL); \
+        void* FF_A_CLEANUP(ffLibraryUnload) libraryObjectName = ffLibraryLoad(__VA_ARGS__, NULL); \
         if (libraryObjectName == NULL)                                                                            \
             return returnValue;
 
@@ -77,7 +76,7 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...);
         __typeof__(&symbolName) ff##symbolName;
 
 #    define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...) \
-        FF_MAYBE_UNUSED void* libraryObjectName = NULL; // Placeholder
+        FF_A_UNUSED void* libraryObjectName = NULL; // Placeholder
 
 #    define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \
         FF_LIBRARY_LOAD(libraryObjectName, , libraryFileName, maxVersion, ##__VA_ARGS__)
@@ -86,13 +85,13 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...);
         symbolMapping = (__typeof__(&symbolName)) &symbolName;
 
 #    define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
-        FF_MAYBE_UNUSED __auto_type FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff##symbolName, symbolName, returnValue);
+        FF_A_UNUSED __auto_type FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff##symbolName, symbolName, returnValue);
 
 #    define FF_LIBRARY_LOAD_SYMBOL_LAZY(library, symbolName) \
-        FF_MAYBE_UNUSED __auto_type ff##symbolName = (__typeof__(&symbolName)) &symbolName;
+        FF_A_UNUSED __auto_type ff##symbolName = (__typeof__(&symbolName)) &symbolName;
 
 #    define FF_LIBRARY_LOAD_SYMBOL_MESSAGE(library, symbolName) \
-        FF_MAYBE_UNUSED __auto_type FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff##symbolName, symbolName, "dlsym " #symbolName " failed");
+        FF_A_UNUSED __auto_type FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff##symbolName, symbolName, "dlsym " #symbolName " failed");
 
 #    define FF_LIBRARY_LOAD_SYMBOL_VAR(library, varName, symbolName, returnValue) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName).ff##symbolName, symbolName, returnValue);

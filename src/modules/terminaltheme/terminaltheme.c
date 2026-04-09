@@ -59,7 +59,7 @@ void ffGenerateTerminalThemeJsonConfig(FFTerminalThemeOptions* options, yyjson_m
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTerminalThemeJsonResult(FF_A_UNUSED FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTerminalThemeResult result = {};
 
     if (!ffDetectTerminalTheme(&result, false)) {

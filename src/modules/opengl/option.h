@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFOpenGLLibrary {
+typedef enum FF_A_PACKED FFOpenGLLibrary {
     FF_OPENGL_LIBRARY_AUTO,
     FF_OPENGL_LIBRARY_EGL,
     FF_OPENGL_LIBRARY_GLX,

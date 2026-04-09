@@ -65,7 +65,7 @@ void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLMJsonResult(FF_A_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);

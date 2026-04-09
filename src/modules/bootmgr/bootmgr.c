@@ -67,7 +67,7 @@ void ffGenerateBootmgrJsonConfig(FFBootmgrOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBootmgrJsonResult(FF_A_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFBootmgrResult bootmgr = {
         .name = ffStrbufCreate(),

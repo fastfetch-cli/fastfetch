@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFDisplayCompactType {
+typedef enum FF_A_PACKED FFDisplayCompactType {
     FF_DISPLAY_COMPACT_TYPE_NONE = 0,
     FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT = 1 << 0,
     FF_DISPLAY_COMPACT_TYPE_SCALED_BIT = 1 << 1,
@@ -10,7 +10,7 @@ typedef enum __attribute__((__packed__)) FFDisplayCompactType {
     FF_DISPLAY_COMPACT_TYPE_UNSIGNED = UINT8_MAX,
 } FFDisplayCompactType;
 
-typedef enum __attribute__((__packed__)) FFDisplayOrder {
+typedef enum FF_A_PACKED FFDisplayOrder {
     FF_DISPLAY_ORDER_NONE,
     FF_DISPLAY_ORDER_ASC,
     FF_DISPLAY_ORDER_DESC,

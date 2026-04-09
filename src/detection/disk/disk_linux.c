@@ -162,7 +162,7 @@ static void detectName(FFDisk* disk) {
 
 #ifdef __ANDROID__
 
-static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk, FF_MAYBE_UNUSED struct mntent* device) {
+static void detectType(FF_A_UNUSED const FFlist* disks, FFDisk* currentDisk, FF_A_UNUSED struct mntent* device) {
     if (ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated")) {
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
     } else if (ffStrbufStartsWithS(&currentDisk->mountpoint, "/mnt/media_rw/")) {

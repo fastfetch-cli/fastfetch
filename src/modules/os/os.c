@@ -120,7 +120,7 @@ void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateOSJsonResult(FF_A_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFOSResult* os = ffDetectOS();
 
     if (os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0) {

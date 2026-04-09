@@ -59,7 +59,7 @@ typedef struct FFSmbiosMemoryDevice {
     uint16_t Pmic0RevisionNumber; // varies
     uint16_t RcdManufacturerID;   // varies
     uint16_t RcdRevisionNumber;   // varies
-} __attribute__((__packed__)) FFSmbiosMemoryDevice;
+} FF_A_PACKED FFSmbiosMemoryDevice;
 
 static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
     "FFSmbiosMemoryDevice: Wrong struct alignment");

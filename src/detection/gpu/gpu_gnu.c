@@ -15,7 +15,7 @@ enum {
     PCI_CONF_SIZE = 0x40,
 };
 
-const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus) {
+const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
     int dDomainFd = open(_SERVERS_BUS "/pci/0000", O_RDONLY | O_CLOEXEC);
     if (dDomainFd < 0) {
         return "open(_SERVERS_BUS \"/pci/0000\") failed";

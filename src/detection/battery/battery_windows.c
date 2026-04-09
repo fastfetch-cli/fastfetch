@@ -186,7 +186,7 @@ typedef struct FFSmbiosPortableBattery {
     uint8_t SbdsDeviceChemistry;      // string
     uint8_t DesignCapacityMultiplier; // varies
     uint16_t OEMSpecific;             // varies
-} __attribute__((__packed__)) FFSmbiosPortableBattery;
+} FF_A_PACKED FFSmbiosPortableBattery;
 
 static_assert(offsetof(FFSmbiosPortableBattery, OEMSpecific) == 0x16,
     "FFSmbiosPortableBattery: Wrong struct alignment");
@@ -256,7 +256,7 @@ static const char* detectBySmbios(FFBatteryResult* battery) {
     return NULL;
 }
 
-static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results) {
+static const char* detectWithNtApi(FF_A_UNUSED FFBatteryOptions* options, FFlist* results) {
     SYSTEM_BATTERY_STATE info;
     if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) && info.BatteryPresent) {
         FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(results);

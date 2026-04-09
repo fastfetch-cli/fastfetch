@@ -118,7 +118,7 @@ void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc,
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLoadavgJsonResult(FF_A_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
 
     const char* error = ffDetectLoadavg(result);

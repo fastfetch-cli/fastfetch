@@ -17,7 +17,7 @@ static void ffCoTaskMemFreeWrapper(void* pptr) {
         CoTaskMemFree(ptr);
     }
 }
-#define FF_COTASK_AUTO_FREE __attribute__((__cleanup__(ffCoTaskMemFreeWrapper)))
+#define FF_COTASK_AUTO_FREE FF_A_CLEANUP(ffCoTaskMemFreeWrapper)
 
 const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
     const char* error = ffInitCom();

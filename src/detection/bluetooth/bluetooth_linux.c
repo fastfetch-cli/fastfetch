@@ -234,7 +234,7 @@ static uint32_t connectedDevices(void) {
 
 #endif
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */) {
+const char* ffDetectBluetooth(FF_A_UNUSED FFBluetoothOptions* options, FF_A_UNUSED FFlist* devices /* FFBluetoothResult */) {
 #ifdef FF_HAVE_DBUS
     int32_t connectedCount = -1;
     if (!options->showDisconnected) {

@@ -57,7 +57,7 @@ static void enumerate_props(FFSoundDeviceBundle* bundle, struct sioctl_desc* des
 }
 
 const char* ffDetectSound(FFlist* devices) {
-    __attribute__((__cleanup__(close_hdl))) struct sioctl_hdl* hdl = sioctl_open(SIO_DEVANY, SIOCTL_READ, 0);
+    FF_A_CLEANUP(close_hdl) struct sioctl_hdl* hdl = sioctl_open(SIO_DEVANY, SIOCTL_READ, 0);
     if (!hdl) {
         return "sio_open() failed";
     }

@@ -10,7 +10,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 }
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
-    __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
+    FF_A_CLEANUP(kstatFreeWrap) kstat_ctl_t* kc = kstat_open();
     if (!kc) {
         return "kstat_open() failed";
     }

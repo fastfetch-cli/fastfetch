@@ -57,7 +57,7 @@ void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateFontJsonResult(FF_A_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFFontResult font;
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i) {

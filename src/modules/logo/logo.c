@@ -3,12 +3,12 @@
 #include "modules/logo/logo.h"
 #include "options/logo.h"
 
-bool ffPrintLogo(FF_MAYBE_UNUSED FFLogoOptions* options) {
+bool ffPrintLogo(FF_A_UNUSED FFLogoOptions* options) {
     ffPrintError(FF_LOGO_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_DEFAULT, "Supported in JSON format only");
     return false;
 }
 
-void ffParseLogoJsonObject(FF_MAYBE_UNUSED FFLogoOptions* options, FF_MAYBE_UNUSED yyjson_val* module) {
+void ffParseLogoJsonObject(FF_A_UNUSED FFLogoOptions* options, FF_A_UNUSED yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
     yyjson_obj_foreach (module, idx, max, key, val) {
@@ -20,7 +20,7 @@ void ffParseLogoJsonObject(FF_MAYBE_UNUSED FFLogoOptions* options, FF_MAYBE_UNUS
     }
 }
 
-bool ffGenerateLogoJsonResult(FF_MAYBE_UNUSED FFLogoOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLogoJsonResult(FF_A_UNUSED FFLogoOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFLogoSize size = FF_LOGO_SIZE_UNKNOWN;
     FFOptionsLogo* logoOptions = &instance.config.logo;
     if (logoOptions->type == FF_LOGO_TYPE_SMALL) {
@@ -70,10 +70,10 @@ bool ffGenerateLogoJsonResult(FF_MAYBE_UNUSED FFLogoOptions* options, yyjson_mut
     return true;
 }
 
-void ffInitLogoOptions(FF_MAYBE_UNUSED FFLogoOptions* options) {
+void ffInitLogoOptions(FF_A_UNUSED FFLogoOptions* options) {
 }
 
-void ffDestroyLogoOptions(FF_MAYBE_UNUSED FFLogoOptions* options) {
+void ffDestroyLogoOptions(FF_A_UNUSED FFLogoOptions* options) {
 }
 
 FFModuleBaseInfo ffLogoModuleInfo = {

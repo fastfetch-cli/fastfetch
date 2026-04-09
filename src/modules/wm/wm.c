@@ -82,7 +82,7 @@ void ffGenerateWMJsonConfig(FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mu
     yyjson_mut_obj_add_bool(doc, module, "detectPlugin", options->detectPlugin);
 }
 
-bool ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateWMJsonResult(FF_A_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if (result->wmPrettyName.length == 0) {

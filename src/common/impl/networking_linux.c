@@ -254,7 +254,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
 
     if (state->timeout > 0) {
         FF_DEBUG("Setting connection timeout: %u ms", state->timeout);
-        FF_MAYBE_UNUSED uint32_t sec = state->timeout / 1000;
+        FF_A_UNUSED uint32_t sec = state->timeout / 1000;
         if (sec == 0) {
             sec = 1;
         }
@@ -410,7 +410,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
 
     FF_DEBUG("Starting data reception");
-    FF_MAYBE_UNUSED int recvCount = 0;
+    FF_A_UNUSED int recvCount = 0;
     uint32_t contentLength = 0;
     uint32_t headerEnd = 0;
 

@@ -84,7 +84,7 @@ const char* detectByOpenGL(FFlist* gpus) {
     ffStrbufInit(&result.slv);
     ffStrbufInit(&result.library);
 
-    __attribute__((__cleanup__(ffDestroyOpenGLOptions))) FFOpenGLOptions options;
+    FF_A_CLEANUP(ffDestroyOpenGLOptions) FFOpenGLOptions options;
     ffInitOpenGLOptions(&options);
     const char* error = ffDetectOpenGL(&options, &result);
     FF_DEBUG("OpenGL detection returns: %s", error ?: "success");

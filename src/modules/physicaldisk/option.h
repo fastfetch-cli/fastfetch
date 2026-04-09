@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFPhysicalDiskType {
+typedef enum FF_A_PACKED FFPhysicalDiskType {
     FF_PHYSICALDISK_TYPE_NONE = 0,
 
     // If none is set, it's unknown

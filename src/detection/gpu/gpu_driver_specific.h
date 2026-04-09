@@ -2,7 +2,7 @@
 
 #include "gpu.h"
 
-typedef enum __attribute__((__packed__)) FFGpuDriverConditionType {
+typedef enum FF_A_PACKED FFGpuDriverConditionType {
     FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID = 1 << 0,
     FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID = 1 << 1,
     FF_GPU_DRIVER_CONDITION_TYPE_LUID = 1 << 2,
@@ -47,7 +47,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
 #    define FF_GPU_DRIVER_DLLNAME_PATH_PREFIX
 #endif
 
-FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName) {
+FF_A_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName) {
     if (vendor == FF_GPU_VENDOR_NAME_NVIDIA) {
         *pDetectFn = ffDetectNvidiaGpuInfo;
 #ifdef _WIN32

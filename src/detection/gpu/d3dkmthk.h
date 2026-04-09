@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdalign.h>
 
 #if _WIN32
 #    include <ntdef.h>
@@ -43,7 +44,7 @@ typedef int32_t NTSTATUS; // 0 for success, -1 for failure
 #    define _In_range_(low, hi)
 #endif
 
-#define D3DKMT_ALIGN64 __attribute__((aligned(8)))
+#define D3DKMT_ALIGN64 alignas(8)
 
 typedef struct D3DKMT_HANDLE {
     union {
@@ -308,12 +309,12 @@ typedef struct _DXGK_NODEMETADATA {
     DXGK_NODEMETADATA_FLAGS Flags; // WDDM 2.2
     BOOLEAN GpuMmuSupported;       // WDDM 2.0 ???
     BOOLEAN IoMmuSupported;
-} __attribute__((packed)) DXGK_NODEMETADATA;
+} FF_A_PACKED DXGK_NODEMETADATA;
 
 typedef struct _D3DKMT_NODEMETADATA {
     UINT NodeOrdinalAndAdapterIndex; // WDDMv2: High word is physical adapter index, low word is node ordinal
     DXGK_NODEMETADATA NodeData;
-} __attribute__((packed)) D3DKMT_NODEMETADATA;
+} FF_A_PACKED D3DKMT_NODEMETADATA;
 static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structure size mismatch");
 
 // Functions

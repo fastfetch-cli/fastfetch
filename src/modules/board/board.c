@@ -64,7 +64,7 @@ void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBoardJsonResult(FF_A_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFBoardResult board;
     ffStrbufInit(&board.name);

@@ -22,7 +22,7 @@
 #    define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
-static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getKDE(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
 #ifdef _PATH_LOCALBASE
     ffParsePropFile(_PATH_LOCALBASE "/share/wayland-sessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
     if (result->length == 0) {
@@ -56,7 +56,7 @@ static void getKDE(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     }
 }
 
-static const char* getGnomeByDbus(FF_MAYBE_UNUSED FFstrbuf* result) {
+static const char* getGnomeByDbus(FF_A_UNUSED FFstrbuf* result) {
 #ifdef FF_HAVE_DBUS
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL) {
@@ -70,7 +70,7 @@ static const char* getGnomeByDbus(FF_MAYBE_UNUSED FFstrbuf* result) {
 #endif // FF_HAVE_DBUS
 }
 
-static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getGnome(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     getGnomeByDbus(result);
 
     if (result->length == 0) {
@@ -80,7 +80,7 @@ static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     }
 }
 
-static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getCinnamon(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     ffStrbufSetS(result, getenv("CINNAMON_VERSION"));
 
     if (result->length == 0) {
@@ -94,7 +94,7 @@ static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) 
     }
 }
 
-static void getMate(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getMate(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     FF_STRBUF_AUTO_DESTROY major = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY micro = ffStrbufCreate();
@@ -124,7 +124,7 @@ static const char* getXfce4ByLib(FFstrbuf* result) {
 #endif
 }
 
-static void getXFCE4(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getXFCE4(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     getXfce4ByLib(result);
 
     if (result->length == 0) {
@@ -137,7 +137,7 @@ static void getXFCE4(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     }
 }
 
-static void getLXQt(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getLXQt(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     ffParsePropFileData("gconfig/lxqt.pc", "Version:", result);
 
     if (result->length == 0) {
@@ -156,11 +156,11 @@ static void getLXQt(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
     }
 }
 
-static void getBudgie(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getBudgie(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     ffParsePropFileData("budgie/budgie-version.xml", "<str>", result);
 }
 
-static void getUnity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static void getUnity(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     if (ffParsePropFile("/usr/bin/unity", "parser = OptionParser(version= \"%prog ", result)) {
         ffStrbufSubstrBeforeFirstC(result, '"');
     }
@@ -177,7 +177,7 @@ static bool extractTdeVersion(const char* line, uint32_t len, void* userdata) {
     return false;
 }
 
-static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static const char* getTrinity(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("tde-config", &path);
     if (error) {
@@ -200,7 +200,7 @@ static const char* getTrinity(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* opt
     return "All methods failed";
 }
 
-static const char* getCosmic(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options) {
+static const char* getCosmic(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
     if (ffProcessAppendStdOut(result, (char* const[]) { "cosmic-comp", "--version", NULL }) == NULL) {
         // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
         ffStrbufSubstrAfterFirstC(result, ' ');

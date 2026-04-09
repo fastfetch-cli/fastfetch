@@ -2,7 +2,7 @@
 
 #include "fastfetch.h"
 
-typedef enum __attribute__((__packed__)) FFvarianttype {
+typedef enum FF_A_PACKED FFvarianttype {
     FF_VARIANT_TYPE_STRING,
     FF_VARIANT_TYPE_BOOL,
     FF_VARIANT_TYPE_INT

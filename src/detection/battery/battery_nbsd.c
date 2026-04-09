@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results) {
+const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* results) {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
         return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";

@@ -136,7 +136,7 @@ static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFon
     FF_DEBUG("detectGhostty: end");
 }
 
-FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont) {
+FF_A_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffParsePropFile(FASTFETCH_TARGET_DIR_ETC "/vconsole.conf", "Font =", &fontName);
@@ -155,7 +155,7 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont) {
     }
 }
 
-FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
+FF_A_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 

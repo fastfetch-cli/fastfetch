@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFLocalIpType {
+typedef enum FF_A_PACKED FFLocalIpType {
     FF_LOCALIP_TYPE_NONE,
     FF_LOCALIP_TYPE_LOOP_BIT = 1 << 0,
     FF_LOCALIP_TYPE_IPV4_BIT = 1 << 1,
@@ -20,7 +20,7 @@ typedef enum __attribute__((__packed__)) FFLocalIpType {
 } FFLocalIpType;
 static_assert(sizeof(FFLocalIpType) == sizeof(uint16_t), "");
 
-typedef enum __attribute__((__packed__)) FFLocalIpIpv6Type {
+typedef enum FF_A_PACKED FFLocalIpIpv6Type {
     FF_LOCALIP_IPV6_TYPE_NONE = 0b00000000,
     FF_LOCALIP_IPV6_TYPE_GUA_BIT = 0b00000001,
     FF_LOCALIP_IPV6_TYPE_ULA_BIT = 0b00000010,

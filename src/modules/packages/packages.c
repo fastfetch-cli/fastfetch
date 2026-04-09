@@ -389,7 +389,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
-bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 

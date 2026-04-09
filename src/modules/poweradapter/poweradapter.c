@@ -69,7 +69,7 @@ void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* m
     }
 }
 
-bool ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePowerAdapterJsonResult(FF_A_UNUSED FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
     const char* error = ffDetectPowerAdapter(&results);

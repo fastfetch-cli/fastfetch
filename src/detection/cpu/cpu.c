@@ -505,14 +505,14 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
     }
 }
 #    else
-void ffCPUDetectByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu) {
+void ffCPUDetectByCpuid(FF_A_UNUSED FFCPUResult* cpu) {
     // Unsupported system
 }
 #    endif
 
 #else
 
-void ffCPUDetectByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu) {
+void ffCPUDetectByCpuid(FF_A_UNUSED FFCPUResult* cpu) {
     // Unsupported architecture
 }
 

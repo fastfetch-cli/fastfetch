@@ -6,7 +6,7 @@
 #include "common/debug.h"
 
 // Helper function to convert ADL status code to string
-FF_MAYBE_UNUSED static const char* ffAdlStatusToString(int status) {
+FF_A_UNUSED static const char* ffAdlStatusToString(int status) {
     switch (status) {
 #define FF_ADL_STATUS_CASE(name) \
     case name:                   \
@@ -41,7 +41,7 @@ FF_MAYBE_UNUSED static const char* ffAdlStatusToString(int status) {
 }
 
 // Memory allocation function
-static void* __attribute__((__stdcall__)) ffAdlMainMemoryAlloc(int iSize) {
+static void* __stdcall ffAdlMainMemoryAlloc(int iSize) {
     return malloc((size_t) iSize);
 }
 

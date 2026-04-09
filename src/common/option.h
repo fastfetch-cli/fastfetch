@@ -36,7 +36,7 @@ typedef struct FFModuleBaseInfo {
     FFModuleFormatArgList formatArgs;
 } FFModuleBaseInfo;
 
-typedef enum __attribute__((__packed__)) FFModuleKeyType {
+typedef enum FF_A_PACKED FFModuleKeyType {
     FF_MODULE_KEY_TYPE_NONE = 0,
     FF_MODULE_KEY_TYPE_STRING = 1 << 0,
     FF_MODULE_KEY_TYPE_ICON = 1 << 1,
@@ -66,10 +66,10 @@ typedef struct FFKeyValuePair {
 
 const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName);
 void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer);
-FF_C_NODISCARD uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
-FF_C_NODISCARD int32_t ffOptionParseInt32(const char* argumentKey, const char* value);
-FF_C_NODISCARD int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]);
-FF_C_NODISCARD bool ffOptionParseBoolean(const char* str);
+FF_A_NODISCARD uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
+FF_A_NODISCARD int32_t ffOptionParseInt32(const char* argumentKey, const char* value);
+FF_A_NODISCARD int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]);
+FF_A_NODISCARD bool ffOptionParseBoolean(const char* str);
 void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer);
 static inline void ffOptionParseColor(const char* value, FFstrbuf* buffer) {
     ffStrbufClear(buffer);

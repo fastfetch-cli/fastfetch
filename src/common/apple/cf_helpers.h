@@ -28,7 +28,7 @@ static inline void cfReleaseWrapper(void* type) {
     }
 }
 
-#define FF_CFTYPE_AUTO_RELEASE __attribute__((__cleanup__(cfReleaseWrapper)))
+#define FF_CFTYPE_AUTO_RELEASE FF_A_CLEANUP(cfReleaseWrapper)
 
 static inline void wrapIoObjectRelease(io_object_t* service) {
     assert(service);
@@ -36,4 +36,4 @@ static inline void wrapIoObjectRelease(io_object_t* service) {
         IOObjectRelease(*service);
     }
 }
-#define FF_IOOBJECT_AUTO_RELEASE __attribute__((__cleanup__(wrapIoObjectRelease)))
+#define FF_IOOBJECT_AUTO_RELEASE FF_A_CLEANUP(wrapIoObjectRelease)

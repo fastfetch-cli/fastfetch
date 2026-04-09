@@ -9,7 +9,7 @@
 
 #    include "../displayserver_linux.h"
 
-typedef enum __attribute__((__packed__)) WaylandProtocolType {
+typedef enum FF_A_PACKED WaylandProtocolType {
     FF_WAYLAND_PROTOCOL_TYPE_NONE,
     FF_WAYLAND_PROTOCOL_TYPE_GLOBAL,
     FF_WAYLAND_PROTOCOL_TYPE_ZWLR,
@@ -71,8 +71,8 @@ inline static uint64_t ffWaylandGenerateIdFromName(const char* name) {
     return id;
 }
 
-void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char* name);
-void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description);
+void ffWaylandOutputNameListener(void* data, FF_A_UNUSED void* output, const char* name);
+void ffWaylandOutputDescriptionListener(void* data, FF_A_UNUSED void* output, const char* description);
 // Modifies content of display. Don't call this function when calling ffdsAppendDisplay
 uint32_t ffWaylandHandleRotation(WaylandDisplay* display);
 

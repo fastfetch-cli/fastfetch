@@ -4,7 +4,7 @@
 #    include "common/stringUtils.h"
 #    include "xdg-output-unstable-v1-client-protocol.h"
 
-static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate) {
+static void waylandOutputModeListener(void* data, FF_A_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate) {
     WaylandDisplay* display = data;
 
     if (flags & WL_OUTPUT_MODE_CURRENT) {
@@ -19,20 +19,20 @@ static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_outp
     }
 }
 
-static void waylandOutputScaleListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, int32_t scale) {
+static void waylandOutputScaleListener(void* data, FF_A_UNUSED struct wl_output* output, int32_t scale) {
     WaylandDisplay* display = data;
     display->dpi = 96 * (uint32_t) scale;
 }
 
 static void waylandOutputGeometryListener(void* data,
-    FF_MAYBE_UNUSED struct wl_output* output,
-    FF_MAYBE_UNUSED int32_t x,
-    FF_MAYBE_UNUSED int32_t y,
+    FF_A_UNUSED struct wl_output* output,
+    FF_A_UNUSED int32_t x,
+    FF_A_UNUSED int32_t y,
     int32_t physical_width,
     int32_t physical_height,
-    FF_MAYBE_UNUSED int32_t subpixel,
-    FF_MAYBE_UNUSED const char* make,
-    FF_MAYBE_UNUSED const char* model,
+    FF_A_UNUSED int32_t subpixel,
+    FF_A_UNUSED const char* make,
+    FF_A_UNUSED const char* model,
     int32_t transform) {
     WaylandDisplay* display = data;
     display->physicalWidth = physical_width;
@@ -40,7 +40,7 @@ static void waylandOutputGeometryListener(void* data,
     display->transform = (enum wl_output_transform) transform;
 }
 
-static void handleXdgLogicalSize(void* data, FF_MAYBE_UNUSED struct zxdg_output_v1* _, int32_t width, FF_MAYBE_UNUSED int32_t height) {
+static void handleXdgLogicalSize(void* data, FF_A_UNUSED struct zxdg_output_v1* _, int32_t width, FF_A_UNUSED int32_t height) {
     WaylandDisplay* display = data;
     // Seems the values are only useful when ractional scale is enabled
     if (width < display->width) {

@@ -166,7 +166,7 @@ static inline const char* drmType2Name(uint32_t connector_type) {
     }
 }
 
-FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength) {
+FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength) {
     const char* drmDirPath = "/sys/class/drm/";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
@@ -420,7 +420,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
 
 #endif
 
-const char* ffdsConnectDrm(FF_MAYBE_UNUSED FFDisplayServerResult* result) {
+const char* ffdsConnectDrm(FF_A_UNUSED FFDisplayServerResult* result) {
 #ifdef FF_HAVE_DRM
     if (instance.config.general.dsForceDrm != FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY) {
         if (drmConnectLibdrm(result) == NULL) {

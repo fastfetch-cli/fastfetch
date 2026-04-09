@@ -2,6 +2,7 @@
 #include "common/mallocHelper.h"
 #include "common/stringUtils.h"
 
+#include <stdalign.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 
@@ -53,7 +54,7 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk) {
     return NULL;
 }
 #    else
-static const char* detectFsLabel(FF_MAYBE_UNUSED struct statfs* fs, FF_MAYBE_UNUSED FFDisk* disk) {
+static const char* detectFsLabel(FF_A_UNUSED struct statfs* fs, FF_A_UNUSED FFDisk* disk) {
     return "Fastfetch was compiled without libgeom support";
 }
 #    endif
@@ -87,7 +88,7 @@ struct CmnAttrBuf {
     uint32_t length;
     attrreference_t nameRef;
     char nameSpace[NAME_MAX * 3 + 1];
-} __attribute__((aligned(4), packed));
+} FF_A_PACKED;
 
 void detectFsInfo(struct statfs* fs, FFDisk* disk) {
     if (fs->f_flags & MNT_DONTBROWSE) {
@@ -98,7 +99,7 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk) {
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
     }
 
-    struct CmnAttrBuf attrBuf;
+    alignas(4) struct CmnAttrBuf attrBuf;
     if (getattrlist(disk->mountpoint.chars, &(struct attrlist) {
                                                 .bitmapcount = ATTR_BIT_MAP_COUNT,
                                                 .commonattr = ATTR_CMN_NAME,

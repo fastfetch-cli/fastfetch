@@ -5,10 +5,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef _MSC_VER
-#    define __attribute__(x)
-#endif
-
 #include "common/arrayUtils.h"
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"

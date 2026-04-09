@@ -35,7 +35,7 @@
 #    define FF_HAVE_DRM_ASAHI 1
 #endif
 
-static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey) {
+static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
     uint32_t pciDirLength = pciDir->length;
     ffStrbufAppendS(pciDir, "/driver");
     char pathBuf[PATH_MAX];
@@ -80,7 +80,7 @@ static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer
     return true;
 }
 
-FF_MAYBE_UNUSED static const char* drmFindRenderFromCard(const char* drmCardKey, FFstrbuf* result) {
+FF_A_UNUSED static const char* drmFindRenderFromCard(const char* drmCardKey, FFstrbuf* result) {
     char path[PATH_MAX];
     sprintf(path, "/sys/class/drm/%s/device/drm", drmCardKey);
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path);
@@ -497,7 +497,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
 #if __aarch64__
 
-FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FF_MAYBE_UNUSED FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey) {
+FF_A_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FF_A_UNUSED FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
     if (sscanf(name, "agx-t%lu", &gpu->deviceId) == 1) {
         ffStrbufSetStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
     }

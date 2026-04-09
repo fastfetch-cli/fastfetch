@@ -38,7 +38,7 @@ typedef struct FFSmbiosBios {
 
     // 3.1+
     uint16_t ExtendedBiosRomSize; // bit field
-} __attribute__((__packed__)) FFSmbiosBios;
+} FF_A_PACKED FFSmbiosBios;
 
 static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
     "FFSmbiosBios: Wrong struct alignment");

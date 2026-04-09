@@ -2,7 +2,7 @@
 
 #include "common/FFstrbuf.h"
 
-typedef enum __attribute__((__packed__)) FFDataResultDocType {
+typedef enum FF_A_PACKED FFDataResultDocType {
     FF_RESULT_DOC_TYPE_DEFAULT = 0,
     FF_RESULT_DOC_TYPE_JSON,
     FF_RESULT_DOC_TYPE_CONFIG,

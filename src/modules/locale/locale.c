@@ -38,7 +38,7 @@ void ffGenerateLocaleJsonConfig(FFLocaleOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLocaleJsonResult(FF_A_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 
     const char* error = ffDetectLocale(&locale);
