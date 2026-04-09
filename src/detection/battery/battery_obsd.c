@@ -30,33 +30,28 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
     battery->capacity = info.battery_life;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
-    ffStrbufInit(&battery->status);
     ffStrbufInit(&battery->technology);
     ffStrbufInit(&battery->serial);
     ffStrbufInit(&battery->manufactureDate);
+    battery->status = FF_BATTERY_STATUS_NONE;
 
-    if (info.ac_state == APM_AC_ON) {
-        ffStrbufAppendS(&battery->status, "AC Connected");
-    } else if (info.ac_state == APM_AC_BACKUP) {
-        ffStrbufAppendS(&battery->status, "Backup In Use");
+    if (info.ac_state == APM_AC_ON || info.ac_state == APM_AC_BACKUP) {
+        battery->status |= FF_BATTERY_STATUS_AC_CONNECTED;
     } else if (info.ac_state == APM_AC_OFF) {
         battery->timeRemaining = (int) info.minutes_left * 60;
-        ffStrbufAppendS(&battery->status, "Discharging");
+        battery->status |= FF_BATTERY_STATUS_DISCHARGING;
     }
 
     if (info.battery_state == APM_BATT_CRITICAL || info.battery_state == APM_BATT_CHARGING || info.battery_state == APM_BATT_UNKNOWN) {
-        if (battery->status.length) {
-            ffStrbufAppendS(&battery->status, ", ");
-        }
         switch (info.battery_state) {
             case APM_BATT_UNKNOWN:
-                ffStrbufAppendS(&battery->status, "Unknown");
+                battery->status |= FF_BATTERY_STATUS_UNKNOWN;
                 break;
             case APM_BATT_CHARGING:
-                ffStrbufAppendS(&battery->status, "Charging");
+                battery->status |= FF_BATTERY_STATUS_CHARGING;
                 break;
             case APM_BATT_CRITICAL:
-                ffStrbufAppendS(&battery->status, "Critical");
+                battery->status |= FF_BATTERY_STATUS_CRITICAL;
                 break;
         }
     }

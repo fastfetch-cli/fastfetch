@@ -30,10 +30,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-        bool showStatus =
-            !(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
-            result->status.length > 0 &&
-            ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
+        bool showStatus = !(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) && result->status;
 
         if (result->capacity >= 0) {
             if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
@@ -59,10 +56,34 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         }
 
         if (showStatus) {
-            if (str.length > 0) {
-                ffStrbufAppendF(&str, " [%s]", result->status.chars);
-            } else {
-                ffStrbufAppend(&str, &result->status);
+            bool hasOtherInfo = str.length > 0;
+            if (hasOtherInfo) {
+                ffStrbufAppendS(&str, " [");
+            }
+            if (result->status & FF_BATTERY_STATUS_AC_CONNECTED) {
+                ffStrbufAppendS(&str, "AC Connected, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_USB_CONNECTED) {
+                ffStrbufAppendS(&str, "USB Connected, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_WIRELESS_CONNECTED) {
+                ffStrbufAppendS(&str, "Wireless Connected, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_CHARGING) {
+                ffStrbufAppendS(&str, "Charging, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_DISCHARGING) {
+                ffStrbufAppendS(&str, "Discharging, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_CRITICAL) {
+                ffStrbufAppendS(&str, "Critical, ");
+            }
+            if (result->status & FF_BATTERY_STATUS_UNKNOWN) {
+                ffStrbufAppendS(&str, "Unknown, ");
+            }
+            ffStrbufSubstrBefore(&str, str.length - 2); // Remove last ", "
+            if (hasOtherInfo) {
+                ffStrbufAppendC(&str, ']');
             }
         }
 
@@ -100,12 +121,36 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffDurationAppendNum((uint32_t) result->timeRemaining, &timeStr);
         }
 
+        FF_STRBUF_AUTO_DESTROY statusStr = ffStrbufCreate();
+        if (result->status & FF_BATTERY_STATUS_AC_CONNECTED) {
+            ffStrbufAppendS(&statusStr, "AC Connected, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_USB_CONNECTED) {
+            ffStrbufAppendS(&statusStr, "USB Connected, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_WIRELESS_CONNECTED) {
+            ffStrbufAppendS(&statusStr, "Wireless Connected, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_CHARGING) {
+            ffStrbufAppendS(&statusStr, "Charging, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_DISCHARGING) {
+            ffStrbufAppendS(&statusStr, "Discharging, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_CRITICAL) {
+            ffStrbufAppendS(&statusStr, "Critical, ");
+        }
+        if (result->status & FF_BATTERY_STATUS_UNKNOWN) {
+            ffStrbufAppendS(&statusStr, "Unknown, ");
+        }
+        ffStrbufSubstrBefore(&statusStr, statusStr.length - 2); // Remove last ", "
+
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                      FF_ARG(result->manufacturer, "manufacturer"),
                                                                                                      FF_ARG(result->modelName, "model-name"),
                                                                                                      FF_ARG(result->technology, "technology"),
                                                                                                      FF_ARG(capacityNum, "capacity"),
-                                                                                                     FF_ARG(result->status, "status"),
+                                                                                                     FF_ARG(statusStr, "status"),
                                                                                                      FF_ARG(tempStr, "temperature"),
                                                                                                      FF_ARG(result->cycleCount, "cycle-count"),
                                                                                                      FF_ARG(result->serial, "serial"),
@@ -143,7 +188,6 @@ bool ffPrintBattery(FFBatteryOptions* options) {
         ffStrbufDestroy(&result->manufacturer);
         ffStrbufDestroy(&result->modelName);
         ffStrbufDestroy(&result->technology);
-        ffStrbufDestroy(&result->status);
         ffStrbufDestroy(&result->serial);
         ffStrbufDestroy(&result->manufactureDate);
     }
@@ -205,7 +249,6 @@ bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &battery->manufacturer);
         yyjson_mut_obj_add_strbuf(doc, obj, "manufactureDate", &battery->manufactureDate);
         yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
-        yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
         yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
         if (battery->temperature != FF_BATTERY_TEMP_UNSET) {
@@ -219,6 +262,28 @@ bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         } else {
             yyjson_mut_obj_add_null(doc, obj, "timeRemaining");
         }
+        yyjson_mut_val* status = yyjson_mut_obj_add_arr(doc, obj, "status");
+        if (battery->status & FF_BATTERY_STATUS_AC_CONNECTED) {
+            yyjson_mut_arr_add_str(doc, status, "AC Connected");
+        }
+        if (battery->status & FF_BATTERY_STATUS_USB_CONNECTED) {
+            yyjson_mut_arr_add_str(doc, status, "USB Connected");
+        }
+        if (battery->status & FF_BATTERY_STATUS_WIRELESS_CONNECTED) {
+            yyjson_mut_arr_add_str(doc, status, "Wireless Connected");
+        }
+        if (battery->status & FF_BATTERY_STATUS_CHARGING) {
+            yyjson_mut_arr_add_str(doc, status, "Charging");
+        }
+        if (battery->status & FF_BATTERY_STATUS_DISCHARGING) {
+            yyjson_mut_arr_add_str(doc, status, "Discharging");
+        }
+        if (battery->status & FF_BATTERY_STATUS_CRITICAL) {
+            yyjson_mut_arr_add_str(doc, status, "Critical");
+        }
+        if (battery->status & FF_BATTERY_STATUS_UNKNOWN) {
+            yyjson_mut_arr_add_str(doc, status, "Unknown");
+        }
     }
 
     FF_LIST_FOR_EACH (FFBatteryResult, battery, results) {
@@ -226,7 +291,6 @@ bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         ffStrbufDestroy(&battery->manufactureDate);
         ffStrbufDestroy(&battery->modelName);
         ffStrbufDestroy(&battery->technology);
-        ffStrbufDestroy(&battery->status);
         ffStrbufDestroy(&battery->serial);
     }
 

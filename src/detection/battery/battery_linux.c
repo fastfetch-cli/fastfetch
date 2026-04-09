@@ -64,9 +64,9 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
     ffStrbufInit(&result->manufacturer);
     ffStrbufInit(&result->modelName);
     ffStrbufInit(&result->technology);
-    ffStrbufInit(&result->status);
     ffStrbufInit(&result->serial);
     ffStrbufInit(&result->manufactureDate);
+    result->status = FF_BATTERY_STATUS_NONE;
     result->capacity = ffStrbufToDouble(&tmpBuffer, 0);
     result->cycleCount = 0;
     result->temperature = FF_BATTERY_TEMP_UNSET;
@@ -88,21 +88,23 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         ffStrbufTrimRightSpace(&result->technology);
     }
 
-    if (ffReadFileBufferRelative(dfd, "status", &result->status)) {
-        ffStrbufTrimRightSpace(&result->status);
+    if (ffReadFileBufferRelative(dfd, "status", &tmpBuffer)) {
+        ffStrbufTrimRightSpace(&tmpBuffer);
     }
 
     // Unknown, Charging, Discharging, Not charging, Full
 
-    if (ffStrbufEqualS(&result->status, "Discharging")) {
-        if (ffReadFileBufferRelative(dfd, "time_to_empty_now", &tmpBuffer)) {
-            result->timeRemaining = (int32_t) ffStrbufToSInt(&tmpBuffer, 0);
+    if (ffStrbufEqualS(&tmpBuffer, "Discharging")) {
+        result->status |= FF_BATTERY_STATUS_DISCHARGING;
+        FF_STRBUF_AUTO_DESTROY now = ffStrbufCreate();
+        if (ffReadFileBufferRelative(dfd, "time_to_empty_now", &now)) {
+            result->timeRemaining = (int32_t) ffStrbufToSInt(&now, 0);
         } else {
-            if (ffReadFileBufferRelative(dfd, "charge_now", &tmpBuffer)) {
-                int64_t chargeNow = ffStrbufToSInt(&tmpBuffer, 0);
+            if (ffReadFileBufferRelative(dfd, "charge_now", &now)) {
+                int64_t chargeNow = ffStrbufToSInt(&now, 0);
                 if (chargeNow > 0) {
-                    if (ffReadFileBufferRelative(dfd, "current_now", &tmpBuffer)) {
-                        int64_t currentNow = ffStrbufToSInt(&tmpBuffer, INT64_MIN);
+                    if (ffReadFileBufferRelative(dfd, "current_now", &now)) {
+                        int64_t currentNow = ffStrbufToSInt(&now, INT64_MIN);
                         if (currentNow < 0) {
                             currentNow = -currentNow;
                         }
@@ -113,19 +115,16 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
                 }
             }
         }
-    } else if (ffStrbufEqualS(&result->status, "Not charging") ||
-               ffStrbufEqualS(&result->status, "Full")) {
-        ffStrbufClear(&result->status);
+    } else if (ffStrbufEqualS(&tmpBuffer, "Charging")) {
+        result->status |= FF_BATTERY_STATUS_CHARGING;
+    } else if (ffStrbufEqualS(&tmpBuffer, "Unknown")) {
+        result->status |= FF_BATTERY_STATUS_UNKNOWN;
     }
 
     if (ffReadFileBufferRelative(dfd, "capacity_level", &tmpBuffer)) {
         ffStrbufTrimRightSpace(&tmpBuffer);
         if (ffStrbufEqualS(&tmpBuffer, "Critical")) {
-            if (result->status.length) {
-                ffStrbufAppendS(&result->status, ", Critical");
-            } else {
-                ffStrbufSetStatic(&result->status, "Critical");
-            }
+            result->status |= FF_BATTERY_STATUS_CRITICAL;
         }
     }
 
@@ -164,8 +163,8 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         }
     }
 
-    FF_DEBUG("Battery \"%s\": Capacity: %.2f%%, Status: \"%s\", Time Remaining: %d seconds, Temperature: %.1f°C, Cycle Count: %u",
-             id, result->capacity, result->status.chars, result->timeRemaining, result->temperature, result->cycleCount);
+    FF_DEBUG("Battery \"%s\": Capacity: %.2f%%, Status: \"%x\", Time Remaining: %d seconds, Temperature: %.1f°C, Cycle Count: %u",
+             id, result->capacity, result->status, result->timeRemaining, result->temperature, result->cycleCount);
     return true;
 }
 
@@ -191,11 +190,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
 
     if (acConnected) {
         FF_LIST_FOR_EACH(FFBatteryResult, batt, *results) {
-            if (batt->status.length) {
-                ffStrbufAppendS(&batt->status, ", AC Connected");
-            } else {
-                ffStrbufSetStatic(&batt->status, "AC Connected");
-            }
+            batt->status |= FF_BATTERY_STATUS_AC_CONNECTED;
         }
     }
 

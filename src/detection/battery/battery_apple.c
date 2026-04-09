@@ -38,9 +38,11 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->serial);
         ffStrbufInit(&battery->technology);
-        ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->manufactureDate);
+        battery->status = FF_BATTERY_STATUS_NONE;
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
+        battery->cycleCount = 0;
+        battery->timeRemaining = -1;
 
         ffCfDictGetString(properties, CFSTR(kIOPMDeviceNameKey), &battery->modelName);
         ffCfDictGetString(properties, CFSTR(kIOPMPSSerialKey), &battery->serial);
@@ -63,9 +65,9 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         battery->timeRemaining = -1;
         if (ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) == NULL) {
             if (boolValue) {
-                ffStrbufAppendS(&battery->status, "AC connected, ");
+                battery->status |= FF_BATTERY_STATUS_AC_CONNECTED;
             } else {
-                ffStrbufAppendS(&battery->status, "Discharging, ");
+                battery->status |= FF_BATTERY_STATUS_DISCHARGING;
                 ffCfDictGetInt(properties, CFSTR("AvgTimeToEmpty"), &battery->timeRemaining); // in minutes
                 if (battery->timeRemaining < 0 || battery->timeRemaining >= 0xFFFF) {
                     battery->timeRemaining = -1;
@@ -75,13 +77,11 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
             }
         }
         if (ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) == NULL && boolValue) {
-            ffStrbufAppendS(&battery->status, "Charging, ");
+            battery->status |= FF_BATTERY_STATUS_CHARGING;
         }
         if (ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) == NULL && boolValue) {
-            ffStrbufAppendS(&battery->status, "Critical, ");
+            battery->status |= FF_BATTERY_STATUS_CRITICAL;
         }
-        ffStrbufTrimRight(&battery->status, ' ');
-        ffStrbufTrimRight(&battery->status, ',');
 
         int sbdsManufactureDate = 0;
         if (ffCfDictGetInt(properties, CFSTR(kIOPMPSManufactureDateKey), &sbdsManufactureDate) == NULL) {

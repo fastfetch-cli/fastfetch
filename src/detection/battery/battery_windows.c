@@ -141,25 +141,24 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
             BATTERY_WAIT_STATUS bws = { .BatteryTag = bqi.BatteryTag };
             if (DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_STATUS, &bws, sizeof(bws), &bs, sizeof(bs), &dwOut, NULL) && bs.Capacity != BATTERY_UNKNOWN_CAPACITY && bi.FullChargedCapacity != 0) {
                 battery->capacity = bs.Capacity * 100.0 / bi.FullChargedCapacity;
+
+                battery->status = FF_BATTERY_STATUS_NONE;
+                if (bs.PowerState & BATTERY_POWER_ON_LINE) {
+                    battery->status |= FF_BATTERY_STATUS_AC_CONNECTED;
+                }
+                if (bs.PowerState & BATTERY_DISCHARGING) {
+                    battery->status |= FF_BATTERY_STATUS_DISCHARGING;
+                }
+                if (bs.PowerState & BATTERY_CHARGING) {
+                    battery->status |= FF_BATTERY_STATUS_CHARGING;
+                }
+                if (bs.PowerState & BATTERY_CRITICAL) {
+                    battery->status |= FF_BATTERY_STATUS_CRITICAL;
+                }
             } else {
+                battery->status = FF_BATTERY_STATUS_UNKNOWN;
                 battery->capacity = 0;
             }
-
-            ffStrbufInit(&battery->status);
-            if (bs.PowerState & BATTERY_POWER_ON_LINE) {
-                ffStrbufAppendS(&battery->status, "AC Connected, ");
-            }
-            if (bs.PowerState & BATTERY_DISCHARGING) {
-                ffStrbufAppendS(&battery->status, "Discharging, ");
-            }
-            if (bs.PowerState & BATTERY_CHARGING) {
-                ffStrbufAppendS(&battery->status, "Charging, ");
-            }
-            if (bs.PowerState & BATTERY_CRITICAL) {
-                ffStrbufAppendS(&battery->status, "Critical, ");
-            }
-            ffStrbufTrimRight(&battery->status, ' ');
-            ffStrbufTrimRight(&battery->status, ',');
         }
     }
     return NULL;
@@ -258,26 +257,31 @@ static const char* detectBySmbios(FFBatteryResult* battery) {
 
 static const char* detectWithNtApi(FF_A_UNUSED FFBatteryOptions* options, FFlist* results) {
     SYSTEM_BATTERY_STATE info;
-    if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) && info.BatteryPresent) {
+    if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) &&
+        info.BatteryPresent) {
         FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(results);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->manufactureDate);
         ffStrbufInit(&battery->technology);
-        ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->serial);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         battery->cycleCount = 0;
         battery->timeRemaining = info.EstimatedTime == BATTERY_UNKNOWN_TIME ? -1 : (int32_t) info.EstimatedTime;
+        battery->status = FF_BATTERY_STATUS_NONE;
 
         battery->capacity = info.RemainingCapacity * 100.0 / info.MaxCapacity;
         if (info.AcOnLine) {
-            ffStrbufAppendS(&battery->status, "AC Connected");
-            if (info.Charging) {
-                ffStrbufAppendS(&battery->status, ", Charging");
-            }
-        } else if (info.Discharging) {
-            ffStrbufAppendS(&battery->status, "Discharging");
+            battery->status |= FF_BATTERY_STATUS_AC_CONNECTED;
+        }
+        if (info.Charging) {
+            battery->status |= FF_BATTERY_STATUS_CHARGING;
+        }
+        if (info.Discharging) {
+            battery->status |= FF_BATTERY_STATUS_DISCHARGING;
+        }
+        if (info.DefaultAlert1 > 0 && info.RemainingCapacity <= info.DefaultAlert1) {
+            battery->status |= FF_BATTERY_STATUS_CRITICAL;
         }
 
         detectBySmbios(battery);
