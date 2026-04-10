@@ -9,22 +9,29 @@
 static void parsePowerAdapter(int dfd, const char* id, FFlist* results) {
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
+    {
+        char present = '\0';
+        if (ffReadFileDataRelative(dfd, "present", 1, &present) && present == '0') {
+            return;
+        }
+    }
+
     // type must exist and be "Mains"
     if (ffReadFileBufferRelative(dfd, "type", &tmpBuffer)) {
         ffStrbufTrimRightSpace(&tmpBuffer);
     }
 
-    if (!ffStrbufIgnCaseEqualS(&tmpBuffer, "Mains")) {
+    if (!ffStrbufEqualS(&tmpBuffer, "Mains")) {
         return;
     }
 
     // scope may not exist or must not be "Device" (?)
     if (ffReadFileBufferRelative(dfd, "scope", &tmpBuffer)) {
         ffStrbufTrimRightSpace(&tmpBuffer);
-    }
 
-    if (ffStrbufIgnCaseEqualS(&tmpBuffer, "Device")) {
-        return;
+        if (ffStrbufEqualS(&tmpBuffer, "Device")) {
+            return;
+        }
     }
 
     char online = '\0';

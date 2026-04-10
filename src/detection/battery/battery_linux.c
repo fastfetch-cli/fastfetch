@@ -48,7 +48,7 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         ffStrbufTrimRightSpace(&tmpBuffer);
 
         FF_DEBUG("Battery \"%s\": Scope is \"%s\"", id, tmpBuffer.chars);
-        if (ffStrbufIgnCaseEqualS(&tmpBuffer, "Device")) {
+        if (ffStrbufEqualS(&tmpBuffer, "Device")) {
             return false;
         }
     }
