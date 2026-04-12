@@ -164,7 +164,12 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
     }
 
     FF_DEBUG("Battery \"%s\": Capacity: %.2f%%, Status: \"%x\", Time Remaining: %d seconds, Temperature: %.1f°C, Cycle Count: %u",
-             id, result->capacity, result->status, result->timeRemaining, result->temperature, result->cycleCount);
+        id,
+        result->capacity,
+        result->status,
+        result->timeRemaining,
+        result->temperature,
+        result->cycleCount);
     return true;
 }
 
@@ -189,7 +194,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     }
 
     if (acConnected) {
-        FF_LIST_FOR_EACH(FFBatteryResult, batt, *results) {
+        FF_LIST_FOR_EACH (FFBatteryResult, batt, *results) {
             batt->status |= FF_BATTERY_STATUS_AC_CONNECTED;
         }
     }

@@ -47,8 +47,7 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c);
 void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transformFunc)(int));
-FF_A_PRINTF(2, 3)
-void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
+FF_A_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
 
@@ -61,8 +60,7 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c);
 // NOTE: Unlike ffStrbufAppend*, ffStrbufSet* functions may NOT reserve extra space
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
-FF_A_PRINTF(2, 3)
-void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
+FF_A_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
@@ -194,16 +192,15 @@ FF_A_NODISCARD static inline FFstrbuf ffStrbufCreateVF(const char* format, va_li
     return strbuf;
 }
 
-FF_A_PRINTF(2, 3)
-static inline void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...) {
+FF_A_PRINTF(2, 3) static inline void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...) {
     va_list arguments;
     va_start(arguments, format);
     ffStrbufInitVF(strbuf, format, arguments);
     va_end(arguments);
 }
 
-FF_A_PRINTF(1, 2)
-FF_A_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...) {
+FF_A_PRINTF(1, 2) FF_A_NODISCARD static inline FFstrbuf
+ffStrbufCreateF(const char* format, ...) {
     FFstrbuf strbuf;
 
     va_list arguments;

@@ -35,9 +35,9 @@ static inline void ffLibraryUnload(void** handle) {
 #    define FF_LIBRARY_SYMBOL(symbolName) \
         __typeof__(&symbolName) ff##symbolName;
 
-#    define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...)                                                  \
+#    define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...)                                  \
         void* FF_A_CLEANUP(ffLibraryUnload) libraryObjectName = ffLibraryLoad(__VA_ARGS__, NULL); \
-        if (libraryObjectName == NULL)                                                                            \
+        if (libraryObjectName == NULL)                                                            \
             return returnValue;
 
 #    define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \

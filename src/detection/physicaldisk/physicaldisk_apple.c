@@ -78,13 +78,14 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         if (deviceName.length == 0) {
             FF_CFTYPE_AUTO_RELEASE CFDictionaryRef deviceCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyDeviceCharacteristicsKey), NULL, kNilOptions);
             if (deviceCharacteristics) {
-                if (ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyVendorNameKey), &deviceName) == NULL &&deviceName.length > 0) {
+                if (ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyVendorNameKey), &deviceName) == NULL && deviceName.length > 0) {
                     ffStrbufAppendC(&deviceName, ' ');
                 }
 
                 FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-                if (ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductNameKey), &name) == NULL)
+                if (ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductNameKey), &name) == NULL) {
                     ffStrbufAppend(&deviceName, &name);
+                }
             }
         }
 

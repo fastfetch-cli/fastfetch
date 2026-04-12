@@ -4,7 +4,7 @@
 #include "logo/logo.h"
 #include "modules/modules.h"
 
-#define MODULE_OPTION(name)                                                       \
+#define MODULE_OPTION(name)                                           \
     FF_A_CLEANUP(ffDestroy##name##Options) FF##name##Options options; \
     ffInit##name##Options(&options);
 

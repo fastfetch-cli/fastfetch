@@ -18,7 +18,7 @@ typedef struct FFSmbiosSystemInfo {
         uint8_t ClockSeqLow;
         uint8_t Node[6];
     } FF_A_PACKED UUID; // varies
-    uint8_t WakeUpType;                 // enum
+    uint8_t WakeUpType; // enum
 
     // 2.4+
     uint8_t SKUNumber; // string
