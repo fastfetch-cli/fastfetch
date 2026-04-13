@@ -10,7 +10,7 @@ static inline void ffCleanUpSmbiosValue(FFstrbuf* value) {
 }
 
 // https://github.com/KunYi/DumpSMBIOS
-// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.7.0.pdf
+// https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.9.0.pdf
 
 typedef enum FF_A_PACKED FFSmbiosType // : uint8_t
 {

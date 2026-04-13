@@ -142,6 +142,9 @@ const char* ffDetectPhysicalMemory(FFlist* result) {
             "SRIMM",            // 0x0E
             "FBDIMM",           // 0x0F
             "Die",              // 0x10
+            "CAMM",             // 0x11
+            "CUDIMM",           // 0x12
+            "CSODIMM",          // 0x13
         };
         if (data->FormFactor > 0 && data->FormFactor < ARRAY_SIZE(formFactorNames)) {
             ffStrbufSetS(&device->formFactor, formFactorNames[data->FormFactor]);
@@ -187,6 +190,7 @@ const char* ffDetectPhysicalMemory(FFlist* result) {
             "DDR5",                        // 0x22
             "LPDDR5",                      // 0x23
             "HBM3",                        // 0x24
+            "MRDIMM",                      // 0x25
         };
         if (!installed) {
             ffStrbufSetStatic(&device->type, "Empty");

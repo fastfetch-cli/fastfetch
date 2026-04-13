@@ -1,7 +1,6 @@
 #include "chassis.h"
 
 const char* ffChassisTypeToString(uint32_t type) {
-    // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.7.0.pdf
     // 7.4.1 System Enclosure or Chassis Types
     switch (type & 0b01111111) {
         case 0x01:
@@ -61,7 +60,7 @@ const char* ffChassisTypeToString(uint32_t type) {
         case 0x1C:
             return "Blade";
         case 0x1D:
-            return "Mobile Workstation";
+            return "Blade Enclosure";
         case 0x1E:
             return "Tablet";
         case 0x1F:
