@@ -47,6 +47,7 @@ const char* ffDetectCamera(FFlist* result)
             case AVCaptureColorSpace_P3_D65: ffStrbufInitStatic(&camera->colorspace, "P3-D65"); break;
             case 2 /*AVCaptureColorSpace_HLG_BT2020*/: ffStrbufInitStatic(&camera->colorspace, "BT2020-HLG"); break;
             case 3 /*AVCaptureColorSpace_AppleLog*/: ffStrbufInitStatic(&camera->colorspace, "AppleLog"); break;
+            case 4 /*AVCaptureColorSpace_AppleLog2*/: ffStrbufInitStatic(&camera->colorspace, "AppleLog2"); break;
         }
 
         CMVideoDimensions size = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription);
