@@ -1398,10 +1398,18 @@
                     "description": "Set global fallback values for display formatting",
                     "properties": {
                         "ndigits": {
-                            "type": "integer",
-                            "description": "Set the default number of digits to keep after the decimal point for all value types. Can be overridden per category (size, temp, percent, freq, fraction)",
-                            "minimum": 0,
-                            "maximum": 9
+                            "oneOf": [
+                                {
+                                    "type": "integer",
+                                    "description": "Set the default number of digits to keep after the decimal point for all value types. Can be overridden per category (size, temp, percent, freq, fraction)",
+                                    "minimum": 0,
+                                    "maximum": 9
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "Use the normal fallback behavior instead of forcing a global default number of digits"
+                                }
+                            ]
                         }
                     }
                 },
