@@ -239,7 +239,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             FF_DEBUG("Using FreeBSD kenv implementation");
             if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress)) {
                 FF_DEBUG("Failed to get SMBIOS address from FreeBSD kenv");
-                return NULL;
+                goto fallback; // For non-UEFI systems
             }
             FF_DEBUG("Got SMBIOS address from kenv: %s", strEntryAddress.chars);
 #            elif defined(__linux__)
@@ -394,7 +394,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         }
 #    else
         {
-            FF_DEBUG("Using %s implementation",
+        fallback:
+            FF_DEBUG("Using fallback implementation",
 #        if __HAIKU__
                 "Haiku"
 #        else
