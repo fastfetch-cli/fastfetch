@@ -226,10 +226,25 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         smbiosTableInitialized = true;
         FF_DEBUG("Initializing SMBIOS buffer");
         ffStrbufInit(&buffer);
-#    if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__ && !__GNU__
+#    if !__HAIKU__ && !__GNU__
 #        ifdef __linux__
         FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
+#        elif defined(__OpenBSD__)
+        {
+                FF_DEBUG("Using OpenBSD /var/run/dmesg.boot implementation");
+                char dmesg[8192];
+                ssize_t size =  ffReadFileData("/var/run/dmesg.boot", sizeof(dmesg), dmesg);
+                if (size <= 0) {
+                    goto fallback;
+                }
+                char* line = memmem(dmesg, sizeof(dmesg), "\nbios0 at mainbios0: SMBIOS rev. ", strlen("\nbios0 at mainbios0: SMBIOS rev. "));
+                if (!line) {
+                    goto fallback;
+                }
+                line += strlen("\nbios0 at mainbios0: SMBIOS rev. ");
+
+        }
 #        endif
         {
 #        if !defined(__sun) && !defined(__NetBSD__)
@@ -277,6 +292,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             FF_DEBUG("Attempting to read %zu bytes from physical address 0x%lx",
                 sizeof(entryPoint),
                 (unsigned long) entryAddress);
+
             if (pread(fd, &entryPoint, sizeof(entryPoint), entryAddress) < 0x10) {
                 FF_DEBUG("pread failed: %s. Trying mmap", strerror(errno));
                 // `pread /dev/mem` returns EFAULT in FreeBSD
@@ -368,7 +384,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
                     entryPoint.Smbios30.SmbiosDocrev);
             } else {
                 FF_DEBUG("Unknown SMBIOS entry point format");
-                return NULL;
+                goto fallback; // Dragonfly goes here
             }
 
             ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
@@ -392,27 +408,23 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
                 FF_DEBUG("Successfully read SMBIOS table data via mmap: %u bytes", tableLength);
             }
         }
-#    else
-        {
-        fallback:
-            FF_DEBUG("Using fallback implementation",
+
+        return NULL;
+#    endif
+
+    fallback:
+        if (buffer.length == 0) {
+            const char* devMem =
 #        if __HAIKU__
-                "Haiku"
+                "/dev/misc/mem";
 #        else
-                "OpenBSD"
+                "/dev/mem"; // kern.securelevel must be -1
 #        endif
-            );
+            FF_DEBUG("Using physical memory searching implementation: %s", devMem);
 
             uint32_t tableLength = 0;
             off_t tableAddress = 0;
-            FF_AUTO_CLOSE_FD int fd = open(
-#        if __HAIKU__
-                "/dev/misc/mem"
-#        else
-                "/dev/mem" // kern.securelevel must be -1
-#        endif
-                ,
-                O_RDONLY | O_CLOEXEC);
+            FF_AUTO_CLOSE_FD int fd = open(devMem, O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
                 FF_DEBUG("Failed to open memory device: %s", strerror(errno));
                 return NULL;
@@ -484,7 +496,6 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
                 return NULL;
             }
         }
-#    endif
 
         if (!parseSmbiosTable((const uint8_t*) buffer.chars, buffer.length)) {
             ffStrbufClear(&buffer);
