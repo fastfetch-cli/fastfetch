@@ -511,6 +511,26 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 }
                 options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
+        } else if (unsafe_yyjson_equals_str(key, "global")) {
+            if (!yyjson_is_obj(val)) {
+                return "display.global must be an object";
+            }
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) {
+                if (yyjson_is_null(ndigits)) {
+                    options->globalNdigits = -1;
+                } else {
+                    if (!yyjson_is_uint(ndigits)) {
+                        return "display.global.ndigits must be an unsigned integer";
+                    }
+                    uint64_t val = yyjson_get_uint(ndigits);
+                    if (val > 9) {
+                        return "display.global.ndigits must be between 0 and 9";
+                    }
+                    options->globalNdigits = (int8_t) val;
+                }
+            }
         } else {
             return "Unknown display property";
         }
@@ -619,7 +639,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         if (ffStrEqualsIgnCase(subkey, "binary-prefix")) {
             options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC }, { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI }, { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
-            options->sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+            uint32_t ndigits = ffOptionParseUInt32(key, value);
+            if (ndigits > 9) {
+                fprintf(stderr, "Error: %s must be between 0 and 9\n", key);
+                exit(477);
+            }
+            options->sizeNdigits = (uint8_t) ndigits;
         } else if (ffStrEqualsIgnCase(subkey, "max-prefix")) {
             options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "B", 0 }, { "kB", 1 }, { "MB", 2 }, { "GB", 3 }, { "TB", 4 }, { "PB", 5 }, { "EB", 6 }, { "ZB", 7 }, { "YB", 8 }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
@@ -647,7 +672,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                                                                                       {},
                                                                                   });
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
-            options->tempNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+            uint32_t ndigits = ffOptionParseUInt32(key, value);
+            if (ndigits > 9) {
+                fprintf(stderr, "Error: %s must be between 0 and 9\n", key);
+                exit(477);
+            }
+            options->tempNdigits = (uint8_t) ndigits;
         } else if (ffStrEqualsIgnCase(subkey, "color-green")) {
             ffOptionParseColor(value, &options->tempColorGreen);
         } else if (ffStrEqualsIgnCase(subkey, "color-yellow")) {
@@ -669,7 +699,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         if (ffStrEqualsIgnCase(subkey, "type")) {
             options->percentType = (uint8_t) ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
-            options->percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+            uint32_t ndigits = ffOptionParseUInt32(key, value);
+            if (ndigits > 9) {
+                fprintf(stderr, "Error: %s must be between 0 and 9\n", key);
+                exit(477);
+            }
+            options->percentNdigits = (uint8_t) ndigits;
         } else if (ffStrEqualsIgnCase(subkey, "color-green")) {
             ffOptionParseColor(value, &options->percentColorGreen);
         } else if (ffStrEqualsIgnCase(subkey, "color-yellow")) {
@@ -689,7 +724,19 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             return false;
         }
     } else if (ffStrEqualsIgnCase(key, "--fraction-ndigits")) {
-        options->fractionNdigits = (int8_t) ffOptionParseInt32(key, value);
+        int32_t ndigits = ffOptionParseInt32(key, value);
+        if (ndigits < -1 || ndigits > 9) {
+            fprintf(stderr, "Error: %s must be between -1 and 9\n", key);
+            exit(477);
+        }
+        options->fractionNdigits = (int8_t) ndigits;
+    } else if (ffStrEqualsIgnCase(key, "--ndigits")) {
+        uint32_t ndigits = ffOptionParseUInt32(key, value);
+        if (ndigits > 9) {
+            fprintf(stderr, "Error: %s must be between 0 and 9\n", key);
+            exit(477);
+        }
+        options->globalNdigits = (int8_t) ndigits;
     } else if (ffStrEqualsIgnCase(key, "--fraction-trailing-zeros")) {
         options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                                                                                                          { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
@@ -733,7 +780,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     } else if (ffStrStartsWithIgnCase(key, "--freq-")) {
         const char* subkey = key + strlen("--freq-");
         if (ffStrEqualsIgnCase(subkey, "ndigits")) {
-            options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
+            int32_t ndigits = ffOptionParseInt32(key, value);
+            if (ndigits < -1 || ndigits > 9) {
+                fprintf(stderr, "Error: %s must be between -1 and 9\n", key);
+                exit(477);
+            }
+            options->freqNdigits = (int8_t) ndigits;
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                                                                                                      { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
@@ -771,7 +823,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->hideCursor = false;
     options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
-    options->sizeNdigits = 2;
+    options->sizeNdigits = UINT8_MAX;
     options->sizeMaxPrefix = 8; // YB
     options->sizeSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
@@ -782,7 +834,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->keyType = FF_MODULE_KEY_TYPE_STRING;
 
     options->tempUnit = FF_TEMPERATURE_UNIT_DEFAULT;
-    options->tempNdigits = 1;
+    options->tempNdigits = UINT8_MAX;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
@@ -802,16 +854,17 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->durationAbbreviation = false;
     options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentType = 9;
-    options->percentNdigits = 0;
+    options->percentNdigits = UINT8_MAX;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentWidth = 0;
 
-    options->freqNdigits = 2;
+    options->freqNdigits = INT8_MIN;
     options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
-    options->fractionNdigits = 2;
+    options->fractionNdigits = INT8_MIN;
+    options->globalNdigits = -1;
     options->fractionTrailingZeros = FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));
@@ -901,7 +954,8 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "jedec");
                 break;
         }
-        yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
+        if (options->sizeNdigits != UINT8_MAX)
+            yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
         switch (options->sizeSpaceBeforeUnit) {
             case FF_SPACE_BEFORE_UNIT_DEFAULT:
                 yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "default");
@@ -931,7 +985,8 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_obj_add_str(doc, obj, "unit", "K");
                 break;
         }
-        yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
+        if (options->tempNdigits != UINT8_MAX)
+            yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
         {
             yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, temperature, "color");
             yyjson_mut_obj_add_strbuf(doc, color, "green", &options->tempColorGreen);
@@ -971,14 +1026,15 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_arr_add_str(doc, type, "bar-monochrome");
             }
         }
-        yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
+        if (options->percentNdigits != UINT8_MAX)
+            yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
         {
             yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, percent, "color");
             yyjson_mut_obj_add_strbuf(doc, color, "green", &options->percentColorGreen);
             yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->percentColorYellow);
             yyjson_mut_obj_add_strbuf(doc, color, "red", &options->percentColorRed);
         }
-        switch (options->percentSpaceBeforeUnit) {
+        switch (options->freqSpaceBeforeUnit) {
             case FF_SPACE_BEFORE_UNIT_DEFAULT:
                 yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "default");
                 break;
@@ -1016,10 +1072,11 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
     {
         yyjson_mut_val* fraction = yyjson_mut_obj_add_obj(doc, obj, "fraction");
 
-        if (options->fractionNdigits < 0) {
-            yyjson_mut_obj_add_null(doc, fraction, "ndigits");
-        } else {
-            yyjson_mut_obj_add_uint(doc, fraction, "ndigits", (uint8_t) options->fractionNdigits);
+        if (options->fractionNdigits != INT8_MIN) {
+            if (options->fractionNdigits < 0)
+                yyjson_mut_obj_add_null(doc, fraction, "ndigits");
+            else 
+                yyjson_mut_obj_add_uint(doc, fraction, "ndigits", (uint8_t) options->fractionNdigits);
         }
     }
 
@@ -1048,7 +1105,8 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
 
     {
         yyjson_mut_val* freq = yyjson_mut_obj_add_obj(doc, obj, "freq");
-        yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
+        if (options->freqNdigits != INT8_MIN)
+            yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
         switch (options->percentSpaceBeforeUnit) {
             case FF_SPACE_BEFORE_UNIT_DEFAULT:
                 yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "default");
@@ -1060,6 +1118,11 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "never");
                 break;
         }
+    }
+
+    if (options->globalNdigits >= 0) {
+        yyjson_mut_val* global = yyjson_mut_obj_add_obj(doc, obj, "global");
+        yyjson_mut_obj_add_uint(doc, global, "ndigits", (uint8_t) options->globalNdigits);
     }
 
     {

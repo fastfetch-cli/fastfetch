@@ -190,7 +190,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             }
         }
     }
-    ffStrbufAppendF(buffer, "%*.*f%s%%", options->percentWidth, options->percentNdigits, percent, options->percentSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
+    ffStrbufAppendF(buffer, "%*.*f%s%%", options->percentWidth, ffNdigitsResolve(options->percentNdigits, options->globalNdigits, 0), percent, options->percentSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
 
     if (colored && !options->pipe) {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);

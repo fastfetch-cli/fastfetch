@@ -8,6 +8,8 @@ bool ffFreqAppendNum(uint32_t mhz, FFstrbuf* result) {
     const FFOptionsDisplay* options = &instance.config.display;
     bool spaceBeforeUnit = options->freqSpaceBeforeUnit != FF_SPACE_BEFORE_UNIT_NEVER;
     int8_t ndigits = options->freqNdigits;
+    if (ndigits == INT8_MIN)
+        ndigits = (options->globalNdigits >= 0) ? options->globalNdigits : 2;
 
     if (ndigits >= 0) {
         ffStrbufAppendDouble(result, mhz / 1000., ndigits, true);

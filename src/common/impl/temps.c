@@ -38,13 +38,13 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
     switch (options->tempUnit) {
         case FF_TEMPERATURE_UNIT_DEFAULT:
         case FF_TEMPERATURE_UNIT_CELSIUS:
-            ffStrbufAppendF(buffer, "%.*f%s°C", options->tempNdigits, celsius, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
+            ffStrbufAppendF(buffer, "%.*f%s°C", ffNdigitsResolve(options->tempNdigits, options->globalNdigits, 1), celsius, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
             break;
         case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-            ffStrbufAppendF(buffer, "%.*f%s°F", options->tempNdigits, celsius * 1.8 + 32, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
+            ffStrbufAppendF(buffer, "%.*f%s°F", ffNdigitsResolve(options->tempNdigits, options->globalNdigits, 1), celsius * 1.8 + 32, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
             break;
         case FF_TEMPERATURE_UNIT_KELVIN:
-            ffStrbufAppendF(buffer, "%.*f%sK", options->tempNdigits, celsius + 273.15, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ");
+            ffStrbufAppendF(buffer, "%.*f%sK", ffNdigitsResolve(options->tempNdigits, options->globalNdigits, 1), celsius + 273.15, options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ");
             break;
     }
 

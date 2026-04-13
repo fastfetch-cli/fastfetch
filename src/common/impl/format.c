@@ -30,10 +30,10 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg) {
             ffStrbufAppend(buffer, (const FFstrbuf*) formatarg->value);
             break;
         case FF_ARG_TYPE_FLOAT:
-            ffStrbufAppendDouble(buffer, *(float*) formatarg->value, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
+            ffStrbufAppendDouble(buffer, *(float*) formatarg->value, ffNdigitsResolveInt8(instance.config.display.fractionNdigits, instance.config.display.globalNdigits, 2), instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
             break;
         case FF_ARG_TYPE_DOUBLE:
-            ffStrbufAppendDouble(buffer, *(double*) formatarg->value, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
+            ffStrbufAppendDouble(buffer, *(double*) formatarg->value, ffNdigitsResolveInt8(instance.config.display.fractionNdigits, instance.config.display.globalNdigits, 2), instance.config.display.fractionTrailingZeros != FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER);
             break;
         case FF_ARG_TYPE_BOOL:
             ffStrbufAppendS(buffer, *(bool*) formatarg->value ? "true" : "false");

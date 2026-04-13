@@ -5,6 +5,18 @@
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"
 
+static inline uint8_t ffNdigitsResolve(uint8_t specific, int8_t global, uint8_t hardcoded) {
+    if (specific != UINT8_MAX) return specific;
+    if (global >= 0) return (uint8_t) global;
+    return hardcoded;
+}
+
+static inline int8_t ffNdigitsResolveInt8(int8_t specific, int8_t global, int8_t hardcoded) {
+    if (specific != INT8_MIN) return specific;
+    if (global >= 0) return global;
+    return hardcoded;
+}
+
 typedef enum FF_A_PACKED FFSizeBinaryPrefixType {
     FF_SIZE_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
     FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 kB, 1000 kB = 1 MB, ...
@@ -86,6 +98,7 @@ typedef struct FFOptionsDisplay {
     FFSpaceBeforeUnitType freqSpaceBeforeUnit;
     int8_t fractionNdigits;
     FFFractionTrailingZerosType fractionTrailingZeros;
+    int8_t globalNdigits;
 
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;

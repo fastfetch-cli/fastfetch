@@ -31,10 +31,10 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
 
 static void appendSpeed(FFLocalIpResult* ip, FFstrbuf* strbuf) {
     if (ip->speed >= 1000000) {
-        ffStrbufAppendDouble(strbuf, ip->speed / 1e6, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
+        ffStrbufAppendDouble(strbuf, ip->speed / 1e6, ffNdigitsResolveInt8(instance.config.display.fractionNdigits, instance.config.display.globalNdigits, 2), instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
         ffStrbufAppendS(strbuf, " Tbps");
     } else if (ip->speed >= 1000) {
-        ffStrbufAppendDouble(strbuf, ip->speed / 1e3, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
+        ffStrbufAppendDouble(strbuf, ip->speed / 1e3, ffNdigitsResolveInt8(instance.config.display.fractionNdigits, instance.config.display.globalNdigits, 2), instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
         ffStrbufAppendS(strbuf, " Gbps");
     } else {
         ffStrbufAppendF(strbuf, "%u Mbps", (unsigned) ip->speed);
