@@ -433,7 +433,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             for (off_t offset = 0; offset <= 0xffe0; offset += 0x10) {
                 FFSmbiosEntryPoint* p = (void*) (smBiosBase + offset);
                 if (memcmp(p, "_SM3_", sizeof(p->Smbios30.AnchorString)) == 0) {
-                    FF_DEBUG("Found SMBIOS 3.0 entry point at offset 0x%lx", (unsigned long) offset);
+                    FF_DEBUG("Found SMBIOS 3.0 entry point at phyaddr 0x%05lX", (unsigned long) (0xF0000 + offset));
                     if (p->Smbios30.EntryPointLength != sizeof(p->Smbios30)) {
                         FF_DEBUG("Invalid SMBIOS 3.0 entry point length: %u (expected %zu)",
                             p->Smbios30.EntryPointLength,
@@ -450,7 +450,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
                         p->Smbios30.SmbiosDocrev);
                     break;
                 } else if (memcmp(p, "_SM_", sizeof(p->Smbios20.AnchorString)) == 0) {
-                    FF_DEBUG("Found SMBIOS 2.0 entry point at offset 0x%lx", (unsigned long) offset);
+                    FF_DEBUG("Found SMBIOS 2.0 entry point at phyaddr 0x%05lX", (unsigned long) (0xF0000 + offset));
                     if (p->Smbios20.EntryPointLength != sizeof(p->Smbios20)) {
                         FF_DEBUG("Invalid SMBIOS 2.0 entry point length: %u (expected %zu)",
                             p->Smbios20.EntryPointLength,
