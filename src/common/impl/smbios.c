@@ -1,6 +1,5 @@
 #include "common/smbios.h"
 #include "common/io.h"
-#include "common/unused.h"
 #include "common/mallocHelper.h"
 #include "common/debug.h"
 
@@ -138,13 +137,53 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
 #        include "common/properties.h"
 #    elif defined(__FreeBSD__)
 #        include "common/settings.h"
-#        define loff_t off_t // FreeBSD doesn't have loff_t
-#    elif defined(__sun)
+#        define loff_t off_t
+#    elif defined(__sun) || defined(__OpenBSD__)
 #        define loff_t off_t
 #    elif defined(__NetBSD__)
 #        include "common/sysctl.h"
 #        define loff_t off_t
 #    endif
+
+static bool readPhysicalMemory(int fd, loff_t address, size_t length, void* buffer) {
+#    if !defined(__FreeBSD__) // Either causes kernel panic or returns EFAULT
+    // -1: unknown, 0: failed before (stop trying), 1: succeeded before
+    static int preadState = -1;
+    if (preadState != 0) {
+        ssize_t bytesRead = pread(fd, buffer, length, address);
+        if (bytesRead == (ssize_t) length) {
+            preadState = 1;
+            return true;
+        }
+
+        FF_DEBUG("pread failed at address 0x%lx for %zu bytes: %s. Falling back to mmap%s",
+            (unsigned long) address,
+            length,
+            strerror(errno),
+            preadState < 0 ? " and caching failure" : "");
+        preadState = 0;
+    } else {
+        FF_DEBUG("Skipping pread due to cached failure; using mmap");
+    }
+#    endif
+
+    loff_t alignedAddress = address & ~((loff_t) instance.state.platform.sysinfo.pageSize - 1);
+    size_t pageOffset = (size_t) (address - alignedAddress);
+    size_t mapLength = pageOffset + length;
+
+    void* p = mmap(NULL, mapLength, PROT_READ, MAP_SHARED, fd, alignedAddress);
+    if (p == MAP_FAILED) {
+        FF_DEBUG("mmap failed at aligned address 0x%lx for %zu bytes: %s",
+            (unsigned long) alignedAddress,
+            mapLength,
+            strerror(errno));
+        return false;
+    }
+
+    memcpy(buffer, (const uint8_t*) p + pageOffset, length);
+    munmap(p, mapLength);
+    return true;
+}
 
 #    ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer) {
@@ -291,22 +330,10 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             FF_DEBUG("Attempting to read %zu bytes from physical address 0x%lx",
                 sizeof(entryPoint),
                 (unsigned long) entryAddress);
-
-            if (pread(fd, &entryPoint, sizeof(entryPoint), entryAddress) < 0x10) {
-                FF_DEBUG("pread failed: %s. Trying mmap", strerror(errno));
-                // `pread /dev/mem` returns EFAULT in FreeBSD
-                // https://stackoverflow.com/questions/69372330/how-to-read-dev-mem-using-read
-                void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, entryAddress);
-                if (p == MAP_FAILED) {
-                    FF_DEBUG("mmap failed: %s", strerror(errno));
-                    return NULL;
-                }
-                memcpy(&entryPoint, p, sizeof(entryPoint));
-                munmap(p, sizeof(entryPoint));
-                FF_DEBUG("Successfully read entry point data via mmap");
-            } else {
-                FF_DEBUG("Successfully read entry point data via pread");
+            if (!readPhysicalMemory(fd, entryAddress, sizeof(entryPoint), &entryPoint)) {
+                return NULL;
             }
+            FF_DEBUG("Successfully read SMBIOS entry point data");
 #        else
             // Sun or NetBSD
             FF_DEBUG("Using %s specific implementation",
@@ -388,37 +415,25 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
 
             ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
             FF_DEBUG("Attempting to read SMBIOS table data: %u bytes at 0x%lx", tableLength, (unsigned long) tableAddress);
-            if (pread(fd, buffer.chars, tableLength, tableAddress) == (ssize_t) tableLength) {
+            if (readPhysicalMemory(fd, tableAddress, tableLength, buffer.chars)) {
                 buffer.length = tableLength;
                 buffer.chars[buffer.length] = '\0';
                 FF_DEBUG("Successfully read SMBIOS table data: %u bytes", tableLength);
             } else {
-                FF_DEBUG("pread failed, trying mmap");
-                // entryPoint.StructureTableAddress must be page aligned.
-                // Unaligned physical memory access results in all kinds of crashes.
-                void* p = mmap(NULL, tableLength, PROT_READ, MAP_SHARED, fd, tableAddress);
-                if (p == MAP_FAILED) {
-                    FF_DEBUG("mmap failed: %s", strerror(errno));
-                    ffStrbufDestroy(&buffer); // free buffer and reset state
-                    return NULL;
-                }
-                ffStrbufSetNS(&buffer, tableLength, (char*) p);
-                munmap(p, tableLength);
-                FF_DEBUG("Successfully read SMBIOS table data via mmap: %u bytes", tableLength);
+                ffStrbufDestroy(&buffer); // free buffer and reset state
+                return NULL;
             }
         }
-
-        return NULL;
 #    endif
 
     fallback:
         if (buffer.length == 0) {
             const char* devMem =
-#        if __HAIKU__
+#    if __HAIKU__
                 "/dev/misc/mem";
-#        else
+#    else
                 "/dev/mem"; // kern.securelevel must be -1
-#        endif
+#    endif
             FF_DEBUG("Using physical memory searching implementation: %s", devMem);
 
             uint32_t tableLength = 0;
@@ -436,8 +451,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             // However, to acquire SMBIOS entry point, we need EFI configuration table (provided by EFI system table)
             // which is not available via EFIIOC_GET_TABLE.
             FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
-            if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000) {
-                FF_DEBUG("Failed to read SMBIOS memory region: %s", strerror(errno));
+            if (!readPhysicalMemory(fd, 0xF0000, 0x10000, smBiosBase)) {
+                FF_DEBUG("Failed to read SMBIOS memory region");
                 return NULL;
             }
             FF_DEBUG("Successfully read 0x10000 bytes from physical address 0xF0000");
@@ -486,12 +501,12 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
 
             ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
             FF_DEBUG("Attempting to read SMBIOS table data: %u bytes at 0x%lx", tableLength, (unsigned long) tableAddress);
-            if (pread(fd, buffer.chars, tableLength, tableAddress) == tableLength) {
+            if (readPhysicalMemory(fd, (loff_t) tableAddress, tableLength, buffer.chars)) {
                 buffer.length = tableLength;
                 buffer.chars[buffer.length] = '\0';
                 FF_DEBUG("Successfully read SMBIOS table data: %u bytes", tableLength);
             } else {
-                FF_DEBUG("Failed to read SMBIOS table data: %s", strerror(errno));
+                FF_DEBUG("Failed to read SMBIOS table data");
                 return NULL;
             }
         }
