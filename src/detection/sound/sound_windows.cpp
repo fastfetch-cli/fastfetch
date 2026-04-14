@@ -36,8 +36,8 @@ static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */
     }
 
     FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
-    device->main = !mainDeviceId || wcscmp(immDeviceId, mainDeviceId) == 0;
-    device->active = !!(immState & DEVICE_STATE_ACTIVE);
+    device->type = (FFSoundType) ((!mainDeviceId || wcscmp(immDeviceId, mainDeviceId) == 0 ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE) |
+        ((immState & DEVICE_STATE_ACTIVE) ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE));
     device->volume = FF_SOUND_VOLUME_UNKNOWN;
     ffStrbufInitWS(&device->identifier, immDeviceId);
     ffStrbufInit(&device->name);

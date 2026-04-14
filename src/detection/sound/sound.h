@@ -10,8 +10,7 @@ typedef struct FFSoundDevice {
     FFstrbuf name;
     FFstrbuf platformApi;
     uint8_t volume; // 0-100%
-    bool main;
-    bool active;
+    FFSoundType type;
 } FFSoundDevice;
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */);

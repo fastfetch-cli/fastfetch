@@ -30,8 +30,7 @@ const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /
     ffStrbufInitStatic(&device->platformApi, "MediaKit");
     // We'll check the Mixer actually
     device->volume = 0;
-    device->active = true;
-    device->main = true;
+    device->type = (FFSoundType) (FF_SOUND_TYPE_ACTIVE | FF_SOUND_TYPE_MAIN);
 
     roster->ReleaseNode(mediaNode);
 

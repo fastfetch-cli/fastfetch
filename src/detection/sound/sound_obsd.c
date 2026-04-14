@@ -75,9 +75,8 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
     ffStrbufInitS(&device->name, bundle.name);
     ffStrbufInitS(&device->identifier, SIO_DEVANY);
     ffStrbufInitStatic(&device->platformApi, "sndio");
-    device->active = true;
-    device->main = true;
     device->volume = 0;
+    device->type = FF_SOUND_TYPE_ACTIVE | FF_SOUND_TYPE_MAIN;
 
     double totalLevel = 0;
     for (uint8_t i = 0; i < bundle.iLevel; ++i) {

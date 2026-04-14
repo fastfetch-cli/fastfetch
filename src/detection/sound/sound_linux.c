@@ -36,8 +36,7 @@ static void paSinkInfoCallback(FF_A_UNUSED pa_context* c, const pa_sink_info* i,
     ffStrbufTrimRightSpace(&device->name);
     ffStrbufTrimLeft(&device->name, ' ');
     device->volume = i->mute ? 0 : (uint8_t) ((i->volume.values[0] * 100 + PA_VOLUME_NORM / 2 /*round*/) / PA_VOLUME_NORM);
-    device->active = isActive;
-    device->main = isMain;
+    device->type = (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE) | (isActive ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE);
 }
 
 static void paServerInfoCallback(FF_A_UNUSED pa_context* c, const pa_server_info* i, void* userdata) {
@@ -70,6 +69,7 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_get_sink_info_list)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_get_server_info)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_context_unref)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_operation_cancel)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_operation_get_state)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_operation_unref)
 
@@ -90,32 +90,35 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
         return "Failed to create pulseaudio context";
     }
 
-    if (ffpa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0) {
-        ffpa_context_unref(context);
-        ffpa_mainloop_free(mainloop);
-        return "Failed to connect to pulseaudio context";
-    }
-
-    pa_context_state_t state;
-    while ((state = ffpa_context_get_state(context)) != PA_CONTEXT_READY) {
-        if (!PA_CONTEXT_IS_GOOD(state)) {
-            ffpa_context_unref(context);
-            ffpa_mainloop_free(mainloop);
-            return "Failed to get pulseaudio context state";
-        }
-
-        ffpa_mainloop_iterate(mainloop, 1, NULL);
-    }
-
     struct DetectionInfoBundle bundle = {
         .serverName = ffStrbufCreate(),
         .defaultDeviceId = ffStrbufCreate(),
         .result = devices,
         .options = options,
     };
+    const char* error = NULL;
+
+    if (ffpa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0) {
+        error = "Failed to connect to pulseaudio context";
+        goto exit;
+    }
+
+    pa_context_state_t state;
+    while ((state = ffpa_context_get_state(context)) != PA_CONTEXT_READY) {
+        if (!PA_CONTEXT_IS_GOOD(state)) {
+            error = "Failed to get pulseaudio context state";
+            goto exit;
+        }
+
+        ffpa_mainloop_iterate(mainloop, 1, NULL);
+    }
 
     {
         pa_operation* operation = ffpa_context_get_server_info(context, paServerInfoCallback, &bundle);
+        if (!operation) {
+            error = "Failed to get pulseaudio server info";
+            goto exit;
+        }
         while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
             ffpa_mainloop_iterate(mainloop, 1, NULL);
         }
@@ -123,23 +126,30 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
         ffpa_operation_unref(operation);
     }
 
-    pa_operation* operation = ffpa_context_get_sink_info_list(context, paSinkInfoCallback, &bundle);
-    if (!operation) {
-        ffpa_context_unref(context);
-        ffpa_mainloop_free(mainloop);
-        return "Failed to get pulseaudio sink info list";
+    {
+        pa_operation* operation = ffpa_context_get_sink_info_list(context, paSinkInfoCallback, &bundle);
+        if (!operation) {
+            error = "Failed to get pulseaudio sink info list";
+            goto exit;
+        }
+
+        while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
+            if (options->soundType & FF_SOUND_TYPE_MAIN && devices->length > 0) {
+                ffpa_operation_cancel(operation);
+            }
+
+            ffpa_mainloop_iterate(mainloop, 1, NULL);
+        }
+
+        ffpa_operation_unref(operation);
     }
 
-    while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
-        ffpa_mainloop_iterate(mainloop, 1, NULL);
-    }
-
-    ffpa_operation_unref(operation);
-
-
+exit:
+    ffStrbufDestroy(&bundle.serverName);
+    ffStrbufDestroy(&bundle.defaultDeviceId);
     ffpa_context_unref(context);
     ffpa_mainloop_free(mainloop);
-    return NULL;
+    return error;
 }
 
 #endif // FF_HAVE_PULSE

@@ -51,8 +51,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
         ffStrbufTrimRightSpace(&device->name);
         ffStrbufInitF(&device->platformApi, "%s", "SunAudio");
         device->volume = (uint8_t) ((ai.play.gain * 100 + AUDIO_MAX_GAIN / 2) / AUDIO_MAX_GAIN);
-        device->active = true;
-        device->main = isMain;
+        device->type = FF_SOUND_TYPE_ACTIVE | (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE);
     }
 
     return NULL;

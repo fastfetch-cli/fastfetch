@@ -83,8 +83,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
             mutemask & SOUND_MASK_VOLUME ? 0 :
 #endif
                                          ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;
-        device->active = true;
-        device->main = isMain;
+        device->type = FF_SOUND_TYPE_ACTIVE | (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE);
     }
 
     return NULL;

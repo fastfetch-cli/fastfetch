@@ -55,8 +55,8 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         }
 
         FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
-        device->main = deviceId == mainDeviceId;
-        device->active = !!active;
+        device->type = (deviceId == mainDeviceId ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE) |
+            (active ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE);
         device->volume = FF_SOUND_VOLUME_UNKNOWN;
         ffStrbufInit(&device->identifier);
         ffStrbufInit(&device->name);

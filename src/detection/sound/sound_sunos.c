@@ -101,8 +101,8 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
         ffStrbufTrimRightSpace(&device->name);
         ffStrbufInitF(&device->platformApi, "%s %s", info.product, info.version);
         device->volume = (uint8_t) volume;
-        device->active = !!mi.enabled;
-        device->main = isMain;
+        device->type = (mi.enabled ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE) |
+            (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE);
     }
 
     return NULL;

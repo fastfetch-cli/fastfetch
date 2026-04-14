@@ -34,7 +34,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
         }
 
         if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
-            if (device->main && index > 0) {
+            if ((device->type & FF_SOUND_TYPE_MAIN) && index > 0) {
                 ffStrbufAppendS(&str, " (*)");
             }
         }
@@ -52,8 +52,11 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
             }
         }
 
+        bool isMain = !!(device->type & FF_SOUND_TYPE_MAIN);
+        bool isActive = !!(device->type & FF_SOUND_TYPE_ACTIVE);
         FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-                                                                                                              FF_ARG(device->main, "is-main"),
+                                                                                                              FF_ARG(isMain, "is-main"),
+                                                                                                              FF_ARG(isActive, "is-active"),
                                                                                                               FF_ARG(device->name, "name"),
                                                                                                               FF_ARG(percentageNum, "volume-percentage"),
                                                                                                               FF_ARG(device->identifier, "identifier"),
@@ -155,18 +158,24 @@ bool ffGenerateSoundJsonResult(FFSoundOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH (FFSoundDevice, item, result) {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_bool(doc, obj, "active", item->active);
-        yyjson_mut_obj_add_bool(doc, obj, "main", item->main);
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
+        yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &item->platformApi);
+
+        yyjson_mut_val* type = yyjson_mut_obj_add_arr(doc, obj, "type");
+        if (item->type & FF_SOUND_TYPE_MAIN) {
+            yyjson_mut_arr_add_str(doc, type, "main");
+        }
+        if (item->type & FF_SOUND_TYPE_ACTIVE) {
+            yyjson_mut_arr_add_str(doc, type, "active");
+        }
 
         if (item->volume != FF_SOUND_VOLUME_UNKNOWN) {
             yyjson_mut_obj_add_uint(doc, obj, "volume", item->volume);
         } else {
             yyjson_mut_obj_add_null(doc, obj, "volume");
         }
-
-        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-        yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
-        yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &item->platformApi);
     }
 
     FF_LIST_FOR_EACH (FFSoundDevice, device, result) {
@@ -200,6 +209,7 @@ FFModuleBaseInfo ffSoundModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateSoundJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Is main sound device", "is-main" },
+        { "Is active sound device", "is-active" },
         { "Device name", "name" },
         { "Volume (in percentage num)", "volume-percentage" },
         { "Identifier", "identifier" },
