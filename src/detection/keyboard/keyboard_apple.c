@@ -6,7 +6,7 @@
 #include <IOKit/hid/IOHIDLib.h>
 
 static void enumSet(IOHIDDeviceRef value, FFlist* results) {
-    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(results);
+    FFKeyboardDevice* device = FF_LIST_ADD(FFKeyboardDevice, *results);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
 

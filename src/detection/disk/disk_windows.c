@@ -66,7 +66,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             }
         }
 
-        FFDisk* disk = ffListAdd(disks);
+        FFDisk* disk = FF_LIST_ADD(FFDisk, *disks);
 
         disk->filesUsed = 0;
         disk->filesTotal = 0;

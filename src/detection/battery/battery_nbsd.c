@@ -74,7 +74,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
         }
 
         if (max > 0) {
-            FFBatteryResult* battery = ffListAdd(results);
+            FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
             battery->temperature = FF_BATTERY_TEMP_UNSET;
             battery->cycleCount = 0;
             ffStrbufInit(&battery->manufacturer);

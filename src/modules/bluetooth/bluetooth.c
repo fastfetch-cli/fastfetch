@@ -56,7 +56,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
 }
 
 bool ffPrintBluetooth(FFBluetoothOptions* options) {
-    FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof(FFBluetoothResult));
+    FF_LIST_AUTO_DESTROY devices = ffListCreate();
     const char* error = ffDetectBluetooth(options, &devices);
 
     if (error) {
@@ -64,23 +64,14 @@ bool ffPrintBluetooth(FFBluetoothOptions* options) {
         return false;
     }
 
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothResult*));
-
-    FF_LIST_FOR_EACH (FFBluetoothResult, device, devices) {
-        if (!device->connected && !options->showDisconnected) {
-            continue;
-        }
-
-        *(FFBluetoothResult**) ffListAdd(&filtered) = device;
-    }
-
-    if (filtered.length == 0) {
+    if (devices.length == 0) {
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
     }
 
-    for (uint32_t i = 0; i < filtered.length; i++) {
-        uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
-        printDevice(options, *FF_LIST_GET(FFBluetoothResult*, filtered, i), index);
+    uint8_t i = 1;
+    FF_LIST_FOR_EACH (FFBluetoothResult, device, devices) {
+        printDevice(options, device, devices.length == 0 ? 0 : i);
+        ++i;
     }
 
     FF_LIST_FOR_EACH (FFBluetoothResult, device, devices) {
@@ -121,7 +112,7 @@ void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* 
 }
 
 bool ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBluetoothResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBluetooth(options, &results);
     if (error) {

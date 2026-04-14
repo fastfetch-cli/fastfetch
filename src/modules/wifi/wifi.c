@@ -5,7 +5,7 @@
 #include "modules/wifi/wifi.h"
 
 bool ffPrintWifi(FFWifiOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectWifi(&result);
     if (error) {
@@ -150,7 +150,7 @@ void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjso
 }
 
 bool ffGenerateWifiJsonResult(FF_A_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectWifi(&result);
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);

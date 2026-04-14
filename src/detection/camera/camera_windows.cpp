@@ -48,7 +48,7 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
             continue;
         }
 
-        FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
+        FFCameraResult* camera = FF_LIST_ADD(FFCameraResult, *result);
         ffStrbufInitNWS(&camera->name, length, buffer);
         ffStrbufInit(&camera->colorspace);
         ffStrbufInit(&camera->vendor);

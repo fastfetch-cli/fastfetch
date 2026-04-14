@@ -4,7 +4,7 @@
 #include <bluetooth.h>
 
 static int enumDev(FF_A_UNUSED int sockfd, struct bt_devinfo const* dev, FFlist* devices) {
-    FFBluetoothResult* device = ffListAdd(devices);
+    FFBluetoothResult* device = FF_LIST_ADD(FFBluetoothResult, *devices);
     ffStrbufInitS(&device->name,
 #if __FreeBSD__
         bt_devremote_name_gen(dev->devname, &dev->bdaddr)

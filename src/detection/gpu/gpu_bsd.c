@@ -56,7 +56,7 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus) {
 
         const char* path = dev->nodes[DRM_NODE_PRIMARY];
 
-        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+        FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
@@ -179,7 +179,7 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
             continue; // Likely an auxiliary display controller (#2034)
         }
 
-        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+        FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, pc->pd_name);

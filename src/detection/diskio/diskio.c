@@ -16,7 +16,7 @@ void ffPrepareDiskIO(FFDiskIOOptions* options) {
         return; // Already prepared
     }
 
-    ffListInit(&ioCounters1, sizeof(FFDiskIOResult));
+    ffListInit(&ioCounters1);
     ffDiskIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
@@ -33,7 +33,7 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
     }
 
     if (time1 == 0) {
-        ffListInit(&ioCounters1, sizeof(FFDiskIOResult));
+        ffListInit(&ioCounters1);
         error = ffDiskIOGetIoCounters(&ioCounters1, options);
         if (error) {
             return error;

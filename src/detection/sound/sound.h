@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/sound/option.h"
 
 #define FF_SOUND_VOLUME_UNKNOWN 255
 
@@ -13,4 +14,4 @@ typedef struct FFSoundDevice {
     bool active;
 } FFSoundDevice;
 
-const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */);
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */);

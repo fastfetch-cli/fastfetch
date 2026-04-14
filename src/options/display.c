@@ -474,7 +474,8 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* item;
             size_t idx, max;
             yyjson_arr_foreach (val, idx, max, item) {
-                ffStrbufInitJsonVal(ffListAdd(&options->constants), item);
+                FFstrbuf* buffer = FF_LIST_ADD(FFstrbuf, options->constants);
+                ffStrbufInitJsonVal(buffer, item);
             }
         } else if (unsafe_yyjson_equals_str(key, "freq")) {
             if (!yyjson_is_obj(val)) {
@@ -814,7 +815,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->fractionNdigits = 2;
     options->fractionTrailingZeros = FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT;
 
-    ffListInit(&options->constants, sizeof(FFstrbuf));
+    ffListInit(&options->constants);
 }
 
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options) {

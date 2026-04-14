@@ -8,7 +8,7 @@
 const char* ffDetectPowerAdapter(FFlist* results) {
     FF_CFTYPE_AUTO_RELEASE CFDictionaryRef details = IOPSCopyExternalPowerAdapterDetails();
     if (details && CFDictionaryContainsKey(details, CFSTR(kIOPSPowerAdapterWattsKey))) {
-        FFPowerAdapterResult* adapter = ffListAdd(results);
+        FFPowerAdapterResult* adapter = FF_LIST_ADD(FFPowerAdapterResult, *results);
 
         ffStrbufInit(&adapter->name);
         ffStrbufInit(&adapter->description);

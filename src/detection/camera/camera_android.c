@@ -33,7 +33,7 @@ const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
     yyjson_val* device;
     size_t idx, max;
     yyjson_arr_foreach (root, idx, max, device) {
-        FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
+        FFCameraResult* camera = FF_LIST_ADD(FFCameraResult, *result);
         {
             const char* facing = yyjson_get_str(yyjson_obj_get(device, "facing"));
             if (facing) {

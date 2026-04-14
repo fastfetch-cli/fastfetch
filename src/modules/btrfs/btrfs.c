@@ -95,7 +95,7 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
 }
 
 bool ffPrintBtrfs(FFBtrfsOptions* options) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBtrfsResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBtrfs(&results);
 
@@ -147,7 +147,7 @@ void ffGenerateBtrfsJsonConfig(FFBtrfsOptions* options, yyjson_mut_doc* doc, yyj
 }
 
 bool ffGenerateBtrfsJsonResult(FF_A_UNUSED FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBtrfsResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBtrfs(&results);
     if (error) {

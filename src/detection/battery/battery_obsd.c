@@ -23,7 +23,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
         return NULL;
     }
 
-    FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(result);
+    FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *result);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
     battery->timeRemaining = -1;

@@ -18,7 +18,7 @@ static void getData(FFstrbuf* buffer, const char* ifName, bool isDefaultRoute, i
         return;
     }
 
-    FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+    FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
     ffStrbufInitS(&counters->name, ifName);
     counters->defaultRoute = isDefaultRoute;
 

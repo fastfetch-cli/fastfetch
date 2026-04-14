@@ -39,7 +39,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
             continue;
         }
 
-        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
         *counters = (FFNetIOResult) {
             .name = ffStrbufCreateNS(sdl->sdl_nlen, sdl->sdl_data),
             .txBytes = ifm->ifm_data.ifi_obytes,

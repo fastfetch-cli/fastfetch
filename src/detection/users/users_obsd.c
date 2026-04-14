@@ -27,7 +27,7 @@ next:
             }
         }
 
-        FFUserResult* user = (FFUserResult*) ffListAdd(users);
+        FFUserResult* user = FF_LIST_ADD(FFUserResult, *users);
         ffStrbufInitS(&user->name, n.ut_name);
         ffStrbufInitS(&user->hostName, n.ut_host);
         ffStrbufInitS(&user->sessionName, n.ut_line);

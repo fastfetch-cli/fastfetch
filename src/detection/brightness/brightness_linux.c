@@ -36,7 +36,7 @@ static const char* detectWithBacklight(FFlist* result) {
             ffStrbufAppendS(&backlightDir, entry->d_name);
             ffStrbufAppendS(&backlightDir, "/max_brightness");
             if (ffReadFileBuffer(backlightDir.chars, &buffer)) {
-                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 ffStrbufSubstrBeforeLastC(&backlightDir, '/');
                 ffStrbufAppendS(&backlightDir, "/device");
                 ffStrbufInitA(&brightness->name, PATH_MAX);
@@ -146,7 +146,7 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
                 int current = VALREC_CUR_VAL(vcpValue), max = VALREC_MAX_VAL(vcpValue);
                 ffddca_free_any_vcp_value(vcpValue);
 
-                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 brightness->max = max;
                 brightness->min = 0;
                 brightness->current = current;

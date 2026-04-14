@@ -17,6 +17,6 @@ typedef struct FFPhysicalMemoryResult {
     bool ecc;
 } FFPhysicalMemoryResult;
 
-const char* ffDetectPhysicalMemory(FFlist* result); // list of FFPhysicalMemoryResult
+const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* result); // list of FFPhysicalMemoryResult
 
 void FFPhysicalMemoryUpdateVendorString(FFPhysicalMemoryResult* device);

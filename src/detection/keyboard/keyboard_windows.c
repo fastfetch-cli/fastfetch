@@ -43,7 +43,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
             continue;
         }
 
-        FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+        FFKeyboardDevice* device = FF_LIST_ADD(FFKeyboardDevice, *devices);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->name);
 

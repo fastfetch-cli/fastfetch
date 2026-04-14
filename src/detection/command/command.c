@@ -8,9 +8,7 @@ typedef struct FFCommandResultBundle {
 } FFCommandResultBundle;
 
 // FIFO, non-thread-safe list of running commands
-static FFlist commandQueue = {
-    .elementSize = sizeof(FFCommandResultBundle),
-};
+static FFlist commandQueue;
 
 static const char* spawnProcess(FFCommandOptions* options, FFProcessHandle* handle) {
     if (options->text.length == 0) {
@@ -32,7 +30,7 @@ bool ffPrepareCommand(FFCommandOptions* options) {
         return false;
     }
 
-    FFCommandResultBundle* bundle = ffListAdd(&commandQueue);
+    FFCommandResultBundle* bundle = FF_LIST_ADD(FFCommandResultBundle, commandQueue);
     bundle->error = spawnProcess(options, &bundle->handle);
 
     return true;
@@ -42,7 +40,7 @@ const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result) {
     FFCommandResultBundle bundle = {};
     if (!options->parallel) {
         bundle.error = spawnProcess(options, &bundle.handle);
-    } else if (!ffListShift(&commandQueue, &bundle)) {
+    } else if (!FF_LIST_SHIFT(commandQueue, &bundle)) {
         return "[BUG] command queue is empty";
     }
 

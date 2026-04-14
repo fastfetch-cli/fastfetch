@@ -33,7 +33,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
             continue;
         }
 
-        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
         *counters = (FFNetIOResult) {
             .name = ffStrbufCreateS(interface.Name()),
             .defaultRoute = defaultRoute,

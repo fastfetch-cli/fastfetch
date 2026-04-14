@@ -7,7 +7,7 @@ static int walkDevTree(di_node_t node, FF_A_UNUSED di_minor_t minor, FFlist* gpu
     int* vendorId;
     int* deviceId;
     if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "vendor-id", &vendorId) > 0 && di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-id", &deviceId) > 0) {
-        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+        FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
         ffStrbufInitS(&gpu->vendor, ffGPUGetVendorString((uint16_t) *vendorId));
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, di_driver_name(node));

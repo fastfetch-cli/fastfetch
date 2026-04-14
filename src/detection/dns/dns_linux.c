@@ -51,7 +51,7 @@ static const char* detectDnsFromConf(const char* path, FFDNSOptions* options, FF
                 continue;
             }
 
-            FFstrbuf* item = (FFstrbuf*) ffListAdd(results);
+            FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
             ffStrbufInitS(item, nameserver);
             ffStrbufTrimRightSpace(item);
             FF_DEBUG("Found DNS server: %s", item->chars);

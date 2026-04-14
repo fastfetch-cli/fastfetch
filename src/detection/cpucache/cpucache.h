@@ -33,7 +33,7 @@ static inline FFCPUCache* ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t l
         }
     }
 
-    FFCPUCache* item = (FFCPUCache*) ffListAdd(cacheLevel);
+    FFCPUCache* item = FF_LIST_ADD(FFCPUCache, *cacheLevel);
     *item = (FFCPUCache) {
         .size = size,
         .num = 1,

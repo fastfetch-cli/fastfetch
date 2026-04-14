@@ -86,7 +86,7 @@ void printSwap(FFSwapOptions* options, uint8_t index, uint32_t totalCount, FFSwa
 }
 
 bool ffPrintSwap(FFSwapOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSwapResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectSwap(&result);
 
     if (error) {
@@ -148,7 +148,7 @@ void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjso
 }
 
 bool ffGenerateSwapJsonResult(FF_A_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSwapResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectSwap(&result);
 
     if (error) {

@@ -42,7 +42,7 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
             continue;
         }
 
-        FFMouseDevice* device = (FFMouseDevice*) ffListAdd(devices);
+        FFMouseDevice* device = FF_LIST_ADD(FFMouseDevice, *devices);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->name);
 

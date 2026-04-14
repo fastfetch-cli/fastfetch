@@ -138,7 +138,7 @@ const char* ffDetectBtrfs(FFlist* result) {
             continue;
         }
 
-        FFBtrfsResult* item = ffListAdd(result);
+        FFBtrfsResult* item = FF_LIST_ADD(FFBtrfsResult, *result);
         (*item) = (FFBtrfsResult) {
             .uuid = ffStrbufCreateNS(uuidLen, entry->d_name),
             .name = ffStrbufCreate(),

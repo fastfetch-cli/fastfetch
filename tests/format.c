@@ -112,9 +112,9 @@ int main(void) {
 
 #ifndef _WIN32 // Windows doesn't have setenv
     {
-        ffListInit(&instance.config.display.constants, sizeof(FFstrbuf));
-        ffStrbufInitStatic(ffListAdd(&instance.config.display.constants), "CONST1");
-        ffStrbufInitStatic(ffListAdd(&instance.config.display.constants), "CONST2");
+        ffListInit(&instance.config.display.constants);
+        ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, instance.config.display.constants), "CONST1");
+        ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, instance.config.display.constants), "CONST2");
         setenv("FF_TEST", "ENVVAR", 1);
         VERIFY("output({$FF_TEST})", "", "output(ENVVAR)");
         VERIFY("output({$1})", "", "output(CONST1)");

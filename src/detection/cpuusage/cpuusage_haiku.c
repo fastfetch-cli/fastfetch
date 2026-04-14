@@ -18,7 +18,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     uint64_t uptime = (uint64_t) system_time();
 
     for (uint32_t i = 0; i < sysInfo.cpu_count; ++i) {
-        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        FFCpuUsageInfo* info = FF_LIST_ADD(FFCpuUsageInfo, *cpuTimes);
         info->inUseAll = (uint64_t) cpuInfo[i].active_time;
         info->totalAll = uptime;
     }

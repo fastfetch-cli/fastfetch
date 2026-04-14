@@ -64,7 +64,7 @@ static const char* parseDiskIOCounters(int dfd, const char* devName, FFlist* res
         }
     }
 
-    FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+    FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
     ffStrbufInitMove(&device->name, &name);
     ffStrbufInitF(&device->devPath, "/dev/%s", devName);
     device->bytesRead = sectorRead * 512;

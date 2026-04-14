@@ -5,7 +5,7 @@
 #include "modules/dns/dns.h"
 
 bool ffPrintDNS(FFDNSOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectDNS(options, &result);
 
@@ -101,7 +101,7 @@ void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
 }
 
 bool ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectDNS(options, &result);
 

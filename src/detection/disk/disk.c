@@ -18,7 +18,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks) {
     //  For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
     // Note that we sort alphabetically here for a better ordering when printing the list,
     //  so the check must be done in reverse order
-    ffListSort(disks, (void*) compareDisks);
+    ffListSort(disks, sizeof(FFDisk), (void*) compareDisks);
     FF_LIST_FOR_EACH (FFDisk, disk, *disks) {
         if (disk->bytesTotal == 0) {
             disk->type |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;

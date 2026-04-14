@@ -31,7 +31,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results) {
         return "Battery info result is not a JSON object";
     }
 
-    FFBatteryResult* battery = ffListAdd(results);
+    FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
     battery->timeRemaining = -1;
@@ -92,7 +92,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
     }
     ffStrbufClear(&temp);
 
-    FFBatteryResult* battery = ffListAdd(results);
+    FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
     battery->timeRemaining = -1;

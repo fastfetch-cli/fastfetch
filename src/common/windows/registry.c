@@ -178,14 +178,6 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
             }
 
             FFlist* list = (FFlist*) arg->value;
-            if (list->elementSize != sizeof(FFstrbuf)) {
-                if (error) {
-                    FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
-                    ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: expected list of strbuf for REG_MULTI_SZ", nameA.chars);
-                }
-                return false;
-            }
-
             ffListClear(list);
 
             for (

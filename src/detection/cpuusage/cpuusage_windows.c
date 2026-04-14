@@ -28,7 +28,7 @@ static const char* getInfoByNqsi(FFlist* cpuTimes) {
         uint64_t inUse = (uint64_t) (coreInfo->UserTime.QuadPart + coreInfo->KernelTime.QuadPart);
         uint64_t total = inUse + (uint64_t) coreInfo->IdleTime.QuadPart;
 
-        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        FFCpuUsageInfo* info = FF_LIST_ADD(FFCpuUsageInfo, *cpuTimes);
         *info = (FFCpuUsageInfo) {
             .inUseAll = inUse,
             .totalAll = total,
@@ -138,7 +138,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
                 return "Counter \"% Processor Utility\" are not supported";
             }
 
-            FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+            FFCpuUsageInfo* info = FF_LIST_ADD(FFCpuUsageInfo, *cpuTimes);
             *info = (FFCpuUsageInfo) {
                 .inUseAll = processorUtility,
                 .totalAll = utilityBase,

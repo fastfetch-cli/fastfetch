@@ -10,7 +10,7 @@ static void addSwapEntry(FFlist* result, struct xswdev* xsw, uint32_t pageSize) 
         return;
     }
 
-    FFSwapResult* swap = ffListAdd(result);
+    FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
     if (xsw->xsw_dev == NODEV) {
         ffStrbufInitStatic(&swap->name, "[NFS]");
     } else {

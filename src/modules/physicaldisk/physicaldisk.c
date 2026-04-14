@@ -26,7 +26,7 @@ static void formatKey(const FFPhysicalDiskOptions* options, FFPhysicalDiskResult
 }
 
 bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalDiskResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectPhysicalDisk(&result, options);
 
     if (error) {
@@ -34,7 +34,7 @@ bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options) {
         return false;
     }
 
-    ffListSort(&result, (const void*) sortDevices);
+    ffListSort(&result, sizeof(FFPhysicalDiskResult), (const void*) sortDevices);
 
     uint32_t index = 0;
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -181,7 +181,7 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
 }
 
 bool ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalDiskResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectPhysicalDisk(&result, options);
 
     if (error) {

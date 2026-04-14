@@ -6,7 +6,7 @@
 #include <IOKit/hid/IOHIDLib.h>
 
 static void enumSet(IOHIDDeviceRef value, FFlist* results) {
-    FFMouseDevice* device = (FFMouseDevice*) ffListAdd(results);
+    FFMouseDevice* device = FF_LIST_ADD(FFMouseDevice, *results);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
 

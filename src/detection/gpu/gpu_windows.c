@@ -32,13 +32,15 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
     }
 
     static FFlist deviceIdsCache;
+    static bool initialized;
     typedef struct {
         D3DKMT_DEVICE_IDS deviceIds;
         D3DKMT_ADAPTERADDRESS adapterAddress;
     } CacheEntry;
 
-    if (deviceIdsCache.elementSize == 0) {
-        ffListInit(&deviceIdsCache, sizeof(CacheEntry));
+    if (!initialized) {
+        initialized = true;
+        ffListInit(&deviceIdsCache);
 
         ULONG devIdListSize = 0;
         if (CM_Get_Device_ID_List_SizeW(&devIdListSize, GUID_DEVCLASS_DISPLAY_STRING, CM_GETIDLIST_FILTER_CLASS | CM_GETIDLIST_FILTER_PRESENT) != CR_SUCCESS || devIdListSize <= 1) {

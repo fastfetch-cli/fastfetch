@@ -104,10 +104,10 @@ bool ffPrintCPUCache(FFCPUCacheOptions* options) {
     bool success = false;
     FFCPUCacheResult result = {
         .caches = {
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
+            ffListCreate(),
+            ffListCreate(),
+            ffListCreate(),
+            ffListCreate(),
         },
     };
 
@@ -161,10 +161,10 @@ bool ffGenerateCPUCacheJsonResult(FF_A_UNUSED FFCPUCacheOptions* options, yyjson
     bool success = false;
     FFCPUCacheResult result = {
         .caches = {
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
-            ffListCreate(sizeof(FFCPUCache)),
+            ffListCreate(),
+            ffListCreate(),
+            ffListCreate(),
+            ffListCreate(),
         },
     };
 

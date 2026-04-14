@@ -25,7 +25,7 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results) {
         return "Skipped";
     }
 
-    FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(results);
+    FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
     ffStrbufInitS(&battery->modelName, extended.model_number);
     ffStrbufInitS(&battery->manufacturer, extended.oem_info);
     ffStrbufInit(&battery->manufactureDate);

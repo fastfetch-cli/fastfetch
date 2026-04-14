@@ -43,7 +43,7 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
             }
         }
 
-        FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+        FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
         ffStrbufInitMove(&device->name, &name);
         ffStrbufInitF(&device->devPath, "/devices%s", di_devfs_path(node));
         ffStrbufInit(&device->serial);

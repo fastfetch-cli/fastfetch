@@ -30,7 +30,11 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
     }
 
     do {
-        FFBluetoothResult* device = ffListAdd(devices);
+        if (!options->showDisconnected && !btdi.fConnected) {
+            continue;
+        }
+
+        FFBluetoothResult* device = FF_LIST_ADD(FFBluetoothResult, *devices);
         ffStrbufInitWS(&device->name, btdi.szName);
         ffStrbufInitF(&device->address, "%02X:%02X:%02X:%02X:%02X:%02X", btdi.Address.rgBytes[5], btdi.Address.rgBytes[4], btdi.Address.rgBytes[3], btdi.Address.rgBytes[2], btdi.Address.rgBytes[1], btdi.Address.rgBytes[0]);
         ffStrbufInit(&device->type);

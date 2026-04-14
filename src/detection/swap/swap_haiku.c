@@ -10,7 +10,7 @@ const char* ffDetectSwap(FFlist* result) {
     }
 
     uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
-    FFSwapResult* swap = ffListAdd(result);
+    FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
     ffStrbufInitStatic(&swap->name, "System");
     void* kvms = load_driver_settings("virtual_memory"); // /boot/home/config/settings/kernel/drivers/virtual_memory
     if (kvms) {

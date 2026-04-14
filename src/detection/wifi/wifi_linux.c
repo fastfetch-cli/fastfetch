@@ -475,7 +475,7 @@ const char* ffDetectWifi(FF_A_UNUSED FFlist* result) {
         }
 
         FF_DEBUG("Found wifi interface: %s", i->if_name);
-        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+        FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitS(&item->inf.description, i->if_name);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);

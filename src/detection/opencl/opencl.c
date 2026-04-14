@@ -87,7 +87,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result) {
                 continue;
             }
 
-            FFGPUResult* gpu = ffListAdd(&result->gpus);
+            FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, result->gpus);
             ffStrbufInitS(&gpu->name, buffer);
             ffStrbufInit(&gpu->vendor);
             ffStrbufInit(&gpu->driver);
@@ -198,12 +198,14 @@ static const char* detectOpenCL(FFOpenCLResult* result) {
 
 FFOpenCLResult* ffDetectOpenCL(void) {
     static FFOpenCLResult result;
+    static bool initialized;
 
-    if (result.gpus.elementSize == 0) {
+    if (!initialized) {
+        initialized = true;
         ffStrbufInit(&result.version);
         ffStrbufInit(&result.name);
         ffStrbufInit(&result.vendor);
-        ffListInit(&result.gpus, sizeof(FFGPUResult));
+        ffListInit(&result.gpus);
 
 #ifdef FF_HAVE_OPENCL
         result.error = detectOpenCL(&result);

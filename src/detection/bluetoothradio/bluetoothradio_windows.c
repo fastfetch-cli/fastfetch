@@ -77,7 +77,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
             continue;
         }
 
-        FFBluetoothRadioResult* device = ffListAdd(devices);
+        FFBluetoothRadioResult* device = FF_LIST_ADD(FFBluetoothRadioResult, *devices);
         ffStrbufInitS(&device->name, blri.localInfo.name);
 
         BLUETOOTH_ADDRESS_STRUCT addr = { .ullLong = blri.localInfo.address };

@@ -126,7 +126,7 @@ static const char* detectBluetooth(FFlist* devices) {
             continue;
         }
 
-        FFBluetoothRadioResult* device = ffListAdd(devices);
+        FFBluetoothRadioResult* device = FF_LIST_ADD(FFBluetoothRadioResult, *devices);
         ffStrbufInit(&device->name);
         ffStrbufInit(&device->address);
         ffStrbufInitStatic(&device->vendor, "Unknown");

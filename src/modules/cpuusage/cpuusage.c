@@ -8,7 +8,7 @@
 #define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
 
 bool ffPrintCPUUsage(FFCPUUsageOptions* options) {
-    FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
+    FF_LIST_AUTO_DESTROY percentages = ffListCreate();
     const char* error = ffGetCpuUsageResult(options, &percentages);
 
     if (error) {
@@ -154,7 +154,7 @@ void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* do
 }
 
 bool ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
+    FF_LIST_AUTO_DESTROY percentages = ffListCreate();
     const char* error = ffGetCpuUsageResult(options, &percentages);
 
     if (error) {

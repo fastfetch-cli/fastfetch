@@ -26,7 +26,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
             continue;
         }
 
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
         ffStrbufInitF(&device->devPath, "/dev/%s", st->ds_name);
         ffStrbufInitS(&device->name, st->ds_name);
         device->bytesRead = st->ds_rbytes;

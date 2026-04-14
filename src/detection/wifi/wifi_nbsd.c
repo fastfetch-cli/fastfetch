@@ -35,7 +35,7 @@ const char* ffDetectWifi(FFlist* result) {
             continue;
         }
 
-        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+        FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitS(&item->inf.description, i->if_name);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);

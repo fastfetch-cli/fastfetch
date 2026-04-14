@@ -20,7 +20,7 @@ const char* ffDetectSwap(FFlist* result) {
         }
     }
 
-    FFSwapResult* swap = ffListAdd(result);
+    FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
     ffStrbufInitStatic(&swap->name, xsw.xsu_encrypted ? "Encrypted" : "Normal");
     swap->bytesTotal = xsw.xsu_total;
     swap->bytesUsed = xsw.xsu_used;

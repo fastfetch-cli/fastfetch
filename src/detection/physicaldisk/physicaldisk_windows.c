@@ -204,7 +204,7 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         return "Name prefix mismatch";
     }
 
-    FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+    FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->revision);
     ffStrbufInitMove(&device->name, &name);

@@ -6,8 +6,8 @@
 void ffPlatformInit(FFPlatform* platform) {
     ffStrbufInit(&platform->homeDir);
     ffStrbufInit(&platform->cacheDir);
-    ffListInit(&platform->configDirs, sizeof(FFstrbuf));
-    ffListInit(&platform->dataDirs, sizeof(FFstrbuf));
+    ffListInit(&platform->configDirs);
+    ffListInit(&platform->dataDirs);
     ffStrbufInit(&platform->exePath);
     ffStrbufInit(&platform->cwd);
 
@@ -77,8 +77,8 @@ void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path) {
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&buffer, '/');
-    if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
-        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+    if (!FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
+        ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
     }
 }
 
@@ -87,7 +87,7 @@ void ffPlatformPathAddHome(FFlist* dirs, const FFPlatform* platform, const char*
     ffStrbufAppend(&buffer, &platform->homeDir);
     ffStrbufAppendS(&buffer, suffix);
     ffStrbufEnsureEndsWithC(&buffer, '/');
-    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
-        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
+        ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
     }
 }

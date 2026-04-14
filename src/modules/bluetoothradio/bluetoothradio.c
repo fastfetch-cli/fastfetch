@@ -89,7 +89,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
 }
 
 bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options) {
-    FF_LIST_AUTO_DESTROY radios = ffListCreate(sizeof(FFBluetoothRadioResult));
+    FF_LIST_AUTO_DESTROY radios = ffListCreate();
     const char* error = ffDetectBluetoothRadio(&radios);
 
     if (error) {
@@ -140,7 +140,7 @@ void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson
 }
 
 bool ffGenerateBluetoothRadioJsonResult(FF_A_UNUSED FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBluetoothRadioResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBluetoothRadio(&results);
     if (error) {

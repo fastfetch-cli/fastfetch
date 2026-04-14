@@ -776,7 +776,7 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     uint64_t pkgLow = 0, pkgHigh = 0;
 
     struct dirent* entry;
-    FF_LIST_AUTO_DESTROY cpuList = ffListCreate(sizeof(uint32_t));
+    FF_LIST_AUTO_DESTROY cpuList = ffListCreate();
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type != DT_DIR || !ffStrStartsWith(entry->d_name, "cpu") || !ffCharIsDigit(entry->d_name[strlen("cpu")])) {
             continue;
@@ -826,7 +826,7 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
                     }
                 }
                 if (!found) {
-                    *(uint32_t*) ffListAdd(&cpuList) = coreId;
+                    *FF_LIST_ADD(uint32_t, cpuList) = coreId;
                 }
 
                 p = strchr(pend, ',');

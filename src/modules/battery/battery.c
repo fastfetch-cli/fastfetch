@@ -166,7 +166,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
 }
 
 bool ffPrintBattery(FFBatteryOptions* options) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBattery(options, &results);
 
@@ -233,7 +233,7 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
 }
 
 bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBattery(options, &results);
     if (error) {

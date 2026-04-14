@@ -77,8 +77,8 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId) 
         CoTaskMemFree(pPath);
         ffStrbufReplaceAllC(&buffer, '\\', '/');
         ffStrbufEnsureEndsWithC(&buffer, '/');
-        if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
-            ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+        if (!FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
+            ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
         }
     }
 }
@@ -98,8 +98,8 @@ static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* 
         ffStrbufEnsureEndsWithC(&buffer, '/');
     }
 
-    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !ffListContains(dirs, &buffer, (void*) ffStrbufEqual)) {
-        ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+    if (ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY) && !FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
+        ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
     }
 }
 

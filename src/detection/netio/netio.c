@@ -14,7 +14,7 @@ void ffPrepareNetIO(FFNetIOOptions* options) {
         return; // Already prepared
     }
 
-    ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+    ffListInit(&ioCounters1);
     ffNetIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
@@ -31,7 +31,7 @@ const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options) {
     }
 
     if (time1 == 0) {
-        ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+        ffListInit(&ioCounters1);
         error = ffNetIOGetIoCounters(&ioCounters1, options);
         if (error) {
             return error;

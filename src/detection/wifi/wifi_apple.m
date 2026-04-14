@@ -21,7 +21,7 @@ const char* ffDetectWifi(FFlist* result)
 
     for (CWInterface* inf in interfaces)
     {
-        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+        FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInit(&item->inf.description);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);

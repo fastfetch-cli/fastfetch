@@ -7,7 +7,7 @@ extern "C" {
 #include <MediaRoster.h>
 #include <ParameterWeb.h>
 
-const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
+const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
     BMediaRoster* roster = BMediaRoster::Roster();
     media_node mediaNode;
     live_node_info liveInfo;
@@ -17,7 +17,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
         return NULL;
     }
 
-    FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
+    FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
     ffStrbufInit(&device->identifier);
     if (roster->GetDormantNodeFor(mediaNode, &dormantInfo) == B_OK) {
         ffStrbufAppendS(&device->identifier, dormantInfo.name);

@@ -27,7 +27,7 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users) {
             continue;
         }
 
-        FFUserResult* user = (FFUserResult*) ffListAdd(users);
+        FFUserResult* user = FF_LIST_ADD(FFUserResult, *users);
         ffStrbufInitMove(&user->name, &userName);
         ffStrbufInitWS(&user->hostName, session->pHostName);
         ffStrbufInitWS(&user->sessionName, session->pSessionName);

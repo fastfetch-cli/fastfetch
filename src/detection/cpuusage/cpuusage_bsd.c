@@ -47,7 +47,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
         uint64_t inUse = cpTime[CP_USER] + cpTime[CP_NICE] + cpTime[CP_SYS] + cpTime[CP_INTR];
         uint64_t total = inUse + cpTime[CP_IDLE];
 
-        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        FFCpuUsageInfo* info = FF_LIST_ADD(FFCpuUsageInfo, *cpuTimes);
         *info = (FFCpuUsageInfo) {
             .inUseAll = inUse,
             .totalAll = total,

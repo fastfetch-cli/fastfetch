@@ -259,7 +259,7 @@ static void detectWarp(FFTerminalFontResult* terminalFont) {
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 
-    FFstrbuf* fontWeight = (FFstrbuf*) ffListAdd(&terminalFont->font.styles);
+    FFstrbuf* fontWeight = FF_LIST_ADD(FFstrbuf, terminalFont->font.styles);
     ffStrbufInit(fontWeight);
     if (ffRegReadStrbuf(key, L"FontWeight", fontWeight, NULL)) {
         ffStrbufTrim(fontWeight, '"');

@@ -4,7 +4,7 @@
 
 static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path) {
     uint32_t baseLen = path->length;
-    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
+    FFGamepadDevice* device = FF_LIST_ADD(FFGamepadDevice, *devices);
     ffStrbufInit(&device->serial);
     ffStrbufInitMove(&device->name, name);
     device->battery = 0;

@@ -36,7 +36,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             continue;
         }
 
-        FFDisk* disk = (FFDisk*) ffListAdd(disks);
+        FFDisk* disk = FF_LIST_ADD(FFDisk, *disks);
 
         disk->bytesTotal = (uint64_t) fs.total_blocks * (uint64_t) fs.block_size;
         disk->bytesFree = (uint64_t) fs.free_blocks * (uint64_t) fs.block_size;

@@ -183,7 +183,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
 }
 
 bool ffPrintDisk(FFDiskOptions* options) {
-    FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof(FFDisk));
+    FF_LIST_AUTO_DESTROY disks = ffListCreate();
     const char* error = ffDetectDisks(options, &disks);
 
     if (error) {
@@ -358,7 +358,7 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 }
 
 bool ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof(FFDisk));
+    FF_LIST_AUTO_DESTROY disks = ffListCreate();
     const char* error = ffDetectDisks(options, &disks);
 
     if (error) {

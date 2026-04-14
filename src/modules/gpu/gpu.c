@@ -165,15 +165,14 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 }
 
 bool ffPrintGPU(FFGPUOptions* options) {
-    FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof(FFGPUResult));
+    FF_LIST_AUTO_DESTROY gpus = ffListCreate();
     const char* error = ffDetectGPU(options, &gpus);
     if (error) {
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
-    FF_LIST_AUTO_DESTROY selectedGPUs;
-    ffListInitA(&selectedGPUs, sizeof(const FFGPUResult*), gpus.length);
+    FF_LIST_AUTO_DESTROY selectedGPUs = ffListCreateA(sizeof(const FFGPUResult*), gpus.length);
 
     FF_LIST_FOR_EACH (FFGPUResult, gpu, gpus) {
         if (gpu->type == FF_GPU_TYPE_UNKNOWN && options->hideType == FF_GPU_TYPE_UNKNOWN) {
@@ -188,11 +187,13 @@ bool ffPrintGPU(FFGPUOptions* options) {
             continue;
         }
 
-        *(const FFGPUResult**) ffListAdd(&selectedGPUs) = gpu;
+        *FF_LIST_ADD(const FFGPUResult*, selectedGPUs) = gpu;
     }
 
-    for (uint32_t i = 0; i < selectedGPUs.length; i++) {
-        printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), *FF_LIST_GET(const FFGPUResult*, selectedGPUs, i));
+    uint32_t i = 0;
+    FF_LIST_FOR_EACH (const FFGPUResult*, pgpu, selectedGPUs) {
+        printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), *pgpu);
+        ++i;
     }
 
     if (selectedGPUs.length == 0) {
@@ -318,7 +319,7 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 }
 
 bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof(FFGPUResult));
+    FF_LIST_AUTO_DESTROY gpus = ffListCreate();
     const char* error = ffDetectGPU(options, &gpus);
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);

@@ -28,7 +28,7 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
             ffStrbufTrimRightSpace(&name);
             ffStrbufSubstrBefore(&path, path.length - 4);
 
-            FFMouseDevice* device = (FFMouseDevice*) ffListAdd(devices);
+            FFMouseDevice* device = FF_LIST_ADD(FFMouseDevice, *devices);
             ffStrbufInitMove(&device->name, &name);
             ffStrbufInit(&device->serial);
 

@@ -67,7 +67,7 @@ const char* ffDetectWifi(FFlist* result) {
     for (uint32_t index = 0; index < ifList->dwNumberOfItems; ++index) {
         WLAN_INTERFACE_INFO* ifInfo = (WLAN_INTERFACE_INFO*) &ifList->InterfaceInfo[index];
 
-        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+        FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitWS(&item->inf.description, ifInfo->strInterfaceDescription);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);

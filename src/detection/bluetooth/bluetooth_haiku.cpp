@@ -17,7 +17,7 @@ const char* ffDetectBluetooth(FF_A_UNUSED FFBluetoothOptions* options, FFlist* d
     BString devClass;
     dev->GetDeviceClass().DumpDeviceClass(devClass);
 
-    FFBluetoothResult* device = (FFBluetoothResult*) ffListAdd(devices);
+    FFBluetoothResult* device = FF_LIST_ADD(FFBluetoothResult, *devices);
     ffStrbufInitS(&device->name, dev->GetFriendlyName());
     ffStrbufInitS(&device->address, bdaddrUtils::ToString(dev->GetBluetoothAddress()).String());
     ffStrbufInitS(&device->type, devClass.String());

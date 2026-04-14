@@ -392,7 +392,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         return "Likely an auxiliary display controller"; // #2034
     }
 
-    FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+    FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
     ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString((uint16_t) vendorId));
     ffStrbufInit(&gpu->name);
     ffStrbufInit(&gpu->driver);
@@ -528,7 +528,7 @@ static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, co
         ++name;
     }
 
-    FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+    FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
     gpu->index = FF_GPU_INDEX_UNSET;
     gpu->deviceId = 0;
     ffStrbufInit(&gpu->name);

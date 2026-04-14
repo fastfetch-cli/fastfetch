@@ -14,7 +14,7 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
             continue;
         }
 
-        FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+        FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
         ffStrbufInitF(&brightness->name, "acpiout%d", i);
 
         brightness->max = 100;

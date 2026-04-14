@@ -19,7 +19,56 @@ static void ffCoTaskMemFreeWrapper(void* pptr) {
 }
 #define FF_COTASK_AUTO_FREE FF_A_CLEANUP(ffCoTaskMemFreeWrapper)
 
-const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
+static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */, IMMDevice* immDevice, LPWSTR mainDeviceId) {
+    LPWSTR FF_COTASK_AUTO_FREE immDeviceId = NULL;
+    if (FAILED(immDevice->GetId(&immDeviceId))) {
+        return "immDevice->GetId() failed";
+    }
+
+    IPropertyStore* FF_AUTO_RELEASE_COM_OBJECT immPropStore;
+    if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore))) {
+        return "immDevice->OpenPropertyStore() failed";
+    }
+
+    DWORD immState;
+    if (FAILED(immDevice->GetState(&immState))) {
+        return "immDevice->GetState() failed";
+    }
+
+    FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
+    device->main = !mainDeviceId || wcscmp(immDeviceId, mainDeviceId) == 0;
+    device->active = !!(immState & DEVICE_STATE_ACTIVE);
+    device->volume = FF_SOUND_VOLUME_UNKNOWN;
+    ffStrbufInitWS(&device->identifier, immDeviceId);
+    ffStrbufInit(&device->name);
+    ffStrbufInitStatic(&device->platformApi, "Core Audio APIs");
+
+    {
+        FFPropVariant friendlyName;
+        if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_FriendlyName, &friendlyName))) {
+            ffStrbufSetWSV(&device->name, friendlyName.get<std::wstring_view>());
+        } else if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_DeviceDesc, &friendlyName))) {
+            ffStrbufSetWSV(&device->name, friendlyName.get<std::wstring_view>());
+        } else {
+            ffStrbufSetStatic(&device->name, "Unknown Device");
+        }
+    }
+
+    IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume;
+    if (SUCCEEDED(immDevice->Activate(IID_IAudioEndpointVolume, CLSCTX_ALL, NULL, (void**) &immEndpointVolume))) {
+        BOOL muted;
+        if (FAILED(immEndpointVolume->GetMute(&muted)) || !muted) {
+            FLOAT volume;
+            if (SUCCEEDED(immEndpointVolume->GetMasterVolumeLevelScalar(&volume))) {
+                device->volume = (uint8_t) (volume * 100 + 0.5);
+            }
+        }
+    }
+
+    return NULL;
+}
+
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
     const char* error = ffInitCom();
     if (error) {
         return error;
@@ -40,6 +89,10 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
             return "GetDefaultAudioEndpoint() failed";
         }
 
+        if (options->soundType & FF_SOUND_TYPE_MAIN) {
+            return detectSoundDevice(devices, pDefaultDevice, NULL);
+        }
+
         if (FAILED(pDefaultDevice->GetId(&mainDeviceId))) {
             return "pDefaultDevice->GetId() failed";
         }
@@ -47,7 +100,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
 
     IMMDeviceCollection* FF_AUTO_RELEASE_COM_OBJECT pDevices = NULL;
 
-    if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_DISABLED, &pDevices))) {
+    if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | (options->soundType & FF_SOUND_TYPE_ACTIVE ? 0 : DEVICE_STATE_DISABLED), &pDevices))) {
         return "EnumAudioEndpoints() failed";
     }
 
@@ -62,46 +115,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */) {
             continue;
         }
 
-        LPWSTR FF_COTASK_AUTO_FREE immDeviceId = NULL;
-        if (FAILED(immDevice->GetId(&immDeviceId))) {
-            continue;
-        }
-
-        IPropertyStore* FF_AUTO_RELEASE_COM_OBJECT immPropStore;
-        if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore))) {
-            continue;
-        }
-
-        DWORD immState;
-        if (FAILED(immDevice->GetState(&immState))) {
-            continue;
-        }
-
-        FFSoundDevice* device = (FFSoundDevice*) ffListAdd(devices);
-        device->main = wcscmp(mainDeviceId, immDeviceId) == 0;
-        device->active = !!(immState & DEVICE_STATE_ACTIVE);
-        device->volume = FF_SOUND_VOLUME_UNKNOWN;
-        ffStrbufInitWS(&device->identifier, immDeviceId);
-        ffStrbufInit(&device->name);
-        ffStrbufInitStatic(&device->platformApi, "Core Audio APIs");
-
-        {
-            FFPropVariant friendlyName;
-            if (SUCCEEDED(immPropStore->GetValue(PKEY_Device_FriendlyName, &friendlyName))) {
-                ffStrbufSetWSV(&device->name, friendlyName.get<std::wstring_view>());
-            }
-        }
-
-        IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume;
-        if (SUCCEEDED(immDevice->Activate(IID_IAudioEndpointVolume, CLSCTX_ALL, NULL, (void**) &immEndpointVolume))) {
-            BOOL muted;
-            if (FAILED(immEndpointVolume->GetMute(&muted)) || !muted) {
-                FLOAT volume;
-                if (SUCCEEDED(immEndpointVolume->GetMasterVolumeLevelScalar(&volume))) {
-                    device->volume = (uint8_t) (volume * 100 + 0.5);
-                }
-            }
-        }
+        detectSoundDevice(devices, immDevice, mainDeviceId);
     }
 
     return NULL;

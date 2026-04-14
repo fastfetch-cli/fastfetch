@@ -21,7 +21,7 @@ FFDisplayResult* ffdsAppendDisplay(
         return NULL;
     }
 
-    FFDisplayResult* display = (FFDisplayResult*) ffListAdd(&result->displays);
+    FFDisplayResult* display = FF_LIST_ADD(FFDisplayResult, result->displays);
     display->width = width;
     display->height = height;
     display->refreshRate = refreshRate;
@@ -52,13 +52,15 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
 const FFDisplayServerResult* ffConnectDisplayServer() {
     static FFDisplayServerResult result;
-    if (result.displays.elementSize == 0) {
+    static bool initialized = false;
+    if (!initialized) {
+        initialized = true;
         ffStrbufInit(&result.wmProcessName);
         ffStrbufInit(&result.wmPrettyName);
         ffStrbufInit(&result.wmProtocolName);
         ffStrbufInit(&result.deProcessName);
         ffStrbufInit(&result.dePrettyName);
-        ffListInit(&result.displays, sizeof(FFDisplayResult));
+        ffListInit(&result.displays);
         ffConnectDisplayServerImpl(&result);
     }
     return &result;

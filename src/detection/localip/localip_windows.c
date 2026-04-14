@@ -114,7 +114,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         processedCount++;
         FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned) adapter->IfIndex, name.chars);
 
-        FFLocalIpResult* item = (FFLocalIpResult*) ffListAdd(results);
+        FFLocalIpResult* item = FF_LIST_ADD(FFLocalIpResult, *results);
         ffStrbufInitMove(&item->name, &name);
         ffStrbufInit(&item->ipv4);
         ffStrbufInit(&item->ipv6);

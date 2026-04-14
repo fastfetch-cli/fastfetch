@@ -21,7 +21,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
         integer_t inUse = cpuInfo[CPU_STATE_MAX * i + CPU_STATE_USER] + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_SYSTEM] + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_NICE];
         integer_t total = inUse + cpuInfo[CPU_STATE_MAX * i + CPU_STATE_IDLE];
 
-        FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
+        FFCpuUsageInfo* info = FF_LIST_ADD(FFCpuUsageInfo, *cpuTimes);
         *info = (FFCpuUsageInfo) {
             .inUseAll = (uint64_t) inUse,
             .totalAll = (uint64_t) total,

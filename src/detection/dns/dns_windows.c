@@ -46,7 +46,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
         }
 
         for (IP_ADAPTER_DNS_SERVER_ADDRESS_XP* ifa = adapter->FirstDnsServerAddress; ifa; ifa = ifa->Next) {
-            FFstrbuf* item = (FFstrbuf*) ffListAdd(results);
+            FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
             if (ifa->Address.lpSockaddr->sa_family == AF_INET) {
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 ffStrbufInitA(item, INET_ADDRSTRLEN);

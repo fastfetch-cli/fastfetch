@@ -50,7 +50,7 @@ static void waylandZwlrModeListener(void* data, FF_A_UNUSED struct zwlr_output_h
         return;
     }
 
-    WaylandZwlrMode* newMode = ffListAdd((FFlist*) wldata->internal);
+    WaylandZwlrMode* newMode = FF_LIST_ADD(WaylandZwlrMode, *(FFlist*) wldata->internal);
     *newMode = (WaylandZwlrMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandZwlrCurrentModeListener`
@@ -118,7 +118,7 @@ static const struct zwlr_output_head_v1_listener headListener = {
 static void waylandHandleZwlrHead(void* data, FF_A_UNUSED struct zwlr_output_manager_v1* zwlr_output_manager_v1, struct zwlr_output_head_v1* head) {
     WaylandData* wldata = data;
 
-    FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandZwlrMode));
+    FF_LIST_AUTO_DESTROY modes = ffListCreate();
     WaylandDisplay display = {
         .parent = wldata,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,

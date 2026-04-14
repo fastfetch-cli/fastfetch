@@ -62,7 +62,7 @@ static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFl
                 type |= FF_PHYSICALDISK_TYPE_UNUSED;
             }
 
-            FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+            FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
             ffStrbufInitS(&device->name, name);
             ffStrbufInitCopy(&device->devPath, path);
             ffStrbufInit(&device->serial);

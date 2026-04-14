@@ -90,7 +90,7 @@ const char* detectByOpenGL(FFlist* gpus) {
     FF_DEBUG("OpenGL detection returns: %s", error ?: "success");
 
     if (!error) {
-        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+        FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         ffStrbufInitMove(&gpu->vendor, &result.vendor);
         ffStrbufInitMove(&gpu->name, &result.renderer);

@@ -4,23 +4,40 @@
 #    include "common/library.h"
 #    include <pulse/pulseaudio.h>
 
-static void paSinkInfoCallback(pa_context* c, const pa_sink_info* i, int eol, void* userdata) {
-    FF_UNUSED(c);
+struct DetectionInfoBundle {
+    FFstrbuf serverName;
+    FFstrbuf defaultDeviceId;
+    FFlist* result;
+    FFSoundOptions* options;
+};
 
+static void paSinkInfoCallback(FF_A_UNUSED pa_context* c, const pa_sink_info* i, int eol, void* userdata) {
     if (eol > 0 || !i) {
         return;
     }
 
-    FFSoundDevice* device = ffListAdd(userdata);
+    struct DetectionInfoBundle* bundle = userdata;
+
+    bool isMain = ffStrbufEqualS(&bundle->defaultDeviceId, i->name);
+    if ((bundle->options->soundType & FF_SOUND_TYPE_MAIN) && !isMain) {
+        return;
+    }
+
+    bool isActive = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
+    if ((bundle->options->soundType & FF_SOUND_TYPE_ACTIVE) && !isActive) {
+        return;
+    }
+
+    FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *bundle->result);
     ffStrbufInitS(&device->identifier, i->name);
-    ffStrbufInitStatic(&device->platformApi, "PulseAudio");
+    ffStrbufInitCopy(&device->platformApi, &bundle->serverName);
     ffStrbufTrimRightSpace(&device->identifier);
     ffStrbufInitS(&device->name, i->description);
     ffStrbufTrimRightSpace(&device->name);
     ffStrbufTrimLeft(&device->name, ' ');
     device->volume = i->mute ? 0 : (uint8_t) ((i->volume.values[0] * 100 + PA_VOLUME_NORM / 2 /*round*/) / PA_VOLUME_NORM);
-    device->active = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
-    device->main = false;
+    device->active = isActive;
+    device->main = isMain;
 }
 
 static void paServerInfoCallback(FF_A_UNUSED pa_context* c, const pa_server_info* i, void* userdata) {
@@ -28,22 +45,20 @@ static void paServerInfoCallback(FF_A_UNUSED pa_context* c, const pa_server_info
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY api = ffStrbufCreate();
+    struct DetectionInfoBundle* bundle = userdata;
+
     const char* realServer = strstr(i->server_name, "(on ");
     if (realServer) {
-        ffStrbufSetS(&api, realServer + strlen("(on "));
-        ffStrbufTrimRight(&api, ')');
+        ffStrbufSetS(&bundle->serverName, realServer + strlen("(on "));
+        ffStrbufTrimRight(&bundle->serverName, ')');
     } else {
-        ffStrbufSetF(&api, "%s %s", i->server_name, i->server_version);
+        ffStrbufSetF(&bundle->serverName, "%s %s", i->server_name, i->server_version);
     }
 
-    FF_LIST_FOR_EACH (FFSoundDevice, device, *(FFlist*) userdata) {
-        device->main = ffStrbufEqualS(&device->identifier, i->default_sink_name);
-        ffStrbufSet(&device->platformApi, &api);
-    }
+    ffStrbufSetS(&bundle->defaultDeviceId, i->default_sink_name);
 }
 
-static const char* detectSound(FFlist* devices) {
+static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
     FF_LIBRARY_LOAD_MESSAGE(pulse, "libpulse" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_new)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pulse, pa_mainloop_get_api)
@@ -92,7 +107,23 @@ static const char* detectSound(FFlist* devices) {
         ffpa_mainloop_iterate(mainloop, 1, NULL);
     }
 
-    pa_operation* operation = ffpa_context_get_sink_info_list(context, paSinkInfoCallback, devices);
+    struct DetectionInfoBundle bundle = {
+        .serverName = ffStrbufCreate(),
+        .defaultDeviceId = ffStrbufCreate(),
+        .result = devices,
+        .options = options,
+    };
+
+    {
+        pa_operation* operation = ffpa_context_get_server_info(context, paServerInfoCallback, &bundle);
+        while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
+            ffpa_mainloop_iterate(mainloop, 1, NULL);
+        }
+
+        ffpa_operation_unref(operation);
+    }
+
+    pa_operation* operation = ffpa_context_get_sink_info_list(context, paSinkInfoCallback, &bundle);
     if (!operation) {
         ffpa_context_unref(context);
         ffpa_mainloop_free(mainloop);
@@ -105,14 +136,6 @@ static const char* detectSound(FFlist* devices) {
 
     ffpa_operation_unref(operation);
 
-    operation = ffpa_context_get_server_info(context, paServerInfoCallback, devices);
-    if (operation) {
-        while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
-            ffpa_mainloop_iterate(mainloop, 1, NULL);
-        }
-
-        ffpa_operation_unref(operation);
-    }
 
     ffpa_context_unref(context);
     ffpa_mainloop_free(mainloop);
@@ -121,11 +144,11 @@ static const char* detectSound(FFlist* devices) {
 
 #endif // FF_HAVE_PULSE
 
-const char* ffDetectSound(FFlist* devices) {
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
 #ifdef FF_HAVE_PULSE
-    return detectSound(devices);
+    return detectSound(options, devices);
 #else
-    FF_UNUSED(devices);
+    FF_UNUSED(options, devices);
     return "Fastfetch was built without libpulse support";
 #endif
 }

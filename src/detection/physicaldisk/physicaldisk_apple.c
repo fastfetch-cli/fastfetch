@@ -130,7 +130,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             type |= FF_PHYSICALDISK_TYPE_UNUSED;
         }
 
-        FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+        FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInitMove(&device->name, &deviceName);

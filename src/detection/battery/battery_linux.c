@@ -60,7 +60,7 @@ static bool parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         return false;
     }
 
-    FFBatteryResult* result = ffListAdd(results);
+    FFBatteryResult* result = FF_LIST_ADD(FFBatteryResult, *results);
     ffStrbufInit(&result->manufacturer);
     ffStrbufInit(&result->modelName);
     ffStrbufInit(&result->technology);

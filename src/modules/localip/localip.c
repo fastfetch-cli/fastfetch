@@ -95,7 +95,7 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute, FFstrbuf* buffer
 }
 
 bool ffPrintLocalIp(FFLocalIpOptions* options) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectLocalIps(options, &results);
 
@@ -109,7 +109,7 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
         return false;
     }
 
-    ffListSort(&results, (const void*) sortIps);
+    ffListSort(&results, sizeof(FFLocalIpResult), (const void*) sortIps);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
@@ -351,7 +351,7 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 }
 
 bool ffGenerateLocalIpJsonResult(FF_A_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectLocalIps(options, &results);
 

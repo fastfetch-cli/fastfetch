@@ -18,7 +18,7 @@ static const char* detectByIoctl(FFlist* devices) {
         return "ioctl(KDGKBINFO) failed";
     }
 
-    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+    FFKeyboardDevice* device = FF_LIST_ADD(FFKeyboardDevice, *devices);
 
     switch (kbdInfo.kb_type) {
         case KB_84:
@@ -69,7 +69,7 @@ static const char* detectByUsbhid(FFlist* devices) {
 
                 struct usb_device_info di;
                 if (ioctl(fd, USB_GET_DEVICEINFO, &di) != -1) {
-                    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+                    FFKeyboardDevice* device = FF_LIST_ADD(FFKeyboardDevice, *devices);
                     ffStrbufInitS(&device->serial, di.udi_serial);
                     ffStrbufInitS(&device->name, di.udi_product);
                 }

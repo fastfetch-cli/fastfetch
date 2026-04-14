@@ -26,7 +26,7 @@ static void formatKey(const FFDiskIOOptions* options, FFDiskIOResult* dev, uint3
 }
 
 bool ffPrintDiskIO(FFDiskIOOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFDiskIOResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectDiskIO(&result, options);
 
     if (error) {
@@ -34,7 +34,7 @@ bool ffPrintDiskIO(FFDiskIOOptions* options) {
         return false;
     }
 
-    ffListSort(&result, (const void*) sortDevices);
+    ffListSort(&result, sizeof(FFDiskIOResult), (const void*) sortDevices);
 
     uint32_t index = 0;
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -131,7 +131,7 @@ void ffGenerateDiskIOJsonConfig(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
 }
 
 bool ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFDiskIOResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectDiskIO(&result, options);
 
     if (error) {

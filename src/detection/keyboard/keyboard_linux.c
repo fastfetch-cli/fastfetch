@@ -83,7 +83,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
             case '\0':
                 // End of device entry; add to list if it has a name.
                 if (device.name.length > 0) {
-                    FFKeyboardDevice* added = (FFKeyboardDevice*) ffListAdd(devices);
+                    FFKeyboardDevice* added = FF_LIST_ADD(FFKeyboardDevice, *devices);
                     ffStrbufInitMove(&added->name, &device.name);
                     ffStrbufInitMove(&added->serial, &device.serial);
                 }

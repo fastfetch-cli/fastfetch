@@ -37,7 +37,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
             continue;
         }
 
-        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
 
         kstat_named_t* wbytes = (kstat_named_t*) kstat_data_lookup(ks, "obytes64");
         kstat_named_t* rbytes = (kstat_named_t*) kstat_data_lookup(ks, "rbytes64");

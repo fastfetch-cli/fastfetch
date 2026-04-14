@@ -232,18 +232,17 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
 #        elif defined(__OpenBSD__)
         {
-                FF_DEBUG("Using OpenBSD /var/run/dmesg.boot implementation");
-                char dmesg[8192];
-                ssize_t size =  ffReadFileData("/var/run/dmesg.boot", sizeof(dmesg), dmesg);
-                if (size <= 0) {
-                    goto fallback;
-                }
-                char* line = memmem(dmesg, sizeof(dmesg), "\nbios0 at mainbios0: SMBIOS rev. ", strlen("\nbios0 at mainbios0: SMBIOS rev. "));
-                if (!line) {
-                    goto fallback;
-                }
-                line += strlen("\nbios0 at mainbios0: SMBIOS rev. ");
-
+            FF_DEBUG("Using OpenBSD /var/run/dmesg.boot implementation");
+            char dmesg[8192];
+            ssize_t size = ffReadFileData("/var/run/dmesg.boot", sizeof(dmesg), dmesg);
+            if (size <= 0) {
+                goto fallback;
+            }
+            char* line = memmem(dmesg, sizeof(dmesg), "\nbios0 at mainbios0: SMBIOS rev. ", strlen("\nbios0 at mainbios0: SMBIOS rev. "));
+            if (!line) {
+                goto fallback;
+            }
+            line += strlen("\nbios0 at mainbios0: SMBIOS rev. ");
         }
 #        endif
         {

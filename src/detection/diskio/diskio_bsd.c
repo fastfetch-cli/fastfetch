@@ -57,7 +57,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
             continue;
         }
 
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
         ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
         device->bytesRead = snapIter->bytes[DEVSTAT_READ];
         device->readCount = snapIter->operations[DEVSTAT_READ];
@@ -102,7 +102,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
             continue;
         }
 
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInitF(&device->devPath, "/dev/%s", deviceName);
         device->bytesRead = current->bytes_read;

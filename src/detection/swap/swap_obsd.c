@@ -24,7 +24,7 @@ const char* ffDetectSwap(FFlist* result) {
 
     for (int i = 0; i < nswap; i++) {
         if (swdev[i].se_flags & SWF_ENABLE) {
-            FFSwapResult* swap = ffListAdd(result);
+            FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
             ffStrbufInitS(&swap->name, swdev[i].se_path);
             swap->bytesUsed = (uint64_t) swdev[i].se_inuse * DEV_BSIZE;
             swap->bytesTotal = (uint64_t) swdev[i].se_nblks * DEV_BSIZE;

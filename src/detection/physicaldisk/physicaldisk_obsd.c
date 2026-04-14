@@ -14,35 +14,58 @@
 
 static inline const char* retstsToStr(uint8_t retsts) {
     switch (retsts) {
-        case SCCMD_OK: return "OK";
-        case SCCMD_TIMEOUT: return "TIMEOUT";
-        case SCCMD_BUSY: return "BUSY";
-        case SCCMD_SENSE: return "SENSE";
-        case SCCMD_UNKNOWN: return "UNKNOWN";
-        default: return "?";
+        case SCCMD_OK:
+            return "OK";
+        case SCCMD_TIMEOUT:
+            return "TIMEOUT";
+        case SCCMD_BUSY:
+            return "BUSY";
+        case SCCMD_SENSE:
+            return "SENSE";
+        case SCCMD_UNKNOWN:
+            return "UNKNOWN";
+        default:
+            return "?";
     }
 }
 
 #ifndef NDEBUG
 static inline const char* senseKeyToStr(uint8_t key) {
     switch (key) {
-        case 0x0: return "No Sense";
-        case 0x1: return "Recovered Error";
-        case 0x2: return "Not Ready";
-        case 0x3: return "Medium Error";
-        case 0x4: return "Hardware Error";
-        case 0x5: return "Illegal Request";
-        case 0x6: return "Unit Attention";
-        case 0x7: return "Data Protect";
-        case 0x8: return "Blank Check";
-        case 0x9: return "Vendor Specific";
-        case 0xA: return "Copy Aborted";
-        case 0xB: return "Aborted Command";
-        case 0xC: return "Equal";
-        case 0xD: return "Volume Overflow";
-        case 0xE: return "Miscompare";
-        case 0xF: return "Completed";
-        default: return "Unknown";
+        case 0x0:
+            return "No Sense";
+        case 0x1:
+            return "Recovered Error";
+        case 0x2:
+            return "Not Ready";
+        case 0x3:
+            return "Medium Error";
+        case 0x4:
+            return "Hardware Error";
+        case 0x5:
+            return "Illegal Request";
+        case 0x6:
+            return "Unit Attention";
+        case 0x7:
+            return "Data Protect";
+        case 0x8:
+            return "Blank Check";
+        case 0x9:
+            return "Vendor Specific";
+        case 0xA:
+            return "Copy Aborted";
+        case 0xB:
+            return "Aborted Command";
+        case 0xC:
+            return "Equal";
+        case 0xD:
+            return "Volume Overflow";
+        case 0xE:
+            return "Miscompare";
+        case 0xF:
+            return "Completed";
+        default:
+            return "Unknown";
     }
 }
 
@@ -64,8 +87,9 @@ static void logScsiSense(const char* diskName, const char* operation, const scsi
 
     FF_STRBUF_AUTO_DESTROY rawSense = ffStrbufCreate();
     for (size_t i = 0; i < req->senselen_used; ++i) {
-        if (i)
+        if (i) {
             ffStrbufAppendC(&rawSense, ' ');
+        }
         ffStrbufAppendF(&rawSense, "%02X", req->sense[i]);
     }
 
@@ -78,11 +102,10 @@ static void logScsiSense(const char* diskName, const char* operation, const scsi
         senseKeyToStr(senseKey),
         asc,
         ascq,
-        rawSense.length ? rawSense.chars : "empty"
-    );
+        rawSense.length ? rawSense.chars : "empty");
 }
 #else
-#define logScsiSense(...) ((void)0)
+#    define logScsiSense(...) ((void) 0)
 #endif
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
@@ -155,7 +178,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             type |= FF_PHYSICALDISK_TYPE_UNUSED;
         }
 
-        FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+        FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
         ffStrbufInitS(&device->name, dl.d_packname);
         ffStrbufInitS(&device->devPath, devPath);
         ffStrbufInit(&device->serial);
@@ -181,7 +204,6 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         };
         if (ioctl(f, SCIOCCOMMAND, &req) == 0) {
             if (req.retsts == SCCMD_OK) {
-
                 ffStrbufClear(&device->name);
                 ffStrbufAppendNS(&device->name, (uint32_t) ARRAY_SIZE(inquiry.vendor), inquiry.vendor);
                 ffStrbufTrimRight(&device->name, '\0');

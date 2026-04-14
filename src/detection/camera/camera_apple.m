@@ -37,7 +37,7 @@ const char* ffDetectCamera(FFlist* result)
 
     for (AVCaptureDevice* device in session.devices)
     {
-        FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
+        FFCameraResult* camera = FF_LIST_ADD(FFCameraResult, *result);
         ffStrbufInitS(&camera->name, device.localizedName.UTF8String);
         ffStrbufInitS(&camera->vendor, device.manufacturer.UTF8String);
         ffStrbufInitS(&camera->id, device.uniqueID.UTF8String);

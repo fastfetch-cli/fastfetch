@@ -113,7 +113,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
             continue;
         }
 
-        FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
+        FFGamepadDevice* device = FF_LIST_ADD(FFGamepadDevice, *devices);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->name);
         device->battery = 0;

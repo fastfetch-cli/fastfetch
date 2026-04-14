@@ -44,7 +44,7 @@ static void waylandKdeModeListener(void* data, FF_A_UNUSED struct kde_output_dev
         return;
     }
 
-    WaylandKdeMode* newMode = ffListAdd((FFlist*) wldata->internal);
+    WaylandKdeMode* newMode = FF_LIST_ADD(WaylandKdeMode, *(FFlist*) wldata->internal);
     *newMode = (WaylandKdeMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandKdeCurrentModeListener`
@@ -188,7 +188,7 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
         return "Failed to create kde_output_device_v2";
     }
 
-    FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandKdeMode));
+    FF_LIST_AUTO_DESTROY modes = ffListCreate();
     WaylandDisplay display = {
         .parent = wldata,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,

@@ -50,7 +50,7 @@ static inline void cleanLibzfs(FFZfsData* data) {
 static int enumZpoolCallback(zpool_handle_t* zpool, void* param) {
     FFZfsData* data = (FFZfsData*) param;
     zprop_source_t source;
-    FFZpoolResult* item = ffListAdd(data->result);
+    FFZpoolResult* item = FF_LIST_ADD(FFZpoolResult, *data->result);
     char buf[1024];
     if (data->ffzpool_get_prop(zpool, data->props.name, buf, ARRAY_SIZE(buf), &source, false) == 0) {
         ffStrbufInitS(&item->name, buf);

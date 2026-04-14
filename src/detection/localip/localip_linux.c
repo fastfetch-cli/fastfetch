@@ -172,8 +172,10 @@ static FFLocalIpIpv6Type getIpv6Type(struct ifaddrs* ifa) {
     return result;
 #elif __linux__
     static FFlist addresses = {};
-    if (addresses.elementSize == 0) {
-        ffListInit(&addresses, sizeof(struct in6_addr));
+    static bool initialized = false;
+    if (!initialized) {
+        initialized = true;
+        ffListInit(&addresses);
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         if (!ffReadFileBuffer("/proc/net/if_inet6", &buffer)) {
             return result;
@@ -182,7 +184,7 @@ static FFLocalIpIpv6Type getIpv6Type(struct ifaddrs* ifa) {
         char* line = NULL;
         size_t len = 0;
         while (ffStrbufGetline(&line, &len, &buffer)) {
-            struct in6_addr* entry = (struct in6_addr*) ffListAdd(&addresses);
+            struct in6_addr* entry = FF_LIST_ADD(struct in6_addr, addresses);
             uint8_t flags;
             if (sscanf(line, "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 " %*s %*s %*s %" SCNx8 " %*s", &entry->s6_addr[0], &entry->s6_addr[1], &entry->s6_addr[2], &entry->s6_addr[3], &entry->s6_addr[4], &entry->s6_addr[5], &entry->s6_addr[6], &entry->s6_addr[7], &entry->s6_addr[8], &entry->s6_addr[9], &entry->s6_addr[10], &entry->s6_addr[11], &entry->s6_addr[12], &entry->s6_addr[13], &entry->s6_addr[14], &entry->s6_addr[15], &flags) != 17 ||
                 (!IN6_IS_ADDR_GLOBAL(entry) && !IN6_IS_ADDR_UNIQUE_LOCAL(entry)) ||
@@ -284,7 +286,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
     FF_DEBUG("Successfully retrieved interface addresses");
 
-    FF_LIST_AUTO_DESTROY adapters = ffListCreate(sizeof(FFAdapter));
+    FF_LIST_AUTO_DESTROY adapters = ffListCreate();
 
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next) {
         if (!ifa->ifa_addr) {
@@ -341,11 +343,11 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
             }
         }
         if (!adapter) {
-            adapter = ffListAdd(&adapters);
+            adapter = FF_LIST_ADD(FFAdapter, adapters);
             *adapter = (FFAdapter) {
                 .mac = ifa,
-                .ipv4 = ffListCreate(sizeof(struct ifaddrs*)),
-                .ipv6 = ffListCreate(sizeof(struct ifaddrs*)),
+                .ipv4 = ffListCreate(),
+                .ipv6 = ffListCreate(),
             };
             FF_DEBUG("Created new adapter entry for interface %s", ifa->ifa_name);
         }

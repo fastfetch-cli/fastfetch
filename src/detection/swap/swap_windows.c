@@ -20,7 +20,7 @@ const char* ffDetectSwap(FFlist* result) {
 
     uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
     for (SYSTEM_PAGEFILE_INFORMATION* current = pstart;; current = (SYSTEM_PAGEFILE_INFORMATION*) ((uint8_t*) current + current->NextEntryOffset)) {
-        FFSwapResult* swap = ffListAdd(result);
+        FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
         ffStrbufInitNWS(&swap->name, current->FileName.Length / sizeof(wchar_t), current->FileName.Buffer);
         if (ffStrbufStartsWithS(&swap->name, "\\??\\")) {
             ffStrbufSubstrAfter(&swap->name, strlen("\\??\\") - 1);

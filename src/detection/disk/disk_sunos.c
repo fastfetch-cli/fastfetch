@@ -131,7 +131,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         }
 
         // We have a valid device, add it to the list
-        FFDisk* disk = ffListAdd(disks);
+        FFDisk* disk = FF_LIST_ADD(FFDisk, *disks);
         disk->type = FF_DISK_VOLUME_TYPE_NONE;
         ffStrbufInitS(&disk->mountFrom, device.mnt_special);
         ffStrbufInitS(&disk->mountpoint, device.mnt_mountp);

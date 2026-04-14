@@ -97,7 +97,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         ffStrbufSetS(&name, devName);
     }
 
-    FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+    FFPhysicalDiskResult* device = FF_LIST_ADD(FFPhysicalDiskResult, *result);
     ffStrbufInitMove(&device->name, &name);
     ffStrbufInitF(&device->devPath, "/dev/%s", devName);
     ffStrbufInit(&device->serial);

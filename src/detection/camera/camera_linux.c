@@ -39,7 +39,7 @@ const char* ffDetectCamera(FFlist* result) {
             continue;
         }
 
-        FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
+        FFCameraResult* camera = FF_LIST_ADD(FFCameraResult, *result);
         ffStrbufInitS(&camera->name, (const char*) cap.card);
         ffStrbufInit(&camera->vendor);
         ffStrbufInitS(&camera->id, (const char*) cap.bus_info);

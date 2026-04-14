@@ -151,7 +151,7 @@ static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbu
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    FFBluetoothResult* device = ffListAdd(devices);
+    FFBluetoothResult* device = FF_LIST_ADD(FFBluetoothResult, *devices);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
     ffStrbufInit(&device->type);
@@ -165,7 +165,7 @@ static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbu
     return device;
 }
 
-static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter, int32_t connectedCount) {
+static void detectBluetoothRoot(FFBluetoothOptions* options, FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter, int32_t connectedCount) {
     if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY) {
         return;
     }
@@ -177,11 +177,15 @@ static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIt
         FFBluetoothResult* device = detectBluetoothObject(devices, dbus, &arrayIter);
 
         if (device) {
-            if (device->name.length == 0 || (connectedCount > 0 && !device->connected)) {
+            if (!options->showDisconnected && !device->connected) {
                 ffStrbufDestroy(&device->name);
                 ffStrbufDestroy(&device->address);
                 ffStrbufDestroy(&device->type);
                 --devices->length;
+            }
+
+            if (device->name.length == 0) {
+                ffStrbufSetStatic(&device->name, "Unknown Device");
             }
 
             if (device->connected && --connectedCount == 0) {
@@ -191,7 +195,7 @@ static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIt
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
-static const char* detectBluetooth(FFlist* devices, int32_t connectedCount) {
+static const char* detectBluetooth(FFBluetoothOptions* options, FFlist* devices, int32_t connectedCount) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
     if (error) {
@@ -209,7 +213,7 @@ static const char* detectBluetooth(FFlist* devices, int32_t connectedCount) {
         return "Failed to get root iterator of GetManagedObjects";
     }
 
-    detectBluetoothRoot(devices, &dbus, &rootIter, connectedCount);
+    detectBluetoothRoot(options, devices, &dbus, &rootIter, connectedCount);
 
     dbus.lib->ffdbus_message_unref(managedObjects);
     return NULL;
@@ -234,7 +238,7 @@ static uint32_t connectedDevices(void) {
 
 #endif
 
-const char* ffDetectBluetooth(FF_A_UNUSED FFBluetoothOptions* options, FF_A_UNUSED FFlist* devices /* FFBluetoothResult */) {
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
 #ifdef FF_HAVE_DBUS
     int32_t connectedCount = -1;
     if (!options->showDisconnected) {
@@ -244,8 +248,9 @@ const char* ffDetectBluetooth(FF_A_UNUSED FFBluetoothOptions* options, FF_A_UNUS
         }
     }
 
-    return detectBluetooth(devices, connectedCount);
+    return detectBluetooth(options, devices, connectedCount);
 #else
+    FF_UNUSED(options, devices);
     return "Fastfetch was compiled without DBus support";
 #endif
 }

@@ -7,7 +7,7 @@
 #include <sys/audioio.h>
 #include <sys/ioctl.h>
 
-const char* ffDetectSound(FFlist* devices) {
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
     int defaultDev;
     {
         char audiop[12];
@@ -24,6 +24,11 @@ const char* ffDetectSound(FFlist* devices) {
     char path[] = "/dev/audio0";
 
     for (int idev = 0; idev < 9; ++idev) {
+        bool isMain = idev == defaultDev;
+        if ((options->soundType & FF_SOUND_TYPE_MAIN) && !isMain) {
+            continue;
+        }
+
         path[strlen("/dev/audio")] = (char) ('0' + idev);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
@@ -40,14 +45,14 @@ const char* ffDetectSound(FFlist* devices) {
             continue;
         }
 
-        FFSoundDevice* device = ffListAdd(devices);
+        FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
         ffStrbufInitS(&device->identifier, path);
         ffStrbufInitS(&device->name, ad.name);
         ffStrbufTrimRightSpace(&device->name);
         ffStrbufInitF(&device->platformApi, "%s", "SunAudio");
         device->volume = (uint8_t) ((ai.play.gain * 100 + AUDIO_MAX_GAIN / 2) / AUDIO_MAX_GAIN);
         device->active = true;
-        device->main = defaultDev == idev;
+        device->main = isMain;
     }
 
     return NULL;

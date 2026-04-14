@@ -243,7 +243,7 @@ static const char* detectVulkan(FFVulkanResult* result) {
             }
         }
 
-        FFGPUResult* gpu = ffListAdd(&result->gpus);
+        FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, result->gpus);
 
         ffStrbufInitF(&gpu->platformApi, "Vulkan %u.%u.%u", deviceAPIVersion.major, deviceAPIVersion.minor, deviceAPIVersion.patch);
         gpu->deviceId = physicalDeviceProperties.properties.deviceID;
@@ -304,14 +304,16 @@ static const char* detectVulkan(FFVulkanResult* result) {
 
 FFVulkanResult* ffDetectVulkan(void) {
     static FFVulkanResult result;
+    static bool initialized;
 
-    if (result.gpus.elementSize == 0) {
+    if (!initialized) {
         FF_DEBUG("Initializing Vulkan detection cache");
+        initialized = true;
         ffStrbufInit(&result.driver);
         ffStrbufInit(&result.apiVersion);
         ffStrbufInit(&result.conformanceVersion);
         ffStrbufInit(&result.instanceVersion);
-        ffListInit(&result.gpus, sizeof(FFGPUResult));
+        ffListInit(&result.gpus);
 
 #ifdef FF_HAVE_VULKAN
         result.error = detectVulkan(&result);

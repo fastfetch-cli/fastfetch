@@ -7,8 +7,8 @@
 #define FF_PHYSICALMEMORY_DISPLAY_NAME "Physical Memory"
 
 bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalMemoryResult));
-    const char* error = ffDetectPhysicalMemory(&result);
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
+    const char* error = ffDetectPhysicalMemory(options, &result);
 
     if (error) {
         ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
@@ -16,35 +16,21 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory detected");
-        return false;
-    }
-
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFPhysicalMemoryResult*));
-    FF_LIST_FOR_EACH (FFPhysicalMemoryResult, device, result) {
-        if (!options->showEmptySlots && !device->installed) {
-            continue;
-        }
-
-        *(FFPhysicalMemoryResult**) ffListAdd(&filtered) = device;
-    }
-
-    if (filtered.length == 0) {
-        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No installed physical memory detected");
+        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory devices detected");
         return false;
     }
 
     FF_STRBUF_AUTO_DESTROY prettySize = ffStrbufCreate();
 
-    for (uint32_t i = 0; i < filtered.length; ++i) {
-        FFPhysicalMemoryResult* device = *FF_LIST_GET(FFPhysicalMemoryResult*, filtered, i);
+    uint32_t i = 0;
+    FF_LIST_FOR_EACH (FFPhysicalMemoryResult, device, result) {
         ffStrbufClear(&prettySize);
         if (device->installed) {
             ffSizeAppendNum(device->size, &prettySize);
         }
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_PHYSICALMEMORY_DISPLAY_NAME, filtered.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_PHYSICALMEMORY_DISPLAY_NAME, result.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             if (device->installed) {
                 fputs(prettySize.chars, stdout);
@@ -88,6 +74,8 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
                                                                                                                                         FF_ARG(device->installed, "is-installed"),
                                                                                                                                     }));
         }
+
+        i++;
     }
 
     FF_LIST_FOR_EACH (FFPhysicalMemoryResult, device, result) {
@@ -124,9 +112,9 @@ void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson
     yyjson_mut_obj_add_bool(doc, module, "showEmptySlots", options->showEmptySlots);
 }
 
-bool ffGeneratePhysicalMemoryJsonResult(FF_A_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalMemoryResult));
-    const char* error = ffDetectPhysicalMemory(&result);
+bool ffGeneratePhysicalMemoryJsonResult(FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
+    const char* error = ffDetectPhysicalMemory(options, &result);
 
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);

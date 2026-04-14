@@ -34,7 +34,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
         if (display->type == FF_DISPLAY_TYPE_BUILTIN || display->type == FF_DISPLAY_TYPE_UNKNOWN) {
             float value;
             if (DisplayServicesGetBrightness((CGDirectDisplayID) display->id, &value) == kCGErrorSuccess) {
-                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 brightness->current = value;
                 brightness->max = 1;
                 brightness->min = 0;
@@ -103,7 +103,7 @@ static const char* detectWithDdcci(FF_A_UNUSED const FFDisplayServerResult* disp
             uint32_t current = ((uint32_t) i2cOut[8] << 8u) + (uint32_t) i2cOut[9];
             uint32_t max = ((uint32_t) i2cOut[6] << 8u) + (uint32_t) i2cOut[7];
 
-            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+            FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
             brightness->max = max;
             brightness->min = 0;
             brightness->current = current;
@@ -214,7 +214,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 uint32_t current = ((uint32_t) i2cOut[8] << 8u) + (uint32_t) i2cOut[9];
                 uint32_t max = ((uint32_t) i2cOut[6] << 8u) + (uint32_t) i2cOut[7];
 
-                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 brightness->max = max;
                 brightness->min = 0;
                 brightness->current = current;

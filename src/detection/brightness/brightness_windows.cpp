@@ -43,7 +43,7 @@ static const char* detectWithWmi(FFlist* result) {
 
     while (FFWmiRecord record = query.next()) {
         if (FFWmiVariant vtValue = record.get(L"CurrentBrightness")) {
-            FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+            FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
             brightness->max = 100;
             brightness->min = 0;
             brightness->current = vtValue.get<uint8_t>();
@@ -90,7 +90,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
         if (NT_SUCCESS(ffGetPhysicalMonitors(&deviceName, 1, &monitorCount, &physicalMonitor)) && monitorCount >= 1) {
             DWORD curr = 0, max = 0;
             if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, 0x10 /* luminance */, NULL, &curr, &max))) {
-                FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 if (display->name.length > 0) {
                     ffStrbufInitCopy(&brightness->name, &display->name);
                 } else {

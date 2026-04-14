@@ -30,7 +30,7 @@ const char* ffDetectWifi(FFlist* result) {
         return "Wifi info result is not a JSON object";
     }
 
-    FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+    FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
     ffStrbufInit(&item->inf.description);
     ffStrbufInit(&item->inf.status);
     ffStrbufInit(&item->conn.status);

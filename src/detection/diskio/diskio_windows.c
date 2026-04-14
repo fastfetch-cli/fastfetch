@@ -29,7 +29,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
         return true;
     }
 
-    FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+    FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
     STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
 
     ffStrbufInit(&device->name);

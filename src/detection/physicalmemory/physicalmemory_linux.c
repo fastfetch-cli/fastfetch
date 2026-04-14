@@ -64,7 +64,7 @@ typedef struct FFSmbiosMemoryDevice {
 static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
     "FFSmbiosMemoryDevice: Wrong struct alignment");
 
-const char* ffDetectPhysicalMemory(FFlist* result) {
+const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* result) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
         return "Failed to get SMBIOS data";
@@ -84,7 +84,11 @@ const char* ffDetectPhysicalMemory(FFlist* result) {
         const char* strings = (const char*) data + data->Header.Length;
         bool installed = data->Size != 0;
 
-        FFPhysicalMemoryResult* device = ffListAdd(result);
+        if (!installed && !options->showEmptySlots) {
+            continue;
+        }
+
+        FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
         ffStrbufInit(&device->type);
         ffStrbufInit(&device->formFactor);
         ffStrbufInit(&device->locator);

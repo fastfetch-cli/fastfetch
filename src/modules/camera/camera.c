@@ -33,7 +33,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
 }
 
 bool ffPrintCamera(FFCameraOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectCamera(&result);
 
     if (error) {
@@ -77,7 +77,7 @@ void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, y
 }
 
 bool ffGenerateCameraJsonResult(FF_A_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectCamera(&result);
 
     if (error) {

@@ -46,7 +46,7 @@ static void parsePowerAdapter(int dfd, const char* id, FFlist* results) {
         return;
     }
 
-    FFPowerAdapterResult* result = ffListAdd(results);
+    FFPowerAdapterResult* result = FF_LIST_ADD(FFPowerAdapterResult, *results);
     ffStrbufInit(&result->name);
     ffStrbufInit(&result->description);
     result->watts = (int) (ffStrbufToDouble(&tmpBuffer, 0) / 1e6 + 0.5);

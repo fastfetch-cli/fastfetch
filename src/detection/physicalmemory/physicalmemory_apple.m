@@ -19,7 +19,7 @@ static void appendDevice(
     NSString* speed,
     bool ecc)
 {
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInitS(&device->type, type.UTF8String);
     ffStrbufInit(&device->formFactor);
     ffStrbufInitS(&device->locator, locator.UTF8String);
@@ -133,7 +133,7 @@ FF_A_UNUSED static const char* detectFromIokit(FFlist* result)
     if (!dramType || !dramSize || !dramVendor)
         return "IORegistryEntryCreateCFProperty() failed";
 
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInit(&device->type);
     ffStrbufInit(&device->formFactor);
     ffStrbufInit(&device->locator);
@@ -152,7 +152,7 @@ FF_A_UNUSED static const char* detectFromIokit(FFlist* result)
     return NULL;
 }
 
-const char* ffDetectPhysicalMemory(FFlist* result)
+const char* ffDetectPhysicalMemory(FF_A_UNUSED FFPhysicalMemoryOptions* options, FFlist* result)
 {
     #if __aarch64__
     if (detectFromIokit(result) == NULL)

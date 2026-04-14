@@ -6,7 +6,7 @@
 #include <sys/soundcard.h>
 #include <unistd.h>
 
-const char* ffDetectSound(FFlist* devices) {
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
 #ifndef __NetBSD__
     int defaultDev = ffSysctlGetInt("hw.snd.default_unit", -1);
     if (defaultDev == -1) {
@@ -32,6 +32,11 @@ const char* ffDetectSound(FFlist* devices) {
     struct oss_sysinfo info = { .nummixers = 9 };
 
     for (int idev = 0; idev <= info.nummixers; ++idev) {
+        bool isMain = idev == defaultDev;
+        if ((options->soundType & FF_SOUND_TYPE_MAIN) && !isMain) {
+            continue;
+        }
+
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
@@ -68,7 +73,7 @@ const char* ffDetectSound(FFlist* devices) {
             continue;
         }
 
-        FFSoundDevice* device = ffListAdd(devices);
+        FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
         ffStrbufInitS(&device->identifier, path);
         ffStrbufInitF(&device->name, "%s %s", ci.longname, ci.hw_info);
         ffStrbufTrimRightSpace(&device->name);
@@ -79,7 +84,7 @@ const char* ffDetectSound(FFlist* devices) {
 #endif
                                          ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;
         device->active = true;
-        device->main = defaultDev == idev;
+        device->main = isMain;
     }
 
     return NULL;

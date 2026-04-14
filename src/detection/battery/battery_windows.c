@@ -63,7 +63,7 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results) {
             continue;
         }
 
-        FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(results);
+        FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
 
         if (memcmp(bi.Chemistry, "PbAc", 4) == 0) {
             ffStrbufInitStatic(&battery->technology, "Lead Acid");
@@ -259,7 +259,7 @@ static const char* detectWithNtApi(FF_A_UNUSED FFBatteryOptions* options, FFlist
     SYSTEM_BATTERY_STATE info;
     if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) &&
         info.BatteryPresent) {
-        FFBatteryResult* battery = (FFBatteryResult*) ffListAdd(results);
+        FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->manufactureDate);

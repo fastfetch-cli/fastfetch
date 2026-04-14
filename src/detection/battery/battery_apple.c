@@ -32,7 +32,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
 
         bool boolValue;
 
-        FFBatteryResult* battery = ffListAdd(results);
+        FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *results);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);

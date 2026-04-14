@@ -18,7 +18,7 @@ static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, ui
 }
 
 bool ffPrintMouse(FFMouseOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFMouseDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectMouse(&result);
 
@@ -32,7 +32,7 @@ bool ffPrintMouse(FFMouseOptions* options) {
         return false;
     }
 
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFMouseDevice*));
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate();
     FF_LIST_FOR_EACH (FFMouseDevice, device, result) {
         bool ignored = false;
         FF_LIST_FOR_EACH (FFstrbuf, ignore, options->ignores) {
@@ -42,7 +42,7 @@ bool ffPrintMouse(FFMouseOptions* options) {
             }
         }
         if (!ignored) {
-            FFMouseDevice** ptr = ffListAdd(&filtered);
+            FFMouseDevice** ptr = FF_LIST_ADD(FFMouseDevice*, filtered);
             *ptr = device;
         }
     }
@@ -80,7 +80,7 @@ void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module) {
             size_t eidx, emax;
             yyjson_arr_foreach (val, eidx, emax, elem) {
                 if (yyjson_is_str(elem)) {
-                    FFstrbuf* strbuf = ffListAdd(&options->ignores);
+                    FFstrbuf* strbuf = FF_LIST_ADD(FFstrbuf, options->ignores);
                     ffStrbufInitJsonVal(strbuf, elem);
                 }
             }
@@ -103,7 +103,7 @@ void ffGenerateMouseJsonConfig(FFMouseOptions* options, yyjson_mut_doc* doc, yyj
 }
 
 bool ffGenerateMouseJsonResult(FF_A_UNUSED FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFMouseDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectMouse(&result);
 
@@ -139,7 +139,7 @@ bool ffGenerateMouseJsonResult(FF_A_UNUSED FFMouseOptions* options, yyjson_mut_d
 void ffInitMouseOptions(FFMouseOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
 
-    ffListInit(&options->ignores, sizeof(FFstrbuf));
+    ffListInit(&options->ignores);
 }
 
 void ffDestroyMouseOptions(FFMouseOptions* options) {

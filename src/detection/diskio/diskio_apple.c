@@ -37,7 +37,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
             continue;
         }
 
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        FFDiskIOResult* device = FF_LIST_ADD(FFDiskIOResult, *result);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
 

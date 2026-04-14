@@ -18,7 +18,7 @@ static void printDevice(FFKeyboardOptions* options, const FFKeyboardDevice* devi
 }
 
 bool ffPrintKeyboard(FFKeyboardOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFKeyboardDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectKeyboard(&result);
 
@@ -32,7 +32,7 @@ bool ffPrintKeyboard(FFKeyboardOptions* options) {
         return false;
     }
 
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFKeyboardDevice*));
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate();
     FF_LIST_FOR_EACH (FFKeyboardDevice, device, result) {
         bool ignored = false;
         FF_LIST_FOR_EACH (FFstrbuf, ignore, options->ignores) {
@@ -42,7 +42,7 @@ bool ffPrintKeyboard(FFKeyboardOptions* options) {
             }
         }
         if (!ignored) {
-            FFKeyboardDevice** ptr = ffListAdd(&filtered);
+            FFKeyboardDevice** ptr = FF_LIST_ADD(FFKeyboardDevice*, filtered);
             *ptr = device;
         }
     }
@@ -77,7 +77,7 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module) {
             size_t eidx, emax;
             yyjson_arr_foreach (val, eidx, emax, elem) {
                 if (yyjson_is_str(elem)) {
-                    FFstrbuf* strbuf = ffListAdd(&options->ignores);
+                    FFstrbuf* strbuf = FF_LIST_ADD(FFstrbuf, options->ignores);
                     ffStrbufInitJsonVal(strbuf, elem);
                 }
             }
@@ -100,7 +100,7 @@ void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* do
 }
 
 bool ffGenerateKeyboardJsonResult(FF_A_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFKeyboardDevice));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectKeyboard(&result);
 
@@ -136,7 +136,7 @@ bool ffGenerateKeyboardJsonResult(FF_A_UNUSED FFKeyboardOptions* options, yyjson
 void ffInitKeyboardOptions(FFKeyboardOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    ffListInit(&options->ignores, sizeof(FFstrbuf));
+    ffListInit(&options->ignores);
 }
 
 void ffDestroyKeyboardOptions(FFKeyboardOptions* options) {

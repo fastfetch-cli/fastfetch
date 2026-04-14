@@ -8,7 +8,7 @@
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
 bool ffPrintUsers(FFUsersOptions* options) {
-    FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFUserResult));
+    FF_LIST_AUTO_DESTROY users = ffListCreate();
 
     const char* error = ffDetectUsers(options, &users);
 
@@ -134,7 +134,7 @@ void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
 }
 
 bool ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
+    FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectUsers(options, &results);
 

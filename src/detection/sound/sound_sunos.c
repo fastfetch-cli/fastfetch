@@ -11,7 +11,7 @@
 #    include "audio_oss_sunos.h"
 #endif
 
-const char* ffDetectSound(FFlist* devices) {
+const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
     int defaultDev;
     {
         char mixerp[12];
@@ -33,6 +33,11 @@ const char* ffDetectSound(FFlist* devices) {
 
     // The implementation is very different from *BSD's. They call it OSS4
     for (int idev = 0; idev < info.nummixers; ++idev) {
+        bool isMain = idev == defaultDev;
+        if ((options->soundType & FF_SOUND_TYPE_MAIN) && !isMain) {
+            continue;
+        }
+
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
@@ -50,6 +55,10 @@ const char* ffDetectSound(FFlist* devices) {
 
         struct oss_mixerinfo mi = {};
         if (ioctl(fd, SNDCTL_MIXERINFO, &mi) < 0) {
+            continue;
+        }
+
+        if (options->soundType == FF_SOUND_TYPE_ACTIVE && !mi.enabled) {
             continue;
         }
 
@@ -73,7 +82,7 @@ const char* ffDetectSound(FFlist* devices) {
             continue;
         }
 
-        FFSoundDevice* device = ffListAdd(devices);
+        FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
         ffStrbufInitS(&device->identifier, path);
         char buf[16];
         int bufLen = snprintf(buf, ARRAY_SIZE(buf), "\n%d: ", mi.dev);
@@ -93,7 +102,7 @@ const char* ffDetectSound(FFlist* devices) {
         ffStrbufInitF(&device->platformApi, "%s %s", info.product, info.version);
         device->volume = (uint8_t) volume;
         device->active = !!mi.enabled;
-        device->main = defaultDev == idev;
+        device->main = isMain;
     }
 
     return NULL;

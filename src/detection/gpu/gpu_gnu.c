@@ -117,7 +117,7 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
                 uint16_t vendorId = data[PCI_VENDOR_ID] | (data[PCI_VENDOR_ID + 1] << 8);
                 uint16_t deviceId = data[PCI_DEVICE_ID] | (data[PCI_DEVICE_ID + 1] << 8);
 
-                FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+                FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
                 ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
                 ffStrbufInit(&gpu->name);
                 ffStrbufInit(&gpu->driver);

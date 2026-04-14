@@ -29,7 +29,7 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
 }
 
 bool ffPrintNetIO(FFNetIOOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectNetIO(&result, options);
 
     if (error) {
@@ -37,7 +37,7 @@ bool ffPrintNetIO(FFNetIOOptions* options) {
         return false;
     }
 
-    ffListSort(&result, (const void*) sortInfs);
+    ffListSort(&result, sizeof(FFNetIOResult), (const void*) sortInfs);
 
     uint32_t index = 0;
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -148,7 +148,7 @@ void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 }
 
 bool ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectNetIO(&result, options);
 
     if (error) {

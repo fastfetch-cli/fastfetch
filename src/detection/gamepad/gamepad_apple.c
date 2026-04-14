@@ -6,7 +6,7 @@
 #include <IOKit/hid/IOHIDLib.h>
 
 static void enumSet(IOHIDDeviceRef value, FFlist* results) {
-    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(results);
+    FFGamepadDevice* device = FF_LIST_ADD(FFGamepadDevice, *results);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
     device->battery = 0;

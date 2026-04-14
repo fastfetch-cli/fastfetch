@@ -6,7 +6,7 @@
 #include "modules/brightness/brightness.h"
 
 bool ffPrintBrightness(FFBrightnessOptions* options) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectBrightness(options, &result);
 
@@ -141,7 +141,7 @@ void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc
 }
 
 bool ffGenerateBrightnessJsonResult(FF_A_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
+    FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectBrightness(options, &result);
 

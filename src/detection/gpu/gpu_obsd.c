@@ -72,7 +72,7 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
                     continue; // Likely an auxiliary display controller (#2034)
                 }
 
-                FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+                FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *gpus);
                 ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(PCI_VENDOR(pciid)));
                 ffStrbufInit(&gpu->name);
                 ffStrbufInit(&gpu->driver);
