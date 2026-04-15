@@ -151,12 +151,8 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
 #        include "common/properties.h"
 #    elif defined(__FreeBSD__)
 #        include "common/settings.h"
-#        define loff_t off_t
-#    elif defined(__sun) || defined(__OpenBSD__)
-#        define loff_t off_t
 #    elif defined(__NetBSD__)
 #        include "common/sysctl.h"
-#        define loff_t off_t
 #    endif
 
 #    ifdef __linux__
@@ -192,7 +188,7 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
 }
 #    endif
 
-static bool readPhysicalMemory(int fd, loff_t address, size_t length, void* buffer) {
+static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffer) {
 #    if !defined(__FreeBSD__) // Either causes kernel panic or returns EFAULT
     // -1: unknown, 0: failed before (stop trying), 1: succeeded before
     static int preadState = -1;
@@ -214,7 +210,7 @@ static bool readPhysicalMemory(int fd, loff_t address, size_t length, void* buff
     }
 #    endif
 
-    loff_t alignedAddress = address & ~((loff_t) instance.state.platform.sysinfo.pageSize - 1);
+    off_t alignedAddress = address & ~((off_t) instance.state.platform.sysinfo.pageSize - 1);
     size_t pageOffset = (size_t) (address - alignedAddress);
     size_t mapLength = pageOffset + length;
 
@@ -383,7 +379,7 @@ static bool fillTableBufferOpenBSD(FFstrbuf* buffer) {
         return false;
     }
 
-    loff_t tableAddress = (loff_t) parsedAddress;
+    off_t tableAddress = (off_t) parsedAddress;
     FF_DEBUG("Parsed OpenBSD SMBIOS table address: 0x%llx", parsedAddress);
 
     FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY | O_CLOEXEC);
@@ -494,7 +490,7 @@ static bool fillTableBufferFallback(FFstrbuf* buffer) {
     ffStrbufClear(buffer);
     ffStrbufEnsureFixedLengthFree(buffer, tableLength);
     FF_DEBUG("Attempting to read SMBIOS table data: %u bytes at 0x%lx", tableLength, (unsigned long) tableAddress);
-    if (readPhysicalMemory(fd, (loff_t) tableAddress, tableLength, buffer->chars)) {
+    if (readPhysicalMemory(fd, (off_t) tableAddress, tableLength, buffer->chars)) {
         buffer->length = tableLength;
         buffer->chars[buffer->length] = '\0';
         FF_DEBUG("Successfully read SMBIOS table data: %u bytes", tableLength);
@@ -543,7 +539,7 @@ static bool fillTableBufferFast(FFstrbuf* buffer) {
         }
 #            endif
 
-        loff_t entryAddress = (loff_t) strtol(strEntryAddress.chars, NULL, 16);
+        off_t entryAddress = (off_t) strtol(strEntryAddress.chars, NULL, 16);
         if (entryAddress == 0) {
             FF_DEBUG("Invalid SMBIOS entry address: 0");
             return false;
@@ -607,7 +603,7 @@ static bool fillTableBufferFast(FFstrbuf* buffer) {
 #        endif
 
         uint32_t tableLength = 0;
-        loff_t tableAddress = 0;
+        off_t tableAddress = 0;
         if (memcmp(entryPoint.Smbios20.AnchorString, "_SM_", sizeof(entryPoint.Smbios20.AnchorString)) == 0) {
             FF_DEBUG("Found SMBIOS 2.0 entry point");
             if (entryPoint.Smbios20.EntryPointLength != sizeof(entryPoint.Smbios20)) {
@@ -617,7 +613,7 @@ static bool fillTableBufferFast(FFstrbuf* buffer) {
                 return false;
             }
             tableLength = entryPoint.Smbios20.StructureTableLength;
-            tableAddress = (loff_t) entryPoint.Smbios20.StructureTableAddress;
+            tableAddress = (off_t) entryPoint.Smbios20.StructureTableAddress;
             FF_DEBUG("SMBIOS 2.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,
@@ -632,7 +628,7 @@ static bool fillTableBufferFast(FFstrbuf* buffer) {
                 return false;
             }
             tableLength = entryPoint.Smbios30.StructureTableMaximumSize;
-            tableAddress = (loff_t) entryPoint.Smbios30.StructureTableAddress;
+            tableAddress = (off_t) entryPoint.Smbios30.StructureTableAddress;
             FF_DEBUG("SMBIOS 3.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,
