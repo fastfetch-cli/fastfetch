@@ -923,13 +923,13 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_obj_add_str(doc, temperature, "unit", "D");
                 break;
             case FF_TEMPERATURE_UNIT_CELSIUS:
-                yyjson_mut_obj_add_str(doc, obj, "unit", "C");
+                yyjson_mut_obj_add_str(doc, temperature, "unit", "C");
                 break;
             case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-                yyjson_mut_obj_add_str(doc, obj, "unit", "F");
+                yyjson_mut_obj_add_str(doc, temperature, "unit", "F");
                 break;
             case FF_TEMPERATURE_UNIT_KELVIN:
-                yyjson_mut_obj_add_str(doc, obj, "unit", "K");
+                yyjson_mut_obj_add_str(doc, temperature, "unit", "K");
                 break;
         }
         yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
@@ -960,7 +960,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 yyjson_mut_arr_add_str(doc, type, "num");
             }
             if (options->percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
-                yyjson_mut_arr_add_str(doc, type, "var");
+                yyjson_mut_arr_add_str(doc, type, "bar");
             }
             if (options->percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) {
                 yyjson_mut_arr_add_str(doc, type, "hide-others");
@@ -1022,6 +1022,18 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
         } else {
             yyjson_mut_obj_add_uint(doc, fraction, "ndigits", (uint8_t) options->fractionNdigits);
         }
+
+        switch (options->fractionTrailingZeros) {
+            case FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT:
+                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "default");
+                break;
+            case FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS:
+                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "always");
+                break;
+            case FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER:
+                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "never");
+                break;
+        }
     }
 
     yyjson_mut_obj_add_bool(doc, obj, "noBuffer", options->noBuffer);
@@ -1039,8 +1051,20 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             case FF_MODULE_KEY_TYPE_ICON:
                 yyjson_mut_obj_add_str(doc, key, "type", "icon");
                 break;
-            case FF_MODULE_KEY_TYPE_BOTH:
+            case FF_MODULE_KEY_TYPE_BOTH_0:
+                yyjson_mut_obj_add_str(doc, key, "type", "both-0");
+                break;
+            case FF_MODULE_KEY_TYPE_BOTH_1: // alias: both
                 yyjson_mut_obj_add_str(doc, key, "type", "both");
+                break;
+            case FF_MODULE_KEY_TYPE_BOTH_2:
+                yyjson_mut_obj_add_str(doc, key, "type", "both-2");
+                break;
+            case FF_MODULE_KEY_TYPE_BOTH_3:
+                yyjson_mut_obj_add_str(doc, key, "type", "both-3");
+                break;
+            case FF_MODULE_KEY_TYPE_BOTH_4:
+                yyjson_mut_obj_add_str(doc, key, "type", "both-4");
                 break;
         }
 
@@ -1050,7 +1074,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
     {
         yyjson_mut_val* freq = yyjson_mut_obj_add_obj(doc, obj, "freq");
         yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
-        switch (options->percentSpaceBeforeUnit) {
+        switch (options->freqSpaceBeforeUnit) {
             case FF_SPACE_BEFORE_UNIT_DEFAULT:
                 yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "default");
                 break;
