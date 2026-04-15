@@ -506,8 +506,12 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
     return false;
         #elif defined(__linux__)
     FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
-    if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", buffer))
-        #else
+    if (ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", buffer))
+        return true;
+
+    FF_DEBUG("Failed to read /sys/firmware/dmi/tables/DMI, falling back to memory-mapped implementation");
+        #endif
+
     {
             #if !defined(__sun) && !defined(__NetBSD__)
         FF_DEBUG("Using memory-mapped implementation");
@@ -649,7 +653,6 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
     }
-        #endif
 
     return true;
 }
