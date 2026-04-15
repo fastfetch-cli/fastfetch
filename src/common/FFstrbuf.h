@@ -11,15 +11,15 @@
 #include <assert.h>
 
 #ifdef FF_USE_SYSTEM_YYJSON
-#    include <yyjson.h>
+    #include <yyjson.h>
 #else
-#    include "3rdparty/yyjson/yyjson.h"
+    #include "3rdparty/yyjson/yyjson.h"
 #endif
 
 #ifdef _WIN32
 // #include <shlwapi.h>
 __stdcall char* StrStrIA(const char* lpFirst, const char* lpSrch);
-#    define strcasestr StrStrIA
+    #define strcasestr StrStrIA
 #endif
 
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32

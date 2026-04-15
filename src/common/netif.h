@@ -3,8 +3,8 @@
 #include "fastfetch.h"
 
 #ifndef _WIN32
-#    include <net/if.h>
-#    include <netinet/in.h>
+    #include <net/if.h>
+    #include <netinet/in.h>
 #endif
 
 typedef enum FF_A_PACKED FFNetifDefaultRouteResultStatus {

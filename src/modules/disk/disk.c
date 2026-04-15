@@ -7,7 +7,7 @@
 #include "modules/disk/disk.h"
 
 #ifndef _WIN32
-#    include <fnmatch.h>
+    #include <fnmatch.h>
 #endif
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"

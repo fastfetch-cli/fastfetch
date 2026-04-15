@@ -24,9 +24,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#    include <stdlib.h>
-#    include <stdint.h>
-#    include <wayland-util.h>
+    #include <stdlib.h>
+    #include <stdint.h>
+    #include <wayland-util.h>
 
 extern const struct wl_interface wl_output_interface;
 extern const struct wl_interface zxdg_output_v1_interface;

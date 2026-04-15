@@ -12,17 +12,17 @@
 #include <paths.h>
 
 #ifdef __APPLE__
-#    include <mach-o/dyld.h>
-#    include <sys/sysctl.h>
+    #include <mach-o/dyld.h>
+    #include <sys/sysctl.h>
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
-#    include <sys/sysctl.h>
+    #include <sys/sysctl.h>
 #elif defined(__OpenBSD__)
-#    include <sys/sysctl.h>
-#    include <kvm.h>
-#    include "common/path.h"
+    #include <sys/sysctl.h>
+    #include <kvm.h>
+    #include "common/path.h"
 #elif defined(__HAIKU__)
-#    include <image.h>
-#    include <OS.h>
+    #include <image.h>
+    #include <OS.h>
 #endif
 
 static void getExePath(FFPlatform* platform) {
@@ -43,15 +43,15 @@ static void getExePath(FFPlatform* platform) {
     size_t exePathLen = sizeof(exePath);
     if (sysctl(
             (int[]) { CTL_KERN,
-#    ifdef __FreeBSD__
+    #ifdef __FreeBSD__
                 KERN_PROC,
                 KERN_PROC_PATHNAME,
                 (pid_t) platform->pid
-#    else
+    #else
                 KERN_PROC_ARGS,
                 (pid_t) platform->pid,
                 KERN_PROC_PATHNAME
-#    endif
+    #endif
             },
             4,
             exePath,

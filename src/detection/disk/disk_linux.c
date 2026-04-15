@@ -11,14 +11,14 @@
 #include <sys/statvfs.h>
 
 #if defined(STATX_BTIME) && !defined(__ANDROID__)
-#    include <sys/syscall.h>
+    #include <sys/syscall.h>
 #endif
 
 #ifdef __USE_LARGEFILE64
-#    define stat stat64
-#    define statvfs statvfs64
-#    define dirent dirent64
-#    define readdir readdir64
+    #define stat stat64
+    #define statvfs statvfs64
+    #define dirent dirent64
+    #define readdir readdir64
 #endif
 
 static bool isPhysicalDevice(const struct mntent* device) {

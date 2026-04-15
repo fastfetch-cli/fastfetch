@@ -42,7 +42,7 @@ SpacesInLineCommentPrefix:
 SpacesInContainerLiterals: true
 
 SortIncludes: Never
-IndentPPDirectives: AfterHash
+IndentPPDirectives: BeforeHash
 PPIndentWidth: 4
 
 IndentCaseLabels: true

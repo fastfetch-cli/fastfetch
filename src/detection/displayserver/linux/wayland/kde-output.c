@@ -1,10 +1,10 @@
 #ifdef FF_HAVE_WAYLAND
 
-#    include "wayland.h"
-#    include "kde-output-device-v2-client-protocol.h"
-#    include "kde-output-order-v1-client-protocol.h"
-#    include "common/edidHelper.h"
-#    include "common/base64.h"
+    #include "wayland.h"
+    #include "kde-output-device-v2-client-protocol.h"
+    #include "kde-output-order-v1-client-protocol.h"
+    #include "common/edidHelper.h"
+    #include "common/base64.h"
 
 typedef struct WaylandKdeMode {
     int32_t width;

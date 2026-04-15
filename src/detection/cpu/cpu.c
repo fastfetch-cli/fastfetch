@@ -80,7 +80,7 @@ const char* ffCPUQualcommCodeToName(uint32_t code) {
 
 #if defined(__x86_64__) || defined(__i386__)
 
-#    include <cpuid.h>
+    #include <cpuid.h>
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
     uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
@@ -150,9 +150,9 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
 // https://en.wikipedia.org/wiki/AArch64#ARM-A_(application_architecture)
 // Worth noting: Apple M1 is marked as ARMv8.5-A on Wikipedia, but it lacks BTI (mandatory in v8.5)
 
-#    ifdef __linux__
-#        include "common/io.h"
-#        include <elf.h>
+    #ifdef __linux__
+        #include "common/io.h"
+        #include <elf.h>
 // #include <asm/hwcap.h>
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
@@ -286,8 +286,8 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
         }
     }
 }
-#    elif __APPLE__
-#        include <sys/sysctl.h>
+    #elif __APPLE__
+        #include <sys/sysctl.h>
 // #include <arm/cpu_capabilities_public.h> // Not available in macOS 14-
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
@@ -298,8 +298,8 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
         return;
     }
 
-// Helper macro to test bit in 80-bit capability mask
-#        define FF_HAS_CAP(bit) \
+        // Helper macro to test bit in 80-bit capability mask
+        #define FF_HAS_CAP(bit) \
             (((bit) < 64) ? ((caps[0] >> (bit)) & 1ULL) : ((caps[1] >> ((bit) - 64U)) & 1ULL))
 
     cpu->march = "unknown";
@@ -397,39 +397,39 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
         }
     }
 
-#        undef HAS_CAP
+        #undef HAS_CAP
 }
-#    elif _WIN32
-#        include <processthreadsapi.h>
+    #elif _WIN32
+        #include <processthreadsapi.h>
 
-// Missing from winnt.h of MinGW-w64
-#        define PF_ARM_LSE2_AVAILABLE 62
-#        define PF_RESERVED_FEATURE 63
-#        define PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE 64
-#        define PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE 65
-#        define PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE 66
-#        define PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE 67
-#        define PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE 68
-#        define PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE 69
-#        define PF_ARM_SME_INSTRUCTIONS_AVAILABLE 70
-#        define PF_ARM_SME2_INSTRUCTIONS_AVAILABLE 71
-#        define PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE 72
-#        define PF_ARM_SME2_2_INSTRUCTIONS_AVAILABLE 73
-#        define PF_ARM_SME_AES_INSTRUCTIONS_AVAILABLE 74
-#        define PF_ARM_SME_SBITPERM_INSTRUCTIONS_AVAILABLE 75
-#        define PF_ARM_SME_SF8MM4_INSTRUCTIONS_AVAILABLE 76
-#        define PF_ARM_SME_SF8MM8_INSTRUCTIONS_AVAILABLE 77
-#        define PF_ARM_SME_SF8DP2_INSTRUCTIONS_AVAILABLE 78
-#        define PF_ARM_SME_SF8DP4_INSTRUCTIONS_AVAILABLE 79
-#        define PF_ARM_SME_SF8FMA_INSTRUCTIONS_AVAILABLE 80
-#        define PF_ARM_SME_F8F32_INSTRUCTIONS_AVAILABLE 81
-#        define PF_ARM_SME_F8F16_INSTRUCTIONS_AVAILABLE 82
-#        define PF_ARM_SME_F16F16_INSTRUCTIONS_AVAILABLE 83
-#        define PF_ARM_SME_B16B16_INSTRUCTIONS_AVAILABLE 84
-#        define PF_ARM_SME_F64F64_INSTRUCTIONS_AVAILABLE 85
-#        define PF_ARM_SME_I16I64_INSTRUCTIONS_AVAILABLE 86
-#        define PF_ARM_SME_LUTv2_INSTRUCTIONS_AVAILABLE 87
-#        define PF_ARM_SME_FA64_INSTRUCTIONS_AVAILABLE 88
+        // Missing from winnt.h of MinGW-w64
+        #define PF_ARM_LSE2_AVAILABLE 62
+        #define PF_RESERVED_FEATURE 63
+        #define PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE 64
+        #define PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE 65
+        #define PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE 66
+        #define PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE 67
+        #define PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE 68
+        #define PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE 69
+        #define PF_ARM_SME_INSTRUCTIONS_AVAILABLE 70
+        #define PF_ARM_SME2_INSTRUCTIONS_AVAILABLE 71
+        #define PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE 72
+        #define PF_ARM_SME2_2_INSTRUCTIONS_AVAILABLE 73
+        #define PF_ARM_SME_AES_INSTRUCTIONS_AVAILABLE 74
+        #define PF_ARM_SME_SBITPERM_INSTRUCTIONS_AVAILABLE 75
+        #define PF_ARM_SME_SF8MM4_INSTRUCTIONS_AVAILABLE 76
+        #define PF_ARM_SME_SF8MM8_INSTRUCTIONS_AVAILABLE 77
+        #define PF_ARM_SME_SF8DP2_INSTRUCTIONS_AVAILABLE 78
+        #define PF_ARM_SME_SF8DP4_INSTRUCTIONS_AVAILABLE 79
+        #define PF_ARM_SME_SF8FMA_INSTRUCTIONS_AVAILABLE 80
+        #define PF_ARM_SME_F8F32_INSTRUCTIONS_AVAILABLE 81
+        #define PF_ARM_SME_F8F16_INSTRUCTIONS_AVAILABLE 82
+        #define PF_ARM_SME_F16F16_INSTRUCTIONS_AVAILABLE 83
+        #define PF_ARM_SME_B16B16_INSTRUCTIONS_AVAILABLE 84
+        #define PF_ARM_SME_F64F64_INSTRUCTIONS_AVAILABLE 85
+        #define PF_ARM_SME_I16I64_INSTRUCTIONS_AVAILABLE 86
+        #define PF_ARM_SME_LUTv2_INSTRUCTIONS_AVAILABLE 87
+        #define PF_ARM_SME_FA64_INSTRUCTIONS_AVAILABLE 88
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
     // ARMv8-A
@@ -504,11 +504,11 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
         }
     }
 }
-#    else
+    #else
 void ffCPUDetectByCpuid(FF_A_UNUSED FFCPUResult* cpu) {
     // Unsupported system
 }
-#    endif
+    #endif
 
 #else
 

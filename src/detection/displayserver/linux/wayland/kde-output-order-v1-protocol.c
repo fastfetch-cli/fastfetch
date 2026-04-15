@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: MIT-CMU
  */
 
-#    include <stdlib.h>
-#    include <stdint.h>
-#    include "wayland-util.h"
+    #include <stdlib.h>
+    #include <stdint.h>
+    #include "wayland-util.h"
 
 static const struct wl_interface* kde_output_order_v1_types[] = {
     NULL,

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef _MSC_VER
-#    define __attribute__(x)
+    #define __attribute__(x)
 #endif
 
 #define FF_A_FALLTHROUGH __attribute__((__fallthrough__))

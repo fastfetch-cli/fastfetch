@@ -38,6 +38,6 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData);
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK6
-#    include <math.h>
+    #include <math.h>
 FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData);
 #endif

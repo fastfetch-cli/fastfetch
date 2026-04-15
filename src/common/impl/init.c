@@ -11,10 +11,10 @@
 #include <unistd.h>
 #include <locale.h>
 #ifdef _WIN32
-#    include <windows.h>
-#    include "common/windows/unicode.h"
+    #include <windows.h>
+    #include "common/windows/unicode.h"
 #else
-#    include <signal.h>
+    #include <signal.h>
 #endif
 
 FFinstance instance; // Global singleton

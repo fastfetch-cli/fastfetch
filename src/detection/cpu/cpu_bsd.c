@@ -4,8 +4,8 @@
 
 #include <sys/param.h>
 #if __has_include(<sys/cpuset.h>)
-#    include <sys/cpuset.h>
-#    define FF_HAVE_CPUSET 1
+    #include <sys/cpuset.h>
+    #define FF_HAVE_CPUSET 1
 #endif
 
 static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {

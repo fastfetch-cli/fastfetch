@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <time.h>
 #ifdef _WIN32
-#    include <ntstatus.h>
-#    include "common/windows/nt.h"
-#    include <profileapi.h>
+    #include <ntstatus.h>
+    #include "common/windows/nt.h"
+    #include <profileapi.h>
 #elif defined(__HAIKU__)
-#    include <OS.h>
+    #include <OS.h>
 #endif
 
 #include "common/arrayUtils.h"

@@ -2,8 +2,8 @@
 #include "common/stringUtils.h"
 
 #ifdef FF_HAVE_DBUS
-#    include "common/dbus.h"
-#    include "common/io.h"
+    #include "common/dbus.h"
+    #include "common/io.h"
 
 /* Example dbus reply, striped to only the relevant parts:
 array [                                                     //root

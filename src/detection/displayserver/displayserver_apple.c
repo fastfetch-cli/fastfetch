@@ -15,7 +15,7 @@ extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) FF
 extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
 #else
-#    include <IOKit/graphics/IOGraphicsLib.h>
+    #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
 
 static void detectDisplays(FFDisplayServerResult* ds) {

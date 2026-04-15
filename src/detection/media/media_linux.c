@@ -9,9 +9,9 @@
 #define FF_DBUS_MPRIS_PREFIX "org.mpris.MediaPlayer2."
 
 #ifdef FF_HAVE_DBUS
-#    include "common/dbus.h"
+    #include "common/dbus.h"
 
-#    define FF_DBUS_ITER_CONTINUE(dbus, iterator)                 \
+    #define FF_DBUS_ITER_CONTINUE(dbus, iterator)                 \
         {                                                         \
             if (!(dbus)->lib->ffdbus_message_iter_next(iterator)) \
                 break;                                            \

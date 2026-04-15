@@ -10,13 +10,13 @@
 #include <math.h>
 
 #ifdef __APPLE__
-#    include <sys/syslimits.h>
+    #include <sys/syslimits.h>
 #elif _WIN32
-#    include <windows.h>
+    #include <windows.h>
 #elif __linux__
-#    include <sys/sendfile.h>
+    #include <sys/sendfile.h>
 #elif __sun
-#    include <sys/termios.h>
+    #include <sys/termios.h>
 #endif
 
 static bool printImageIterm(bool printError) {
@@ -342,30 +342,30 @@ static bool printImageKittyDirect(bool printError) {
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-#    define FF_KITTY_MAX_CHUNK_SIZE 4096
+    #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
-#    define FF_CACHE_FILE_HEIGHT "height"
-#    define FF_CACHE_FILE_WIDTH "width"
-#    define FF_CACHE_FILE_SIXEL "sixel"
-#    define FF_CACHE_FILE_KITTY_COMPRESSED "kittyc"
-#    define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
-#    define FF_CACHE_FILE_CHAFA "chafa"
+    #define FF_CACHE_FILE_HEIGHT "height"
+    #define FF_CACHE_FILE_WIDTH "width"
+    #define FF_CACHE_FILE_SIXEL "sixel"
+    #define FF_CACHE_FILE_KITTY_COMPRESSED "kittyc"
+    #define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
+    #define FF_CACHE_FILE_CHAFA "chafa"
 
-#    include <string.h>
-#    include <unistd.h>
-#    include <fcntl.h>
+    #include <string.h>
+    #include <unistd.h>
+    #include <fcntl.h>
 
-#    ifndef _WIN32
-#        include <sys/ioctl.h>
-#    else
-#        include <wincon.h>
-#        include "common/path.h"
-#    endif
+    #ifndef _WIN32
+        #include <sys/ioctl.h>
+    #else
+        #include <wincon.h>
+        #include "common/path.h"
+    #endif
 
-#    ifdef FF_HAVE_ZLIB
-#        include "common/library.h"
-#        include <stdlib.h>
-#        include <zlib.h>
+    #ifdef FF_HAVE_ZLIB
+        #include "common/library.h"
+        #include <stdlib.h>
+        #include <zlib.h>
 
 static bool compressBlob(void** blob, size_t* length) {
     FF_LIBRARY_LOAD(zlib, false, "libz" FF_LIBRARY_EXTENSION, 2)
@@ -390,14 +390,14 @@ static bool compressBlob(void** blob, size_t* length) {
     return true;
 }
 
-#    endif // FF_HAVE_ZLIB
+    #endif // FF_HAVE_ZLIB
 
-// We use only the defines from here, that are exactly the same in both versions
-#    ifdef FF_HAVE_IMAGEMAGICK7
-#        include <MagickCore/MagickCore.h>
-#    else
-#        include <magick/MagickCore.h>
-#    endif
+    // We use only the defines from here, that are exactly the same in both versions
+    #ifdef FF_HAVE_IMAGEMAGICK7
+        #include <MagickCore/MagickCore.h>
+    #else
+        #include <magick/MagickCore.h>
+    #endif
 
 typedef struct ImageData {
     FF_LIBRARY_SYMBOL(CopyMagickString)
@@ -518,11 +518,11 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
         return false;
     }
 
-#    ifdef FF_HAVE_ZLIB
+    #ifdef FF_HAVE_ZLIB
     bool isCompressed = compressBlob(&blob, &length);
-#    else
+    #else
     bool isCompressed = false;
-#    endif
+    #endif
 
     char* chars = imageData->ffBase64Encode(blob, length, &length);
     free(blob);
@@ -550,8 +550,8 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
     return true;
 }
 
-#    ifdef FF_HAVE_CHAFA
-#        include <chafa.h>
+    #ifdef FF_HAVE_CHAFA
+        #include <chafa.h>
 static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* imageData) {
     FF_LIBRARY_LOAD(chafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1, "libchafa-0" FF_LIBRARY_EXTENSION, -1 // Required for Windows
     )
@@ -645,7 +645,7 @@ static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* ima
 
     return true;
 }
-#    endif
+    #endif
 
 FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFIMData* imData) {
     FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreGenesis, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
@@ -727,9 +727,9 @@ FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFI
 
     bool printSuccessful = false;
     if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
-#    ifdef FF_HAVE_CHAFA
+    #ifdef FF_HAVE_CHAFA
         printSuccessful = printImageChafa(requestData, &imageData);
-#    endif
+    #endif
     } else if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY) {
         printSuccessful = printImageKitty(requestData, &imageData);
     } else if (requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL) {
@@ -747,15 +747,15 @@ FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFI
 static FFNativeFD getCacheFD(FFLogoRequestData* requestData, const char* fileName) {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, fileName);
-#    ifndef _WIN32
+    #ifndef _WIN32
     int fd = open(requestData->cacheDir.chars, O_RDONLY
-#        ifdef O_CLOEXEC
+        #ifdef O_CLOEXEC
             | O_CLOEXEC
-#        endif
+        #endif
     );
-#    else
+    #else
     HANDLE fd = CreateFileA(requestData->cacheDir.chars, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-#    endif
+    #endif
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
     return fd;
 }
@@ -839,7 +839,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
     fflush(stdout);
 
     bool sent = false;
-#    ifdef __linux__
+    #ifdef __linux__
     struct stat st;
     if (fstat(fd, &st) >= 0) {
         while (st.st_size > 0) {
@@ -852,7 +852,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
             }
         }
     }
-#    endif
+    #endif
 
     if (!sent) {
         char buffer[32768];
@@ -885,7 +885,7 @@ static bool printCached(FFLogoRequestData* requestData) {
 }
 
 static bool getCharacterPixelDimensions(FFLogoRequestData* requestData) {
-#    ifdef _WIN32
+    #ifdef _WIN32
 
     CONSOLE_FONT_INFOEX cfi = { .cbSize = sizeof(cfi) };
     if (GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi)) // Only works for ConHost
@@ -896,7 +896,7 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData) {
     if (requestData->characterPixelWidth > 1.0 && requestData->characterPixelHeight > 1.0) {
         return true;
     }
-#    endif
+    #endif
 
     FFTerminalSizeResult termSize = {};
     if (ffDetectTerminalSize(&termSize)) {
@@ -938,10 +938,10 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
         return false;
     }
 
-#    ifdef _WIN32
+    #ifdef _WIN32
     filePath[1] = filePath[0]; // Drive Name
     filePath[0] = '/';
-#    endif
+    #endif
 
     ffStrbufRecalculateLength(&requestData.cacheDir);
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
@@ -954,15 +954,15 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
 
     FFLogoImageResult result = FF_LOGO_IMAGE_RESULT_INIT_ERROR;
 
-#    ifdef FF_HAVE_IMAGEMAGICK7
+    #ifdef FF_HAVE_IMAGEMAGICK7
     result = ffLogoPrintImageIM7(&requestData);
-#    endif
+    #endif
 
-#    ifdef FF_HAVE_IMAGEMAGICK6
+    #ifdef FF_HAVE_IMAGEMAGICK6
     if (result == FF_LOGO_IMAGE_RESULT_INIT_ERROR) {
         result = ffLogoPrintImageIM6(&requestData);
     }
-#    endif
+    #endif
 
     ffStrbufDestroy(&requestData.cacheDir);
 

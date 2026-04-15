@@ -2,16 +2,16 @@
 
 #ifdef FF_HAVE_XCB_RANDR
 
-#    include "common/library.h"
-#    include "common/properties.h"
-#    include "common/edidHelper.h"
-#    include "common/mallocHelper.h"
-#    include "common/stringUtils.h"
+    #include "common/library.h"
+    #include "common/properties.h"
+    #include "common/edidHelper.h"
+    #include "common/mallocHelper.h"
+    #include "common/stringUtils.h"
 
-#    include <stdlib.h>
-#    include <string.h>
-#    include <xcb/randr.h>
-#    include <xcb/xcb.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <xcb/randr.h>
+    #include <xcb/xcb.h>
 
 typedef struct XcbRandrData {
     FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current)

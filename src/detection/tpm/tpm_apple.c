@@ -1,8 +1,8 @@
 #include "tpm.h"
 
 #ifndef __aarch64__
-#    include "common/apple/cf_helpers.h"
-#    include <IOKit/IOKitLib.h>
+    #include "common/apple/cf_helpers.h"
+    #include <IOKit/IOKitLib.h>
 #endif
 
 const char* ffDetectTPM(FFTPMResult* result) {

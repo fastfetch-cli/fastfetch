@@ -5,25 +5,25 @@
 #include <string.h>
 
 #if __ANDROID__ && !defined(FF_HAVE_EGL)
-// On Android, installing OpenGL headers is enough (mesa-dev)
-#    if __has_include(<EGL/egl.h>)
-#        define FF_HAVE_EGL 1
-#    endif
+    // On Android, installing OpenGL headers is enough (mesa-dev)
+    #if __has_include(<EGL/egl.h>)
+        #define FF_HAVE_EGL 1
+    #endif
 #endif
 
 #if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX)
-#    define FF_HAVE_GL 1
+    #define FF_HAVE_GL 1
 
-#    include "common/library.h"
+    #include "common/library.h"
 
-#    include <GL/gl.h>
+    #include <GL/gl.h>
 
 void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
 #endif // FF_HAVE_GL
 
 #ifdef FF_HAVE_GLX
-#    include <GL/glx.h>
+    #include <GL/glx.h>
 
 typedef struct GLXData {
     FF_LIBRARY_SYMBOL(glGetString)
@@ -128,11 +128,11 @@ static const char* detectByGlx(FFOpenGLResult* result) {
     GLXData data;
 
     FF_LIBRARY_LOAD_MESSAGE(glx,
-#    if !__OpenBSD__ && !__NetBSD__
+    #if !__OpenBSD__ && !__NetBSD__
         "libGLX"
-#    else
+    #else
         "libGL"
-#    endif
+    #endif
         FF_LIBRARY_EXTENSION,
         1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
@@ -160,34 +160,34 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result) {
 #if FF_HAVE_GL
 
     if (options->library == FF_OPENGL_LIBRARY_GLX) {
-#    ifdef FF_HAVE_GLX
+    #ifdef FF_HAVE_GLX
         return detectByGlx(result);
-#    else
+    #else
         return "fastfetch was compiled without glx support";
-#    endif
+    #endif
     }
 
     if (options->library == FF_OPENGL_LIBRARY_EGL) {
-#    ifdef FF_HAVE_EGL
+    #ifdef FF_HAVE_EGL
         const char* ffOpenGLDetectByEGL(FFOpenGLResult * result);
         return ffOpenGLDetectByEGL(result);
-#    else
+    #else
         return "fastfetch was compiled without egl support";
-#    endif
+    #endif
     }
 
     const char* error = ""; // not NULL dummy value
 
-#    ifdef FF_HAVE_EGL
+    #ifdef FF_HAVE_EGL
     const char* ffOpenGLDetectByEGL(FFOpenGLResult * result);
     error = ffOpenGLDetectByEGL(result);
-#    endif
+    #endif
 
-#    ifdef FF_HAVE_GLX
+    #ifdef FF_HAVE_GLX
     if (error != NULL) {
         error = detectByGlx(result);
     }
-#    endif
+    #endif
 
     return error;
 

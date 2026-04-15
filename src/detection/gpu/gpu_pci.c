@@ -5,21 +5,21 @@
 
 #include <stdlib.h>
 #ifdef __FreeBSD__
-#    include <paths.h>
-#    ifndef _PATH_LOCALBASE
-#        define _PATH_LOCALBASE "/usr/local"
-#    endif
+    #include <paths.h>
+    #ifndef _PATH_LOCALBASE
+        #define _PATH_LOCALBASE "/usr/local"
+    #endif
 #elif __OpenBSD__
-#    define _PATH_LOCALBASE "/usr/local"
+    #define _PATH_LOCALBASE "/usr/local"
 #elif __NetBSD__
-#    define _PATH_LOCALBASE "/usr/pkg"
+    #define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
 #if FF_HAVE_EMBEDDED_PCIIDS
-#    include "fastfetch_pciids.c.inc"
+    #include "fastfetch_pciids.c.inc"
 #endif
 #if FF_HAVE_EMBEDDED_AMDGPUIDS
-#    include "fastfetch_amdgpuids.c.inc"
+    #include "fastfetch_amdgpuids.c.inc"
 #endif
 
 #define FF_STR_INDIR(x) #x
@@ -39,7 +39,7 @@ static const FFstrbuf* loadPciIds() {
 
 #else // FF_CUSTOM_PCI_IDS_PATH
 
-#    if __linux__
+    #if __linux__
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", &pciids);
     if (pciids.length == 0) {
         ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/misc/pci.ids", &pciids); // debian?
@@ -47,16 +47,16 @@ static const FFstrbuf* loadPciIds() {
             ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", &pciids);
         }
     }
-#    elif __OpenBSD__ || __FreeBSD__ || __NetBSD__
+    #elif __OpenBSD__ || __FreeBSD__ || __NetBSD__
     ffReadFileBuffer(_PATH_LOCALBASE "/share/hwdata/pci.ids", &pciids);
     if (pciids.length == 0) {
         ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", &pciids);
     }
-#    elif __sun
+    #elif __sun
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
-#    elif __HAIKU__
+    #elif __HAIKU__
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/system/data/hwdata/pci.ids", &pciids);
-#    endif
+    #endif
 
 #endif // FF_CUSTOM_PCI_IDS_PATH
 

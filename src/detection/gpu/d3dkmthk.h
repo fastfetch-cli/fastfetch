@@ -6,12 +6,12 @@
 #include <stdalign.h>
 
 #if _WIN32
-#    include <ntdef.h>
-#    include <windef.h>
+    #include <ntdef.h>
+    #include <windef.h>
 #else
-#    include <sys/ioctl.h>
-#    include <uchar.h>
-#    include <errno.h>
+    #include <sys/ioctl.h>
+    #include <uchar.h>
+    #include <errno.h>
 
 typedef struct _LUID {
     uint32_t LowPart;
@@ -40,8 +40,8 @@ typedef union {
     int64_t QuadPart;
 } LARGE_INTEGER;
 typedef int32_t NTSTATUS; // 0 for success, -1 for failure
-#    define NT_SUCCESS(Status) ((NTSTATUS) (Status) >= 0)
-#    define _In_range_(low, hi)
+    #define NT_SUCCESS(Status) ((NTSTATUS) (Status) >= 0)
+    #define _In_range_(low, hi)
 #endif
 
 #define D3DKMT_ALIGN64 alignas(8)
@@ -330,12 +330,12 @@ EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKM
 
 #else
 
-// Ref: https://github.com/microsoft/WSL2-Linux-Kernel/blob/linux-msft-wsl-6.6.y/include/uapi/misc/d3dkmthk.h
-#    define LX_DXOPENADAPTERFROMLUID _IOWR(0x47, 0x01, D3DKMT_OPENADAPTERFROMLUID)
-#    define LX_DXQUERYADAPTERINFO _IOWR(0x47, 0x09, D3DKMT_QUERYADAPTERINFO)
-#    define LX_DXENUMADAPTERS2 _IOWR(0x47, 0x14, D3DKMT_ENUMADAPTERS2)
-#    define LX_DXCLOSEADAPTER _IOWR(0x47, 0x15, D3DKMT_CLOSEADAPTER)
-#    define LX_DXQUERYSTATISTICS _IOWR(0x47, 0x43, D3DKMT_QUERYSTATISTICS)
+    // Ref: https://github.com/microsoft/WSL2-Linux-Kernel/blob/linux-msft-wsl-6.6.y/include/uapi/misc/d3dkmthk.h
+    #define LX_DXOPENADAPTERFROMLUID _IOWR(0x47, 0x01, D3DKMT_OPENADAPTERFROMLUID)
+    #define LX_DXQUERYADAPTERINFO _IOWR(0x47, 0x09, D3DKMT_QUERYADAPTERINFO)
+    #define LX_DXENUMADAPTERS2 _IOWR(0x47, 0x14, D3DKMT_ENUMADAPTERS2)
+    #define LX_DXCLOSEADAPTER _IOWR(0x47, 0x15, D3DKMT_CLOSEADAPTER)
+    #define LX_DXQUERYSTATISTICS _IOWR(0x47, 0x43, D3DKMT_QUERYSTATISTICS)
 
 extern int dxgfd; // File descriptor for /dev/dxg, initialized in gpu_wsl.c
 

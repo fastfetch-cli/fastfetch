@@ -4,13 +4,13 @@
 #include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_VULKAN
-#    include "common/library.h"
-#    include "common/io.h"
-#    include "common/parsing.h"
-#    include "common/stringUtils.h"
+    #include "common/library.h"
+    #include "common/io.h"
+    #include "common/parsing.h"
+    #include "common/stringUtils.h"
 
-#    include <stdlib.h>
-#    include <vulkan/vulkan.h>
+    #include <stdlib.h>
+    #include <vulkan/vulkan.h>
 
 static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersion) {
     ffVersion->major = VK_VERSION_MAJOR(vulkanVersion);
@@ -42,16 +42,16 @@ static const char* detectVulkan(FFVulkanResult* result) {
     FF_DEBUG("Starting Vulkan detection");
 
     FF_LIBRARY_LOAD_MESSAGE(vulkan,
-#    if __APPLE__
+    #if __APPLE__
         "libMoltenVK" FF_LIBRARY_EXTENSION,
         -1
-#    elif _WIN32
+    #elif _WIN32
         "vulkan-1" FF_LIBRARY_EXTENSION,
         -1
-#    else
+    #else
         "libvulkan" FF_LIBRARY_EXTENSION,
         2
-#    endif
+    #endif
     )
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)

@@ -2,35 +2,35 @@
 #include "common/library.h"
 
 #if _WIN32
-#    include "common/debug.h"
-#    include "common/windows/nt.h"
-#    include <errno.h>
-#    include <ntstatus.h>
+    #include "common/debug.h"
+    #include "common/windows/nt.h"
+    #include <errno.h>
+    #include <ntstatus.h>
 #endif
 
 #ifndef FF_DISABLE_DLOPEN
 
-#    include <stdarg.h>
+    #include <stdarg.h>
 
-// Clang doesn't define __SANITIZE_ADDRESS__ but defines __has_feature(address_sanitizer)
-#    if !defined(__SANITIZE_ADDRESS__) && defined(__has_feature)
-#        if __has_feature(address_sanitizer)
-#            define __SANITIZE_ADDRESS__
-#        endif
-#    endif
+    // Clang doesn't define __SANITIZE_ADDRESS__ but defines __has_feature(address_sanitizer)
+    #if !defined(__SANITIZE_ADDRESS__) && defined(__has_feature)
+        #if __has_feature(address_sanitizer)
+            #define __SANITIZE_ADDRESS__
+        #endif
+    #endif
 
-#    ifndef FF_DLOPEN_FLAGS
-#        ifdef __SANITIZE_ADDRESS__
-#            define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
-#        else
-#            define FF_DLOPEN_FLAGS RTLD_LAZY
-#        endif
-#    endif
+    #ifndef FF_DLOPEN_FLAGS
+        #ifdef __SANITIZE_ADDRESS__
+            #define FF_DLOPEN_FLAGS RTLD_LAZY | RTLD_NODELETE
+        #else
+            #define FF_DLOPEN_FLAGS RTLD_LAZY
+        #endif
+    #endif
 
 static void* libraryLoad(const char* path, int maxVersion) {
     void* result = dlopen(path, FF_DLOPEN_FLAGS);
 
-#    ifdef _WIN32
+    #ifdef _WIN32
 
     // libX.dll.1 never exists on Windows, while libX-1.dll may exist
     FF_UNUSED(maxVersion)
@@ -48,7 +48,7 @@ static void* libraryLoad(const char* path, int maxVersion) {
     strcpy(mempcpy(absPath, instance.state.platform.exePath.chars, pathLen + 1), path);
     return dlopen(absPath, FF_DLOPEN_FLAGS);
 
-#    else
+    #else
 
     if (result != NULL || maxVersion < 0) {
         return result;
@@ -70,7 +70,7 @@ static void* libraryLoad(const char* path, int maxVersion) {
         ffStrbufSubstrBefore(&pathbuf, originalLength);
     }
 
-#    endif
+    #endif
 
     return result;
 }

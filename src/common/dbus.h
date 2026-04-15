@@ -1,10 +1,10 @@
 #pragma once
 
 #ifdef FF_HAVE_DBUS
-#    include <dbus/dbus.h>
+    #include <dbus/dbus.h>
 
-#    include "common/FFstrbuf.h"
-#    include "common/library.h"
+    #include "common/FFstrbuf.h"
+    #include "common/library.h"
 
 typedef struct FFDBusLibrary {
     FF_LIBRARY_SYMBOL(dbus_bus_get)
@@ -41,6 +41,6 @@ static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* 
     return ffDBusGetMethodReply(dbus, busName, objectPath, "org.freedesktop.DBus.Properties", "GetAll", interface, NULL);
 }
 
-#    define FF_DBUS_AUTO_DESTROY_DATA FF_A_CLEANUP(ffDBusDestroyData)
+    #define FF_DBUS_AUTO_DESTROY_DATA FF_A_CLEANUP(ffDBusDestroyData)
 
 #endif // FF_HAVE_DBUS

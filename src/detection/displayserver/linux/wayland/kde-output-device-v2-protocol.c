@@ -12,10 +12,10 @@
  * SPDX-License-Identifier: MIT-CMU
  */
 
-#    include <stdbool.h>
-#    include <stdlib.h>
-#    include <stdint.h>
-#    include <wayland-util.h>
+    #include <stdbool.h>
+    #include <stdlib.h>
+    #include <stdint.h>
+    #include <wayland-util.h>
 
 extern const struct wl_interface kde_output_device_mode_v2_interface;
 extern const struct wl_interface kde_output_device_v2_interface;

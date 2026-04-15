@@ -2,14 +2,14 @@
 
 #if __has_include(<libgeom.h>)
 
-#    include "common/stringUtils.h"
+    #include "common/stringUtils.h"
 
-#    include <devstat.h>
-#    include <memory.h>
-#    include <fcntl.h>
-#    include <sys/ioctl.h>
-#    include <sys/disk.h>
-#    include <libgeom.h>
+    #include <devstat.h>
+    #include <memory.h>
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
+    #include <sys/disk.h>
+    #include <libgeom.h>
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     struct gmesh geomTree;

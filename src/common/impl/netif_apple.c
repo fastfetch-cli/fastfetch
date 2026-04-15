@@ -11,13 +11,13 @@
 #define ROUNDUP2(a, n) ((a) > 0 ? (1 + (((a) - 1U) | ((n) - 1))) : (n))
 
 #if __APPLE__
-// https://github.com/apple-oss-distributions/network_cmds/blob/8f38231438e6a4d16ef8015e97e12c2c05105644/rtsol.tproj/if.c#L243
-#    define ROUNDUP(a) ROUNDUP2((a), sizeof(uint32_t))
+    // https://github.com/apple-oss-distributions/network_cmds/blob/8f38231438e6a4d16ef8015e97e12c2c05105644/rtsol.tproj/if.c#L243
+    #define ROUNDUP(a) ROUNDUP2((a), sizeof(uint32_t))
 #elif __sun
-// https://github.com/illumos/illumos-gate/blob/95b8c88950fa7b19af46bc63230137cf96b0bff7/usr/src/cmd/cmd-inet/usr.sbin/route.c#L339
-#    define ROUNDUP(a) ROUNDUP2((a), sizeof(long))
+    // https://github.com/illumos/illumos-gate/blob/95b8c88950fa7b19af46bc63230137cf96b0bff7/usr/src/cmd/cmd-inet/usr.sbin/route.c#L339
+    #define ROUNDUP(a) ROUNDUP2((a), sizeof(long))
 #else
-#    error unknown platform
+    #error unknown platform
 #endif
 
 static struct sockaddr*

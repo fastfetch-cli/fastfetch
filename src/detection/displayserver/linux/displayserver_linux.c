@@ -3,7 +3,7 @@
 #include "common/stringUtils.h"
 
 #ifdef __FreeBSD__
-#    include "common/settings.h"
+    #include "common/settings.h"
 #endif
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result) {

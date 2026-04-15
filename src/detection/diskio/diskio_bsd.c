@@ -2,14 +2,14 @@
 
 #if __has_include(<libgeom.h>)
 
-#    include "common/stringUtils.h"
+    #include "common/stringUtils.h"
 
-#    include <devstat.h>
-#    include <memory.h>
-#    include <fcntl.h>
-#    include <sys/ioctl.h>
-#    include <sys/disk.h>
-#    include <libgeom.h>
+    #include <devstat.h>
+    #include <memory.h>
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
+    #include <sys/disk.h>
+    #include <libgeom.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     FF_A_CLEANUP(geom_deletetree) struct gmesh geomTree = {};
@@ -74,8 +74,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
 
 #else
 
-#    include <devstat.h>
-#    include <memory.h>
+    #include <devstat.h>
+    #include <memory.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     if (checkversion() < 0) {

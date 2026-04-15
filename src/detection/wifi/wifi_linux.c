@@ -37,7 +37,7 @@ typedef enum {
     NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192 = 0x00002000,
 } NM80211ApSecurityFlags;
 
-#    define FF_DBUS_ITER_CONTINUE(dbus, iterator)                \
+    #define FF_DBUS_ITER_CONTINUE(dbus, iterator)                \
         {                                                        \
             if (!(dbus).lib->ffdbus_message_iter_next(iterator)) \
                 break;                                           \
@@ -310,10 +310,10 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer) {
 }
 
 #if FF_HAVE_LINUX_WIRELESS
-#    include <sys/ioctl.h>
-#    include <sys/types.h>
-#    include <unistd.h>
-#    include <linux/wireless.h>
+    #include <sys/ioctl.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+    #include <linux/wireless.h>
 
 static const char* detectWifiWithIoctls(FFWifiResult* item) {
     FF_DEBUG("Starting ioctl wifi detection for interface %s", item->inf.description.chars);

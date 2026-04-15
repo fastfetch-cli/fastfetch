@@ -1,7 +1,7 @@
 #ifdef FF_HAVE_WAYLAND
 
-#    include "wayland.h"
-#    include "wlr-output-management-unstable-v1-client-protocol.h"
+    #include "wayland.h"
+    #include "wlr-output-management-unstable-v1-client-protocol.h"
 
 static void waylandZwlrTransformListener(void* data, FF_A_UNUSED struct zwlr_output_head_v1* zwlr_output_head_v1, int32_t transform) {
     WaylandDisplay* wldata = (WaylandDisplay*) data;

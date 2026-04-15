@@ -8,15 +8,15 @@
 #include <dirent.h>
 #include <errno.h>
 #ifndef __APPLE__
-#    include <poll.h>
+    #include <poll.h>
 #else
-#    include <sys/select.h>
+    #include <sys/select.h>
 #endif
 
 #if FF_HAVE_WORDEXP
-#    include <wordexp.h>
+    #include <wordexp.h>
 #else
-#    include <glob.h>
+    #include <glob.h>
 #endif
 
 static void createSubfolders(const char* fileName) {
@@ -112,12 +112,12 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
 
     glob_t gb;
     if (glob(in, GLOB_NOSORT
-#    ifdef GLOB_TILDE
+    #ifdef GLOB_TILDE
                 | GLOB_TILDE
-#    endif
-#    ifdef GLOB_BRACE
+    #endif
+    #ifdef GLOB_BRACE
                 | GLOB_BRACE
-#    endif
+    #endif
             ,
             NULL,
             &gb) != 0)

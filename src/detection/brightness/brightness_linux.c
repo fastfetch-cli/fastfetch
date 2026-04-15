@@ -78,19 +78,19 @@ static const char* detectWithBacklight(FFlist* result) {
 }
 
 #ifdef FF_HAVE_DDCUTIL
-#    include "detection/displayserver/displayserver.h"
-#    include "common/library.h"
-#    include "common/mallocHelper.h"
+    #include "detection/displayserver/displayserver.h"
+    #include "common/library.h"
+    #include "common/mallocHelper.h"
 
-#    include <ddcutil_macros.h>
-#    include <ddcutil_c_api.h>
+    #include <ddcutil_macros.h>
+    #include <ddcutil_c_api.h>
 
-// Try to be compatible with ddcutil 2.0
-#    if DDCUTIL_VMAJOR >= 2
+    // Try to be compatible with ddcutil 2.0
+    #if DDCUTIL_VMAJOR >= 2
 double ddca_set_default_sleep_multiplier(double multiplier); // ddcutil 1.4
-#    else
+    #else
 DDCA_Status ddca_init(const char* libopts, int syslog_level, int opts);
-#    endif
+    #endif
 
 static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(libddcutil, "libddcutil" FF_LIBRARY_EXTENSION, 5);
@@ -100,7 +100,7 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
 
-#    ifndef FF_DISABLE_DLOPEN
+    #ifndef FF_DISABLE_DLOPEN
     FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_init)
     if (ffddca_init) {
         FF_SUPPRESS_IO();
@@ -116,15 +116,15 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
 
         libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
     }
-#    else
-#        if DDCUTIL_VMAJOR >= 2
+    #else
+        #if DDCUTIL_VMAJOR >= 2
     if (ddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
         return "ddca_init() failed";
     }
-#        else
+        #else
     ddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
-#        endif
-#    endif
+        #endif
+    #endif
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (ffddca_get_display_info_list2(false, &infoList) < 0) {

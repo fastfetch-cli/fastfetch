@@ -1,65 +1,65 @@
 #include "version.h"
 
 #if defined(__x86_64__)
-#    define FF_ARCHITECTURE "x86_64"
+    #define FF_ARCHITECTURE "x86_64"
 #elif defined(__i386__)
-#    define FF_ARCHITECTURE "i386"
+    #define FF_ARCHITECTURE "i386"
 #elif defined(__ia64__)
-#    define FF_ARCHITECTURE "ia64"
+    #define FF_ARCHITECTURE "ia64"
 #elif defined(__aarch64__)
-#    define FF_ARCHITECTURE "aarch64"
+    #define FF_ARCHITECTURE "aarch64"
 #elif defined(__arm__)
-#    define FF_ARCHITECTURE "arm"
+    #define FF_ARCHITECTURE "arm"
 #elif defined(__mips__)
-#    define FF_ARCHITECTURE "mips"
+    #define FF_ARCHITECTURE "mips"
 #elif defined(__powerpc__) || defined(__powerpc)
-#    define FF_ARCHITECTURE "powerpc"
+    #define FF_ARCHITECTURE "powerpc"
 #elif defined(__riscv__) || defined(__riscv)
-#    define FF_ARCHITECTURE "riscv"
+    #define FF_ARCHITECTURE "riscv"
 #elif defined(__s390x__)
-#    define FF_ARCHITECTURE "s390x"
+    #define FF_ARCHITECTURE "s390x"
 #elif defined(__loongarch__)
-#    define FF_ARCHITECTURE "loongarch"
+    #define FF_ARCHITECTURE "loongarch"
 #elif defined(__sparc__)
-#    define FF_ARCHITECTURE "sparc"
+    #define FF_ARCHITECTURE "sparc"
 #elif defined(__alpha__)
-#    define FF_ARCHITECTURE "alpha"
+    #define FF_ARCHITECTURE "alpha"
 #elif defined(__hppa__)
-#    define FF_ARCHITECTURE "hppa"
+    #define FF_ARCHITECTURE "hppa"
 #elif defined(__sh__)
-#    define FF_ARCHITECTURE "sh"
+    #define FF_ARCHITECTURE "sh"
 #elif defined(__m68k__)
-#    define FF_ARCHITECTURE "m68k"
+    #define FF_ARCHITECTURE "m68k"
 #else
-#    define FF_ARCHITECTURE "Unknown"
+    #define FF_ARCHITECTURE "Unknown"
 #endif
 
 #if defined(__ANDROID__)
-#    define FF_SYSNAME "Android"
+    #define FF_SYSNAME "Android"
 #elif defined(__linux__)
-#    define FF_SYSNAME "Linux"
+    #define FF_SYSNAME "Linux"
 #elif defined(__DragonFly__) // We define `__FreeBSD__` on DragonFly BSD for simplification
-#    define FF_SYSNAME "DragonFly"
+    #define FF_SYSNAME "DragonFly"
 #elif defined(__MidnightBSD__)
-#    define FF_SYSNAME "MidnightBSD"
+    #define FF_SYSNAME "MidnightBSD"
 #elif defined(__FreeBSD__)
-#    define FF_SYSNAME "FreeBSD"
+    #define FF_SYSNAME "FreeBSD"
 #elif defined(__APPLE__)
-#    define FF_SYSNAME "macOS"
+    #define FF_SYSNAME "macOS"
 #elif defined(_WIN32)
-#    define FF_SYSNAME "Windows"
+    #define FF_SYSNAME "Windows"
 #elif defined(__sun)
-#    define FF_SYSNAME "SunOS"
+    #define FF_SYSNAME "SunOS"
 #elif defined(__OpenBSD__)
-#    define FF_SYSNAME "OpenBSD"
+    #define FF_SYSNAME "OpenBSD"
 #elif defined(__NetBSD__)
-#    define FF_SYSNAME "NetBSD"
+    #define FF_SYSNAME "NetBSD"
 #elif defined(__HAIKU__)
-#    define FF_SYSNAME "Haiku"
+    #define FF_SYSNAME "Haiku"
 #elif defined(__GNU__)
-#    define FF_SYSNAME "GNU"
+    #define FF_SYSNAME "GNU"
 #else
-#    define FF_SYSNAME "Unknown"
+    #define FF_SYSNAME "Unknown"
 #endif
 
 #define FF_STR_INDIR(x) #x
@@ -77,20 +77,20 @@ FFVersionResult ffVersionResult = {
     .compiler =
 
 #ifdef __clang__
-#    ifdef _MSC_VER
+    #ifdef _MSC_VER
         "clang-cl ";
-#    elif defined(__APPLE__) && defined(__apple_build_version__)
+    #elif defined(__APPLE__) && defined(__apple_build_version__)
         "Apple clang "
-#    else
+    #else
         "clang "
-#    endif
+    #endif
 
 FF_STR(__clang_major__)
 "." FF_STR(__clang_minor__) "." FF_STR(__clang_patchlevel__)
 
-#    if defined(__APPLE__) && defined(__apple_build_version__)
+    #if defined(__APPLE__) && defined(__apple_build_version__)
     " (" FF_STR(__apple_build_version__) ")"
-#    endif
+    #endif
     ,
 #elif defined(__GNUC__)
         "gcc " FF_STR(__GNUC__) "." FF_STR(__GNUC_MINOR__) "." FF_STR(__GNUC_PATCHLEVEL__),

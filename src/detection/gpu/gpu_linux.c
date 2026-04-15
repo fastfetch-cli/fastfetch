@@ -13,26 +13,26 @@
 #include <stdint.h>
 
 #ifdef FF_HAVE_DRM_AMDGPU
-#    include <amdgpu.h>
-#    include <amdgpu_drm.h>
-#    include <fcntl.h>
+    #include <amdgpu.h>
+    #include <amdgpu_drm.h>
+    #include <fcntl.h>
 #endif
 
 #ifdef FF_HAVE_DRM
-#    include "intel_drm.h"
-#    include <fcntl.h>
-#    include <sys/ioctl.h>
+    #include "intel_drm.h"
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
 #endif
 
 #if defined(FF_HAVE_DRM) && defined(__aarch64__)
-// https://github.com/alyssarosenzweig/linux/blob/agx-uapi-v7/include/uapi/drm/asahi_drm.h
-// Found in kernel-headers-6.14.4-400.asahi.fc42.aarch64
-#    if __has_include(<drm/asahi_drm.h>)
-#        include <drm/asahi_drm.h>
-#    else
-#        include "asahi_drm.h"
-#    endif
-#    define FF_HAVE_DRM_ASAHI 1
+    // https://github.com/alyssarosenzweig/linux/blob/agx-uapi-v7/include/uapi/drm/asahi_drm.h
+    // Found in kernel-headers-6.14.4-400.asahi.fc42.aarch64
+    #if __has_include(<drm/asahi_drm.h>)
+        #include <drm/asahi_drm.h>
+    #else
+        #include "asahi_drm.h"
+    #endif
+    #define FF_HAVE_DRM_ASAHI 1
 #endif
 
 static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
@@ -108,12 +108,12 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
     if (ffStrbufEqualS(&gpu->driver, "radeon")) {
         return ffDrmDetectRadeon(options, gpu, buffer->chars);
     } else {
-#    if FF_HAVE_DRM_AMDGPU
+    #if FF_HAVE_DRM_AMDGPU
         return ffDrmDetectAmdgpu(options, gpu, buffer->chars);
-#    else
+    #else
         FF_UNUSED(options, gpu, drmKey, buffer);
         return "Fastfetch is not compiled with libdrm_amdgpu support";
-#    endif
+    #endif
     }
 #else
     FF_UNUSED(options, gpu, drmKey, buffer);
@@ -503,14 +503,14 @@ FF_A_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const ch
     }
     ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
 
-#    if FF_HAVE_DRM_ASAHI
+    #if FF_HAVE_DRM_ASAHI
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd >= 0) {
         return ffDrmDetectAsahi(gpu, fd);
     }
-#    endif
+    #endif
 
     return NULL;
 }

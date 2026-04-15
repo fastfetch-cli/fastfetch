@@ -69,7 +69,7 @@ struct zwlr_output_manager_v1;
 struct zwlr_output_mode_v1;
 
 #ifndef ZWLR_OUTPUT_MANAGER_V1_INTERFACE
-#    define ZWLR_OUTPUT_MANAGER_V1_INTERFACE
+    #define ZWLR_OUTPUT_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_manager_v1 zwlr_output_manager_v1
  * @section page_iface_zwlr_output_manager_v1_desc Description
@@ -138,7 +138,7 @@ struct zwlr_output_mode_v1;
 extern const struct wl_interface zwlr_output_manager_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_HEAD_V1_INTERFACE
-#    define ZWLR_OUTPUT_HEAD_V1_INTERFACE
+    #define ZWLR_OUTPUT_HEAD_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_head_v1 zwlr_output_head_v1
  * @section page_iface_zwlr_output_head_v1_desc Description
@@ -179,7 +179,7 @@ extern const struct wl_interface zwlr_output_manager_v1_interface;
 extern const struct wl_interface zwlr_output_head_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_MODE_V1_INTERFACE
-#    define ZWLR_OUTPUT_MODE_V1_INTERFACE
+    #define ZWLR_OUTPUT_MODE_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_mode_v1 zwlr_output_mode_v1
  * @section page_iface_zwlr_output_mode_v1_desc Description
@@ -210,7 +210,7 @@ extern const struct wl_interface zwlr_output_head_v1_interface;
 extern const struct wl_interface zwlr_output_mode_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
-#    define ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
+    #define ZWLR_OUTPUT_CONFIGURATION_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_configuration_v1 zwlr_output_configuration_v1
  * @section page_iface_zwlr_output_configuration_v1_desc Description
@@ -245,7 +245,7 @@ extern const struct wl_interface zwlr_output_mode_v1_interface;
 extern const struct wl_interface zwlr_output_configuration_v1_interface;
 #endif
 #ifndef ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
-#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
+    #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_INTERFACE
 /**
  * @page page_iface_zwlr_output_configuration_head_v1 zwlr_output_configuration_head_v1
  * @section page_iface_zwlr_output_configuration_head_v1_desc Description
@@ -408,7 +408,7 @@ zwlr_output_manager_v1_destroy(struct zwlr_output_manager_v1* zwlr_output_manage
 // }
 
 #ifndef ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
-#    define ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
+    #define ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
 enum zwlr_output_head_v1_adaptive_sync_state {
     /**
      * adaptive sync is disabled
@@ -896,7 +896,7 @@ zwlr_output_mode_v1_destroy(struct zwlr_output_mode_v1* zwlr_output_mode_v1) {
 // }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
-#    define ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
+    #define ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
 enum zwlr_output_configuration_v1_error {
     /**
      * head has been configured twice
@@ -1119,7 +1119,7 @@ zwlr_output_configuration_v1_get_version(struct zwlr_output_configuration_v1* zw
 // }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
-#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
+    #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
 enum zwlr_output_configuration_head_v1_error {
     /**
      * property has already been set
@@ -1147,10 +1147,10 @@ enum zwlr_output_configuration_head_v1_error {
      */
     ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE = 6,
 };
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- */
-#    define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE_SINCE_VERSION 4
+    /**
+     * @ingroup iface_zwlr_output_configuration_head_v1
+     */
+    #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_INVALID_ADAPTIVE_SYNC_STATE_SINCE_VERSION 4
 #endif /* ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM */
 
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_MODE 0

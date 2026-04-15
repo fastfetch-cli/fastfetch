@@ -8,7 +8,7 @@
 #include <IOKit/storage/IOStorageDeviceCharacteristics.h>
 #include <IOKit/storage/IOStorageProtocolCharacteristics.h>
 #ifdef MAC_OS_X_VERSION_10_15
-#    include <IOKit/storage/nvme/NVMeSMARTLibExternal.h>
+    #include <IOKit/storage/nvme/NVMeSMARTLibExternal.h>
 #endif
 
 #ifdef MAC_OS_X_VERSION_10_15

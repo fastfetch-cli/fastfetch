@@ -34,7 +34,7 @@ struct kde_output_device_registry_v2;
 struct kde_output_device_v2;
 
 #ifndef KDE_OUTPUT_DEVICE_REGISTRY_V2_INTERFACE
-#    define KDE_OUTPUT_DEVICE_REGISTRY_V2_INTERFACE
+    #define KDE_OUTPUT_DEVICE_REGISTRY_V2_INTERFACE
 /**
  * @page page_iface_kde_output_device_registry_v2 kde_output_device_registry_v2
  * @section page_iface_kde_output_device_registry_v2_desc Description
@@ -57,7 +57,7 @@ struct kde_output_device_v2;
 extern const struct wl_interface kde_output_device_registry_v2_interface;
 #endif
 #ifndef KDE_OUTPUT_DEVICE_V2_INTERFACE
-#    define KDE_OUTPUT_DEVICE_V2_INTERFACE
+    #define KDE_OUTPUT_DEVICE_V2_INTERFACE
 /**
  * @page page_iface_kde_output_device_v2 kde_output_device_v2
  * @section page_iface_kde_output_device_v2_desc Description
@@ -114,7 +114,7 @@ extern const struct wl_interface kde_output_device_registry_v2_interface;
 extern const struct wl_interface kde_output_device_v2_interface;
 #endif
 #ifndef KDE_OUTPUT_DEVICE_MODE_V2_INTERFACE
-#    define KDE_OUTPUT_DEVICE_MODE_V2_INTERFACE
+    #define KDE_OUTPUT_DEVICE_MODE_V2_INTERFACE
 /**
  * @page page_iface_kde_output_device_mode_v2 kde_output_device_mode_v2
  * @section page_iface_kde_output_device_mode_v2_desc Description
@@ -146,7 +146,7 @@ extern const struct wl_interface kde_output_device_mode_v2_interface;
 #endif
 
 #ifndef KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM
-#    define KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM
+    #define KDE_OUTPUT_DEVICE_REGISTRY_V2_ERROR_ENUM
 /**
  * @ingroup iface_kde_output_device_registry_v2
  * kde_output_device_registry_v2 error values
@@ -256,7 +256,7 @@ kde_output_device_registry_v2_destroy(struct kde_output_device_registry_v2* kde_
 // }
 
 #ifndef KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * subpixel geometry information
@@ -275,7 +275,7 @@ enum kde_output_device_v2_subpixel {
 #endif /* KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_TRANSFORM_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_TRANSFORM_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_TRANSFORM_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * transform from framebuffer to output
@@ -304,7 +304,7 @@ enum kde_output_device_v2_transform {
 #endif /* KDE_OUTPUT_DEVICE_V2_TRANSFORM_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * describes capabilities of the outputdevice
@@ -384,58 +384,58 @@ enum kde_output_device_v2_capability {
      */
     KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS = 0x4000,
 };
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_HIGH_DYNAMIC_RANGE_SINCE_VERSION 3
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_WIDE_COLOR_GAMUT_SINCE_VERSION 3
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_ROTATE_SINCE_VERSION 4
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_ICC_PROFILE_SINCE_VERSION 5
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BRIGHTNESS_SINCE_VERSION 9
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BUILT_IN_COLOR_SINCE_VERSION 12
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_DDC_CI_SINCE_VERSION 14
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_MAX_BITS_PER_COLOR_SINCE_VERSION 15
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_EDR_SINCE_VERSION 16
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_SHARPNESS_SINCE_VERSION 17
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES_SINCE_VERSION 18
-/**
- * @ingroup iface_kde_output_device_v2
- */
-#    define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS_SINCE_VERSION 19
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_HIGH_DYNAMIC_RANGE_SINCE_VERSION 3
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_WIDE_COLOR_GAMUT_SINCE_VERSION 3
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_ROTATE_SINCE_VERSION 4
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_ICC_PROFILE_SINCE_VERSION 5
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BRIGHTNESS_SINCE_VERSION 9
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BUILT_IN_COLOR_SINCE_VERSION 12
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_DDC_CI_SINCE_VERSION 14
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_MAX_BITS_PER_COLOR_SINCE_VERSION 15
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_EDR_SINCE_VERSION 16
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_SHARPNESS_SINCE_VERSION 17
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES_SINCE_VERSION 18
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS_SINCE_VERSION 19
 #endif /* KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * describes vrr policy
@@ -450,7 +450,7 @@ enum kde_output_device_v2_vrr_policy {
 #endif /* KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_RGB_RANGE_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_RGB_RANGE_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_RGB_RANGE_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * describes RGB range policy
@@ -465,7 +465,7 @@ enum kde_output_device_v2_rgb_range {
 #endif /* KDE_OUTPUT_DEVICE_V2_RGB_RANGE_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_AUTO_ROTATE_POLICY_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_AUTO_ROTATE_POLICY_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_AUTO_ROTATE_POLICY_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * describes when auto rotate should be used
@@ -478,7 +478,7 @@ enum kde_output_device_v2_auto_rotate_policy {
 #endif /* KDE_OUTPUT_DEVICE_V2_AUTO_ROTATE_POLICY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_COLOR_PROFILE_SOURCE_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_COLOR_PROFILE_SOURCE_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_COLOR_PROFILE_SOURCE_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * which source the compositor should use for the color profile on an output
@@ -491,7 +491,7 @@ enum kde_output_device_v2_color_profile_source {
 #endif /* KDE_OUTPUT_DEVICE_V2_COLOR_PROFILE_SOURCE_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * tradeoff between power and accuracy
@@ -514,7 +514,7 @@ enum kde_output_device_v2_color_power_tradeoff {
 #endif /* KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM
-#    define KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM
+    #define KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM
 /**
  * @ingroup iface_kde_output_device_v2
  * when the compositor may make use of EDR
@@ -1190,7 +1190,7 @@ kde_output_device_v2_destroy(struct kde_output_device_v2* kde_output_device_v2) 
 // }
 
 #ifndef KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
-#    define KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
+    #define KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
 /**
  * @ingroup iface_kde_output_device_mode_v2
  * mode flags

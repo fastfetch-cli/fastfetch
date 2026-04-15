@@ -14,7 +14,7 @@ static inline size_t mbrtoc32(uint32_t* restrict pc32, const char* restrict s, s
     return mbrtowc((wchar_t*) pc32, s, n, ps);
 }
 #else
-#    include <uchar.h>
+    #include <uchar.h>
 #endif
 
 static uint8_t getMbrWidth(const char* mbstr, uint32_t length, const char** next, mbstate_t* state) {

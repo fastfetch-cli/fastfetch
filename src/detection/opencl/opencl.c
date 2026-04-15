@@ -2,24 +2,24 @@
 #include "detection/gpu/gpu.h"
 
 #if !defined(FF_HAVE_OPENCL) && defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_15)
-#    define FF_HAVE_OPENCL 1
+    #define FF_HAVE_OPENCL 1
 #endif
 
 #ifdef FF_HAVE_OPENCL
 
-#    include "common/library.h"
-#    include "common/parsing.h"
-#    include "common/stringUtils.h"
-#    include <string.h>
+    #include "common/library.h"
+    #include "common/parsing.h"
+    #include "common/stringUtils.h"
+    #include <string.h>
 
-#    define CL_TARGET_OPENCL_VERSION 110
-#    ifndef __APPLE__
-#        include <CL/cl.h>
-#        include <CL/cl_ext.h>
-#    else
-#        include <OpenCL/cl.h>
-#        include <OpenCL/cl_ext.h>
-#    endif
+    #define CL_TARGET_OPENCL_VERSION 110
+    #ifndef __APPLE__
+        #include <CL/cl.h>
+        #include <CL/cl_ext.h>
+    #else
+        #include <OpenCL/cl.h>
+        #include <OpenCL/cl_ext.h>
+    #endif
 
 typedef struct OpenCLData {
     FF_LIBRARY_SYMBOL(clGetPlatformIDs)
@@ -34,10 +34,10 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result) {
     cl_int ret = data->ffclGetPlatformIDs(ARRAY_SIZE(platforms), platforms, &numPlatforms);
     if (ret != CL_SUCCESS) {
         switch (ret) {
-#    ifdef CL_PLATFORM_NOT_FOUND_KHR // not available on macOS
+    #ifdef CL_PLATFORM_NOT_FOUND_KHR // not available on macOS
             case CL_PLATFORM_NOT_FOUND_KHR:
                 return "clGetPlatformIDs() failed: CL_PLATFORM_NOT_FOUND_KHR";
-#    endif
+    #endif
             case CL_INVALID_VALUE:
                 return "clGetPlatformIDs() failed: CL_INVALID_VALUE";
             case CL_OUT_OF_HOST_MEMORY:
@@ -166,13 +166,13 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result) {
 static const char* detectOpenCL(FFOpenCLResult* result) {
     OpenCLData data;
 
-#    ifndef __APPLE__
+    #ifndef __APPLE__
 
     FF_LIBRARY_LOAD_MESSAGE(opencl,
-#        ifdef _WIN32
+        #ifdef _WIN32
         "OpenCL" FF_LIBRARY_EXTENSION,
         -1,
-#        endif
+        #endif
         "libOpenCL" FF_LIBRARY_EXTENSION,
         1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
@@ -182,7 +182,7 @@ static const char* detectOpenCL(FFOpenCLResult* result) {
 
     return openCLHandleData(&data, result);
 
-#    else
+    #else
 
     data.ffclGetPlatformIDs = clGetPlatformIDs;
     data.ffclGetPlatformInfo = clGetPlatformInfo;
@@ -191,7 +191,7 @@ static const char* detectOpenCL(FFOpenCLResult* result) {
 
     return openCLHandleData(&data, result);
 
-#    endif
+    #endif
 }
 
 #endif // defined(FF_HAVE_OPENCL)

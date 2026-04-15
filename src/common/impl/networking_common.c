@@ -5,7 +5,7 @@
 #include "common/debug.h"
 
 #ifdef FF_HAVE_ZLIB
-#    include <zlib.h>
+    #include <zlib.h>
 
 struct FFZlibLibrary {
     FF_LIBRARY_SYMBOL(inflateInit2_)
@@ -19,11 +19,11 @@ const char* ffNetworkingLoadZlibLibrary(void) {
     if (!zlibData.inited) {
         zlibData.inited = true;
         FF_LIBRARY_LOAD_MESSAGE(zlib,
-#    ifdef _WIN32
+    #ifdef _WIN32
             "zlib1"
-#    else
+    #else
             "libz"
-#    endif
+    #endif
             FF_LIBRARY_EXTENSION,
             2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateInit2_)

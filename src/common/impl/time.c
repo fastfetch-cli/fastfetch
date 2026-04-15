@@ -5,8 +5,8 @@
 char ffTimeInternalBuffer[64]; // Reduce memory usage and prevent redundant allocations
 
 #ifdef _WIN32
-#    pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wformat"
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 const char* ffTimeToFullStr(uint64_t msec) {
@@ -45,7 +45,7 @@ const char* ffTimeToTimeStr(uint64_t msec) {
 }
 
 #ifdef _WIN32
-#    pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 #endif
 
 FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs) {

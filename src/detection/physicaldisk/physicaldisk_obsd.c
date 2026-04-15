@@ -105,7 +105,7 @@ static void logScsiSense(const char* diskName, const char* operation, const scsi
         rawSense.length ? rawSense.chars : "empty");
 }
 #else
-#    define logScsiSense(...) ((void) 0)
+    #define logScsiSense(...) ((void) 0)
 #endif
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {

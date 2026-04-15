@@ -2,12 +2,12 @@
 
 #include <sys/sysctl.h>
 #ifdef __FreeBSD__
-#    include <sys/types.h>
-#    include <sys/user.h>
+    #include <sys/types.h>
+    #include <sys/user.h>
 #endif
 
 #ifndef KERN_PROC_PROC
-#    define KERN_PROC_PROC KERN_PROC_ALL // Apple
+    #define KERN_PROC_PROC KERN_PROC_ALL // Apple
 #endif
 
 const char* ffDetectProcesses(uint32_t* result) {

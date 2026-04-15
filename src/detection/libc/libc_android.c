@@ -10,11 +10,11 @@ const char* ffDetectLibc(FFLibcResult* result) {
     result->name = "ndk-bionic";
     result->version = FF_STR(__NDK_MAJOR__) "." FF_STR(__NDK_MINOR__) "." FF_STR(__NDK_BUILD__)
 
-#    if __NDK_BETA__
+    #if __NDK_BETA__
         "-beta" FF_STR(__NDK_BETA__)
-#    elif __NDK_CANARY__
+    #elif __NDK_CANARY__
         "-canary"
-#    endif
+    #endif
 
         ;
     return NULL;

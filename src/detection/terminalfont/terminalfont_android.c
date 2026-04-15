@@ -4,9 +4,9 @@
 #include "common/io.h"
 
 #ifdef FF_HAVE_FREETYPE
-#    include "common/library.h"
-#    include <ft2build.h>
-#    include FT_FREETYPE_H
+    #include "common/library.h"
+    #include <ft2build.h>
+    #include FT_FREETYPE_H
 #endif
 
 #define FF_TERMUX_FONT_PATH FASTFETCH_TARGET_DIR_HOME "/.termux/font.ttf"

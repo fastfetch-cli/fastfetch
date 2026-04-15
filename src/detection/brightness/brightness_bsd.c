@@ -2,12 +2,12 @@
 
 #if __has_include(<sys/backlight.h>)
 
-#    include "common/io.h"
+    #include "common/io.h"
 
-#    include <sys/backlight.h>
-#    include <sys/ioctl.h>
-#    include <sys/fcntl.h>
-#    include <unistd.h>
+    #include <sys/backlight.h>
+    #include <sys/ioctl.h>
+    #include <sys/fcntl.h>
+    #include <unistd.h>
 
 const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
     // https://man.freebsd.org/cgi/man.cgi?query=backlight&sektion=9

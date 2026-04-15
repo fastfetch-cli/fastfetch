@@ -7,7 +7,7 @@
 #include <string.h>
 
 #ifdef FF_HAVE_GIO
-#    include <gio/gio.h>
+    #include <gio/gio.h>
 
 typedef struct GVariantGetters {
     FF_LIBRARY_SYMBOL(g_variant_dup_string)
@@ -124,7 +124,7 @@ FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const
 #endif // FF_HAVE_GIO
 
 #ifdef FF_HAVE_DCONF
-#    include <dconf.h>
+    #include <dconf.h>
 
 typedef struct DConfData {
     FF_LIBRARY_SYMBOL(dconf_client_read_full)
@@ -200,7 +200,7 @@ FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaNa
 }
 
 #ifdef FF_HAVE_DBUS
-#    include "common/dbus.h"
+    #include "common/dbus.h"
 
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
@@ -248,7 +248,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
     return FF_VARIANT_NULL;
 }
 
-#    define FF_DBUS_ITER_CONTINUE(dbus, iterator)                \
+    #define FF_DBUS_ITER_CONTINUE(dbus, iterator)                \
         {                                                        \
             if (!(dbus).lib->ffdbus_message_iter_next(iterator)) \
                 break;                                           \
@@ -334,7 +334,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
 #endif // FF_HAVE_DBUS
 
 #ifdef FF_HAVE_SQLITE3
-#    include <sqlite3.h>
+    #include <sqlite3.h>
 
 typedef struct SQLiteData {
     FF_LIBRARY_SYMBOL(sqlite3_open_v2)
@@ -454,7 +454,7 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
 #endif // FF_HAVE_SQLITE3
 
 #ifdef __ANDROID__
-#    include <sys/system_properties.h>
+    #include <sys/system_properties.h>
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     ffStrbufEnsureFree(result, PROP_VALUE_MAX);
     int len = __system_property_get(propName, result->chars + result->length);
@@ -466,7 +466,7 @@ bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result) {
     return true;
 }
 #elif defined(__FreeBSD__)
-#    include <kenv.h>
+    #include <kenv.h>
 bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result) {
     // https://wiki.ghostbsd.org/index.php/Kenv
     ffStrbufEnsureFree(result, KENV_MVALLEN);

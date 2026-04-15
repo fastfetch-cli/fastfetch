@@ -5,7 +5,7 @@
 #include <AvailabilityMacros.h>
 
 #ifndef MAC_OS_VERSION_12_0
-#    define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
+    #define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
 #endif
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {

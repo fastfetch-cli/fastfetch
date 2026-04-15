@@ -2,13 +2,13 @@
 
 #ifdef FF_HAVE_XRANDR
 
-#    include "common/library.h"
-#    include "common/properties.h"
-#    include "common/edidHelper.h"
-#    include "common/stringUtils.h"
+    #include "common/library.h"
+    #include "common/properties.h"
+    #include "common/edidHelper.h"
+    #include "common/stringUtils.h"
 
-#    include <X11/extensions/Xrandr.h>
-#    include <X11/Xlib.h>
+    #include <X11/extensions/Xrandr.h>
+    #include <X11/Xlib.h>
 
 typedef struct XrandrData {
     FF_LIBRARY_SYMBOL(XInternAtom)

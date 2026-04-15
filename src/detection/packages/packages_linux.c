@@ -162,11 +162,11 @@ static uint32_t getSnap(FFstrbuf* baseDir) {
 }
 
 #ifdef FF_HAVE_RPM
-#    include "common/library.h"
-#    include <rpm/rpmlib.h>
-#    include <rpm/rpmts.h>
-#    include <rpm/rpmdb.h>
-#    include <rpm/rpmlog.h>
+    #include "common/library.h"
+    #include <rpm/rpmlib.h>
+    #include <rpm/rpmts.h>
+    #include <rpm/rpmdb.h>
+    #include <rpm/rpmlog.h>
 
 static uint32_t getRpmFromLibrpm(void) {
     FF_LIBRARY_LOAD(rpm, 0, "librpm" FF_LIBRARY_EXTENSION, 12)

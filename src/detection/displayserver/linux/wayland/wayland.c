@@ -8,26 +8,26 @@
 
 #ifdef FF_HAVE_WAYLAND
 
-#    include <sys/socket.h>
+    #include <sys/socket.h>
 
-#    include "common/properties.h"
+    #include "common/properties.h"
 
-#    include "wayland.h"
-#    include "wlr-output-management-unstable-v1-client-protocol.h"
-#    include "kde-output-device-v2-client-protocol.h"
-#    include "kde-output-order-v1-client-protocol.h"
-#    include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wayland.h"
+    #include "wlr-output-management-unstable-v1-client-protocol.h"
+    #include "kde-output-device-v2-client-protocol.h"
+    #include "kde-output-order-v1-client-protocol.h"
+    #include "xdg-output-unstable-v1-client-protocol.h"
 
-#    if __FreeBSD__
-#        include <sys/un.h>
-#        include <sys/ucred.h>
-#        include <sys/sysctl.h>
-#    endif
+    #if __FreeBSD__
+        #include <sys/un.h>
+        #include <sys/ucred.h>
+        #include <sys/sysctl.h>
+    #endif
 
 static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
-#    if __linux__ || __GNU__ || (__FreeBSD__ && !__DragonFly__)
+    #if __linux__ || __GNU__ || (__FreeBSD__ && !__DragonFly__)
 
-#        if __linux__ || __GNU__
+        #if __linux__ || __GNU__
     struct ucred ucred = {};
     socklen_t len = sizeof(ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1 || ucred.pid <= 0) {
@@ -39,7 +39,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
     if (!ffReadFileBuffer(procPath.chars, &result->wmProcessName)) {
         return false;
     }
-#        else
+        #else
     struct xucred ucred = {};
     socklen_t len = sizeof(ucred);
     if (getsockopt(fd, AF_UNSPEC, LOCAL_PEERCRED, &ucred, &len) == -1 || ucred.cr_pid <= 0) {
@@ -53,7 +53,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
         return false;
     }
     result->wmProcessName.length = (uint32_t) size - 1;
-#        endif
+        #endif
 
     // #1135: wl-restart is a special case
     const char* filename = strrchr(result->wmProcessName.chars, '/');
@@ -72,10 +72,10 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
 
     return true;
 
-#    else
+    #else
     FF_UNUSED(fd, result);
     return false;
-#    endif
+    #endif
 }
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version) {
@@ -148,11 +148,11 @@ void ffWaylandOutputNameListener(void* data, FF_A_UNUSED void* output, const cha
     }
 
     display->type = ffdsGetDisplayType(name);
-#    if __linux__
+    #if __linux__
     if (!display->edidName.length) {
         matchDrmConnector(name, display);
     }
-#    endif
+    #endif
     display->id = ffWaylandGenerateIdFromName(name);
     ffStrbufAppendS(&display->name, name);
 }

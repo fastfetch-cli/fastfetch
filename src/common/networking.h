@@ -4,7 +4,7 @@
 #include "common/FFstrbuf.h"
 
 #ifdef _WIN32
-#    include <minwindef.h>
+    #include <minwindef.h>
 #endif
 
 struct addrinfo;
@@ -17,9 +17,9 @@ typedef struct FFNetworkingState {
     int sockfd;
     struct addrinfo* addr;
 
-#    ifdef FF_HAVE_THREADS
+    #ifdef FF_HAVE_THREADS
     FFThreadType thread;
-#    endif
+    #endif
 #endif
 
     FFstrbuf command;

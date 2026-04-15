@@ -2,8 +2,8 @@
 
 #ifdef FF_HAVE_DBUS
 
-#    include "common/thread.h"
-#    include "common/stringUtils.h"
+    #include "common/thread.h"
+    #include "common/stringUtils.h"
 
 static bool loadLibSymbols(FFDBusLibrary* lib) {
     FF_LIBRARY_LOAD(dbus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);

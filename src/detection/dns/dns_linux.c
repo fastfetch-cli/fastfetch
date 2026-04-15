@@ -6,9 +6,9 @@
 #include "common/debug.h"
 
 #ifdef __HAIKU__
-#    define RESOLV_CONF "/system/settings/network/resolv.conf"
+    #define RESOLV_CONF "/system/settings/network/resolv.conf"
 #else
-#    define RESOLV_CONF "/etc/resolv.conf"
+    #define RESOLV_CONF "/etc/resolv.conf"
 #endif
 
 static const char* detectDnsFromConf(const char* path, FFDNSOptions* options, FFlist* results) {

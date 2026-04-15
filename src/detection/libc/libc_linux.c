@@ -14,11 +14,11 @@ const char* ffDetectLibc(FFLibcResult* result) {
     result->version = FF_STR(__GLIBC__) "." FF_STR(__GLIBC_MINOR__);
 #else
     result->name = "musl";
-#    ifdef FF_MUSL_VERSION
+    #ifdef FF_MUSL_VERSION
     result->version = FF_MUSL_VERSION;
-#    else
+    #else
     result->version = NULL;
-#    endif
+    #endif
 #endif
 
     return NULL;

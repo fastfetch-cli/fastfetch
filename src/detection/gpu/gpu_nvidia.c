@@ -23,7 +23,7 @@ struct FFNvmlData {
 
 #if defined(_WIN32) && !defined(FF_DISABLE_DLOPEN)
 
-#    include "nvapi.h"
+    #include "nvapi.h"
 
 struct FFNvapiData {
     FF_LIBRARY_SYMBOL(nvapi_Unload)
@@ -39,15 +39,15 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
         nvapiData.inited = true;
 
         FF_LIBRARY_LOAD_MESSAGE(libnvapi,
-#    ifdef _WIN64
+    #ifdef _WIN64
             "nvapi64.dll"
-#    else
+    #else
             "nvapi.dll"
-#    endif
+    #endif
             ,
             1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvapi, nvapi_QueryInterface)
-#    define FF_NVAPI_INTERFACE(iName, iOffset)                          \
+    #define FF_NVAPI_INTERFACE(iName, iOffset)                          \
         __typeof__(&iName) ff##iName = ffnvapi_QueryInterface(iOffset); \
         if (ff##iName == NULL) return "nvapi_QueryInterface " #iName " failed";
 
@@ -56,7 +56,7 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
         FF_NVAPI_INTERFACE(nvapi_EnumPhysicalGPUs, NVAPI_INTERFACE_OFFSET_ENUM_PHYSICAL_GPUS)
         FF_NVAPI_INTERFACE(nvapi_GPU_GetRamType, NVAPI_INTERFACE_OFFSET_GPU_GET_RAM_TYPE)
         FF_NVAPI_INTERFACE(nvapi_GPU_GetGPUType, NVAPI_INTERFACE_OFFSET_GPU_GET_GPU_TYPE)
-#    undef FF_NVAPI_INTERFACE
+    #undef FF_NVAPI_INTERFACE
 
         if (ffnvapi_Initialize() < 0) {
             return "NvAPI_Initialize() failed";
@@ -94,7 +94,7 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
     NvApiGPUMemoryType memType;
     if (result->memoryType && nvapiData.ffnvapi_GPU_GetRamType(gpuHandle, &memType) == 0) {
         switch (memType) {
-#    define FF_NVAPI_MEMORY_TYPE(type)                    \
+    #define FF_NVAPI_MEMORY_TYPE(type)                    \
         case NVAPI_GPU_MEMORY_TYPE_##type:                \
             ffStrbufSetStatic(result->memoryType, #type); \
             break;
@@ -115,7 +115,7 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
             FF_NVAPI_MEMORY_TYPE(GDDR6)
             FF_NVAPI_MEMORY_TYPE(GDDR6X)
             FF_NVAPI_MEMORY_TYPE(GDDR7)
-#    undef FF_NVAPI_MEMORY_TYPE
+    #undef FF_NVAPI_MEMORY_TYPE
             default:
                 ffStrbufSetF(result->memoryType, "Unknown (%d)", memType);
                 break;
@@ -236,12 +236,12 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         unsigned int value;
         if (nvmlData.ffnvmlDeviceGetIndex(device, &value) == NVML_SUCCESS) {
             *result.index = value;
-#    ifdef _WIN32
+    #ifdef _WIN32
             // Don't bother loading nvapi for GPU type detection only
             if (result.memoryType) {
                 detectMoreByNvapi(&result);
             }
-#    endif
+    #endif
         }
     }
 

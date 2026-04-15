@@ -63,7 +63,7 @@ typedef struct _PROCESS_DEVICEMAP_INFORMATION_EX {
 } PROCESS_DEVICEMAP_INFORMATION_EX, *PPROCESS_DEVICEMAP_INFORMATION_EX;
 
 #ifndef NtCurrentProcess
-#    define NtCurrentProcess() ((HANDLE) (LONG_PTR) - 1)
+    #define NtCurrentProcess() ((HANDLE) (LONG_PTR) - 1)
 #endif
 
 typedef struct _CURDIR {

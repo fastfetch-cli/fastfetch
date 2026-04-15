@@ -1,19 +1,19 @@
 #include "gpu.h"
 
 #if FF_HAVE_DRM
-#    include <drm.h>
-#    include <fcntl.h>
-#    include <sys/ioctl.h>
+    #include <drm.h>
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
 
-#    include "common/io.h"
-#    include "common/library.h"
-#    include "common/mallocHelper.h"
-#    include "common/stringUtils.h"
+    #include "common/io.h"
+    #include "common/library.h"
+    #include "common/mallocHelper.h"
+    #include "common/stringUtils.h"
 
-#    include "intel_drm.h"
-#    include "asahi_drm.h"
-#    include <radeon_drm.h>
-#    include <nouveau_drm.h>
+    #include "intel_drm.h"
+    #include "asahi_drm.h"
+    #include <radeon_drm.h>
+    #include <nouveau_drm.h>
 
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
     FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY | O_CLOEXEC);
@@ -76,12 +76,12 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     return NULL;
 }
 
-#    ifdef FF_HAVE_DRM_AMDGPU
-#        include <amdgpu.h>
-#        include <amdgpu_drm.h>
+    #ifdef FF_HAVE_DRM_AMDGPU
+        #include <amdgpu.h>
+        #include <amdgpu_drm.h>
 
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
-#        if FF_HAVE_DRM_AMDGPU
+        #if FF_HAVE_DRM_AMDGPU
     FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
@@ -117,7 +117,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
         gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-#            define FF_VRAM_CASE(name, value)                   \
+            #define FF_VRAM_CASE(name, value)                   \
                 case value /* AMDGPU_VRAM_TYPE_ ## name */:     \
                     ffStrbufSetStatic(&gpu->memoryType, #name); \
                     break
@@ -158,12 +158,12 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
     ffamdgpu_device_deinitialize(handle);
 
     return NULL;
-#        else
+        #else
     FF_UNUSED(options, gpu, renderPath);
     return "Fastfetch is compiled without libdrm support";
-#        endif
+        #endif
 }
-#    endif
+    #endif
 
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
     {
@@ -326,9 +326,9 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd) {
     return "Failed to query Asahi GPU information";
 }
 
-#    ifndef DRM_IOCTL_NOUVEAU_GETPARAM
-#        define DRM_IOCTL_NOUVEAU_GETPARAM DRM_IOWR(DRM_COMMAND_BASE + DRM_NOUVEAU_GETPARAM, struct drm_nouveau_getparam)
-#    endif
+    #ifndef DRM_IOCTL_NOUVEAU_GETPARAM
+        #define DRM_IOCTL_NOUVEAU_GETPARAM DRM_IOWR(DRM_COMMAND_BASE + DRM_NOUVEAU_GETPARAM, struct drm_nouveau_getparam)
+    #endif
 
 const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
     struct drm_nouveau_getparam getparam = {};

@@ -26,7 +26,7 @@ extern "C" {
 struct kde_output_order_v1;
 
 #ifndef KDE_OUTPUT_ORDER_V1_INTERFACE
-#    define KDE_OUTPUT_ORDER_V1_INTERFACE
+    #define KDE_OUTPUT_ORDER_V1_INTERFACE
 /**
  * @page page_iface_kde_output_order_v1 kde_output_order_v1
  * @section page_iface_kde_output_order_v1_desc Description

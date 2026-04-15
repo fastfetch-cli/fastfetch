@@ -14,10 +14,10 @@ extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2) FF_A_
 extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize) FF_A_WEAK_IMPORT;
 extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize) FF_A_WEAK_IMPORT;
 #else
-// DDC/CI (Intel)
-#    include <IOKit/IOKitLib.h>
-#    include <IOKit/graphics/IOGraphicsLib.h>
-#    include <IOKit/i2c/IOI2CInterface.h>
+    // DDC/CI (Intel)
+    #include <IOKit/IOKitLib.h>
+    #include <IOKit/graphics/IOGraphicsLib.h>
+    #include <IOKit/i2c/IOI2CInterface.h>
 extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service) FF_A_WEAK_IMPORT;
 #endif
 

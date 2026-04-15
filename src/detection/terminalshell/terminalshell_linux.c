@@ -374,11 +374,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result) {
 }
 
 #if defined(MAXPATH)
-#    define FF_EXE_PATH_LEN MAXPATH
+    #define FF_EXE_PATH_LEN MAXPATH
 #elif defined(PATH_MAX)
-#    define FF_EXE_PATH_LEN PATH_MAX
+    #define FF_EXE_PATH_LEN PATH_MAX
 #else
-#    define FF_EXE_PATH_LEN 260
+    #define FF_EXE_PATH_LEN 260
 #endif
 
 const FFShellResult* ffDetectShell() {

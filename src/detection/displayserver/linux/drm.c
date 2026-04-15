@@ -4,7 +4,7 @@
 #include "common/stringUtils.h"
 
 #ifdef __linux__
-#    include <dirent.h>
+    #include <dirent.h>
 
 static const char* drmParseSysfs(FFDisplayServerResult* result) {
     const char* drmDirPath = "/sys/class/drm/";
@@ -107,11 +107,11 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
 
 #ifdef FF_HAVE_DRM
 
-#    include "common/library.h"
+    #include "common/library.h"
 
-#    include <xf86drm.h>
-#    include <xf86drmMode.h>
-#    include <fcntl.h>
+    #include <xf86drm.h>
+    #include <xf86drmMode.h>
+    #include <fcntl.h>
 
 // https://gitlab.freedesktop.org/mesa/drm/-/blob/main/xf86drmMode.c#L1785
 // It's not supported on Ubuntu 20.04
@@ -242,14 +242,14 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
 
         const char* path = dev->nodes[DRM_NODE_PRIMARY];
 
-#    if __linux__
+    #if __linux__
         ffStrbufSetF(&name, "/sys/class/drm/%s/device/power/runtime_status", strrchr(path, '/') + 1);
 
         char buffer[8] = "";
         if (ffReadFileData(name.chars, strlen("suspend"), buffer) > 0 && ffStrStartsWith(buffer, "suspend")) {
             continue;
         }
-#    endif
+    #endif
 
         FF_AUTO_CLOSE_FD int primaryFd = open(path, O_RDWR | O_CLOEXEC);
         if (primaryFd < 0) {
@@ -356,7 +356,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
                     ffdrmModeFreeProperty(prop);
                 }
 
-#    if __linux__
+    #if __linux__
                 if (name.length == 0) {
                     uint8_t edidData[512];
                     ssize_t edidLength = 0;
@@ -367,7 +367,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
                         ffEdidGetSerialAndManufactureDate(edidData, &serial, &myear, &mweak);
                     }
                 }
-#    endif
+    #endif
 
                 if (name.length == 0) {
                     const char* connectorTypeName = drmType2Name(conn->connector_type);

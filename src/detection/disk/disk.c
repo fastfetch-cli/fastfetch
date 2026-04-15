@@ -31,7 +31,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks) {
 }
 
 #ifndef _WIN32
-#    include <fnmatch.h>
+    #include <fnmatch.h>
 
 bool ffDiskMatchesFolderPatterns(FFstrbuf* folders, const char* path, char separator) {
     uint32_t startIndex = 0;

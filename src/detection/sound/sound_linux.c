@@ -1,8 +1,8 @@
 #include "sound.h"
 
 #ifdef FF_HAVE_PULSE
-#    include "common/library.h"
-#    include <pulse/pulseaudio.h>
+    #include "common/library.h"
+    #include <pulse/pulseaudio.h>
 
 struct DetectionInfoBundle {
     FFstrbuf serverName;

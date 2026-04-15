@@ -4,13 +4,13 @@
 #include <assert.h>
 
 #if FF_HAVE_MALLOC_USABLE_SIZE || FF_HAVE_MSVC_MSIZE
-#    if __has_include(<malloc.h>)
-#        include <malloc.h>
-#    else
-#        include <malloc_np.h> // For DragonFly BSD
-#    endif
+    #if __has_include(<malloc.h>)
+        #include <malloc.h>
+    #else
+        #include <malloc_np.h> // For DragonFly BSD
+    #endif
 #elif FF_HAVE_MALLOC_SIZE
-#    include <malloc/malloc.h>
+    #include <malloc/malloc.h>
 #endif
 
 static inline void ffWrapFree(const void* pPtr) {

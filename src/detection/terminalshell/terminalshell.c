@@ -9,18 +9,18 @@
 #include <ctype.h>
 #include <stdint.h>
 #ifdef __FreeBSD__
-#    include <paths.h>
-#    ifndef _PATH_LOCALBASE
-#        define _PATH_LOCALBASE "/usr/local"
-#    endif
+    #include <paths.h>
+    #ifndef _PATH_LOCALBASE
+        #define _PATH_LOCALBASE "/usr/local"
+    #endif
 #elif __OpenBSD__
-#    define _PATH_LOCALBASE "/usr/local"
+    #define _PATH_LOCALBASE "/usr/local"
 #elif __NetBSD__
-#    define _PATH_LOCALBASE "/usr/pkg"
+    #define _PATH_LOCALBASE "/usr/pkg"
 #elif _WIN32
 
-#    include "common/windows/version.h"
-#    include <windows.h>
+    #include "common/windows/version.h"
+    #include <windows.h>
 
 static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, FFstrbuf* version) {
     wchar_t exePathW[PATH_MAX + 1];
@@ -31,7 +31,7 @@ static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, F
 }
 
 #elif __HAIKU__
-#    include "common/haiku/version.h"
+    #include "common/haiku/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version) {
@@ -586,15 +586,15 @@ static bool getTerminalVersionSshd(FFstrbuf* exe, FFstrbuf* version) {
 
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
-#    if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__GNU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__GNU__)
     char buffer[1024] = {};
     if (
-#        if __linux__ || __GNU__
+        #if __linux__ || __GNU__
         ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer) ||
         ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
-#        else
+        #else
         ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
-#        endif
+        #endif
     ) {
         // Starts from version 0.17.0
         // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
@@ -608,7 +608,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
             }
         }
     }
-#    elif __APPLE__
+    #elif __APPLE__
     if (ffStrbufEndsWithS(exe, "/kitty.app/Contents/MacOS/kitty")) {
         ffStrbufSet(version, exe);
         ffStrbufSubstrBeforeLastC(version, '/');
@@ -635,7 +635,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
         }
         ffStrbufClear(version);
     }
-#    endif
+    #endif
 
     char versionHex[64];
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233

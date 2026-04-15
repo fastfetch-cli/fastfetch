@@ -162,7 +162,7 @@ static const char* getNiri(FFstrbuf* result) {
     return "Failed to run command `niri --version`";
 }
 
-#    ifdef __linux__
+    #ifdef __linux__
 static const char* getWslg(FFstrbuf* result) {
     if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result)) {
         return "Failed to read /mnt/wslg/versions.txt";
@@ -178,7 +178,7 @@ static const char* getWslg(FFstrbuf* result) {
     ffStrbufTrimLeft(result, ' ');
     return NULL;
 }
-#    endif
+    #endif
 
 #endif // !__ANDROID__
 
@@ -300,11 +300,11 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNU
         return getNiri(result);
     }
 
-#    if __linux__
+    #if __linux__
     if (ffStrbufEqualS(wmName, "WSLg")) {
         return getWslg(result);
     }
-#    endif
+    #endif
 #endif
 
     // X11 WMs

@@ -78,7 +78,7 @@ struct zxdg_output_manager_v1;
 struct zxdg_output_v1;
 
 #ifndef ZXDG_OUTPUT_MANAGER_V1_INTERFACE
-#    define ZXDG_OUTPUT_MANAGER_V1_INTERFACE
+    #define ZXDG_OUTPUT_MANAGER_V1_INTERFACE
 /**
  * @page page_iface_zxdg_output_manager_v1 zxdg_output_manager_v1
  * @section page_iface_zxdg_output_manager_v1_desc Description
@@ -95,7 +95,7 @@ struct zxdg_output_v1;
 extern const struct wl_interface zxdg_output_manager_v1_interface;
 #endif
 #ifndef ZXDG_OUTPUT_V1_INTERFACE
-#    define ZXDG_OUTPUT_V1_INTERFACE
+    #define ZXDG_OUTPUT_V1_INTERFACE
 /**
  * @page page_iface_zxdg_output_v1 zxdg_output_v1
  * @section page_iface_zxdg_output_v1_desc Description

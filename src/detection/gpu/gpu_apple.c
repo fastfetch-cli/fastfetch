@@ -48,9 +48,9 @@ static double detectGpuTemp(const FFstrbuf* gpuName) {
 }
 
 #ifdef __aarch64__
-#    include "common/apple/cf_helpers.h"
+    #include "common/apple/cf_helpers.h"
 
-#    include <IOKit/IOKitLib.h>
+    #include <IOKit/IOKitLib.h>
 
 static const char* detectFrequency(FFGPUResult* gpu) {
     // https://github.com/giampaolo/psutil/pull/2222/files

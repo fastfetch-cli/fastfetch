@@ -2,12 +2,12 @@
 
 #ifdef FF_HAVE_WAYLAND
 
-#    include "common/library.h"
-#    include "common/stringUtils.h"
+    #include "common/library.h"
+    #include "common/stringUtils.h"
 
-#    include <wayland-client.h>
+    #include <wayland-client.h>
 
-#    include "../displayserver_linux.h"
+    #include "../displayserver_linux.h"
 
 typedef enum FF_A_PACKED WaylandProtocolType {
     FF_WAYLAND_PROTOCOL_TYPE_NONE,

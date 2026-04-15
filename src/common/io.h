@@ -4,36 +4,36 @@
 #include "common/FFlist.h"
 
 #ifdef _WIN32
-#    include <fileapi.h>
-#    include <handleapi.h>
-#    include <io.h>
-#    include "common/windows/nt.h"
+    #include <fileapi.h>
+    #include <handleapi.h>
+    #include <io.h>
+    #include "common/windows/nt.h"
 typedef HANDLE FFNativeFD;
-#    define FF_INVALID_FD INVALID_HANDLE_VALUE
+    #define FF_INVALID_FD INVALID_HANDLE_VALUE
 #else
-#    include <unistd.h>
-#    include <dirent.h>
-#    include <sys/stat.h>
-#    include <errno.h>
-#    include <limits.h>
-#    include <fcntl.h>
+    #include <unistd.h>
+    #include <dirent.h>
+    #include <sys/stat.h>
+    #include <errno.h>
+    #include <limits.h>
+    #include <fcntl.h>
 typedef int FFNativeFD;
-#    define FF_INVALID_FD (-1)
-// procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
-// one safe way to read correct data is reading the whole file in a single read syscall
-#    define PROC_FILE_BUFFSIZ (32 * 1024)
+    #define FF_INVALID_FD (-1)
+    // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
+    // one safe way to read correct data is reading the whole file in a single read syscall
+    #define PROC_FILE_BUFFSIZ (32 * 1024)
 #endif
 
 #ifdef _WIN32
-#    ifndef O_CLOEXEC
-#        define O_CLOEXEC 0
-#    endif
-#    ifndef O_RDONLY
-#        define O_RDONLY 0
-#    endif
-#    ifndef O_DIRECTORY
-#        define O_DIRECTORY 0200000
-#    endif
+    #ifndef O_CLOEXEC
+        #define O_CLOEXEC 0
+    #endif
+    #ifndef O_RDONLY
+        #define O_RDONLY 0
+    #endif
+    #ifndef O_DIRECTORY
+        #define O_DIRECTORY 0200000
+    #endif
 
 // Only O_RDONLY is supported
 HANDLE openat(HANDLE dfd, const char* fileName, int oflag);

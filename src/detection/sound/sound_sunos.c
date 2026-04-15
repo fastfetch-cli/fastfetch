@@ -5,10 +5,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #if __has_include(<sys/soundcard.h>)
-#    include <sys/soundcard.h>
+    #include <sys/soundcard.h>
 #else
-// Strangely, they don't provide this file on default installation
-#    include "audio_oss_sunos.h"
+    // Strangely, they don't provide this file on default installation
+    #include "audio_oss_sunos.h"
 #endif
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {

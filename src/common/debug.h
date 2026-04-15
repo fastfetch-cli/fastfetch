@@ -17,13 +17,13 @@ static inline const char* ffFindFileName(const char* file) {
 }
 
 #ifndef NDEBUG
-#    define FF_DEBUG_PRINT(file_, line_, format_, ...)                                                                                      \
+    #define FF_DEBUG_PRINT(file_, line_, format_, ...)                                                                                      \
         do {                                                                                                                                \
             if (instance.config.display.debugMode)                                                                                          \
                 fprintf(stderr, "[%s%4d, %s] " format_ "\n", ffFindFileName(file_), line_, ffTimeToTimeStr(ffTimeGetNow()), ##__VA_ARGS__); \
         } while (0)
 #else
-#    define FF_DEBUG_PRINT(file_, line_, format_, ...) \
+    #define FF_DEBUG_PRINT(file_, line_, format_, ...) \
         do {                                           \
         } while (0)
 #endif

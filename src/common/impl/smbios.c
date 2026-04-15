@@ -141,21 +141,21 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
 }
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__) || defined(__GNU__)
-#    include <fcntl.h>
-#    include <sys/stat.h>
-#    include <sys/types.h>
-#    include <sys/mman.h>
-#    include <stddef.h>
+    #include <fcntl.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <sys/mman.h>
+    #include <stddef.h>
 
-#    ifdef __linux__
-#        include "common/properties.h"
-#    elif defined(__FreeBSD__)
-#        include "common/settings.h"
-#    elif defined(__NetBSD__)
-#        include "common/sysctl.h"
-#    endif
+    #ifdef __linux__
+        #include "common/properties.h"
+    #elif defined(__FreeBSD__)
+        #include "common/settings.h"
+    #elif defined(__NetBSD__)
+        #include "common/sysctl.h"
+    #endif
 
-#    ifdef __linux__
+    #ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer) {
     // /sys/class/dmi/id/* are all pseudo-files with very small content
     // so reading the whole file at once is efficient
@@ -186,10 +186,10 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     ffStrbufClear(buffer);
     return false;
 }
-#    endif
+    #endif
 
 static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffer) {
-#    if !defined(__FreeBSD__) // Either causes kernel panic or returns EFAULT
+    #if !defined(__FreeBSD__) // Either causes kernel panic or returns EFAULT
     // -1: unknown, 0: failed before (stop trying), 1: succeeded before
     static int preadState = -1;
     if (preadState != 0) {
@@ -208,7 +208,7 @@ static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffe
     } else {
         FF_DEBUG("Skipping pread due to cached failure; using mmap");
     }
-#    endif
+    #endif
 
     off_t alignedAddress = address & ~((off_t) instance.state.platform.sysinfo.pageSize - 1);
     size_t pageOffset = (size_t) (address - alignedAddress);
@@ -270,11 +270,11 @@ typedef union FFSmbiosEntryPoint {
 
 static bool fillTableBufferFallback(FFstrbuf* buffer) {
     const char* devMem =
-#    if __HAIKU__
+    #if __HAIKU__
         "/dev/misc/mem";
-#    else
+    #else
         "/dev/mem"; // kern.securelevel must be -1
-#    endif
+    #endif
     FF_DEBUG("Using physical memory searching implementation: %s", devMem);
 
     uint32_t tableLength = 0;
@@ -355,7 +355,7 @@ static bool fillTableBufferFallback(FFstrbuf* buffer) {
     return true;
 }
 
-#    ifdef __OpenBSD__
+    #ifdef __OpenBSD__
 static bool detectSmbiosTableLength(const uint8_t* data, uint32_t bufferLength, uint32_t* tableLength) {
     const uint8_t* p = data;
     const uint8_t* end = data + bufferLength;
@@ -500,26 +500,26 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
     ffStrbufClear(buffer);
     return false;
 }
-#    else
+    #else
 static bool fillTableBufferPlatform(FFstrbuf* buffer) {
-#        if __HAIKU__ && __GNU__
+        #if __HAIKU__ && __GNU__
     return false;
-#        elif defined(__linux__)
+        #elif defined(__linux__)
     FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
     if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", buffer))
-#        else
+        #else
     {
-#            if !defined(__sun) && !defined(__NetBSD__)
+            #if !defined(__sun) && !defined(__NetBSD__)
         FF_DEBUG("Using memory-mapped implementation");
         FF_STRBUF_AUTO_DESTROY strEntryAddress = ffStrbufCreate();
-#                ifdef __FreeBSD__
+                #ifdef __FreeBSD__
         FF_DEBUG("Using FreeBSD kenv implementation");
         if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress)) {
             FF_DEBUG("Failed to get SMBIOS address from FreeBSD kenv");
             return false; // non-UEFI systems
         }
         FF_DEBUG("Got SMBIOS address from kenv: %s", strEntryAddress.chars);
-#                elif defined(__linux__)
+                #elif defined(__linux__)
         {
             FF_DEBUG("Using Linux EFI systab implementation");
             FF_STRBUF_AUTO_DESTROY systab = ffStrbufCreate();
@@ -534,7 +534,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             }
             FF_DEBUG("Found SMBIOS entry in systab: %s", strEntryAddress.chars);
         }
-#                endif
+                #endif
 
         off_t entryAddress = (off_t) strtol(strEntryAddress.chars, NULL, 16);
         if (entryAddress == 0) {
@@ -558,14 +558,14 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point data");
-#            else
+            #else
         // Sun or NetBSD
         FF_DEBUG("Using %s specific implementation",
-#                ifdef __NetBSD__
+                #ifdef __NetBSD__
             "NetBSD"
-#                else
+                #else
             "SunOS"
-#                endif
+                #endif
         );
 
         FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY | O_CLOEXEC);
@@ -576,7 +576,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
         FF_DEBUG("/dev/smbios opened successfully with fd=%d", fd);
 
         FFSmbiosEntryPoint entryPoint;
-#                ifdef __NetBSD__
+                #ifdef __NetBSD__
         off_t addr = (off_t) ffSysctlGetInt64("machdep.smbios", 0);
         if (addr == 0) {
             FF_DEBUG("Failed to get SMBIOS address from sysctl");
@@ -589,15 +589,15 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point");
-#                else
+                #else
         FF_DEBUG("Reading SMBIOS entry point from /dev/smbios");
         if (ffReadFDData(fd, sizeof(entryPoint), &entryPoint) < 1) {
             FF_DEBUG("Failed to read SMBIOS entry point: %s", strerror(errno));
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point");
-#                endif
-#            endif
+                #endif
+            #endif
 
         uint32_t tableLength = 0;
         off_t tableAddress = 0;
@@ -649,11 +649,11 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
     }
-#        endif
+        #endif
 
     return true;
 }
-#    endif
+    #endif
 
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
     static FFstrbuf buffer;
@@ -684,9 +684,9 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
     return &smbiosTable;
 }
 #elif defined(_WIN32)
-#    include "common/windows/nt.h"
+    #include "common/windows/nt.h"
 
-#    pragma GCC diagnostic ignored "-Wmultichar"
+    #pragma GCC diagnostic ignored "-Wmultichar"
 
 typedef struct FFRawSmbiosData {
     uint8_t Used20CallingMethod;
@@ -754,7 +754,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
     return &smbiosTable;
 }
 #elif defined(__APPLE__)
-#    include "common/apple/cf_helpers.h"
+    #include "common/apple/cf_helpers.h"
 
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
     static CFDataRef smbiosDataBuffer;

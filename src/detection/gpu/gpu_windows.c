@@ -1,6 +1,6 @@
 #include "detection/gpu/gpu.h"
 #if __linux__
-#    define FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "/usr/lib/wsl/lib/"
+    #define FF_GPU_DRIVER_DLLNAME_PATH_PREFIX "/usr/lib/wsl/lib/"
 #endif
 #include "detection/gpu/gpu_driver_specific.h"
 #include "common/debug.h"
@@ -9,16 +9,16 @@
 #include "d3dkmthk.h"
 
 #if _WIN32
-#    include "common/windows/unicode.h"
-#    include "common/windows/registry.h"
+    #include "common/windows/unicode.h"
+    #include "common/windows/registry.h"
 
-#    if FF_WIN81_COMPAT
-#        include "common/mallocHelper.h"
-#        include <windows.h>
-#        include <cfgmgr32.h>
-#        include <devguid.h>
+    #if FF_WIN81_COMPAT
+        #include "common/mallocHelper.h"
+        #include <windows.h>
+        #include <cfgmgr32.h>
+        #include <devguid.h>
 
-#        define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
+        #define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
 
 static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_DEVICE_IDS* outDeviceIds) {
     FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS failed. Attempting queryDeviceIdsFallback: bus=%u device=%u function=%u",
@@ -128,7 +128,7 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
     FF_DEBUG("Cache miss for adapter address: bus=%u device=%u function=%u", adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
     return false;
 }
-#    endif // FF_WIN81_COMPAT
+    #endif // FF_WIN81_COMPAT
 
 static bool queryVendorNameViaRegistry(FFstrbuf* vendor, D3DKMT_HANDLE hAdapter) {
     // `KMTQAITYPE_QUERY_ADAPTER_UNIQUE_GUID` reports the GUID value used by the adapter's registry key (DirectX and Video)
@@ -158,10 +158,10 @@ static bool queryVendorNameViaRegistry(FFstrbuf* vendor, D3DKMT_HANDLE hAdapter)
 }
 
 #else
-#    include <unistd.h>
-#    include <fcntl.h>
-#    include <sys/ioctl.h>
-#    include <uchar.h>
+    #include <unistd.h>
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
+    #include <uchar.h>
 
 int dxgfd = -2;
 

@@ -41,9 +41,9 @@ static double detectCpuTemp(const FFCPUOptions* options, const FFstrbuf* cpuName
 }
 
 #ifdef __aarch64__
-#    include "common/apple/cf_helpers.h"
+    #include "common/apple/cf_helpers.h"
 
-#    include <IOKit/IOKitLib.h>
+    #include <IOKit/IOKitLib.h>
 
 static const char* detectFrequency(FFCPUResult* cpu) {
     // https://github.com/giampaolo/psutil/pull/2222/files

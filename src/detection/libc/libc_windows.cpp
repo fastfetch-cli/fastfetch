@@ -3,7 +3,7 @@ extern "C" {
 }
 
 #ifdef __MINGW32__
-#    include <_mingw.h>
+    #include <_mingw.h>
 #endif
 
 template <uint32_t Major, uint32_t Minor>

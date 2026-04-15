@@ -1,9 +1,9 @@
 #ifdef FF_HAVE_IMAGEMAGICK7
 
-#    include "image.h"
-#    include "common/library.h"
+    #include "image.h"
+    #include "common/library.h"
 
-#    include <MagickCore/MagickCore.h>
+    #include <MagickCore/MagickCore.h>
 
 static FF_LIBRARY_SYMBOL(ResizeImage)
 

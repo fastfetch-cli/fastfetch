@@ -3,13 +3,13 @@
 #ifdef __cplusplus
 
 extern "C" {
-#    include "fastfetch.h"
+    #include "fastfetch.h"
 }
 
-#    include <initguid.h>
-#    include <wbemidl.h>
+    #include <initguid.h>
+    #include <wbemidl.h>
 
-#    include "variant.hpp"
+    #include "variant.hpp"
 
 enum class FFWmiNamespace {
     CIMV2,
@@ -92,6 +92,6 @@ struct FFWmiQuery {
 };
 
 #else
-// Win32 COM headers requires C++ compiler
-#    error Must be included in C++ source file
+    // Win32 COM headers requires C++ compiler
+    #error Must be included in C++ source file
 #endif //__cplusplus

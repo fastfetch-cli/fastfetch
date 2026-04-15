@@ -765,21 +765,21 @@ typedef unsigned short oss_peaks_t[MAX_PEAK_CHANNELS];
  * opposite endian formats).
  */
 #if defined(_BIG_ENDIAN)
-#    define AFMT_S16_NE AFMT_S16_BE
-#    define AFMT_U16_NE AFMT_U16_BE
-#    define AFMT_S32_NE AFMT_S32_BE
-#    define AFMT_S24_NE AFMT_S24_BE
-#    define AFMT_S16_OE AFMT_S16_LE
-#    define AFMT_S32_OE AFMT_S32_LE
-#    define AFMT_S24_OE AFMT_S24_LE
+    #define AFMT_S16_NE AFMT_S16_BE
+    #define AFMT_U16_NE AFMT_U16_BE
+    #define AFMT_S32_NE AFMT_S32_BE
+    #define AFMT_S24_NE AFMT_S24_BE
+    #define AFMT_S16_OE AFMT_S16_LE
+    #define AFMT_S32_OE AFMT_S32_LE
+    #define AFMT_S24_OE AFMT_S24_LE
 #else
-#    define AFMT_S16_NE AFMT_S16_LE
-#    define AFMT_U16_NE AFMT_U16_LE
-#    define AFMT_S32_NE AFMT_S32_LE
-#    define AFMT_S24_NE AFMT_S24_LE
-#    define AFMT_S16_OE AFMT_S16_BE
-#    define AFMT_S32_OE AFMT_S32_BE
-#    define AFMT_S24_OE AFMT_S24_BE
+    #define AFMT_S16_NE AFMT_S16_LE
+    #define AFMT_U16_NE AFMT_U16_LE
+    #define AFMT_S32_NE AFMT_S32_LE
+    #define AFMT_S24_NE AFMT_S24_LE
+    #define AFMT_S16_OE AFMT_S16_BE
+    #define AFMT_S32_OE AFMT_S32_BE
+    #define AFMT_S24_OE AFMT_S24_BE
 #endif
 
 /*

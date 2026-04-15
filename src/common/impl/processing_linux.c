@@ -13,28 +13,28 @@
 #include <sys/wait.h>
 
 #if !(__ANDROID__ || __OpenBSD__)
-#    include <spawn.h>
+    #include <spawn.h>
 #endif
 
 #if defined(__FreeBSD__) || defined(__APPLE__)
-#    include <sys/types.h>
-#    include <sys/user.h>
-#    include <sys/sysctl.h>
+    #include <sys/types.h>
+    #include <sys/user.h>
+    #include <sys/sysctl.h>
 #endif
 #if defined(__APPLE__)
-#    include <libproc.h>
+    #include <libproc.h>
 #elif defined(__sun)
-#    include <procfs.h>
+    #include <procfs.h>
 #elif defined(__OpenBSD__)
-#    include <sys/param.h>
-#    include <sys/sysctl.h>
-#    include <kvm.h>
+    #include <sys/param.h>
+    #include <sys/sysctl.h>
+    #include <kvm.h>
 #elif defined(__NetBSD__)
-#    include <sys/types.h>
-#    include <sys/sysctl.h>
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
 #elif defined(__HAIKU__)
-#    include <OS.h>
-#    include <image.h>
+    #include <OS.h>
+    #include <image.h>
 #endif
 
 #ifndef environ
@@ -234,9 +234,9 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
             // For interpreters, try to find the real script path in the arguments
             if (ffStrStartsWith(name, "python")
-#    ifndef __ANDROID__
+    #ifndef __ANDROID__
                 || ffStrEquals(name, "guile") // for shepherd
-#    endif
+    #endif
             ) {
                 // `cmdline` always ends with a trailing '\0', and ffReadFileBuffer appends another \0
                 // So `exe->chars` is always double '\0' terminated
@@ -341,15 +341,15 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     static_assert(ARG_MAX > PATH_MAX, "");
 
     if (exePath && sysctl((int[]) { CTL_KERN,
-#    if __FreeBSD__
+    #if __FreeBSD__
                               KERN_PROC,
                               KERN_PROC_PATHNAME,
                               pid
-#    else
+    #else
                               KERN_PROC_ARGS,
                               pid,
                               KERN_PROC_PATHNAME
-#    endif
+    #endif
                           },
                        4,
                        args,
@@ -361,15 +361,15 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     size = ARG_MAX;
     if (sysctl(
             (int[]) { CTL_KERN,
-#    if __FreeBSD__
+    #if __FreeBSD__
                 KERN_PROC,
                 KERN_PROC_ARGS,
                 pid
-#    else
+    #else
                 KERN_PROC_ARGS,
                 pid,
                 KERN_PROC_ARGV,
-#    endif
+    #endif
             },
             4,
             args,
@@ -476,9 +476,9 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 #if defined(__linux__) || defined(__GNU__)
 
     char procFilePath[64];
-#    if __linux__
+    #if __linux__
     if (ppid || tty)
-#    endif
+    #endif
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int) pid);
         char buf[PROC_FILE_BUFFSIZ];
@@ -509,9 +509,9 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             pState = end + 2; // skip ") "
         }
 
-#    if !__linux__
+    #if !__linux__
         if (ppid || tty)
-#    endif
+    #endif
         {
             int ppid_, tty_;
             if (sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2) {
@@ -526,7 +526,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             }
         }
     }
-#    if __linux__
+    #if __linux__
     else {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int) pid);
         ssize_t nRead = ffReadFileBuffer(procFilePath, name);
@@ -535,7 +535,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         }
         ffStrbufTrimRightSpace(name);
     }
-#    endif
+    #endif
 
 #elif defined(__APPLE__)
 
@@ -558,12 +558,12 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
 #elif defined(__FreeBSD__)
 
-#    ifdef __DragonFly__
-#        define ki_comm kp_comm
-#        define ki_ppid kp_ppid
-#        define ki_tdev kp_tdev
-#        define ki_flag kp_flags
-#    endif
+    #ifdef __DragonFly__
+        #define ki_comm kp_comm
+        #define ki_ppid kp_ppid
+        #define ki_tdev kp_tdev
+        #define ki_flag kp_flags
+    #endif
 
     struct kinfo_proc proc;
     size_t size = sizeof(proc);

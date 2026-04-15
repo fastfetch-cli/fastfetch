@@ -1,8 +1,8 @@
 #include "common/netif.h"
 
 #ifndef _WIN32
-#    include <net/if.h>
-#    include <netinet/in.h>
+    #include <net/if.h>
+    #include <netinet/in.h>
 #endif
 
 const FFNetifDefaultRouteResult* ffNetifGetDefaultRouteV4(void) {
