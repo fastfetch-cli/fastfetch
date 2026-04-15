@@ -139,9 +139,15 @@ static void getUserName(FFPlatform* platform) {
         ffStrbufSetWS(&platform->fullUserName, buffer);
     }
 
-    size = ARRAY_SIZE(buffer);
-    if (GetUserNameW(buffer, &size)) { // GetUserNameExW(10002)?
-        ffStrbufSetWS(&platform->userName, buffer);
+    NTSYSAPI NTSTATUS NTAPI LsaGetUserName(
+        _Outptr_ PLSA_UNICODE_STRING* UserName,
+        _Outptr_opt_ PLSA_UNICODE_STRING* DomainName
+    );
+    PLSA_UNICODE_STRING userName = NULL;
+    if (NT_SUCCESS(LsaGetUserName(&userName, NULL))) {
+        ffStrbufSetNWS(&platform->userName, userName->Length / sizeof(wchar_t), userName->Buffer);
+        RtlFreeUnicodeString(userName);
+        LsaFreeMemory(userName);
     } else {
         ffStrbufSetS(&platform->userName, getenv("USERNAME"));
     }
