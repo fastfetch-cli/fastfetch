@@ -512,6 +512,45 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 }
                 options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
+        } else if (unsafe_yyjson_equals_str(key, "common")) {
+            if (!yyjson_is_obj(val)) {
+                return "display.common must be an object";
+            }
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) {
+                if (!yyjson_is_uint(ndigits)) {
+                    return "display.common.ndigits must be an unsigned integer";
+                }
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9) {
+                    return "display.common.ndigits must be between 0 and 9";
+                }
+                options->fractionNdigits = (int8_t) val;
+                options->freqNdigits = (int8_t) val;
+                options->percentNdigits = (uint8_t) val;
+                options->sizeNdigits = (uint8_t) val;
+                options->tempNdigits = (uint8_t) val;
+            }
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit) {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                                                                                       { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                                                                                       { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                                                                                       { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                                                                                       {},
+                                                                                   });
+                if (error) {
+                    return error;
+                }
+                options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+                options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+                options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+                options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+                options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         } else {
             return "Unknown display property";
         }

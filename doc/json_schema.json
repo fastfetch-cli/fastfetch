@@ -1392,6 +1392,22 @@
                         }
                     }
                 },
+                "common": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Overwrite configurations of `duration`, `fraction`, `freq`, `percent`, `size` and `temp`\nPutting this before other properties will make it work as default configurations",
+                    "properties": {
+                        "ndigits": {
+                            "description": "Set the number of decimal places to display",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
                 "noBuffer": {
                     "type": "boolean",
                     "description": "Whether to disable the stdout application buffer",
