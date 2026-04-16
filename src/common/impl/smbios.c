@@ -666,7 +666,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         ffStrbufInit(&buffer);
 
         if (!fillTableBufferPlatform(&buffer)) {
-            FF_DEBUG("Platform specfic SMBIOS retrieval failed, trying fallback method");
+            FF_DEBUG("Platform specific SMBIOS retrieval failed, trying fallback method");
             if (!fillTableBufferFallback(&buffer)) {
                 FF_DEBUG("Fallback SMBIOS retrieval also failed");
                 ffStrbufDestroy(&buffer);
