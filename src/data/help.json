@@ -3,7 +3,7 @@
         {
             "short": "h",
             "long": "help",
-            "desc": "Display this help message or help for a specific command",
+            "desc": "Show this help message or help for a specific command",
             "arg": {
                 "type": "command",
                 "optional": true
@@ -12,11 +12,11 @@
         {
             "short": "v",
             "long": "version",
-            "desc": "Show the full version of fastfetch"
+            "desc": "Show the full Fastfetch version"
         },
         {
             "long": "version-raw",
-            "desc": "Display the raw version string (major.minor.patch)"
+            "desc": "Show the raw version string (major.minor.patch)"
         },
         {
             "long": "list-config-paths",
@@ -36,7 +36,7 @@
         },
         {
             "long": "list-presets",
-            "desc": "List presets that fastfetch knows about",
+            "desc": "List available presets",
             "remark": "Presets can be loaded with \"--config <preset-name>\""
         },
         {
@@ -46,15 +46,15 @@
         },
         {
             "long": "print-logos",
-            "desc": "Display available logos"
+            "desc": "Show available logos"
         },
         {
             "long": "print-structure",
-            "desc": "Display the default structure"
+            "desc": "Show the default structure"
         },
         {
             "long": "format",
-            "desc": "Set output format",
+            "desc": "Set the output format",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -77,8 +77,8 @@
         },
         {
             "long": "dynamic-interval",
-            "desc": "Keep fastfetch open and update the output every <num> milliseconds",
-            "remark": "0 (default) to disable the behavior; don't work with --json",
+            "desc": "Keep Fastfetch running and refresh the output every <num> milliseconds",
+            "remark": "Set to 0 (default) to disable this behavior; does not work with --json",
             "arg": {
                 "type": "num",
                 "default": 0
@@ -90,7 +90,7 @@
             "short": "c",
             "long": "config",
             "desc": "Specify the config file or preset to load",
-            "remark": "The file will be searched according to the order shown by \"fastfetch --list-config-paths\". Use \"-\" to read config from stdin or \"none\" to disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
+            "remark": "The file is searched in the order shown by \"fastfetch --list-config-paths\". Use \"-\" to read config from stdin, or \"none\" to disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for details",
             "arg": {
                 "type": "config"
             }
@@ -98,7 +98,7 @@
         {
             "long": "gen-config",
             "desc": "Generate a minimal config file at the specified path",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will print the generated config if <path> is \"-\"",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Prints the generated config if <path> is \"-\"",
             "arg": {
                 "type": "path",
                 "optional": true
@@ -106,8 +106,8 @@
         },
         {
             "long": "gen-config-full",
-            "desc": "Generate a full config file with all optional options at the specified path",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will print the generated config if <path> is \"-\"",
+            "desc": "Generate a full config file with all optional settings at the specified path",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Prints the generated config if <path> is \"-\"",
             "arg": {
                 "type": "path",
                 "optional": true
@@ -152,7 +152,7 @@
         },
         {
             "long": "ds-force-drm",
-            "desc": "Specify whether only DRM should be used to detect displays",
+            "desc": "Specify whether display detection should use DRM only",
             "remark": [
                 "Use this option if you encounter problems with other detection methods.",
                 "Linux only"
@@ -170,7 +170,7 @@
         },
         {
             "long": "detect-version",
-            "desc": "Specify whether to detect and display versions of terminal, shell, editor, and others",
+            "desc": "Specify whether to detect and display versions for terminal, shell, editor, and others",
             "remark": "Mainly for benchmarking",
             "arg": {
                 "type": "bool",
@@ -183,31 +183,31 @@
         {
             "short": "l",
             "long": "logo",
-            "desc": "Set the logo source. Use \"none\" to disable the logo",
-            "remark": "Should be the name of a built-in logo or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "desc": "Set the logo source. Use \"none\" to disable logo output",
+            "remark": "Use either a built-in logo name or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
             }
         },
         {
             "long": "logo-type",
-            "desc": "Set the type of the logo specified in \"--logo\"",
+            "desc": "Set the type of logo specified by \"--logo\"",
             "remark": "See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "If something is given, first try built-in, then file. Otherwise detect logo",
+                    "auto": "If a value is provided, try built-in first, then file. Otherwise auto-detect the logo",
                     "builtin": "Built-in ASCII art",
                     "small": "Built-in ASCII art, small version",
                     "file": "Text file, printed with color code replacement",
                     "file-raw": "Text file, printed as is",
                     "data": "Text data, printed with color code replacement",
                     "data-raw": "Text data, printed as is",
-                    "sixel": "Image file, printed as sixel codes",
-                    "kitty": "Image file, printed using kitty graphics protocol",
+                    "sixel": "Image file, rendered as sixel",
+                    "kitty": "Image file, rendered using the Kitty graphics protocol",
                     "kitty-direct": "Image file, tells the terminal emulator to read image data from the specified file",
-                    "kitty-icat": "Image file, uses `kitten icat` to display the image. Requires binary `kitten` to be installed",
-                    "iterm": "Image file, printed using iterm graphics protocol",
+                    "kitty-icat": "Image file, displayed using `kitten icat`. Requires the `kitten` binary",
+                    "iterm": "Image file, rendered using the iTerm graphics protocol",
                     "chafa": "Image file, printed as ASCII art using libchafa",
                     "raw": "Image file, printed as raw binary string",
                     "none": "Disable logo printing"
@@ -279,7 +279,7 @@
         },
         {
             "long": "logo-print-remaining",
-            "desc": "Specify whether to print the remaining logo if it has more lines than modules to display",
+            "desc": "Specify whether to print remaining logo lines when the logo is taller than the module list",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -288,7 +288,7 @@
         },
         {
             "long": "logo-position",
-            "desc": "Set the position where the logo should be displayed",
+            "desc": "Set the display position of the logo",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -398,7 +398,7 @@
         {
             "long": "chafa-fg-only",
             "desc": "Produce character-cell output using foreground colors only",
-            "remark": "See chafa document for detail",
+            "remark": "See the Chafa documentation for details",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -408,7 +408,7 @@
         {
             "long": "chafa-symbols",
             "desc": "Specify character symbols to employ in final output",
-            "remark": "See chafa document for detail",
+            "remark": "See the Chafa documentation for details",
             "arg": {
                 "type": "str"
             }
@@ -416,7 +416,7 @@
         {
             "long": "chafa-canvas-mode",
             "desc": "Determine how colors are used in the output",
-            "remark": "This value maps the int value of enum ChafaCanvasMode. See chafa document for detail",
+            "remark": "This value maps to the integer value of enum ChafaCanvasMode. See the Chafa documentation for details",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -433,8 +433,8 @@
         },
         {
             "long": "chafa-color-space",
-            "desc": "Set color space used for quantization",
-            "remark": "This value maps the int value of enum ChafaColorSpace. See chafa document for detail",
+            "desc": "Set the color space used for quantization",
+            "remark": "This value maps to the integer value of enum ChafaColorSpace. See the Chafa documentation for details",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -445,8 +445,8 @@
         },
         {
             "long": "chafa-dither-mode",
-            "desc": "Set output dither mode (No effect with 24-bit color)",
-            "remark": "This value maps the int value of enum ChafaDitherMode. See chafa document for detail",
+            "desc": "Set the output dithering mode (no effect with 24-bit color)",
+            "remark": "This value maps to the integer value of enum ChafaDitherMode. See the Chafa documentation for details",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -462,7 +462,7 @@
             "short": "s",
             "long": "structure",
             "desc": "Set the structure of the fetch",
-            "remark": "Must be a colon-separated list of keys. Use \"fastfetch --list-modules\" to see available options",
+            "remark": "Must be a colon-separated list of module keys. Use \"fastfetch --list-modules\" to see available options",
             "arg": {
                 "type": "structure",
                 "default": "\"fastfetch --print-structure\""
@@ -478,7 +478,7 @@
         },
         {
             "long": "stat",
-            "desc": "Show time usage (in ms) for individual modules",
+            "desc": "Show execution time (ms) for individual modules",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -541,7 +541,7 @@
         {
             "long": "duration-abbreviation",
             "desc": "Specify whether to abbreviate duration values",
-            "remark": "If true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+            "remark": "If true, output is shown as \"1h 2m\" instead of \"1 hour, 2 mins\"",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -582,7 +582,7 @@
                 "enum": {
                     "none": "Disable keys",
                     "string": "Show string",
-                    "icon": "Show icon (requires newest nerd font)",
+                    "icon": "Show icon (requires a recent Nerd Font)",
                     "both": "Show both icon and string (alias of `both-1`)",
                     "both-0": "Show both icon and string with no spaces between them",
                     "both-1": "Show both icon and string with a space between them",
@@ -639,7 +639,7 @@
         },
         {
             "long": "percent-type",
-            "desc": "Set the percentage output type",
+            "desc": "Set the percentage output style",
             "remark": [
                 "1 for percentage number",
                 "2 for multi-color bar",
@@ -655,7 +655,7 @@
         },
         {
             "long": "percent-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when formatting percentage numbers",
+            "desc": "Set the number of decimal places to use when formatting percentages",
             "arg": {
                 "type": "num",
                 "default": 0
@@ -702,7 +702,7 @@
         },
         {
             "long": "percent-width",
-            "desc": "Specify the width of the percentage number, in number of characters",
+            "desc": "Specify the width of the percentage number, in characters",
             "remark": "This option affects only percentage numbers, not bars",
             "arg": {
                 "type": "num",
@@ -711,7 +711,7 @@
         },
         {
             "long": "bar-char-elapsed",
-            "desc": "Set the character to use in the elapsed part of percentage bars",
+            "desc": "Set the character used for the elapsed part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "\u25a0"
@@ -719,7 +719,7 @@
         },
         {
             "long": "bar-char-total",
-            "desc": "Set the character to use in the total part of percentage bars",
+            "desc": "Set the character used for the total part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "-"
@@ -743,7 +743,7 @@
         },
         {
             "long": "bar-border-left-elapsed",
-            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border will be used as parts of bar content",
+            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border is used as part of the bar content",
             "arg": {
                 "type": "string",
                 "default": ""
@@ -751,7 +751,7 @@
         },
         {
             "long": "bar-border-right-elapsed",
-            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border will be used as parts of bar content",
+            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border is used as part of the bar content",
             "arg": {
                 "type": "string",
                 "default": ""
@@ -759,8 +759,8 @@
         },
         {
             "long": "bar-color-elapsed",
-            "desc": "Set the color to use in the elapsed part of percentage bars",
-            "remark": "By default, auto selected by percent-color-{green,yellow,red}",
+            "desc": "Set the color used for the elapsed part of percentage bars",
+            "remark": "By default, this is auto-selected by percent-color-{green,yellow,red}",
             "arg": {
                 "type": "color",
                 "default": "<auto>"
@@ -768,7 +768,7 @@
         },
         {
             "long": "bar-color-total",
-            "desc": "Set the color to use in the total part of percentage bars",
+            "desc": "Set the color used for the total part of percentage bars",
             "arg": {
                 "type": "color",
                 "default": "light_white"
@@ -776,7 +776,7 @@
         },
         {
             "long": "bar-color-border",
-            "desc": "Set the color to use in the borders of percentage bars",
+            "desc": "Set the color used for percentage bar borders",
             "arg": {
                 "type": "color",
                 "default": "light_white"
@@ -792,7 +792,7 @@
         },
         {
             "long": "no-buffer",
-            "desc": "Specify whether the stdout application buffer should be disabled",
+            "desc": "Specify whether stdout buffering should be disabled",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -801,7 +801,7 @@
         },
         {
             "long": "size-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when formatting sizes",
+            "desc": "Set the number of decimal places to use when formatting sizes",
             "arg": {
                 "type": "num"
             }
@@ -852,7 +852,7 @@
         },
         {
             "long": "freq-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing CPU/GPU frequency in GHz",
+            "desc": "Set the number of decimal places to use when printing CPU/GPU frequency in GHz",
             "arg": {
                 "type": "num",
                 "default": 2
@@ -872,7 +872,7 @@
         },
         {
             "long": "fraction-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing ordinary fraction numbers",
+            "desc": "Set the number of decimal places to use when printing fractional values",
             "remark": "If negative, the number of digits will be automatically determined based on the value",
             "arg": {
                 "type": "num",
@@ -885,7 +885,7 @@
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "default": "Use the behavior defined internally",
+                    "default": "Use the built-in behavior",
                     "always": "Always keep trailing zeros",
                     "never": "Never keep trailing zeros"
                 }
@@ -907,7 +907,7 @@
         },
         {
             "long": "temp-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing temperature",
+            "desc": "Set the number of decimal places to use when printing temperatures",
             "arg": {
                 "type": "num",
                 "default": 2

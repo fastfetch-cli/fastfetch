@@ -77,7 +77,7 @@ void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options) {
 
 FFModuleBaseInfo ffTerminalSizeModuleInfo = {
     .name = FF_TERMINALSIZE_MODULE_NAME,
-    .description = "Print current terminal size",
+    .description = "Print the current terminal size",
     .initOptions = (void*) ffInitTerminalSizeOptions,
     .destroyOptions = (void*) ffDestroyTerminalSizeOptions,
     .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,

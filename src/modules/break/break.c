@@ -28,7 +28,7 @@ void ffDestroyBreakOptions(FF_A_UNUSED FFBreakOptions* options) {
 
 FFModuleBaseInfo ffBreakModuleInfo = {
     .name = FF_BREAK_MODULE_NAME,
-    .description = "Print a empty line",
+    .description = "Print an empty line",
     .initOptions = (void*) ffInitBreakOptions,
     .destroyOptions = (void*) ffDestroyBreakOptions,
     .parseJsonObject = (void*) ffParseBreakJsonObject,

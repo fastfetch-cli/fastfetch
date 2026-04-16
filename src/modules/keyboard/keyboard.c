@@ -150,7 +150,7 @@ void ffDestroyKeyboardOptions(FFKeyboardOptions* options) {
 
 FFModuleBaseInfo ffKeyboardModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
-    .description = "List (connected) keyboards",
+    .description = "List connected keyboards",
     .initOptions = (void*) ffInitKeyboardOptions,
     .destroyOptions = (void*) ffDestroyKeyboardOptions,
     .parseJsonObject = (void*) ffParseKeyboardJsonObject,

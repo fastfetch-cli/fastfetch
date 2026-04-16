@@ -111,7 +111,7 @@ void ffDestroyPublicIpOptions(FFPublicIPOptions* options) {
 
 FFModuleBaseInfo ffPublicIPModuleInfo = {
     .name = FF_PUBLICIP_MODULE_NAME,
-    .description = "Print your public IP address, etc",
+    .description = "Print your public IP address and related information",
     .initOptions = (void*) ffInitPublicIpOptions,
     .destroyOptions = (void*) ffDestroyPublicIpOptions,
     .parseJsonObject = (void*) ffParsePublicIpJsonObject,

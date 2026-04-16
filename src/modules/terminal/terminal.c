@@ -84,7 +84,7 @@ void ffDestroyTerminalOptions(FFTerminalOptions* options) {
 
 FFModuleBaseInfo ffTerminalModuleInfo = {
     .name = FF_TERMINAL_MODULE_NAME,
-    .description = "Print current terminal name and version",
+    .description = "Print the current terminal name and version",
     .initOptions = (void*) ffInitTerminalOptions,
     .destroyOptions = (void*) ffDestroyTerminalOptions,
     .parseJsonObject = (void*) ffParseTerminalJsonObject,

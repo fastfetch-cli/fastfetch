@@ -62,7 +62,7 @@ void ffDestroyWMThemeOptions(FFWMThemeOptions* options) {
 
 FFModuleBaseInfo ffWMThemeModuleInfo = {
     .name = FF_WMTHEME_MODULE_NAME,
-    .description = "Print current theme of window manager",
+    .description = "Print the current window manager theme",
     .initOptions = (void*) ffInitWMThemeOptions,
     .destroyOptions = (void*) ffDestroyWMThemeOptions,
     .parseJsonObject = (void*) ffParseWMThemeJsonObject,

@@ -90,7 +90,7 @@ void ffDestroyShellOptions(FFShellOptions* options) {
 
 FFModuleBaseInfo ffShellModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
-    .description = "Print current shell name and version",
+    .description = "Print the current shell name and version",
     .initOptions = (void*) ffInitShellOptions,
     .destroyOptions = (void*) ffDestroyShellOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,

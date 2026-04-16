@@ -109,7 +109,7 @@ void ffDestroyBoardOptions(FFBoardOptions* options) {
 
 FFModuleBaseInfo ffBoardModuleInfo = {
     .name = FF_BOARD_MODULE_NAME,
-    .description = "Print motherboard name and other info",
+    .description = "Print motherboard name and other information",
     .initOptions = (void*) ffInitBoardOptions,
     .destroyOptions = (void*) ffDestroyBoardOptions,
     .parseJsonObject = (void*) ffParseBoardJsonObject,

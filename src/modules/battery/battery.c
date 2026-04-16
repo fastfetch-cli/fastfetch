@@ -314,7 +314,7 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options) {
 
 FFModuleBaseInfo ffBatteryModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
-    .description = "Print battery capacity, status, etc",
+    .description = "Print battery information",
     .initOptions = (void*) ffInitBatteryOptions,
     .destroyOptions = (void*) ffDestroyBatteryOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,
@@ -330,7 +330,7 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         { "Battery temperature (formatted)", "temperature" },
         { "Battery cycle count", "cycle-count" },
         { "Battery serial number", "serial" },
-        { "Battery manufactor date", "manufacture-date" },
+        { "Battery manufacture date", "manufacture-date" },
         { "Battery capacity (percentage bar)", "capacity-bar" },
         { "Battery time remaining days", "time-days" },
         { "Battery time remaining hours", "time-hours" },

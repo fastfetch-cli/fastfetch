@@ -121,7 +121,7 @@ void ffDestroyWMOptions(FFWMOptions* options) {
 
 FFModuleBaseInfo ffWMModuleInfo = {
     .name = FF_WM_MODULE_NAME,
-    .description = "Print window manager name and version",
+    .description = "Print the window manager name and version",
     .initOptions = (void*) ffInitWMOptions,
     .destroyOptions = (void*) ffDestroyWMOptions,
     .parseJsonObject = (void*) ffParseWMJsonObject,

@@ -76,7 +76,7 @@ void ffDestroyWallpaperOptions(FFWallpaperOptions* options) {
 
 FFModuleBaseInfo ffWallpaperModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
-    .description = "Print image file path of current wallpaper",
+    .description = "Print the file path of the current wallpaper",
     .initOptions = (void*) ffInitWallpaperOptions,
     .destroyOptions = (void*) ffDestroyWallpaperOptions,
     .parseJsonObject = (void*) ffParseWallpaperJsonObject,

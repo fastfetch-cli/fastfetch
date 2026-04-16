@@ -131,7 +131,7 @@ void ffDestroyBiosOptions(FFBiosOptions* options) {
 
 FFModuleBaseInfo ffBiosModuleInfo = {
     .name = FF_BIOS_MODULE_NAME,
-    .description = "Print information of 1st-stage bootloader (name, version, release date, etc)",
+    .description = "Print first-stage bootloader information (name, version, release date, etc.)",
     .initOptions = (void*) ffInitBiosOptions,
     .destroyOptions = (void*) ffDestroyBiosOptions,
     .parseJsonObject = (void*) ffParseBiosJsonObject,
@@ -139,10 +139,10 @@ FFModuleBaseInfo ffBiosModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,
     .generateJsonConfig = (void*) ffGenerateBiosJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Bios date", "date" },
-        { "Bios release", "release" },
-        { "Bios vendor", "vendor" },
-        { "Bios version", "version" },
+        { "BIOS date", "date" },
+        { "BIOS release", "release" },
+        { "BIOS vendor", "vendor" },
+        { "BIOS version", "version" },
         { "Firmware type", "type" },
     }))
 };

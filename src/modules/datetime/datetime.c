@@ -145,7 +145,7 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options) {
 
 FFModuleBaseInfo ffDateTimeModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
-    .description = "Print current date and time",
+    .description = "Print the current date and time",
     .initOptions = (void*) ffInitDateTimeOptions,
     .destroyOptions = (void*) ffDestroyDateTimeOptions,
     .parseJsonObject = (void*) ffParseDateTimeJsonObject,

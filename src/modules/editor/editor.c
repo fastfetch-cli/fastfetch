@@ -104,7 +104,7 @@ void ffDestroyEditorOptions(FFEditorOptions* options) {
 
 FFModuleBaseInfo ffEditorModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
-    .description = "Print information of the default editor ($VISUAL or $EDITOR)",
+    .description = "Print information about the default editor ($VISUAL or $EDITOR)",
     .initOptions = (void*) ffInitEditorOptions,
     .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,

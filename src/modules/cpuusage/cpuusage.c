@@ -182,7 +182,7 @@ void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options) {
 
 FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
-    .description = "Print CPU usage. Costs some time to collect data",
+    .description = "Print CPU usage. Collecting data takes some time",
     .initOptions = (void*) ffInitCPUUsageOptions,
     .destroyOptions = (void*) ffDestroyCPUUsageOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,

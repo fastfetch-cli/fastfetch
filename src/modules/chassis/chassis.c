@@ -111,7 +111,7 @@ void ffDestroyChassisOptions(FFChassisOptions* options) {
 
 FFModuleBaseInfo ffChassisModuleInfo = {
     .name = FF_CHASSIS_MODULE_NAME,
-    .description = "Print chassis type (desktop, laptop, etc)",
+    .description = "Print chassis type information (desktop, laptop, etc.)",
     .initOptions = (void*) ffInitChassisOptions,
     .destroyOptions = (void*) ffDestroyChassisOptions,
     .parseJsonObject = (void*) ffParseChassisJsonObject,

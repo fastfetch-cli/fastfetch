@@ -94,7 +94,7 @@ void ffDestroyTerminalThemeOptions(FFTerminalThemeOptions* options) {
 
 FFModuleBaseInfo ffTerminalThemeModuleInfo = {
     .name = FF_TERMINALTHEME_MODULE_NAME,
-    .description = "Print current terminal theme (foreground and background colors)",
+    .description = "Print the current terminal theme (foreground and background colors)",
     .initOptions = (void*) ffInitTerminalThemeOptions,
     .destroyOptions = (void*) ffDestroyTerminalThemeOptions,
     .parseJsonObject = (void*) ffParseTerminalThemeJsonObject,

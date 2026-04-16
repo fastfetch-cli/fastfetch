@@ -455,7 +455,7 @@ void ffDestroyGPUOptions(FFGPUOptions* options) {
 
 FFModuleBaseInfo ffGPUModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
-    .description = "Print GPU names, graphic memory size, type, etc",
+    .description = "Print GPU names, memory sizes, types, etc",
     .initOptions = (void*) ffInitGPUOptions,
     .destroyOptions = (void*) ffDestroyGPUOptions,
     .parseJsonObject = (void*) ffParseGPUJsonObject,

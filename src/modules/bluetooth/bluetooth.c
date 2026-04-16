@@ -151,7 +151,7 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options) {
 
 FFModuleBaseInfo ffBluetoothModuleInfo = {
     .name = FF_BLUETOOTH_MODULE_NAME,
-    .description = "List (connected) bluetooth devices",
+    .description = "List connected Bluetooth devices",
     .initOptions = (void*) ffInitBluetoothOptions,
     .destroyOptions = (void*) ffDestroyBluetoothOptions,
     .parseJsonObject = (void*) ffParseBluetoothJsonObject,

@@ -13,45 +13,45 @@
                 },
                 {
                     "type": "null",
-                    "$comment": "Disable default color"
+                    "$comment": "Disable default coloring"
                 }
             ]
         },
         "key": {
-            "description": "Key of the module\nOne whitespace character (` `) can be used to hide the key",
+            "description": "Module key\nUse a single space (` `) to hide the key",
             "type": "string",
             "minLength": 1
         },
         "keyColor": {
-            "description": "Color of the module key to override the global setting `display.color.key`",
+            "description": "Color of the module key. Overrides `display.color.key`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key to override the global setting `display.keyWidth`",
+            "description": "Width of the module key. Overrides `display.keyWidth`",
             "type": "integer",
             "minimum": 1
         },
         "keyIcon": {
-            "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
+            "description": "Icon to display when `display.key.type` is set to `icon`",
             "type": "string"
         },
         "outputColor": {
-            "description": "Output color of the module to override the global setting `display.color.output`",
+            "description": "Color of the module output. Overrides `display.color.output`",
             "$ref": "#/$defs/colors"
         },
         "percentType": {
-            "description": "Set the percentage output type",
+            "description": "Percentage output style",
             "oneOf": [
                 {
                     "type": "number",
-                    "description": "0 to use global setting, 1 for percentage number, 2 for multi-color bar, 3 for both, 6 for bar only, 9 for colored number, 10 for monochrome bar",
+                    "description": "0 uses the global setting; 1 shows the percentage number; 2 shows a multicolor bar; 3 shows both; 6 shows only the bar; 9 shows a colored number; 10 shows a monochrome bar",
                     "minimum": 0,
                     "maximum": 255,
                     "default": 9
                 },
                 {
                     "type": "array",
-                    "description": "Array of string flags",
+                    "description": "Array of style flags",
                     "items": {
                         "enum": [
                             "num",
@@ -70,7 +70,7 @@
             ]
         },
         "percent": {
-            "description": "Thresholds for percentage colors",
+            "description": "Color thresholds for percentage output",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -78,13 +78,13 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100,
-                    "description": "Values less than green will be shown in green"
+                    "description": "Values below this threshold are shown in green"
                 },
                 "yellow": {
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100,
-                    "description": "Values greater than green and less than yellow will be shown in yellow.\nValues greater than yellow will be shown in red"
+                    "description": "Values between the green and yellow thresholds are shown in yellow.\nValues above the yellow threshold are shown in red"
                 },
                 "type": {
                     "$ref": "#/$defs/percentType"
@@ -92,7 +92,7 @@
             }
         },
         "temperature": {
-            "description": "Detect and display temperature if supported",
+            "description": "Whether to detect and display temperature, if supported",
             "oneOf": [
                 {
                     "type": "boolean",
@@ -106,13 +106,13 @@
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Values (in celsius) less than green will be shown in green"
+                            "description": "Values in Celsius below this threshold are shown in green"
                         },
                         "yellow": {
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Values (in celsius) greater than green and less than yellow will be shown in yellow.\nValues greater than yellow will be shown in red"
+                            "description": "Values in Celsius between the green and yellow thresholds are shown in yellow.\nValues above the yellow threshold are shown in red"
                         }
                     }
                 }
@@ -154,12 +154,12 @@
             ]
         },
         "conditions": {
-            "description": "Only show the module if conditions are met",
+            "description": "Show the module only if these conditions are met",
             "type": "object",
             "additionalProperties": false,
             "properties": {
                 "system": {
-                    "description": "System name to match",
+                    "description": "System to match",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
@@ -170,16 +170,16 @@
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
-                            "description": "Array of system names to match"
+                            "description": "Array of systems to match"
                         },
                         {
                             "type": "null",
-                            "description": "Null to disable this condition"
+                            "description": "Set to null to disable this condition"
                         }
                     ]
                 },
                 "!system": {
-                    "description": "System name to not match",
+                    "description": "System not to match",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
@@ -190,11 +190,11 @@
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
-                            "description": "Array of system names to not match"
+                            "description": "Array of systems not to match"
                         },
                         {
                             "type": "null",
-                            "description": "Null to disable this condition"
+                            "description": "Set to null to disable this condition"
                         }
                     ]
                 },
@@ -214,12 +214,12 @@
                         },
                         {
                             "type": "null",
-                            "description": "Null to disable this condition"
+                            "description": "Set to null to disable this condition"
                         }
                     ]
                 },
                 "!arch": {
-                    "description": "Architecture to not match",
+                    "description": "Architecture not to match",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
@@ -230,11 +230,11 @@
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
-                            "description": "Array of architectures to not match"
+                            "description": "Array of architectures not to match"
                         },
                         {
                             "type": "null",
-                            "description": "Null to disable this condition"
+                            "description": "Set to null to disable this condition"
                         }
                     ]
                 },
@@ -243,11 +243,11 @@
                     "oneOf": [
                         {
                             "type": "boolean",
-                            "description": "True to only show the module if it succeeded, false to only show it if it failed"
+                            "description": "True to show the module only if it succeeded; false to show it only if it failed"
                         },
                         {
                             "type": "null",
-                            "description": "Null to disable this condition"
+                            "description": "Set to null to disable this condition"
                         }
                     ]
                 }
@@ -255,7 +255,7 @@
         },
         "spaceBeforeUnit": {
             "type": "string",
-            "description": "Whether to put a space before the unit",
+            "description": "Whether to insert a space before the unit",
             "oneOf": [
                 {
                     "const": "default",
@@ -274,295 +274,295 @@
 
 
         "batteryFormat": {
-            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
+            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
-            "description": "Output format of the module `BIOS`. See Wiki for formatting syntax\n    1. {date}: Bios date\n    2. {release}: Bios release\n    3. {vendor}: Bios vendor\n    4. {version}: Bios version\n    5. {type}: Firmware type",
+            "description": "Output format for the `BIOS` module. See Wiki for formatting syntax\n    1. {date}: BIOS date\n    2. {release}: BIOS release\n    3. {vendor}: BIOS vendor\n    4. {version}: BIOS version\n    5. {type}: Firmware type",
             "type": "string"
         },
         "bluetoothFormat": {
-            "description": "Output format of the module `Bluetooth`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {battery-percentage}: Battery percentage number\n    5. {connected}: Is connected\n    6. {battery-percentage-bar}: Battery percentage bar",
+            "description": "Output format for the `Bluetooth` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {battery-percentage}: Battery percentage number\n    5. {connected}: Is connected\n    6. {battery-percentage-bar}: Battery percentage bar",
             "type": "string"
         },
         "bluetoothradioFormat": {
-            "description": "Output format of the module `BluetoothRadio`. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
+            "description": "Output format for the `BluetoothRadio` module. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
             "type": "string"
         },
         "boardFormat": {
-            "description": "Output format of the module `Board`. See Wiki for formatting syntax\n    1. {name}: Board name\n    2. {vendor}: Board vendor\n    3. {version}: Board version\n    4. {serial}: Board serial number",
+            "description": "Output format for the `Board` module. See Wiki for formatting syntax\n    1. {name}: Board name\n    2. {vendor}: Board vendor\n    3. {version}: Board version\n    4. {serial}: Board serial number",
             "type": "string"
         },
         "bootmgrFormat": {
-            "description": "Output format of the module `Bootmgr`. See Wiki for formatting syntax\n    1. {name}: Name / description\n    2. {firmware-path}: Firmware file path\n    3. {firmware-name}: Firmware file name\n    4. {secure-boot}: Is secure boot enabled\n    5. {order}: Boot order",
+            "description": "Output format for the `Bootmgr` module. See Wiki for formatting syntax\n    1. {name}: Name / description\n    2. {firmware-path}: Firmware file path\n    3. {firmware-name}: Firmware file name\n    4. {secure-boot}: Is secure boot enabled\n    5. {order}: Boot order",
             "type": "string"
         },
         "brightnessFormat": {
-            "description": "Output format of the module `Brightness`. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
+            "description": "Output format for the `Brightness` module. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
             "type": "string"
         },
         "btrfsFormat": {
-            "description": "Output format of the module `Btrfs`. See Wiki for formatting syntax\n    1. {name}: Name / Label\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
+            "description": "Output format for the `Btrfs` module. See Wiki for formatting syntax\n    1. {name}: Name / Label\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
             "type": "string"
         },
         "cameraFormat": {
-            "description": "Output format of the module `Camera`. See Wiki for formatting syntax\n    1. {name}: Device name\n    2. {vendor}: Vendor\n    3. {colorspace}: Color space\n    4. {id}: Identifier\n    5. {width}: Width (in px)\n    6. {height}: Height (in px)",
+            "description": "Output format for the `Camera` module. See Wiki for formatting syntax\n    1. {name}: Device name\n    2. {vendor}: Vendor\n    3. {colorspace}: Color space\n    4. {id}: Identifier\n    5. {width}: Width (in px)\n    6. {height}: Height (in px)",
             "type": "string"
         },
         "chassisFormat": {
-            "description": "Output format of the module `Chassis`. See Wiki for formatting syntax\n    1. {type}: Chassis type\n    2. {vendor}: Chassis vendor\n    3. {version}: Chassis version\n    4. {serial}: Chassis serial number",
+            "description": "Output format for the `Chassis` module. See Wiki for formatting syntax\n    1. {type}: Chassis type\n    2. {vendor}: Chassis vendor\n    3. {version}: Chassis version\n    4. {serial}: Chassis serial number",
             "type": "string"
         },
         "commandFormat": {
-            "description": "Output format of the module `Command`. See Wiki for formatting syntax\n    1. {result}: Command result",
+            "description": "Output format for the `Command` module. See Wiki for formatting syntax\n    1. {result}: Command result",
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format of the module `CPU`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
             "type": "string"
         },
         "cpucacheFormat": {
-            "description": "Output format of the module `CPUCache`. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result",
+            "description": "Output format for the `CPUCache` module. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result",
             "type": "string"
         },
         "cpuusageFormat": {
-            "description": "Output format of the module `CPUUsage`. See Wiki for formatting syntax\n    1. {avg}: CPU usage (percentage num, average)\n    2. {max}: CPU usage (percentage num, maximum)\n    3. {max-index}: CPU core index of maximum usage\n    4. {min}: CPU usage (percentage num, minimum)\n    5. {min-index}: CPU core index of minimum usage\n    6. {avg-bar}: CPU usage (percentage bar, average)\n    7. {max-bar}: CPU usage (percentage bar, maximum)\n    8. {min-bar}: CPU usage (percentage bar, minimum)",
+            "description": "Output format for the `CPUUsage` module. See Wiki for formatting syntax\n    1. {avg}: CPU usage (percentage num, average)\n    2. {max}: CPU usage (percentage num, maximum)\n    3. {max-index}: CPU core index of maximum usage\n    4. {min}: CPU usage (percentage num, minimum)\n    5. {min-index}: CPU core index of minimum usage\n    6. {avg-bar}: CPU usage (percentage bar, average)\n    7. {max-bar}: CPU usage (percentage bar, maximum)\n    8. {min-bar}: CPU usage (percentage bar, minimum)",
             "type": "string"
         },
         "cursorFormat": {
-            "description": "Output format of the module `Cursor`. See Wiki for formatting syntax\n    1. {theme}: Cursor theme\n    2. {size}: Cursor size",
+            "description": "Output format for the `Cursor` module. See Wiki for formatting syntax\n    1. {theme}: Cursor theme\n    2. {size}: Cursor size",
             "type": "string"
         },
         "datetimeFormat": {
-            "description": "Output format of the module `DateTime`. See Wiki for formatting syntax\n    1. {year}: Year\n    2. {year-short}: Last two digits of year\n    3. {month}: Month\n    4. {month-pretty}: Month with leading zero\n    5. {month-name}: Month name\n    6. {month-name-short}: Month name short\n    7. {week}: Week number on year\n    8. {weekday}: Weekday\n    9. {weekday-short}: Weekday short\n    10. {day-in-year}: Day in year\n    11. {day-in-month}: Day in month\n    12. {day-in-week}: Day in week\n    13. {hour}: Hour\n    14. {hour-pretty}: Hour with leading zero\n    15. {hour-12}: Hour 12h format\n    16. {hour-12-pretty}: Hour 12h format with leading zero\n    17. {minute}: Minute\n    18. {minute-pretty}: Minute with leading zero\n    19. {second}: Second\n    20. {second-pretty}: Second with leading zero\n    21. {offset-from-utc}: Offset from UTC in the ISO 8601 format\n    22. {timezone-name}: Locale-dependent timezone name or abbreviation\n    23. {day-pretty}: Day in month with leading zero",
+            "description": "Output format for the `DateTime` module. See Wiki for formatting syntax\n    1. {year}: Year\n    2. {year-short}: Last two digits of year\n    3. {month}: Month\n    4. {month-pretty}: Month with leading zero\n    5. {month-name}: Month name\n    6. {month-name-short}: Month name short\n    7. {week}: Week number on year\n    8. {weekday}: Weekday\n    9. {weekday-short}: Weekday short\n    10. {day-in-year}: Day in year\n    11. {day-in-month}: Day in month\n    12. {day-in-week}: Day in week\n    13. {hour}: Hour\n    14. {hour-pretty}: Hour with leading zero\n    15. {hour-12}: Hour 12h format\n    16. {hour-12-pretty}: Hour 12h format with leading zero\n    17. {minute}: Minute\n    18. {minute-pretty}: Minute with leading zero\n    19. {second}: Second\n    20. {second-pretty}: Second with leading zero\n    21. {offset-from-utc}: Offset from UTC in the ISO 8601 format\n    22. {timezone-name}: Locale-dependent timezone name or abbreviation\n    23. {day-pretty}: Day in month with leading zero",
             "type": "string"
         },
         "deFormat": {
-            "description": "Output format of the module `DE`. See Wiki for formatting syntax\n    1. {process-name}: DE process name\n    2. {pretty-name}: DE pretty name\n    3. {version}: DE version",
+            "description": "Output format for the `DE` module. See Wiki for formatting syntax\n    1. {process-name}: DE process name\n    2. {pretty-name}: DE pretty name\n    3. {version}: DE version",
             "type": "string"
         },
         "displayFormat": {
-            "description": "Output format of the module `Display`. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name\n    7. {type}: Screen type (Built-in or External)\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
+            "description": "Output format for the `Display` module. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name\n    7. {type}: Screen type (Built-in or External)\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
+            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
             "type": "string"
         },
         "diskioFormat": {
-            "description": "Output format of the module `DiskIO`. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
+            "description": "Output format for the `DiskIO` module. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
             "type": "string"
         },
         "dnsFormat": {
-            "description": "Output format of the module `DNS`. See Wiki for formatting syntax\n    1. {result}: DNS result",
+            "description": "Output format for the `DNS` module. See Wiki for formatting syntax\n    1. {result}: DNS result",
             "type": "string"
         },
         "editorFormat": {
-            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
+            "description": "Output format for the `Editor` module. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
             "type": "string"
         },
         "fontFormat": {
-            "description": "Output format of the module `Font`. See Wiki for formatting syntax\n    1. {font1}: Font 1\n    2. {font2}: Font 2\n    3. {font3}: Font 3\n    4. {font4}: Font 4\n    5. {combined}: Combined fonts for display",
+            "description": "Output format for the `Font` module. See Wiki for formatting syntax\n    1. {font1}: Font 1\n    2. {font2}: Font 2\n    3. {font3}: Font 3\n    4. {font4}: Font 4\n    5. {combined}: Combined fonts for display",
             "type": "string"
         },
         "gamepadFormat": {
-            "description": "Output format of the module `Gamepad`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number\n    3. {battery-percentage}: Battery percentage num\n    4. {battery-percentage-bar}: Battery percentage bar",
+            "description": "Output format for the `Gamepad` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number\n    3. {battery-percentage}: Battery percentage num\n    4. {battery-percentage-bar}: Battery percentage bar",
             "type": "string"
         },
         "gpuFormat": {
-            "description": "Output format of the module `GPU`. See Wiki for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num\n    19. {core-usage-bar}: Core usage percentage bar\n    20. {memory-type}: Memory type (Windows only)",
+            "description": "Output format for the `GPU` module. See Wiki for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num\n    19. {core-usage-bar}: Core usage percentage bar\n    20. {memory-type}: Memory type (Windows only)",
             "type": "string"
         },
         "hostFormat": {
-            "description": "Output format of the module `Host`. See Wiki for formatting syntax\n    1. {family}: Product family\n    2. {name}: Product name\n    3. {version}: Product version\n    4. {sku}: Product sku\n    5. {vendor}: Product vendor\n    6. {serial}: Product serial number\n    7. {uuid}: Product uuid",
+            "description": "Output format for the `Host` module. See Wiki for formatting syntax\n    1. {family}: Product family\n    2. {name}: Product name\n    3. {version}: Product version\n    4. {sku}: Product sku\n    5. {vendor}: Product vendor\n    6. {serial}: Product serial number\n    7. {uuid}: Product uuid",
             "type": "string"
         },
         "iconsFormat": {
-            "description": "Output format of the module `Icons`. See Wiki for formatting syntax\n    1. {icons1}: Icons part 1\n    2. {icons2}: Icons part 2",
+            "description": "Output format for the `Icons` module. See Wiki for formatting syntax\n    1. {icons1}: Icons part 1\n    2. {icons2}: Icons part 2",
             "type": "string"
         },
         "initsystemFormat": {
-            "description": "Output format of the module `InitSystem`. See Wiki for formatting syntax\n    1. {name}: Init system name\n    2. {exe}: Init system exe path\n    3. {version}: Init system version path\n    4. {pid}: Init system pid",
+            "description": "Output format for the `InitSystem` module. See Wiki for formatting syntax\n    1. {name}: Init system name\n    2. {exe}: Init system exe path\n    3. {version}: Init system version path\n    4. {pid}: Init system pid",
             "type": "string"
         },
         "kernelFormat": {
-            "description": "Output format of the module `Kernel`. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {display-version}: Display version\n    6. {page-size}: Page size",
+            "description": "Output format for the `Kernel` module. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {display-version}: Display version\n    6. {page-size}: Page size",
             "type": "string"
         },
         "keyboardFormat": {
-            "description": "Output format of the module `Keyboard`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number",
+            "description": "Output format for the `Keyboard` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number",
             "type": "string"
         },
         "lmFormat": {
-            "description": "Output format of the module `LM`. See Wiki for formatting syntax\n    1. {service}: LM service\n    2. {type}: LM type\n    3. {version}: LM version",
+            "description": "Output format for the `LM` module. See Wiki for formatting syntax\n    1. {service}: LM service\n    2. {type}: LM type\n    3. {version}: LM version",
             "type": "string"
         },
         "loadavgFormat": {
-            "description": "Output format of the module `Loadavg`. See Wiki for formatting syntax\n    1. {loadavg1}: Load average over 1min\n    2. {loadavg2}: Load average over 5min\n    3. {loadavg3}: Load average over 15min",
+            "description": "Output format for the `Loadavg` module. See Wiki for formatting syntax\n    1. {loadavg1}: Load average over 1min\n    2. {loadavg2}: Load average over 5min\n    3. {loadavg3}: Load average over 15min",
             "type": "string"
         },
         "localeFormat": {
-            "description": "Output format of the module `Locale`. See Wiki for formatting syntax\n    1. {result}: Locale code",
+            "description": "Output format for the `Locale` module. See Wiki for formatting syntax\n    1. {result}: Locale code",
             "type": "string"
         },
         "localipFormat": {
-            "description": "Output format of the module `LocalIp`. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address\n    4. {ifname}: Interface name\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
+            "description": "Output format for the `LocalIp` module. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address\n    4. {ifname}: Interface name\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
             "type": "string"
         },
         "mediaFormat": {
-            "description": "Output format of the module `Media`. See Wiki for formatting syntax\n    1. {combined}: Pretty media name\n    2. {title}: Media name\n    3. {artist}: Artist name\n    4. {album}: Album name\n    5. {status}: Status",
+            "description": "Output format for the `Media` module. See Wiki for formatting syntax\n    1. {combined}: Pretty media name\n    2. {title}: Media name\n    3. {artist}: Artist name\n    4. {album}: Album name\n    5. {status}: Status",
             "type": "string"
         },
         "memoryFormat": {
-            "description": "Output format of the module `Memory`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
+            "description": "Output format for the `Memory` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
             "type": "string"
         },
         "monitorFormat": {
-            "description": "Output format of the module `Monitor`. See Wiki for formatting syntax\n    1. {name}: Display name\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
+            "description": "Output format for the `Monitor` module. See Wiki for formatting syntax\n    1. {name}: Display name\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
             "type": "string"
         },
         "mouseFormat": {
-            "description": "Output format of the module `Mouse`. See Wiki for formatting syntax\n    1. {name}: Mouse name\n    2. {serial}: Mouse serial number",
+            "description": "Output format for the `Mouse` module. See Wiki for formatting syntax\n    1. {name}: Mouse name\n    2. {serial}: Mouse serial number",
             "type": "string"
         },
         "netioFormat": {
-            "description": "Output format of the module `NetIO`. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
+            "description": "Output format for the `NetIO` module. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
             "type": "string"
         },
         "openclFormat": {
-            "description": "Output format of the module `OpenCL`. See Wiki for formatting syntax\n    1. {version}: Platform version\n    2. {name}: Platform name\n    3. {vendor}: Platform vendor",
+            "description": "Output format for the `OpenCL` module. See Wiki for formatting syntax\n    1. {version}: Platform version\n    2. {name}: Platform name\n    3. {vendor}: Platform vendor",
             "type": "string"
         },
         "openglFormat": {
-            "description": "Output format of the module `OpenGL`. See Wiki for formatting syntax\n    1. {version}: OpenGL version\n    2. {renderer}: OpenGL renderer\n    3. {vendor}: OpenGL vendor\n    4. {slv}: OpenGL shading language version\n    5. {library}: OpenGL library used",
+            "description": "Output format for the `OpenGL` module. See Wiki for formatting syntax\n    1. {version}: OpenGL version\n    2. {renderer}: OpenGL renderer\n    3. {vendor}: OpenGL vendor\n    4. {slv}: OpenGL shading language version\n    5. {library}: OpenGL library used",
             "type": "string"
         },
         "osFormat": {
-            "description": "Output format of the module `OS`. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel\n    2. {name}: Name of the OS\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
+            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel\n    2. {name}: Name of the OS\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop-user}: Number of scoop-user packages\n    21. {scoop-global}: Number of scoop-global packages\n    22. {choco}: Number of choco packages\n    23. {pkgtool}: Number of pkgtool packages\n    24. {paludis}: Number of paludis packages\n    25. {winget}: Number of winget packages\n    26. {opkg}: Number of opkg packages\n    27. {am-system}: Number of am-system packages\n    28. {sorcery}: Number of sorcery packages\n    29. {lpkg}: Number of lpkg packages\n    30. {lpkgbuild}: Number of lpkgbuild packages\n    31. {guix-system}: Number of guix-system packages\n    32. {guix-user}: Number of guix-user packages\n    33. {guix-home}: Number of guix-home packages\n    34. {linglong}: Number of linglong packages\n    35. {pacstall}: Number of pacstall packages\n    36. {mport}: Number of mport packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {kiss}: Number of kiss packages\n    44. {moss}: Number of moss packages\n    45. {nix-all}: Total number of all nix packages\n    46. {flatpak-all}: Total number of all flatpak app packages\n    47. {brew-all}: Total number of all brew packages\n    48. {guix-all}: Total number of all guix packages\n    49. {hpkg-all}: Total number of all hpkg packages",
+            "description": "Output format for the `Packages` module. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop-user}: Number of scoop-user packages\n    21. {scoop-global}: Number of scoop-global packages\n    22. {choco}: Number of choco packages\n    23. {pkgtool}: Number of pkgtool packages\n    24. {paludis}: Number of paludis packages\n    25. {winget}: Number of winget packages\n    26. {opkg}: Number of opkg packages\n    27. {am-system}: Number of am-system packages\n    28. {sorcery}: Number of sorcery packages\n    29. {lpkg}: Number of lpkg packages\n    30. {lpkgbuild}: Number of lpkgbuild packages\n    31. {guix-system}: Number of guix-system packages\n    32. {guix-user}: Number of guix-user packages\n    33. {guix-home}: Number of guix-home packages\n    34. {linglong}: Number of linglong packages\n    35. {pacstall}: Number of pacstall packages\n    36. {mport}: Number of mport packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {kiss}: Number of kiss packages\n    44. {moss}: Number of moss packages\n    45. {nix-all}: Total number of all nix packages\n    46. {flatpak-all}: Total number of all flatpak app packages\n    47. {brew-all}: Total number of all brew packages\n    48. {guix-all}: Total number of all guix packages\n    49. {hpkg-all}: Total number of all hpkg packages",
             "type": "string"
         },
         "physicaldiskFormat": {
-            "description": "Output format of the module `PhysicalDisk`. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
+            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
             "type": "string"
         },
         "physicalmemoryFormat": {
-            "description": "Output format of the module `PhysicalMemory`. See Wiki for formatting syntax\n    1. {bytes}: Size (in bytes)\n    2. {size}: Size formatted\n    3. {max-speed}: Max speed (in MT/s)\n    4. {running-speed}: Running speed (in MT/s)\n    5. {type}: Type (DDR4, DDR5, etc.)\n    6. {form-factor}: Form factor (SODIMM, DIMM, etc.)\n    7. {locator}: Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)\n    8. {vendor}: Vendor\n    9. {serial}: Serial number\n    10. {part-number}: Part number\n    11. {is-ecc-enabled}: True if ECC enabled\n    12. {is-installed}: True if a memory module is installed in the slot",
+            "description": "Output format for the `PhysicalMemory` module. See Wiki for formatting syntax\n    1. {bytes}: Size (in bytes)\n    2. {size}: Size formatted\n    3. {max-speed}: Max speed (in MT/s)\n    4. {running-speed}: Running speed (in MT/s)\n    5. {type}: Type (DDR4, DDR5, etc.)\n    6. {form-factor}: Form factor (SODIMM, DIMM, etc.)\n    7. {locator}: Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)\n    8. {vendor}: Vendor\n    9. {serial}: Serial number\n    10. {part-number}: Part number\n    11. {is-ecc-enabled}: True if ECC enabled\n    12. {is-installed}: True if a memory module is installed in the slot",
             "type": "string"
         },
         "playerFormat": {
-            "description": "Output format of the module `Player`. See Wiki for formatting syntax\n    1. {player}: Pretty player name\n    2. {name}: Player name\n    3. {id}: Player Identifier\n    4. {url}: URL name",
+            "description": "Output format for the `Player` module. See Wiki for formatting syntax\n    1. {player}: Pretty player name\n    2. {name}: Player name\n    3. {id}: Player Identifier\n    4. {url}: URL name",
             "type": "string"
         },
         "poweradapterFormat": {
-            "description": "Output format of the module `PowerAdapter`. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
+            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
             "type": "string"
         },
         "processesFormat": {
-            "description": "Output format of the module `Processes`. See Wiki for formatting syntax\n    1. {result}: Process count",
+            "description": "Output format for the `Processes` module. See Wiki for formatting syntax\n    1. {result}: Process count",
             "type": "string"
         },
         "publicipFormat": {
-            "description": "Output format of the module `PublicIp`. See Wiki for formatting syntax\n    1. {ip}: Public IP address\n    2. {location}: Location",
+            "description": "Output format for the `PublicIp` module. See Wiki for formatting syntax\n    1. {ip}: Public IP address\n    2. {location}: Location",
             "type": "string"
         },
         "shellFormat": {
-            "description": "Output format of the module `Shell`. See Wiki for formatting syntax\n    1. {process-name}: Shell process name\n    2. {exe}: The first argument of the command line when running the shell\n    3. {exe-name}: Shell base name of arg0\n    4. {version}: Shell version\n    5. {pid}: Shell pid\n    6. {pretty-name}: Shell pretty name\n    7. {exe-path}: Shell full exe path\n    8. {tty}: Shell tty used",
+            "description": "Output format for the `Shell` module. See Wiki for formatting syntax\n    1. {process-name}: Shell process name\n    2. {exe}: The first argument of the command line when running the shell\n    3. {exe-name}: Shell base name of arg0\n    4. {version}: Shell version\n    5. {pid}: Shell pid\n    6. {pretty-name}: Shell pretty name\n    7. {exe-path}: Shell full exe path\n    8. {tty}: Shell tty used",
             "type": "string"
         },
         "soundFormat": {
-            "description": "Output format of the module `Sound`. See Wiki for formatting syntax\n    1. {is-main}: Is main sound device\n    2. {name}: Device name\n    3. {volume-percentage}: Volume (in percentage num)\n    4. {identifier}: Identifier\n    5. {volume-percentage-bar}: Volume (in percentage bar)\n    6. {platform-api}: Platform API used",
+            "description": "Output format for the `Sound` module. See Wiki for formatting syntax\n    1. {is-main}: Is main sound device\n    2. {is-active}: Is active sound device\n    3. {name}: Device name\n    4. {volume-percentage}: Volume (in percentage num)\n    5. {identifier}: Identifier\n    6. {volume-percentage-bar}: Volume (in percentage bar)\n    7. {platform-api}: Platform API used",
             "type": "string"
         },
         "swapFormat": {
-            "description": "Output format of the module `Swap`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
+            "description": "Output format for the `Swap` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
             "type": "string"
         },
         "terminalFormat": {
-            "description": "Output format of the module `Terminal`. See Wiki for formatting syntax\n    1. {process-name}: Terminal process name\n    2. {exe}: The first argument of the command line when running the terminal\n    3. {exe-name}: Terminal base name of arg0\n    4. {pid}: Terminal pid\n    5. {pretty-name}: Terminal pretty name\n    6. {version}: Terminal version\n    7. {exe-path}: Terminal full exe path\n    8. {tty}: Terminal tty / pts used",
+            "description": "Output format for the `Terminal` module. See Wiki for formatting syntax\n    1. {process-name}: Terminal process name\n    2. {exe}: The first argument of the command line when running the terminal\n    3. {exe-name}: Terminal base name of arg0\n    4. {pid}: Terminal pid\n    5. {pretty-name}: Terminal pretty name\n    6. {version}: Terminal version\n    7. {exe-path}: Terminal full exe path\n    8. {tty}: Terminal tty / pts used",
             "type": "string"
         },
         "terminalfontFormat": {
-            "description": "Output format of the module `TerminalFont`. See Wiki for formatting syntax\n    1. {combined}: Terminal font combined\n    2. {name}: Terminal font name\n    3. {size}: Terminal font size\n    4. {styles}: Terminal font styles",
+            "description": "Output format for the `TerminalFont` module. See Wiki for formatting syntax\n    1. {combined}: Terminal font combined\n    2. {name}: Terminal font name\n    3. {size}: Terminal font size\n    4. {styles}: Terminal font styles",
             "type": "string"
         },
         "terminalsizeFormat": {
-            "description": "Output format of the module `TerminalSize`. See Wiki for formatting syntax\n    1. {rows}: Terminal rows\n    2. {columns}: Terminal columns\n    3. {width}: Terminal width (in pixels)\n    4. {height}: Terminal height (in pixels)",
+            "description": "Output format for the `TerminalSize` module. See Wiki for formatting syntax\n    1. {rows}: Terminal rows\n    2. {columns}: Terminal columns\n    3. {width}: Terminal width (in pixels)\n    4. {height}: Terminal height (in pixels)",
             "type": "string"
         },
         "terminalthemeFormat": {
-            "description": "Output format of the module `TerminalTheme`. See Wiki for formatting syntax\n    1. {fg-color}: Terminal foreground color\n    2. {fg-type}: Terminal foreground type (Dark / Light)\n    3. {bg-color}: Terminal background color\n    4. {bg-type}: Terminal background type (Dark / Light)",
+            "description": "Output format for the `TerminalTheme` module. See Wiki for formatting syntax\n    1. {fg-color}: Terminal foreground color\n    2. {fg-type}: Terminal foreground type (Dark / Light)\n    3. {bg-color}: Terminal background color\n    4. {bg-type}: Terminal background type (Dark / Light)",
             "type": "string"
         },
         "titleFormat": {
-            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: CWD with home dir replaced by `~`",
+            "description": "Output format for the `Title` module. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: CWD with home dir replaced by `~`",
             "type": "string"
         },
         "themeFormat": {
-            "description": "Output format of the module `Theme`. See Wiki for formatting syntax\n    1. {theme1}: Theme part 1\n    2. {theme2}: Theme part 2",
+            "description": "Output format for the `Theme` module. See Wiki for formatting syntax\n    1. {theme1}: Theme part 1\n    2. {theme2}: Theme part 2",
             "type": "string"
         },
         "tpmFormat": {
-            "description": "Output format of the module `TPM`. See Wiki for formatting syntax\n    1. {version}: TPM device version\n    2. {description}: TPM general description",
+            "description": "Output format for the `TPM` module. See Wiki for formatting syntax\n    1. {version}: TPM device version\n    2. {description}: TPM general description",
             "type": "string"
         },
         "uptimeFormat": {
-            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot\n    10. {formatted}: Formatted uptime",
+            "description": "Output format for the `Uptime` module. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot\n    10. {formatted}: Formatted uptime",
             "type": "string"
         },
         "usersFormat": {
-            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session-name}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
+            "description": "Output format for the `Users` module. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session-name}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
             "type": "string"
         },
         "versionFormat": {
-            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "description": "Output format for the `Version` module. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
             "type": "string"
         },
         "vulkanFormat": {
-            "description": "Output format of the module `Vulkan`. See Wiki for formatting syntax\n    1. {driver}: Driver name\n    2. {api-version}: API version\n    3. {conformance-version}: Conformance version\n    4. {instance-version}: Instance version",
+            "description": "Output format for the `Vulkan` module. See Wiki for formatting syntax\n    1. {driver}: Driver name\n    2. {api-version}: API version\n    3. {conformance-version}: Conformance version\n    4. {instance-version}: Instance version",
             "type": "string"
         },
         "wallpaperFormat": {
-            "description": "Output format of the module `Wallpaper`. See Wiki for formatting syntax\n    1. {file-name}: File name\n    2. {full-path}: Full path",
+            "description": "Output format for the `Wallpaper` module. See Wiki for formatting syntax\n    1. {file-name}: File name\n    2. {full-path}: Full path",
             "type": "string"
         },
         "weatherFormat": {
-            "description": "Output format of the module `Weather`. See Wiki for formatting syntax\n    1. {result}: Weather result",
+            "description": "Output format for the `Weather` module. See Wiki for formatting syntax\n    1. {result}: Weather result",
             "type": "string"
         },
         "wmFormat": {
-            "description": "Output format of the module `WM`. See Wiki for formatting syntax\n    1. {process-name}: WM process name\n    2. {pretty-name}: WM pretty name\n    3. {protocol-name}: WM protocol name\n    4. {plugin-name}: WM plugin name\n    5. {version}: WM version",
+            "description": "Output format for the `WM` module. See Wiki for formatting syntax\n    1. {process-name}: WM process name\n    2. {pretty-name}: WM pretty name\n    3. {protocol-name}: WM protocol name\n    4. {plugin-name}: WM plugin name\n    5. {version}: WM version",
             "type": "string"
         },
         "wifiFormat": {
-            "description": "Output format of the module `Wifi`. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {band}: Connection channel band in GHz",
+            "description": "Output format for the `Wifi` module. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {band}: Connection channel band in GHz",
             "type": "string"
         },
         "wmthemeFormat": {
-            "description": "Output format of the module `WMTheme`. See Wiki for formatting syntax\n    1. {result}: WM theme",
+            "description": "Output format for the `WMTheme` module. See Wiki for formatting syntax\n    1. {result}: WM theme",
             "type": "string"
         },
         "zpoolFormat": {
-            "description": "Output format of the module `Zpool`. See Wiki for formatting syntax\n    1. {name}: Zpool name\n    2. {guid}: Zpool guid\n    3. {state}: Zpool state\n    4. {used}: Size used\n    5. {allocated}: Size allocated\n    6. {total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {fragmentation-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {fragmentation-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
+            "description": "Output format for the `Zpool` module. See Wiki for formatting syntax\n    1. {name}: Zpool name\n    2. {guid}: Zpool guid\n    3. {state}: Zpool state\n    4. {size-used}: Size used\n    5. {size-allocated}: Size allocated\n    6. {size-total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {frag-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {frag-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
             "type": "string"
         }
     },
     "type": "object",
     "additionalProperties": false,
     "title": "JSON config",
-    "description": "JSON config file for fastfetch. Usually located at `~/.config/fastfetch/config.jsonc`",
+    "description": "Fastfetch JSON config file. Usually located at `~/.config/fastfetch/config.jsonc`",
     "properties": {
         "$schema": {
             "type": "string",
-            "description": "JSON schema URL, for JSON validation and IDE intelligence",
+            "description": "JSON Schema URL for validation and IDE support",
             "format": "uri",
             "default": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"
         },
         "logo": {
-            "description": "Fastfetch logo configurations\nSee also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "description": "Fastfetch logo configuration\nSee also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "oneOf": [
                 {
                     "description": "Disable logo",
@@ -570,20 +570,20 @@
                     "const": null
                 },
                 {
-                    "description": "Set the source file of the logo or built-in ASCII art name",
+                    "description": "Path to a logo source file or the name of a built-in ASCII art logo",
                     "type": "string"
                 },
                 {
-                    "description": "Fastfetch logo configurations",
+                    "description": "Fastfetch logo configuration",
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
                         "type": {
-                            "description": "Set the type of the logo",
+                            "description": "Logo type",
                             "oneOf": [
                                 {
                                     "const": "auto",
-                                    "description": "If something is given, first try built-in, then file. Otherwise detect logo"
+                                    "description": "If a value is provided, try a built-in logo first, then a file. Otherwise, auto-detect the logo. Explicit type is highly recommended when use image files."
                                 },
                                 {
                                     "const": "builtin",
@@ -595,7 +595,7 @@
                                 },
                                 {
                                     "const": "file",
-                                    "description": "Text file, printed with color code replacement"
+                                    "description": "Text file with color code replacement"
                                 },
                                 {
                                     "const": "file-raw",
@@ -603,7 +603,7 @@
                                 },
                                 {
                                     "const": "data",
-                                    "description": "Text data, printed with color code replacement"
+                                    "description": "Text data with color code replacement"
                                 },
                                 {
                                     "const": "data-raw",
@@ -611,35 +611,35 @@
                                 },
                                 {
                                     "const": "command-raw",
-                                    "description": "Command to generate text data, printed as is"
+                                    "description": "Command that generates text data, printed as is"
                                 },
                                 {
                                     "const": "sixel",
-                                    "description": "Image file, printed as sixel codes"
+                                    "description": "Image file rendered as sixel"
                                 },
                                 {
                                     "const": "kitty",
-                                    "description": "Image file, printed using kitty graphics protocol"
+                                    "description": "Image file rendered using the Kitty graphics protocol"
                                 },
                                 {
                                     "const": "kitty-direct",
-                                    "description": "Image file, tells the terminal emulator to read image data from the specified file"
+                                    "description": "Image file. Instructs the terminal emulator to read image data directly from the specified file"
                                 },
                                 {
                                     "const": "kitty-icat",
-                                    "description": "Image file, uses `kitten icat` to display the image. Requires binary `kitten` to be installed"
+                                    "description": "Image file displayed using `kitten icat`. Requires the `kitten` binary to be installed"
                                 },
                                 {
                                     "const": "iterm",
-                                    "description": "Image file, uses `iTerm` image protocol"
+                                    "description": "Image file rendered using the iTerm image protocol"
                                 },
                                 {
                                     "const": "chafa",
-                                    "description": "Image file, prints `ASCII` art image generated by `libchafa`"
+                                    "description": "Image file rendered as ASCII art using `libchafa`"
                                 },
                                 {
                                     "const": "raw",
-                                    "description": "Image file, printed as `raw` binary string image"
+                                    "description": "Image file rendered as a raw binary string"
                                 },
                                 {
                                     "const": "none",
@@ -650,7 +650,7 @@
                         },
                         "source": {
                             "type": "string",
-                            "description": "Set the source file of the logo"
+                            "description": "Path to the logo source file"
                         },
                         "color": {
                             "type": "object",
@@ -699,11 +699,11 @@
                             "oneOf": [
                                 {
                                     "type": "null",
-                                    "description": "Auto detect width (default)"
+                                    "description": "Auto-detect the width (default)"
                                 },
                                 {
                                     "type": "integer",
-                                    "description": "Set the width of the logo (in characters). Required for some image protocols",
+                                    "description": "Width of the logo in characters. Required by some image protocols",
                                     "minimum": 1
                                 }
                             ]
@@ -712,11 +712,11 @@
                             "oneOf": [
                                 {
                                     "type": "null",
-                                    "description": "Auto detect width (default)"
+                                    "description": "Auto-detect the height (default)"
                                 },
                                 {
                                     "type": "integer",
-                                    "description": "Set the height of the logo (in characters). Required for some image protocols",
+                                    "description": "Height of the logo in characters. Required by some image protocols",
                                     "minimum": 1
                                 }
                             ]
@@ -724,28 +724,28 @@
                         "padding": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set the padding of the logo",
+                            "description": "Logo padding",
                             "properties": {
                                 "top": {
                                     "type": "integer",
-                                    "description": "Set the top padding of the logo",
+                                    "description": "Top padding of the logo",
                                     "minimum": 0
                                 },
                                 "left": {
                                     "type": "integer",
-                                    "description": "Set the left padding of the logo",
+                                    "description": "Left padding of the logo",
                                     "minimum": 0
                                 },
                                 "right": {
                                     "type": "integer",
-                                    "description": "Set the right padding of the logo",
+                                    "description": "Right padding of the logo",
                                     "minimum": 0
                                 }
                             }
                         },
                         "printRemaining": {
                             "type": "boolean",
-                            "description": "Whether to print the remaining logo if it has more lines than modules to display",
+                            "description": "Whether to print any remaining logo lines when the logo is taller than the module list",
                             "default": true
                         },
                         "preserveAspectRatio": {
@@ -760,7 +760,7 @@
                         },
                         "position": {
                             "type": "string",
-                            "description": "Set the position where the logo should be displayed",
+                            "description": "Position of the logo",
                             "enum": [
                                 "left",
                                 "top",
@@ -859,7 +859,7 @@
             ]
         },
         "general": {
-            "description": "Fastfetch general configurations",
+            "description": "General Fastfetch configuration",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -878,7 +878,7 @@
                     "description": "The name of the player to use for Media and Player modules. Linux only"
                 },
                 "dsForceDrm": {
-                    "description": "Force display detection to use DRM. Linux only",
+                    "description": "Force display detection to use DRM (Linux only)",
                     "oneOf": [
                         {
                             "type": "boolean",
@@ -910,7 +910,7 @@
                 },
                 "preRun": {
                     "type": "string",
-                    "description": "Set the command to be executed before printing logos",
+                    "description": "Command to run before printing logos",
                     "default": ""
                 },
                 "detectVersion": {
@@ -921,12 +921,12 @@
             }
         },
         "display": {
-            "description": "Configure how things should be displayed",
+            "description": "Configure output formatting",
             "type": "object",
             "additionalProperties": false,
             "properties": {
                 "stat": {
-                    "description": "Show time usage (in ms) for individual modules with optional threshold",
+                    "description": "Show execution time (in ms) for individual modules, optionally above a threshold",
                     "oneOf": [
                         {
                             "type": "boolean",
@@ -945,7 +945,7 @@
                 },
                 "showErrors": {
                     "type": "boolean",
-                    "description": "Print occurring errors to the console. False to ignore errored modules",
+                    "description": "Whether to print errors to the console. If false, modules that error are ignored",
                     "default": false
                 },
                 "disableLinewrap": {
@@ -960,14 +960,14 @@
                 },
                 "separator": {
                     "type": "string",
-                    "description": "Set the separator between key and value",
+                    "description": "Separator between the key and value",
                     "default": ": "
                 },
                 "color": {
-                    "description": "Set the color of the keys and title",
+                    "description": "Color of keys and titles",
                     "oneOf": [
                         {
-                            "description": "Set both the colors of keys and title",
+                            "description": "Color for both keys and titles",
                             "$ref": "#/$defs/colors"
                         },
                         {
@@ -975,19 +975,19 @@
                             "additionalProperties": false,
                             "properties": {
                                 "keys": {
-                                    "description": "Set the color of the keys",
+                                    "description": "Color of keys",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "title": {
-                                    "description": "Set the color of the title",
+                                    "description": "Color of titles",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "output": {
-                                    "description": "Set the color of the module output",
+                                    "description": "Color of module output",
                                     "$ref": "#/$defs/colors"
                                 },
                                 "separator": {
-                                    "description": "Set the color of the key-value separator",
+                                    "description": "Color of the key-value separator",
                                     "$ref": "#/$defs/colors"
                                 }
                             }
@@ -995,24 +995,24 @@
                     ]
                 },
                 "brightColor": {
-                    "description": "Set if the keys, title and ASCII logo should be printed in bright color",
+                    "description": "Whether to print keys, titles, and the ASCII logo in bright colors",
                     "type": "boolean",
                     "default": true
                 },
                 "key": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how module keys should be displayed",
+                    "description": "Configure how module keys are displayed",
                     "properties": {
                         "width": {
-                            "description": "Align the width of keys to number of characters, 0 to disable",
+                            "description": "Key width in characters. Set to 0 to disable alignment",
                             "type": "integer",
                             "minimum": 0,
                             "default": 0
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show builtin icon before string keys",
+                            "description": "Whether to show a built-in icon before string keys",
                             "oneOf": [
                                 {
                                     "const": "none",
@@ -1024,7 +1024,7 @@
                                 },
                                 {
                                     "const": "icon",
-                                    "description": "Show builtin icon (requires newest nerd font)"
+                                    "description": "Show the built-in icon (requires a recent Nerd Font)"
                                 },
                                 {
                                     "const": "both",
@@ -1055,7 +1055,7 @@
                         },
                         "paddingLeft": {
                             "type": "integer",
-                            "description": "Set the left padding of keys",
+                            "description": "Left padding for keys",
                             "minimum": 0,
                             "default": 0
                         }
@@ -1064,7 +1064,7 @@
                 "size": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how size values should be displayed",
+                    "description": "Configure how sizes are displayed",
                     "properties": {
                         "binaryPrefix": {
                             "type": "string",
@@ -1093,7 +1093,7 @@
                         },
                         "ndigits": {
                             "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting sizes",
+                            "description": "Number of decimal places to use when formatting sizes",
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
@@ -1106,7 +1106,7 @@
                 "temp": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how temperature values should be displayed",
+                    "description": "Configure how temperatures are displayed",
                     "properties": {
                         "unit": {
                             "type": "string",
@@ -1133,7 +1133,7 @@
                         },
                         "ndigits": {
                             "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting temperature values",
+                            "description": "Number of decimal places to use when formatting temperatures",
                             "minimum": 0,
                             "maximum": 9,
                             "default": 1
@@ -1141,7 +1141,7 @@
                         "color": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set colors used in different states of temperature values",
+                            "description": "Colors used for different temperature states",
                             "properties": {
                                 "green": {
                                     "description": "Color used in green state",
@@ -1168,21 +1168,21 @@
                 "bar": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set the bar configuration",
+                    "description": "Bar configuration",
                     "properties": {
                         "char": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set the characters used in the bar",
+                            "description": "Characters used in the bar",
                             "properties": {
                                 "elapsed": {
                                     "type": "string",
-                                    "description": "Set the character to use in elapsed part",
+                                    "description": "Character used for the elapsed portion",
                                     "default": "■"
                                 },
                                 "total": {
                                     "type": "string",
-                                    "description": "Set the character to use in total part",
+                                    "description": "Character used for the remaining portion",
                                     "default": "-"
                                 }
                             }
@@ -1196,26 +1196,26 @@
                                 {
                                     "type": "object",
                                     "additionalProperties": false,
-                                    "description": "Set the string to use of borders of percentage bars",
+                                    "description": "Strings used for percentage bar borders",
                                     "properties": {
                                         "left": {
                                             "type": "string",
-                                            "description": "Set the string to use at left border",
+                                            "description": "String used for the left border",
                                             "default": "[ "
                                         },
                                         "right": {
                                             "type": "string",
-                                            "description": "Set the string to use at right border",
+                                            "description": "String used for the right border",
                                             "default": " ]"
                                         },
                                         "leftElapsed": {
                                             "type": "string",
-                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "description": "If both `leftElapsed` and `rightElapsed` are set, the border is used as part of the bar content",
                                             "default": ""
                                         },
                                         "rightElapsed": {
                                             "type": "string",
-                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "description": "If both `leftElapsed` and `rightElapsed` are set, the border is used as part of the bar content",
                                             "default": ""
                                         }
                                     }
@@ -1231,20 +1231,20 @@
                                 {
                                     "type": "object",
                                     "additionalProperties": false,
-                                    "description": "Set the color to use of percentage bars",
+                                    "description": "Colors used for percentage bars",
                                     "properties": {
                                         "elapsed": {
-                                            "description": "Color to use in the elapsed part of percentage bars\nBy default, auto selected by percent.color.{green,yellow,red}",
+                                            "description": "Color used for the elapsed portion of percentage bars\nBy default, it is selected automatically from `percent.color.{green,yellow,red}`",
                                             "$ref": "#/$defs/colors",
                                             "default": "auto"
                                         },
                                         "total": {
-                                            "description": "Color to use in the total part of percentage bars",
+                                            "description": "Color used for the remaining portion of percentage bars",
                                             "$ref": "#/$defs/colors",
                                             "default": "light_white"
                                         },
                                         "border": {
-                                            "description": "Color to use in the borders of percentage bars",
+                                            "description": "Color used for percentage bar borders",
                                             "$ref": "#/$defs/colors",
                                             "default": "light_white"
                                         }
@@ -1254,7 +1254,7 @@
                         },
                         "width": {
                             "type": "integer",
-                            "description": "Set the width of the bar, in number of characters",
+                            "description": "Width of the bar in characters",
                             "minimum": 1,
                             "default": 10
                         }
@@ -1263,14 +1263,14 @@
                 "percent": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how percentage values should be displayed",
+                    "description": "Configure how percentages are displayed",
                     "properties": {
                         "type": {
                             "$ref": "#/$defs/percentType"
                         },
                         "ndigits": {
                             "type": "number",
-                            "description": "Set the number of digits to keep after the decimal point when formatting percentage numbers",
+                            "description": "Number of decimal places to use when formatting percentages",
                             "minimum": 0,
                             "maximum": 9,
                             "default": 0
@@ -1278,7 +1278,7 @@
                         "color": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set colors used in different states of percentage bars and numbers",
+                            "description": "Colors used for different percentage states",
                             "properties": {
                                 "green": {
                                     "description": "Color used in green state",
@@ -1302,7 +1302,7 @@
                         },
                         "width": {
                             "type": "integer",
-                            "description": "Set the width of the percentage number, in number of characters",
+                            "description": "Width of the percentage number in characters",
                             "minimum": 0,
                             "default": 0
                         }
@@ -1311,7 +1311,7 @@
                 "freq": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how frequency values should be displayed",
+                    "description": "Configure how frequencies are displayed",
                     "properties": {
                         "ndigits": {
                             "description": "Set the number of decimal places to display when formatting frequency values",
@@ -1320,11 +1320,11 @@
                                     "type": "integer",
                                     "minimum": 0,
                                     "maximum": 9,
-                                    "description": "Integer value displays the frequency in GHz with specified decimal places"
+                                    "description": "An integer displays the frequency in GHz with the specified number of decimal places"
                                 },
                                 {
                                     "type": "null",
-                                    "description": "Null value display the frequency as integer MHz"
+                                    "description": "A null value displays the frequency as an integer in MHz"
                                 }
                             ],
                             "default": 2
@@ -1336,11 +1336,11 @@
                 },
                 "duration": {
                     "type": "object",
-                    "description": "Set how duration values should be displayed",
+                    "description": "Configure how durations are displayed",
                     "properties": {
                         "abbreviation": {
                             "type": "boolean",
-                            "description": "Set whether to abbreviate duration values\nIf true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+                            "description": "Whether to abbreviate durations\nIf true, values are shown as \"1h 2m\" instead of \"1 hour, 2 mins\"",
                             "default": false
                         },
                         "spaceBeforeUnit": {
@@ -1351,25 +1351,25 @@
                 "fraction": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how ordinary fraction numbers should be displayed",
+                    "description": "Configure how fractional values are displayed",
                     "properties": {
                         "ndigits": {
                             "oneOf": [
                                 {
                                     "type": "number",
-                                    "description": "Set the number of digits to keep after the decimal point when formatting ordinary fraction numbers",
+                                    "description": "Number of decimal places to use when formatting fractional values",
                                     "minimum": 0,
                                     "maximum": 9
                                 },
                                 {
                                     "type": "null",
-                                    "description": "The number of digits will be automatically determined based on the value"
+                                    "description": "Automatically determine the number of decimal places based on the value"
                                 }
                             ],
                             "default": 2
                         },
                         "trailingZeros": {
-                            "description": "Set when to keep trailing zeros",
+                            "description": "Control when trailing zeros are preserved",
                             "oneOf": [
                                 {
                                     "type": "null",
@@ -1377,7 +1377,7 @@
                                 },
                                 {
                                     "const": "default",
-                                    "description": "Use the behavior defined internally"
+                                    "description": "Use the built-in behavior"
                                 },
                                 {
                                     "const": "always",
@@ -1395,10 +1395,10 @@
                 "common": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Overwrite configurations of `duration`, `fraction`, `freq`, `percent`, `size` and `temp`\nPutting this before other properties will make it work as default configurations",
+                    "description": "Override the settings for `duration`, `fraction`, `freq`, `percent`, `size`, and `temp`\nPlace this before those properties to use it as their default configuration",
                     "properties": {
                         "ndigits": {
-                            "description": "Set the number of decimal places to display",
+                            "description": "Default number of decimal places to display",
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 9
@@ -1410,12 +1410,12 @@
                 },
                 "noBuffer": {
                     "type": "boolean",
-                    "description": "Whether to disable the stdout application buffer",
+                    "description": "Whether to disable stdout buffering",
                     "default": false
                 },
                 "constants": {
                     "type": "array",
-                    "description": "List of strings to be used in custom format of modules",
+                    "description": "List of strings available for use in module custom formats",
                     "items": {
                         "type": "string"
                     }
@@ -1423,13 +1423,13 @@
             }
         },
         "modules": {
-            "description": "Fastfetch modules to run",
+            "description": "Modules to run",
             "type": "array",
             "items": {
                 "anyOf": [
                     {
                         "type": "string",
-                        "description": "Run module with default configurations",
+                        "description": "Run a module with its default configuration",
                         "enum": [
                             "battery",
                             "bios",
@@ -1507,7 +1507,7 @@
                     },
                     {
                         "type": "object",
-                        "description": "Run module with custom configurations",
+                        "description": "Run a module with a custom configuration",
                         "required": [
                             "type"
                         ],
@@ -1524,7 +1524,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "break",
-                                        "description": "Print a empty line"
+                                        "description": "Print an empty line"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -1538,10 +1538,10 @@
                                 "properties": {
                                     "type": {
                                         "const": "battery",
-                                        "description": "Print battery capacity, status, etc"
+                                        "description": "Print battery information"
                                     },
                                     "useSetupApi": {
-                                        "description": "Set if `CM API` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
+                                        "description": "Whether to use the `CM API` on Windows to detect battery information. Supports multiple batteries, but is slower (Windows only)",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1580,7 +1580,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print information of 1st-stage bootloader (name, version, release date, etc)",
+                                        "description": "Print first-stage bootloader information (name, version, release date, etc.)",
                                         "const": "bios"
                                     },
                                     "key": {
@@ -1612,11 +1612,11 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "List (connected) bluetooth devices",
+                                        "description": "List connected Bluetooth devices",
                                         "const": "bluetooth"
                                     },
                                     "showDisconnected": {
-                                        "description": "Set if disconnected bluetooth devices should be printed",
+                                        "description": "Whether to show disconnected Bluetooth devices",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1652,7 +1652,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "List bluetooth radios width supported version and vendor",
+                                        "description": "List Bluetooth radios (supported versions, vendors, etc.)",
                                         "const": "bluetoothradio"
                                     },
                                     "key": {
@@ -1684,7 +1684,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print motherboard name and other info",
+                                        "description": "Print motherboard name and other information",
                                         "const": "board"
                                     },
                                     "key": {
@@ -1716,7 +1716,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print information of 2nd-stage bootloader (name, firmware, etc)",
+                                        "description": "Print second-stage bootloader information (name, firmware, etc.)",
                                         "const": "bootmgr"
                                     },
                                     "key": {
@@ -1749,20 +1749,20 @@
                                 "properties": {
                                     "type": {
                                         "const": "brightness",
-                                        "description": "Print current brightness level of your monitors"
+                                        "description": "Print the current brightness level of your monitors"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
                                     "ddcciSleep": {
                                         "type": "integer",
-                                        "description": "Set the sleep times (in ms) when sending DDC/CI requests.\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
+                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
                                         "minimum": 0,
                                         "maximum": 400,
                                         "default": 10
                                     },
                                     "compact": {
-                                        "description": "Set if multiple results should be printed in one line",
+                                        "description": "Whether to print multiple results on a single line",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1863,7 +1863,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "chassis",
-                                        "description": "Print chassis type (desktop, laptop, etc)"
+                                        "description": "Print chassis type information (desktop, laptop, etc.)"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1894,7 +1894,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print CPU name, frequency, etc",
+                                        "description": "Print CPU name, frequency, etc.",
                                         "const": "cpu"
                                     },
                                     "temp": {
@@ -1905,7 +1905,7 @@
                                         "type": "string"
                                     },
                                     "showPeCoreCount": {
-                                        "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
+                                        "description": "Whether to detect and display CPU frequencies for different core types (for example, P-cores and E-cores), if supported",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1974,14 +1974,14 @@
                                 "properties": {
                                     "type": {
                                         "const": "cpuusage",
-                                        "description": "Print CPU usage. Costs some time to collect data"
+                                        "description": "Print CPU usage. Collecting data takes some time"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
                                     "separate": {
                                         "type": "boolean",
-                                        "description": "Display CPU usage per CPU logical core, instead of an average result",
+                                        "description": "Show CPU usage for each logical core instead of an average",
                                         "default": false
                                     },
                                     "waitTime": {
@@ -2032,7 +2032,7 @@
                                             },
                                             {
                                                 "const": "background",
-                                                "description": "(whitespaces with background)"
+                                                "description": "Whitespace with background color"
                                             },
                                             {
                                                 "const": "circle",
@@ -2129,33 +2129,33 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Running custom shell scripts",
+                                        "description": "Run a custom shell command",
                                         "const": "command"
                                     },
                                     "shell": {
-                                        "description": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
+                                        "description": "Shell program used to execute the command text\nDefault: `cmd` on Windows, `/bin/sh` on Unix-like systems",
                                         "type": "string"
                                     },
                                     "param": {
-                                        "description": "Set the parameter used when starting the shell\nIf set to an empty string, it will be ignored\nDefault: /c for Windows, -c for *nix",
+                                        "description": "Parameter used when starting the shell\nIf set to an empty string, it is ignored\nDefault: `/c` on Windows, `-c` on Unix-like systems",
                                         "type": "string"
                                     },
                                     "text": {
-                                        "description": "Set the command text to be executed",
+                                        "description": "Command text to execute",
                                         "type": "string"
                                     },
                                     "useStdErr": {
-                                        "description": "Set if stderr should be used instead of stdout for command output",
+                                        "description": "Whether to use stderr instead of stdout for command output",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "parallel": {
-                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
+                                        "description": "Whether to execute the command in parallel with other commands\nThis can improve performance when using multiple commands, but may cause issues with some commands",
                                         "type": "boolean",
                                         "default": true
                                     },
                                     "splitLines": {
-                                        "description": "Set if the command output should be split into multiple lines",
+                                        "description": "Whether to split command output into multiple lines",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2227,7 +2227,7 @@
                                         "const": "custom"
                                     },
                                     "key": {
-                                        "description": "Leave empty not to print the key",
+                                        "description": "Leave empty to hide the key",
                                         "type": "string"
                                     },
                                     "keyColor": {
@@ -2258,7 +2258,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "datetime",
-                                        "description": "Print current date and time"
+                                        "description": "Print the current date and time"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -2292,11 +2292,11 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print resolutions, refresh rates, etc",
+                                        "description": "Print display resolutions, refresh rates, etc.",
                                         "const": "display"
                                     },
                                     "compactType": {
-                                        "description": "Set if all displays should be printed in one line",
+                                        "description": "Whether to print all displays on a single line",
                                         "oneOf": [
                                             {
                                                 "const": null,
@@ -2326,12 +2326,12 @@
                                         "default": null
                                     },
                                     "preciseRefreshRate": {
-                                        "description": "Set if decimal refresh rates should not be rounded into integers when printing",
+                                        "description": "Whether to preserve decimal refresh rates instead of rounding them to integers",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "order": {
-                                        "description": "Set the order should be used when printing",
+                                        "description": "Order to use when printing displays",
                                         "oneOf": [
                                             {
                                                 "const": null,
@@ -2381,7 +2381,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print partitions, space usage, disk type, etc",
+                                        "description": "Print partitions, space usage, file system, etc.",
                                         "const": "disk"
                                     },
                                     "folders": {
@@ -2442,32 +2442,32 @@
                                     },
                                     "showRegular": {
                                         "type": "boolean",
-                                        "description": "Set if regular volume should be printed",
+                                        "description": "Whether to show regular volumes",
                                         "default": true
                                     },
                                     "showExternal": {
                                         "type": "boolean",
-                                        "description": "Set if external volume should be printed",
+                                        "description": "Whether to show external volumes",
                                         "default": true
                                     },
                                     "showHidden": {
                                         "type": "boolean",
-                                        "description": "Set if hidden volumes should be printed",
+                                        "description": "Whether to show hidden volumes",
                                         "default": false
                                     },
                                     "showSubvolumes": {
                                         "type": "boolean",
-                                        "description": "Set if subvolumes should be printed",
+                                        "description": "Whether to show subvolumes",
                                         "default": false
                                     },
                                     "showReadOnly": {
                                         "type": "boolean",
-                                        "description": "Set if read only volumes should be printed",
+                                        "description": "Whether to show read-only volumes",
                                         "default": false
                                     },
                                     "showUnknown": {
                                         "type": "boolean",
-                                        "description": "Set if unknown (unable to detect sizes) volumes should be printed",
+                                        "description": "Whether to show unknown volumes whose sizes cannot be detected",
                                         "default": false
                                     },
                                     "useAvailable": {
@@ -2511,11 +2511,11 @@
                                         "const": "diskio"
                                     },
                                     "namePrefix": {
-                                        "description": "Show disks with given name prefix only",
+                                        "description": "Show only disks whose names start with this prefix",
                                         "type": "string"
                                     },
                                     "detectTotal": {
-                                        "description": "Detect total bytes instead of current rate",
+                                        "description": "Show total bytes instead of the current rate",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2587,7 +2587,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "dns",
-                                        "description": "Print DNS servers"
+                                        "description": "Print configured DNS servers"
                                     },
                                     "showType": {
                                         "oneOf": [
@@ -2605,7 +2605,7 @@
                                             }
                                         ],
                                         "default": "both",
-                                        "description": "Specify the type of DNS servers should be detected"
+                                        "description": "Which DNS server types to show"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2637,7 +2637,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "editor",
-                                        "description": "Print information of the default editor ($VISUAL or $EDITOR)"
+                                        "description": "Print information about the default editor (`$VISUAL` or `$EDITOR`)"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -2750,7 +2750,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print GPU names, graphic memory size, type, etc",
+                                        "description": "Print GPU names, memory sizes, types, etc.",
                                         "const": "gpu"
                                     },
                                     "temp": {
@@ -2762,7 +2762,7 @@
                                         "default": false
                                     },
                                     "detectionMethod": {
-                                        "description": "Force using a specified method to detect GPUs",
+                                        "description": "Force a specific GPU detection method",
                                         "type": "string",
                                         "oneOf": [
                                             {
@@ -2789,7 +2789,7 @@
                                         "default": "<varies-by-platform>"
                                     },
                                     "hideType": {
-                                        "description": "Specify the type of GPUs should not be printed",
+                                        "description": "Hide GPUs of a specific type",
                                         "oneOf": [
                                             {
                                                 "const": null,
@@ -2847,7 +2847,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "host",
-                                        "description": "Print product name of your computer"
+                                        "description": "Print your computer's product name"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2975,7 +2975,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "keyboard",
-                                        "description": "List (connected) keyboards"
+                                        "description": "List connected keyboards"
                                     },
                                     "ignores": {
                                         "type": "array",
@@ -3047,7 +3047,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "List local IP addresses (v4 or v6), MAC addresses, etc",
+                                        "description": "List local IP addresses (IPv4 or IPv6), MAC addresses, etc.",
                                         "const": "localip"
                                     },
                                     "showIpv4": {
@@ -3086,7 +3086,7 @@
                                         "default": false
                                     },
                                     "showSpeed": {
-                                        "description": "Show ethernet rx speed",
+                                        "description": "Show Ethernet RX speed",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -3111,7 +3111,7 @@
                                         "default": true
                                     },
                                     "showAllIps": {
-                                        "description": "Show all IPs bound to the same interface.\nBy default only the firstly detected IP is shown",
+                                        "description": "Show all IPs bound to the same interface\nBy default, only the first detected IP is shown",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -3130,7 +3130,7 @@
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
+                                        "description": "Show only IPs used for the default route\nDoes not work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -3257,7 +3257,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "media",
-                                        "description": "Print song name of currently playing"
+                                        "description": "Print the name of the currently playing song"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3289,7 +3289,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "memory",
-                                        "description": "Print system memory usage info"
+                                        "description": "Print system memory usage information"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -3324,7 +3324,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "mouse",
-                                        "description": "List connected mouses"
+                                        "description": "List connected mice"
                                     },
                                     "ignores": {
                                         "type": "array",
@@ -3365,7 +3365,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "monitor",
-                                        "description": "Alias of Display module (for backwards compatibility, deprecated)"
+                                        "description": "Same as Display module, but with a different default output format"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3400,11 +3400,11 @@
                                         "const": "netio"
                                     },
                                     "namePrefix": {
-                                        "description": "Show IPs with given name prefix only",
+                                        "description": "Show only interfaces whose names start with this prefix",
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
+                                        "description": "Show only interfaces used for the default route\nDoes not work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -3449,7 +3449,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "opencl",
-                                        "description": "Print highest OpenCL version supported by the GPU"
+                                        "description": "Print the highest OpenCL version supported by the GPU"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3480,7 +3480,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print highest OpenGL version supported by the GPU",
+                                        "description": "Print the highest OpenGL version supported by the GPU",
                                         "const": "opengl"
                                     },
                                     "library": {
@@ -3531,7 +3531,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "os",
-                                        "description": "Print OS / or Linux distro name and version"
+                                        "description": "Print the OS or Linux distribution name and version"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3568,7 +3568,7 @@
                                     "disabled": {
                                         "oneOf": [
                                             {
-                                                "description": "List of package managers to be disabled when detecting\nWarning: Some detection methods can be very slow.",
+                                                "description": "Package managers to disable during detection\nWarning: Some detection methods can be very slow.",
                                                 "type": "array",
                                                 "items": {
                                                     "type": "string",
@@ -3700,7 +3700,7 @@
                                         "description": "Print system physical memory devices"
                                     },
                                     "showEmptySlots": {
-                                        "description": "Set if uninstalled memory slots should be printed",
+                                        "description": "Whether to show uninstalled memory slots",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -3734,7 +3734,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "player",
-                                        "description": "Print music player name"
+                                        "description": "Print the music player name that is currently active"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3798,7 +3798,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "processes",
-                                        "description": "Count running processes"
+                                        "description": "Print the number of running processes"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3829,23 +3829,23 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print your public IP address, etc",
+                                        "description": "Print your public IP address and related information",
                                         "const": "publicip"
                                     },
                                     "url": {
-                                        "description": "The URL of public IP detection server to be used. Only HTTP protocol is supported",
+                                        "description": "URL of the public IP detection server to use. Only HTTP is supported",
                                         "type": "string",
                                         "format": "url",
                                         "default": "http://ipinfo.io/ip"
                                     },
                                     "timeout": {
-                                        "description": "Time in milliseconds to wait for the public ip server to respond.\n0 to disable timeout",
+                                        "description": "Time in milliseconds to wait for the public IP server to respond\nSet to 0 to disable the timeout",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
                                     },
                                     "ipv6": {
-                                        "description": "Whether to use IPv6 for public IP detection server",
+                                        "description": "Whether to use IPv6 for the public IP detection server",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -3882,16 +3882,16 @@
                                         "const": "separator"
                                     },
                                     "string": {
-                                        "description": "Set the string to be printed by the separator line",
+                                        "description": "String to print for the separator line",
                                         "type": "string",
                                         "default": "-"
                                     },
                                     "outputColor": {
-                                        "description": "Set the color of the separator line",
+                                        "description": "Color of the separator line",
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "times": {
-                                        "description": "Set the times of separator string to repeat, or 0 to auto-detect",
+                                        "description": "Number of times to repeat the separator string, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
@@ -3908,7 +3908,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "shell",
-                                        "description": "Print current shell name and version"
+                                        "description": "Print the current shell name and version"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3939,11 +3939,11 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print sound devices, volume, etc",
+                                        "description": "Print sound devices, volume levels, etc.",
                                         "const": "sound"
                                     },
                                     "soundType": {
-                                        "description": "Set what type of sound devices should be printed",
+                                        "description": "Which sound devices to print",
                                         "type": "string",
                                         "oneOf": [
                                             {
@@ -3998,7 +3998,7 @@
                                     },
                                     "separate": {
                                         "type": "boolean",
-                                        "description": "Set if detailed swap devices should be reported on separate lines instead of a summary",
+                                        "description": "Whether to report individual swap devices on separate lines instead of showing a summary",
                                         "default": false
                                     },
                                     "percent": {
@@ -4034,7 +4034,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "terminal",
-                                        "description": "Print current terminal name and version"
+                                        "description": "Print the current terminal name and version"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4066,7 +4066,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "terminalfont",
-                                        "description": "Print font name and size used by current terminal"
+                                        "description": "Print the font name and size used by the current terminal"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4098,7 +4098,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "terminalsize",
-                                        "description": "Print current terminal size"
+                                        "description": "Print the current terminal size"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4130,7 +4130,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "terminaltheme",
-                                        "description": "Print current terminal theme (foreground and background colors)"
+                                        "description": "Print the current terminal theme (foreground and background colors)"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4162,7 +4162,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "theme",
-                                        "description": "Print current theme of desktop environment"
+                                        "description": "Print the current desktop environment theme"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4193,29 +4193,29 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Print title, which contains your user name, hostname",
+                                        "description": "Print the title, including your username and hostname",
                                         "const": "title"
                                     },
                                     "fqdn": {
                                         "type": "boolean",
-                                        "description": "Set if the title should use fully qualified domain name",
+                                        "description": "Whether to use the fully qualified domain name in the title",
                                         "default": false
                                     },
                                     "color": {
-                                        "description": "Set colors of the different part of title",
+                                        "description": "Colors for the different parts of the title",
                                         "type": "object",
                                         "additionalProperties": false,
                                         "properties": {
                                             "user": {
-                                                "description": "Set color of the user name (left part)",
+                                                "description": "Color of the username (left part)",
                                                 "$ref": "#/$defs/colors"
                                             },
                                             "at": {
-                                                "description": "Set color of the @ symbol (middle part)",
+                                                "description": "Color of the @ symbol (middle part)",
                                                 "$ref": "#/$defs/colors"
                                             },
                                             "host": {
-                                                "description": "Set color of the host name (right part)",
+                                                "description": "Color of the hostname (right part)",
                                                 "$ref": "#/$defs/colors"
                                             }
                                         }
@@ -4250,7 +4250,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "tpm",
-                                        "description": "Print info of Trusted Platform Module (TPM) Security Device"
+                                        "description": "Print information about the Trusted Platform Module (TPM) security device"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4282,7 +4282,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "users",
-                                        "description": "Print users currently logged in"
+                                        "description": "Print users who are currently logged in"
                                     },
                                     "compact": {
                                         "type": "boolean",
@@ -4324,7 +4324,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "uptime",
-                                        "description": "Print how long system has been running"
+                                        "description": "Print how long the system has been running"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4356,7 +4356,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "version",
-                                        "description": "Print Fastfetch version"
+                                        "description": "Print the Fastfetch version and build information"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4388,7 +4388,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "vulkan",
-                                        "description": "Print highest Vulkan version supported by the GPU"
+                                        "description": "Print the highest Vulkan version supported by the GPU"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4420,7 +4420,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "wallpaper",
-                                        "description": "Print image file path of current wallpaper"
+                                        "description": "Print the file path of the current wallpaper"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4455,7 +4455,7 @@
                                         "const": "weather"
                                     },
                                     "location": {
-                                        "description": "The location to display\nMust be URI encoded (e.g., a whitespace must be encoded as \"+\")",
+                                        "description": "Location to display\nMust be URI-encoded (for example, spaces must be encoded as `+`)",
                                         "type": "string"
                                     },
                                     "timeout": {
@@ -4465,7 +4465,7 @@
                                         "default": 0
                                     },
                                     "outputFormat": {
-                                        "description": "The output weather format to be used (must be URI encoded)",
+                                        "description": "Weather output format to use (must be URI-encoded)",
                                         "type": "string",
                                         "default": "%t+-+%C+(%l)"
                                     },
@@ -4531,10 +4531,10 @@
                                 "properties": {
                                     "type": {
                                         "const": "wm",
-                                        "description": "Print window manager name and version"
+                                        "description": "Print the window manager name and version"
                                     },
                                     "detectPlugin": {
-                                        "description": "Set if window manager plugin should be detected on supported platforms",
+                                        "description": "Whether to detect the window manager plugin on supported platforms",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -4568,7 +4568,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "wmtheme",
-                                        "description": "Print current theme of window manager"
+                                        "description": "Print the current window manager theme"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

@@ -177,7 +177,7 @@ void ffDestroyTitleOptions(FFTitleOptions* options) {
 
 FFModuleBaseInfo ffTitleModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
-    .description = "Print title, which contains your user name, hostname",
+    .description = "Print the title, including your username and hostname",
     .initOptions = (void*) ffInitTitleOptions,
     .destroyOptions = (void*) ffDestroyTitleOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,

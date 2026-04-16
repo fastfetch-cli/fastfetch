@@ -88,7 +88,7 @@ void ffDestroyThemeOptions(FFThemeOptions* options) {
 
 FFModuleBaseInfo ffThemeModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
-    .description = "Print current theme of desktop environment",
+    .description = "Print the current desktop environment theme",
     .initOptions = (void*) ffInitThemeOptions,
     .destroyOptions = (void*) ffDestroyThemeOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,

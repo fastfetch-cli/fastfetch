@@ -190,7 +190,7 @@ void ffDestroyGamepadOptions(FFGamepadOptions* options) {
 
 FFModuleBaseInfo ffGamepadModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
-    .description = "List (connected) gamepads",
+    .description = "List connected gamepads",
     .initOptions = (void*) ffInitGamepadOptions,
     .destroyOptions = (void*) ffDestroyGamepadOptions,
     .parseJsonObject = (void*) ffParseGamepadJsonObject,

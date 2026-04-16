@@ -133,7 +133,7 @@ void ffDestroyVulkanOptions(FFVulkanOptions* options) {
 
 FFModuleBaseInfo ffVulkanModuleInfo = {
     .name = FF_VULKAN_MODULE_NAME,
-    .description = "Print highest Vulkan version supported by the GPU",
+    .description = "Print the highest Vulkan version supported by the GPU",
     .initOptions = (void*) ffInitVulkanOptions,
     .destroyOptions = (void*) ffDestroyVulkanOptions,
     .parseJsonObject = (void*) ffParseVulkanJsonObject,

@@ -236,7 +236,7 @@ void ffDestroyCPUOptions(FFCPUOptions* options) {
 
 FFModuleBaseInfo ffCPUModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
-    .description = "Print CPU name, frequency, etc",
+    .description = "Print CPU name, frequency, etc.",
     .initOptions = (void*) ffInitCPUOptions,
     .destroyOptions = (void*) ffDestroyCPUOptions,
     .parseJsonObject = (void*) ffParseCPUJsonObject,

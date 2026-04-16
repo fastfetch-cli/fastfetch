@@ -189,7 +189,7 @@ void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options) {
 
 FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
-    .description = "List bluetooth radios width supported version and vendor",
+    .description = "List Bluetooth radios (supported versions, vendors, etc.)",
     .initOptions = (void*) ffInitBluetoothRadioOptions,
     .destroyOptions = (void*) ffDestroyBluetoothRadioOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,

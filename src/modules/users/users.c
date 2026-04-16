@@ -181,7 +181,7 @@ void ffDestroyUsersOptions(FFUsersOptions* options) {
 
 FFModuleBaseInfo ffUsersModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
-    .description = "Print users currently logged in",
+    .description = "Print users who are currently logged in",
     .initOptions = (void*) ffInitUsersOptions,
     .destroyOptions = (void*) ffDestroyUsersOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,

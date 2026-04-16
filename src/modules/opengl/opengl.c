@@ -128,7 +128,7 @@ void ffDestroyOpenGLOptions(FFOpenGLOptions* options) {
 
 FFModuleBaseInfo ffOpenGLModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
-    .description = "Print highest OpenGL version supported by the GPU",
+    .description = "Print the highest OpenGL version supported by the GPU",
     .initOptions = (void*) ffInitOpenGLOptions,
     .destroyOptions = (void*) ffDestroyOpenGLOptions,
     .parseJsonObject = (void*) ffParseOpenGLJsonObject,

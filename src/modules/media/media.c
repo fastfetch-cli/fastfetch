@@ -182,7 +182,7 @@ void ffDestroyMediaOptions(FFMediaOptions* options) {
 
 FFModuleBaseInfo ffMediaModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
-    .description = "Print playing song name",
+    .description = "Print the name of the currently playing song",
     .initOptions = (void*) ffInitMediaOptions,
     .destroyOptions = (void*) ffDestroyMediaOptions,
     .parseJsonObject = (void*) ffParseMediaJsonObject,

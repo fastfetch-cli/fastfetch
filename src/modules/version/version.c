@@ -95,7 +95,7 @@ void ffDestroyVersionOptions(FFVersionOptions* options) {
 
 FFModuleBaseInfo ffVersionModuleInfo = {
     .name = FF_VERSION_MODULE_NAME,
-    .description = "Print Fastfetch version",
+    .description = "Print the Fastfetch version and build information",
     .initOptions = (void*) ffInitVersionOptions,
     .destroyOptions = (void*) ffDestroyVersionOptions,
     .parseJsonObject = (void*) ffParseVersionJsonObject,

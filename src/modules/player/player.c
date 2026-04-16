@@ -110,7 +110,7 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options) {
 
 FFModuleBaseInfo ffPlayerModuleInfo = {
     .name = FF_PLAYER_MODULE_NAME,
-    .description = "Print music player name",
+    .description = "Print the music player name that is currently active",
     .initOptions = (void*) ffInitPlayerOptions,
     .destroyOptions = (void*) ffDestroyPlayerOptions,
     .parseJsonObject = (void*) ffParsePlayerJsonObject,

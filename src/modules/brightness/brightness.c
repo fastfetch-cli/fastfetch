@@ -183,7 +183,7 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options) {
 
 FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
-    .description = "Print current brightness level of your monitors",
+    .description = "Print the current brightness level of your monitors",
     .initOptions = (void*) ffInitBrightnessOptions,
     .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,

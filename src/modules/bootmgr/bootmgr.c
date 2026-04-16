@@ -104,7 +104,7 @@ void ffDestroyBootmgrOptions(FFBootmgrOptions* options) {
 
 FFModuleBaseInfo ffBootmgrModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
-    .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
+    .description = "Print second-stage bootloader information (name, firmware, etc.)",
     .initOptions = (void*) ffInitBootmgrOptions,
     .destroyOptions = (void*) ffDestroyBootmgrOptions,
     .parseJsonObject = (void*) ffParseBootmgrJsonObject,

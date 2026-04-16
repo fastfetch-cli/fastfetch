@@ -173,7 +173,7 @@ void ffDestroyOSOptions(FFOSOptions* options) {
 
 FFModuleBaseInfo ffOSModuleInfo = {
     .name = FF_OS_MODULE_NAME,
-    .description = "Print operating system name and version",
+    .description = "Print the OS or Linux distribution name and version",
     .initOptions = (void*) ffInitOSOptions,
     .destroyOptions = (void*) ffDestroyOSOptions,
     .parseJsonObject = (void*) ffParseOSJsonObject,

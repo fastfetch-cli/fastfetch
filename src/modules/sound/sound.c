@@ -200,7 +200,7 @@ void ffDestroySoundOptions(FFSoundOptions* options) {
 
 FFModuleBaseInfo ffSoundModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
-    .description = "Print sound devices, volume, etc",
+    .description = "Print sound devices, volume levels, etc",
     .initOptions = (void*) ffInitSoundOptions,
     .destroyOptions = (void*) ffDestroySoundOptions,
     .parseJsonObject = (void*) ffParseSoundJsonObject,

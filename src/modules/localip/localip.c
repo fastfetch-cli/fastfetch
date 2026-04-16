@@ -423,7 +423,7 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options) {
 
 FFModuleBaseInfo ffLocalIPModuleInfo = {
     .name = FF_LOCALIP_MODULE_NAME,
-    .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
+    .description = "List local IP addresses (IPv4 or IPv6), MAC addresses, etc",
     .initOptions = (void*) ffInitLocalIpOptions,
     .destroyOptions = (void*) ffDestroyLocalIpOptions,
     .parseJsonObject = (void*) ffParseLocalIpJsonObject,

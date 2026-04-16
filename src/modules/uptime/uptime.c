@@ -84,7 +84,7 @@ void ffDestroyUptimeOptions(FFUptimeOptions* options) {
 
 FFModuleBaseInfo ffUptimeModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
-    .description = "Print how long system has been running",
+    .description = "Print how long the system has been running",
     .initOptions = (void*) ffInitUptimeOptions,
     .destroyOptions = (void*) ffDestroyUptimeOptions,
     .parseJsonObject = (void*) ffParseUptimeJsonObject,

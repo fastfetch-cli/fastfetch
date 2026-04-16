@@ -153,7 +153,7 @@ void ffDestroyMouseOptions(FFMouseOptions* options) {
 
 FFModuleBaseInfo ffMouseModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
-    .description = "List connected mouses",
+    .description = "List connected mice",
     .initOptions = (void*) ffInitMouseOptions,
     .destroyOptions = (void*) ffDestroyMouseOptions,
     .parseJsonObject = (void*) ffParseMouseJsonObject,

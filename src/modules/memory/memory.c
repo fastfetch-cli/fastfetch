@@ -119,7 +119,7 @@ void ffDestroyMemoryOptions(FFMemoryOptions* options) {
 
 FFModuleBaseInfo ffMemoryModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
-    .description = "Print system memory usage info",
+    .description = "Print system memory usage information",
     .initOptions = (void*) ffInitMemoryOptions,
     .destroyOptions = (void*) ffDestroyMemoryOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,

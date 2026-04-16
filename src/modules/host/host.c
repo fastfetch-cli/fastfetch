@@ -137,7 +137,7 @@ void ffDestroyHostOptions(FFHostOptions* options) {
 
 FFModuleBaseInfo ffHostModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
-    .description = "Print product name of your computer",
+    .description = "Print your computer's product name",
     .initOptions = (void*) ffInitHostOptions,
     .destroyOptions = (void*) ffDestroyHostOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,

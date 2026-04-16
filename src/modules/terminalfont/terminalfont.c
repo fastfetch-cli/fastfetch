@@ -106,7 +106,7 @@ void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options) {
 
 FFModuleBaseInfo ffTerminalFontModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
-    .description = "Print font name and size used by current terminal",
+    .description = "Print the font name and size used by the current terminal",
     .initOptions = (void*) ffInitTerminalFontOptions,
     .destroyOptions = (void*) ffDestroyTerminalFontOptions,
     .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
