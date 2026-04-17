@@ -167,7 +167,10 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version) {
 }
 
 static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version) {
-    if (ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--help", NULL }) != NULL) {
+    const char* error = ffStrbufEndsWithS(exe, "busybox")
+        ? ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "ash", "--help", NULL })
+        : ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--help", NULL });
+    if (error != NULL) {
         return false;
     }
 
@@ -268,7 +271,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
     if (ffStrEqualsIgnCase(exeName, "elvish")) {
         return getExeVersionRaw(exe, version);
     }
-    if (ffStrEqualsIgnCase(exeName, "ash")) {
+    if (ffStrEqualsIgnCase(exeName, "ash") || ffStrEqualsIgnCase(exeName, "busybox")) {
         return getShellVersionAsh(exe, version);
     }
     if (ffStrEqualsIgnCase(exeName, "xonsh")) {
