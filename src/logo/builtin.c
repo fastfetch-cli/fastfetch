@@ -4848,7 +4848,19 @@ static const FFlogo T[] = {
             FF_COLOR_FG_RED,
         },
     },
+
+        // PhetaOS
+{
+    .names = { "ThetaLinux", "theta", "Theta" },
+    .lines = FASTFETCH_DATATEXT_LOGO_PHETA,
+    .colors = {
+        FF_COLOR_FG_LIGHT_BLACK,
+        FF_COLOR_FG_WHITE,
+    },
+},
+
     // Twister
+
     {
         .names = { "Twister" },
         .lines = FASTFETCH_DATATEXT_LOGO_TWISTER,
