@@ -644,6 +644,12 @@ void ffLogoPrint(void) {
         if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt")) {
             const FFTerminalResult* terminal = ffDetectTerminal();
 
+            bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
+
+            if (supportsIterm2 && logoPrintImageIfExists(FF_LOGO_TYPE_IMAGE_ITERM, false)) {
+                return;
+            }
+
             // Terminal emulators that support kitty graphics protocol.
             bool supportsKitty =
                 ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
