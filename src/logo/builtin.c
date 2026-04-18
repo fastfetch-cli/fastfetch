@@ -44,6 +44,16 @@ static const FFlogo A[] = {
         .names = { "AerynOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_AERYNOS,
         .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
+    // AerynOS_old
+    {
+        .names = { "AerynOS_old" },
+        .lines = FASTFETCH_DATATEXT_LOGO_AERYNOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
             FF_COLOR_FG_DEFAULT,
             FF_COLOR_FG_MAGENTA,
         },
