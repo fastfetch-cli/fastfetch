@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: get latest release version
         id: get_version_release
-        uses: pozetroninc/github-action-get-latest-release@master
+        uses: pozetroninc/github-action-get-latest-release@53d33d213ee7
         with:
           repository: ${{ github.repository }}
 

@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: setup alpine linux
-        uses: jirutka/setup-alpine@master
+        uses: jirutka/setup-alpine@ae3b3ddba350
 
       - name: install dependencies
         run: |
