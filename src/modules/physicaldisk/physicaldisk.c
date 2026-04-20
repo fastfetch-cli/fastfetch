@@ -178,6 +178,9 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 
     ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
+
+    yyjson_mut_obj_add_bool(doc, module, "hideVirtual", !!(options->hideType & FF_PHYSICALDISK_TYPE_VIRTUAL));
+    yyjson_mut_obj_add_bool(doc, module, "hideUnused", !!(options->hideType & FF_PHYSICALDISK_TYPE_UNUSED));
 }
 
 bool ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {

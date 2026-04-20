@@ -150,6 +150,8 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 
     yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
+
+    yyjson_mut_obj_add_strbuf(doc, module, "tempSensor", &options->tempSensor);
 }
 
 bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {

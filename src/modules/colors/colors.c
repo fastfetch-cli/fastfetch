@@ -264,6 +264,18 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
             yyjson_mut_arr_add_uint(doc, range, options->block.range[i]);
         }
     }
+
+    switch (options->brightness) {
+        case FF_COLORS_BRIGHTNESS_NORMAL:
+            yyjson_mut_obj_add_str(doc, module, "brightness", "normal");
+            break;
+        case FF_COLORS_BRIGHTNESS_LIGHT:
+            yyjson_mut_obj_add_str(doc, module, "brightness", "light");
+            break;
+        default:
+            yyjson_mut_obj_add_str(doc, module, "brightness", "default");
+            break;
+    }
 }
 
 void ffInitColorsOptions(FFColorsOptions* options) {
