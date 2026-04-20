@@ -140,9 +140,8 @@ static void getUserName(FFPlatform* platform) {
     }
 
     NTSYSAPI NTSTATUS NTAPI LsaGetUserName(
-        _Outptr_ PLSA_UNICODE_STRING* UserName,
-        _Outptr_opt_ PLSA_UNICODE_STRING* DomainName
-    );
+        _Outptr_ PLSA_UNICODE_STRING * UserName,
+        _Outptr_opt_ PLSA_UNICODE_STRING * DomainName);
     PLSA_UNICODE_STRING userName = NULL;
     if (NT_SUCCESS(LsaGetUserName(&userName, NULL))) {
         ffStrbufSetNWS(&platform->userName, userName->Length / sizeof(wchar_t), userName->Buffer);

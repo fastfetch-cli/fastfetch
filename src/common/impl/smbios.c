@@ -506,24 +506,25 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
     return false;
         #elif defined(__linux__)
     FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
-    if (ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", buffer))
+    if (ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", buffer)) {
         return true;
+    }
 
     FF_DEBUG("Failed to read /sys/firmware/dmi/tables/DMI, falling back to memory-mapped implementation");
         #endif
 
     {
-            #if !defined(__sun) && !defined(__NetBSD__)
+        #if !defined(__sun) && !defined(__NetBSD__)
         FF_DEBUG("Using memory-mapped implementation");
         FF_STRBUF_AUTO_DESTROY strEntryAddress = ffStrbufCreate();
-                #ifdef __FreeBSD__
+            #ifdef __FreeBSD__
         FF_DEBUG("Using FreeBSD kenv implementation");
         if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress)) {
             FF_DEBUG("Failed to get SMBIOS address from FreeBSD kenv");
             return false; // non-UEFI systems
         }
         FF_DEBUG("Got SMBIOS address from kenv: %s", strEntryAddress.chars);
-                #elif defined(__linux__)
+            #elif defined(__linux__)
         {
             FF_DEBUG("Using Linux EFI systab implementation");
             FF_STRBUF_AUTO_DESTROY systab = ffStrbufCreate();
@@ -538,7 +539,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             }
             FF_DEBUG("Found SMBIOS entry in systab: %s", strEntryAddress.chars);
         }
-                #endif
+            #endif
 
         off_t entryAddress = (off_t) strtol(strEntryAddress.chars, NULL, 16);
         if (entryAddress == 0) {
@@ -562,14 +563,14 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point data");
-            #else
+        #else
         // Sun or NetBSD
         FF_DEBUG("Using %s specific implementation",
-                #ifdef __NetBSD__
+            #ifdef __NetBSD__
             "NetBSD"
-                #else
+            #else
             "SunOS"
-                #endif
+            #endif
         );
 
         FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY | O_CLOEXEC);
@@ -580,7 +581,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
         FF_DEBUG("/dev/smbios opened successfully with fd=%d", fd);
 
         FFSmbiosEntryPoint entryPoint;
-                #ifdef __NetBSD__
+            #ifdef __NetBSD__
         off_t addr = (off_t) ffSysctlGetInt64("machdep.smbios", 0);
         if (addr == 0) {
             FF_DEBUG("Failed to get SMBIOS address from sysctl");
@@ -593,15 +594,15 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point");
-                #else
+            #else
         FF_DEBUG("Reading SMBIOS entry point from /dev/smbios");
         if (ffReadFDData(fd, sizeof(entryPoint), &entryPoint) < 1) {
             FF_DEBUG("Failed to read SMBIOS entry point: %s", strerror(errno));
             return false;
         }
         FF_DEBUG("Successfully read SMBIOS entry point");
-                #endif
             #endif
+        #endif
 
         uint32_t tableLength = 0;
         off_t tableAddress = 0;

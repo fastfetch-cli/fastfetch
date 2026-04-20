@@ -20,8 +20,9 @@ typedef struct {
 
 static inline void wrapMunmap(FFMemoryMapping* mapping) {
     assert(mapping);
-    if (mapping->data == NULL || mapping->data == MAP_FAILED)
+    if (mapping->data == NULL || mapping->data == MAP_FAILED) {
         return;
+    }
     munmap((void*) mapping->data, mapping->length);
 }
 
