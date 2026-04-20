@@ -199,6 +199,11 @@ static bool loadPciidsInc(uint8_t subclass, uint16_t vendor, uint16_t device, FF
 #endif
 
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu) {
+    if (vendor == 0x1234 && device == 0x1111 && subclass == 0) { // Not exist in pci.ids
+        ffStrbufSetStatic(&gpu->name, "Virtual Video Controller");
+        return;
+    }
+
 #if FF_HAVE_EMBEDDED_PCIIDS
     bool ok = loadPciidsInc(subclass, vendor, device, gpu);
     if (ok) {

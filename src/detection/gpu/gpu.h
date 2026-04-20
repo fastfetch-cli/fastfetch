@@ -27,6 +27,7 @@ extern const char* FF_GPU_VENDOR_NAME_LOONGSON;
 extern const char* FF_GPU_VENDOR_NAME_JINGJIA_MICRO;
 extern const char* FF_GPU_VENDOR_NAME_HUAWEI;
 extern const char* FF_GPU_VENDOR_NAME_ZHAOXIN;
+extern const char* FF_GPU_VENDOR_NAME_QEMU;
 
 typedef struct FFGPUMemory {
     uint64_t total;

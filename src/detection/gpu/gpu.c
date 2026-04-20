@@ -22,6 +22,7 @@ const char* FF_GPU_VENDOR_NAME_LOONGSON = "Loongson";
 const char* FF_GPU_VENDOR_NAME_JINGJIA_MICRO = "Jingjia Micro";
 const char* FF_GPU_VENDOR_NAME_HUAWEI = "Huawei";
 const char* FF_GPU_VENDOR_NAME_ZHAOXIN = "Zhaoxin";
+const char* FF_GPU_VENDOR_NAME_QEMU = "QEMU";
 
 const char* ffGPUGetVendorString(unsigned vendorId) {
     // https://devicehunt.com/all-pci-vendors
@@ -69,6 +70,8 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
             return FF_GPU_VENDOR_NAME_HUAWEI;
         case 0x1d17:
             return FF_GPU_VENDOR_NAME_ZHAOXIN;
+        case 0x1234: // https://admin.pci-ids.ucw.cz/read/PC/1234
+            return FF_GPU_VENDOR_NAME_QEMU;
         default:
             return NULL;
     }
