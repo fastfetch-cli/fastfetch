@@ -14,6 +14,7 @@ Features:
 * Improves PhysicalMemory reliability on OpenBSD and FreeBSD, including support for x86 UEFI systems on OpenBSD and non-UEFI systems on FreeBSD (PhysicalMemory, OpenBSD / FreeBSD)
 * Adds `display.common.(ndigits|spaceBeforeUnit)` options to configure common formatting for duration, percent, size, frequency and temperature values (#2234)
 * Slightly improves performance by skipping probes for ignored device types (Sound)
+* Adds support for AppImage package detection (#2179, Packages, Linux)
 
 Bugfixes:
 * Fixes a potential crash on certain Intel GPU models when using `--gpu-driver-specific` (#2259, GPU, Linux)

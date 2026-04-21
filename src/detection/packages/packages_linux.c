@@ -118,6 +118,25 @@ static uint32_t countFilesRecursive(FFstrbuf* baseDir, const char* dirname, cons
     return sum;
 }
 
+static uint32_t getNumElementsBySuffix(FFstrbuf* baseDir, const char* dirname, const char* suffix) {
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    if (dirp == NULL) {
+        return 0;
+    }
+
+    uint32_t count = 0;
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] != '.' && ffStrEndsWithIgnCase(entry->d_name, suffix)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 static uint32_t getXBPSImpl(FFstrbuf* baseDir) {
     DIR* dir = opendir(baseDir->chars);
     if (dir == NULL) {
@@ -620,5 +639,10 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
 
     if (!(options->disabled & FF_PACKAGES_FLAG_SOAR_BIT)) {
         result->soar += getSQLite3Int(&baseDir, ".local/share/soar/db/soar.db", "SELECT COUNT(DISTINCT pkg_id || pkg_name) FROM packages WHERE is_installed = true", "soar");
+    }
+
+    if (!(options->disabled & FF_PACKAGES_FLAG_APPIMAGE_BIT)) {
+        result->appimage += getNumElementsBySuffix(&baseDir, "/AppImages", ".appimage");
+        result->appimage += getNumElementsBySuffix(&baseDir, "/Applications", ".appimage");
     }
 }
