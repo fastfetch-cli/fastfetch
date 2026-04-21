@@ -1,5 +1,9 @@
 # 2.62.0
 
+Changes:
+* Sort package managers alphabetically in output and format arguments (Packages)
+    * The positional order of format arguments has changed — this is a breaking change for users relying on numeric placeholders. Named arguments are always preferred; e.g., use `{pacman}` (refer to `fastfetch -h packages-format`) instead of `{1}` to keep your config future-proof.
+
 Features:
 * Reports `Unused` instead of `Disabled` for zero-size swap on macOS (#2248, Swap, macOS)
 * Improves the robustness of default route detection on Linux (#2252, LocalIP, Linux)

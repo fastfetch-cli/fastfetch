@@ -18,10 +18,6 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
         result->all += ((uint32_t*) result)[i];
     }
 
-    if (result->all == 0) {
-        return "No packages from known package managers found";
-    }
-
     return NULL;
 }
 
