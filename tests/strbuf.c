@@ -4,8 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdnoreturn.h>
 
-__attribute__((__noreturn__)) static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo) {
+noreturn static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo) {
     fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stderr);
     fprintf(stderr, "[%d] %s, strbuf:", lineNo, expression);
     ffStrbufWriteTo(strbuf, stderr);

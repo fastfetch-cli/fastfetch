@@ -5,8 +5,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdnoreturn.h>
 
-__attribute__((__noreturn__)) static void testFailed(const FFlist* list, const char* expression, int lineNo) {
+noreturn static void testFailed(const FFlist* list, const char* expression, int lineNo) {
     fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stderr);
     fprintf(stderr, "[%d] %s, list:", lineNo, expression);
     for (uint32_t i = 0; i < list->length; ++i) {

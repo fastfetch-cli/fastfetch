@@ -1,6 +1,7 @@
 #pragma once
 
-#ifdef _MSC_VER
+#ifndef __has_attribute
+    #error Unsupported compiler
     #define __attribute__(x)
 #endif
 

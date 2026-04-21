@@ -131,7 +131,7 @@ static inline void ffListReserve(FFlist* list, uint32_t elementSize, uint32_t ne
     ({                                                                                                                                 \
         typedef __typeof__(*(pCompElement)) compElementType;                                                                           \
         typedef bool compFuncType(const compElementType*, const compElementType*);                                                     \
-        static_assert(__builtin_types_compatible_p(__typeof__(compFunc), compFuncType), "In compatible callback function");            \
+        static_assert(__builtin_types_compatible_p(__typeof__(compFunc), compFuncType), "Incompatible callback function");             \
         ffListContains(&(listVar), (uint32_t) sizeof(*(pCompElement)), (pCompElement), (bool (*)(const void*, const void*)) compFunc); \
     })
 

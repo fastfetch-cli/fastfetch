@@ -13,7 +13,7 @@ const char* ffDebugWin32Error(DWORD errorCode) {
         (DWORD) errorCode,
         0,
         bufferW,
-        sizeof(buffer),
+        ARRAY_SIZE(bufferW),
         NULL);
 
     if (len == 0) {
