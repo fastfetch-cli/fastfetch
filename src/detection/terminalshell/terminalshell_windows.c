@@ -160,18 +160,22 @@ static bool getTerminalFromEnv(FFTerminalResult* result) {
 static bool detectDefaultTerminal(FFTerminalResult* result) {
     wchar_t regPath[128] = L"SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\";
     wchar_t* uuid = regPath + strlen("SOFTWARE\\Classes\\PackagedCom\\ClassIndex\\");
-    DWORD bufSize = 80;
-    if (RegGetValueW(HKEY_CURRENT_USER, L"Console\\%%Startup", L"DelegationTerminal", RRF_RT_REG_SZ, NULL, uuid, &bufSize) == ERROR_SUCCESS) {
+    FF_AUTO_CLOSE_FD HANDLE hkcu = NULL;
+    if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Console\\%%Startup", &hkcu, NULL) &&
+        ffRegReadData(hkcu, L"DelegationTerminal", &(FFArgBuffer) {
+            .data = uuid,
+            .length = (uint32_t) (sizeof(regPath) - (size_t) (uuid - regPath) * sizeof(wchar_t)),
+        }, NULL)) {
         if (wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0 || // Let Windows decide
             wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)   // Conhost
         {
             goto conhost;
         }
 
-        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL)) {
+        FF_AUTO_CLOSE_FD HANDLE hklm = NULL;
+        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hklm, NULL)) {
             FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-            if (ffRegGetSubKey(hKey, 0, &path, NULL)) {
+            if (ffRegGetSubKey(hklm, 0, &path, NULL)) {
                 if (ffStrbufStartsWithS(&path, "Microsoft.WindowsTerminal")) {
                     ffStrbufSetS(&result->processName, "WindowsTerminal.exe");
                     ffStrbufSetS(&result->prettyName, "WindowsTerminal");
