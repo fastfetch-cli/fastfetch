@@ -8,10 +8,10 @@
 #import <CoreServices/CoreServices.h>
 
 // https://github.com/andrewwiik/iOS-Blocks/blob/master/Widgets/Music/MediaRemote.h
-extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^callback)(_Nullable CFDictionaryRef info)) __attribute__((weak_import));
-extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing)) __attribute__((weak_import));
-extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID)) __attribute__((weak_import));
-extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name)) __attribute__((weak_import));
+extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^callback)(_Nullable CFDictionaryRef info)) FF_A_WEAK_IMPORT;
+extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing)) FF_A_WEAK_IMPORT;
+extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID)) FF_A_WEAK_IMPORT;
+extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name)) FF_A_WEAK_IMPORT;
 
 static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover)
 {

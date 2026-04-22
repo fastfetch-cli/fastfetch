@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.61.0
+    VERSION 2.62.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -119,7 +119,7 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS AM APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
+set(PACKAGE_MANAGERS AM APPIMAGE APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -401,7 +401,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/FFstrbuf.c
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
-    src/common/impl/smbiosHelper.c
+    src/common/impl/smbios.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -561,7 +561,7 @@ if(LINUX)
         src/detection/gpu/gpu_linux.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_wsl.c
+        src/detection/gpu/gpu_windows.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
@@ -793,7 +793,7 @@ elseif(NetBSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_nbsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nbsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -860,7 +860,7 @@ elseif(OpenBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
-        src/common/impl/smbiosHelper.c
+        src/common/impl/smbios.c
         src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
@@ -877,7 +877,7 @@ elseif(OpenBSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_obsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -1767,12 +1767,14 @@ elseif(OpenBSD)
         PRIVATE "m"
         PRIVATE "kvm"
         PRIVATE "sndio"
+        PRIVATE "util"
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
         PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
+        PRIVATE "util"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch

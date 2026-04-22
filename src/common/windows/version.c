@@ -5,53 +5,46 @@
 
 #include <windows.h>
 
-bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrbuf* version)
-{
+bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrbuf* version) {
     FF_DEBUG("ffGetFileVersion: enter filePath=%ls stringName=%ls", filePath, stringName);
 
     DWORD handle;
     DWORD size = GetFileVersionInfoSizeW(filePath, &handle);
-    if (size == 0)
-    {
+    if (size == 0) {
         DWORD err = GetLastError();
         FF_DEBUG("GetFileVersionInfoSizeW failed: err=%lu (%s)",
-            (unsigned long) err, ffDebugWin32Error(err));
+            (unsigned long) err,
+            ffDebugWin32Error(err));
         return false;
     }
 
     FF_DEBUG("GetFileVersionInfoSizeW ok: size=%lu handle=%lu",
-        (unsigned long) size, (unsigned long) handle);
+        (unsigned long) size,
+        (unsigned long) handle);
 
     FF_AUTO_FREE void* versionData = malloc(size);
-    if (!versionData)
-    {
+    if (!versionData) {
         FF_DEBUG("malloc failed: size=%lu", (unsigned long) size);
         return false;
     }
 
-    if (!GetFileVersionInfoW(filePath, handle, size, versionData))
-    {
+    if (!GetFileVersionInfoW(filePath, handle, size, versionData)) {
         DWORD err = GetLastError();
         FF_DEBUG("GetFileVersionInfoW failed: err=%lu (%s)",
-            (unsigned long) err, ffDebugWin32Error(err));
+            (unsigned long) err,
+            ffDebugWin32Error(err));
         return false;
     }
 
     FF_DEBUG("GetFileVersionInfoW ok");
 
-    if (!stringName)
-    {
+    if (!stringName) {
         VS_FIXEDFILEINFO* verInfo;
         UINT len;
         if (VerQueryValueW(versionData, L"\\", (void**) &verInfo, &len) &&
             len &&
-            verInfo->dwSignature == 0xFEEF04BD)
-        {
-            ffStrbufSetF(version, "%u.%u.%u.%u",
-                (unsigned) ((verInfo->dwProductVersionMS >> 16) & 0xffff),
-                (unsigned) ((verInfo->dwProductVersionMS >> 0) & 0xffff),
-                (unsigned) ((verInfo->dwProductVersionLS >> 16) & 0xffff),
-                (unsigned) ((verInfo->dwProductVersionLS >> 0) & 0xffff));
+            verInfo->dwSignature == 0xFEEF04BD) {
+            ffStrbufSetF(version, "%u.%u.%u.%u", (unsigned) ((verInfo->dwProductVersionMS >> 16) & 0xffff), (unsigned) ((verInfo->dwProductVersionMS >> 0) & 0xffff), (unsigned) ((verInfo->dwProductVersionLS >> 16) & 0xffff), (unsigned) ((verInfo->dwProductVersionLS >> 0) & 0xffff));
             FF_DEBUG("fixed version resolved: %s", version->chars);
             return true;
         }
@@ -60,30 +53,28 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
         return false;
     }
 
-    struct { WORD language; WORD codePage; }* translations;
+    struct {
+        WORD language;
+        WORD codePage;
+    }* translations;
     UINT translationsLen;
 
     if (VerQueryValueW(versionData, L"\\VarFileInfo\\Translation", (void**) &translations, &translationsLen) &&
-        translationsLen >= sizeof(*translations))
-    {
+        translationsLen >= sizeof(*translations)) {
         wchar_t subBlock[128];
-        snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\%04x%04x\\%ls",
-                  translations[0].language, translations[0].codePage, stringName);
+        snwprintf(subBlock, ARRAY_SIZE(subBlock), L"\\StringFileInfo\\%04x%04x\\%ls", translations[0].language, translations[0].codePage, stringName);
         FF_DEBUG("query version string with translation: %ls", subBlock);
 
         wchar_t* value;
         UINT valueLen; // Number of characters, including null terminator
-        if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0)
-        {
+        if (VerQueryValueW(versionData, subBlock, (void**) &value, &valueLen) && valueLen > 0) {
             ffStrbufSetNWS(version, valueLen - 1, value);
             FF_DEBUG("version string resolved (translation fallback): %s", version->chars);
             return true;
         }
 
         FF_DEBUG("translation fallback query failed");
-    }
-    else
-    {
+    } else {
         FF_DEBUG("no translation table found in version resource");
     }
 

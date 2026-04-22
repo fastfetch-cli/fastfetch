@@ -9,9 +9,9 @@
 
 static HANDLE hRootKeys[8 /*(uintptr_t) HKEY_CURRENT_USER_LOCAL_SETTINGS - (uintptr_t) HKEY_CLASSES_ROOT + 1*/];
 
-static const char* hKey2Str(HANDLE hRootKey)
-{
-    #define HKEY_CASE(compareKey) if(hRootKey == hRootKeys[(uintptr_t)compareKey - (uintptr_t)HKEY_CLASSES_ROOT]) return #compareKey;
+static const char* hKey2Str(HANDLE hRootKey) {
+#define HKEY_CASE(compareKey) \
+    if (hRootKey == hRootKeys[(uintptr_t) compareKey - (uintptr_t) HKEY_CLASSES_ROOT]) return #compareKey;
     HKEY_CASE(HKEY_CLASSES_ROOT)
     HKEY_CASE(HKEY_CURRENT_USER)
     HKEY_CASE(HKEY_LOCAL_MACHINE)
@@ -20,31 +20,27 @@ static const char* hKey2Str(HANDLE hRootKey)
     HKEY_CASE(HKEY_CURRENT_CONFIG)
     HKEY_CASE(HKEY_DYN_DATA)
     HKEY_CASE(HKEY_CURRENT_USER_LOCAL_SETTINGS)
-    #undef HKEY_CASE
+#undef HKEY_CASE
 
     return "UNKNOWN";
 }
 
-HANDLE ffRegGetRootKeyHandle(HKEY hKey)
-{
+HANDLE ffRegGetRootKeyHandle(HKEY hKey) {
     assert(hKey);
     assert((uintptr_t) hKey >= (uintptr_t) HKEY_CLASSES_ROOT && (uintptr_t) hKey <= (uintptr_t) HKEY_CURRENT_USER_LOCAL_SETTINGS);
 
-    FF_DEBUG("Getting root key handle for HKEY %08llx", (uint64_t)(uintptr_t) hKey);
+    FF_DEBUG("Getting root key handle for HKEY %08llx", (uint64_t) (uintptr_t) hKey);
 
     HANDLE result = hRootKeys[(uintptr_t) hKey - (uintptr_t) HKEY_CLASSES_ROOT];
-    if (result)
-    {
+    if (result) {
         FF_DEBUG("Found cached root key handle for %s -> %p", hKey2Str(result), result);
         return result;
     }
 
-    switch ((uintptr_t) hKey)
-    {
+    switch ((uintptr_t) hKey) {
         case (uintptr_t) HKEY_CURRENT_USER: {
             NTSTATUS status = RtlOpenCurrentUser(KEY_READ, &result);
-            if (!NT_SUCCESS(status))
-            {
+            if (!NT_SUCCESS(status)) {
                 FF_DEBUG("RtlOpenCurrentUser() failed: %s", ffDebugNtStatus(status));
                 return NULL;
             }
@@ -54,13 +50,12 @@ HANDLE ffRegGetRootKeyHandle(HKEY hKey)
         case (uintptr_t) HKEY_LOCAL_MACHINE: {
             UNICODE_STRING path = RTL_CONSTANT_STRING(L"\\Registry\\Machine");
             NTSTATUS status = NtOpenKey(&result, KEY_READ, &(OBJECT_ATTRIBUTES) {
-                .Length = sizeof(OBJECT_ATTRIBUTES),
-                .RootDirectory = NULL,
-                .ObjectName = &path,
-                .Attributes = OBJ_CASE_INSENSITIVE,
-            });
-            if (!NT_SUCCESS(status))
-            {
+                                                               .Length = sizeof(OBJECT_ATTRIBUTES),
+                                                               .RootDirectory = NULL,
+                                                               .ObjectName = &path,
+                                                               .Attributes = OBJ_CASE_INSENSITIVE,
+                                                           });
+            if (!NT_SUCCESS(status)) {
                 FF_DEBUG("NtOpenKey(%ls) failed: %s (0x%08lx)", path.Buffer, ffDebugNtStatus(status), status);
                 return NULL;
             }
@@ -77,8 +72,7 @@ HANDLE ffRegGetRootKeyHandle(HKEY hKey)
     return result;
 }
 
-bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result, FFstrbuf* error)
-{
+bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result, FFstrbuf* error) {
     assert(hKey);
     assert(subKeyW);
     assert(result);
@@ -87,18 +81,16 @@ bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result,
 
     USHORT subKeyLen = (USHORT) (wcslen(subKeyW) * sizeof(wchar_t));
     if (!NT_SUCCESS(NtOpenKey(result, KEY_READ, &(OBJECT_ATTRIBUTES) {
-        .Length = sizeof(OBJECT_ATTRIBUTES),
-        .RootDirectory = hKey,
-        .ObjectName = &(UNICODE_STRING) {
-            .Length = subKeyLen,
-            .MaximumLength = subKeyLen + (USHORT) sizeof(wchar_t),
-            .Buffer = (wchar_t*) subKeyW,
-        },
-    })))
-    {
+                                                    .Length = sizeof(OBJECT_ATTRIBUTES),
+                                                    .RootDirectory = hKey,
+                                                    .ObjectName = &(UNICODE_STRING) {
+                                                        .Length = subKeyLen,
+                                                        .MaximumLength = subKeyLen + (USHORT) sizeof(wchar_t),
+                                                        .Buffer = (wchar_t*) subKeyW,
+                                                    },
+                                                }))) {
         FF_DEBUG("NtOpenKey(%s\\<subkey>) failed", hKey2Str(hKey));
-        if (error)
-        {
+        if (error) {
             FF_STRBUF_AUTO_DESTROY subKeyA = ffStrbufCreateWS(subKeyW);
             ffStrbufAppendF(error, "NtOpenKey(%s\\%s) failed", hKey2Str(hKey), subKeyA.chars);
         }
@@ -108,24 +100,22 @@ bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result,
     return true;
 }
 
-static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const void* regData, ULONG regDataLen, FFstrbuf* error)
-{
-    switch (arg->type)
-    {
-        case FF_ARG_TYPE_STRBUF:
-        {
-            if (regType != REG_SZ && regType != REG_EXPAND_SZ)
+static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const void* regData, ULONG regDataLen, FFstrbuf* error) {
+    switch (arg->type) {
+        case FF_ARG_TYPE_STRBUF: {
+            if (regType != REG_SZ && regType != REG_EXPAND_SZ) {
                 goto type_mismatch;
+            }
 
             FFstrbuf* strbuf = (FFstrbuf*) arg->value;
             uint32_t strLen = regDataLen / sizeof(wchar_t);
-            if (strLen == 0)
+            if (strLen == 0) {
                 ffStrbufClear(strbuf);
-            else
-            {
+            } else {
                 const wchar_t* ws = (const wchar_t*) regData;
-                if (ws[strLen - 1] == L'\0')
+                if (ws[strLen - 1] == L'\0') {
                     --strLen;
+                }
                 ffStrbufSetNWS(strbuf, strLen, ws);
             }
             break;
@@ -135,73 +125,65 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
         case FF_ARG_TYPE_UINT64:
         case FF_ARG_TYPE_UINT16:
         case FF_ARG_TYPE_UINT8:
-        case FF_ARG_TYPE_BOOL:
-        {
+        case FF_ARG_TYPE_BOOL: {
             uint64_t value = 0;
 
-            if (regType == REG_DWORD)
-            {
-                if (regDataLen < sizeof(uint32_t))
+            if (regType == REG_DWORD) {
+                if (regDataLen < sizeof(uint32_t)) {
                     goto type_mismatch;
+                }
                 value = *(uint32_t*) regData;
-            }
-            else if (regType == REG_QWORD)
-            {
-                if (regDataLen < sizeof(uint64_t))
+            } else if (regType == REG_QWORD) {
+                if (regDataLen < sizeof(uint64_t)) {
                     goto type_mismatch;
+                }
                 value = *(uint64_t*) regData;
-            }
-            else
+            } else {
                 goto type_mismatch;
+            }
 
-            if      (arg->type == FF_ARG_TYPE_UINT)   *(uint32_t*) arg->value = (uint32_t) value;
-            else if (arg->type == FF_ARG_TYPE_UINT64) *(uint64_t*) arg->value = (uint64_t) value;
-            else if (arg->type == FF_ARG_TYPE_UINT16) *(uint16_t*) arg->value = (uint16_t) value;
-            else if (arg->type == FF_ARG_TYPE_UINT8)  *(uint8_t*) arg->value = (uint8_t) value;
-            else if (arg->type == FF_ARG_TYPE_BOOL)   *(bool*) arg->value = value != 0;
+            if (arg->type == FF_ARG_TYPE_UINT) {
+                *(uint32_t*) arg->value = (uint32_t) value;
+            } else if (arg->type == FF_ARG_TYPE_UINT64) {
+                *(uint64_t*) arg->value = (uint64_t) value;
+            } else if (arg->type == FF_ARG_TYPE_UINT16) {
+                *(uint16_t*) arg->value = (uint16_t) value;
+            } else if (arg->type == FF_ARG_TYPE_UINT8) {
+                *(uint8_t*) arg->value = (uint8_t) value;
+            } else if (arg->type == FF_ARG_TYPE_BOOL) {
+                *(bool*) arg->value = value != 0;
+            }
             break;
         }
 
-        case FF_ARG_TYPE_FLOAT:
-        {
-            if (regDataLen < sizeof(float))
+        case FF_ARG_TYPE_FLOAT: {
+            if (regDataLen < sizeof(float)) {
                 goto type_mismatch;
+            }
             *(float*) arg->value = *(float*) regData;
             break;
         }
 
-        case FF_ARG_TYPE_DOUBLE:
-        {
-            if (regDataLen < sizeof(double))
+        case FF_ARG_TYPE_DOUBLE: {
+            if (regDataLen < sizeof(double)) {
                 goto type_mismatch;
+            }
             *(double*) arg->value = *(double*) regData;
             break;
         }
 
-        case FF_ARG_TYPE_LIST:
-        {
-            if (regType != REG_MULTI_SZ)
+        case FF_ARG_TYPE_LIST: {
+            if (regType != REG_MULTI_SZ) {
                 goto type_mismatch;
-
-            FFlist* list = (FFlist*) arg->value;
-            if (list->elementSize != sizeof(FFstrbuf))
-            {
-                if (error)
-                {
-                    FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
-                    ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: expected list of strbuf for REG_MULTI_SZ", nameA.chars);
-                }
-                return false;
             }
 
+            FFlist* list = (FFlist*) arg->value;
             ffListClear(list);
 
             for (
                 const wchar_t* ptr = (const wchar_t*) regData;
                 (const uint8_t*) ptr < (const uint8_t*) regData + regDataLen && *ptr;
-                ptr++
-            )
-            {
+                ptr++) {
                 uint32_t strLen = (uint32_t) wcsnlen(ptr, regDataLen / sizeof(wchar_t) - (size_t) (ptr - (const wchar_t*) regData));
                 ffStrbufInitNWS(FF_LIST_ADD(FFstrbuf, *list), strLen, ptr);
                 ptr += strLen;
@@ -209,20 +191,12 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
             break;
         }
 
-        case FF_ARG_TYPE_BUFFER:
-        {
-            if (regType != REG_BINARY)
-                goto type_mismatch;
-
+        case FF_ARG_TYPE_BUFFER: {
             FFArgBuffer* buffer = (FFArgBuffer*) arg->value;
-            if (buffer->length == 0)
-            {
+            if (buffer->length == 0) {
                 buffer->data = malloc(regDataLen);
-            }
-            else if (buffer->length < regDataLen)
-            {
-                if (error)
-                {
+            } else if (buffer->length < regDataLen) {
+                if (error) {
                     FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
                     ffStrbufAppendF(error, "ffRegReadValues(%s) buffer too small (%u): expected %u", nameA.chars, (unsigned) buffer->length, (unsigned) regDataLen);
                 }
@@ -237,8 +211,7 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
         case FF_ARG_TYPE_STRING:
         case FF_ARG_TYPE_NULL:
         default:
-            if (error)
-            {
+            if (error) {
                 FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
                 ffStrbufAppendF(error, "processRegValue(%s) unsupported FFArgType %u", nameA.chars, (unsigned) arg->type);
             }
@@ -249,18 +222,18 @@ static bool processRegValue(const FFRegValueArg* arg, const ULONG regType, const
 
 type_mismatch:
     FF_DEBUG("ffRegReadValues(%ls) type mismatch: regType=%u, argType=%u, dataLen=%u",
-        arg->name ?: L"(default)", (unsigned) regType, (unsigned) arg->type, (unsigned) regDataLen);
-    if (error)
-    {
+        arg->name ?: L"(default)",
+        (unsigned) regType,
+        (unsigned) arg->type,
+        (unsigned) regDataLen);
+    if (error) {
         FF_STRBUF_AUTO_DESTROY nameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
-        ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: regType=%u, argType=%u, dataLen=%u",
-            nameA.chars, (unsigned) regType, (unsigned) arg->type, (unsigned) regDataLen);
+        ffStrbufAppendF(error, "ffRegReadValues(%s) type mismatch: regType=%u, argType=%u, dataLen=%u", nameA.chars, (unsigned) regType, (unsigned) arg->type, (unsigned) regDataLen);
     }
     return false;
 }
 
-bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error)
-{
+bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error) {
     UNICODE_STRING* valueNameU = &(UNICODE_STRING) {
         .Length = arg->name ? (USHORT) (wcslen(arg->name) * sizeof(wchar_t)) : 0 /*(default)*/,
         .MaximumLength = 0,
@@ -272,14 +245,13 @@ bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error)
 
     KEY_VALUE_PARTIAL_INFORMATION* buffer = (KEY_VALUE_PARTIAL_INFORMATION*) &staticBuffer;
     DWORD bufSize = sizeof(staticBuffer);
-    if (NT_SUCCESS(NtQueryValueKey(hKey, valueNameU, KeyValuePartialInformation, buffer, bufSize, &bufSize)))
+    if (NT_SUCCESS(NtQueryValueKey(hKey, valueNameU, KeyValuePartialInformation, buffer, bufSize, &bufSize))) {
         goto process_value;
+    }
 
-    if (bufSize == 0)
-    {
+    if (bufSize == 0) {
         FF_DEBUG("NtQueryValueKey(%p, %ls) failed (bufSize=0)", hKey, arg->name ?: L"(default)");
-        if (error)
-        {
+        if (error) {
             FF_STRBUF_AUTO_DESTROY valueNameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
             ffStrbufAppendF(error, "NtQueryValueKey(%p, %s) failed", hKey, valueNameA.chars);
         }
@@ -289,11 +261,9 @@ bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error)
     dynamicBuffer = (uint8_t*) malloc(bufSize);
     buffer = (KEY_VALUE_PARTIAL_INFORMATION*) dynamicBuffer;
 
-    if (!NT_SUCCESS(NtQueryValueKey(hKey, valueNameU, KeyValuePartialInformation, buffer, bufSize, &bufSize)))
-    {
+    if (!NT_SUCCESS(NtQueryValueKey(hKey, valueNameU, KeyValuePartialInformation, buffer, bufSize, &bufSize))) {
         FF_DEBUG("NtQueryValueKey(%p, %ls, buffer=%u) failed", hKey, arg->name ?: L"(default)", (unsigned) bufSize);
-        if (error)
-        {
+        if (error) {
             FF_STRBUF_AUTO_DESTROY valueNameA = arg->name ? ffStrbufCreateWS(arg->name) : ffStrbufCreateStatic("(default)");
             ffStrbufAppendF(error, "NtQueryValueKey(%p, %s, buffer) failed", hKey, valueNameA.chars);
         }
@@ -305,22 +275,22 @@ process_value:
     return processRegValue(arg, buffer->Type, buffer->Data, buffer->DataLength, error);
 }
 
-bool ffRegReadValues(HANDLE hKey, uint32_t argc, const FFRegValueArg argv[], FFstrbuf* error)
-{
-    if (__builtin_expect(argc == 0, false))
+bool ffRegReadValues(HANDLE hKey, uint32_t argc, const FFRegValueArg argv[], FFstrbuf* error) {
+    if (__builtin_expect(argc == 0, false)) {
         return true;
+    }
 
     assert(argv);
 
     FF_AUTO_FREE UNICODE_STRING* names = (UNICODE_STRING*) calloc(argc, sizeof(*names));
     FF_AUTO_FREE KEY_VALUE_ENTRY* entries = (KEY_VALUE_ENTRY*) calloc(argc, sizeof(*entries));
 
-    for (uint32_t i = 0; i < argc; ++i)
-    {
-        if (__builtin_expect(!argv[i].value, false))
-        {
+    for (uint32_t i = 0; i < argc; ++i) {
+        if (__builtin_expect(!argv[i].value, false)) {
             FF_DEBUG("ffRegReadValues(argv[%u].value) is NULL", (unsigned) i);
-            if (error) ffStrbufAppendF(error, "ffRegReadValues(argv[%u].pVar) is NULL", (unsigned) i);
+            if (error) {
+                ffStrbufAppendF(error, "ffRegReadValues(argv[%u].pVar) is NULL", (unsigned) i);
+            }
             return false;
         }
 
@@ -333,54 +303,51 @@ bool ffRegReadValues(HANDLE hKey, uint32_t argc, const FFRegValueArg argv[], FFs
     }
 
     ULONG bufferSize = argc * 128;
-    if (bufferSize < 512)
+    if (bufferSize < 512) {
         bufferSize = 512;
+    }
 
     FF_AUTO_FREE uint8_t* buffer = NULL;
 
-    while (true)
-    {
+    while (true) {
         buffer = (uint8_t*) realloc(buffer, bufferSize);
 
         ULONG writtenSize = bufferSize;
         ULONG requiredSize = 0;
         NTSTATUS status = NtQueryMultipleValueKey(hKey, entries, argc, buffer, &writtenSize, &requiredSize);
 
-        if (!NT_SUCCESS(status))
-        {
+        if (!NT_SUCCESS(status)) {
             // Buffer too small: docs guarantee requiredSize is returned when provided.
-            if (requiredSize > bufferSize)
-            {
+            if (requiredSize > bufferSize) {
                 FF_DEBUG("NtQueryMultipleValueKey(%p) resize buffer: %u -> %u", hKey, (unsigned) bufferSize, (unsigned) requiredSize);
                 bufferSize = requiredSize;
                 continue;
             }
 
             FF_DEBUG("NtQueryMultipleValueKey(%p, argc=%u) failed, status=0x%08X", hKey, (unsigned) argc, (unsigned) status);
-            if (error)
-                ffStrbufAppendF(error, "NtQueryMultipleValueKey(%p, argc=%u) failed, status=0x%08X",
-                    hKey, (unsigned) argc, (unsigned) status);
+            if (error) {
+                ffStrbufAppendF(error, "NtQueryMultipleValueKey(%p, argc=%u) failed, status=0x%08X", hKey, (unsigned) argc, (unsigned) status);
+            }
             return false;
         }
 
         break;
     }
 
-    for (uint32_t i = 0; i < argc; ++i)
-    {
+    for (uint32_t i = 0; i < argc; ++i) {
         const FFRegValueArg* arg = &argv[i];
         const KEY_VALUE_ENTRY* entry = &entries[i];
 
         FF_DEBUG("Read value[%u] from %p: type=%u, len=%u", (unsigned) i, hKey, (unsigned) entry->Type, (unsigned) entry->DataLength);
-        if (!processRegValue(arg, entry->Type, buffer + entry->DataOffset, entry->DataLength, error))
+        if (!processRegValue(arg, entry->Type, buffer + entry->DataOffset, entry->DataLength, error)) {
             return false;
+        }
     }
 
     return true;
 }
 
-bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error)
-{
+bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error) {
     assert(hKey);
     assert(result);
 
@@ -388,11 +355,11 @@ bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* err
     ULONG bufSize = (ULONG) sizeof(buffer);
     KEY_BASIC_INFORMATION* keyInfo = (KEY_BASIC_INFORMATION*) buffer;
 
-    if (!NT_SUCCESS(NtEnumerateKey(hKey, index, KeyBasicInformation, keyInfo, bufSize, &bufSize)))
-    {
+    if (!NT_SUCCESS(NtEnumerateKey(hKey, index, KeyBasicInformation, keyInfo, bufSize, &bufSize))) {
         FF_DEBUG("NtEnumerateKey(hKey=%p, index=%u) failed", hKey, (unsigned) index);
-        if (error)
+        if (error) {
             ffStrbufAppendF(error, "NtEnumerateKey(hKey=%p, %u, keyInfo) failed", hKey, (unsigned) index);
+        }
         return false;
     }
 
@@ -400,8 +367,7 @@ bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* err
     return true;
 }
 
-bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error)
-{
+bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error) {
     assert(hKey);
     assert(result);
 
@@ -409,11 +375,11 @@ bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error)
     ULONG bufSize = sizeof(buffer);
     KEY_FULL_INFORMATION* keyInfo = (KEY_FULL_INFORMATION*) buffer;
 
-    if (!NT_SUCCESS(NtQueryKey(hKey, KeyFullInformation, keyInfo, bufSize, &bufSize)))
-    {
+    if (!NT_SUCCESS(NtQueryKey(hKey, KeyFullInformation, keyInfo, bufSize, &bufSize))) {
         FF_DEBUG("NtQueryKey(hKey=%p, KeyFullInformation) failed", hKey);
-        if (error)
+        if (error) {
             ffStrbufAppendF(error, "NtQueryKey(hKey=%p, KeyFullInformation, keyInfo) failed", hKey);
+        }
         return false;
     }
 

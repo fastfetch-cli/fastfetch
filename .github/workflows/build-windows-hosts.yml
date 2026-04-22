@@ -1,0 +1,106 @@
+name: Reusable Windows Hosts
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        required: true
+        type: string
+      runs-on:
+        required: true
+        type: string
+      msystem:
+        required: true
+        type: string
+      msystem-lower:
+        required: true
+        type: string
+      msys-arch:
+        required: true
+        type: string
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: setup-msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ inputs.msystem }}
+          update: true
+          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
+
+      - name: print msys version
+        run: uname -a
+
+      - name: configure project
+        run: env PKG_CONFIG_PATH=/${{ inputs.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . --verbose -j4
+
+      - name: copy necessary dlls
+        run: cp /${{ inputs.msystem-lower }}/bin/{OpenCL,vulkan-1}.dll .
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        id: upload-unsigned-artifact
+        name: upload artifacts for signing
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-windows-${{ inputs.arch }}
+          path: |
+            *.dll
+            fastfetch.exe
+            flashfetch.exe
+
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        name: submit signing request
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
+          project-slug: 'fastfetch'
+          signing-policy-slug: ${{ github.ref == 'refs/heads/master' && 'release-signing' || 'test-signing' }}
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: '.'
+
+      - name: create zip archive
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ inputs.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: create 7z archive
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ inputs.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: upload true artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-windows-${{ inputs.arch }}
+          path: ./fastfetch-windows-${{ inputs.arch }}.*
+          overwrite: true

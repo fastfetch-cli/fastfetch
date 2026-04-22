@@ -11,45 +11,44 @@
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static void argvToCmdline(char* const argv[], FFstrbuf* result)
-{
+static void argvToCmdline(char* const argv[], FFstrbuf* result) {
     // From https://gist.github.com/jin-x/cdd641d98887524b091fb1f82a68717d
 
     FF_STRBUF_AUTO_DESTROY temp = ffStrbufCreate();
-    for (int i = 0; argv[i] != NULL; i++)
-    {
+    for (int i = 0; argv[i] != NULL; i++) {
         ffStrbufSetS(&temp, argv[i]);
         // Add slash (\) before double quotes (") and duplicate slashes before it
         for (
             uint32_t pos = ffStrbufFirstIndexC(&temp, '"'), cnt;
             pos != temp.length;
-            pos = ffStrbufNextIndexC(&temp, pos + cnt * 2, '"')
-        ) {
+            pos = ffStrbufNextIndexC(&temp, pos + cnt * 2, '"')) {
             cnt = 1;
             while (pos > 0 && temp.chars[pos - 1] == '\\') { ++cnt, --pos; }
             ffStrbufInsertNC(&temp, pos, cnt, '\\');
         }
 
         // Add quotes around string if whitespace chars are present (with slash duplicating at the end of string)
-        if (ffStrbufFirstIndexS(&temp, " \t") != temp.length)
-        {
+        if (ffStrbufFirstIndexS(&temp, " \t") != temp.length) {
             uint32_t pos = temp.length;
             uint32_t cnt = 0;
             while (pos > 0 && temp.chars[pos - 1] == '\\') { ++cnt, --pos; }
-            if (cnt > 0) ffStrbufAppendNC(&temp, cnt, '\\');
+            if (cnt > 0) {
+                ffStrbufAppendNC(&temp, cnt, '\\');
+            }
             ffStrbufPrependC(&temp, '"');
             ffStrbufAppendC(&temp, '"');
         }
 
         // Add space delimiter
-        if (i > 0) ffStrbufAppendC(result, ' ');
+        if (i > 0) {
+            ffStrbufAppendC(result, ' ');
+        }
         ffStrbufAppend(result, &temp);
         ffStrbufClear(&temp);
     }
 }
 
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle)
-{
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle) {
     const int32_t timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
@@ -64,39 +63,36 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         FF_PIPE_BUFSIZ,
         FF_PIPE_BUFSIZ,
         0,
-        NULL
-    );
-    if (hChildPipeRead == INVALID_HANDLE_VALUE)
+        NULL);
+    if (hChildPipeRead == INVALID_HANDLE_VALUE) {
         return "CreateNamedPipeW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
+    }
 
     HANDLE hChildPipeWrite = CreateFileW(
         pipeName,
         GENERIC_WRITE,
         0,
-        &(SECURITY_ATTRIBUTES){
+        &(SECURITY_ATTRIBUTES) {
             .nLength = sizeof(SECURITY_ATTRIBUTES),
             .lpSecurityDescriptor = NULL,
             .bInheritHandle = TRUE,
         },
         OPEN_EXISTING,
         0,
-        NULL
-    );
-    if (hChildPipeWrite == INVALID_HANDLE_VALUE)
+        NULL);
+    if (hChildPipeWrite == INVALID_HANDLE_VALUE) {
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
+    }
 
     PROCESS_INFORMATION piProcInfo = {};
     STARTUPINFOW siStartInfo = {
         .cb = sizeof(siStartInfo),
         .dwFlags = STARTF_USESTDHANDLES,
     };
-    if (useStdErr)
-    {
+    if (useStdErr) {
         siStartInfo.hStdOutput = ffGetNullFD();
         siStartInfo.hStdError = hChildPipeWrite;
-    }
-    else
-    {
+    } else {
         siStartInfo.hStdOutput = hChildPipeWrite;
         siStartInfo.hStdError = ffGetNullFD();
     }
@@ -107,52 +103,51 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         argvToCmdline(argv, &buf);
         uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
         cmdline = malloc(cmdlineBytes);
-        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, NULL, buf.chars, buf.length + 1)))
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, NULL, buf.chars, buf.length + 1))) {
             return "RtlUTF8ToUnicodeN() failed";
+        }
     }
 
     BOOL success = CreateProcessW(
-        NULL,          // application name
-        cmdline,       // command line
-        NULL,          // process security attributes
-        NULL,          // primary thread security attributes
-        TRUE,          // handles are inherited
-        0,             // creation flags
-        NULL,          // use parent's environment
-        NULL,          // use parent's current directory
-        &siStartInfo,  // STARTUPINFO pointer
-        &piProcInfo    // receives PROCESS_INFORMATION
+        NULL,         // application name
+        cmdline,      // command line
+        NULL,         // process security attributes
+        NULL,         // primary thread security attributes
+        TRUE,         // handles are inherited
+        0,            // creation flags
+        NULL,         // use parent's environment
+        NULL,         // use parent's current directory
+        &siStartInfo, // STARTUPINFO pointer
+        &piProcInfo   // receives PROCESS_INFORMATION
     );
 
     NtClose(hChildPipeWrite);
-    if(!success)
-    {
-        if (GetLastError() == ERROR_FILE_NOT_FOUND)
+    if (!success) {
+        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
             return "command not found";
+        }
         return "CreateProcessW() failed";
     }
 
     NtClose(piProcInfo.hThread); // we don't need the thread handle
-    outHandle->pid   = piProcInfo.hProcess;
-    outHandle->pipeRead  = hChildPipeRead;
+    outHandle->pid = piProcInfo.hProcess;
+    outHandle->pipeRead = hChildPipeRead;
     hChildPipeRead = INVALID_HANDLE_VALUE; // ownership transferred, don't close it
 
     return NULL;
 }
 
-static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE hReadEvent, IO_STATUS_BLOCK* piosb)
-{
+static void terminateChildProcess(HANDLE hProcess, HANDLE hChildPipeRead, HANDLE hReadEvent, IO_STATUS_BLOCK* piosb) {
     IO_STATUS_BLOCK cancelIosb = {};
-    if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb)))
-    {
-        if (hReadEvent)
+    if (NT_SUCCESS(NtCancelIoFileEx(hChildPipeRead, piosb, &cancelIosb))) {
+        if (hReadEvent) {
             NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = -100000 }); // wait for cancellation to complete
+        }
     }
     NtTerminateProcess(hProcess, 1);
 }
 
-const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
-{
+const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
     assert(handle->pipeRead != INVALID_HANDLE_VALUE);
     assert(handle->pid != INVALID_HANDLE_VALUE);
 
@@ -163,14 +158,14 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
     handle->pid = INVALID_HANDLE_VALUE;
     handle->pipeRead = INVALID_HANDLE_VALUE;
 
-    if (timeout >= 0 && !NT_SUCCESS(NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, NULL, SynchronizationEvent, FALSE)))
+    if (timeout >= 0 && !NT_SUCCESS(NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, NULL, SynchronizationEvent, FALSE))) {
         return "NtCreateEvent() failed";
+    }
 
     char str[FF_PIPE_BUFSIZ];
     uint32_t nRead = 0;
     IO_STATUS_BLOCK iosb = {};
-    do
-    {
+    do {
         NTSTATUS status = NtReadFile(
             hChildPipeRead,
             hReadEvent,
@@ -180,33 +175,29 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
             str,
             (ULONG) sizeof(str),
             NULL,
-            NULL
-        );
-        if (status == STATUS_PENDING)
-        {
-            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 }))
-            {
-            case STATUS_WAIT_0:
-                status = iosb.Status;
-                break;
+            NULL);
+        if (status == STATUS_PENDING) {
+            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 })) {
+                case STATUS_WAIT_0:
+                    status = iosb.Status;
+                    break;
 
-            case STATUS_TIMEOUT:
-            {
-                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
-                return "NtReadFile(hChildPipeRead) timed out";
-            }
+                case STATUS_TIMEOUT: {
+                    terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
+                    return "NtReadFile(hChildPipeRead) timed out";
+                }
 
-            default:
-                terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
-                return "NtWaitForSingleObject(hReadEvent) failed";
+                default:
+                    terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
+                    return "NtWaitForSingleObject(hReadEvent) failed";
             }
         }
 
-        if (status == STATUS_PIPE_BROKEN || status == STATUS_END_OF_FILE)
+        if (status == STATUS_PIPE_BROKEN || status == STATUS_END_OF_FILE) {
             goto exit;
+        }
 
-        if (!NT_SUCCESS(status))
-        {
+        if (!NT_SUCCESS(status)) {
             terminateChildProcess(hProcess, hChildPipeRead, NULL, &iosb);
             return "NtReadFile(hChildPipeRead) failed";
         }
@@ -215,81 +206,75 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
         ffStrbufAppendNS(buffer, nRead, str);
     } while (nRead > 0);
 
-exit:
-    {
-        PROCESS_BASIC_INFORMATION info = {};
-        ULONG size;
-        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
-        {
-            assert(size == sizeof(info));
-            if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0)
-                return "Child process exited with an error";
+exit: {
+    PROCESS_BASIC_INFORMATION info = {};
+    ULONG size;
+    if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size))) {
+        assert(size == sizeof(info));
+        if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0) {
+            return "Child process exited with an error";
         }
-        else
-            return "NtQueryInformationProcess(ProcessBasicInformation) failed";
+    } else {
+        return "NtQueryInformationProcess(ProcessBasicInformation) failed";
     }
+}
 
     return NULL;
 }
 
-bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
-{
+bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui) {
     FF_AUTO_CLOSE_FD HANDLE hProcess = NtCurrentProcess();
-    if(pid != 0)
-    {
+    if (pid != 0) {
         if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
-            .Length = sizeof(OBJECT_ATTRIBUTES),
-        }, &(CLIENT_ID) { .UniqueProcess = (HANDLE)(uintptr_t) pid })))
+                                                                                        .Length = sizeof(OBJECT_ATTRIBUTES),
+                                                                                    },
+                &(CLIENT_ID) { .UniqueProcess = (HANDLE) (uintptr_t) pid }))) {
             return false;
+        }
     }
 
-    if(ppid)
-    {
+    if (ppid) {
         PROCESS_BASIC_INFORMATION info = {};
         ULONG size;
-        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
-        {
+        if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size))) {
             assert(size == sizeof(info));
-            *ppid = (uint32_t)info.InheritedFromUniqueProcessId;
-        }
-        else
+            *ppid = (uint32_t) info.InheritedFromUniqueProcessId;
+        } else {
             return false;
+        }
     }
 
-    if(exe)
-    {
+    if (exe) {
         // TODO: It's possible to query the command line with `NtQueryInformationProcess(60/*ProcessCommandLineInformation*/)` since Windows 8.1
 
         alignas(UNICODE_STRING) uint8_t buffer[4096];
         ULONG size;
-        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageFileNameWin32, &buffer, sizeof(buffer), &size)))
-        {
-            UNICODE_STRING* imagePath = (UNICODE_STRING*)buffer;
+        if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageFileNameWin32, &buffer, sizeof(buffer), &size))) {
+            UNICODE_STRING* imagePath = (UNICODE_STRING*) buffer;
             ffStrbufSetNWS(exe, imagePath->Length / sizeof(wchar_t), imagePath->Buffer);
 
-            if (exePath) ffStrbufSet(exePath, exe);
+            if (exePath) {
+                ffStrbufSet(exePath, exe);
+            }
 
-            if (pname && exeName)
-            {
+            if (pname && exeName) {
                 *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
                 ffStrbufSetS(pname, *exeName);
             }
-        }
-        else
+        } else {
             return false;
+        }
     }
 
-    if (gui)
-    {
+    if (gui) {
         SECTION_IMAGE_INFORMATION info = {};
         ULONG size;
-        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageInformation, &info, sizeof(info), &size)))
-        {
+        if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessImageInformation, &info, sizeof(info), &size))) {
             assert(size == sizeof(info));
             *gui = info.SubSystemType == IMAGE_SUBSYSTEM_WINDOWS_GUI;
-        }
-        else
+        } else {
             return false;
+        }
     }
 
     return true;

@@ -1,7 +1,7 @@
 #include <mswsock.h>
 #include <ws2tcpip.h>
 
-//Must be included after <mswsock.h>
+// Must be included after <mswsock.h>
 #include "fastfetch.h"
 #include "common/networking.h"
 #include "common/stringUtils.h"
@@ -9,23 +9,22 @@
 
 static LPFN_CONNECTEX ConnectEx;
 
-static const char* initWsaData(WSADATA* wsaData)
-{
+static const char* initWsaData(WSADATA* wsaData) {
     FF_DEBUG("Initializing WinSock");
-    if(WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
         FF_DEBUG("WSAStartup() failed");
         return "WSAStartup() failed";
     }
 
-    if(LOBYTE(wsaData->wVersion) != 2 || HIBYTE(wsaData->wVersion) != 2) {
+    if (LOBYTE(wsaData->wVersion) != 2 || HIBYTE(wsaData->wVersion) != 2) {
         FF_DEBUG("Invalid wsaData version found: %d.%d", LOBYTE(wsaData->wVersion), HIBYTE(wsaData->wVersion));
         WSACleanup();
         return "Invalid wsaData version found";
     }
 
-    //Dummy socket needed for WSAIoctl
+    // Dummy socket needed for WSAIoctl
     SOCKET sockfd = WSASocketW(AF_INET, SOCK_STREAM, 0, NULL, 0, 0);
-    if(sockfd == INVALID_SOCKET) {
+    if (sockfd == INVALID_SOCKET) {
         FF_DEBUG("WSASocketW(AF_INET, SOCK_STREAM) failed");
         WSACleanup();
         return "WSASocketW(AF_INET, SOCK_STREAM) failed";
@@ -33,10 +32,7 @@ static const char* initWsaData(WSADATA* wsaData)
 
     DWORD dwBytes;
     GUID guid = WSAID_CONNECTEX;
-    if(WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                &guid, sizeof(guid),
-                &ConnectEx, sizeof(ConnectEx),
-                &dwBytes, NULL, NULL) != 0) {
+    if (WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &ConnectEx, sizeof(ConnectEx), &dwBytes, NULL, NULL) != 0) {
         FF_DEBUG("WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed");
         closesocket(sockfd);
         WSACleanup();
@@ -49,45 +45,36 @@ static const char* initWsaData(WSADATA* wsaData)
     return NULL;
 }
 
-const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
-{
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers) {
     FF_DEBUG("Preparing to send HTTP request: host=%s, path=%s", host, path);
 
-    if (state->compression)
-    {
-        #ifdef FF_HAVE_ZLIB
+    if (state->compression) {
+#ifdef FF_HAVE_ZLIB
         const char* zlibError = ffNetworkingLoadZlibLibrary();
         // Only enable compression if zlib library is successfully loaded
-        if (zlibError == NULL)
-        {
+        if (zlibError == NULL) {
             FF_DEBUG("Successfully loaded zlib library, compression enabled");
         } else {
             FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
             state->compression = false;
         }
-        #else
+#else
         FF_DEBUG("zlib not supported at build time, compression disabled");
         state->compression = false;
-        #endif
-    }
-    else
-    {
+#endif
+    } else {
         FF_DEBUG("Compression disabled");
     }
 
     static WSADATA wsaData;
-    if (wsaData.wVersion == 0)
-    {
+    if (wsaData.wVersion == 0) {
         const char* error = initWsaData(&wsaData);
-        if (error != NULL)
-        {
+        if (error != NULL) {
             wsaData.wVersion = (WORD) -1;
             FF_DEBUG("WinSock initialization failed: %s", error);
             return error;
         }
-    }
-    else if (wsaData.wVersion == (WORD) -1)
-    {
+    } else if (wsaData.wVersion == (WORD) -1) {
         FF_DEBUG("WinSock initialization previously failed");
         return "initWsaData() failed before";
     }
@@ -100,54 +87,52 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     };
 
     wchar_t hostW[256];
-    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(hostW, (ULONG) sizeof(hostW), NULL, host, (ULONG) strlen(host) + 1)))
-    {
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(hostW, (ULONG) sizeof(hostW), NULL, host, (ULONG) strlen(host) + 1))) {
         FF_DEBUG("Failed to convert host to wide string: %s", host);
         return "Failed to convert host to wide string";
     }
 
     FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
-    if(GetAddrInfoW(hostW, L"80", &hints, &addr) != 0)
-    {
+    if (GetAddrInfoW(hostW, L"80", &hints, &addr) != 0) {
         FF_DEBUG("GetAddrInfoW() failed");
         return "GetAddrInfoW() failed";
     }
 
     state->sockfd = WSASocketW(addr->ai_family, addr->ai_socktype, addr->ai_protocol, NULL, 0, 0);
-    if(state->sockfd == INVALID_SOCKET)
-    {
+    if (state->sockfd == INVALID_SOCKET) {
         FF_DEBUG("WSASocketW() failed");
         FreeAddrInfoW(addr);
         return "WSASocketW() failed";
     }
 
     DWORD flag = 1;
-    #ifdef TCP_NODELAY
+#ifdef TCP_NODELAY
     // Enable TCP_NODELAY to disable Nagle's algorithm
-    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag)) != 0) {
+    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_NODELAY, (char*) &flag, sizeof(flag)) != 0) {
         FF_DEBUG("Failed to set TCP_NODELAY: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
     } else {
         FF_DEBUG("Successfully disabled Nagle's algorithm");
     }
-    #endif
+#endif
 
     // Set timeout if needed
     if (state->timeout > 0) {
         FF_DEBUG("Setting connection timeout: %u ms", state->timeout);
-        setsockopt(state->sockfd, SOL_SOCKET, SO_SNDTIMEO, (const char*)&state->timeout, sizeof(state->timeout));
+        setsockopt(state->sockfd, SOL_SOCKET, SO_SNDTIMEO, (const char*) &state->timeout, sizeof(state->timeout));
     }
 
-    //ConnectEx requires the socket to be initially bound
-    if((state->ipv6
-        ? bind(state->sockfd, (SOCKADDR *) &(struct sockaddr_in6) {
-            .sin6_family = AF_INET6,
-            .sin6_addr = in6addr_any,
-        }, sizeof(struct sockaddr_in6))
-        : bind(state->sockfd, (SOCKADDR *) &(struct sockaddr_in) {
-            .sin_family = AF_INET,
-            .sin_addr.s_addr = INADDR_ANY,
-        }, sizeof(struct sockaddr_in))) != 0)
-    {
+    // ConnectEx requires the socket to be initially bound
+    if ((state->ipv6
+                ? bind(state->sockfd, (SOCKADDR*) &(struct sockaddr_in6) {
+                                          .sin6_family = AF_INET6,
+                                          .sin6_addr = in6addr_any,
+                                      },
+                      sizeof(struct sockaddr_in6))
+                : bind(state->sockfd, (SOCKADDR*) &(struct sockaddr_in) {
+                                          .sin_family = AF_INET,
+                                          .sin_addr.s_addr = INADDR_ANY,
+                                      },
+                      sizeof(struct sockaddr_in))) != 0) {
         FF_DEBUG("bind() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
         FreeAddrInfoW(addr);
@@ -156,7 +141,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
 
     // Initialize overlapped structure with WSA event for asynchronous I/O
-    state->overlapped = (OVERLAPPED){
+    state->overlapped = (OVERLAPPED) {
         .hEvent = WSACreateEvent()
     };
 
@@ -185,49 +170,39 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     ffStrbufAppendS(&state->command, headers);
     ffStrbufAppendS(&state->command, "\r\n");
 
-    #ifdef TCP_FASTOPEN
-    if (state->tfo)
-    {
+#ifdef TCP_FASTOPEN
+    if (state->tfo) {
         // Set TCP Fast Open
         flag = 1;
-        if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
+        if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*) &flag, sizeof(flag)) != 0) {
             FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         } else {
             FF_DEBUG("Successfully set TCP_FASTOPEN option");
         }
-    }
-    else
-    {
+    } else {
         FF_DEBUG("TCP Fast Open disabled");
     }
-    #endif
+#endif
 
     FF_DEBUG("Using ConnectEx to send %u bytes of data", state->command.length);
     DWORD sent = 0;
-    BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int)addr->ai_addrlen,
-                          state->command.chars, state->command.length, &sent, &state->overlapped);
+    BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int) addr->ai_addrlen, state->command.chars, state->command.length, &sent, &state->overlapped);
 
     FreeAddrInfoW(addr);
     addr = NULL;
 
-    if(!result)
-    {
-        if (WSAGetLastError() != WSA_IO_PENDING)
-        {
+    if (!result) {
+        if (WSAGetLastError() != WSA_IO_PENDING) {
             FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
             WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             state->sockfd = INVALID_SOCKET;
             ffStrbufDestroy(&state->command);
             return "ConnectEx() failed";
-        }
-        else
-        {
+        } else {
             FF_DEBUG("ConnectEx() pending");
         }
-    }
-    else
-    {
+    } else {
         FF_DEBUG("ConnectEx() succeeded, sent %u bytes of data", (unsigned) sent);
     }
 
@@ -235,31 +210,28 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     return NULL;
 }
 
-const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer)
-{
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer) {
     assert(buffer->allocated > 0);
     FF_DEBUG("Preparing to receive HTTP response");
 
-    if (state->sockfd == INVALID_SOCKET)
-    {
+    if (state->sockfd == INVALID_SOCKET) {
         FF_DEBUG("Invalid socket, HTTP request might have failed");
         return "ffNetworkingSendHttpRequest() failed";
     }
 
     uint32_t timeout = state->timeout;
-    if (timeout > 0)
-    {
+    if (timeout > 0) {
         FF_DEBUG("WSAWaitForMultipleEvents with timeout: %u ms", timeout);
         DWORD result = WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, timeout, FALSE);
-        if (result != WSA_WAIT_EVENT_0)
-        {
+        if (result != WSA_WAIT_EVENT_0) {
             if (result == WSA_WAIT_TIMEOUT) {
                 FF_DEBUG("WSAWaitForMultipleEvents timed out");
             } else {
                 FF_DEBUG("WSAWaitForMultipleEvents failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
             }
-            if (CancelIoEx((HANDLE) state->sockfd, &state->overlapped))
+            if (CancelIoEx((HANDLE) state->sockfd, &state->overlapped)) {
                 WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, 10, TRUE);
+            }
             WSACloseEvent(state->overlapped.hEvent);
             closesocket(state->sockfd);
             ffStrbufDestroy(&state->command);
@@ -268,8 +240,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
 
     DWORD transfer, flags;
-    if (!WSAGetOverlappedResult(state->sockfd, &state->overlapped, &transfer, TRUE, &flags))
-    {
+    if (!WSAGetOverlappedResult(state->sockfd, &state->overlapped, &transfer, TRUE, &flags)) {
         FF_DEBUG("WSAGetOverlappedResult failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
         WSACloseEvent(state->overlapped.hEvent);
@@ -281,46 +252,49 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     WSACloseEvent(state->overlapped.hEvent);
     state->overlapped.hEvent = NULL;
 
-    if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) != 0)
-    {
+    if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) != 0) {
         FF_DEBUG("Failed to update connect context: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         // Not a critical error, continue anyway
     }
 
-    if (shutdown(state->sockfd, SD_SEND) == SOCKET_ERROR)
-    {
+    if (shutdown(state->sockfd, SD_SEND) == SOCKET_ERROR) {
         FF_DEBUG("Failed to shutdown socket send: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         // Not a critical error, continue anyway
     }
 
-    if(timeout > 0)
-    {
+    if (timeout > 0) {
         FF_DEBUG("Setting receive timeout: %u ms", timeout);
-        setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+        setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*) &timeout, sizeof(timeout));
     }
 
     // Set larger receive buffer for better performance
     int rcvbuf = 65536; // 64KB
-    if (setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, (const char*)&rcvbuf, sizeof(rcvbuf)))
-    {
+    if (setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, (const char*) &rcvbuf, sizeof(rcvbuf))) {
         FF_DEBUG("Failed to set SO_RCVBUF: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         // Not a critical error, continue anyway
     }
 
     FF_DEBUG("Starting data reception");
-    FF_MAYBE_UNUSED int recvCount = 0;
+    FF_A_UNUSED int recvCount = 0;
     uint32_t contentLength = 0;
     uint32_t headerEnd = 0;
 
     do {
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
-                 ++recvCount, buffer->length, ffStrbufGetFree(buffer));
+            ++recvCount,
+            buffer->length,
+            ffStrbufGetFree(buffer));
 
         DWORD received = 0, recvFlags = 0;
         int recvResult = WSARecv(state->sockfd, &(WSABUF) {
-            .buf = buffer->chars + buffer->length,
-            .len = (ULONG) ffStrbufGetFree(buffer),
-        }, 1, &received, &recvFlags, NULL, NULL);
+                                                    .buf = buffer->chars + buffer->length,
+                                                    .len = (ULONG) ffStrbufGetFree(buffer),
+                                                },
+            1,
+            &received,
+            &recvFlags,
+            NULL,
+            NULL);
 
         if (recvResult == SOCKET_ERROR || received == 0) {
             if (recvResult == 0 && received == 0) {
@@ -340,7 +314,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         if (headerEnd == 0) {
             char* pHeaderEnd = strstr(buffer->chars, "\r\n\r\n");
             if (pHeaderEnd) {
-                headerEnd = (uint32_t)(pHeaderEnd - buffer->chars);
+                headerEnd = (uint32_t) (pHeaderEnd - buffer->chars);
                 FF_DEBUG("Found HTTP header end marker, position: %u", headerEnd);
 
                 // Check for Content-Length header to pre-allocate enough memory
@@ -358,7 +332,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         }
     } while (ffStrbufGetFree(buffer) > 0);
 
-    FF_DEBUG("Closing socket: fd=%u", (unsigned)state->sockfd);
+    FF_DEBUG("Closing socket: fd=%u", (unsigned) state->sockfd);
     closesocket(state->sockfd);
     state->sockfd = INVALID_SOCKET;
 
@@ -378,14 +352,15 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
 
     if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
         FF_DEBUG("Received valid HTTP 200 response, content length: %u bytes, total length: %u bytes",
-                contentLength, buffer->length);
+            contentLength,
+            buffer->length);
     } else {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);
         return "Invalid response";
     }
 
-    // If compression was used, try to decompress
-    #ifdef FF_HAVE_ZLIB
+// If compression was used, try to decompress
+#ifdef FF_HAVE_ZLIB
     if (state->compression) {
         FF_DEBUG("Content received, checking if compressed");
         if (!ffNetworkingDecompressGzip(buffer, buffer->chars + headerEnd)) {
@@ -395,7 +370,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             FF_DEBUG("Decompression successful or no decompression needed, total length after decompression: %u bytes", buffer->length);
         }
     }
-    #endif
+#endif
 
     return NULL;
 }

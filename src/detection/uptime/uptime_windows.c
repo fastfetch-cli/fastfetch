@@ -2,8 +2,7 @@
 #include "common/time.h"
 #include "common/windows/nt.h"
 
-const char* ffDetectUptime(FFUptimeResult* result)
-{
+const char* ffDetectUptime(FFUptimeResult* result) {
     // QueryInterruptTime with Win7 support
     uint64_t interruptTime = ffKSystemTimeToUInt64(&SharedUserData->InterruptTime);
 

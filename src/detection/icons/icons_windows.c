@@ -1,12 +1,10 @@
 #include "icons.h"
 #include "common/windows/registry.h"
 
-const char* ffDetectIcons(FFIconsResult* result)
-{
+const char* ffDetectIcons(FFIconsResult* result) {
     FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
-       !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL))
-    {
+    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
+        !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL)) {
         // If the key doesn't exist, it means that the user never changed the default settings.
         ffStrbufSetStatic(&result->icons2, "Recycle Bin");
         return NULL;
@@ -20,22 +18,28 @@ const char* ffDetectIcons(FFIconsResult* result)
     ffRegReadUint(hKey, L"{645FF040-5081-101B-9F08-00AA002F954E}", &RecycleBin, NULL);
     ffRegReadUint(hKey, L"{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}", &ControlPanel, NULL);
 
-    if (ThisPC && UsersFiles && RemoteNetwork && RecycleBin && ControlPanel)
+    if (ThisPC && UsersFiles && RemoteNetwork && RecycleBin && ControlPanel) {
         return "All icons are hidden";
+    }
 
-    if (!ThisPC)
+    if (!ThisPC) {
         ffStrbufAppendS(&result->icons1, "This PC, ");
-    if (!UsersFiles)
+    }
+    if (!UsersFiles) {
         ffStrbufAppendS(&result->icons1, "User's Files");
+    }
     ffStrbufTrimRight(&result->icons1, ' ');
     ffStrbufTrimRight(&result->icons1, ',');
 
-    if (!RemoteNetwork)
+    if (!RemoteNetwork) {
         ffStrbufAppendS(&result->icons2, "Remote Network, ");
-    if (!RecycleBin)
+    }
+    if (!RecycleBin) {
         ffStrbufAppendS(&result->icons2, "Recycle Bin, ");
-    if (!ControlPanel)
+    }
+    if (!ControlPanel) {
         ffStrbufAppendS(&result->icons2, "Control Panel");
+    }
     ffStrbufTrimRight(&result->icons2, ' ');
     ffStrbufTrimRight(&result->icons2, ',');
 

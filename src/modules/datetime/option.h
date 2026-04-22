@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFDateTimeOptions
-{
+typedef struct FFDateTimeOptions {
     FFModuleArgs moduleArgs;
 } FFDateTimeOptions;
 

@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/initsystem/option.h"
 
-typedef struct FFInitSystemResult
-{
+typedef struct FFInitSystemResult {
     FFstrbuf name;
     FFstrbuf exe;
     FFstrbuf version;

@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/zpool/option.h"
 
-typedef struct FFZpoolResult
-{
+typedef struct FFZpoolResult {
     FFstrbuf name;
     FFstrbuf state;
     uint64_t guid;

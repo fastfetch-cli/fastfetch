@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFLocaleOptions
-{
+typedef struct FFLocaleOptions {
     FFModuleArgs moduleArgs;
 } FFLocaleOptions;
 

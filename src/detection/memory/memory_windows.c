@@ -2,16 +2,16 @@
 
 #include <windows.h>
 
-const char* ffDetectMemory(FFMemoryResult* ram)
-{
+const char* ffDetectMemory(FFMemoryResult* ram) {
     MEMORYSTATUSEX statex = {
         .dwLength = sizeof(statex),
     };
     // GlobalMemoryStatusEx() internally uses
     // NtQuerySystemInformation(SystemBasicPerformanceInformation) in Win 7, and
     // NtQuerySystemInformation(SystemMemoryUsageInformation) in Win 10
-    if (!GlobalMemoryStatusEx(&statex))
+    if (!GlobalMemoryStatusEx(&statex)) {
         return "GlobalMemoryStatusEx() failed";
+    }
 
     ram->bytesTotal = statex.ullTotalPhys;
     ram->bytesUsed = statex.ullTotalPhys - statex.ullAvailPhys;

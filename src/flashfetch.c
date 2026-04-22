@@ -4,9 +4,12 @@
 #include "logo/logo.h"
 #include "modules/modules.h"
 
-// A dirty replicate of neofetch
-int main(void)
-{
+#define MODULE_OPTION(name)                                           \
+    FF_A_CLEANUP(ffDestroy##name##Options) FF##name##Options options; \
+    ffInit##name##Options(&options);
+
+// A dirty replicate of neofetch; demonstration only.
+int main(void) {
     ffInitInstance(); // Init everything
 
     // Modify global config here if needed
@@ -24,119 +27,98 @@ int main(void)
 
     // Print all modules
     {
-        __attribute__((cleanup(ffDestroyTitleOptions))) FFTitleOptions options;
-        ffInitTitleOptions(&options);
+        MODULE_OPTION(Title)
         ffPrintTitle(&options);
     }
     {
-        __attribute__((cleanup(ffDestroySeparatorOptions))) FFSeparatorOptions options;
-        ffInitSeparatorOptions(&options);
+        MODULE_OPTION(Separator)
         ffPrintSeparator(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyOSOptions))) FFOSOptions options;
-        ffInitOSOptions(&options);
+        MODULE_OPTION(OS)
         ffPrintOS(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyHostOptions))) FFHostOptions options;
-        ffInitHostOptions(&options);
+        MODULE_OPTION(Host)
         ffPrintHost(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyKernelOptions))) FFKernelOptions options;
-        ffInitKernelOptions(&options);
+        MODULE_OPTION(Kernel)
         ffStrbufSetStatic(&options.moduleArgs.outputFormat, "{release}");
         ffPrintKernel(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyUptimeOptions))) FFUptimeOptions options;
-        ffInitUptimeOptions(&options);
+        MODULE_OPTION(Uptime)
         ffPrintUptime(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyPackagesOptions))) FFPackagesOptions options;
-        ffInitPackagesOptions(&options);
+        MODULE_OPTION(Packages)
         options.combined = true;
         ffPrintPackages(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyShellOptions))) FFShellOptions options;
-        ffInitShellOptions(&options);
+        MODULE_OPTION(Shell)
         ffPrintShell(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyDisplayOptions))) FFDisplayOptions options;
-        ffInitDisplayOptions(&options);
+        MODULE_OPTION(Display)
         options.compactType = FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT;
         ffStrbufSetStatic(&options.moduleArgs.key, "Resolution");
         ffPrintDisplay(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyDEOptions))) FFDEOptions options;
-        ffInitDEOptions(&options);
+        MODULE_OPTION(DE)
         ffPrintDE(&options);
     }
     {
         instance.config.general.detectVersion = false;
-        __attribute__((cleanup(ffDestroyWMOptions))) FFWMOptions options;
-        ffInitWMOptions(&options);
+        MODULE_OPTION(WM)
         options.detectPlugin = true;
         ffPrintWM(&options);
         instance.config.general.detectVersion = true;
     }
     {
-        __attribute__((cleanup(ffDestroyWMThemeOptions))) FFWMThemeOptions options;
-        ffInitWMThemeOptions(&options);
+        MODULE_OPTION(WMTheme)
         ffPrintWMTheme(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyThemeOptions))) FFThemeOptions options;
-        ffInitThemeOptions(&options);
+        MODULE_OPTION(Theme)
         ffPrintTheme(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyIconsOptions))) FFIconsOptions options;
-        ffInitIconsOptions(&options);
+        MODULE_OPTION(Icons)
         ffPrintIcons(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyTerminalOptions))) FFTerminalOptions options;
-        ffInitTerminalOptions(&options);
+        MODULE_OPTION(Terminal)
         ffPrintTerminal(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyTerminalFontOptions))) FFTerminalFontOptions options;
-        ffInitTerminalFontOptions(&options);
+        MODULE_OPTION(TerminalFont)
         ffStrbufSetStatic(&options.moduleArgs.outputFormat, "{/name}{-}{/}{name}{?size} {size}{?}");
         ffPrintTerminalFont(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyCPUOptions))) FFCPUOptions options;
-        ffInitCPUOptions(&options);
+        MODULE_OPTION(CPU)
         ffPrintCPU(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyGPUOptions))) FFGPUOptions options;
-        ffInitGPUOptions(&options);
+        MODULE_OPTION(GPU)
         ffStrbufSetStatic(&options.moduleArgs.key, "GPU");
         ffStrbufSetStatic(&options.moduleArgs.outputFormat, "{name}");
         ffPrintGPU(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyMemoryOptions))) FFMemoryOptions options;
-        ffInitMemoryOptions(&options);
+        MODULE_OPTION(Memory)
         ffStrbufSetStatic(&options.moduleArgs.outputFormat, "{} / {}");
         ffPrintMemory(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyBreakOptions))) FFBreakOptions options;
-        ffInitBreakOptions(&options);
+        MODULE_OPTION(Break)
         ffPrintBreak(&options);
     }
     {
-        __attribute__((cleanup(ffDestroyColorsOptions))) FFColorsOptions options;
-        ffInitColorsOptions(&options);
+        MODULE_OPTION(Colors)
         ffPrintColors(&options);
     }
 

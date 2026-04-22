@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/brightness/option.h"
 
-typedef struct FFBrightnessResult
-{
+typedef struct FFBrightnessResult {
     FFstrbuf name;
     double min, max, current;
     bool builtin;

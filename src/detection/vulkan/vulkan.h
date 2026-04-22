@@ -3,13 +3,12 @@
 #include "fastfetch.h"
 #include "modules/vulkan/option.h"
 
-typedef struct FFVulkanResult
-{
+typedef struct FFVulkanResult {
     FFstrbuf driver;
     FFstrbuf apiVersion;
     FFstrbuf conformanceVersion;
     FFstrbuf instanceVersion;
-    FFlist gpus; //List of FFGPUResult, see detection/gpu/gpu.h
+    FFlist gpus; // List of FFGPUResult, see detection/gpu/gpu.h
     const char* error;
 } FFVulkanResult;
 

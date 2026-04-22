@@ -25,154 +25,148 @@
     #include <OS.h>
 #endif
 
-static void getExePath(FFPlatform* platform)
-{
+static void getExePath(FFPlatform* platform) {
     char exePath[PATH_MAX];
-    #if defined(__linux__) || defined (__GNU__)
-        ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-        if (exePathLen >= 0)
-            exePath[exePathLen] = '\0';
-    #elif defined(__APPLE__)
-        uint32_t exePathLen = sizeof(exePath);
-        if (_NSGetExecutablePath(exePath, &exePathLen) == 0)
-            exePathLen = (uint32_t) strlen(exePath);
-        else
-            exePathLen = 0;
-    #elif defined(__FreeBSD__) || defined(__NetBSD__)
-        size_t exePathLen = sizeof(exePath);
-        if(sysctl(
-            (int[]){CTL_KERN,
-            #ifdef __FreeBSD__
-                KERN_PROC, KERN_PROC_PATHNAME, (pid_t) platform->pid
-            #else
-                KERN_PROC_ARGS, platform->pid, KERN_PROC_PATHNAME
-            #endif
-            }, 4,
-            exePath, &exePathLen,
-            NULL, 0
-        ) < 0)
-            exePathLen = 0;
-        else
-            exePathLen--; // remove terminating NUL
-    #elif defined(__OpenBSD__)
-        // OpenBSD doesn't have a reliable way to get the executable path.
-        // Current implementation uses argv[0], which can be easily spoofed.
-        // See #2195
-        size_t exePathLen = 0;
-        kvm_t* kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, NULL);
-        if (kd)
-        {
-            int kpCount;
-            struct kinfo_proc* kp = kvm_getprocs(kd, KERN_PROC_PID, (pid_t) platform->pid, sizeof(*kp), &kpCount);
-            if (kp && kpCount == 1)
-            {
-                char** argv = kvm_getargv(kd, kp, 0);
-                if (argv && argv[0])
-                {
-                    char* arg0 = argv[0];
-                    if (arg0[0])
+#if defined(__linux__) || defined(__GNU__)
+    ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (exePathLen >= 0) {
+        exePath[exePathLen] = '\0';
+    }
+#elif defined(__APPLE__)
+    uint32_t exePathLen = sizeof(exePath);
+    if (_NSGetExecutablePath(exePath, &exePathLen) == 0) {
+        exePathLen = (uint32_t) strlen(exePath);
+    } else {
+        exePathLen = 0;
+    }
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
+    size_t exePathLen = sizeof(exePath);
+    if (sysctl(
+            (int[]) { CTL_KERN,
+    #ifdef __FreeBSD__
+                KERN_PROC,
+                KERN_PROC_PATHNAME,
+                (pid_t) platform->pid
+    #else
+                KERN_PROC_ARGS,
+                (pid_t) platform->pid,
+                KERN_PROC_PATHNAME
+    #endif
+            },
+            4,
+            exePath,
+            &exePathLen,
+            NULL,
+            0) < 0)
+        exePathLen = 0;
+    else {
+        exePathLen--; // remove terminating NUL
+    }
+#elif defined(__OpenBSD__)
+    // OpenBSD doesn't have a reliable way to get the executable path.
+    // Current implementation uses argv[0], which can be easily spoofed.
+    // See #2195
+    size_t exePathLen = 0;
+    kvm_t* kd = kvm_openfiles(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    if (kd) {
+        int kpCount;
+        struct kinfo_proc* kp = kvm_getprocs(kd, KERN_PROC_PID, (pid_t) platform->pid, sizeof(*kp), &kpCount);
+        if (kp && kpCount == 1) {
+            char** argv = kvm_getargv(kd, kp, 0);
+            if (argv && argv[0]) {
+                char* arg0 = argv[0];
+                if (arg0[0]) {
+                    if (strchr(arg0, '/') != NULL) // likely a path (absolute or relative)
                     {
-                        if (strchr(arg0, '/') != NULL) // likely a path (absolute or relative)
-                        {
-                            exePathLen = strlen(arg0);
-                            if (exePathLen < ARRAY_SIZE(exePath))
-                            {
-                                memcpy(exePath, arg0, exePathLen);
-                                exePath[exePathLen] = '\0';
-                            }
-                            else
-                                exePathLen = 0;
+                        exePathLen = strlen(arg0);
+                        if (exePathLen < ARRAY_SIZE(exePath)) {
+                            memcpy(exePath, arg0, exePathLen);
+                            exePath[exePathLen] = '\0';
+                        } else {
+                            exePathLen = 0;
                         }
-                        else
-                        {
-                            FF_STRBUF_AUTO_DESTROY tmpPath = ffStrbufCreate();
-                            if (ffFindExecutableInPath(arg0, &tmpPath) == NULL && tmpPath.length < ARRAY_SIZE(exePath))
-                            {
-                                memcpy(exePath, tmpPath.chars, tmpPath.length + 1);
-                                exePathLen = tmpPath.length;
-                            }
+                    } else {
+                        FF_STRBUF_AUTO_DESTROY tmpPath = ffStrbufCreate();
+                        if (ffFindExecutableInPath(arg0, &tmpPath) == NULL && tmpPath.length < ARRAY_SIZE(exePath)) {
+                            memcpy(exePath, tmpPath.chars, tmpPath.length + 1);
+                            exePathLen = tmpPath.length;
                         }
+                    }
 
-                        if (exePathLen > 0)
-                        {
-                            struct stat st;
-                            if (stat(exePath, &st) == 0 && S_ISREG(st.st_mode))
-                            {
-                                int cntp;
-                                struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, platform->pid, sizeof(*kf), &cntp);
-                                if (kf)
-                                {
-                                    int i;
-                                    for (i = 0; i < cntp; i++)
-                                    {
-                                        if (kf[i].fd_fd == KERN_FILE_TEXT)
-                                        {
-                                            // KERN_FILE_TEXT is the executable file, not a shared library, and should be unique in the list.
-                                            if (st.st_dev != (dev_t)kf[i].va_fsid || st.st_ino != (ino_t)kf[i].va_fileid)
-                                                i = -1;
-                                            break;
+                    if (exePathLen > 0) {
+                        struct stat st;
+                        if (stat(exePath, &st) == 0 && S_ISREG(st.st_mode)) {
+                            int cntp;
+                            struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, platform->pid, sizeof(*kf), &cntp);
+                            if (kf) {
+                                int i;
+                                for (i = 0; i < cntp; i++) {
+                                    if (kf[i].fd_fd == KERN_FILE_TEXT) {
+                                        // KERN_FILE_TEXT is the executable file, not a shared library, and should be unique in the list.
+                                        if (st.st_dev != (dev_t) kf[i].va_fsid || st.st_ino != (ino_t) kf[i].va_fileid) {
+                                            i = -1;
                                         }
+                                        break;
                                     }
-                                    if (i < 0)
-                                        exePathLen = 0;
                                 }
-                                else
-                                {
-                                    // If we can't get the list of open files, we can't verify that the file is actually the executable
-                                    // Assume it is
+                                if (i < 0) {
+                                    exePathLen = 0;
                                 }
+                            } else {
+                                // If we can't get the list of open files, we can't verify that the file is actually the executable
+                                // Assume it is
                             }
-                            else
-                                exePathLen = 0;
+                        } else {
+                            exePathLen = 0;
                         }
                     }
                 }
             }
-            kvm_close(kd);
         }
-    #elif defined(__sun)
-        ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
-        if (exePathLen >= 0)
-            exePath[exePathLen] = '\0';
-    #elif defined(__HAIKU__)
-        size_t exePathLen = 0;
-        image_info info;
-        int32 cookie = 0;
+        kvm_close(kd);
+    }
+#elif defined(__sun)
+    ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
+    if (exePathLen >= 0) {
+        exePath[exePathLen] = '\0';
+    }
+#elif defined(__HAIKU__)
+    size_t exePathLen = 0;
+    image_info info;
+    int32 cookie = 0;
 
-        while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
-            if (info.type == B_APP_IMAGE) {
-                exePathLen = strlcpy(exePath, info.name, sizeof(exePath));
-                break;
-            }
+    while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+        if (info.type == B_APP_IMAGE) {
+            exePathLen = strlcpy(exePath, info.name, sizeof(exePath));
+            break;
         }
-    #endif
-    if (exePathLen > 0)
-    {
+    }
+#endif
+    if (exePathLen > 0) {
         ffStrbufEnsureFree(&platform->exePath, PATH_MAX);
-        if (realpath(exePath, platform->exePath.chars))
+        if (realpath(exePath, platform->exePath.chars)) {
             ffStrbufRecalculateLength(&platform->exePath);
-        else
+        } else {
             ffStrbufSetNS(&platform->exePath, (uint32_t) exePathLen, exePath);
+        }
     }
 }
 
-static void platformPathAddEnv(FFlist* dirs, const char* env)
-{
+static void platformPathAddEnv(FFlist* dirs, const char* env) {
     const char* envValue = getenv(env);
-    if(!ffStrSet(envValue))
+    if (!ffStrSet(envValue)) {
         return;
+    }
 
     FF_STRBUF_AUTO_DESTROY value = ffStrbufCreateA(64);
     ffStrbufAppendS(&value, envValue);
 
     uint32_t startIndex = 0;
-    while (startIndex < value.length)
-    {
+    while (startIndex < value.length) {
         uint32_t colonIndex = ffStrbufNextIndexC(&value, startIndex, ':');
         value.chars[colonIndex] = '\0';
 
-        if(!ffStrSet(value.chars + startIndex))
-        {
+        if (!ffStrSet(value.chars + startIndex)) {
             startIndex = colonIndex + 1;
             continue;
         }
@@ -183,61 +177,53 @@ static void platformPathAddEnv(FFlist* dirs, const char* env)
     }
 }
 
-static void getHomeDir(FFPlatform* platform, const struct passwd* pwd)
-{
+static void getHomeDir(FFPlatform* platform, const struct passwd* pwd) {
     const char* home = pwd ? pwd->pw_dir : getenv("HOME");
     ffStrbufAppendS(&platform->homeDir, home);
     ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
 }
 
-static void getCacheDir(FFPlatform* platform)
-{
+static void getCacheDir(FFPlatform* platform) {
     const char* cache = getenv("XDG_CACHE_HOME");
-    if(ffStrSet(cache))
-    {
+    if (ffStrSet(cache)) {
         ffStrbufAppendS(&platform->cacheDir, cache);
         ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
-    }
-    else
-    {
+    } else {
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, ".cache/");
     }
 }
 
-static void getConfigDirs(FFPlatform* platform)
-{
+static void getConfigDirs(FFPlatform* platform) {
     // Always make sure `${XDG_CONFIG_HOME:-$HOME/.config}` is the first entry
     platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_HOME");
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
 
-    #if defined(__APPLE__)
-        ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Preferences/");
-        ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Application Support/");
-    #endif
-    #if defined(__HAIKU__)
-        ffPlatformPathAddHome(&platform->configDirs, platform, "config/settings/");
-    #endif
+#if defined(__APPLE__)
+    ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Preferences/");
+    ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Application Support/");
+#endif
+#if defined(__HAIKU__)
+    ffPlatformPathAddHome(&platform->configDirs, platform, "config/settings/");
+#endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
     platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
 
-    #if !defined(__APPLE__)
-        ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/xdg/");
-    #endif
+#if !defined(__APPLE__)
+    ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/xdg/");
+#endif
 
     ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_ETC "/");
     ffPlatformPathAddAbsolute(&platform->configDirs, FASTFETCH_TARGET_DIR_INSTALL_SYSCONF "/");
 }
 
-static void getDataDirs(FFPlatform* platform)
-{
+static void getDataDirs(FFPlatform* platform) {
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_HOME");
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
 
     // Add ${currentExePath}/../share
-    if (platform->exePath.length > 0)
-    {
+    if (platform->exePath.length > 0) {
         FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(&platform->exePath);
         ffStrbufSubstrBeforeLastC(&path, '/');
         ffStrbufSubstrBeforeLastC(&path, '/');
@@ -245,9 +231,9 @@ static void getDataDirs(FFPlatform* platform)
         ffPlatformPathAddAbsolute(&platform->dataDirs, path.chars);
     }
 
-    #ifdef __APPLE__
-        ffPlatformPathAddHome(&platform->dataDirs, platform, "Library/Application Support/");
-    #endif
+#ifdef __APPLE__
+    ffPlatformPathAddHome(&platform->dataDirs, platform, "Library/Application Support/");
+#endif
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
@@ -258,74 +244,66 @@ static void getDataDirs(FFPlatform* platform)
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }
 
-static void getUserName(FFPlatform* platform, const struct passwd* pwd)
-{
-    if (pwd)
-    {
+static void getUserName(FFPlatform* platform, const struct passwd* pwd) {
+    if (pwd) {
         ffStrbufSetS(&platform->userName, pwd->pw_name);
         ffStrbufSetS(&platform->fullUserName, pwd->pw_gecos);
         ffStrbufTrimSpace(&platform->fullUserName);
-    }
-    else
-    {
+    } else {
         ffStrbufSetS(&platform->userName, getenv("USER"));
     }
 }
 
-static void getHostName(FFPlatform* platform, const struct utsname* uts)
-{
+static void getHostName(FFPlatform* platform, const struct utsname* uts) {
     ffStrbufAppendS(&platform->hostName, uts->nodename);
 }
 
-static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
-{
+static void getUserShell(FFPlatform* platform, const struct passwd* pwd) {
     const char* shell = getenv("SHELL");
-    if(!ffStrSet(shell) && pwd)
+    if (!ffStrSet(shell) && pwd) {
         shell = pwd->pw_shell;
+    }
 
     ffStrbufAppendS(&platform->userShell, shell);
 }
 
-static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
-{
+static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts) {
     ffStrbufAppendS(&info->name, uts->sysname);
     ffStrbufAppendS(&info->release, uts->release);
     ffStrbufAppendS(&info->version, uts->version);
-    #ifdef __HAIKU__
+#ifdef __HAIKU__
     /* historical reason */
-    if (ffStrEquals(uts->machine, "BePC"))
+    if (ffStrEquals(uts->machine, "BePC")) {
         ffStrbufSetStatic(&info->architecture, "i386");
-    else
-    #endif
-    ffStrbufAppendS(&info->architecture, uts->machine);
+    } else
+#endif
+        ffStrbufAppendS(&info->architecture, uts->machine);
 
-    #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);
-    sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, NULL, 0);
-    #else
+    sysctl((int[]) { CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, NULL, 0);
+#else
     info->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
-    #endif
+#endif
 }
 
-static void getCwd(FFPlatform* platform)
-{
+static void getCwd(FFPlatform* platform) {
     char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
-    {
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
         ffStrbufSetS(&platform->cwd, cwd);
         ffStrbufEnsureEndsWithC(&platform->cwd, '/');
     }
 }
 
-void ffPlatformInitImpl(FFPlatform* platform)
-{
+void ffPlatformInitImpl(FFPlatform* platform) {
     platform->pid = (uint32_t) getpid();
     platform->uid = getuid();
     struct passwd* pwd = getpwuid(platform->uid);
 
     struct utsname uts;
-    if(uname(&uts) < 0)
+    if (uname(&uts) < 0) {
         memset(&uts, 0, sizeof(uts));
+    }
 
     getExePath(platform);
     getCwd(platform);

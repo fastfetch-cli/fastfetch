@@ -1,62 +1,61 @@
 #include "cpucache.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 #include "common/stringUtils.h"
 
-typedef struct FFSmbiosCacheInfo
-{
+typedef struct FFSmbiosCacheInfo {
     FFSmbiosHeader Header;
 
-    uint8_t SocketDesignation; // string
+    uint8_t SocketDesignation;   // string
     uint16_t CacheConfiguration; // varies
-    uint16_t MaximumCacheSize; // varies
-    uint16_t InstalledSize; // varies
-    uint16_t SupportedSramType; // bit field
-    uint16_t CurrentSramType; // bit field
+    uint16_t MaximumCacheSize;   // varies
+    uint16_t InstalledSize;      // varies
+    uint16_t SupportedSramType;  // bit field
+    uint16_t CurrentSramType;    // bit field
 
     // 2.1+
-    uint8_t CacheSpeed; // varies
+    uint8_t CacheSpeed;          // varies
     uint8_t ErrorCorrectionType; // enum
-    uint8_t SystemCacheType; // enum
-    uint8_t Associativity; // enum
+    uint8_t SystemCacheType;     // enum
+    uint8_t Associativity;       // enum
 
     // 3.1+
-    uint32_t MaximumCacheSize2; // bit field
+    uint32_t MaximumCacheSize2;   // bit field
     uint32_t InstalledCacheSize2; // bit field
-} __attribute__((__packed__)) FFSmbiosCacheInfo;
+} FF_A_PACKED FFSmbiosCacheInfo;
 
 static_assert(offsetof(FFSmbiosCacheInfo, InstalledCacheSize2) == 0x17,
     "FFSmbiosCacheInfo: Wrong struct alignment");
 
-const char* ffDetectCPUCache(FFCPUCacheResult* result)
-{
+const char* ffDetectCPUCache(FFCPUCacheResult* result) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
-    if (!smbiosTable)
+    if (!smbiosTable) {
         return "Failed to get SMBIOS data";
+    }
 
     const FFSmbiosCacheInfo* data = (const FFSmbiosCacheInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_CACHE_INFO];
-    if (!data)
+    if (!data) {
         return "Cache information is not found in SMBIOS data";
+    }
 
     const FFSmbiosCacheInfo* endOfTable = (const FFSmbiosCacheInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_END_OF_TABLE];
-    for (; data != endOfTable; data = (const FFSmbiosCacheInfo*) ffSmbiosNextEntry(&data->Header))
-    {
-        if (data->Header.Type != FF_SMBIOS_TYPE_CACHE_INFO)
+    for (; data != endOfTable; data = (const FFSmbiosCacheInfo*) ffSmbiosNextEntry(&data->Header)) {
+        if (data->Header.Type != FF_SMBIOS_TYPE_CACHE_INFO) {
             continue;
+        }
 
         bool enabled = !!(data->CacheConfiguration & (1 << 7));
-        if (!enabled)
+        if (!enabled) {
             continue;
+        }
 
         uint32_t size = data->InstalledSize;
-        if (size == 0)
+        if (size == 0) {
             continue;
-
-        if (data->InstalledSize != 0xFFFF)
-        {
-            size *= (size >> 15 ? 64 : 1) * 1024u;
         }
-        else if (data->Header.Length > offsetof(FFSmbiosCacheInfo, InstalledCacheSize2))
-        {
+
+        if (data->InstalledSize != 0xFFFF) {
+            size *= (size >> 15 ? 64 : 1) * 1024u;
+        } else if (data->Header.Length > offsetof(FFSmbiosCacheInfo, InstalledCacheSize2)) {
             size = data->InstalledCacheSize2;
             size *= (size >> 31 ? 64 : 1) * 1024u;
         }
@@ -64,11 +63,16 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
         uint32_t level = (data->CacheConfiguration & 0b111u) + 1;
 
         FFCPUCacheType type;
-        switch (data->SystemCacheType)
-        {
-            case 3: type = FF_CPU_CACHE_TYPE_INSTRUCTION; break;
-            case 4: type = FF_CPU_CACHE_TYPE_DATA; break;
-            default: type = FF_CPU_CACHE_TYPE_UNIFIED; break;
+        switch (data->SystemCacheType) {
+            case 3:
+                type = FF_CPU_CACHE_TYPE_INSTRUCTION;
+                break;
+            case 4:
+                type = FF_CPU_CACHE_TYPE_DATA;
+                break;
+            default:
+                type = FF_CPU_CACHE_TYPE_UNIFIED;
+                break;
         }
 
         ffCPUCacheAddItem(result, level, size, 0, type);

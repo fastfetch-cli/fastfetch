@@ -3,8 +3,7 @@
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"
 
-typedef struct FFfont
-{
+typedef struct FFfont {
     FFstrbuf pretty;
     FFstrbuf name;
     FFstrbuf size;
@@ -21,7 +20,6 @@ void ffFontInitMoveValues(FFfont* font, FFstrbuf* name, FFstrbuf* size, FFstrbuf
 void ffFontInitWithSpace(FFfont* font, const char* rawName);
 void ffFontDestroy(FFfont* font);
 
-static inline void ffFontInitCopy(FFfont* font, const char* name)
-{
+static inline void ffFontInitCopy(FFfont* font, const char* name) {
     ffFontInitValues(font, name, NULL);
 }

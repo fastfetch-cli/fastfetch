@@ -2,31 +2,31 @@
 
 #if __has_include(<sys/backlight.h>)
 
-#include "common/io.h"
+    #include "common/io.h"
 
-#include <sys/backlight.h>
-#include <sys/ioctl.h>
-#include <sys/fcntl.h>
-#include <unistd.h>
+    #include <sys/backlight.h>
+    #include <sys/ioctl.h>
+    #include <sys/fcntl.h>
+    #include <unistd.h>
 
-const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
-{
+const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
     // https://man.freebsd.org/cgi/man.cgi?query=backlight&sektion=9
     char path[] = "/dev/backlight/backlight0";
 
-    for (char i = '0'; i <= '9'; ++i)
-    {
+    for (char i = '0'; i <= '9'; ++i) {
         path[ARRAY_SIZE(path) - 2] = i;
 
         FF_AUTO_CLOSE_FD int blfd = open(path, O_RDONLY | O_CLOEXEC);
-        if (blfd < 0)
+        if (blfd < 0) {
             continue;
+        }
 
         struct backlight_props status;
-        if(ioctl(blfd, BACKLIGHTGETSTATUS, &status) < 0)
+        if (ioctl(blfd, BACKLIGHTGETSTATUS, &status) < 0) {
             continue;
+        }
 
-        FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+        FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
         ffStrbufInit(&brightness->name);
 
         brightness->max = BACKLIGHTMAXLEVELS;
@@ -35,18 +35,18 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
         brightness->builtin = true;
 
         struct backlight_info info;
-        if(ioctl(blfd, BACKLIGHTGETINFO, &info) == 0)
+        if (ioctl(blfd, BACKLIGHTGETINFO, &info) == 0) {
             ffStrbufAppendS(&brightness->name, info.name);
-        else
+        } else {
             ffStrbufAppendS(&brightness->name, path + strlen("/dev/backlight/"));
+        }
     }
     return NULL;
 }
 
 #else
 
-const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FF_MAYBE_UNUSED FFlist* result)
-{
+const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FF_A_UNUSED FFlist* result) {
     return "Backlight is supported only on FreeBSD 13 and newer";
 }
 

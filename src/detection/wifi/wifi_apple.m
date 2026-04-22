@@ -21,7 +21,7 @@ const char* ffDetectWifi(FFlist* result)
 
     for (CWInterface* inf in interfaces)
     {
-        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
+        FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInit(&item->inf.description);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
@@ -108,7 +108,7 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.security, "WPA Personal");
                 break;
             case kCWSecurityWPAPersonalMixed:
-                ffStrbufSetStatic(&item->conn.security, "WPA Persional Mixed");
+                ffStrbufSetStatic(&item->conn.security, "WPA Personal Mixed");
                 break;
             case kCWSecurityWPA2Personal:
                 ffStrbufSetStatic(&item->conn.security, "WPA2 Personal");

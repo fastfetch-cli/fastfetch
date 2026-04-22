@@ -4,70 +4,60 @@
 #include "detection/terminalshell/terminalshell.h"
 #include "modules/shell/shell.h"
 
-bool ffPrintShell(FFShellOptions* options)
-{
+bool ffPrintShell(FFShellOptions* options) {
     const FFShellResult* result = ffDetectShell();
 
-    if(result->processName.length == 0)
-    {
+    if (result->processName.length == 0) {
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
         return false;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result->prettyName, stdout);
 
-        if(result->version.length > 0)
-        {
+        if (result->version.length > 0) {
             putchar(' ');
             ffStrbufWriteTo(&result->version, stdout);
         }
 
         putchar('\n');
-    }
-    else
-    {
+    } else {
         FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_ARG(result->processName, "process-name"),
-            FF_ARG(result->exe, "exe"),
-            FF_ARG(result->exeName, "exe-name"),
-            FF_ARG(result->version, "version"),
-            FF_ARG(result->pid, "pid"),
-            FF_ARG(result->prettyName, "pretty-name"),
-            FF_ARG(result->exePath, "exe-path"),
-            FF_ARG(result->tty, "tty"),
-        }));
+                                                                                                          FF_ARG(result->processName, "process-name"),
+                                                                                                          FF_ARG(result->exe, "exe"),
+                                                                                                          FF_ARG(result->exeName, "exe-name"),
+                                                                                                          FF_ARG(result->version, "version"),
+                                                                                                          FF_ARG(result->pid, "pid"),
+                                                                                                          FF_ARG(result->prettyName, "pretty-name"),
+                                                                                                          FF_ARG(result->exePath, "exe-path"),
+                                                                                                          FF_ARG(result->tty, "tty"),
+                                                                                                      }));
     }
 
     return true;
 }
 
-void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
-{
+void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateShellJsonResult(FF_A_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFShellResult* result = ffDetectShell();
 
-    if(result->processName.length == 0)
-    {
+    if (result->processName.length == 0) {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect shell");
         return false;
     }
@@ -81,27 +71,26 @@ bool ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
-    if (result->tty >= 0)
+    if (result->tty >= 0) {
         yyjson_mut_obj_add_int(doc, obj, "tty", result->tty);
-    else
+    } else {
         yyjson_mut_obj_add_null(doc, obj, "tty");
+    }
 
     return true;
 }
 
-void ffInitShellOptions(FFShellOptions* options)
-{
+void ffInitShellOptions(FFShellOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyShellOptions(FFShellOptions* options)
-{
+void ffDestroyShellOptions(FFShellOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 FFModuleBaseInfo ffShellModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
-    .description = "Print current shell name and version",
+    .description = "Print the current shell name and version",
     .initOptions = (void*) ffInitShellOptions,
     .destroyOptions = (void*) ffDestroyShellOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,
@@ -109,13 +98,13 @@ FFModuleBaseInfo ffShellModuleInfo = {
     .generateJsonResult = (void*) ffGenerateShellJsonResult,
     .generateJsonConfig = (void*) ffGenerateShellJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Shell process name", "process-name"},
-        {"The first argument of the command line when running the shell", "exe"},
-        {"Shell base name of arg0", "exe-name"},
-        {"Shell version", "version"},
-        {"Shell pid", "pid"},
-        {"Shell pretty name", "pretty-name"},
-        {"Shell full exe path", "exe-path"},
-        {"Shell tty used", "tty"},
+        { "Shell process name", "process-name" },
+        { "The first argument of the command line when running the shell", "exe" },
+        { "Shell base name of arg0", "exe-name" },
+        { "Shell version", "version" },
+        { "Shell pid", "pid" },
+        { "Shell pretty name", "pretty-name" },
+        { "Shell full exe path", "exe-path" },
+        { "Shell tty used", "tty" },
     }))
 };

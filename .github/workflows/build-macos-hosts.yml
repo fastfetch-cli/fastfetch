@@ -1,0 +1,58 @@
+name: Reusable macOS Hosts
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        required: true
+        type: string
+      runs-on:
+        required: true
+        type: string
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: uname -a
+        run: uname -a
+
+      - name: install required packages
+        run: |
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: otool -L fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-macos-${{ inputs.arch }}
+          path: ./fastfetch-*.*

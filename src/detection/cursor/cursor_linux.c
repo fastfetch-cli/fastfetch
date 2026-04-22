@@ -9,58 +9,54 @@
 
 #include <stdlib.h>
 
-static bool detectCursorGTK(FFCursorResult* result)
-{
+static bool detectCursorGTK(FFCursorResult* result) {
     const FFGTKResult* gtk = ffDetectGTK4();
 
-    if(gtk->cursor.length == 0)
+    if (gtk->cursor.length == 0) {
         gtk = ffDetectGTK3();
+    }
 
-    if(gtk->cursor.length == 0)
+    if (gtk->cursor.length == 0) {
         gtk = ffDetectGTK2();
+    }
 
-    if(gtk->cursor.length == 0)
+    if (gtk->cursor.length == 0) {
         return false;
+    }
 
     ffStrbufAppend(&result->theme, &gtk->cursor);
     ffStrbufAppend(&result->size, &gtk->cursorSize);
     return true;
 }
 
-static void detectCursorFromConfigFile(const char* relativeFilePath, const char* themeStart, const char* themeDefault, const char* sizeStart, const char* sizeDefault, FFCursorResult* result)
-{
-    if(ffParsePropFileConfigValues(relativeFilePath, 2, (FFpropquery[]) {
-        {themeStart, &result->theme},
-        {sizeStart, &result->size}
-    })) {
-
-        if(result->theme.length == 0)
+static void detectCursorFromConfigFile(const char* relativeFilePath, const char* themeStart, const char* themeDefault, const char* sizeStart, const char* sizeDefault, FFCursorResult* result) {
+    if (ffParsePropFileConfigValues(relativeFilePath, 2, (FFpropquery[]) { { themeStart, &result->theme }, { sizeStart, &result->size } })) {
+        if (result->theme.length == 0) {
             ffStrbufAppendS(&result->theme, themeDefault);
+        }
 
-        if(result->size.length == 0)
+        if (result->size.length == 0) {
             ffStrbufAppendS(&result->size, sizeDefault);
+        }
     }
 
-    if(result->theme.length == 0)
+    if (result->theme.length == 0) {
         ffStrbufAppendF(&result->error, "Couldn't find cursor in %s", relativeFilePath);
+    }
 }
 
-static bool detectCursorFromXResources(FFCursorResult* result)
-{
-    ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {
-        {"Xcursor.theme :", &result->theme},
-        {"Xcursor.size :", &result->size}
-    });
+static bool detectCursorFromXResources(FFCursorResult* result) {
+    ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) { { "Xcursor.theme :", &result->theme }, { "Xcursor.size :", &result->size } });
 
     return result->theme.length > 0;
 }
 
-static bool detectCursorFromEnv(FFCursorResult* result)
-{
+static bool detectCursorFromEnv(FFCursorResult* result) {
     const char* xcursor_theme = getenv("XCURSOR_THEME");
 
-    if(!ffStrSet(xcursor_theme))
+    if (!ffStrSet(xcursor_theme)) {
         return false;
+    }
 
     ffStrbufAppendS(&result->theme, xcursor_theme);
     ffStrbufAppendS(&result->size, getenv("XCURSOR_SIZE"));
@@ -68,12 +64,12 @@ static bool detectCursorFromEnv(FFCursorResult* result)
     return true;
 }
 
-static bool detectCursorHyprcursor(FFCursorResult* result)
-{
+static bool detectCursorHyprcursor(FFCursorResult* result) {
     const char* hyprcursor_theme = getenv("HYPRCURSOR_THEME");
 
-    if(!ffStrSet(hyprcursor_theme))
+    if (!ffStrSet(hyprcursor_theme)) {
         return false;
+    }
 
     ffStrbufAppendS(&result->theme, hyprcursor_theme);
     ffStrbufAppendS(&result->size, getenv("HYPRCURSOR_SIZE"));
@@ -81,25 +77,25 @@ static bool detectCursorHyprcursor(FFCursorResult* result)
     return true;
 }
 
-void ffDetectCursor(FFCursorResult* result)
-{
+void ffDetectCursor(FFCursorResult* result) {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG))
+    if (ffStrbufEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG)) {
         ffStrbufAppendS(&result->error, "WSLg uses native windows cursor");
-    else if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
+    } else if (ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY)) {
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
-    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
+    } else if (ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA)) {
         detectCursorFromConfigFile("kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
-    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
+    } else if (ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT)) {
         detectCursorFromConfigFile("lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
-    else if(ffStrbufIgnCaseEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_HYPRLAND) && detectCursorHyprcursor(result))
+    } else if (ffStrbufIgnCaseEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_HYPRLAND) && detectCursorHyprcursor(result)) {
         return;
-    else if(
+    } else if (
         !detectCursorGTK(result) &&
         !detectCursorFromEnv(result) &&
         !ffParsePropFileHome(".icons/default/index.theme", "Inherits =", &result->theme) &&
         !detectCursorFromXResources(result) &&
-        !ffParsePropFileData("icons/default/index.theme", "Inherits =", &result->theme)
-    ) ffStrbufAppendS(&result->error, "Couldn't find cursor");
+        !ffParsePropFileData("icons/default/index.theme", "Inherits =", &result->theme)) {
+        ffStrbufAppendS(&result->error, "Couldn't find cursor");
+    }
 }

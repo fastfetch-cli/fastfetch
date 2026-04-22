@@ -19,8 +19,7 @@
 
 FFinstance instance; // Global singleton
 
-static void initState(FFstate* state)
-{
+static void initState(FFstate* state) {
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
@@ -33,27 +32,26 @@ static void initState(FFstate* state)
     {
         // don't enable bright color if the terminal is in light mode
         FFTerminalThemeResult result;
-        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark)
+        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark) {
             state->terminalLightTheme = true;
+        }
     }
 }
 
-static void defaultConfig(void)
-{
+static void defaultConfig(void) {
     ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
     ffOptionsInitDisplay(&instance.config.display);
 }
 
-void ffInitInstance(void)
-{
-    #ifdef _WIN32
-        // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
-        setlocale(LC_ALL, ".UTF8");
-    #else
-        // Never use `setlocale(LC_ALL, "")`
-        setlocale(LC_TIME, "");
-    #endif
+void ffInitInstance(void) {
+#ifdef _WIN32
+    // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
+    setlocale(LC_ALL, ".UTF8");
+#else
+    // Never use `setlocale(LC_ALL, "")`
+    setlocale(LC_TIME, "");
+#endif
 
     defaultConfig();
     initState(&instance.state);
@@ -65,61 +63,65 @@ static volatile bool ffHideCursor = true;
 static volatile UINT oldCp = CP_UTF8;
 #endif
 
-static void resetConsole(void)
-{
-    if(ffDisableLinewrap)
+static void resetConsole(void) {
+    if (ffDisableLinewrap) {
         fputs("\033[?7h", stdout);
+    }
 
-    if(ffHideCursor)
+    if (ffHideCursor) {
         fputs("\033[?25h", stdout);
+    }
 
-    if(instance.state.dynamicInterval > 0)
+    if (instance.state.dynamicInterval > 0) {
         fputs("\033[?1049l", stdout); // Disable alternate buffer
+    }
 
-    #if defined(_WIN32)
-        fflush(stdout);
+#if defined(_WIN32)
+    fflush(stdout);
 
-        if(oldCp != CP_UTF8)
-            SetConsoleOutputCP(oldCp);
-    #endif
+    if (oldCp != CP_UTF8) {
+        SetConsoleOutputCP(oldCp);
+    }
+#endif
 }
 
 #ifdef _WIN32
-BOOL WINAPI consoleHandler(FF_MAYBE_UNUSED DWORD signal)
-{
+BOOL WINAPI consoleHandler(FF_A_UNUSED DWORD signal) {
     resetConsole();
     exit(0);
 }
 #else
-static void exitSignalHandler(FF_MAYBE_UNUSED int signal)
-{
+static void exitSignalHandler(FF_A_UNUSED int signal) {
     resetConsole();
     exit(0);
 }
 #endif
 
-void ffStart(void)
-{
+void ffStart(void) {
     ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe;
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe;
 
-    #ifdef _WIN32
+#ifdef _WIN32
     SetErrorMode(SEM_FAILCRITICALERRORS);
-    if (instance.config.display.noBuffer)
+    if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);
-    else
+    } else {
         setvbuf(stdout, NULL, _IOFBF, 4096);
+    }
     SetConsoleCtrlHandler(consoleHandler, TRUE);
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
-    if (GetConsoleMode(hStdout, &mode))
-    {
+    if (GetConsoleMode(hStdout, &mode)) {
         SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         oldCp = GetConsoleOutputCP();
-        if (oldCp != CP_UTF8) SetConsoleOutputCP(CP_UTF8);
+        if (oldCp != CP_UTF8) {
+            SetConsoleOutputCP(CP_UTF8);
+        }
     }
-    #else
-    if (instance.config.display.noBuffer) setvbuf(stdout, NULL, _IONBF, 0);
+#else
+    if (instance.config.display.noBuffer) {
+        setvbuf(stdout, NULL, _IONBF, 0);
+    }
     struct sigaction action = { .sa_handler = exitSignalHandler };
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
@@ -128,142 +130,139 @@ void ffStart(void)
     sigemptyset(&newmask);
     sigaddset(&newmask, SIGCHLD);
     sigprocmask(SIG_BLOCK, &newmask, NULL);
-    #endif
+#endif
 
-    //reset everything to default before we start printing
-    if(!instance.config.display.pipe)
+    // reset everything to default before we start printing
+    if (!instance.config.display.pipe) {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+    }
 
-    if(ffHideCursor)
+    if (ffHideCursor) {
         fputs("\033[?25l", stdout);
+    }
 
-    if(ffDisableLinewrap)
+    if (ffDisableLinewrap) {
         fputs("\033[?7l", stdout);
+    }
 
-    if(instance.state.dynamicInterval > 0)
-    {
+    if (instance.state.dynamicInterval > 0) {
         fputs("\033[?1049h\033[H", stdout); // Enable alternate buffer
         fflush(stdout);
     }
 }
 
-void ffFinish(void)
-{
+void ffFinish(void) {
     resetConsole();
 }
 
-static void destroyConfig(void)
-{
+static void destroyConfig(void) {
     ffOptionsDestroyLogo(&instance.config.logo);
     ffOptionsDestroyGeneral(&instance.config.general);
     ffOptionsDestroyDisplay(&instance.config.display);
 }
 
-static void destroyState(void)
-{
+static void destroyState(void) {
     ffPlatformDestroy(&instance.state.platform);
 }
 
-void ffDestroyInstance(void)
-{
+void ffDestroyInstance(void) {
     destroyConfig();
     destroyState();
 }
 
-//Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
-void ffListFeatures(void)
-{
+// Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
+void ffListFeatures(void) {
     fputs(
-        #if FF_HAVE_THREADS
-            "threads\n"
-        #endif
-        #if FF_HAVE_VULKAN
-            "vulkan\n"
-        #endif
-        #if FF_HAVE_WAYLAND
-            "wayland\n"
-        #endif
-        #if FF_HAVE_XCB_RANDR
-            "xcb-randr\n"
-        #endif
-        #if FF_HAVE_XRANDR
-            "xrandr\n"
-        #endif
-        #if FF_HAVE_DRM
-            "drm\n"
-        #endif
-        #if FF_HAVE_DRM_AMDGPU
-            "drm_amdgpu\n"
-        #endif
-        #if FF_HAVE_GIO
-            "gio\n"
-        #endif
-        #if FF_HAVE_DCONF
-            "dconf\n"
-        #endif
-        #if FF_HAVE_DBUS
-            "dbus\n"
-        #endif
-        #if FF_HAVE_IMAGEMAGICK7
-            "imagemagick7\n"
-        #endif
-        #if FF_HAVE_IMAGEMAGICK6
-            "imagemagick6\n"
-        #endif
-        #if FF_HAVE_CHAFA
-            "chafa\n"
-        #endif
-        #if FF_HAVE_ZLIB
-            "zlib\n"
-        #endif
-        #if FF_HAVE_SQLITE3
-            "sqlite3\n"
-        #endif
-        #if FF_HAVE_RPM
-            "rpm\n"
-        #endif
-        #if FF_HAVE_EGL
-            "egl\n"
-        #endif
-        #if FF_HAVE_GLX
-            "glx\n"
-        #endif
-        #if FF_HAVE_OPENCL
-            "opencl\n"
-        #endif
-        #if FF_HAVE_FREETYPE
-            "freetype\n"
-        #endif
-        #if FF_HAVE_PULSE
-            "libpulse\n"
-        #endif
-        #if FF_HAVE_DDCUTIL
-            "libddcutil\n"
-        #endif
-        #if FF_HAVE_ELF || __sun || (__FreeBSD__ && !__DragonFly__) || __OpenBSD__ || __NetBSD__
-            "libelf\n"
-        #endif
-        #if FF_HAVE_LIBZFS
-            "libzfs\n"
-        #endif
-        #if FF_USE_SYSTEM_YYJSON
-            "System yyjson\n"
-        #endif
-        #if FF_HAVE_LINUX_VIDEODEV2
-            "linux/videodev2\n"
-        #endif
-        #if FF_HAVE_LINUX_WIRELESS
-            "linux/wireless\n"
-        #endif
-        #if FF_HAVE_EMBEDDED_PCIIDS
-            "Embedded pciids\n"
-        #endif
-        #if FF_WIN81_COMPAT
-            "Windows 8.1 Compatibility\n"
-        #endif
-        #if FF_APPLE_MEMSIZE_USABLE
-            "Apple memsize_usable\n"
-        #endif
-        ""
-    , stdout);
+#if FF_HAVE_THREADS
+        "threads\n"
+#endif
+#if FF_HAVE_VULKAN
+        "vulkan\n"
+#endif
+#if FF_HAVE_WAYLAND
+        "wayland\n"
+#endif
+#if FF_HAVE_XCB_RANDR
+        "xcb-randr\n"
+#endif
+#if FF_HAVE_XRANDR
+        "xrandr\n"
+#endif
+#if FF_HAVE_DRM
+        "drm\n"
+#endif
+#if FF_HAVE_DRM_AMDGPU
+        "drm_amdgpu\n"
+#endif
+#if FF_HAVE_GIO
+        "gio\n"
+#endif
+#if FF_HAVE_DCONF
+        "dconf\n"
+#endif
+#if FF_HAVE_DBUS
+        "dbus\n"
+#endif
+#if FF_HAVE_IMAGEMAGICK7
+        "imagemagick7\n"
+#endif
+#if FF_HAVE_IMAGEMAGICK6
+        "imagemagick6\n"
+#endif
+#if FF_HAVE_CHAFA
+        "chafa\n"
+#endif
+#if FF_HAVE_ZLIB
+        "zlib\n"
+#endif
+#if FF_HAVE_SQLITE3
+        "sqlite3\n"
+#endif
+#if FF_HAVE_RPM
+        "rpm\n"
+#endif
+#if FF_HAVE_EGL
+        "egl\n"
+#endif
+#if FF_HAVE_GLX
+        "glx\n"
+#endif
+#if FF_HAVE_OPENCL
+        "opencl\n"
+#endif
+#if FF_HAVE_FREETYPE
+        "freetype\n"
+#endif
+#if FF_HAVE_PULSE
+        "libpulse\n"
+#endif
+#if FF_HAVE_DDCUTIL
+        "libddcutil\n"
+#endif
+#if FF_HAVE_ELF || __sun || (__FreeBSD__ && !__DragonFly__) || __OpenBSD__ || __NetBSD__
+        "libelf\n"
+#endif
+#if FF_HAVE_LIBZFS
+        "libzfs\n"
+#endif
+#if FF_USE_SYSTEM_YYJSON
+        "System yyjson\n"
+#endif
+#if FF_HAVE_LINUX_VIDEODEV2
+        "linux/videodev2\n"
+#endif
+#if FF_HAVE_LINUX_WIRELESS
+        "linux/wireless\n"
+#endif
+#if FF_HAVE_EMBEDDED_PCIIDS
+        "Embedded pciids\n"
+#endif
+#if FF_WIN81_COMPAT
+        "Windows 8.1 Compatibility\n"
+#endif
+#if FF_APPLE_MEMSIZE_USABLE
+        "Apple memsize_usable\n"
+#endif
+        "",
+        stdout);
 }

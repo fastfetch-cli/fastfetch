@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/FFlist.h"
 
-typedef struct FFMouseOptions
-{
+typedef struct FFMouseOptions {
     FFModuleArgs moduleArgs;
 
     FFlist ignores; // List of FFstrbuf

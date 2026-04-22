@@ -2,10 +2,8 @@
 
 #include "common/windows/nt.h"
 
-void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
-{
-    if(!length)
-    {
+void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source) {
+    if (!length) {
         ffStrbufClear(result);
         return;
     }
@@ -13,8 +11,7 @@ void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
     ULONG size_needed = 0;
     NTSTATUS status = RtlUnicodeToUTF8N(NULL, 0, &size_needed, source, length * sizeof(wchar_t));
 
-    if (size_needed == 0)
-    {
+    if (size_needed == 0) {
         ffStrbufSetF(result, "RtlUnicodeToUTF8N failed: %X", (unsigned) status);
         return;
     }
@@ -26,16 +23,15 @@ void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
     result->chars[size_needed] = '\0';
 }
 
-void ffStrbufAppendNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
-{
-    if(!length)
+void ffStrbufAppendNWS(FFstrbuf* result, uint32_t length, const wchar_t* source) {
+    if (!length) {
         return;
+    }
 
     ULONG size_needed = 0;
     NTSTATUS status = RtlUnicodeToUTF8N(NULL, 0, &size_needed, source, length * sizeof(wchar_t));
 
-    if (size_needed == 0)
-    {
+    if (size_needed == 0) {
         ffStrbufAppendF(result, "RtlUnicodeToUTF8N failed: %X", (unsigned) status);
         return;
     }

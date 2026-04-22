@@ -54,7 +54,7 @@ typedef struct {
     unsigned long long used;
 } nvmlMemory_v2_t;
 // https://github.com/NVIDIA/nvidia-settings/issues/78#issuecomment-1012837988
-enum { nvmlMemory_v2 = (unsigned int)(sizeof(nvmlMemory_v2_t) | (2 << 24U)) };
+enum { nvmlMemory_v2 = (unsigned int) (sizeof(nvmlMemory_v2_t) | (2 << 24U)) };
 
 // https://docs.nvidia.com/deploy/nvml-api/structnvmlMemory__t.html#structnvmlMemory__t
 // Memory allocation information for a device (v1)
@@ -137,7 +137,7 @@ extern nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatur
 // Retrieves the amount of used, free, reserved and total memory available on the device, in bytes. The reserved amount is supported on version 2 only
 extern nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory);
 // Retrieves the amount of used, free, total memory available on the device, in bytes.
-extern nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t *memory);
+extern nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory);
 // Gets the device's core count
 extern nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores);
 // Retrieves the maximum clock speeds for the device
@@ -145,8 +145,8 @@ extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType
 // Retrieves the brand of this device
 extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
 // Retrieves the current utilization rates for the device
-extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t *utilization);
+extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization);
 // Retrieves the globally unique immutable UUID associated with this device, as a 5 part hexadecimal string, that augments the immutable, board serial identifier.
-extern nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int *index);
+extern nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int* index);
 // Retrieves the name of this device.
-extern nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length);
+extern nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int length);

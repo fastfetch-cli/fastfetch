@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFHostOptions
-{
+typedef struct FFHostOptions {
     FFModuleArgs moduleArgs;
 } FFHostOptions;
 

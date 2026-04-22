@@ -7,41 +7,37 @@
 
 #ifdef FF_HAVE_OPENCL
 
-#include "common/library.h"
-#include "common/parsing.h"
-#include "common/stringUtils.h"
-#include <string.h>
+    #include "common/library.h"
+    #include "common/parsing.h"
+    #include "common/stringUtils.h"
+    #include <string.h>
 
-#define CL_TARGET_OPENCL_VERSION 110
-#ifndef __APPLE__
-    #include <CL/cl.h>
-    #include <CL/cl_ext.h>
-#else
-    #include <OpenCL/cl.h>
-    #include <OpenCL/cl_ext.h>
-#endif
+    #define CL_TARGET_OPENCL_VERSION 110
+    #ifndef __APPLE__
+        #include <CL/cl.h>
+        #include <CL/cl_ext.h>
+    #else
+        #include <OpenCL/cl.h>
+        #include <OpenCL/cl_ext.h>
+    #endif
 
-typedef struct OpenCLData
-{
+typedef struct OpenCLData {
     FF_LIBRARY_SYMBOL(clGetPlatformIDs)
     FF_LIBRARY_SYMBOL(clGetPlatformInfo)
     FF_LIBRARY_SYMBOL(clGetDeviceInfo)
     FF_LIBRARY_SYMBOL(clGetDeviceIDs)
 } OpenCLData;
 
-static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
-{
+static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result) {
     cl_platform_id platforms[32];
     cl_uint numPlatforms = 0;
     cl_int ret = data->ffclGetPlatformIDs(ARRAY_SIZE(platforms), platforms, &numPlatforms);
-    if (ret != CL_SUCCESS)
-    {
-        switch (ret)
-        {
-            #ifdef CL_PLATFORM_NOT_FOUND_KHR // not available on macOS
+    if (ret != CL_SUCCESS) {
+        switch (ret) {
+    #ifdef CL_PLATFORM_NOT_FOUND_KHR // not available on macOS
             case CL_PLATFORM_NOT_FOUND_KHR:
                 return "clGetPlatformIDs() failed: CL_PLATFORM_NOT_FOUND_KHR";
-            #endif
+    #endif
             case CL_INVALID_VALUE:
                 return "clGetPlatformIDs() failed: CL_INVALID_VALUE";
             case CL_OUT_OF_HOST_MEMORY:
@@ -51,43 +47,47 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         }
     }
 
-    if (numPlatforms == 0)
+    if (numPlatforms == 0) {
         return "clGetPlatformIDs returned 0 platforms";
+    }
 
     char buffer[1024];
-    for (cl_uint iplat = 0; iplat < numPlatforms; ++iplat)
-    {
-        if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
+    for (cl_uint iplat = 0; iplat < numPlatforms; ++iplat) {
+        if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL) != CL_SUCCESS) {
             return "clGetPlatformInfo() failed";
+        }
 
         // Use the newest supported OpenCL version
-        if (ffStrbufCompS(&result->version, buffer) < 0)
-        {
+        if (ffStrbufCompS(&result->version, buffer) < 0) {
             const char* versionPretty = buffer;
-            if(ffStrStartsWithIgnCase(buffer, "OpenCL "))
+            if (ffStrStartsWithIgnCase(buffer, "OpenCL ")) {
                 versionPretty = buffer + strlen("OpenCL ");
+            }
             ffStrbufSetS(&result->version, versionPretty);
             ffStrbufTrim(&result->version, ' ');
 
-            if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                 ffStrbufSetS(&result->name, buffer);
+            }
 
-            if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                 ffStrbufSetS(&result->vendor, buffer);
+            }
         }
 
         cl_device_id deviceIDs[32];
         cl_uint numDevices = (cl_uint) ARRAY_SIZE(deviceIDs);
-        if (data->ffclGetDeviceIDs(platforms[iplat], CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices) != CL_SUCCESS)
+        if (data->ffclGetDeviceIDs(platforms[iplat], CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices) != CL_SUCCESS) {
             continue;
+        }
 
-        for (cl_uint idev = 0; idev < numDevices; ++idev)
-        {
+        for (cl_uint idev = 0; idev < numDevices; ++idev) {
             cl_device_id deviceID = deviceIDs[idev];
-            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL) != CL_SUCCESS) {
                 continue;
+            }
 
-            FFGPUResult* gpu = ffListAdd(&result->gpus);
+            FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, result->gpus);
             ffStrbufInitS(&gpu->name, buffer);
             ffStrbufInit(&gpu->vendor);
             ffStrbufInit(&gpu->driver);
@@ -102,56 +102,58 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
             gpu->frequency = FF_GPU_FREQUENCY_UNSET;
             gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
 
-            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            {
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                 ffStrbufSetS(&gpu->platformApi, buffer);
                 ffStrbufTrimRight(&gpu->platformApi, ' ');
-            }
-            else
+            } else {
                 ffStrbufSetStatic(&gpu->platformApi, "OpenCL");
+            }
 
             {
                 cl_uint vendorId;
-                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR_ID, sizeof(vendorId), &vendorId, NULL) == CL_SUCCESS)
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR_ID, sizeof(vendorId), &vendorId, NULL) == CL_SUCCESS) {
                     ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
-                if (gpu->vendor.length == 0 && data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+                }
+                if (gpu->vendor.length == 0 && data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                     ffStrbufSetS(&gpu->vendor, buffer);
+                }
             }
 
-            if (data->ffclGetDeviceInfo(deviceID, CL_DRIVER_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            {
+            if (data->ffclGetDeviceInfo(deviceID, CL_DRIVER_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                 const char* versionPretty = strchr(buffer, ' ');
-                if (versionPretty && *versionPretty)
+                if (versionPretty && *versionPretty) {
                     ffStrbufSetS(&gpu->driver, versionPretty + 1);
-                else
+                } else {
                     ffStrbufSetS(&gpu->driver, buffer);
+                }
             }
 
             {
                 cl_uint value;
-                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(value), &value, NULL) == CL_SUCCESS)
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(value), &value, NULL) == CL_SUCCESS) {
                     gpu->coreCount = (int32_t) value;
+                }
             }
 
             {
                 cl_uint value;
-                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(value), &value, NULL) == CL_SUCCESS)
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(value), &value, NULL) == CL_SUCCESS) {
                     gpu->frequency = value;
+                }
             }
 
             {
                 cl_bool value;
-                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_HOST_UNIFIED_MEMORY, sizeof(value), &value, NULL) == CL_SUCCESS)
-                {
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_HOST_UNIFIED_MEMORY, sizeof(value), &value, NULL) == CL_SUCCESS) {
                     gpu->type = value ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
                     cl_ulong memSize;
-                    if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(memSize), &memSize, NULL) == CL_SUCCESS)
-                    {
-                        if (gpu->type == FF_GPU_TYPE_INTEGRATED)
+                    if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(memSize), &memSize, NULL) == CL_SUCCESS) {
+                        if (gpu->type == FF_GPU_TYPE_INTEGRATED) {
                             gpu->shared.total = memSize;
-                        else
+                        } else {
                             gpu->dedicated.total = memSize;
+                        }
                     }
                 }
             }
@@ -161,18 +163,18 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
     return NULL;
 }
 
-static const char* detectOpenCL(FFOpenCLResult* result)
-{
+static const char* detectOpenCL(FFOpenCLResult* result) {
     OpenCLData data;
 
     #ifndef __APPLE__
 
     FF_LIBRARY_LOAD_MESSAGE(opencl,
         #ifdef _WIN32
-            "OpenCL" FF_LIBRARY_EXTENSION, -1,
+        "OpenCL" FF_LIBRARY_EXTENSION,
+        -1,
         #endif
-        "libOpenCL" FF_LIBRARY_EXTENSION, 1
-    );
+        "libOpenCL" FF_LIBRARY_EXTENSION,
+        1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformInfo);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
@@ -194,22 +196,22 @@ static const char* detectOpenCL(FFOpenCLResult* result)
 
 #endif // defined(FF_HAVE_OPENCL)
 
-FFOpenCLResult* ffDetectOpenCL(void)
-{
+FFOpenCLResult* ffDetectOpenCL(void) {
     static FFOpenCLResult result;
+    static bool initialized;
 
-    if (result.gpus.elementSize == 0)
-    {
+    if (!initialized) {
+        initialized = true;
         ffStrbufInit(&result.version);
         ffStrbufInit(&result.name);
         ffStrbufInit(&result.vendor);
-        ffListInit(&result.gpus, sizeof(FFGPUResult));
+        ffListInit(&result.gpus);
 
-        #ifdef FF_HAVE_OPENCL
-            result.error = detectOpenCL(&result);
-        #else
-            result.error = "fastfetch was compiled without OpenCL support";
-        #endif
+#ifdef FF_HAVE_OPENCL
+        result.error = detectOpenCL(&result);
+#else
+        result.error = "fastfetch was compiled without OpenCL support";
+#endif
     }
 
     return &result;

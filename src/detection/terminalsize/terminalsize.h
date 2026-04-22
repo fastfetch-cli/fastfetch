@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/terminalsize/option.h"
 
-typedef struct FFTerminalSizeResult
-{
+typedef struct FFTerminalSizeResult {
     uint16_t rows;
     uint16_t columns;
     uint16_t width;

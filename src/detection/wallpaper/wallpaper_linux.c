@@ -2,25 +2,26 @@
 #include "common/settings.h"
 #include "detection/gtk_qt/gtk_qt.h"
 
-const char* ffDetectWallpaper(FFstrbuf* result)
-{
+const char* ffDetectWallpaper(FFstrbuf* result) {
     const FFstrbuf* wallpaper = NULL;
     const FFGTKResult* gtk = ffDetectGTK4();
-    if (gtk->wallpaper.length)
+    if (gtk->wallpaper.length) {
         wallpaper = &gtk->wallpaper;
-    else
-    {
+    } else {
         const FFQtResult* qt = ffDetectQt();
-        if (qt->wallpaper.length)
+        if (qt->wallpaper.length) {
             wallpaper = &qt->wallpaper;
+        }
     }
 
-    if (!wallpaper)
+    if (!wallpaper) {
         return "Failed to detect the current wallpaper path";
+    }
 
-    if (ffStrbufStartsWithS(wallpaper, "file:///"))
+    if (ffStrbufStartsWithS(wallpaper, "file:///")) {
         ffStrbufAppendS(result, wallpaper->chars + strlen("file://"));
-    else
+    } else {
         ffStrbufAppend(result, wallpaper);
+    }
     return NULL;
 }

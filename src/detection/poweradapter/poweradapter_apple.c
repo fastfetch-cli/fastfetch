@@ -5,12 +5,10 @@
 #include <IOKit/ps/IOPowerSources.h>
 #include <IOKit/ps/IOPSKeys.h>
 
-const char* ffDetectPowerAdapter(FFlist* results)
-{
+const char* ffDetectPowerAdapter(FFlist* results) {
     FF_CFTYPE_AUTO_RELEASE CFDictionaryRef details = IOPSCopyExternalPowerAdapterDetails();
-    if (details && CFDictionaryContainsKey(details, CFSTR(kIOPSPowerAdapterWattsKey)))
-    {
-        FFPowerAdapterResult* adapter = ffListAdd(results);
+    if (details && CFDictionaryContainsKey(details, CFSTR(kIOPSPowerAdapterWattsKey))) {
+        FFPowerAdapterResult* adapter = FF_LIST_ADD(FFPowerAdapterResult, *results);
 
         ffStrbufInit(&adapter->name);
         ffStrbufInit(&adapter->description);
@@ -20,19 +18,19 @@ const char* ffDetectPowerAdapter(FFlist* results)
         adapter->watts = 0;
 
         ffCfDictGetString(details, CFSTR(kIOPSNameKey), &adapter->name);
-        if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL)
-        {
+        if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL) {
             int adapterId;
-            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterIDKey), &adapterId) == 0)
+            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterIDKey), &adapterId) == 0) {
                 ffStrbufSetF(&adapter->modelName, "%d", adapterId);
+            }
         }
         ffCfDictGetString(details, CFSTR("Manufacturer"), &adapter->manufacturer);
         ffCfDictGetString(details, CFSTR("Description"), &adapter->description);
-        if (ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial) != NULL)
-        {
+        if (ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial) != NULL) {
             int serialNumber;
-            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterSerialNumberKey), &serialNumber) == 0)
+            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterSerialNumberKey), &serialNumber) == 0) {
                 ffStrbufSetF(&adapter->serial, "%X", serialNumber);
+            }
         }
         ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterWattsKey), &adapter->watts);
     }

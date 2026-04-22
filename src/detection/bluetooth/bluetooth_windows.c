@@ -7,8 +7,7 @@
 
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
-const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
-{
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
     FF_LIBRARY_LOAD_MESSAGE(bluetoothapis, "bluetoothapis.dll", 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
@@ -18,62 +17,69 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         .dwSize = sizeof(btdi)
     };
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&(BLUETOOTH_DEVICE_SEARCH_PARAMS) {
-        .fReturnConnected = TRUE,
-        .fReturnRemembered = options->showDisconnected,
-        .fReturnAuthenticated = options->showDisconnected,
-        .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS)
-    }, &btdi);
-    if(!hFind)
-    {
-        if (GetLastError() == ERROR_NO_MORE_ITEMS)
+                                                                  .fReturnConnected = TRUE,
+                                                                  .fReturnRemembered = options->showDisconnected,
+                                                                  .fReturnAuthenticated = options->showDisconnected,
+                                                                  .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS) },
+        &btdi);
+    if (!hFind) {
+        if (GetLastError() == ERROR_NO_MORE_ITEMS) {
             return NULL;
+        }
         return "BluetoothFindFirstDevice() failed";
     }
 
     do {
-        FFBluetoothResult* device = ffListAdd(devices);
+        if (!options->showDisconnected && !btdi.fConnected) {
+            continue;
+        }
+
+        FFBluetoothResult* device = FF_LIST_ADD(FFBluetoothResult, *devices);
         ffStrbufInitWS(&device->name, btdi.szName);
-        ffStrbufInitF(&device->address, "%02X:%02X:%02X:%02X:%02X:%02X",
-            btdi.Address.rgBytes[5],
-            btdi.Address.rgBytes[4],
-            btdi.Address.rgBytes[3],
-            btdi.Address.rgBytes[2],
-            btdi.Address.rgBytes[1],
-            btdi.Address.rgBytes[0]);
+        ffStrbufInitF(&device->address, "%02X:%02X:%02X:%02X:%02X:%02X", btdi.Address.rgBytes[5], btdi.Address.rgBytes[4], btdi.Address.rgBytes[3], btdi.Address.rgBytes[2], btdi.Address.rgBytes[1], btdi.Address.rgBytes[0]);
         ffStrbufInit(&device->type);
         device->battery = 0;
         device->connected = !!btdi.fConnected;
 
-        //https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned%20Numbers.pdf
+        // https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned%20Numbers.pdf
 
-        if(BitTest(&btdi.ulClassofDevice, 13))
+        if (BitTest(&btdi.ulClassofDevice, 13)) {
             ffStrbufAppendS(&device->type, "Limited Discoverable Mode, ");
-        if(BitTest(&btdi.ulClassofDevice, 14))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 14)) {
             ffStrbufAppendS(&device->type, "LE audio, ");
-        if(BitTest(&btdi.ulClassofDevice, 15))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 15)) {
             ffStrbufAppendS(&device->type, "Reserved for future use, ");
-        if(BitTest(&btdi.ulClassofDevice, 16))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 16)) {
             ffStrbufAppendS(&device->type, "Positioning, ");
-        if(BitTest(&btdi.ulClassofDevice, 17))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 17)) {
             ffStrbufAppendS(&device->type, "Networking, ");
-        if(BitTest(&btdi.ulClassofDevice, 18))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 18)) {
             ffStrbufAppendS(&device->type, "Rendering, ");
-        if(BitTest(&btdi.ulClassofDevice, 19))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 19)) {
             ffStrbufAppendS(&device->type, "Capturing, ");
-        if(BitTest(&btdi.ulClassofDevice, 20))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 20)) {
             ffStrbufAppendS(&device->type, "Object Transfer, ");
-        if(BitTest(&btdi.ulClassofDevice, 21))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 21)) {
             ffStrbufAppendS(&device->type, "Audio, ");
-        if(BitTest(&btdi.ulClassofDevice, 22))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 22)) {
             ffStrbufAppendS(&device->type, "Telephony, ");
-        if(BitTest(&btdi.ulClassofDevice, 23))
+        }
+        if (BitTest(&btdi.ulClassofDevice, 23)) {
             ffStrbufAppendS(&device->type, "Information, ");
+        }
 
-        if(device->type.length == 0)
-        {
+        if (device->type.length == 0) {
             uint32_t majorDeviceClasses = (btdi.ulClassofDevice >> 8) & ~(UINT32_MAX << 5);
-            switch(majorDeviceClasses)
-            {
+            switch (majorDeviceClasses) {
                 case 0b00000:
                     ffStrbufAppendS(&device->type, "Miscellaneous");
                     break;
@@ -111,9 +117,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
                     ffStrbufAppendS(&device->type, "Unknown");
                     break;
             }
-        }
-        else
-        {
+        } else {
             ffStrbufTrimRight(&device->type, ' ');
             ffStrbufTrimRight(&device->type, ',');
         }
@@ -121,7 +125,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
 
     ffBluetoothFindDeviceClose(hFind);
 
-    const char* ffBluetoothDetectBattery(FFlist* result);
+    const char* ffBluetoothDetectBattery(FFlist * result);
     ffBluetoothDetectBattery(devices);
 
     return NULL;

@@ -3,17 +3,17 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum __attribute__((__packed__)) FFSoundType
-{
-    FF_SOUND_TYPE_MAIN,
-    FF_SOUND_TYPE_ACTIVE,
-    FF_SOUND_TYPE_ALL,
+typedef enum FF_A_PACKED FFSoundType {
+    FF_SOUND_TYPE_NONE = 0,
+    FF_SOUND_TYPE_MAIN = 1 << 0,
+    FF_SOUND_TYPE_ACTIVE = 1 << 1,
 } FFSoundType;
 
-typedef struct FFSoundOptions
-{
+typedef struct FFSoundOptions {
     FFModuleArgs moduleArgs;
 
+    // Reports matched device only, otherwise reports all devices
+    // NOTE: for FF_SOUND_TYPE_NONE, reports all devices
     FFSoundType soundType;
     FFPercentageModuleConfig percent;
 } FFSoundOptions;

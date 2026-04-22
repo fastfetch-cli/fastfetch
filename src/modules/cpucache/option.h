@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCPUCacheOptions
-{
+typedef struct FFCPUCacheOptions {
     FFModuleArgs moduleArgs;
 
     bool compact;
