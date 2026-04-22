@@ -2692,10 +2692,10 @@ static const FFlogo L[] = {
         .names = {"LimeOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_LIMEOS,
         .colors = {
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // Linspire
     {
