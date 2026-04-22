@@ -1593,7 +1593,7 @@ static const FFlogo E[] = {
     },
     // EN-OS
     {
-        .names = {"EN-OS", "enos"},
+        .names = {"ENOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_ENOS,
         .colors = {
             FF_COLOR_FG_BLUE,       
