@@ -1,8 +1,7 @@
 #include "common/wcwidth.h"
 #include "3rdparty/widecharwidth/widechar_width_c.h"
 
-int mk_wcwidth(uint32_t wc)
-{
+int mk_wcwidth(uint32_t wc) {
     // // We render U+1F6E1 (🛡) with a width of 2,
     // // but widechar_width says it has a width of 1 because Unicode classifies it as "neutral".
     // //

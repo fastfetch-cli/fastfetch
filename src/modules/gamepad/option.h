@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/FFlist.h"
 
-typedef struct FFGamepadOptions
-{
+typedef struct FFGamepadOptions {
     FFModuleArgs moduleArgs;
 
     FFlist ignores; // List of FFstrbuf

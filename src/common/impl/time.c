@@ -9,9 +9,10 @@ char ffTimeInternalBuffer[64]; // Reduce memory usage and prevent redundant allo
     #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
-const char* ffTimeToFullStr(uint64_t msec)
-{
-    if (msec == 0) return "";
+const char* ffTimeToFullStr(uint64_t msec) {
+    if (msec == 0) {
+        return "";
+    }
     time_t tsec = (time_t) (msec / 1000);
     const struct tm* tm = localtime(&tsec);
 
@@ -22,18 +23,20 @@ const char* ffTimeToFullStr(uint64_t msec)
     return ffTimeInternalBuffer;
 }
 
-const char* ffTimeToShortStr(uint64_t msec)
-{
-    if (msec == 0) return "";
+const char* ffTimeToShortStr(uint64_t msec) {
+    if (msec == 0) {
+        return "";
+    }
     time_t tsec = (time_t) (msec / 1000);
 
     strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%F %T", localtime(&tsec));
     return ffTimeInternalBuffer;
 }
 
-const char* ffTimeToTimeStr(uint64_t msec)
-{
-    if (msec == 0) return "";
+const char* ffTimeToTimeStr(uint64_t msec) {
+    if (msec == 0) {
+        return "";
+    }
     time_t tsec = (time_t) (msec / 1000);
 
     uint32_t len = (uint32_t) strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%T", localtime(&tsec));
@@ -45,31 +48,32 @@ const char* ffTimeToTimeStr(uint64_t msec)
     #pragma GCC diagnostic pop
 #endif
 
-FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
-{
+FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs) {
     FFTimeGetAgeResult result = {};
-    if (__builtin_expect(birthMs == 0 || nowMs < birthMs, 0))
+    if (__builtin_expect(birthMs == 0 || nowMs < birthMs, 0)) {
         return result;
+    }
 
     time_t birth_s = (time_t) (birthMs / 1000);
     struct tm birth_tm;
-    #ifdef _WIN32
+#ifdef _WIN32
     localtime_s(&birth_tm, &birth_s);
-    #else
+#else
     localtime_r(&birth_s, &birth_tm);
-    #endif
+#endif
 
     time_t now_s = (time_t) (nowMs / 1000);
     struct tm now_tm;
-    #ifdef _WIN32
+#ifdef _WIN32
     localtime_s(&now_tm, &now_s);
-    #else
+#else
     localtime_r(&now_s, &now_tm);
-    #endif
+#endif
 
     result.years = (uint32_t) (now_tm.tm_year - birth_tm.tm_year);
-    if (now_tm.tm_yday < birth_tm.tm_yday)
+    if (now_tm.tm_yday < birth_tm.tm_yday) {
         result.years--;
+    }
 
     birth_tm.tm_year += (int) result.years;
     birth_s = mktime(&birth_tm);
@@ -83,13 +87,11 @@ FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
 }
 
 #ifdef _WIN32
-    double ffQpcMultiplier;
+double ffQpcMultiplier;
 
-    __attribute__((constructor))
-    static void ffTimeInitQpcMultiplier(void)
-    {
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
-        ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
-    }
+__attribute__((constructor)) static void ffTimeInitQpcMultiplier(void) {
+    LARGE_INTEGER frequency;
+    RtlQueryPerformanceFrequency(&frequency);
+    ffQpcMultiplier = 1000. / (double) frequency.QuadPart;
+}
 #endif

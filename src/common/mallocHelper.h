@@ -13,27 +13,26 @@
     #include <malloc/malloc.h>
 #endif
 
-static inline void ffWrapFree(const void* pPtr)
-{
+static inline void ffWrapFree(const void* pPtr) {
     assert(pPtr);
-    if(*(void**)pPtr)
-        free(*(void**)pPtr);
+    if (*(void**) pPtr) {
+        free(*(void**) pPtr);
+    }
 }
 
-#define FF_AUTO_FREE __attribute__((__cleanup__(ffWrapFree)))
+#define FF_AUTO_FREE FF_A_CLEANUP(ffWrapFree)
 
 // ptr MUST be a malloc'ed pointer
-static inline size_t ffMallocUsableSize(const void* ptr)
-{
+static inline size_t ffMallocUsableSize(const void* ptr) {
     assert(ptr);
-    #if FF_HAVE_MALLOC_USABLE_SIZE
-        return malloc_usable_size((void*) ptr);
-    #elif FF_HAVE_MALLOC_SIZE
-        return malloc_size((void*) ptr);
-    #elif FF_HAVE_MSVC_MSIZE
-        return _msize((void*) ptr);
-    #else
-        (void) ptr;
-        return 0; // Not supported
-    #endif
+#if FF_HAVE_MALLOC_USABLE_SIZE
+    return malloc_usable_size((void*) ptr);
+#elif FF_HAVE_MALLOC_SIZE
+    return malloc_size((void*) ptr);
+#elif FF_HAVE_MSVC_MSIZE
+    return _msize((void*) ptr);
+#else
+    (void) ptr;
+    return 0; // Not supported
+#endif
 }

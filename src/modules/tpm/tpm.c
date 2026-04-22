@@ -4,34 +4,30 @@
 #include "detection/tpm/tpm.h"
 #include "modules/tpm/tpm.h"
 
-bool ffPrintTPM(FFTPMOptions* options)
-{
+bool ffPrintTPM(FFTPMOptions* options) {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
         .description = ffStrbufCreate()
     };
     const char* error = ffDetectTPM(&result);
 
-    if(error)
-    {
+    if (error) {
         ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        if (result.description.length > 0)
+        if (result.description.length > 0) {
             ffStrbufPutTo(&result.description, stdout);
-        else
+        } else {
             ffStrbufPutTo(&result.version, stdout);
-    }
-    else
-    {
-        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(result.version, "version"),
-            FF_ARG(result.description, "description"),
-        }));
+        }
+    } else {
+        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                        FF_ARG(result.version, "version"),
+                                                                                                        FF_ARG(result.description, "description"),
+                                                                                                    }));
     }
 
     ffStrbufDestroy(&result.version);
@@ -40,34 +36,30 @@ bool ffPrintTPM(FFTPMOptions* options)
     return true;
 }
 
-void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module)
-{
+void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateTPMJsonResult(FF_A_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
         .description = ffStrbufCreate()
     };
     const char* error = ffDetectTPM(&result);
 
-    if(error)
-    {
+    if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return false;
     }
@@ -82,19 +74,17 @@ bool ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_d
     return true;
 }
 
-void ffInitTPMOptions(FFTPMOptions* options)
-{
+void ffInitTPMOptions(FFTPMOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
-void ffDestroyTPMOptions(FFTPMOptions* options)
-{
+void ffDestroyTPMOptions(FFTPMOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 FFModuleBaseInfo ffTPMModuleInfo = {
     .name = FF_TPM_MODULE_NAME,
-    .description = "Print info of Trusted Platform Module (TPM) Security Device",
+    .description = "Print information about the Trusted Platform Module (TPM) security device",
     .initOptions = (void*) ffInitTPMOptions,
     .destroyOptions = (void*) ffDestroyTPMOptions,
     .parseJsonObject = (void*) ffParseTPMJsonObject,
@@ -102,7 +92,7 @@ FFModuleBaseInfo ffTPMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTPMJsonResult,
     .generateJsonConfig = (void*) ffGenerateTPMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"TPM device version", "version"},
-        {"TPM general description", "description"},
+        { "TPM device version", "version" },
+        { "TPM general description", "description" },
     }))
 };

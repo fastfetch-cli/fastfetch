@@ -5,10 +5,9 @@
 #include "common/debug.h"
 
 #ifdef FF_HAVE_ZLIB
-#include <zlib.h>
+    #include <zlib.h>
 
-struct FFZlibLibrary
-{
+struct FFZlibLibrary {
     FF_LIBRARY_SYMBOL(inflateInit2_)
     FF_LIBRARY_SYMBOL(inflate)
     FF_LIBRARY_SYMBOL(inflateEnd)
@@ -16,18 +15,17 @@ struct FFZlibLibrary
     bool inited;
 } zlibData;
 
-const char* ffNetworkingLoadZlibLibrary(void)
-{
-    if (!zlibData.inited)
-    {
+const char* ffNetworkingLoadZlibLibrary(void) {
+    if (!zlibData.inited) {
         zlibData.inited = true;
         FF_LIBRARY_LOAD_MESSAGE(zlib,
-            #ifdef _WIN32
-                "zlib1"
-            #else
-                "libz"
-            #endif
-            FF_LIBRARY_EXTENSION, 2)
+    #ifdef _WIN32
+            "zlib1"
+    #else
+            "libz"
+    #endif
+            FF_LIBRARY_EXTENSION,
+            2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateInit2_)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflate)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateEnd)
@@ -37,16 +35,16 @@ const char* ffNetworkingLoadZlibLibrary(void)
 }
 
 // Try to pre-read gzip header to determine uncompressed size
-static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize)
-{
+static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize) {
     // gzip file format: http://www.zlib.org/rfc-gzip.html
-    if (dataSize < 10 || ((const uint8_t*)data)[0] != 0x1f || ((const uint8_t*)data)[1] != 0x8b)
+    if (dataSize < 10 || ((const uint8_t*) data)[0] != 0x1f || ((const uint8_t*) data)[1] != 0x8b) {
         return 0;
+    }
 
     // Uncompressed size in gzip format is stored in the last 4 bytes, but only valid if data is less than 4GB
     if (dataSize > 18) {
         // Get ISIZE value from the end of file (little endian)
-        const uint8_t* tail = (const uint8_t*)data + dataSize - 4;
+        const uint8_t* tail = (const uint8_t*) data + dataSize - 4;
         uint32_t uncompressedSize = (uint32_t) tail[0] | ((uint32_t) tail[1] << 8u) | ((uint32_t) tail[2] << 16u) | ((uint32_t) tail[3] << 24u);
 
         // For valid gzip files, this value is the length of the uncompressed data modulo 2^32
@@ -65,8 +63,7 @@ static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize)
 }
 
 // Decompress gzip content
-bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
-{
+bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd) {
     assert(headerEnd != NULL && *headerEnd == '\r');
 
     // Calculate header size
@@ -96,7 +93,7 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
     uint32_t compressedSize = buffer->length - headerSize - 4;
 
     // Check if content is actually in gzip format (gzip header magic is 0x1f 0x8b)
-    if (compressedSize < 2 || (uint8_t)bodyStart[0] != 0x1f || (uint8_t)bodyStart[1] != 0x8b) {
+    if (compressedSize < 2 || (uint8_t) bodyStart[0] != 0x1f || (uint8_t) bodyStart[1] != 0x8b) {
         FF_DEBUG("Content is not valid gzip format, skipping decompression");
         return false;
     }
@@ -113,14 +110,14 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
         .zalloc = Z_NULL,
         .zfree = Z_NULL,
         .opaque = Z_NULL,
-        .avail_in = (uInt)compressedSize,
-        .next_in = (Bytef*)bodyStart,
-        .avail_out = (uInt)ffStrbufGetFree(&decompressedBuffer),
-        .next_out = (Bytef*)decompressedBuffer.chars,
+        .avail_in = (uInt) compressedSize,
+        .next_in = (Bytef*) bodyStart,
+        .avail_out = (uInt) ffStrbufGetFree(&decompressedBuffer),
+        .next_out = (Bytef*) decompressedBuffer.chars,
     };
 
     // Initialize decompression engine
-    if (zlibData.ffinflateInit2_(&zs, 16 + MAX_WBITS, ZLIB_VERSION, (int)sizeof(z_stream)) != Z_OK) {
+    if (zlibData.ffinflateInit2_(&zs, 16 + MAX_WBITS, ZLIB_VERSION, (int) sizeof(z_stream)) != Z_OK) {
         FF_DEBUG("Failed to initialize decompression engine");
         return false;
     }
@@ -130,20 +127,19 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
     int result = zlibData.ffinflate(&zs, Z_FINISH);
 
     // If output buffer is insufficient, try to extend buffer
-    while (result == Z_BUF_ERROR || (result != Z_STREAM_END && zs.avail_out == 0))
-    {
+    while (result == Z_BUF_ERROR || (result != Z_STREAM_END && zs.avail_out == 0)) {
         FF_DEBUG("Output buffer insufficient, trying to extend");
 
         // Save already decompressed data amount
-        uint32_t alreadyDecompressed = (uint32_t)(availableOut - zs.avail_out);
+        uint32_t alreadyDecompressed = (uint32_t) (availableOut - zs.avail_out);
         decompressedBuffer.length += alreadyDecompressed;
         decompressedBuffer.chars[decompressedBuffer.length] = '\0';
 
         ffStrbufEnsureFree(&decompressedBuffer, decompressedBuffer.length / 2);
 
         // Set output parameters to point to new buffer
-        zs.avail_out = (uInt)ffStrbufGetFree(&decompressedBuffer);
-        zs.next_out = (Bytef*)(decompressedBuffer.chars + decompressedBuffer.length);
+        zs.avail_out = (uInt) ffStrbufGetFree(&decompressedBuffer);
+        zs.next_out = (Bytef*) (decompressedBuffer.chars + decompressedBuffer.length);
         availableOut = zs.avail_out;
 
         // Decompress again
@@ -153,7 +149,7 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
     zlibData.ffinflateEnd(&zs);
 
     // Calculate decompressed size
-    uint32_t decompressedSize = (uint32_t)(availableOut - zs.avail_out);
+    uint32_t decompressedSize = (uint32_t) (availableOut - zs.avail_out);
     decompressedBuffer.length += decompressedSize;
     decompressedBuffer.chars[decompressedBuffer.length] = '\0';
     FF_DEBUG("Successfully decompressed %u bytes compressed data to %u bytes", compressedSize, decompressedBuffer.length);
@@ -163,19 +159,13 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd)
 
     char* line = NULL;
     size_t len = 0;
-    while (ffStrbufGetline(&line, &len, buffer))
-    {
-        if (ffStrStartsWithIgnCase(line, "Content-Encoding:"))
-        {
+    while (ffStrbufGetline(&line, &len, buffer)) {
+        if (ffStrStartsWithIgnCase(line, "Content-Encoding:")) {
             continue;
-        }
-        else if (ffStrStartsWithIgnCase(line, "Content-Length:"))
-        {
+        } else if (ffStrStartsWithIgnCase(line, "Content-Length:")) {
             ffStrbufAppendF(&newBuffer, "Content-Length: %u\r\n", decompressedBuffer.length);
             continue;
-        }
-        else if (line[0] == '\r')
-        {
+        } else if (line[0] == '\r') {
             ffStrbufAppendS(&newBuffer, "\r\n");
             ffStrbufGetlineRestore(&line, &len, buffer);
             break;

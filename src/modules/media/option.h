@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFMediaOptions
-{
+typedef struct FFMediaOptions {
     FFModuleArgs moduleArgs;
 } FFMediaOptions;
 

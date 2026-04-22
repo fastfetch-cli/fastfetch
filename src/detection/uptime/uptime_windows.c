@@ -2,9 +2,8 @@
 #include "common/time.h"
 #include "common/windows/nt.h"
 
-const char* ffDetectUptime(FFUptimeResult* result)
-{
-    // GetInterruptTime with Win7 support
+const char* ffDetectUptime(FFUptimeResult* result) {
+    // QueryInterruptTime with Win7 support
     uint64_t interruptTime = ffKSystemTimeToUInt64(&SharedUserData->InterruptTime);
 
     result->uptime = interruptTime / 10000; // Convert from 100-nanosecond intervals to milliseconds

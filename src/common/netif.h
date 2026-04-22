@@ -7,7 +7,7 @@
     #include <netinet/in.h>
 #endif
 
-typedef enum __attribute__((__packed__)) FFNetifDefaultRouteResultStatus {
+typedef enum FF_A_PACKED FFNetifDefaultRouteResultStatus {
     FF_NETIF_UNINITIALIZED,
     FF_NETIF_INVALID,
     FF_NETIF_OK
@@ -16,10 +16,10 @@ typedef enum __attribute__((__packed__)) FFNetifDefaultRouteResultStatus {
 typedef struct FFNetifDefaultRouteResult {
     uint32_t ifIndex;
 
-    #ifndef _WIN32
+#ifndef _WIN32
     char ifName[IF_NAMESIZE + 1];
     uint32_t preferredSourceAddrV4;
-    #endif
+#endif
     enum FFNetifDefaultRouteResultStatus status;
 } FFNetifDefaultRouteResult;
 

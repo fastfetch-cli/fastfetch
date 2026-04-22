@@ -34,7 +34,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
     for (IOBluetoothHostController* ctrl in ctrls)
     {
-        FFBluetoothRadioResult* device = ffListAdd(devices);
+        FFBluetoothRadioResult* device = FF_LIST_ADD(FFBluetoothRadioResult, *devices);
         ffStrbufInitS(&device->name, ctrl.nameAsString.UTF8String);
         ffStrbufInitS(&device->address, ctrl.addressAsString.UTF8String);
         ffStrbufInitStatic(&device->vendor, "Apple");

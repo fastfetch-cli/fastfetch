@@ -1,0 +1,44 @@
+name: Reusable Linux armv7l
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: run VM
+        uses: uraimo/run-on-arch-action@v3
+        id: runcmd
+        with:
+          arch: armv7
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            apt-get update && apt-get install -y software-properties-common ca-certificates gpg curl
+            add-apt-repository -y ppa:ubuntu-toolchain-r/test
+            curl -L https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ jammy main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99ignore-certificates
+            apt-get update && apt-get install -y cmake make gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
+            CC=gcc-13 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-linux-armv7l
+          path: ./fastfetch-*.*

@@ -5,8 +5,7 @@
 
 enum { FF_DETECT_FONT_NUM_FONTS = 4 };
 
-typedef struct FFFontResult
-{
+typedef struct FFFontResult {
     /**
      * Linux / BSD: Qt,      GTK2,  GTK3,        GTK4
      * MacOS:       System,  User,  System Mono, User Mono

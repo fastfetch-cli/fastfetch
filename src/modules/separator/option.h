@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFSeparatorOptions
-{
+typedef struct FFSeparatorOptions {
     FFstrbuf string;
     FFstrbuf outputColor;
     uint32_t times;

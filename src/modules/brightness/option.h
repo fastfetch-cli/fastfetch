@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFBrightnessOptions
-{
+typedef struct FFBrightnessOptions {
     FFModuleArgs moduleArgs;
 
     uint32_t ddcciSleep; // ms

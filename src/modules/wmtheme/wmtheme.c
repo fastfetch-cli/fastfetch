@@ -6,53 +6,44 @@
 
 #define FF_WMTHEME_DISPLAY_NAME "WM Theme"
 
-bool ffPrintWMTheme(FFWMThemeOptions* options)
-{
+bool ffPrintWMTheme(FFWMThemeOptions* options) {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
-    if(!ffDetectWmTheme(&themeOrError))
-    {
+    if (!ffDetectWmTheme(&themeOrError)) {
         ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", themeOrError.chars);
         return false;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         puts(themeOrError.chars);
-    }
-    else
-    {
-        FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(themeOrError, "result"),
-        }));
+    } else {
+        FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                             FF_ARG(themeOrError, "result"),
+                                                                                                         }));
     }
 
     return true;
 }
 
-void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
-{
+void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
         ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-void ffGenerateWMThemeJsonConfig(FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateWMThemeJsonConfig(FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateWMThemeJsonResult(FF_A_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
-    if(!ffDetectWmTheme(&themeOrError))
-    {
+    if (!ffDetectWmTheme(&themeOrError)) {
         yyjson_mut_obj_add_strbuf(doc, module, "error", &themeOrError);
         return false;
     }
@@ -61,19 +52,17 @@ bool ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
     return true;
 }
 
-void ffInitWMThemeOptions(FFWMThemeOptions* options)
-{
+void ffInitWMThemeOptions(FFWMThemeOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰓸");
 }
 
-void ffDestroyWMThemeOptions(FFWMThemeOptions* options)
-{
+void ffDestroyWMThemeOptions(FFWMThemeOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 FFModuleBaseInfo ffWMThemeModuleInfo = {
     .name = FF_WMTHEME_MODULE_NAME,
-    .description = "Print current theme of window manager",
+    .description = "Print the current window manager theme",
     .initOptions = (void*) ffInitWMThemeOptions,
     .destroyOptions = (void*) ffDestroyWMThemeOptions,
     .parseJsonObject = (void*) ffParseWMThemeJsonObject,
@@ -81,6 +70,6 @@ FFModuleBaseInfo ffWMThemeModuleInfo = {
     .generateJsonResult = (void*) ffGenerateWMThemeJsonResult,
     .generateJsonConfig = (void*) ffGenerateWMThemeJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"WM theme", "result"},
+        { "WM theme", "result" },
     }))
 };

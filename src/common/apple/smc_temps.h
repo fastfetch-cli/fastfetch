@@ -2,15 +2,13 @@
 
 #include "fastfetch.h"
 
-typedef struct FFTempValue
-{
+typedef struct FFTempValue {
     FFstrbuf name;
     FFstrbuf deviceClass;
     double value;
 } FFTempValue;
 
-enum FFTempType
-{
+enum FFTempType {
     FF_TEMP_CPU_X64,
     FF_TEMP_CPU_M1X,
     FF_TEMP_CPU_M2X,

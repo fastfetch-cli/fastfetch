@@ -4,36 +4,40 @@
 
 #include <kstat.h>
 
-static inline void kstatFreeWrap(kstat_ctl_t** pkc)
-{
+static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
     assert(pkc);
-    if (*pkc)
+    if (*pkc) {
         kstat_close(*pkc);
+    }
 }
 
-const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
-{
-    __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
-    if (!kc)
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
+    FF_A_CLEANUP(kstatFreeWrap) kstat_ctl_t* kc = kstat_open();
+    if (!kc) {
         return "kstat_open() failed";
+    }
 
     const char* defaultRouteIfName = ffNetifGetDefaultRouteV4()->ifName;
 
-    for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next)
-    {
-        if (!ffStrEquals(ks->ks_class, "net") || !ffStrEquals(ks->ks_module, "link")) continue;
-
-        if (options->namePrefix.length && strncmp(ks->ks_name, options->namePrefix.chars, options->namePrefix.length) != 0)
+    for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next) {
+        if (!ffStrEquals(ks->ks_class, "net") || !ffStrEquals(ks->ks_module, "link")) {
             continue;
+        }
+
+        if (options->namePrefix.length && strncmp(ks->ks_name, options->namePrefix.chars, options->namePrefix.length) != 0) {
+            continue;
+        }
 
         bool isDefaultRoute = ffStrEquals(ks->ks_name, defaultRouteIfName);
-        if (options->defaultRouteOnly && !isDefaultRoute)
+        if (options->defaultRouteOnly && !isDefaultRoute) {
             continue;
+        }
 
-        if (kstat_read(kc, ks, NULL) < 0)
+        if (kstat_read(kc, ks, NULL) < 0) {
             continue;
+        }
 
-        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
 
         kstat_named_t* wbytes = (kstat_named_t*) kstat_data_lookup(ks, "obytes64");
         kstat_named_t* rbytes = (kstat_named_t*) kstat_data_lookup(ks, "rbytes64");
@@ -55,8 +59,9 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             .defaultRoute = isDefaultRoute,
         };
 
-        if (options->defaultRouteOnly)
+        if (options->defaultRouteOnly) {
             break;
+        }
     }
 
     return NULL;

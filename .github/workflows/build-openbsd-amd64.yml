@@ -1,0 +1,42 @@
+name: Reusable OpenBSD amd64
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: openbsd
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          version: '7.8'
+          environment_variables: 'CMAKE_BUILD_TYPE'
+          run: |
+            uname -a
+            sudo pkg_add -u
+            sudo pkg_add -r llvm-21.1.2p0 cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa
+            CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-openbsd-amd64
+          path: ./fastfetch-*.*

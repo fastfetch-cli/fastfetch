@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/tpm/option.h"
 
-typedef struct FFTPMResult
-{
+typedef struct FFTPMResult {
     FFstrbuf version;
     FFstrbuf description;
 } FFTPMResult;

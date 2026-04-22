@@ -1,0 +1,43 @@
+name: Reusable Solaris amd64
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: run VM
+        uses: vmactions/solaris-vm@v1
+        with:
+          usesh: true
+          envs: 'CMAKE_BUILD_TYPE'
+          release: "11.4-gcc-14"
+          prepare: |
+            uname -a
+            pkg install cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja dconf mesa
+
+          run: |
+            export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake --build . --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+            echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-solaris-amd64")' >> CPackConfig.cmake
+            cpack -V
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-solaris-amd64
+          path: ./fastfetch-*.*

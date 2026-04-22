@@ -1,0 +1,103 @@
+name: Reusable Linux Hosts
+
+on:
+  workflow_call:
+    inputs:
+      arch:
+        required: true
+        type: string
+      runs-on:
+        required: true
+        type: string
+    outputs:
+      ffversion:
+        description: fastfetch version from linux host build
+        value: ${{ jobs.build.outputs.ffversion }}
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    outputs:
+      ffversion: ${{ steps.ffversion.outputs.ffversion }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: uname -a
+        run: uname -a
+
+      - name: cat /etc/os-release
+        run: cat /etc/os-release
+
+      - name: cat /proc/cpuinfo
+        run: cat /proc/cpuinfo
+
+      - name: add gcc-13 repo
+        run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      - name: install required packages
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev rpm ninja-build
+
+      - name: install linuxbrew packages
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
+
+      - name: Initialize CodeQL
+        if: inputs.arch == 'amd64'
+        uses: github/codeql-action/init@v4
+        with:
+          languages: c
+
+      - name: configure project
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: perform CodeQL analysis
+        if: inputs.arch == 'amd64'
+        uses: github/codeql-action/analyze@v4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: get fastfetch version
+        id: ffversion
+        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
+
+      - name: polyfill glibc
+        run: |
+          wget https://github.com/CarterLi/polyfill-glibc/releases/download/v0.0.1/polyfill-glibc-${{ inputs.arch }} -O polyfill-glibc
+          chmod +x polyfill-glibc
+          strip fastfetch && ./polyfill-glibc fastfetch --target-glibc=2.17
+          strip flashfetch && ./polyfill-glibc flashfetch --target-glibc=2.17
+          echo 'set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-polyfilled")' >> CPackConfig.cmake
+          echo 'set(CPACK_PACKAGE_RELOCATABLE OFF)' >> CPackConfig.cmake
+          echo 'set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.17)")' >> CPackConfig.cmake
+          echo 'set(CPACK_RPM_SPEC_MORE_DEFINE "%global __os_install_post %{nil}")' >> CPackConfig.cmake
+          cpack -V
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-linux-${{ inputs.arch }}
+          path: ./fastfetch-*.*

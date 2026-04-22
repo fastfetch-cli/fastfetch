@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFBootmgrOptions
-{
+typedef struct FFBootmgrOptions {
     FFModuleArgs moduleArgs;
 } FFBootmgrOptions;
 

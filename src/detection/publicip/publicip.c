@@ -1,16 +1,14 @@
 #include "publicip.h"
 #include "common/networking.h"
 
-#define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
+#define FF_UNITIALIZED ((const char*) (uintptr_t) -1)
 static FFNetworkingState states[2];
 static const char* statuses[2] = { FF_UNITIALIZED, FF_UNITIALIZED };
 
-void ffPreparePublicIp(FFPublicIPOptions* options)
-{
+void ffPreparePublicIp(FFPublicIPOptions* options) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
-    if (*status != FF_UNITIALIZED)
-    {
+    if (*status != FF_UNITIALIZED) {
         fputs("Error: PublicIp module can only be used once due to internal limitations\n", stderr);
         exit(1);
     }
@@ -18,20 +16,15 @@ void ffPreparePublicIp(FFPublicIPOptions* options)
     state->timeout = options->timeout;
     state->ipv6 = options->ipv6;
 
-    if (options->url.length == 0)
-    {
+    if (options->url.length == 0) {
         state->compression = true;
         state->tfo = true;
         *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", "/json", NULL);
-    }
-    else
-    {
+    } else {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
         uint32_t hostStartIndex = ffStrbufFirstIndexS(&host, "://");
-        if (hostStartIndex < host.length)
-        {
-            if (hostStartIndex != 4 || !ffStrbufStartsWithIgnCaseS(&host, "http"))
-            {
+        if (hostStartIndex < host.length) {
+            if (hostStartIndex != 4 || !ffStrbufStartsWithIgnCaseS(&host, "http")) {
                 fputs("Error: only http: protocol is supported. Use `Command` module with `curl` if needed\n", stderr);
                 exit(1);
             }
@@ -40,8 +33,7 @@ void ffPreparePublicIp(FFPublicIPOptions* options)
         uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
 
         FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-        if(pathStartIndex != host.length)
-        {
+        if (pathStartIndex != host.length) {
             ffStrbufAppendNS(&path, pathStartIndex, host.chars + (host.length - pathStartIndex));
             host.length = pathStartIndex;
             host.chars[pathStartIndex] = '\0';
@@ -51,42 +43,43 @@ void ffPreparePublicIp(FFPublicIPOptions* options)
     }
 }
 
-static inline void wrapYyjsonFree(yyjson_doc** doc)
-{
+static inline void wrapYyjsonFree(yyjson_doc** doc) {
     assert(doc);
-    if (*doc)
+    if (*doc) {
         yyjson_doc_free(*doc);
+    }
 }
 
-const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* result)
-{
+const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* result) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
-    if (*status == FF_UNITIALIZED)
+    if (*status == FF_UNITIALIZED) {
         ffPreparePublicIp(options);
+    }
 
-    if (*status != NULL)
+    if (*status != NULL) {
         return *status;
+    }
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
     const char* error = ffNetworkingRecvHttpResponse(state, &response);
 
-    *state = (FFNetworkingState){};
+    *state = (FFNetworkingState) {};
     *status = FF_UNITIALIZED;
 
-    if (error == NULL)
+    if (error == NULL) {
         ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
-    else
+    } else {
         return error;
+    }
 
-    if (response.length == 0)
+    if (response.length == 0) {
         return "Empty server response received";
+    }
 
-    if (options->url.length == 0)
-    {
-        yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(response.chars, response.length, 0, NULL, NULL);
-        if (doc)
-        {
+    if (options->url.length == 0) {
+        yyjson_doc* FF_A_CLEANUP(wrapYyjsonFree) doc = yyjson_read_opts(response.chars, response.length, 0, NULL, NULL);
+        if (doc) {
             yyjson_val* root = yyjson_doc_get_root(doc);
             ffStrbufAppendJsonVal(&result->ip, yyjson_obj_get(root, "ip"));
             ffStrbufDestroy(&result->location);

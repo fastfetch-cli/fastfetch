@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFTerminalOptions
-{
+typedef struct FFTerminalOptions {
     FFModuleArgs moduleArgs;
 } FFTerminalOptions;
 

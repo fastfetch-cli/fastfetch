@@ -5,8 +5,7 @@
 #define FASTFETCH_LOGO_MAX_NAMES 9
 #define FASTFETCH_LOGO_MAX_COLORS 9 // two digits would make parsing much more complicated (index 1 - 9)
 
-typedef enum __attribute__((__packed__)) FFLogoType
-{
+typedef enum FF_A_PACKED FFLogoType {
     FF_LOGO_TYPE_AUTO,               // if something is given, first try builtin, then file. Otherwise detect logo
     FF_LOGO_TYPE_BUILTIN,            // builtin ascii art
     FF_LOGO_TYPE_SMALL,              // builtin ascii art, small version
@@ -25,15 +24,13 @@ typedef enum __attribute__((__packed__)) FFLogoType
     FF_LOGO_TYPE_NONE,               // `--logo none`, but still applies colors to the system information output (unless `--pipe` is set)
 } FFLogoType;
 
-typedef enum __attribute__((__packed__)) FFLogoPosition
-{
+typedef enum FF_A_PACKED FFLogoPosition {
     FF_LOGO_POSITION_LEFT,
     FF_LOGO_POSITION_TOP,
     FF_LOGO_POSITION_RIGHT,
 } FFLogoPosition;
 
-typedef struct FFOptionsLogo
-{
+typedef struct FFOptionsLogo {
     FFstrbuf source;
     FFLogoType type;
     FFLogoPosition position;

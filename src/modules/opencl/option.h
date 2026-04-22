@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFOpenCLOptions
-{
+typedef struct FFOpenCLOptions {
     FFModuleArgs moduleArgs;
 } FFOpenCLOptions;
 

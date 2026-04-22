@@ -4,27 +4,30 @@
 
 #include <utmp.h>
 
-const char* ffDetectUsers(FF_MAYBE_UNUSED FFUsersOptions* options, FFlist* users)
-{
+const char* ffDetectUsers(FF_A_UNUSED FFUsersOptions* options, FFlist* users) {
     FF_AUTO_CLOSE_FILE FILE* fp = fopen(_PATH_UTMP, "r");
-    if (!fp) return "fopen(_PATH_UTMP, r) failed";
+    if (!fp) {
+        return "fopen(_PATH_UTMP, r) failed";
+    }
 
     struct utmp n;
 next:
-    while (fread(&n, sizeof(n), 1, fp) == 1)
-    {
-        if (!n.ut_name[0]) continue;
-
-        if (options->myselfOnly && !ffStrbufEqualS(&instance.state.platform.userName, n.ut_name))
+    while (fread(&n, sizeof(n), 1, fp) == 1) {
+        if (!n.ut_name[0]) {
             continue;
-
-        FF_LIST_FOR_EACH(FFUserResult, user, *users)
-        {
-            if (ffStrbufEqualS(&user->name, n.ut_name))
-                goto next;
         }
 
-        FFUserResult* user = (FFUserResult*) ffListAdd(users);
+        if (options->myselfOnly && !ffStrbufEqualS(&instance.state.platform.userName, n.ut_name)) {
+            continue;
+        }
+
+        FF_LIST_FOR_EACH (FFUserResult, user, *users) {
+            if (ffStrbufEqualS(&user->name, n.ut_name)) {
+                goto next;
+            }
+        }
+
+        FFUserResult* user = FF_LIST_ADD(FFUserResult, *users);
         ffStrbufInitS(&user->name, n.ut_name);
         ffStrbufInitS(&user->hostName, n.ut_host);
         ffStrbufInitS(&user->sessionName, n.ut_line);

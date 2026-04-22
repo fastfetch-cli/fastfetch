@@ -1,3 +1,71 @@
+# 2.62.0
+
+Changes:
+* Sort package managers alphabetically in output and format arguments (Packages)
+    * The positional order of format arguments has changed — this is a breaking change for users relying on numeric placeholders. Named arguments are always preferred; e.g., use `{pacman}` (refer to `fastfetch -h packages-format`) instead of `{1}` to keep your config future-proof.
+
+Features:
+* Reports `Unused` instead of `Disabled` for zero-size swap on macOS (#2248, Swap, macOS)
+* Improves the robustness of default route detection on Linux (#2252, LocalIP, Linux)
+* PhysicalDisk module improvements
+    * Detects virtual disks and adds support for hiding them via `hideVirtual` option (defaults to `false`)
+    * Detects unused/disconnected disks and adds support for hiding them via `hideUnused` option (defaults to `true`)
+    * Adds support for OpenBSD and NetBSD (root privileges are required to access disk information)
+    * Improves interconnect type detection on SunOS
+    * Adds floppy drive support on Windows
+* Rewrites Windows GPU detection with D3DKMT APIs, unifying it with WSL GPU detection (GPU, Windows)
+* Verifies that the battery and power adapter are present before detection (Battery / PowerAdapter, Linux)
+* Improves PhysicalMemory reliability on OpenBSD and FreeBSD, including support for x86 UEFI systems on OpenBSD and non-UEFI systems on FreeBSD (PhysicalMemory, OpenBSD / FreeBSD)
+* Adds `display.common.(ndigits|spaceBeforeUnit)` options to configure common formatting for duration, percent, size, frequency and temperature values (#2234)
+* Slightly improves performance by skipping probes for ignored device types (Sound)
+* Adds support for AppImage package detection (#2179, Packages, Linux)
+
+Bugfixes:
+* Fixes a potential crash on certain Intel GPU models when using `--gpu-driver-specific` (#2259, GPU, Linux)
+* Doesn't report partitions as physical disks (DiskIO, NetBSD)
+* Fixes a typo (#2260, Wifi, macOS)
+* Corrects documentation for zpool format placeholders (#2261, Zpool)
+* Restores Windows 8.1 support (Cursor, Windows)
+* Fixes an out-of-bounds memory access when swaps are disabled (Swap, Windows)
+* Fixes battery status being incorrectly reported as `Charging` on systems with multiple batteries (#2263, Battery, Linux)
+* Fixes ash shell version detection (#2271, Shell, Linux)
+* Uses the `iterm` image protocol automatically on iTerm terminals for auto logo type (Logo)
+* Adds missing options when generating full config file
+
+Logos:
+* Updates AerynOS (#2272)
+
+# 2.61.0
+
+Changes:
+* Support for Windows 7 and 8 has been removed.
+    * Windows 8.1 is now the oldest version supported by fastfetch.
+* The GPU module on WSL no longer relies on `DXCore`.
+    * The `directx-headers` dependency is no longer required.
+    * Fastfetch on Linux is now pure C; a C++ compiler is no longer required.
+    * GPU type detection is now slightly less accurate, but detection speed should be slightly faster.
+* The GPU module on Windows now uses `DXCore` for more accurate GPU type detection (requires Windows 10 or later).
+    * This feature is built only when `DXCore` headers are available, which requires installing `mingw-w64-<msystem>-x86_64-directx-headers` on MSYS2.
+
+Features:
+* Adds a `brightness` option for color display configuration (#2238, Colors)
+* Adds support for detecting Bluetooth keyboards on Linux (#2220, Keyboard)
+* Adds support for detecting GlazeWM (WM, macOS)
+* Adds a `showEmptySlots` option to display empty memory slots on Linux (#2222, PhysicalMemory)
+* Adds marketing product name detection on Asahi Linux (Host, Linux)
+* Adds support for new M5 Mac models (Host, macOS)
+* Improves SMBIOS robustness by validating malformed data and improving error handling
+* Improves reliability when terminating child processes (Processing, Windows)
+* Improves Intel Mac support by querying SMBIOS data directly (Global, macOS)
+* Includes numerous internal cleanups and optimizations
+
+Bugfixes:
+* Fixes missing memory devices on some machines (PhysicalMemory)
+* Fixes CPUCache deduplication for shared caches (#2228, CPUCache, Linux)
+* Fixes WM version reporting for niri (#2218, WM, Linux)
+* Fixes SSID decoding issues from `iw` output (Wifi, Linux)
+* Fixes the CMD code page being changed after running fastfetch on Windows (#2245, Windows)
+
 # 2.60.0
 
 Changes:

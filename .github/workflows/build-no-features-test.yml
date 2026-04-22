@@ -1,0 +1,42 @@
+name: Reusable No Features Test
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: uname -a
+        run: uname -a
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_DRM_AMDGPU=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OPENCL=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_ELF=OFF -DENABLE_THREADS=OFF
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure

@@ -1,0 +1,70 @@
+name: Reusable Linux i686
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: uname -a
+        run: uname -a
+
+      - name: cat /etc/os-release
+        run: cat /etc/os-release
+
+      - name: cat /proc/cpuinfo
+        run: cat /proc/cpuinfo
+
+      - name: add gcc-13 repo
+        run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+      - name: install required packages
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 gcc-13-multilib libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev rpm ninja-build
+
+      - name: install linuxbrew packages
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
+
+      - name: cmake version
+        run: cmake --version
+
+      - name: configure project
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -DCPACK_DEBIAN_PACKAGE_ARCHITECTURE=i386 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: check deb package
+        run: dpkg -I fastfetch-*.deb
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-linux-i686
+          path: ./fastfetch-*.*

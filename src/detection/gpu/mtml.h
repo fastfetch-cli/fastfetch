@@ -10,16 +10,14 @@
 /**
  * Return values for MTML API calls.
  */
-typedef enum
-{
+typedef enum {
     MTML_SUCCESS = 0,
 } MtmlReturn;
 
 /**
  * The brand of the device.
  */
-typedef enum
-{
+typedef enum {
     MTML_BRAND_MTT = 0, //!< MTT series.
 } MtmlBrandType;
 
@@ -53,60 +51,60 @@ typedef struct
 // Retrieves the number of cores of a device.
 MtmlReturn mtmlDeviceCountGpuCores(const MtmlDevice* device, unsigned int* numCores);
 // Retrieves the brand of a device.
-MtmlReturn mtmlDeviceGetBrand(const MtmlDevice *dev, MtmlBrandType *type);
+MtmlReturn mtmlDeviceGetBrand(const MtmlDevice* dev, MtmlBrandType* type);
 // Retrieves the index associated with the specified device.
-MtmlReturn mtmlDeviceGetIndex(const MtmlDevice *dev, unsigned int *index);
+MtmlReturn mtmlDeviceGetIndex(const MtmlDevice* dev, unsigned int* index);
 // Retrieves the name of a device.
-MtmlReturn mtmlDeviceGetName(const MtmlDevice *dev, char *name, unsigned int length);
+MtmlReturn mtmlDeviceGetName(const MtmlDevice* dev, char* name, unsigned int length);
 // Retrieves the PCI attributes of a device.
-MtmlReturn mtmlDeviceGetPciInfo(const MtmlDevice *dev, MtmlPciInfo *pci);
+MtmlReturn mtmlDeviceGetPciInfo(const MtmlDevice* dev, MtmlPciInfo* pci);
 /**
  * Retrieves the UUID of a specified device. The UUID is a hexadecimal string in the
  * form of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx, where each 'x' is an ASCII character that represents a hexadecimal
  * digit. The UUID is globally unique for every single device thus can be used to identify different devices
  * physically.
  */
-MtmlReturn mtmlDeviceGetUUID(const MtmlDevice *dev, char *uuid, unsigned int length);
+MtmlReturn mtmlDeviceGetUUID(const MtmlDevice* dev, char* uuid, unsigned int length);
 // Initializes a GPU opaque object to represent a specific graphic core on the target device that is designated by its index.
-MtmlReturn mtmlDeviceInitGpu(const MtmlDevice *dev, MtmlGpu **gpu);
+MtmlReturn mtmlDeviceInitGpu(const MtmlDevice* dev, MtmlGpu** gpu);
 // Initializes a memory opaque object to represent the memory on the target device.
-MtmlReturn mtmlDeviceInitMemory(const MtmlDevice *dev, MtmlMemory **mem);
+MtmlReturn mtmlDeviceInitMemory(const MtmlDevice* dev, MtmlMemory** mem);
 
 // Retrieves the maximum supported clock speed for the device's graphic core.
-MtmlReturn mtmlGpuGetMaxClock(const MtmlGpu *gpu, unsigned int *clockMhz);
+MtmlReturn mtmlGpuGetMaxClock(const MtmlGpu* gpu, unsigned int* clockMhz);
 // Retrieves the current temperature readings for the device's graphic core, in degrees Celsius.
-MtmlReturn mtmlGpuGetTemperature(const MtmlGpu *gpu, unsigned int *temp);
+MtmlReturn mtmlGpuGetTemperature(const MtmlGpu* gpu, unsigned int* temp);
 // Retrieves the current utilization rate for the device's graphic core.
-MtmlReturn mtmlGpuGetUtilization(const MtmlGpu *gpu, unsigned int *utilization);
+MtmlReturn mtmlGpuGetUtilization(const MtmlGpu* gpu, unsigned int* utilization);
 
 // Retrieves the number of devices that can be accessed by the library opaque object.
-MtmlReturn mtmlLibraryCountDevice(const MtmlLibrary *lib, unsigned int *count);
+MtmlReturn mtmlLibraryCountDevice(const MtmlLibrary* lib, unsigned int* count);
 /**
  * Initializes a device opaque object to represent a device that is designated by its index.
  * The index ranges from (0) to (deviceCount - 1), where deviceCount is retrieved from \ref mtmlLibraryCountDevice().
  */
-MtmlReturn mtmlLibraryInit(MtmlLibrary **lib);
+MtmlReturn mtmlLibraryInit(MtmlLibrary** lib);
 /**
  * Initializes a device opaque object to represent a device that is designated by its index.
  * The index ranges from (0) to (deviceCount - 1), where deviceCount is retrieved from \ref mtmlLibraryCountDevice().
  */
-MtmlReturn mtmlLibraryInitDeviceByIndex(const MtmlLibrary *lib, unsigned int index, MtmlDevice **dev);
+MtmlReturn mtmlLibraryInitDeviceByIndex(const MtmlLibrary* lib, unsigned int index, MtmlDevice** dev);
 /**
  * Initializes a device opaque object to represent a device that is designated by its PCI Sbdf.
  * The PCI Sbdf format like 00000000:3a:00.0 refer to \ref MtmlPciInfo::sbdf.
  */
-MtmlReturn mtmlLibraryInitDeviceByPciSbdf(const MtmlLibrary *lib, const char *pciSbdf, MtmlDevice **dev);
+MtmlReturn mtmlLibraryInitDeviceByPciSbdf(const MtmlLibrary* lib, const char* pciSbdf, MtmlDevice** dev);
 // Initializes a MtmlSystem opaque pointer that is bound to a library opaque object.
-MtmlReturn mtmlLibraryInitSystem(const MtmlLibrary *lib, MtmlSystem **sys);
+MtmlReturn mtmlLibraryInitSystem(const MtmlLibrary* lib, MtmlSystem** sys);
 /**
  * Shuts down the library opaque object that is previously initialized by \ref mtmlLibraryInit() and releases its resources.
  * The \a lib pointer cannot be used anymore after this function returns.
  */
-MtmlReturn mtmlLibraryShutDown(MtmlLibrary *lib);
+MtmlReturn mtmlLibraryShutDown(MtmlLibrary* lib);
 
 // Retrieves the amount of total memory available on the device, in bytes.
-MtmlReturn mtmlMemoryGetTotal(const MtmlMemory *mem, unsigned long long *total);
+MtmlReturn mtmlMemoryGetTotal(const MtmlMemory* mem, unsigned long long* total);
 // Retrieves the amount of used memory on the device, in bytes.
-MtmlReturn mtmlMemoryGetUsed(const MtmlMemory *mem, unsigned long long *used);
+MtmlReturn mtmlMemoryGetUsed(const MtmlMemory* mem, unsigned long long* used);
 // Retrieves the current memory utilization rate for the device.
-MtmlReturn mtmlMemoryGetUtilization(const MtmlMemory *mem, unsigned int *utilization);
+MtmlReturn mtmlMemoryGetUtilization(const MtmlMemory* mem, unsigned int* utilization);

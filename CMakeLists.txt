@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.60.0
+    VERSION 2.62.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -89,7 +89,6 @@ cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR Ope
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
@@ -120,7 +119,7 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS AM APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
+set(PACKAGE_MANAGERS AM APPIMAGE APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -159,7 +158,7 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
-if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
+if(WIN32 OR Haiku)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -402,7 +401,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/FFstrbuf.c
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
-    src/common/impl/smbiosHelper.c
+    src/common/impl/smbios.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -415,6 +414,7 @@ set(LIBFASTFETCH_SRC
     src/detection/editor/editor.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
+    src/detection/host/host_mac.c
     src/detection/media/media.c
     src/detection/netio/netio.c
     src/detection/opencl/opencl.c
@@ -561,9 +561,9 @@ if(LINUX)
         src/detection/gpu/gpu_linux.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
+        src/detection/gpu/gpu_windows.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
-        src/detection/host/host_mac.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_linux.c
@@ -722,7 +722,6 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
-        src/detection/host/host_mac.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
@@ -794,7 +793,7 @@ elseif(NetBSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_nbsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nbsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -861,7 +860,7 @@ elseif(OpenBSD)
         src/common/impl/sysctl.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
-        src/common/impl/smbiosHelper.c
+        src/common/impl/smbios.c
         src/common/impl/kmod_nosupport.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_windows.c
@@ -878,7 +877,7 @@ elseif(OpenBSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_obsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
@@ -949,14 +948,11 @@ elseif(APPLE)
         src/common/apple/osascript.m
         src/common/apple/smc_temps.c
         src/detection/battery/battery_apple.c
-        src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
         src/detection/bluetoothradio/bluetoothradio_apple.m
-        src/detection/board/board_apple.c
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
@@ -964,14 +960,11 @@ elseif(APPLE)
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
-        src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
-        src/detection/host/host_apple.c
-        src/detection/host/host_mac.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
@@ -1007,6 +1000,24 @@ elseif(APPLE)
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
     )
+    # CMAKE_SYSTEM_PROCESSOR has been normalized before
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bios/bios_windows.c
+            src/detection/board/board_windows.c
+            src/detection/chassis/chassis_windows.c
+            src/detection/host/host_windows.c
+            src/detection/physicalmemory/physicalmemory_linux.c
+        )
+    else()
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bios/bios_apple.c
+            src/detection/board/board_apple.c
+            src/detection/chassis/chassis_apple.c
+            src/detection/host/host_apple.c
+            src/detection/physicalmemory/physicalmemory_apple.m
+        )
+    endif()
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/impl/io_windows.c
@@ -1045,7 +1056,7 @@ elseif(WIN32)
         src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/host/host_mac.c
+        src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
@@ -1313,11 +1324,6 @@ elseif(GNU)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
    )
-endif()
-
-if(ENABLE_DIRECTX_HEADERS)
-    message(STATUS "Enabling DirectX headers for WSL")
-    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
 endif()
 
 # Proprietary GPU driver APIs
@@ -1661,10 +1667,6 @@ ff_lib_enable(ELF
     "libelf"
     "libelf"
 )
-ff_lib_enable(DIRECTX_HEADERS
-    "DirectX-Headers"
-    "DirectX-Headers"
-)
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
@@ -1765,12 +1767,14 @@ elseif(OpenBSD)
         PRIVATE "m"
         PRIVATE "kvm"
         PRIVATE "sndio"
+        PRIVATE "util"
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
         PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
+        PRIVATE "util"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch

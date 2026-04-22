@@ -5,24 +5,20 @@
 
 #include <math.h>
 
-static bool checkHdrStatus(FFDisplayResult* display)
-{
+static bool checkHdrStatus(FFDisplayResult* display) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    if (ffSettingsGetAndroidProperty("ro.surface_flinger.has_HDR_display", &buffer))
-    {
-        if (ffStrbufIgnCaseEqualS(&buffer, "true"))
-        {
+    if (ffSettingsGetAndroidProperty("ro.surface_flinger.has_HDR_display", &buffer)) {
+        if (ffStrbufIgnCaseEqualS(&buffer, "true")) {
             display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
 
             if (ffSettingsGetAndroidProperty("persist.sys.hdr_mode", &buffer) &&
-                ffStrbufToUInt(&buffer, 0) > 0)
+                ffStrbufToUInt(&buffer, 0) > 0) {
                 display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+            }
 
             return true;
-        }
-        else
-        {
+        } else {
             display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
             return true;
         }
@@ -32,19 +28,19 @@ static bool checkHdrStatus(FFDisplayResult* display)
     return false;
 }
 
-static void detectWithDumpsys(FFDisplayServerResult* ds)
-{
+static void detectWithDumpsys(FFDisplayServerResult* ds) {
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if (ffProcessAppendStdOut(&buf, (char* []) {
-        "/system/bin/dumpsys",
-        "display",
-        NULL,
-    }) != NULL || buf.length == 0)
+    if (ffProcessAppendStdOut(&buf, (char*[]) {
+                                        "/system/bin/dumpsys",
+                                        "display",
+                                        NULL,
+                                    }) != NULL ||
+        buf.length == 0) {
         return; // Only works in `adb shell`, or when rooted
+    }
 
     uint32_t index = 0;
-    while ((index = ffStrbufNextIndexS(&buf, index, "DisplayDeviceInfo")) < buf.length)
-    {
+    while ((index = ffStrbufNextIndexS(&buf, index, "DisplayDeviceInfo")) < buf.length) {
         index += strlen("DisplayDeviceInfo");
         uint32_t nextIndex = ffStrbufNextIndexC(&buf, index, '\n');
         buf.chars[nextIndex] = '\0';
@@ -56,37 +52,34 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
         double refreshRate = 0;
         // {"Builtin display": uniqueId="local:4630947134992368259", 1440 x 3200, modeId 2
         int res = sscanf(info, "{\"%63[^\"]\":%*s%u x %u, modeId%u", name.chars, &width, &height, &modeId);
-        if (res >= 3)
-        {
-            if (res == 4)
-            {
+        if (res >= 3) {
+            if (res == 4) {
                 ++info; // skip first '{'
-                while ((info = strchr(info, '{')))
-                {
+                while ((info = strchr(info, '{'))) {
                     ++info;
 
                     unsigned id;
                     double fps;
                     // id=1, width=1440, height=3200, fps=60.000004,
-                    if (sscanf(info, "id=%u, %*s%*s fps=%lf", &id, &fps) >= 2)
-                    {
-                        if (id == modeId)
-                        {
+                    if (sscanf(info, "id=%u, %*s%*s fps=%lf", &id, &fps) >= 2) {
+                        if (id == modeId) {
                             refreshRate = fps;
                             break;
                         }
-                    }
-                    else
+                    } else {
                         break;
+                    }
                 }
             }
 
             ffStrbufRecalculateLength(&name);
             FFDisplayResult* display = ffdsAppendDisplay(ds,
-                (uint32_t)width, (uint32_t)height,
+                (uint32_t) width,
+                (uint32_t) height,
                 refreshRate,
                 0,
-                0, 0,
+                0,
+                0,
                 0,
                 0,
                 &name,
@@ -95,23 +88,22 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
                 0,
                 0,
                 0,
-                "dumpsys"
-            );
-            if (display) display->hdrStatus = checkHdrStatus(display);
+                "dumpsys");
+            if (display) {
+                display->hdrStatus = checkHdrStatus(display);
+            }
         }
 
         index = nextIndex + 1;
     }
 }
 
-static bool detectWithGetprop(FFDisplayServerResult* ds)
-{
+static bool detectWithGetprop(FFDisplayServerResult* ds) {
     // Only for MiUI
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
-        ffStrbufContainC(&buffer, ','))
-    {
+        ffStrbufContainC(&buffer, ',')) {
         // 1440,3200,560 => width,height,densityDpi
         uint32_t width = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
@@ -119,10 +111,12 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         uint32_t dpi = (uint32_t) ffStrbufToUInt(&buffer, 0) * 96 / 160;
         FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width, height,
+            width,
+            height,
             0,
             dpi,
-            0, 0,
+            0,
+            0,
             0,
             0,
             NULL,
@@ -131,17 +125,17 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
             0,
             0,
             0,
-            "getprop"
-        );
-        if (display) display->hdrStatus = checkHdrStatus(display);
+            "getprop");
+        if (display) {
+            display->hdrStatus = checkHdrStatus(display);
+        }
         return !!display;
     }
 
     return false;
 }
 
-static bool detectDE(FFDisplayServerResult* ds)
-{
+static bool detectDE(FFDisplayServerResult* ds) {
     if (ffSettingsGetAndroidProperty("ro.vivo.os.build.display.id", &ds->dePrettyName)) // OriginOS 6
     {
         ffStrbufAppendC(&ds->dePrettyName, ' ');
@@ -149,47 +143,41 @@ static bool detectDE(FFDisplayServerResult* ds)
         return true;
     }
     if (ffSettingsGetAndroidProperty("ro.build.version.magic", &ds->dePrettyName) ||
-        ffSettingsGetAndroidProperty("ro.build.version.emui", &ds->dePrettyName))
-    {
+        ffSettingsGetAndroidProperty("ro.build.version.emui", &ds->dePrettyName)) {
         ffStrbufReplaceAllC(&ds->dePrettyName, '_', ' ');
         return true;
     }
-    if (ffSettingsGetAndroidProperty("ro.mi.os.version.name", &ds->dePrettyName))
-    {
+    if (ffSettingsGetAndroidProperty("ro.mi.os.version.name", &ds->dePrettyName)) {
         // MiUI like
         ffStrbufClear(&ds->dePrettyName);
         ffSettingsGetAndroidProperty("ro.build.version.incremental", &ds->dePrettyName); // Detail version number
-        if (ffStrbufStartsWithS(&ds->dePrettyName, "OS"))
-        {
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "OS")) {
             ds->dePrettyName.chars[0] = 'S';
             ds->dePrettyName.chars[1] = ' ';
             ffStrbufPrependS(&ds->dePrettyName, "HyperO");
-        }
-        else if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
-        {
+        } else if (ffStrbufStartsWithS(&ds->dePrettyName, "V")) {
             ds->dePrettyName.chars[0] = ' ';
             ffStrbufPrependS(&ds->dePrettyName, "MiUI");
-        }
-        else
+        } else {
             ffStrbufSetStatic(&ds->dePrettyName, "MiUI");
+        }
         return true;
     }
-    if (ffSettingsGetAndroidProperty("ro.build.version.oplusrom", &ds->dePrettyName))
-    {
-        if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
+    if (ffSettingsGetAndroidProperty("ro.build.version.oplusrom", &ds->dePrettyName)) {
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "V")) {
             ffStrbufSubstrAfter(&ds->dePrettyName, 0);
+        }
         ffStrbufPrependS(&ds->dePrettyName, "ColorOS");
         return true;
     }
-    if (ffSettingsGetAndroidProperty("ro.oxygen.version", &ds->dePrettyName))
-    {
+    if (ffSettingsGetAndroidProperty("ro.oxygen.version", &ds->dePrettyName)) {
         ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
         return true;
     }
-    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName))
-    {
-        if (ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS"))
+    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName)) {
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS")) {
             ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
+        }
 
         // Google Pixel uses native Android
         return true;
@@ -198,13 +186,12 @@ static bool detectDE(FFDisplayServerResult* ds)
     return false;
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
-{
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
     const char* error = ffdsConnectXcbRandr(ds);
-    if (error)
+    if (error) {
         error = ffdsConnectXrandr(ds);
-    if (!error)
-    {
+    }
+    if (!error) {
         ffdsDetectWMDE(ds);
         return;
     }
@@ -214,8 +201,9 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
     ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
-    if (!detectWithGetprop(ds))
+    if (!detectWithGetprop(ds)) {
         detectWithDumpsys(ds);
+    }
 
     detectDE(ds);
 }

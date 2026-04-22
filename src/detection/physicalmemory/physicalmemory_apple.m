@@ -1,6 +1,6 @@
 #include "physicalmemory.h"
 #include "common/processing.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 #include "common/stringUtils.h"
 #include "common/apple/cf_helpers.h"
 
@@ -19,7 +19,7 @@ static void appendDevice(
     NSString* speed,
     bool ecc)
 {
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInitS(&device->type, type.UTF8String);
     ffStrbufInit(&device->formFactor);
     ffStrbufInitS(&device->locator, locator.UTF8String);
@@ -62,7 +62,6 @@ static void appendDevice(
             case 'G': device->maxSpeed *= 1000; break;
             case 'K': device->maxSpeed /= 1000; break;
         }
-        device->runningSpeed = device->maxSpeed;
     }
 }
 
@@ -122,7 +121,7 @@ static const char* detectFromSystemProfiler(FFlist* result)
     return NULL;
 }
 
-FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
+FF_A_UNUSED static const char* detectFromIokit(FFlist* result)
 {
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (!entryDevice)
@@ -134,7 +133,7 @@ FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
     if (!dramType || !dramSize || !dramVendor)
         return "IORegistryEntryCreateCFProperty() failed";
 
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInit(&device->type);
     ffStrbufInit(&device->formFactor);
     ffStrbufInit(&device->locator);
@@ -153,7 +152,7 @@ FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
     return NULL;
 }
 
-const char* ffDetectPhysicalMemory(FFlist* result)
+const char* ffDetectPhysicalMemory(FF_A_UNUSED FFPhysicalMemoryOptions* options, FFlist* result)
 {
     #if __aarch64__
     if (detectFromIokit(result) == NULL)

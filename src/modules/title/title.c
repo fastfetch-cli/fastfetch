@@ -3,125 +3,124 @@
 #include "common/textModifier.h"
 #include "modules/title/title.h"
 
-static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
-{
-    if (!instance.config.display.pipe)
-    {
-        if (instance.config.display.brightColor)
+static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color) {
+    if (!instance.config.display.pipe) {
+        if (instance.config.display.brightColor) {
             ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_BOLT);
-        if (color->length > 0)
+        }
+        if (color->length > 0) {
             ffStrbufAppendF(output, "\e[%sm", color->chars);
-        else if (instance.config.display.colorTitle.length > 0)
+        } else if (instance.config.display.colorTitle.length > 0) {
             ffStrbufAppendF(output, "\e[%sm", instance.config.display.colorTitle.chars);
+        }
     }
 
     ffStrbufAppend(output, text);
 
-    if(!instance.config.display.pipe)
+    if (!instance.config.display.pipe) {
         ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_RESET);
+    }
 }
 
-bool ffPrintTitle(FFTitleOptions* options)
-{
+bool ffPrintTitle(FFTitleOptions* options) {
     FF_STRBUF_AUTO_DESTROY userNameColored = ffStrbufCreate();
     appendText(&userNameColored, &instance.state.platform.userName, &options->colorUser);
 
     FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
-    if (!options->fqdn)
+    if (!options->fqdn) {
         ffStrbufSubstrBeforeFirstC(&hostName, '.');
+    }
     instance.state.titleFqdn = options->fqdn;
 
     FF_STRBUF_AUTO_DESTROY hostNameColored = ffStrbufCreate();
     appendText(&hostNameColored, &hostName, &options->colorHost);
 
     FF_STRBUF_AUTO_DESTROY atColored = ffStrbufCreate();
-    if (!instance.config.display.pipe && options->colorAt.length > 0)
-    {
+    if (!instance.config.display.pipe && options->colorAt.length > 0) {
         ffStrbufAppendF(&atColored, "\e[%sm", options->colorAt.chars);
         ffStrbufAppendC(&atColored, '@');
         ffStrbufAppendS(&atColored, FASTFETCH_TEXT_MODIFIER_RESET);
-    }
-    else
+    } else {
         ffStrbufAppendC(&atColored, '@');
+    }
 
-    if (options->moduleArgs.outputFormat.length == 0)
-    {
+    if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&userNameColored, stdout);
         ffStrbufWriteTo(&atColored, stdout);
         ffStrbufPutTo(&hostNameColored, stdout);
-    }
-    else
-    {
+    } else {
         FF_STRBUF_AUTO_DESTROY cwdTilde = ffStrbufCreate();
         if (
-            #if _WIN32
-                ffStrbufStartsWithIgnCase
-            #else
-                ffStrbufStartsWith
-            #endif
-            (&instance.state.platform.cwd, &instance.state.platform.homeDir))
-        {
+#if _WIN32
+            ffStrbufStartsWithIgnCase
+#else
+            ffStrbufStartsWith
+#endif
+            (&instance.state.platform.cwd, &instance.state.platform.homeDir)) {
             ffStrbufAppendS(&cwdTilde, "~/");
             ffStrbufAppendNS(&cwdTilde, instance.state.platform.cwd.length - instance.state.platform.homeDir.length, &instance.state.platform.cwd.chars[instance.state.platform.homeDir.length]);
-        }
-        else
+        } else {
             ffStrbufSet(&cwdTilde, &instance.state.platform.cwd);
-        if (cwdTilde.length > 1) ffStrbufTrimRight(&cwdTilde, '/');
+        }
+        if (cwdTilde.length > 1) {
+            ffStrbufTrimRight(&cwdTilde, '/');
+        }
 
-        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_ARG(instance.state.platform.userName, "user-name"),
-            FF_ARG(hostName, "host-name"),
-            FF_ARG(instance.state.platform.homeDir, "home-dir"),
-            FF_ARG(instance.state.platform.exePath, "exe-path"),
-            FF_ARG(instance.state.platform.userShell, "user-shell"),
-            FF_ARG(userNameColored, "user-name-colored"),
-            FF_ARG(atColored, "at-symbol-colored"),
-            FF_ARG(hostNameColored, "host-name-colored"),
-            FF_ARG(instance.state.platform.fullUserName, "full-user-name"),
-            #ifndef _WIN32
-            FF_ARG(instance.state.platform.uid, "user-id"),
-            #else
-            FF_ARG(instance.state.platform.sid, "user-id"),
-            #endif
-            FF_ARG(instance.state.platform.pid, "pid"),
-            FF_ARG(cwdTilde, "cwd"),
-        }));
+        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                                                                                                          FF_ARG(instance.state.platform.userName, "user-name"),
+                                                                                                          FF_ARG(hostName, "host-name"),
+                                                                                                          FF_ARG(instance.state.platform.homeDir, "home-dir"),
+                                                                                                          FF_ARG(instance.state.platform.exePath, "exe-path"),
+                                                                                                          FF_ARG(instance.state.platform.userShell, "user-shell"),
+                                                                                                          FF_ARG(userNameColored, "user-name-colored"),
+                                                                                                          FF_ARG(atColored, "at-symbol-colored"),
+                                                                                                          FF_ARG(hostNameColored, "host-name-colored"),
+                                                                                                          FF_ARG(instance.state.platform.fullUserName, "full-user-name"),
+#ifndef _WIN32
+                                                                                                          FF_ARG(instance.state.platform.uid, "user-id"),
+#else
+                                                                                                          FF_ARG(instance.state.platform.sid, "user-id"),
+#endif
+                                                                                                          FF_ARG(instance.state.platform.pid, "pid"),
+                                                                                                          FF_ARG(cwdTilde, "cwd"),
+                                                                                                      }));
     }
 
     return true;
 }
 
-void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
-{
+void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key, val)
-    {
-        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
+    yyjson_obj_foreach (module, idx, max, key, val) {
+        if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs)) {
             continue;
+        }
 
-        if (unsafe_yyjson_equals_str(key, "fqdn"))
-        {
+        if (unsafe_yyjson_equals_str(key, "fqdn")) {
             options->fqdn = yyjson_get_bool(val);
             continue;
         }
 
-        if (unsafe_yyjson_equals_str(key, "color"))
-        {
-            if (!yyjson_is_obj(val))
+        if (unsafe_yyjson_equals_str(key, "color")) {
+            if (!yyjson_is_obj(val)) {
                 continue;
+            }
 
             yyjson_val* color = yyjson_obj_get(val, "user");
-            if (color)
+            if (color) {
                 ffOptionParseColor(yyjson_get_str(color), &options->colorUser);
+            }
             color = yyjson_obj_get(val, "at");
-            if (color)
+            if (color) {
                 ffOptionParseColor(yyjson_get_str(color), &options->colorAt);
+            }
             color = yyjson_obj_get(val, "host");
-            if (color)
+            if (color) {
                 ffOptionParseColor(yyjson_get_str(color), &options->colorHost);
+            }
             continue;
         }
 
@@ -129,8 +128,7 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
     yyjson_mut_obj_add_bool(doc, module, "fqdn", options->fqdn);
@@ -141,14 +139,13 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
 }
 
-bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
-{
+bool ffGenerateTitleJsonResult(FF_A_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    #ifdef _WIN32
+#ifdef _WIN32
     yyjson_mut_obj_add_strbuf(doc, obj, "userId", &instance.state.platform.sid);
-    #else
+#else
     yyjson_mut_obj_add_uint(doc, obj, "userId", instance.state.platform.uid);
-    #endif
+#endif
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
     yyjson_mut_obj_add_strbuf(doc, obj, "fullUserName", &instance.state.platform.fullUserName);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
@@ -161,8 +158,7 @@ bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     return true;
 }
 
-void ffInitTitleOptions(FFTitleOptions* options)
-{
+void ffInitTitleOptions(FFTitleOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 
@@ -172,8 +168,7 @@ void ffInitTitleOptions(FFTitleOptions* options)
     ffStrbufInit(&options->colorHost);
 }
 
-void ffDestroyTitleOptions(FFTitleOptions* options)
-{
+void ffDestroyTitleOptions(FFTitleOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
     ffStrbufDestroy(&options->colorUser);
     ffStrbufDestroy(&options->colorAt);
@@ -182,7 +177,7 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
 
 FFModuleBaseInfo ffTitleModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
-    .description = "Print title, which contains your user name, hostname",
+    .description = "Print the title, including your username and hostname",
     .initOptions = (void*) ffInitTitleOptions,
     .destroyOptions = (void*) ffDestroyTitleOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,
@@ -190,17 +185,17 @@ FFModuleBaseInfo ffTitleModuleInfo = {
     .generateJsonResult = (void*) ffGenerateTitleJsonResult,
     .generateJsonConfig = (void*) ffGenerateTitleJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"User name", "user-name"},
-        {"Host name", "host-name"},
-        {"Home directory", "home-dir"},
-        {"Executable path of current process", "exe-path"},
-        {"User's default shell", "user-shell"},
-        {"User name (colored)", "user-name-colored"},
-        {"@ symbol (colored)", "at-symbol-colored"},
-        {"Host name (colored)", "host-name-colored"},
-        {"Full user name", "full-user-name"},
-        {"UID (*nix) / SID (Windows)", "user-id"},
-        {"PID of current process", "pid"},
-        {"CWD with home dir replaced by `~`", "cwd"},
+        { "User name", "user-name" },
+        { "Host name", "host-name" },
+        { "Home directory", "home-dir" },
+        { "Executable path of current process", "exe-path" },
+        { "User's default shell", "user-shell" },
+        { "User name (colored)", "user-name-colored" },
+        { "@ symbol (colored)", "at-symbol-colored" },
+        { "Host name (colored)", "host-name-colored" },
+        { "Full user name", "full-user-name" },
+        { "UID (*nix) / SID (Windows)", "user-id" },
+        { "PID of current process", "pid" },
+        { "CWD with home dir replaced by `~`", "cwd" },
     }))
 };

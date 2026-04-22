@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFColorsSymbol
-{
+typedef enum FF_A_PACKED FFColorsSymbol {
     FF_COLORS_SYMBOL_BLOCK,
     FF_COLORS_SYMBOL_BACKGROUND,
     FF_COLORS_SYMBOL_CIRCLE,
@@ -13,19 +12,24 @@ typedef enum __attribute__((__packed__)) FFColorsSymbol
     FF_COLORS_SYMBOL_STAR,
 } FFColorsSymbol;
 
-typedef struct FFBlockConfig
-{
+typedef struct FFBlockConfig {
     uint8_t width;
     uint8_t range[2];
 } FFBlockConfig;
 
-typedef struct FFColorsOptions
-{
+typedef enum FF_A_PACKED FFColorsBrightness {
+    FF_COLORS_BRIGHTNESS_DEFAULT,
+    FF_COLORS_BRIGHTNESS_NORMAL,
+    FF_COLORS_BRIGHTNESS_LIGHT,
+} FFColorsBrightness;
+
+typedef struct FFColorsOptions {
     FFModuleArgs moduleArgs;
 
     FFColorsSymbol symbol;
     uint32_t paddingLeft;
     FFBlockConfig block;
+    FFColorsBrightness brightness;
 } FFColorsOptions;
 
 static_assert(sizeof(FFColorsOptions) <= FF_OPTION_MAX_SIZE, "FFColorsOptions size exceeds maximum allowed size");
