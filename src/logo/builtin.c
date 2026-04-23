@@ -4232,9 +4232,9 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
-    // Redrose Linux
+    // Redrose
     {
-        .names = {"redrose"},
+        .names = {"Redrose"},
         .lines = FASTFETCH_DATATEXT_LOGO_REDROSE,
         .colors = {
             FF_COLOR_FG_RED,
