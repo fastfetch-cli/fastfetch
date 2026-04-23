@@ -1,3 +1,12 @@
+# 2.62.1
+
+Bugfixes:
+* Fixes Host module not working on some devices (#2279, Host, Linux)
+    * Regression from v2.61.0
+
+Logos:
+* Adds EN-OS, LimeOS, Redrose and Uzbek
+
 # 2.62.0
 
 Changes:

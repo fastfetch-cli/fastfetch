@@ -51,26 +51,37 @@ static bool getHostVendor(FFstrbuf* vendor) {
 
 const char* ffDetectHost(FFHostResult* host) {
     // This is a hack for Asahi Linux, whose product_family is empty
-    if (ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->family)) {
-        ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &host->name);
+    bool productName = ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &host->name);
+    bool productFamily = ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->family);
+    if (productName || productFamily) {
         ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &host->version);
         ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->sku);
         ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_serial", "/sys/class/dmi/id/product_serial", &host->serial);
         ffGetSmbiosValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->vendor);
+
+#if __x86_64__
+        ffHostDetectMac(host);
+#endif
+
+        // KVM/Qemu virtual machine
+        if (ffStrbufStartsWithS(&host->name, "Standard PC")) {
+            ffStrbufPrependS(&host->name, "KVM/QEMU ");
+        }
+
+#if __aarch64__
+        else if (host->family.length == 0 && ffStrbufEqualS(&host->vendor, "Apple Inc.") && ffStrbufStartsWithS(&host->name, "Mac")) {
+            // Hack for Asahi Linux
+            ffStrbufDestroy(&host->family);
+            ffStrbufInitMove(&host->family, &host->name);
+            getHostProductName(&host->name);
+            getHostSerialNumber(&host->serial);
+        }
+#endif
     } else {
         getHostProductFamily(&host->family);
         getHostProductName(&host->name);
         getHostSerialNumber(&host->serial);
         getHostVendor(&host->vendor);
-    }
-
-#ifdef __x86_64__
-    ffHostDetectMac(host);
-#endif
-
-    // KVM/Qemu virtual machine
-    if (ffStrbufStartsWithS(&host->name, "Standard PC")) {
-        ffStrbufPrependS(&host->name, "KVM/QEMU ");
     }
 
     if (host->family.length == 0 && host->name.length == 0) {
