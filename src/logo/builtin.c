@@ -1561,6 +1561,16 @@ static const FFlogo E[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    // EN-OS
+    {
+        .names = {"ENOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ENOS,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
+        .colorTitle = FF_COLOR_FG_LIGHT_BLUE,
+    },
     // EncryptOS
     {
         .names = { "EncryptOS" },
