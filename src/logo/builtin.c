@@ -5506,6 +5506,16 @@ static const FFlogo Y[] = {
 };
 
 static const FFlogo Z[] = {
+    // ZelixOS
+    {
+        .names = { "ZelixOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZELIXOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Zorin
     {
         .names = { "Zorin" },
