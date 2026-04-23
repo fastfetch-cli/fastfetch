@@ -5164,6 +5164,13 @@ static const FFlogo U[] = {
         },
     },
     // LAST
+    {
+        .names = { "Uzbek" },
+        .lines = FASTFETCH_DATATEXT_LOGO_UZBEK,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+    },
     {},
 };
 
