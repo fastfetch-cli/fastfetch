@@ -4262,6 +4262,17 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // Redrose
+    {
+        .names = {"Redrose"},
+        .lines = FASTFETCH_DATATEXT_LOGO_REDROSE,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Refracta
     {
         .names = { "Refracta" },
