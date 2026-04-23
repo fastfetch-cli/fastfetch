@@ -1,17 +1,17 @@
-      $1xxrjr  ftttt
-      $1xxxxxjjfffft
-      $1xxxxxxxjjjjj
-      $1xxxxxxxjjjjj
-      $1xxxxxxxxxnxx
-        $1xxxxxxxn
-           $2[[
-    $2////   $2[[
-    $2////   $2[[
-    $2///////[[
-      $2/////]]
-           $2[[
-           $2[[
-           $2[[
-           $2[[
-           $2[[
-           $2[]
+  xxrjr  ftttt
+  xxxxxjjfffft
+  xxxxxxxjjjjj
+  xxxxxxxjjjjj
+  xxxxxxxxxnxx
+    xxxxxxxn
+       $2[[
+////   [[
+////   [[
+///////[[
+  /////]]
+       [[
+       [[
+       [[
+       [[
+       [[
+       []
