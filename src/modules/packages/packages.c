@@ -27,6 +27,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
     uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
     uint32_t amAll = counts.amSystem + counts.amUser;
     uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
+    counts.all += counts.cards;
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -119,6 +120,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(pkgsrc)
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(rpm)
+        FF_PRINT_PACKAGE(cards)
         if (options->combined) {
             FF_PRINT_PACKAGE_ALL(scoop);
         } else if (counts.scoopGlobal > 0) {
@@ -248,6 +250,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(CHOCO)
+                            FF_TEST_PACKAGE_NAME(CARDS)
                             break;
                         case 'D':
                             if (false)
@@ -371,6 +374,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(APK)
     FF_TEST_PACKAGE_NAME(APPIMAGE)
     FF_TEST_PACKAGE_NAME(BREW)
+    FF_TEST_PACKAGE_NAME(CARDS)
     FF_TEST_PACKAGE_NAME(CHOCO)
     FF_TEST_PACKAGE_NAME(DPKG)
     FF_TEST_PACKAGE_NAME(EMERGE)
@@ -447,6 +451,7 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
     FF_APPEND_PACKAGE_COUNT(macports)
     FF_APPEND_PACKAGE_COUNT(mport)
     FF_APPEND_PACKAGE_COUNT(moss)
+    FF_APPEND_PACKAGE_COUNT(cards)
     FF_APPEND_PACKAGE_COUNT(nixDefault)
     FF_APPEND_PACKAGE_COUNT(nixSystem)
     FF_APPEND_PACKAGE_COUNT(nixUser)

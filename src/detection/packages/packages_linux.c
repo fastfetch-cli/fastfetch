@@ -537,6 +537,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_MOSS_BIT)) {
         packageCounts->moss += getSQLite3Int(baseDir, "/.moss/db/state", "SELECT COUNT(*) FROM state_selections WHERE state_id = (SELECT MAX(id) FROM state)", "moss");
     }
+    if (!(options->disabled & FF_PACKAGES_FLAG_CARDS_BIT)) {
+        packageCounts->cards += getNumElements(baseDir, "/var/lib/pkg/DB", true);
+    }
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options) {

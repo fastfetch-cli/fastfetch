@@ -10,6 +10,7 @@ typedef struct FFPackagesResult {
     uint32_t appimage;
     uint32_t brew;
     uint32_t brewCask;
+    uint32_t cards;
     uint32_t choco;
     uint32_t dpkg;
     uint32_t emerge;
