@@ -61,6 +61,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
             FF_PRINT_PACKAGE_NAME(brew, "brew")
             FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
         }
+        FF_PRINT_PACKAGE(cards)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(emerge)
@@ -119,7 +120,6 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(pkgsrc)
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(rpm)
-        FF_PRINT_PACKAGE(cards)
         if (options->combined) {
             FF_PRINT_PACKAGE_ALL(scoop);
         } else if (counts.scoopGlobal > 0) {
