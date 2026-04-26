@@ -248,8 +248,8 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                         case 'C':
                             if (false)
                                 ;
-                            FF_TEST_PACKAGE_NAME(CHOCO)
                             FF_TEST_PACKAGE_NAME(CARDS)
+                            FF_TEST_PACKAGE_NAME(CHOCO)
                             break;
                         case 'D':
                             if (false)
