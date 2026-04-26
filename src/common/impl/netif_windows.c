@@ -1,5 +1,4 @@
 #include "common/netif.h"
-#include "common/mallocHelper.h"
 
 #include <ws2tcpip.h> // AF_INET6, IN6_IS_ADDR_UNSPECIFIED
 #include <iphlpapi.h>
@@ -7,7 +6,7 @@
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
 
-    if (!NETIO_SUCCESS(GetIpForwardTable2(AF_UNSPEC, &pIpForwardTable))) {
+    if (!NETIO_SUCCESS(GetIpForwardTable2(AF_INET, &pIpForwardTable))) {
         return false;
     }
 
@@ -18,7 +17,6 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         MIB_IPFORWARD_ROW2* row = &pIpForwardTable->Table[i];
 
         if (row->DestinationPrefix.PrefixLength == 0 &&
-            row->DestinationPrefix.Prefix.Ipv4.sin_family == AF_INET &&
             row->DestinationPrefix.Prefix.Ipv4.sin_addr.S_un.S_addr == 0) {
             MIB_IF_ROW2 ifRow = {
                 .InterfaceIndex = row->InterfaceIndex,
@@ -39,7 +37,6 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
                     smallestMetric = realMetric;
                     result->ifIndex = row->InterfaceIndex;
                     foundDefault = true;
-                    break;
                 }
             }
         }
@@ -53,7 +50,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
 
-    if (!NETIO_SUCCESS(GetIpForwardTable2(AF_UNSPEC, &pIpForwardTable))) {
+    if (!NETIO_SUCCESS(GetIpForwardTable2(AF_INET6, &pIpForwardTable))) {
         return false;
     }
 
@@ -64,7 +61,6 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
         MIB_IPFORWARD_ROW2* row = &pIpForwardTable->Table[i];
 
         if (row->DestinationPrefix.PrefixLength == 0 &&
-            row->DestinationPrefix.Prefix.Ipv6.sin6_family == AF_INET6 &&
             IN6_IS_ADDR_UNSPECIFIED(&row->DestinationPrefix.Prefix.Ipv6.sin6_addr)) {
             MIB_IF_ROW2 ifRow = {
                 .InterfaceIndex = row->InterfaceIndex,
