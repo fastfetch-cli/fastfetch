@@ -27,7 +27,6 @@ bool ffPrintPackages(FFPackagesOptions* options) {
     uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
     uint32_t amAll = counts.amSystem + counts.amUser;
     uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
-    counts.all += counts.cards;
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
