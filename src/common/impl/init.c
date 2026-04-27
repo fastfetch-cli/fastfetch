@@ -57,9 +57,9 @@ void ffInitInstance(void) {
     initState(&instance.state);
 }
 
-static volatile bool ffDisableLinewrap = true;
-static volatile bool ffHideCursor = true;
-#if _WIN32
+static volatile bool ffDisableLinewrap = false;
+static volatile bool ffHideCursor = false;
+#ifdef _WIN32
 static volatile UINT oldCp = CP_UTF8;
 #endif
 
@@ -122,7 +122,10 @@ void ffStart(void) {
     if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);
     }
-    struct sigaction action = { .sa_handler = exitSignalHandler };
+    struct sigaction action;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    action.sa_handler = exitSignalHandler;
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
