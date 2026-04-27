@@ -18,9 +18,9 @@ typedef struct FFlist {
 void* ffListAdd(FFlist* list, uint32_t elementSize);
 
 // Removes the first element, and copy its value to `*result`
-bool ffListShift(FFlist* list, uint32_t elementSize, void* result);
+bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result);
 // Removes the last element, and copy its value to `*result`
-bool ffListPop(FFlist* list, uint32_t elementSize, void* result);
+bool ffListPop(FFlist* list, uint32_t elementSize, void* __restrict result);
 
 static inline void ffListInit(FFlist* list) {
     list->capacity = 0;
