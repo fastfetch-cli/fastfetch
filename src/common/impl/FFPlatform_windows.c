@@ -145,7 +145,7 @@ static void getUserName(FFPlatform* platform) {
     PLSA_UNICODE_STRING userName = NULL;
     if (NT_SUCCESS(LsaGetUserName(&userName, NULL))) {
         ffStrbufSetNWS(&platform->userName, userName->Length / sizeof(wchar_t), userName->Buffer);
-        RtlFreeUnicodeString(userName);
+        RtlFreeUnicodeString(userName); // Required. userName.Buffer is allocated separately
         LsaFreeMemory(userName);
     } else {
         ffStrbufSetS(&platform->userName, getenv("USERNAME"));
