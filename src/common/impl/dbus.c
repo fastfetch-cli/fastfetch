@@ -76,7 +76,7 @@ bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result) 
         uint8_t value;
         dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
         ffStrbufAppendC(result, (char) value);
-        return false; // Don't append a comma
+        return true;
     }
 
     if (argType != DBUS_TYPE_VARIANT && argType != DBUS_TYPE_ARRAY) {
@@ -91,6 +91,25 @@ bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result) 
     }
 
     // At this point we have an array
+
+    int subArgType = dbus->lib->ffdbus_message_iter_get_arg_type(&subIter);
+    if (subArgType == DBUS_TYPE_INVALID) {
+        return false;
+    }
+
+    if (subArgType == DBUS_TYPE_BYTE) {
+        while (true) {
+            uint8_t value;
+            dbus->lib->ffdbus_message_iter_get_basic(&subIter, &value);
+            ffStrbufAppendC(result, (char) value);
+
+            if (!dbus->lib->ffdbus_message_iter_next(&subIter)) {
+                break;
+            }
+        }
+
+        return true;
+    }
 
     bool foundAValue = false;
 
@@ -189,12 +208,17 @@ bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result) {
     if (argType == DBUS_TYPE_UINT16) {
         uint16_t value = 0;
         dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
-        *result = (int16_t) value;
+        *result = (int32_t) value;
         return true;
     }
 
     if (argType == DBUS_TYPE_UINT32) {
-        dbus->lib->ffdbus_message_iter_get_basic(iter, result);
+        uint32_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        if (value > 0x7FFFFFFFu) {
+            return false;
+        }
+        *result = (int32_t) value;
         return true;
     }
 
