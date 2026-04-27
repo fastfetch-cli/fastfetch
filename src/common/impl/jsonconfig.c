@@ -133,16 +133,11 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
-        case 'b':
-        case 'B': {
-            if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
-                ffPrepareCPUUsage();
-            }
-            break;
-        }
         case 'c':
         case 'C': {
-            if (ffStrEqualsIgnCase(type, FF_COMMAND_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
+                ffPrepareCPUUsage();
+            } else if (ffStrEqualsIgnCase(type, FF_COMMAND_MODULE_NAME)) {
                 FF_A_CLEANUP(ffDestroyCommandOptions) FFCommandOptions options;
                 ffInitCommandOptions(&options);
                 if (module) {
@@ -259,7 +254,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
             yyjson_val* conditions = yyjson_obj_get(module, "condition");
             if (conditions) {
                 if (!yyjson_is_obj(conditions)) {
-                    return "Property 'conditions' must be an object";
+                    return "Property 'condition' must be an object";
                 }
 
                 yyjson_val* system = yyjson_obj_get(conditions, "system");
