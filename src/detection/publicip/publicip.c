@@ -1,14 +1,14 @@
 #include "publicip.h"
 #include "common/networking.h"
 
-#define FF_UNITIALIZED ((const char*) (uintptr_t) -1)
+#define FF_UNINITIALIZED ((const char*) (uintptr_t) -1)
 static FFNetworkingState states[2];
-static const char* statuses[2] = { FF_UNITIALIZED, FF_UNITIALIZED };
+static const char* statuses[2] = { FF_UNINITIALIZED, FF_UNINITIALIZED };
 
 void ffPreparePublicIp(FFPublicIPOptions* options) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
-    if (*status != FF_UNITIALIZED) {
+    if (*status != FF_UNINITIALIZED) {
         fputs("Error: PublicIp module can only be used once due to internal limitations\n", stderr);
         exit(1);
     }
@@ -53,7 +53,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* result) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
-    if (*status == FF_UNITIALIZED) {
+    if (*status == FF_UNINITIALIZED) {
         ffPreparePublicIp(options);
     }
 
@@ -65,7 +65,7 @@ const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* resul
     const char* error = ffNetworkingRecvHttpResponse(state, &response);
 
     *state = (FFNetworkingState) {};
-    *status = FF_UNITIALIZED;
+    *status = FF_UNINITIALIZED;
 
     if (error == NULL) {
         ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
