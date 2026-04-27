@@ -790,9 +790,10 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
     }
 
     for (const char* p = comp; p < comp + compLength;) {
-        const char* colon = memchr(p, separator, compLength);
+        const char* colon = memchr(p, separator, (size_t)(comp + compLength - p));
         if (colon == NULL) {
-            return strcmp(strbuf->chars, p) == 0;
+            uint32_t remainingLen = (uint32_t)(comp + compLength - p);
+            return strbuf->length == remainingLen && memcmp(strbuf->chars, p, remainingLen) == 0;
         }
 
         uint32_t substrLength = (uint32_t) (colon - p);
@@ -817,9 +818,10 @@ bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength
     }
 
     for (const char* p = comp; p < comp + compLength;) {
-        const char* colon = memchr(p, separator, compLength);
+        const char* colon = memchr(p, separator, (size_t)(comp + compLength - p));
         if (colon == NULL) {
-            return strcasecmp(strbuf->chars, p) == 0;
+            uint32_t remainingLen = (uint32_t)(comp + compLength - p);
+            return strbuf->length == remainingLen && strncasecmp(strbuf->chars, p, remainingLen) == 0;
         }
 
         uint32_t substrLength = (uint32_t) (colon - p);
