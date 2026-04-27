@@ -425,10 +425,11 @@ void ffFontInitXft(FFfont* font, const char* xft) {
         if (value.length > 0) {
             if (
                 (keyLen == 4 && ffStrStartsWithIgnCase(keyStart, "size")) ||
-                (keyLen == 9 && ffStrStartsWithIgnCase(keyStart, "pixelsize"))) {
+                (keyLen == 9 && (ffStrStartsWithIgnCase(keyStart, "pixelsize") || ffStrStartsWithIgnCase(keyStart, "pointsize")))) {
                 if (sizeEmpty && ffCharIsDigit(value.chars[0])) {
                     ffStrbufAppend(&font->size, &value);
-                    ffStrbufAppendS(&font->size, keyLen == 4 ? "pt" : "px");
+                    ffStrbufAppendS(&font->size,
+                        (keyLen == 9 && ffStrStartsWithIgnCase(keyStart, "pixelsize")) ? "px" : "pt");
                 }
             } else if (keyLen == 5 && ffStrStartsWithIgnCase(keyStart, "style")) {
                 // style may contain multiple words: "Bold Italic"
@@ -457,6 +458,10 @@ void ffFontInitXft(FFfont* font, const char* xft) {
                 ffStrbufInit(style);
                 strbufAppendNSExcludingC(style, value.length, value.chars, '-');
                 ffStrbufTrim(style, ' ');
+                if (style->length == 0) {
+                    ffStrbufDestroy(style);
+                    --font->styles.length;
+                }
             }
         }
     }
