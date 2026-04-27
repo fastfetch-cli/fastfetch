@@ -18,6 +18,7 @@
     #include <sys/sysctl.h>
 #elif defined(__OpenBSD__)
     #include <sys/sysctl.h>
+    #include <sys/stat.h>
     #include <kvm.h>
     #include "common/path.h"
 #elif defined(__HAIKU__)
@@ -97,7 +98,7 @@ static void getExePath(FFPlatform* platform) {
                         struct stat st;
                         if (stat(exePath, &st) == 0 && S_ISREG(st.st_mode)) {
                             int cntp;
-                            struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, platform->pid, sizeof(*kf), &cntp);
+                            struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, (pid_t) platform->pid, sizeof(*kf), &cntp);
                             if (kf) {
                                 int i;
                                 for (i = 0; i < cntp; i++) {
