@@ -30,7 +30,7 @@
 static void* libraryLoad(const char* path, int maxVersion) {
     void* result = dlopen(path, FF_DLOPEN_FLAGS);
 
-    #ifdef _WIN32
+    #if _WIN32
 
     // libX.dll.1 never exists on Windows, while libX-1.dll may exist
     FF_UNUSED(maxVersion)
@@ -114,7 +114,7 @@ void* dlopen(const char* path, FF_A_UNUSED int mode) {
 
     PVOID module = NULL;
     status = LdrLoadDll(NULL, NULL, &(UNICODE_STRING) {
-                                        .Length = (USHORT) pathWBytes - sizeof(wchar_t), // Exclude null terminator
+                                        .Length = (USHORT) (pathWBytes - sizeof(wchar_t)), // Exclude null terminator
                                         .MaximumLength = (USHORT) pathWBytes,
                                         .Buffer = pathW,
                                     },
@@ -139,7 +139,7 @@ int dlclose(void* handle) {
 
 void* dlsym(void* handle, const char* symbol) {
     void* address;
-    USHORT symbolBytes = (USHORT) strlen(symbol) + 1;
+    USHORT symbolBytes = (USHORT) (strlen(symbol) + 1);
     NTSTATUS status = LdrGetProcedureAddress(handle, &(ANSI_STRING) {
                                                          .Length = symbolBytes - sizeof(char),
                                                          .MaximumLength = symbolBytes,
@@ -158,7 +158,7 @@ void* ffLibraryGetModule(const wchar_t* libraryFileName) {
     assert(libraryFileName != NULL && "Use \"ffGetPeb()->ImageBaseAddress\" instead");
 
     void* module = NULL;
-    USHORT libraryFileNameBytes = (USHORT) (wcslen(libraryFileName) * sizeof(wchar_t)) + sizeof(wchar_t);
+    USHORT libraryFileNameBytes = (USHORT) (wcslen(libraryFileName) * sizeof(wchar_t) + sizeof(wchar_t));
     NTSTATUS status = LdrGetDllHandle(NULL, NULL, &(UNICODE_STRING) {
                                                       .Length = libraryFileNameBytes - sizeof(wchar_t),
                                                       .MaximumLength = libraryFileNameBytes,
