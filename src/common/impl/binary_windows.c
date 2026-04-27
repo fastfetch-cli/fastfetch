@@ -49,8 +49,9 @@ const char* ffBinaryExtractStrings(const char* peFile, bool (*cb)(const char* st
                 if (*p == '\0') {
                     continue;
                 }
-                uint32_t len = (uint32_t) strlen(p);
+                uint32_t len = (uint32_t) strnlen(p, section->SizeOfRawData - off);
                 if (len < minLength) {
+                    off += len;
                     continue;
                 }
                 // Only process printable ASCII characters

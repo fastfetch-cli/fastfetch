@@ -72,6 +72,7 @@ static bool handleMachSection(const FFMemoryMapping* mapping, const char* name, 
         }
         uint32_t len = (uint32_t) strnlen(p, size - off);
         if (len < minLength) {
+            off += len; // Skip short strings
             continue;
         }
         if (*p >= ' ' && *p <= '~') { // Ignore control characters
@@ -177,8 +178,6 @@ static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, 
                 }
             }
         }
-
-        return NULL;
     }
 
     return NULL;
