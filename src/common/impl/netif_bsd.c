@@ -32,8 +32,8 @@ get_rt_address(struct rt_msghdr* rtm, int desired) {
     struct sockaddr* sa = (struct sockaddr*) (rtm + 1);
 
     for (int i = 0; i < RTAX_MAX; i++) {
-        if (rtm->rtm_addrs & (1 << i)) {
-            if ((1 << i) == desired) {
+        if (rtm->rtm_addrs & (1u << i)) {
+            if ((1u << i) == (unsigned) desired) {
                 return sa;
             }
             sa = (struct sockaddr*) (ROUNDUP(sa->sa_len) + (char*) sa);
@@ -65,7 +65,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         if ((rtm->rtm_flags & RTF_GATEWAY) && !(rtm->rtm_flags & RTF_REJECT) && (sa->sa_family == AF_INET)) {
             struct sockaddr_dl* sdl = (struct sockaddr_dl*) get_rt_address(rtm, RTA_IFP);
             if (sdl && sdl->sdl_family == AF_LINK) {
-                assert(sdl->sdl_nlen <= IF_NAMESIZE);
+                if (sdl->sdl_nlen > IF_NAMESIZE) continue;
                 memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
                 result->ifName[sdl->sdl_nlen] = '\0';
                 result->ifIndex = sdl->sdl_index;
@@ -106,7 +106,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
         if ((rtm->rtm_flags & RTF_GATEWAY) && !(rtm->rtm_flags & RTF_REJECT) && (sa->sa_family == AF_INET6)) {
             struct sockaddr_dl* sdl = (struct sockaddr_dl*) get_rt_address(rtm, RTA_IFP);
             if (sdl && sdl->sdl_family == AF_LINK) {
-                assert(sdl->sdl_nlen <= IF_NAMESIZE);
+                if (sdl->sdl_nlen > IF_NAMESIZE) continue;
                 memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
                 result->ifName[sdl->sdl_nlen] = '\0';
                 result->ifIndex = sdl->sdl_index;

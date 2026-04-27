@@ -25,7 +25,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         // TODO: Get the preferred source address
         return true;
     }
-    result->ifName[0] = '0';
+    result->ifName[0] = '\0';
     return false;
 }
 
