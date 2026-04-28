@@ -252,14 +252,14 @@ bool ffSuppressIO(bool suppress) {
 }
 
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty) {
-    FF_AUTO_CLOSE_FD int dfd = open(folder->chars, O_RDONLY | O_CLOEXEC);
+    int dfd = open(folder->chars, O_RDONLY | O_CLOEXEC | O_DIRECTORY); // Ownership of dfd will be transformed to dir
     if (dfd < 0) {
         return;
     }
 
-    DIR* dir = fdopendir(dfd);
+    FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
     if (dir == NULL) {
-        return;
+        return; // Should not happen
     }
 
     uint32_t folderLength = folder->length;
@@ -310,8 +310,6 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
         puts(entry->d_name);
     }
-
-    closedir(dir);
 }
 
 void ffListFilesRecursively(const char* path, bool pretty) {

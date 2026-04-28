@@ -387,10 +387,12 @@ void ffListFilesRecursively(const char* path, bool pretty) {
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...) {
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     FF_AUTO_CLOSE_FD HANDLE hConin = INVALID_HANDLE_VALUE;
-    DWORD inputMode;
-    if (!GetConsoleMode(hInput, &inputMode)) {
+    DWORD inputMode = 0;
+    bool hasInputMode = !!GetConsoleMode(hInput, &inputMode);
+    if (!hasInputMode) {
         hConin = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
         hInput = hConin;
+        hasInputMode = !!GetConsoleMode(hInput, &inputMode);
     }
     SetConsoleMode(hInput, 0);
 
@@ -439,12 +441,16 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true) {
         DWORD bytes = 0;
-        if (!ReadFile(hInput, buffer, sizeof(buffer) - 1, &bytes, NULL) || bytes == 0) {
+        if (!ReadFile(hInput, buffer + bytesRead, (DWORD)(sizeof(buffer) - 1 - bytesRead), &bytes, NULL) || bytes == 0) {
             va_end(args);
             return "ReadFile() failed";
         }
 
         bytesRead += bytes;
+        if (__builtin_expect(bytesRead >= sizeof(buffer) - 1, false)) {
+            va_end(args);
+            return "terminal response buffer overflow";
+        }
         buffer[bytesRead] = '\0';
 
         va_list cargs;
@@ -461,7 +467,9 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         }
     }
 
-    SetConsoleMode(hInput, inputMode);
+    if (hasInputMode) {
+        SetConsoleMode(hInput, inputMode);
+    }
 
     va_end(args);
 
