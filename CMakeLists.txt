@@ -1041,7 +1041,7 @@ elseif(WIN32)
         src/detection/bluetoothradio/bluetoothradio_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
-        src/detection/brightness/brightness_windows.cpp
+        src/detection/brightness/brightness_windows.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
