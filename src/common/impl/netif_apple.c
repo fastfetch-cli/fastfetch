@@ -25,8 +25,8 @@ get_rt_address(struct rt_msghdr* rtm, int desired) {
     struct sockaddr* sa = (struct sockaddr*) (rtm + 1);
 
     for (int i = 0; i < RTAX_MAX; i++) {
-        if (rtm->rtm_addrs & (1u << i)) {
-            if ((1u << i) == (unsigned) desired) {
+        if (rtm->rtm_addrs & (1 << i)) {
+            if ((1 << i) == desired) {
                 return sa;
             }
 
