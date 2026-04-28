@@ -1032,7 +1032,6 @@ elseif(WIN32)
         src/common/windows/com.cpp
         src/common/windows/registry.c
         src/common/windows/unicode.c
-        src/common/windows/wmi.cpp
         src/common/windows/variant.cpp
         src/common/windows/version.c
         src/detection/battery/battery_windows.c
