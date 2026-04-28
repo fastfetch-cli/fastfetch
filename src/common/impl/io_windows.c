@@ -441,7 +441,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true) {
         DWORD bytes = 0;
-        if (!ReadFile(hInput, buffer + bytesRead, (DWORD)(sizeof(buffer) - 1 - bytesRead), &bytes, NULL) || bytes == 0) {
+        if (!ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, NULL) || bytes == 0) {
             va_end(args);
             return "ReadFile() failed";
         }

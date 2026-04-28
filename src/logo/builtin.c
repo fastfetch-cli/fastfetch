@@ -1563,7 +1563,7 @@ static const FFlogo E[] = {
     },
     // EN-OS
     {
-        .names = {"ENOS"},
+        .names = { "ENOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_ENOS,
         .colors = {
             FF_COLOR_FG_LIGHT_BLUE,
@@ -2665,7 +2665,7 @@ static const FFlogo L[] = {
     },
     // LimeOS
     {
-        .names = {"LimeOS"},
+        .names = { "LimeOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_LIMEOS,
         .colors = {
             FF_COLOR_FG_DEFAULT,
@@ -4264,7 +4264,7 @@ static const FFlogo R[] = {
     },
     // Redrose
     {
-        .names = {"Redrose"},
+        .names = { "Redrose" },
         .lines = FASTFETCH_DATATEXT_LOGO_REDROSE,
         .colors = {
             FF_COLOR_FG_RED,

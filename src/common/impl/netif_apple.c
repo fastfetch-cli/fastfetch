@@ -110,7 +110,9 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
             && sdl->sdl_len
 #endif
         ) {
-            if (sdl->sdl_nlen > IF_NAMESIZE) return false;
+            if (sdl->sdl_nlen > IF_NAMESIZE) {
+                return false;
+            }
             memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
             result->ifName[sdl->sdl_nlen] = '\0';
             result->ifIndex = sdl->sdl_index;
@@ -183,7 +185,9 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
             && sdl->sdl_len
 #endif
         ) {
-            if (sdl->sdl_nlen > IF_NAMESIZE) return false;
+            if (sdl->sdl_nlen > IF_NAMESIZE) {
+                return false;
+            }
             memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
             result->ifName[sdl->sdl_nlen] = '\0';
             result->ifIndex = sdl->sdl_index;
