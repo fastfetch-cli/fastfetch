@@ -5418,7 +5418,19 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
-
+    },
+    // WolfOS
+    {
+        .names = { "KibaOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KIBAOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
+    // LAST
+    {},
+};
 static const FFlogo X[] = {
     // XCP-ng
     {
