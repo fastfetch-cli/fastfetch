@@ -320,7 +320,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 // Check for Content-Length header to pre-allocate enough memory
                 const char* clHeader = strcasestr(buffer->chars, "Content-Length:");
                 if (clHeader) {
-                    contentLength = (uint32_t) strtoul(clHeader + 16, NULL, 10);
+                    contentLength = (uint32_t) strtoul(clHeader + 15, NULL, 10);
                     if (contentLength > 0) {
                         FF_DEBUG("Detected Content-Length: %u, pre-allocating buffer", contentLength);
                         // Ensure buffer is large enough, adding header size and some margin
@@ -345,18 +345,18 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("No HTTP header end marker found");
         return "No HTTP header end found";
     }
+
+    if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
+        FF_DEBUG("Invalid response: %.40s...", buffer->chars);
+        return "Invalid response";
+    }
+    FF_DEBUG("Received valid HTTP 200 response, content length: %u bytes, total length: %u bytes",
+        contentLength,
+        buffer->length);
+
     if (contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
         FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
         return "Content length mismatch";
-    }
-
-    if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
-        FF_DEBUG("Received valid HTTP 200 response, content length: %u bytes, total length: %u bytes",
-            contentLength,
-            buffer->length);
-    } else {
-        FF_DEBUG("Invalid response: %.40s...", buffer->chars);
-        return "Invalid response";
     }
 
 // If compression was used, try to decompress
