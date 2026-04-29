@@ -1540,11 +1540,6 @@
                                         "const": "battery",
                                         "description": "Print battery information"
                                     },
-                                    "useSetupApi": {
-                                        "description": "Whether to use the `CM API` on Windows to detect battery information. Supports multiple batteries, but is slower (Windows only)",
-                                        "type": "boolean",
-                                        "default": false
-                                    },
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },
