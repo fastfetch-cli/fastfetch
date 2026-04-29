@@ -2490,10 +2490,6 @@ static const FFlogo K[] = {
             FF_COLOR_FG_BLUE,
         },
     },
-    // LAST
-    {},
-   },
-
     // Kibojoe
     {
         .names = { "Kibojoe" },
@@ -4564,7 +4560,7 @@ static const FFlogo S[] = {
                                                                                 FF_COLOR_FG_CYAN,
                                                                                 FF_COLOR_FG_WHITE,
                                                                             } },
-    // SleeperOS
+    // SleeperOSSmall
     { .names = { "SleeperOS_small" }, .type = FF_LOGO_LINE_TYPE_SMALL_BIT, .lines = FASTFETCH_DATATEXT_LOGO_SLEEPEROS_SMALL, .colors = {
                                                                                                                                  FF_COLOR_FG_CYAN,
                                                                                                                                  FF_COLOR_FG_WHITE,
@@ -5176,7 +5172,7 @@ static const FFlogo U[] = {
             FF_COLOR_FG_256 "52",
         },
     },
-    // LAST
+    // Uzbek
     {
         .names = { "Uzbek" },
         .lines = FASTFETCH_DATATEXT_LOGO_UZBEK,
@@ -5184,6 +5180,7 @@ static const FFlogo U[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    // LAST
     {},
 };
 
