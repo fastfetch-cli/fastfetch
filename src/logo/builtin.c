@@ -5418,7 +5418,9 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
-    // KibaOS
+
+
+   // KibaOS
     {
         .names = { "KibaOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_KIBAOS,
@@ -5430,6 +5432,7 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
+
 static const FFlogo X[] = {
     // XCP-ng
     {
