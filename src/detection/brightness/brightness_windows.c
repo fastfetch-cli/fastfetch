@@ -49,18 +49,18 @@ static const char* detectWithWmi(FFlist* result) {
 
     ULONG status = WmiOpenBlock(&WmiMonitorBrightnessGuid, WMIGUID_QUERY, &hBlock);
     if (status != 0) {
-        FF_DEBUG("WMI: WmiOpenBlock failed, status=%lu, error=%s", status, ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("WMI: WmiOpenBlock failed: %s", ffDebugWin32Error(status));
         return "WmiOpenBlock() failed";
     }
 
     ULONG bufferSize = 0;
     status = WmiQueryAllDataW(hBlock, &bufferSize, NULL);
     if (status != ERROR_SUCCESS && status != ERROR_INSUFFICIENT_BUFFER) {
-        FF_DEBUG("WMI: first WmiQueryAllDataW failed, status=%lu, bufferSize=%lu, error=%s", status, bufferSize, ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("WMI: first WmiQueryAllDataW failed, bufferSize=%lu: %s", bufferSize, ffDebugWin32Error(status));
         return "WmiQueryAllDataW() failed";
     }
 
-    FF_DEBUG("WMI: initial query status=%lu, bufferSize=%lu", status, bufferSize);
+    FF_DEBUG("WMI: initial query bufferSize=%lu", bufferSize);
 
     if (bufferSize == 0) {
         FF_DEBUG("WMI: WmiQueryAllDataW returned empty buffer");
@@ -68,14 +68,10 @@ static const char* detectWithWmi(FFlist* result) {
     }
 
     FF_AUTO_FREE PWNODE_ALL_DATA pAllData = (PWNODE_ALL_DATA) malloc(bufferSize);
-    if (!pAllData) {
-        FF_DEBUG("WMI: malloc failed, bufferSize=%lu", bufferSize);
-        return "malloc() failed";
-    }
 
     status = WmiQueryAllDataW(hBlock, &bufferSize, pAllData);
     if (status != ERROR_SUCCESS) {
-        FF_DEBUG("WMI: second WmiQueryAllDataW failed, status=%lu, bufferSize=%lu, error=%s", status, bufferSize, ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("WMI: second WmiQueryAllDataW failed, bufferSize=%lu: %s", bufferSize, ffDebugWin32Error(status));
         return "WmiQueryAllDataW() failed";
     }
 
@@ -133,7 +129,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
 
     void* gdi32 = ffLibraryGetModule(L"gdi32.dll");
     if (!gdi32) {
-        FF_DEBUG("DDC/CI: failed to load gdi32.dll: %s", ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("DDC/CI: failed to load gdi32.dll");
         return "ffLibraryGetModule(gdi32.dll) failed";
     }
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(gdi32, GetPhysicalMonitors)
