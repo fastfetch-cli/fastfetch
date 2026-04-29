@@ -2481,6 +2481,19 @@ static const FFlogo K[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    // KibaOS
+    {
+        .names = { "KibaOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KIBAOS,
+        .colors = {
+            FF_COLOR_BG_WHITE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    // LAST
+    {},
+   },
+
     // Kibojoe
     {
         .names = { "Kibojoe" },
@@ -5410,20 +5423,6 @@ static const FFlogo W[] = {
     {
         .names = { "WolfOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
-        },
-    },
-    // LAST
-    {},
-};
-
-
-   // KibaOS
-    {
-        .names = { "KibaOS" },
-        .lines = FASTFETCH_DATATEXT_LOGO_KIBAOS,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_GREEN,
