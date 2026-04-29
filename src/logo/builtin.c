@@ -5418,8 +5418,7 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
-    },
-    // WolfOS
+    // KibaOS
     {
         .names = { "KibaOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_KIBAOS,
