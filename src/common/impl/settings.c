@@ -225,6 +225,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
             dbus.lib->ffdbus_message_unref(reply);
             return (FFvariant) { .intValue = value };
         }
+        dbus.lib->ffdbus_message_unref(reply);
         return FF_VARIANT_NULL;
     }
 
@@ -234,6 +235,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
             dbus.lib->ffdbus_message_unref(reply);
             return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
         }
+        dbus.lib->ffdbus_message_unref(reply);
         return FF_VARIANT_NULL;
     }
 
@@ -245,6 +247,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
         }
     }
 
+    dbus.lib->ffdbus_message_unref(reply);
     return FF_VARIANT_NULL;
 }
 
@@ -297,6 +300,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
                 dbus.lib->ffdbus_message_unref(reply);
                 return (FFvariant) { .intValue = value };
             }
+            dbus.lib->ffdbus_message_unref(reply);
             return FF_VARIANT_NULL;
         }
 
@@ -306,6 +310,7 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
                 dbus.lib->ffdbus_message_unref(reply);
                 return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
             }
+            dbus.lib->ffdbus_message_unref(reply);
             return FF_VARIANT_NULL;
         }
 
@@ -317,9 +322,11 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
             }
         }
 
+        dbus.lib->ffdbus_message_unref(reply);
         return FF_VARIANT_NULL;
     }
 
+    dbus.lib->ffdbus_message_unref(reply);
     return FF_VARIANT_NULL;
 }
 #else  // FF_HAVE_DBUS
