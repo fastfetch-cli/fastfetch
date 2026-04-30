@@ -160,7 +160,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointe
 
 if(WIN32 OR Haiku)
     enable_language(CXX)
-    set(CMAKE_CXX_STANDARD 17)
+    if(WIN32)
+        set(CMAKE_CXX_STANDARD 20)
+    else()
+        set(CMAKE_CXX_STANDARD 17)
+    endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 endif()
 
@@ -1065,7 +1069,7 @@ elseif(WIN32)
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
-        src/detection/media/media_windows.c
+        src/detection/media/media_windows.cpp
         src/detection/memory/memory_windows.c
         src/detection/mouse/mouse_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
@@ -1332,6 +1336,14 @@ endif()
 if(WIN32)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
+
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
+    if(HAVE_WINRT)
+        message(STATUS "WinRT headers are available, media detection will use WinRT APIs")
+    else()
+        message(STATUS "WinRT headers are NOT available, media detection will be disabled")
+    endif()
 endif()
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
@@ -1434,7 +1446,7 @@ if(LINUX)
 elseif(ANDROID)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE _FILE_OFFSET_BITS=64 "$<$<CONFIG:DEBUG>:__BIONIC_FORTIFY>" "$<$<CONFIG:DEBUG>:__BIONIC_FORTIFY_RUNTIME_CHECKS_ENABLED>")
 elseif(WIN32)
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0A00 NOMINMAX UNICODE) # "$<$<CONFIG:Release>:_FORTIFY_SOURCE=3>"
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN WINRT_LEAN_AND_MEAN _WIN32_WINNT=0x0A00 NOMINMAX UNICODE) # "$<$<CONFIG:Release>:_FORTIFY_SOURCE=3>"
 elseif(APPLE)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64 _DARWIN_C_SOURCE)
 elseif(OpenBSD)
@@ -1745,6 +1757,12 @@ elseif(WIN32)
             PRIVATE "mincore"
         )
     endif()
+    if(HAVE_WINRT)
+        target_link_libraries(libfastfetch
+            PRIVATE
+            "RuntimeObject"
+        )
+    endif()
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
@@ -1831,20 +1849,6 @@ target_link_libraries(libfastfetch
 target_compile_options(libfastfetch PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>)
 
-if(WIN32)
-    set(CMAKE_CXX_STANDARD 20)
-    include(CheckIncludeFileCXX)
-    CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
-    if(HAVE_WINRT)
-        add_library(ffwinrt MODULE src/detection/media/media_windows.dll.cpp)
-        target_link_libraries(ffwinrt PRIVATE "RuntimeObject")
-        target_compile_definitions(ffwinrt PRIVATE WIN32_LEAN_AND_MEAN=1 WINRT_LEAN_AND_MEAN=1)
-        target_link_options(ffwinrt
-            PRIVATE "-static" # stdc++, winpthread, gcc_s, etc.
-        )
-    endif()
-    set(CMAKE_CXX_STANDARD 17)
-endif()
 if(FreeBSD)
     set(CMAKE_REQUIRED_INCLUDES "/usr/local/include" "/usr/include")
 endif()
@@ -1891,6 +1895,8 @@ if(NOT WIN32)
             message(WARNING "pthread_timedjoin_np was not found; networking timeout will not work")
         endif()
     endif()
+elseif(HAVE_WINRT)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WINRT=1)
 endif()
 
 set(PACKAGES_DISABLE_LIST "")
@@ -2033,13 +2039,6 @@ install(
 if (TARGET flashfetch)
     install(
         TARGETS flashfetch
-        DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    )
-endif()
-
-if (TARGET ffwinrt)
-    install(
-        TARGETS ffwinrt
         DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
 endif()

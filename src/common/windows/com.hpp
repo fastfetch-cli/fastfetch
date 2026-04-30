@@ -2,6 +2,7 @@
 
 #ifdef __cplusplus
 
+    #include "common/attributes.h"
     #include <unknwn.h>
 
 const char* ffInitCom(void);

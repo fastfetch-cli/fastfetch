@@ -260,6 +260,9 @@ void ffListFeatures(void) {
 #if FF_HAVE_EMBEDDED_PCIIDS
         "Embedded pciids\n"
 #endif
+#if FF_HAVE_WINRT
+        "WinRT headers\n"
+#endif
 #if FF_WIN81_COMPAT
         "Windows 8.1 Compatibility\n"
 #endif
