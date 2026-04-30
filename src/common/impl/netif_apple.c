@@ -1,6 +1,5 @@
 #include "common/netif.h"
 #include "common/io.h"
-#include "common/mallocHelper.h"
 
 #include <net/if.h>
 #include <net/if_dl.h>
@@ -98,7 +97,16 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         return false;
     }
 
-    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == (pid_t) pid));
+    bool gotResponse = false;
+    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0) {
+        if (rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == (pid_t) pid) {
+            gotResponse = true;
+            break;
+        }
+    }
+    if (!gotResponse) {
+        return false;
+    }
 
 #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason
     if ((rtmsg.hdr.rtm_flags & (RTF_UP | RTF_GATEWAY)) == (RTF_UP | RTF_GATEWAY))
@@ -109,6 +117,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 #ifndef __sun
             && sdl->sdl_len
 #endif
+            && sdl->sdl_family == AF_LINK
         ) {
             if (sdl->sdl_nlen > IF_NAMESIZE) {
                 return false;
@@ -173,7 +182,16 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
         return false;
     }
 
-    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 2 && rtmsg.hdr.rtm_pid == (pid_t) pid));
+    bool gotResponse = false;
+    while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0) {
+        if (rtmsg.hdr.rtm_seq == 2 && rtmsg.hdr.rtm_pid == (pid_t) pid) {
+            gotResponse = true;
+            break;
+        }
+    }
+    if (!gotResponse) {
+        return false;
+    }
 
 #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason
     if ((rtmsg.hdr.rtm_flags & (RTF_UP | RTF_GATEWAY)) == (RTF_UP | RTF_GATEWAY))
@@ -184,6 +202,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
 #ifndef __sun
             && sdl->sdl_len
 #endif
+            && sdl->sdl_family == AF_LINK
         ) {
             if (sdl->sdl_nlen > IF_NAMESIZE) {
                 return false;
