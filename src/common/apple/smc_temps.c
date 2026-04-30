@@ -3,7 +3,6 @@
 #include "common/stringUtils.h"
 
 #include <stdint.h>
-#include <math.h>
 #include <IOKit/IOKitLib.h>
 
 static const char kSmcCmdReadBytes = 5;

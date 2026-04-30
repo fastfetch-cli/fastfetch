@@ -1,8 +1,6 @@
 #include "osascript.h"
 
 #import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
-#import <CoreData/CoreData.h>
 
 bool ffOsascript(const char* input, FFstrbuf* result)
 {

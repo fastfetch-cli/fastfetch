@@ -24,10 +24,10 @@ const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result) {
         }
         return NULL;
     } else if (CFGetTypeID(cf) == CFDataGetTypeID()) {
-        if (CFDataGetLength((CFDataRef) cf) != sizeof(int)) {
-            return "Data length is not sizeof(int)";
+        if (CFDataGetLength((CFDataRef) cf) != sizeof(*result)) {
+            return "Data length is not sizeof(int32_t)";
         }
-        CFDataGetBytes((CFDataRef) cf, CFRangeMake(0, sizeof(int)), (uint8_t*) result);
+        CFDataGetBytes((CFDataRef) cf, CFRangeMake(0, sizeof(*result)), (uint8_t*) result);
         return NULL;
     }
 
