@@ -101,7 +101,21 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* maxPrefix = yyjson_obj_get(val, "maxPrefix");
             if (maxPrefix) {
                 int value;
-                const char* error = ffJsonConfigParseEnum(maxPrefix, &value, (FFKeyValuePair[]) { { "B", 0 }, { "kB", 1 }, { "MB", 2 }, { "GB", 3 }, { "TB", 4 }, { "PB", 5 }, { "EB", 6 }, { "ZB", 7 }, { "YB", 8 }, {} });
+                const char* error = ffJsonConfigParseEnum(
+                    maxPrefix,
+                    &value,
+                    (FFKeyValuePair[]) {
+                        { "B", 0 },
+                        { "kB", 1 },
+                        { "MB", 2 },
+                        { "GB", 3 },
+                        { "TB", 4 },
+                        { "PB", 5 },
+                        { "EB", 6 },
+                        { "ZB", 7 },
+                        { "YB", 8 },
+                        {},
+                    });
                 if (error) {
                     return error;
                 }
@@ -659,9 +673,28 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         if (ffStrEqualsIgnCase(subkey, "binary-prefix")) {
             options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC }, { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI }, { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "ndigits")) {
-            options->sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+            uint32_t num = ffOptionParseUInt32(key, value);
+            if (num > 9) {
+                fprintf(stderr, "Error: %s must be between 0 and 9\n", key);
+                exit(479);
+            }
+            options->sizeNdigits = (uint8_t) num;
         } else if (ffStrEqualsIgnCase(subkey, "max-prefix")) {
-            options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "B", 0 }, { "kB", 1 }, { "MB", 2 }, { "GB", 3 }, { "TB", 4 }, { "PB", 5 }, { "EB", 6 }, { "ZB", 7 }, { "YB", 8 }, {} });
+            options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(
+                key,
+                value,
+                (FFKeyValuePair[]) {
+                    { "B", 0 },
+                    { "kB", 1 },
+                    { "MB", 2 },
+                    { "GB", 3 },
+                    { "TB", 4 },
+                    { "PB", 5 },
+                    { "EB", 6 },
+                    { "ZB", 7 },
+                    { "YB", 8 },
+                    {},
+                });
         } else if (ffStrEqualsIgnCase(subkey, "space-before-unit")) {
             options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                                                                                                      { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
