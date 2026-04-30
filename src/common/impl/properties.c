@@ -55,7 +55,7 @@ bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buff
         ++(*line);
     }
 
-    // Allow faster parsing of quotet values
+    // Allow faster parsing of quoted values
     if (**line == '"' || **line == '\'') {
         valueEnd = **line;
         ++(*line);
