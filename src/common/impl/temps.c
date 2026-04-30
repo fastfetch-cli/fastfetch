@@ -123,7 +123,12 @@ bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, F
 
     yyjson_val* greenVal = yyjson_obj_get(value, "green");
     if (greenVal) {
-        int num = yyjson_get_int(greenVal);
+        if (!yyjson_is_int(greenVal)) {
+            fputs("Error: usage: temp.green must be an integer between 0 and 100\n", stderr);
+            exit(480);
+        }
+
+        int num = unsafe_yyjson_get_int(greenVal);
         if (num < 0 || num > 100) {
             fputs("Error: usage: temp.green must be between 0 and 100\n", stderr);
             exit(480);
@@ -133,7 +138,12 @@ bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, F
 
     yyjson_val* yellowVal = yyjson_obj_get(value, "yellow");
     if (yellowVal) {
-        int num = yyjson_get_int(yellowVal);
+        if (!yyjson_is_int(yellowVal)) {
+            fputs("Error: usage: temp.yellow must be an integer between 0 and 100\n", stderr);
+            exit(480);
+        }
+
+        int num = unsafe_yyjson_get_int(yellowVal);
         if (num < 0 || num > 100) {
             fputs("Error: usage: temp.yellow must be between 0 and 100\n", stderr);
             exit(480);
