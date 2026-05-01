@@ -2058,7 +2058,7 @@ static const FFlogo G[] = {
     },
     // GNOME
     {
-        .names = { "GNOME" },
+        .names = { "GNOME", "GNOME OS" },
         .lines = FASTFETCH_DATATEXT_LOGO_GNOME,
         .colors = {
             FF_COLOR_FG_BLUE,
