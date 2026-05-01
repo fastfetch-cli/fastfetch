@@ -17,6 +17,8 @@ extern "C" {
 
     #include "common/windows/com.hpp"
 
+    #define FF_BIND_FRONT(method, pobject) std::bind_front(&std::remove_cvref_t<decltype(*(pobject))>::method, (pobject))
+
 using winrt::impl::abi_t;
 using winrt::Windows::Foundation::IAsyncOperation;
 using winrt::Windows::Foundation::IAsyncOperationWithProgress;
@@ -28,7 +30,7 @@ static inline void deleteHstring(HSTRING* pstr) {
 }
 
 static inline void ffStrbufSetHstring(FFstrbuf* destination, HSTRING value) {
-    uint32_t length = 0;
+    uint32_t length;
     const wchar_t* raw = WindowsGetStringRawBuffer(value, &length);
     ffStrbufSetNWS(destination, length, raw);
 }
@@ -36,7 +38,7 @@ static inline void ffStrbufSetHstring(FFstrbuf* destination, HSTRING value) {
 template <typename Interface>
 static inline HRESULT ffGetActivationFactory(const wchar_t* className, REFIID iid, Interface** factory) {
     HSTRING_HEADER header;
-    FF_A_CLEANUP(deleteHstring) HSTRING runtimeClass = NULL;
+    HSTRING runtimeClass;
     HRESULT hr = WindowsCreateStringReference(className, (UINT32)::wcslen(className), &header, &runtimeClass);
     if (FAILED(hr)) {
         return hr;
@@ -45,16 +47,13 @@ static inline HRESULT ffGetActivationFactory(const wchar_t* className, REFIID ii
     return RoGetActivationFactory(runtimeClass, iid, reinterpret_cast<void**>(factory));
 }
 
-template <typename TargetProjection, typename SourceAbi, typename TargetAbi>
-static inline HRESULT ffQueryInterface(SourceAbi* source, TargetAbi** target) {
-    *target = NULL;
-    return reinterpret_cast<IUnknown*>(source)->QueryInterface(winrt::guid_of<TargetProjection>(), reinterpret_cast<void**>(target));
+template <typename TargetProjection, typename SourceAbi>
+static inline HRESULT ffQueryInterface(SourceAbi* source, abi_t<TargetProjection>** target) {
+    return source->QueryInterface(winrt::guid_of<TargetProjection>(), reinterpret_cast<void**>(target));
 }
 
 template <typename TOperationAbi, typename TResultAbi>
 static HRESULT ffWaitForAsyncOperation(TOperationAbi* operation, TResultAbi** result) {
-    *result = NULL;
-
     IAsyncInfo* FF_AUTO_RELEASE_COM_OBJECT asyncInfo = NULL;
     HRESULT hr = ffQueryInterface<IAsyncInfo>(operation, &asyncInfo);
     if (FAILED(hr)) {
@@ -84,17 +83,35 @@ static HRESULT ffWaitForAsyncOperation(TOperationAbi* operation, TResultAbi** re
     return operation->GetResults((void**) result);
 }
 
-static HRESULT ffSaveThumbnailToTempPath(
-    abi_t<winrt::Windows::Storage::Streams::IRandomAccessStreamReference>* thumbnail,
-    FFstrbuf* destination) {
-    abi_t<IAsyncOperation<winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType>>* FF_AUTO_RELEASE_COM_OBJECT openOperation = NULL;
-    HRESULT hr = thumbnail->OpenReadAsync(reinterpret_cast<void**>(&openOperation));
-    if (FAILED(hr)) {
+template <typename TResultProjection, typename TOperation, typename... TArgs>
+static HRESULT ffRunAndWait(TOperation&& operation, abi_t<TResultProjection>** result, TArgs&&... args) {
+    abi_t<IAsyncOperation<TResultProjection>>* FF_AUTO_RELEASE_COM_OBJECT opResult = NULL;
+    HRESULT hr = operation(std::forward<TArgs>(args)..., reinterpret_cast<void**>(&opResult));
+    if (FAILED(hr) || !opResult) {
         return hr;
     }
 
+    return ffWaitForAsyncOperation(opResult, result);
+}
+
+template <typename TResultProjection, typename TOperation, typename... TArgs>
+static HRESULT ffRunAndWait2(TOperation&& operation, abi_t<TResultProjection>** result, TArgs&&... args) {
+    *result = NULL;
+
+    abi_t<IAsyncOperationWithProgress<TResultProjection, int32_t>>* FF_AUTO_RELEASE_COM_OBJECT opResult = NULL;
+    HRESULT hr = operation(std::forward<TArgs>(args)..., reinterpret_cast<void**>(&opResult));
+    if (FAILED(hr) || !opResult) {
+        return hr;
+    }
+
+    return ffWaitForAsyncOperation(opResult, result);
+}
+
+static HRESULT ffSaveThumbnailToTempPath(
+    abi_t<winrt::Windows::Storage::Streams::IRandomAccessStreamReference>* thumbnail,
+    FFstrbuf* destination) {
     abi_t<winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType>* FF_AUTO_RELEASE_COM_OBJECT contentStream = NULL;
-    hr = ffWaitForAsyncOperation(openOperation, &contentStream);
+    HRESULT hr = ffRunAndWait<winrt::Windows::Storage::Streams::IRandomAccessStreamWithContentType>(FF_BIND_FRONT(OpenReadAsync, thumbnail), &contentStream);
     if (FAILED(hr) || !contentStream) {
         return FAILED(hr) ? hr : E_FAIL;
     }
@@ -133,14 +150,8 @@ static HRESULT ffSaveThumbnailToTempPath(
         return hr;
     }
 
-    abi_t<IAsyncOperationWithProgress<winrt::Windows::Storage::Streams::IBuffer, uint32_t>>* FF_AUTO_RELEASE_COM_OBJECT readOperation = NULL;
-    hr = inputStream->ReadAsync(buffer, (UINT32) size, static_cast<uint32_t>(winrt::Windows::Storage::Streams::InputStreamOptions::None), reinterpret_cast<void**>(&readOperation));
-    if (FAILED(hr)) {
-        return hr;
-    }
-
     abi_t<winrt::Windows::Storage::Streams::IBuffer>* FF_AUTO_RELEASE_COM_OBJECT readBuffer = NULL;
-    hr = ffWaitForAsyncOperation(readOperation, &readBuffer);
+    hr = ffRunAndWait2<winrt::Windows::Storage::Streams::IBuffer>(FF_BIND_FRONT(ReadAsync, inputStream), &readBuffer, buffer, (uint32_t) size, static_cast<uint32_t>(winrt::Windows::Storage::Streams::InputStreamOptions::None));
     if (FAILED(hr) || !readBuffer) {
         return FAILED(hr) ? hr : E_FAIL;
     }
@@ -152,7 +163,7 @@ static HRESULT ffSaveThumbnailToTempPath(
     }
 
     Windows::Storage::Streams::IBufferByteAccess* FF_AUTO_RELEASE_COM_OBJECT byteAccess = NULL;
-    hr = reinterpret_cast<IUnknown*>(readBuffer)->QueryInterface(IID_PPV_ARGS(&byteAccess));
+    hr = readBuffer->QueryInterface(IID_PPV_ARGS(&byteAccess));
     if (FAILED(hr)) {
         return hr;
     }
@@ -176,16 +187,18 @@ static HRESULT ffSaveThumbnailToTempPath(
 
     HANDLE file = CreateFileW(tempFilePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (file == INVALID_HANDLE_VALUE) {
+        DWORD writeError = GetLastError();
         DeleteFileW(tempFilePath);
-        return HRESULT_FROM_WIN32(GetLastError());
+        return HRESULT_FROM_WIN32(writeError);
     }
 
     DWORD written = 0;
     BOOL writtenOk = WriteFile(file, bytes, length, &written, NULL);
-    DWORD writeError = writtenOk ? ERROR_SUCCESS : GetLastError();
-    CloseHandle(file);
+    NtClose(file);
+    file = NULL;
 
     if (!writtenOk || written != length) {
+        DWORD writeError = GetLastError();
         DeleteFileW(tempFilePath);
         return HRESULT_FROM_WIN32(writtenOk ? ERROR_WRITE_FAULT : writeError);
     }
@@ -212,15 +225,8 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
             break;
         }
 
-        abi_t<IAsyncOperation<winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSessionManager>>* FF_AUTO_RELEASE_COM_OBJECT managerOperation = NULL;
-        hr = managerStatics->RequestAsync(reinterpret_cast<void**>(&managerOperation));
-        if (FAILED(hr) || !managerOperation) {
-            error = "winrt: RequestAsync() failed";
-            break;
-        }
-
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionManager>* FF_AUTO_RELEASE_COM_OBJECT manager = NULL;
-        hr = ffWaitForAsyncOperation(managerOperation, &manager);
+        hr = ffRunAndWait<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionManager>(FF_BIND_FRONT(RequestAsync, managerStatics), &manager);
         if (FAILED(hr) || !manager) {
             error = "winrt: RequestAsync().GetResults() failed";
             break;
@@ -228,20 +234,14 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
 
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSession>* FF_AUTO_RELEASE_COM_OBJECT session = NULL;
         hr = manager->GetCurrentSession(reinterpret_cast<void**>(&session));
+
         if (FAILED(hr) || !session) {
             error = "winrt: GetCurrentSession() failed";
             break;
         }
 
-        abi_t<IAsyncOperation<winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSessionMediaProperties>>* FF_AUTO_RELEASE_COM_OBJECT mediaPropsOperation = NULL;
-        hr = session->TryGetMediaPropertiesAsync(reinterpret_cast<void**>(&mediaPropsOperation));
-        if (FAILED(hr) || !mediaPropsOperation) {
-            error = "winrt: TryGetMediaPropertiesAsync() failed";
-            break;
-        }
-
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionMediaProperties>* FF_AUTO_RELEASE_COM_OBJECT mediaProps = NULL;
-        hr = ffWaitForAsyncOperation(mediaPropsOperation, &mediaProps);
+        hr = ffRunAndWait<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionMediaProperties>(FF_BIND_FRONT(TryGetMediaPropertiesAsync, session), &mediaProps);
         if (FAILED(hr) || !mediaProps) {
             error = "winrt: TryGetMediaPropertiesAsync().GetResults() failed";
             break;
