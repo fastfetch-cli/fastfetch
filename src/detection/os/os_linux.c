@@ -149,9 +149,9 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return false;
     }
 
-    if (ffStrContains(xdgConfigDirs, "studio")) {
-        ffStrbufSetStatic(&result->name, "Ubuntu Studio");
-        ffStrbufSetStatic(&result->id, "ubuntu-studio");
+    if (ffStrContains(xdgConfigDirs, "ukui")) {
+        ffStrbufSetStatic(&result->name, "Ubuntu Kylin");
+        ffStrbufSetStatic(&result->id, "ubuntu-kylin");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return false;
     }
