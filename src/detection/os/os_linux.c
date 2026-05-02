@@ -170,6 +170,13 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return false;
     }
 
+    if (ffStrContains(xdgConfigDirs, "unity")) {
+        ffStrbufSetStatic(&result->name, "Ubuntu Unity");
+        ffStrbufSetStatic(&result->id, "ubuntu-unity");
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return false;
+    }
+
     return false;
 }
 
