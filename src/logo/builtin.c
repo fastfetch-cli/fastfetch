@@ -5052,17 +5052,6 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // UbuntuKde
-    {
-        .names = { "ubuntu kde", "ubuntu-kde", "ubuntu-plasma" },
-        .lines = FASTFETCH_DATATEXT_LOGO_KUBUNTU,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_BLUE,
-    },
     // UbuntuStudio
     {
         .names = { "ubuntu studio", "ubuntu-studio" },
