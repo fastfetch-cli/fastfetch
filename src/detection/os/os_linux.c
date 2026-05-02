@@ -99,6 +99,14 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return false;
     }
 
+    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE))
+    {
+        ffStrbufSetStatic(&result->name, "Ubuntu Studio");
+        ffStrbufSetStatic(&result->id, "ubuntu-studio");
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return false;
+    }
+
     if (ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu")) {
         ffStrbufSetStatic(&result->name, "Kubuntu");
         ffStrbufSetStatic(&result->id, "kubuntu");
