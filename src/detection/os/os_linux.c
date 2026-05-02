@@ -94,16 +94,17 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return true;
     }
 
-    const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
-    if (!ffStrSet(xdgConfigDirs)) {
-        return false;
-    }
-
+    // xdgConfigDirs contains plasma only
     if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return false;
+    }
+
+    const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
+    if (!ffStrSet(xdgConfigDirs)) {
         return false;
     }
 
