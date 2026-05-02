@@ -99,7 +99,7 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return false;
     }
 
-    if (ffPathExists("/usr/share/doc/ubuntustudio-desktop", FF_PATHTYPE_DIRECTORY))
+    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
