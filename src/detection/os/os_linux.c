@@ -328,9 +328,9 @@ static void detectDeepinEnhancement(FFOSResult* result)
         ffStrbufSet(&result->versionID, &minor);
 
         if (edition.length > 0)
-            ffStrbufSetF(&result->prettyName, "Deepin %s (%s)", minor.chars, edition.chars);
+            ffStrbufSetF(&result->prettyName, "%s %s (%s)", result->name.chars, minor.chars, edition.chars);
         else
-            ffStrbufSetF(&result->prettyName, "Deepin %s", minor.chars);
+            ffStrbufSetF(&result->prettyName, "%s %s", result->name.chars, minor.chars);
     }
 
     ffStrbufDestroy(&minor);
