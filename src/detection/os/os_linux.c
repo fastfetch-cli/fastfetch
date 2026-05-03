@@ -323,7 +323,7 @@ static void detectDeepinEnhancement(FFOSResult* result)
         }
     );
 
-    if (minor.length > 0)
+    if (edition.length > 0 && !ffStrbufContainC(&result->prettyName, '('))
     {
         ffStrbufSet(&result->versionID, &minor);
 
