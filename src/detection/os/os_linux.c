@@ -306,6 +306,37 @@ static bool detectBedrock(FFOSResult* os) {
     return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
 }
 
+static void detectDeepinEnhancement(FFOSResult* result)
+{
+    if (!ffStrbufEqualS(&result->id, "deepin"))
+        return;
+
+    FFstrbuf minor = ffStrbufCreate();
+    FFstrbuf edition = ffStrbufCreate();
+
+    ffParsePropFileValues(
+        FASTFETCH_TARGET_DIR_ETC "/os-version",
+        2,
+        (FFpropquery[]) {
+            { "MinorVersion=", &minor },
+            { "EditionName=", &edition },
+        }
+    );
+
+    if (minor.length > 0)
+    {
+        ffStrbufSet(&result->versionID, &minor);
+
+        if (edition.length > 0)
+            ffStrbufSetF(&result->prettyName, "Deepin %s (%s)", minor.chars, edition.chars);
+        else
+            ffStrbufSetF(&result->prettyName, "Deepin %s", minor.chars);
+    }
+
+    ffStrbufDestroy(&minor);
+    ffStrbufDestroy(&edition);
+}
+
 static void detectOS(FFOSResult* os) {
 #ifdef FF_CUSTOM_OS_RELEASE_PATH
     parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
@@ -322,6 +353,7 @@ static void detectOS(FFOSResult* os) {
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+    detectDeepinEnhancement(os);
     if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0) {
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     }
