@@ -3247,6 +3247,16 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // NebiOS
+    {
+        .names = { "NebiOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_NEBIOS,
+        .colors = {
+            FF_COLOR_FG_RGB "255;95;95",
+            FF_COLOR_FG_RGB "252;146;84",
+            FF_COLOR_FG_RGB "248;196;72",
+        },
+    },
     // Nekos
     {
         .names = { "Nekos" },
