@@ -308,11 +308,8 @@ static bool detectBedrock(FFOSResult* os) {
 
 static void detectDeepinEnhancement(FFOSResult* result)
 {
-    if (!ffStrbufEqualS(&result->id, "deepin"))
-        return;
-
-    FFstrbuf minor = ffStrbufCreate();
-    FFstrbuf edition = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY edition = ffStrbufCreate();
 
     ffParsePropFileValues(
         FASTFETCH_TARGET_DIR_ETC "/os-version",
@@ -332,9 +329,6 @@ static void detectDeepinEnhancement(FFOSResult* result)
         else
             ffStrbufSetF(&result->prettyName, "%s %s", result->name.chars, minor.chars);
     }
-
-    ffStrbufDestroy(&minor);
-    ffStrbufDestroy(&edition);
 }
 
 static void detectOS(FFOSResult* os) {
@@ -353,7 +347,7 @@ static void detectOS(FFOSResult* os) {
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
-    detectDeepinEnhancement(os);
+
     if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0) {
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     }
@@ -392,6 +386,8 @@ void ffDetectOSImpl(FFOSResult* os) {
             ffStrbufSetS(&os->id, "lmde");
             ffStrbufSetS(&os->idLike, "linuxmint");
         }
+    } else if (ffStrbufEqualS(&result->id, "deepin")) {
+        detectDeepinEnhancement(&result);
     }
 #endif
 }
