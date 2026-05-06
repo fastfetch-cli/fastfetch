@@ -1,40 +1,30 @@
 #include "com.hpp"
-#include "fastfetch.h"
 
-#include <stdlib.h>
+#include <roapi.h>
 
-// https://learn.microsoft.com/en-us/windows/win32/wmisdk/example--getting-wmi-data-from-the-local-computer
-// https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/computer-system-hardware-classes
-static void CoUninitializeWrap(void) {
-    CoUninitialize();
+static void RoUninitializeWrap(void) {
+    RoUninitialize();
 }
 
 static const char* doInitCom() {
-    // Initialize COM
-    if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) {
-        return "CoInitializeEx() failed";
+    HRESULT res = RoInitialize(RO_INIT_MULTITHREADED);
+    if (FAILED(res)) {
+        switch (res) {
+            case E_INVALIDARG:
+                return "RoInitialize() failed: invalid argument";
+            case E_OUTOFMEMORY:
+                return "RoInitialize() failed: out of memory";
+            case E_UNEXPECTED:
+                return "RoInitialize() failed: unexpected error";
+            case RPC_E_CHANGED_MODE:
+                // COM was already initialized with a different concurrency model
+                return NULL;
+            default:
+                return "RoInitialize() failed: unknown error";
+        }
     }
 
-    // Set general COM security levels
-
-    HRESULT hRes = CoInitializeSecurity(
-        NULL,
-        -1,                          // COM authentication
-        NULL,                        // Authentication services
-        NULL,                        // Reserved
-        RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-        RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-        NULL,                        // Authentication info
-        EOAC_NONE,                   // Additional capabilities
-        NULL                         // Reserved
-    );
-
-    if (FAILED(hRes) && hRes != RPC_E_TOO_LATE /* Has been set by a random dll */) {
-        CoUninitialize();
-        return "CoInitializeSecurity() failed";
-    }
-
-    atexit(CoUninitializeWrap);
+    atexit(RoUninitializeWrap);
     return NULL;
 }
 

@@ -208,14 +208,10 @@ static HRESULT ffSaveThumbnailToTempPath(
 }
 
 static const char* getMedia(FFMediaResult* result, bool saveCover) {
-    // RO_INIT_MULTITHREADED is required for IRandomAccessStreamReference::OpenReadAsync to work correctly
-    HRESULT initHr = RoInitialize(RO_INIT_MULTITHREADED);
-    bool shouldUninitialize = SUCCEEDED(initHr);
-    if (FAILED(initHr) && initHr != RPC_E_CHANGED_MODE) {
-        return "winrt: RoInitialize() failed";
+    const char* error = ffInitCom();
+    if (error) {
+        return error;
     }
-
-    const char* error = NULL;
 
     do {
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionManagerStatics>* FF_AUTO_RELEASE_COM_OBJECT managerStatics = NULL;
@@ -324,10 +320,6 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
             }
         }
     } while (false);
-
-    if (shouldUninitialize) {
-        RoUninitialize();
-    }
 
     return error;
 }

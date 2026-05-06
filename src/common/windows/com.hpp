@@ -5,6 +5,7 @@
     #include "common/attributes.h"
     #include <unknwn.h>
 
+// Initialize COM & WinRT
 const char* ffInitCom(void);
 
 static inline void ffReleaseComObject(void* ppUnknown) {
