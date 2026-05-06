@@ -5491,6 +5491,13 @@ static const FFlogo X[] = {
                                                                             FF_COLOR_FG_256 "14",
                                                                             FF_COLOR_FG_256 "16",
                                                                         } },
+    // Ximper
+    { .names = { "Ximper" }, .lines = FASTFETCH_DATATEXT_LOGO_XIMPER, .colors = {
+                                                                            FF_COLOR_FG_256 "21",
+                                                                            FF_COLOR_FG_256 "57",
+                                                                            FF_COLOR_FG_256 "92",
+                                                                            FF_COLOR_FG_256 "128",
+                                                                        } },
     // Xinux
     { .names = { "Xinux" }, .lines = FASTFETCH_DATATEXT_LOGO_XINUX, .colors = {
                                                                         FF_COLOR_FG_BLUE,
