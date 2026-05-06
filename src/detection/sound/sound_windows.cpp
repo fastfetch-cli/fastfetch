@@ -1,8 +1,8 @@
 extern "C" {
 #include "sound.h"
+#include "common/windows/com.h"
 }
 #include "common/windows/unicode.hpp"
-#include "common/windows/com.hpp"
 #include "common/windows/variant.hpp"
 
 #include <initguid.h>

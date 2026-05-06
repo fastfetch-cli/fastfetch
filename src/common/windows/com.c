@@ -1,4 +1,4 @@
-#include "com.hpp"
+#include "com.h"
 
 #include <roapi.h>
 

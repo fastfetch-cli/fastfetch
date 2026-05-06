@@ -2,6 +2,7 @@ extern "C" {
 #include "media.h"
 #include "common/time.h"
 #include "common/windows/unicode.h"
+#include "common/windows/com.h"
 }
 
 #if FF_HAVE_WINRT
@@ -14,8 +15,6 @@ extern "C" {
     #include <winrt/Windows.Foundation.h>
     #include <winrt/Windows.Media.Control.h>
     #include <winrt/Windows.Storage.Streams.h>
-
-    #include "common/windows/com.hpp"
 
     #define FF_BIND_FRONT(method, pobject) std::bind_front(&std::remove_cvref_t<decltype(*(pobject))>::method, (pobject))
 

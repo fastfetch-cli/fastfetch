@@ -1,8 +1,8 @@
 extern "C" {
 #include "camera.h"
 #include "common/library.h"
+#include "common/windows/com.h"
 }
-#include "common/windows/com.hpp"
 #include "common/windows/unicode.hpp"
 #include "common/windows/util.hpp"
 
