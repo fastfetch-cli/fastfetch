@@ -95,8 +95,7 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
     }
 
     // xdgConfigDirs contains plasma only
-    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE))
-    {
+    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE)) {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
@@ -306,6 +305,34 @@ static bool detectBedrock(FFOSResult* os) {
     return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
 }
 
+static void detectDeepinEnhancement(FFOSResult* result) {
+    if (ffStrbufContainC(&result->prettyName, '(')) {
+        return;
+    }
+
+    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY edition = ffStrbufCreate();
+
+    if (!ffParsePropFileValues(
+            FASTFETCH_TARGET_DIR_ETC "/os-version",
+            2,
+            (FFpropquery[]) {
+                { "MinorVersion=", &minor },
+                { "EditionName=", &edition },
+            }) ||
+        minor.length == 0) {
+        return;
+    }
+
+    ffStrbufSet(&result->versionID, &minor);
+
+    if (edition.length > 0) {
+        ffStrbufSetF(&result->prettyName, "%s %s (%s)", result->name.chars, minor.chars, edition.chars);
+    } else {
+        ffStrbufSetF(&result->prettyName, "%s %s", result->name.chars, minor.chars);
+    }
+}
+
 static void detectOS(FFOSResult* os) {
 #ifdef FF_CUSTOM_OS_RELEASE_PATH
     parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
@@ -322,6 +349,7 @@ static void detectOS(FFOSResult* os) {
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+
     if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0) {
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     }
@@ -360,6 +388,8 @@ void ffDetectOSImpl(FFOSResult* os) {
             ffStrbufSetS(&os->id, "lmde");
             ffStrbufSetS(&os->idLike, "linuxmint");
         }
+    } else if (ffStrbufEqualS(&os->id, "deepin")) {
+        detectDeepinEnhancement(os);
     }
 #endif
 }
