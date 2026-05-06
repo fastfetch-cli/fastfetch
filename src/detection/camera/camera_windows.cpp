@@ -133,6 +133,9 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
                     case MFVideoPrimaries_ACES:
                         ffStrbufSetStatic(&camera->colorspace, "ACES");
                         break;
+                    case (MFVideoPrimaries)13: // MFVideoPrimaries_Display_P3
+                        ffStrbufSetStatic(&camera->colorspace, "Display P3");
+                        break;
                     default:
                         break;
                 }
