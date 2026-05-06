@@ -297,7 +297,7 @@ FF_A_UNUSED static bool detectFedoraVariant(FFOSResult* result) {
     return false;
 }
 
-static bool detectBedrock(FFOSResult* os) {
+FF_A_UNUSED static bool detectBedrock(FFOSResult* os) {
     const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
     if (bedrockRestrict && bedrockRestrict[0] == '1') {
         return false;
@@ -305,7 +305,7 @@ static bool detectBedrock(FFOSResult* os) {
     return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
 }
 
-static void detectDeepinEnhancement(FFOSResult* result) {
+FF_A_UNUSED static void detectDeepinEnhancement(FFOSResult* result) {
     if (ffStrbufContainC(&result->prettyName, '(')) {
         return;
     }
@@ -342,9 +342,11 @@ static void detectOS(FFOSResult* os) {
     return;
 #endif
 
+#ifdef __linux__
     if (detectBedrock(os)) {
         return;
     }
+#endif
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
