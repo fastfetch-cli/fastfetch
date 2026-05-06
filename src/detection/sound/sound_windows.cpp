@@ -25,7 +25,7 @@ static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */
         return "immDevice->GetId() failed";
     }
 
-    IPropertyStore* FF_AUTO_RELEASE_COM_OBJECT immPropStore;
+    IPropertyStore* FF_AUTO_RELEASE_COM_OBJECT immPropStore = NULL;
     if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore))) {
         return "immDevice->OpenPropertyStore() failed";
     }
@@ -54,7 +54,7 @@ static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */
         }
     }
 
-    IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume;
+    IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume = NULL;
     if (SUCCEEDED(immDevice->Activate(IID_IAudioEndpointVolume, CLSCTX_ALL, NULL, (void**) &immEndpointVolume))) {
         BOOL muted;
         if (FAILED(immEndpointVolume->GetMute(&muted)) || !muted) {

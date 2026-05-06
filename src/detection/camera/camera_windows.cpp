@@ -72,13 +72,13 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
             continue;
         }
 
-        IMFStreamDescriptor* FF_AUTO_RELEASE_COM_OBJECT sd = NULL;
+        IMFStreamDescriptor* FF_AUTO_RELEASE_COM_OBJECT sd = nullptr;
         BOOL selected;
         if (FAILED(pd->GetStreamDescriptorByIndex(0, &selected, &sd))) {
             continue;
         }
 
-        IMFMediaTypeHandler* FF_AUTO_RELEASE_COM_OBJECT handler = NULL;
+        IMFMediaTypeHandler* FF_AUTO_RELEASE_COM_OBJECT handler = nullptr;
         if (FAILED(sd->GetMediaTypeHandler(&handler))) {
             continue;
         }
