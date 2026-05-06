@@ -5515,6 +5515,16 @@ static const FFlogo Y[] = {
 };
 
 static const FFlogo Z[] = {
+    // Zerene
+    {
+        .names = { "zerene", "zeluxos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZERENE,
+        .colors = {
+            FF_COLOR_FG_RGB "40;0;255"
+        },
+        .colorKeys = FF_COLOR_FG_RGB "40;0;255",
+        .colorTitle = FF_COLOR_FG_RGB "40;0;255",
+    },
     // Zorin
     {
         .names = { "Zorin" },
