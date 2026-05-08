@@ -127,30 +127,36 @@ static void detectStaticData(FFlist* entries, FFlist* results) {
         FFBatteryWmiEntry* entry = getBatteryEntry(entries, results, data->Tag);
 
         FF_DEBUG("chemistry: %.4s", (const char*) &data->Chemistry);
+#if __BIG_ENDIAN__
+    #define htobe32(x) (x) // Should not happen on Windows, but just in case
+#else
+    #define htobe32(x) __builtin_bswap32(x)
+#endif
         switch (data->Chemistry) {
-            case 'cAbP':
+            case htobe32('PbAc'):
                 ffStrbufSetStatic(&entry->result->technology, "Lead Acid");
                 break;
-            case 'NOIL':
-            case 'I-iL':
+            case htobe32('LION'):
+            case htobe32('Li-I'):
                 ffStrbufSetStatic(&entry->result->technology, "Lithium Ion");
                 break;
-            case 'dCiN':
+            case htobe32('NiCd'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Cadmium");
                 break;
-            case 'HMiN':
+            case htobe32('NiMH'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Metal Hydride");
                 break;
-            case 'nZiN':
+            case htobe32('NiZn'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Zinc");
                 break;
-            case '\0MAR':
+            case htobe32('RAM\0'):
                 ffStrbufSetStatic(&entry->result->technology, "Rechargeable Alkaline-Manganese");
                 break;
             default:
                 ffStrbufSetStatic(&entry->result->technology, data->Technology ? "Rechargeable" : "Non Rechargeable");
                 break;
         }
+#undef htobe32
 
         const BATTERY_MANUFACTURE_DATE* manufactureDate = (const BATTERY_MANUFACTURE_DATE*) data->ManufactureDate;
         if (manufactureDate->Year > 0 && manufactureDate->Month >= 1 && manufactureDate->Month <= 12 && manufactureDate->Day >= 1 && manufactureDate->Day <= 31) {
