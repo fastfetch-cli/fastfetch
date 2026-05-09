@@ -254,9 +254,6 @@ void ffListFeatures(void) {
 #if FF_HAVE_LINUX_VIDEODEV2
         "linux/videodev2\n"
 #endif
-#if FF_HAVE_LINUX_WIRELESS
-        "linux/wireless\n"
-#endif
 #if FF_HAVE_EMBEDDED_PCIIDS
         "Embedded pciids\n"
 #endif
