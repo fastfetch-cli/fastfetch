@@ -634,7 +634,8 @@ static inline bool ffIsWindows10OrGreater() {
 }
 
 static inline bool ffIsWindows11OrGreater() {
-    return ffIsWindows10OrGreater() && SharedUserData->NtBuildNumber >= 22000;
+    return SharedUserData->NtMajorVersion > 10 ||
+        (SharedUserData->NtMajorVersion == 10 && SharedUserData->NtBuildNumber >= 22000);
 }
 
 NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
