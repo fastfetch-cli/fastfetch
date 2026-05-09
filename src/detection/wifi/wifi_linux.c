@@ -225,10 +225,10 @@ static double ffWifiParseBitrateFromRateInfo(const struct nlattr* rateAttr, FFst
         size_t payload = ffWifiNlAttrPayload(info);
 
         switch (type) {
-            case 30 /* NL80211_RATE_INFO_UHR_MCS*/:
+            case 30 /* NL80211_RATE_INFO_UHR_MCS */:
                 ffStrbufSetStatic(protocol, "802.11bn (Wi-Fi 8)");
                 break;
-            case 23 /*NL80211_RATE_INFO_S1G_MCS*/:
+            case 23 /* NL80211_RATE_INFO_S1G_MCS */:
                 ffStrbufSetStatic(protocol, "802.11ah (Wi-Fi HaLow)");
                 break;
             case 19 /* NL80211_RATE_INFO_EHT_MCS */:
@@ -735,13 +735,39 @@ static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, cha
 
     if (!item->conn.protocol.length) {
         FF_DEBUG("Getting protocol name via ioctl");
-        if (ioctl(sock, SIOCGIWNAME, &iwr) >= 0 && !ffStrEqualsIgnCase(iwr.u.name, "IEEE 802.11")) {
+        if (ioctl(sock, SIOCGIWNAME, &iwr) >= 0) {
+            char* token = iwr.u.name;
             if (ffStrStartsWithIgnCase(iwr.u.name, "IEEE ")) {
-                ffStrbufSetS(&item->conn.protocol, iwr.u.name + strlen("IEEE "));
-            } else {
-                ffStrbufSetS(&item->conn.protocol, iwr.u.name);
+                token += strlen("IEEE ");
             }
-            FF_DEBUG("Protocol: %s", item->conn.protocol.chars);
+            if (ffStrStartsWith(token, "802.11")) {
+                token += strlen("802.11");
+                if (*token) {
+                    if (*token == ' ') {
+                        token++;
+                    }
+                    for (char* c = token; *c; ++c) {
+                        if (*c >= 'A' && *c <= 'Z') {
+                            *c += 'a' - 'A';
+                        }
+                    }
+                    if (ffStrEquals(token, "n")) {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+                    } else if (ffStrEquals(token, "ac")) {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+                    } else if (ffStrEquals(token, "ax")) {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+                    } else if (ffStrEquals(token, "be")) {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+                    } else if (ffStrEquals(token, "bn")) {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11bn (Wi-Fi 8)");
+                    } else {
+                        ffStrbufSetStatic(&item->conn.protocol, "802.11");
+                        ffStrbufAppendS(&item->conn.protocol, token);
+                    }
+                }
+            }
+            FF_DEBUG("Protocol: %s", item->conn.protocol.length ? item->conn.protocol.chars : "(unknown)");
         } else {
             FF_DEBUG("Failed to get protocol name via ioctl: %s", strerror(errno));
         }
