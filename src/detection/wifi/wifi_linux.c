@@ -1,12 +1,17 @@
 #include "wifi.h"
 #include "common/io.h"
 #include "common/debug.h"
+#include "common/stringUtils.h"
 
 #include <sys/time.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <net/if.h>
 #include <linux/genetlink.h>
 #include <linux/nl80211.h>
-#include <net/if.h>
+#include <linux/wireless.h>
+#include <unistd.h>
 
 // Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -18,6 +23,10 @@ typedef struct FFWifiNlContext {
     uint32_t seq;
 } FFWifiNlContext;
 
+typedef struct FFWifiIcContext {
+    int sockFd;
+} FFWifiIcContext;
+
 typedef struct FFWifiSecurityFlags {
     bool privacy : 1;
     bool wep : 1;
@@ -28,9 +37,9 @@ typedef struct FFWifiSecurityFlags {
     bool eap : 1;
 } FFWifiSecurityFlags;
 
-static inline double rssiToSignalQuality(int rssi)
-{
-    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2);
+static inline double rssiToSignalQuality(int rssi) {
+    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0
+                                                      : (rssi + 100) * 2);
 }
 
 static inline uint32_t ffWifiGetNetlinkPortId(int sockFd) {
@@ -66,6 +75,7 @@ static inline size_t ffWifiNlAttrPayload(const struct nlattr* attr) {
 }
 
 static inline const void* ffWifiNlAttrData(const struct nlattr* attr) {
+    // Big endian?
     return (const uint8_t*) attr + NLA_HDRLEN;
 }
 
@@ -399,7 +409,7 @@ static void ffWifiParseInformationElements(const uint8_t* ies, size_t length, FF
         }
 
         const uint8_t* ie = ies + pos;
-        if (id == 0 && !item->conn.ssid.length) {
+        if (id == 0) {
             ffStrbufSetNS(&item->conn.ssid, len, (const char*) ie);
         } else if (id == 48) {
             ffWifiParseRsnIe(ie, len, sec);
@@ -411,7 +421,23 @@ static void ffWifiParseInformationElements(const uint8_t* ies, size_t length, FF
     }
 }
 
-static bool ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item, bool* associated) {
+static bool ffWifiIsBssAssociated(const struct nlattr* bssAttr) {
+    size_t remaining = ffWifiNlAttrPayload(bssAttr);
+    for (const struct nlattr* attr = (const struct nlattr*) ffWifiNlAttrData(bssAttr);
+        ffWifiNlAttrOk(attr, remaining);
+        attr = ffWifiNlAttrNext(attr, &remaining)) {
+        uint16_t type = (uint16_t) (attr->nla_type & NLA_TYPE_MASK);
+        size_t payload = ffWifiNlAttrPayload(attr);
+
+        if (type == NL80211_BSS_STATUS && payload >= sizeof(uint32_t)) {
+            return *(uint32_t*) ffWifiNlAttrData(attr) == NL80211_BSS_STATUS_ASSOCIATED;
+        }
+    }
+
+    return false;
+}
+
+static void ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item) {
     FFWifiSecurityFlags sec = {};
     size_t remaining = ffWifiNlAttrPayload(bssAttr);
 
@@ -421,11 +447,7 @@ static bool ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item,
         uint16_t type = (uint16_t) (attr->nla_type & NLA_TYPE_MASK);
         size_t payload = ffWifiNlAttrPayload(attr);
 
-        if (type == NL80211_BSS_STATUS && payload >= sizeof(uint32_t)) {
-            if (*(uint32_t*) ffWifiNlAttrData(attr) == NL80211_BSS_STATUS_ASSOCIATED) {
-                *associated = true;
-            }
-        } else if (type == NL80211_BSS_BSSID && payload >= 6) {
+        if (type == NL80211_BSS_BSSID && payload >= 6) {
             const uint8_t* mac = (const uint8_t*) ffWifiNlAttrData(attr);
             ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         } else if (type == NL80211_BSS_FREQUENCY && payload >= sizeof(uint32_t)) {
@@ -442,12 +464,8 @@ static bool ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item,
         }
     }
 
-    if (!*associated) {
-        return false;
-    }
-
     ffWifiApplySecurityFlags(item, &sec);
-    return true;
+    return;
 }
 
 static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32_t ifIndex) {
@@ -485,7 +503,6 @@ static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32
     }
 
     uint8_t buffer[1024 * 16];
-    bool associated = false;
     while (true) {
         ssize_t received = recvfrom(ctx->sockFd, buffer, sizeof(buffer), 0, NULL, NULL);
         if (received < 0) {
@@ -501,7 +518,7 @@ static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32
             }
 
             if (nlh->nlmsg_type == NLMSG_DONE) {
-                return associated;
+                return false;
             }
 
             if (nlh->nlmsg_type == NLMSG_ERROR) {
@@ -510,7 +527,7 @@ static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32
                     continue;
                 }
                 FF_DEBUG("nl80211 scan request failed: %s", strerror(-err->error));
-                return associated;
+                return false;
             }
 
             if (nlh->nlmsg_type != ctx->nl80211FamilyId) {
@@ -526,13 +543,18 @@ static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32
                     continue;
                 }
 
-                bool thisAssociated = false;
-                if (ffWifiParseBssAttr(attr, item, &thisAssociated) && thisAssociated) {
-                    associated = true;
+                if (!ffWifiIsBssAssociated(attr)) {
+                    continue;
                 }
+
+                ffWifiParseBssAttr(attr, item);
+                ffStrbufSetStatic(&item->conn.status, "connected");
+                return true;
             }
         }
     }
+
+    return false;
 }
 
 static void ffWifiParseStationInfo(const struct nlattr* staInfoAttr, FFWifiResult* item) {
@@ -546,12 +568,12 @@ static void ffWifiParseStationInfo(const struct nlattr* staInfoAttr, FFWifiResul
         if (type == NL80211_STA_INFO_SIGNAL && payload >= sizeof(uint8_t) && item->conn.signalQuality == -DBL_MAX) {
             int rssi = (int8_t) *(const uint8_t*) ffWifiNlAttrData(attr);
             item->conn.signalQuality = rssiToSignalQuality(rssi);
-        } else if (type == NL80211_STA_INFO_TX_BITRATE) {
+        } else if (type == NL80211_STA_INFO_TX_BITRATE && item->conn.txRate == -DBL_MAX) {
             double tx = ffWifiParseBitrateFromRateInfo(attr, &item->conn.protocol);
             if (tx != -DBL_MAX) {
                 item->conn.txRate = tx;
             }
-        } else if (type == NL80211_STA_INFO_RX_BITRATE) {
+        } else if (type == NL80211_STA_INFO_RX_BITRATE && item->conn.rxRate == -DBL_MAX) {
             double rx = ffWifiParseBitrateFromRateInfo(attr, &item->conn.protocol);
             if (rx != -DBL_MAX) {
                 item->conn.rxRate = rx;
@@ -642,29 +664,211 @@ static bool ffWifiFetchStationInfo(FFWifiNlContext* ctx, FFWifiResult* item, uin
     }
 }
 
-static void ffWifiDetectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, uint32_t ifIndex) {
-    bool associated = ffWifiFetchScanInfo(ctx, item, ifIndex);
-    if (associated) {
+static const char* detectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, uint32_t ifIndex) {
+    if (ctx->sockFd < 0) {
+        if (ctx->sockFd == -1) {
+            if (!ffWifiNlInit(ctx)) {
+                FF_DEBUG("Failed to initialize netlink context, skipping");
+                ctx->sockFd = -2; // Don't try again
+                return "Netlink initialization failed";
+            }
+        } else {
+            FF_DEBUG("Netlink socket is not available, skipping");
+            return "Netlink socket unavailable";
+        }
+    }
+
+    FF_DEBUG("Starting netlink wifi detection for interface %s", item->inf.description.chars);
+    if (ffWifiFetchScanInfo(ctx, item, ifIndex)) {
+        FF_DEBUG("found associated BSS: %s", item->conn.ssid.chars);
         ffStrbufSetStatic(&item->conn.status, "connected");
-    } else if (!item->conn.status.length) {
+        ffWifiFetchStationInfo(ctx, item, ifIndex);
+        if (!item->conn.protocol.length && item->conn.txRate != -DBL_MAX) {
+            FF_DEBUG("nl80211 station info did not include MCS family fields");
+        }
+    } else {
+        FF_DEBUG("No associated BSS found");
         ffStrbufSetStatic(&item->conn.status, "disconnected");
     }
 
-    if (associated) {
-        ffWifiFetchStationInfo(ctx, item, ifIndex);
+    FF_DEBUG("Netlink wifi detection completed");
+    return NULL;
+}
+
+static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, char ifName[static IFNAMSIZ]) {
+    int sock = -1;
+    if (ctx->sockFd < 0) {
+        if (ctx->sockFd == -1) {
+            sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+            if (sock < 0) {
+                FF_DEBUG("Failed to initialize ioctl context, skipping: %s", strerror(errno));
+                ctx->sockFd = -2; // Don't try again
+                return "socket() failed";
+            }
+            ctx->sockFd = sock;
+        } else {
+            FF_DEBUG("Ioctl socket is not available, skipping");
+            return "ioctl socket unavailable";
+        }
+    } else {
+        sock = ctx->sockFd;
     }
 
-    if (!item->conn.protocol.length && item->conn.txRate != -DBL_MAX) {
-        FF_DEBUG("nl80211 station info did not include MCS family fields");
+    FF_DEBUG("Starting ioctl wifi detection for interface %s", ifName);
+    struct iwreq iwr = {};
+    strcpy(iwr.ifr_name, ifName);
+
+    if (!item->conn.ssid.length) {
+        FF_DEBUG("Getting SSID via ioctl");
+        ffStrbufEnsureFree(&item->conn.ssid, IW_ESSID_MAX_SIZE);
+        iwr.u.essid.pointer = (caddr_t) item->conn.ssid.chars;
+        iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+        iwr.u.essid.flags = 0;
+        if (ioctl(sock, SIOCGIWESSID, &iwr) >= 0) {
+            ffStrbufSetStatic(&item->conn.status, "connected");
+            ffStrbufRecalculateLength(&item->conn.ssid);
+            FF_DEBUG("SSID: %s", item->conn.ssid.chars);
+        } else {
+            FF_DEBUG("Failed to get SSID via ioctl: %s", strerror(errno));
+        }
     }
+
+    if (!item->conn.protocol.length) {
+        FF_DEBUG("Getting protocol name via ioctl");
+        if (ioctl(sock, SIOCGIWNAME, &iwr) >= 0 && !ffStrEqualsIgnCase(iwr.u.name, "IEEE 802.11")) {
+            if (ffStrStartsWithIgnCase(iwr.u.name, "IEEE ")) {
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name + strlen("IEEE "));
+            } else {
+                ffStrbufSetS(&item->conn.protocol, iwr.u.name);
+            }
+            FF_DEBUG("Protocol: %s", item->conn.protocol.chars);
+        } else {
+            FF_DEBUG("Failed to get protocol name via ioctl: %s", strerror(errno));
+        }
+    }
+
+    if (!item->conn.bssid.length) {
+        FF_DEBUG("Getting BSSID via ioctl");
+        if (ioctl(sock, SIOCGIWAP, &iwr) >= 0) {
+            for (int i = 0; i < 6; ++i) {
+                ffStrbufAppendF(&item->conn.bssid, "%.2X:", (uint8_t) iwr.u.ap_addr.sa_data[i]);
+            }
+            ffStrbufTrimRight(&item->conn.bssid, ':');
+            FF_DEBUG("BSSID: %s", item->conn.bssid.chars);
+        } else {
+            FF_DEBUG("Failed to get BSSID via ioctl: %s", strerror(errno));
+        }
+    }
+
+    if (item->conn.txRate == -DBL_MAX) {
+        FF_DEBUG("Getting bitrate via ioctl");
+        if (ioctl(sock, SIOCGIWRATE, &iwr) >= 0) {
+            if (iwr.u.bitrate.value > 0) {
+                item->conn.txRate = iwr.u.bitrate.value / 1000000.;
+                FF_DEBUG("TX bitrate: %.2f Mbps", item->conn.txRate);
+            } else {
+                FF_DEBUG("Bitrate value is zero or negative, ignoring");
+            }
+        } else {
+            FF_DEBUG("Failed to get bitrate via ioctl: %s", strerror(errno));
+        }
+    }
+
+    if (item->conn.frequency == 0 && item->conn.channel == 0) {
+        FF_DEBUG("Getting frequency via ioctl");
+        if (ioctl(sock, SIOCGIWFREQ, &iwr) >= 0) {
+            if (iwr.u.freq.e == 0 && iwr.u.freq.m <= 1000) {
+                item->conn.channel = (uint16_t) iwr.u.freq.m;
+                FF_DEBUG("Direct channel value: %u", item->conn.channel);
+            } else {
+                // convert it to MHz
+                while (iwr.u.freq.e < 6) {
+                    iwr.u.freq.m /= 10;
+                    iwr.u.freq.e++;
+                }
+                while (iwr.u.freq.e > 6) {
+                    iwr.u.freq.m *= 10;
+                    iwr.u.freq.e--;
+                }
+                item->conn.frequency = (uint16_t) iwr.u.freq.m;
+                item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
+                FF_DEBUG("Frequency: %u MHz, Channel: %u", item->conn.frequency, item->conn.channel);
+            }
+        } else {
+            FF_DEBUG("Failed to get frequency via ioctl: %s", strerror(errno));
+        }
+    }
+
+    if (item->conn.signalQuality == -DBL_MAX) {
+        FF_DEBUG("Getting signal stats via ioctl");
+        struct iw_statistics stats;
+        iwr.u.data.pointer = &stats;
+        iwr.u.data.length = sizeof(stats);
+        iwr.u.data.flags = 0;
+
+        if (ioctl(sock, SIOCGIWSTATS, &iwr) >= 0) {
+            int8_t level = (int8_t) stats.qual.level;
+            item->conn.signalQuality = level >= -50 ? 100 : level <= -100 ? 0
+                                                                          : (level + 100) * 2;
+            FF_DEBUG("Signal level: %d dBm, quality: %.0f%%", level, item->conn.signalQuality);
+        } else {
+            FF_DEBUG("Failed to get signal stats via ioctl: %s", strerror(errno));
+        }
+    }
+
+    if (!item->conn.security.length) {
+        FF_DEBUG("Getting security info via ioctl");
+        struct iw_encode_ext iwe;
+        iwr.u.data.pointer = &iwe;
+        iwr.u.data.length = sizeof(iwe);
+        iwr.u.data.flags = 0;
+        if (ioctl(sock, SIOCGIWENCODEEXT, &iwr) >= 0) {
+            switch (iwe.alg) {
+                case IW_ENCODE_ALG_WEP:
+                    ffStrbufAppendS(&item->conn.security, "WEP");
+                    FF_DEBUG("Security: WEP");
+                    break;
+                case IW_ENCODE_ALG_TKIP:
+                    ffStrbufAppendS(&item->conn.security, "TKIP");
+                    FF_DEBUG("Security: TKIP");
+                    break;
+                case IW_ENCODE_ALG_CCMP:
+                    ffStrbufAppendS(&item->conn.security, "CCMP");
+                    FF_DEBUG("Security: CCMP");
+                    break;
+                case IW_ENCODE_ALG_PMK:
+                    ffStrbufAppendS(&item->conn.security, "PMK");
+                    FF_DEBUG("Security: PMK");
+                    break;
+                case IW_ENCODE_ALG_AES_CMAC:
+                    ffStrbufAppendS(&item->conn.security, "CMAC");
+                    FF_DEBUG("Security: CMAC");
+                    break;
+                default:
+                    ffStrbufAppendF(&item->conn.security, "Unknown (%d)", (int) iwe.alg);
+                    FF_DEBUG("Security: Unknown (%d)", (int) iwe.alg);
+                    break;
+            }
+        } else {
+            FF_DEBUG("Failed to get security info via ioctl: %s", strerror(errno));
+        }
+    }
+
+    FF_DEBUG("Ioctl wifi detection completed");
+    return NULL;
 }
 
 const char* ffDetectWifi(FFlist* result) {
     FF_DEBUG("Starting wifi detection");
 
-    FFWifiNlContext nl = { .sockFd = -1 };
-
     struct if_nameindex* infs = if_nameindex();
+    if (!infs) {
+        FF_DEBUG("if_nameindex failed: %s", strerror(errno));
+        return "if_nameindex() failed";
+    }
+
+    FFWifiNlContext nl = { .sockFd = -1 };
+    FFWifiIcContext ic = { .sockFd = -1 };
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
@@ -674,13 +878,6 @@ const char* ffDetectWifi(FFlist* result) {
         if (!ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY)) {
             FF_DEBUG("Not a wifi interface (no phy80211 directory)");
             continue;
-        }
-
-        if (nl.sockFd < 0) {
-            if (!ffWifiNlInit(&nl)) {
-                FF_DEBUG("Failed to initialize netlink context, skipping wifi detection");
-                break;
-            }
         }
 
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
@@ -707,10 +904,8 @@ const char* ffDetectWifi(FFlist* result) {
 
         if (operstate == 'u') {
             ffStrbufSetStatic(&item->inf.status, "up");
-            ffWifiDetectWithNetlink(&nl, item, i->if_index);
-            if (!item->conn.status.length) {
-                ffStrbufSetStatic(&item->conn.status, "disconnected");
-            }
+            detectWithNetlink(&nl, item, i->if_index);
+            detectWithIoctl(&ic, item, i->if_name);
         } else {
             ffStrbufSetStatic(&item->conn.status, "disconnected");
 
@@ -735,6 +930,9 @@ const char* ffDetectWifi(FFlist* result) {
     if_freenameindex(infs);
     if (nl.sockFd >= 0) {
         close(nl.sockFd);
+    }
+    if (ic.sockFd >= 0) {
+        close(ic.sockFd);
     }
 
     FF_DEBUG("Wifi detection completed, found %u wifi interfaces", result->length);
