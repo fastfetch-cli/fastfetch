@@ -3544,6 +3544,18 @@ static const FFlogo O[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    // openRuyi
+    {
+        .names = { "openruyi" },
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENRUYI,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // OpenStage
     {
         .names = { "OpenStage" },
