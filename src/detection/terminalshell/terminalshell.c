@@ -365,7 +365,13 @@ FF_A_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* versi
         }
     }
 
-    return getExeVersionGeneral(exe, version);
+    if (!getExeVersionRaw(exe, version)) {
+            return false;
+    }
+
+    ffStrbufSubstrAfterFirstS(version, "Konsole: ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
 }
 
 FF_A_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version) {
