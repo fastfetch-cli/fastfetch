@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 #include "common/parsing.h"
 
-
 #ifdef _WIN32
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wformat"

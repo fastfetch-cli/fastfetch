@@ -117,8 +117,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 #ifndef __sun
             && sdl->sdl_len
 #endif
-            && sdl->sdl_family == AF_LINK
-        ) {
+            && sdl->sdl_family == AF_LINK) {
             if (sdl->sdl_nlen > IF_NAMESIZE) {
                 return false;
             }
@@ -202,8 +201,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
 #ifndef __sun
             && sdl->sdl_len
 #endif
-            && sdl->sdl_family == AF_LINK
-        ) {
+            && sdl->sdl_family == AF_LINK) {
             if (sdl->sdl_nlen > IF_NAMESIZE) {
                 return false;
             }

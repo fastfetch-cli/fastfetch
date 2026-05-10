@@ -16,8 +16,7 @@ NTSYSAPI ULONG NTAPI
 WmiOpenBlock(
     _In_ LPCGUID Guid,
     _In_ ACCESS_MASK DesiredAccess,
-    _Out_ PHANDLE DataBlockHandle
-);
+    _Out_ PHANDLE DataBlockHandle);
 
 /**
  * The WmiQueryAllDataW function returns all WMI data blocks that implement a given WMI class (Unicode).
@@ -31,8 +30,7 @@ NTSYSAPI ULONG NTAPI
 WmiQueryAllDataW(
     _In_ HANDLE DataBlockHandle,
     _Inout_ PULONG BufferLength,
-    _Out_writes_bytes_opt_(*BufferLength) PVOID Buffer
-);
+    _Out_writes_bytes_opt_(*BufferLength) PVOID Buffer);
 
 /**
  * The WmiCloseBlock function closes a WMI data block object.
@@ -42,8 +40,7 @@ WmiQueryAllDataW(
  */
 NTSYSAPI ULONG NTAPI
 WmiCloseBlock(
-    _In_ HANDLE DataBlockHandle
-);
+    _In_ HANDLE DataBlockHandle);
 
 static inline void ffCloseWmiBlock(HANDLE* hBlock) {
     assert(hBlock);
