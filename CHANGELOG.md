@@ -1,3 +1,30 @@
+# 2.63.0
+
+Changes:
+* On Windows, multi-battery detection is now always enabled
+    * Removes the old Windows-specific `useSetupApi` option. (Battery, Windows)
+
+Features:
+* Adds wallpaper detection support on Haiku (#2314, Wallpaper, Haiku)
+* Adds Wi-Fi 6 GHz channel detection and improves protocol reporting (Wifi, Linux)
+* Improves Deepin version detection using `/etc/os-version` (#2300, OS, Linux)
+* Adds Ubuntu Kylin and Ubuntu Unity flavor detection (OS, Linux)
+* Adds NebiDE support (WMTheme, Linux)
+* Adds package counting for `cards` on NuTyX (#2287, Packages, Linux)
+
+Bugfixes:
+* Improves DisplayServer compatibility on Linux by handling newer `kde-output-device-v2` protocol updates (DisplayServer, Linux)
+    * This fixes a long-standing issue where display detection fails with an `interface 'kde_output_device_mode_v2' has no event X` error.
+* Improves Wi-Fi reliability on Linux by switching to a netlink implementation (Wifi, Linux)
+* Improves network interface reliability and default route selection on macOS and Windows (Netif, macOS / Windows)
+* Validates temperature color thresholds as integers when parsing JSON config (Temps)
+* Fixes GNOME OS builtin logo detection (#2296)
+* Various internal cleanups and optimizations
+
+Logos:
+* Adds KibaOS and NebiOS
+* Removes Ubuntu KDE
+
 # 2.62.1
 
 Bugfixes:
