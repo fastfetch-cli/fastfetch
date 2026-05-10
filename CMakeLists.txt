@@ -1240,7 +1240,7 @@ elseif(Haiku)
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_haiku.c
         src/detection/users/users_linux.c
-        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wallpaper/wallpaper_haiku.cpp
         src/detection/wifi/wifi_nosupport.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
