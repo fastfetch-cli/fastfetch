@@ -1340,9 +1340,9 @@ if(WIN32)
     include(CheckIncludeFileCXX)
     CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
     if(HAVE_WINRT)
-        message(STATUS "WinRT headers are available, media detection will use WinRT APIs")
+        message(STATUS "WinRT headers are available, media detection will be enabled")
     else()
-        message(STATUS "WinRT headers are NOT available, media detection will be disabled")
+        message(WARNING "WinRT headers are NOT available, media detection will be disabled")
     endif()
 endif()
 include(CheckFunctionExists)
@@ -1759,8 +1759,7 @@ elseif(WIN32)
     endif()
     if(HAVE_WINRT)
         target_link_libraries(libfastfetch
-            PRIVATE
-            "RuntimeObject"
+            PRIVATE "runtimeobject"
         )
     endif()
 elseif(FreeBSD)
