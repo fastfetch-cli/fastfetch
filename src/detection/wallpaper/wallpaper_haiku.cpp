@@ -1,6 +1,6 @@
 extern "C" {
-	#include "wallpaper.h"
-	#include "common/settings.h"
+#include "wallpaper.h"
+#include "common/mallocHelper.h"
 }
 
 #include <Application.h>
@@ -14,51 +14,41 @@ extern "C" {
 
 const char* ffDetectWallpaper(FFstrbuf* result) {
     BMessage backgrounds;
-	status_t err = B_OK;
-	BPath pDesktop;
-	struct attr_info ai;
-	BScreen bs;
-	BString path;
+    BPath pDesktop;
+    BString path;
 
-	//ssize_t flatSize;
-	char *pAttr;
-
-	if (find_directory(B_DESKTOP_DIRECTORY, &pDesktop) < B_OK)
-		return "find_directory(B_DESKTOP_DIRECTORY) failed";
+    if (find_directory(B_DESKTOP_DIRECTORY, &pDesktop) < B_OK) {
+        return "find_directory(B_DESKTOP_DIRECTORY) failed";
+    }
 
     // We need a valid be_app to query the app_server here.
     BApplication app("application/x-vnd.fastfetch-cli-fastfetch");
 
-	BNode nDesktop(pDesktop.Path());
-	if (nDesktop.InitCheck() == B_OK) {
-		err = nDesktop.GetAttrInfo(B_BACKGROUND_INFO, &ai);
-		if (err == B_OK) {
-			pAttr = new char[ai.size];
-			if (pAttr) {
-				err = nDesktop.ReadAttr(B_BACKGROUND_INFO, ai.type, 0LL, pAttr, (size_t)ai.size);
-				if (err >= B_OK) {
-					err = backgrounds.Unflatten(pAttr);
-					if (err == B_OK) {
-						int32 ws;
-						for (int i = 0; backgrounds.FindString(B_BACKGROUND_IMAGE, i, &path) == B_OK; i++) {
-							if (backgrounds.FindInt32(B_BACKGROUND_WORKSPACES, i, &ws) == B_OK) {
-								if (ws & (1 << current_workspace())) {
-									// We try to match the one for the current workspace
-									break;
-								}
-							}
-						}
-					}
-				}
-				delete [] pAttr;
-			}
-		}
-	}
+    BNode nDesktop(pDesktop.Path());
+    if (nDesktop.InitCheck() == B_OK) {
+        struct attr_info ai;
+        if (nDesktop.GetAttrInfo(B_BACKGROUND_INFO, &ai) == B_OK && ai.size > 0) {
+            FF_AUTO_FREE char* pAttr = (char*) malloc(ai.size);
+            if (nDesktop.ReadAttr(B_BACKGROUND_INFO, ai.type, 0LL, pAttr, (size_t) ai.size) >= B_OK) {
+                if (backgrounds.Unflatten(pAttr) == B_OK) {
+                    for (int i = 0; backgrounds.FindString(B_BACKGROUND_IMAGE, i, &path) == B_OK; i++) {
+                        int32 ws;
+                        if (backgrounds.FindInt32(B_BACKGROUND_WORKSPACES, i, &ws) == B_OK) {
+                            if (ws & (1 << current_workspace())) {
+                                // We try to match the one for the current workspace
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	if (path.Length() < 1) {
+    if (path.Length() < 1) {
         return "Failed to detect the current wallpaper path";
-	}
+    }
 
-	ffStrbufAppendS(result, path.String());
+    ffStrbufAppendS(result, path.String());
     return NULL;
 }
