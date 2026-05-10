@@ -180,6 +180,9 @@ static struct kde_output_device_v2_listener outputListener = {
     .priority = (void*) stubListener,
     .auto_brightness = (void*) stubListener,
     .removed = (void*) stubListener,
+    .hdr_icc_profile_path = (void*) stubListener,
+    .hdr_color_profile_source = (void*) stubListener,
+    .abm_level = (void*) stubListener,
 };
 
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
