@@ -71,7 +71,9 @@ static struct zxdg_output_v1_listener zxdgOutputListener = {
 };
 
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
-    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
+    const char* api = "wayland-global";
+    uint32_t bindVersion = min(version, WL_OUTPUT_DESCRIPTION_SINCE_VERSION);
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, bindVersion, name, wldata->ffwl_output_interface->name, bindVersion, NULL);
     if (output == NULL) {
         return "Failed to create wl_output";
     }
@@ -95,12 +97,14 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
     }
 
     if (wldata->zxdgOutputManager) {
-        struct wl_proxy* zxdgOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->zxdgOutputManager, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, version, NULL, output);
+        uint32_t bindVersion = min(version, ZXDG_OUTPUT_V1_DESCRIPTION_SINCE_VERSION);
+        struct wl_proxy* zxdgOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->zxdgOutputManager, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, bindVersion, NULL, output);
 
         if (zxdgOutput) {
             wldata->ffwl_proxy_add_listener(zxdgOutput, (void (**)(void)) &zxdgOutputListener, &display);
             wldata->ffwl_display_roundtrip(wldata->display);
             wldata->ffwl_proxy_destroy(zxdgOutput);
+            api = "wayland-global-zxdg";
         }
     }
 
@@ -132,7 +136,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
         display.id,
         (uint32_t) display.physicalWidth,
         (uint32_t) display.physicalHeight,
-        "wayland-global");
+        api);
     if (item) {
         if (display.hdrSupported) {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
@@ -155,7 +159,8 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
 }
 
 const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
-    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, version, name, zxdg_output_manager_v1_interface.name, version, NULL);
+    uint32_t bindVersion = min(version, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT_SINCE_VERSION);
+    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, bindVersion, name, zxdg_output_manager_v1_interface.name, bindVersion, NULL);
     if (manager == NULL) {
         return "Failed to create zxdg_output_manager_v1";
     }

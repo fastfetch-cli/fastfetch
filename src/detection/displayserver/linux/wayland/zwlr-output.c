@@ -183,17 +183,18 @@ static void waylandHandleZwlrHead(void* data, FF_A_UNUSED struct zwlr_output_man
     wldata->ffwl_proxy_destroy((void*) head);
 }
 
+static const struct zwlr_output_manager_v1_listener outputListener = {
+    .head = waylandHandleZwlrHead,
+    .done = (void*) stubListener,
+    .finished = (void*) stubListener,
+};
+
 const char* ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
-    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zwlr_output_manager_v1_interface, version, name, zwlr_output_manager_v1_interface.name, version, NULL);
+    uint32_t bindVersion = min(version, ZWLR_OUTPUT_MANAGER_V1_HEAD_SINCE_VERSION);
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zwlr_output_manager_v1_interface, bindVersion, name, zwlr_output_manager_v1_interface.name, bindVersion, NULL);
     if (output == NULL) {
         return "Failed to bind zwlr_output_manager_v1";
     }
-
-    const struct zwlr_output_manager_v1_listener outputListener = {
-        .head = waylandHandleZwlrHead,
-        .done = (void*) stubListener,
-        .finished = (void*) stubListener,
-    };
 
     if (wldata->ffwl_proxy_add_listener(output, (void (**)(void)) &outputListener, wldata) < 0) {
         wldata->ffwl_proxy_destroy(output);

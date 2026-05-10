@@ -9,6 +9,10 @@
 
     #include "../displayserver_linux.h"
 
+static inline uint32_t min(uint32_t a, uint32_t b) {
+    return a < b ? a : b;
+}
+
 typedef enum FF_A_PACKED WaylandProtocolType {
     FF_WAYLAND_PROTOCOL_TYPE_NONE,
     FF_WAYLAND_PROTOCOL_TYPE_GLOBAL,
