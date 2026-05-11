@@ -259,6 +259,7 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
     if (dir == NULL) {
+        close(dfd);
         return; // Should not happen
     }
 
