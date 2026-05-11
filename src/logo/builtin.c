@@ -5496,6 +5496,15 @@ static const FFlogo X[] = {
                                                                         FF_COLOR_FG_BLUE,
                                                                         FF_COLOR_FG_CYAN,
                                                                     } },
+    // XJ380
+    { 
+        .names = { "XJ380" }, 
+        .lines = FASTFETCH_DATATEXT_LOGO_XJ380, 
+        .colors = {
+            FF_COLOR_FG_RGB "0;162;232",
+            FF_COLOR_FG_RGB "255;242;0",
+        } 
+    },
     // LAST
     {},
 };
