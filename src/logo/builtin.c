@@ -3747,9 +3747,9 @@ static const FFlogo O[] = {
         .names = { "Origami", "origami" },
         .lines = FASTFETCH_DATATEXT_LOGO_ORIGAMI,
         .colors = {
-            FF_COLOR_FG_RGB "155;189;213",
-            FF_COLOR_FG_RGB "60;110;180",
-        },
+            FF_COLOR_FG_RGB "185;210;235",   // $1 sail — light sky blue
+            FF_COLOR_FG_RGB "40;90;160",     // $2 hull — deeper navy
+                    },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
@@ -3759,9 +3759,9 @@ static const FFlogo O[] = {
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ORIGAMI_SMALL,
         .colors = {
-            FF_COLOR_FG_RGB "155;189;213",
-            FF_COLOR_FG_RGB "60;110;180",
-        },
+            FF_COLOR_FG_RGB "185;210;235",   // $1 sail — light sky blue
+            FF_COLOR_FG_RGB "40;90;160",     // $2 hull — deeper navy
+                    },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
