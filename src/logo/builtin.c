@@ -2583,7 +2583,7 @@ static const FFlogo K[] = {
     },
     // Kylin
     {
-        .names = { "Kylin", "kylin" },
+        .names = { "Kylin" },
         .lines = FASTFETCH_DATATEXT_LOGO_KYLIN,
         .colors = { FF_COLOR_FG_BLUE, FF_COLOR_FG_CYAN, FF_COLOR_FG_WHITE, FF_COLOR_FG_LIGHT_BLACK },
         .colorKeys = FF_COLOR_FG_BLUE,
