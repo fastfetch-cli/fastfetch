@@ -267,6 +267,11 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->deProcessName, "unity-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_UNITY);
     }
+
+    else if (ffStrEqualsIgnCase(name, "Enlightenment")) {
+        ffStrbufSetS(&result->deProcessName, "enlightenment_start");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_ENLIGHTENMENT);
+    }
 }
 
 static const char* getFromProcesses(FFDisplayServerResult* result) {
