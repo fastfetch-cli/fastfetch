@@ -13,6 +13,8 @@ typedef struct FFMediaResult {
     FFstrbuf url;
     FFstrbuf status;
     FFstrbuf cover;
+    uint32_t length; // In milliseconds
+    uint32_t position; // In milliseconds
     bool removeCoverAfterUse;
 } FFMediaResult;
 

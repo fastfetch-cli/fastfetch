@@ -158,6 +158,8 @@ bool ffGenerateMediaJsonResult(FF_A_UNUSED FFMediaOptions* options, yyjson_mut_d
     yyjson_mut_obj_add_strbuf(doc, song, "artist", &media->artist);
     yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
+    yyjson_mut_obj_add_uint(doc, song, "length", media->length);
+    yyjson_mut_obj_add_uint(doc, song, "position", media->position);
     if (media->cover.length > 0) {
         yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->cover);
     } else {

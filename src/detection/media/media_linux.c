@@ -69,8 +69,8 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                 break;
             }
         } else if (ffStrStartsWith(key, "mpris:")) {
-            const char* xesam = key + strlen("mpris:");
-            if (ffStrEquals(xesam, "artUrl")) {
+            const char* mpris = key + strlen("mpris:");
+            if (ffStrEquals(mpris, "artUrl")) {
                 FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
                 ffDBusGetString(data, &dictIterator, &path);
                 if (ffStrbufStartsWithS(&path, "file:///")) {
@@ -93,6 +93,11 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                             ffStrbufAppendC(&result->cover, path.chars[i]);
                         }
                     }
+                }
+            } else if (ffStrEquals(mpris, "length")) {
+                uint64_t length = 0; // microseconds
+                if (ffDBusGetUint(data, &dictIterator, &length)) {
+                    result->length = (uint32_t) (length / 1000);
                 }
             }
         }
@@ -137,6 +142,11 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
             parseMprisMetadata(data, &dictIterator, result);
         } else if (ffStrEquals(key, "PlaybackStatus")) {
             ffDBusGetString(data, &dictIterator, &result->status);
+        } else if (ffStrEquals(key, "Position")) {
+            int64_t position = 0; // microseconds
+            if (ffDBusGetInt(data, &dictIterator, &position) && position > 0) {
+                result->position = (uint32_t) (position / 1000);
+            }
         }
 
         FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
