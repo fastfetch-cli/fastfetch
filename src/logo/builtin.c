@@ -3742,11 +3742,37 @@ static const FFlogo O[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    // Origami
+    {
+        .names = { "Origami", "origami" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ORIGAMI,
+        .colors = {
+            FF_COLOR_FG_RGB "185;210;235",   // $1 sail — light sky blue
+            FF_COLOR_FG_RGB "40;90;160",     // $2 hull — deeper navy
+                    },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    // OrigamiSmall
+    {
+        .names = { "Origami_small", "origami_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ORIGAMI_SMALL,
+        .colors = {
+            FF_COLOR_FG_RGB "185;210;235",   // $1 sail — light sky blue
+            FF_COLOR_FG_RGB "40;90;160",     // $2 hull — deeper navy
+                    },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // OS/2 Warp
-    { .names = { "OS2Warp" }, .lines = FASTFETCH_DATATEXT_LOGO_OS2WARP, .colors = {
-                                                                            FF_COLOR_FG_LIGHT_WHITE,
-                                                                            FF_COLOR_FG_LIGHT_BLUE,
-                                                                        } },
+    { 
+        .names = { "OS2Warp" }, 
+        .lines = FASTFETCH_DATATEXT_LOGO_OS2WARP, 
+        .colors = {
+             FF_COLOR_FG_LIGHT_WHITE,
+             FF_COLOR_FG_LIGHT_BLUE,
+                    } },
     // OS_Elbrus
     {
         .names = { "OS Elbrus" },
