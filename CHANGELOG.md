@@ -18,11 +18,12 @@ Bugfixes:
 * Improves Wi-Fi reliability on Linux by switching to a netlink implementation (Wifi, Linux)
 * Improves network interface reliability and default route selection on macOS and Windows (Netif, macOS / Windows)
 * Validates temperature color thresholds as integers when parsing JSON config (Temps)
-* Fixes GNOME OS builtin logo detection (#2296)
+* Fixes TDE konsole version detection (#2319, Terminal, Linux)
 * Various internal cleanups and optimizations
 
 Logos:
 * Adds KibaOS and NebiOS
+* Fixes GNOME OS builtin logo detection (#2296)
 * Removes Ubuntu KDE
 
 # 2.62.1
