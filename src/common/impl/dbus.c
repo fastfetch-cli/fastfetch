@@ -152,7 +152,7 @@ bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result) {
     return ffDBusGetBool(dbus, &subIter, result);
 }
 
-bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result) {
+bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint64_t* result) {
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
     if (argType == DBUS_TYPE_BYTE) {
@@ -170,6 +170,13 @@ bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result) {
     }
 
     if (argType == DBUS_TYPE_UINT32) {
+        uint32_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if (argType == DBUS_TYPE_UINT64) {
         dbus->lib->ffdbus_message_iter_get_basic(iter, result);
         return true;
     }
@@ -183,7 +190,7 @@ bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result) {
     return ffDBusGetUint(dbus, &subIter, result);
 }
 
-bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result) {
+bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int64_t* result) {
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
     if (argType == DBUS_TYPE_INT16) {
@@ -194,6 +201,13 @@ bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result) {
     }
 
     if (argType == DBUS_TYPE_INT32) {
+        int32_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if (argType == DBUS_TYPE_INT64) {
         dbus->lib->ffdbus_message_iter_get_basic(iter, result);
         return true;
     }
@@ -215,10 +229,17 @@ bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result) {
     if (argType == DBUS_TYPE_UINT32) {
         uint32_t value = 0;
         dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
-        if (value > 0x7FFFFFFFu) {
+        *result = (int32_t) value;
+        return true;
+    }
+
+    if (argType == DBUS_TYPE_UINT64) {
+        uint64_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        if (value > INT64_MAX) {
             return false;
         }
-        *result = (int32_t) value;
+        *result = (int64_t) value;
         return true;
     }
 
@@ -291,7 +312,7 @@ bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
     return ret;
 }
 
-bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result) {
+bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint64_t* result) {
     DBusMessage* reply = ffDBusGetProperty(dbus, busName, objectPath, interface, property);
     if (reply == NULL) {
         return false;

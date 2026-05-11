@@ -69,7 +69,7 @@ static bool detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
     } else if (ffStrEquals(deviceProperty, "Icon")) {
         ffDBusGetString(dbus, &dictIter, &device->type);
     } else if (ffStrEquals(deviceProperty, "Percentage")) {
-        uint32_t percentage;
+        uint64_t percentage;
         if (ffDBusGetUint(dbus, &dictIter, &percentage)) {
             device->battery = (uint8_t) percentage;
         }

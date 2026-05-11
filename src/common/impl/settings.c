@@ -220,10 +220,10 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
     }
 
     if (type == FF_VARIANT_TYPE_INT) {
-        int32_t value;
+        int64_t value;
         if (ffDBusGetInt(&dbus, &rootIterator, &value)) {
             dbus.lib->ffdbus_message_unref(reply);
-            return (FFvariant) { .intValue = value };
+            return (FFvariant) { .intValue = (int32_t) value };
         }
         dbus.lib->ffdbus_message_unref(reply);
         return FF_VARIANT_NULL;
@@ -295,10 +295,10 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
         dbus.lib->ffdbus_message_iter_next(&dictIterator);
 
         if (type == FF_VARIANT_TYPE_INT) {
-            int32_t value;
+            int64_t value;
             if (ffDBusGetInt(&dbus, &dictIterator, &value)) {
                 dbus.lib->ffdbus_message_unref(reply);
-                return (FFvariant) { .intValue = value };
+                return (FFvariant) { .intValue = (int32_t) value };
             }
             dbus.lib->ffdbus_message_unref(reply);
             return FF_VARIANT_NULL;

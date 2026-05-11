@@ -29,12 +29,12 @@ typedef struct FFDBusData {
 const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data); // Returns an error message or NULL on success
 bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result);
 bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result);
-bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result);
+bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint64_t* result);
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg1, const char* arg2);
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property);
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
-bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result);
-bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result);
+bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int64_t* result);
+bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint64_t* result);
 void ffDBusDestroyData(FFDBusData* data);
 
 static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface) {
