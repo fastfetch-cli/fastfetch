@@ -1,5 +1,7 @@
 #include "com.h"
 
+#include <stdlib.h>
+
 #if FF_HAVE_WINRT
     #include <roapi.h>
 
