@@ -3546,7 +3546,7 @@ static const FFlogo O[] = {
     },
     // openRuyi
     {
-        .names = { "openruyi" },
+        .names = { "openRuyi" },
         .lines = FASTFETCH_DATATEXT_LOGO_OPENRUYI,
         .colors = {
             FF_COLOR_FG_BLUE,
