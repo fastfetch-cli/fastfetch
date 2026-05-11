@@ -22,9 +22,8 @@ Bugfixes:
 * Various internal cleanups and optimizations
 
 Logos:
-* Adds KibaOS and NebiOS
+* Adds KibaOS, NebiOS, XJ380 and openRuyi
 * Fixes GNOME OS builtin logo detection (#2296)
-* Removes Ubuntu KDE
 
 # 2.62.1
 
