@@ -227,12 +227,64 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
             break;
         }
 
-        abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSession>* FF_AUTO_RELEASE_COM_OBJECT session = NULL;
-        hr = manager->GetCurrentSession(reinterpret_cast<void**>(&session));
+        FF_A_CLEANUP(deleteHstring) HSTRING playerId = NULL;
 
-        if (FAILED(hr) || !session) {
-            error = "winrt: GetCurrentSession() failed";
-            break;
+        abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSession>* FF_AUTO_RELEASE_COM_OBJECT session = NULL;
+        if (instance.config.general.playerName.length) {
+            abi_t<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSession>>* FF_AUTO_RELEASE_COM_OBJECT sessions = NULL;
+            hr = manager->GetSessions(reinterpret_cast<void**>(&sessions));
+            if (FAILED(hr) || !sessions) {
+                error = "winrt: GetSessions() failed";
+                break;
+            }
+            uint32_t sessionCount = 0;
+            hr = sessions->get_Size(&sessionCount);
+            if (FAILED(hr)) {
+                error = "winrt: GetSessions().get_Size() failed";
+                break;
+            }
+            for (uint32_t i = 0; i < sessionCount; i++) {
+                abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSession>* FF_AUTO_RELEASE_COM_OBJECT currentSession = NULL;
+                hr = sessions->GetAt(i, reinterpret_cast<void**>(&currentSession));
+                if (FAILED(hr) || !currentSession) {
+                    continue;
+                }
+
+                hr = currentSession->get_SourceAppUserModelId(reinterpret_cast<void**>(&playerId));
+                if (FAILED(hr) || !playerId) {
+                    continue;
+                }
+
+                ffStrbufSetHstring(&result->playerId, playerId);
+
+                if (ffStrbufContainIgnCase(&result->playerId, &instance.config.general.playerName)) {
+                    session = currentSession;
+                    currentSession = NULL; // Don't release the session object
+                    break;
+                }
+                deleteHstring(&playerId);
+                ffStrbufClear(&result->playerId);
+            }
+
+            if (!session) {
+                error = "winrt: No media session found with the specified player name";
+                break;
+            }
+        } else {
+            hr = manager->GetCurrentSession(reinterpret_cast<void**>(&session));
+
+            if (FAILED(hr) || !session) {
+                error = "winrt: GetCurrentSession() failed";
+                break;
+            }
+
+            hr = session->get_SourceAppUserModelId(reinterpret_cast<void**>(&playerId));
+            if (FAILED(hr)) {
+                error = "winrt: get_SourceAppUserModelId() failed";
+                break;
+            }
+
+            ffStrbufSetHstring(&result->playerId, playerId);
         }
 
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionMediaProperties>* FF_AUTO_RELEASE_COM_OBJECT mediaProps = NULL;
@@ -272,15 +324,6 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
                 }
             }
         }
-
-        FF_A_CLEANUP(deleteHstring) HSTRING playerId = NULL;
-        hr = session->get_SourceAppUserModelId(reinterpret_cast<void**>(&playerId));
-        if (FAILED(hr)) {
-            error = "winrt: get_SourceAppUserModelId() failed";
-            break;
-        }
-
-        ffStrbufSetHstring(&result->playerId, playerId);
 
         FF_A_CLEANUP(deleteHstring) HSTRING title = NULL;
         if (SUCCEEDED(mediaProps->get_Title(reinterpret_cast<void**>(&title)))) {
