@@ -485,3 +485,127 @@ bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result) {
     return true;
 }
 #endif
+
+#ifdef FF_HAVE_EET
+    #if defined(__clang__)
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Weverything"
+    #elif defined(__GNUC__)
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wall"
+        #pragma GCC diagnostic ignored "-Wextra"
+        #pragma GCC diagnostic ignored "-Wpedantic"
+        #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+    #endif
+    #include <Eet.h>
+    #if defined(__clang__)
+        #pragma clang diagnostic pop
+    #elif defined(__GNUC__)
+        #pragma GCC diagnostic pop
+    #endif
+
+typedef struct E_Font_Default {
+    char* text_class;
+    char* font;
+    int size;
+} E_Font_Default;
+
+typedef struct E_Config {
+    char* theme_default_border_style;
+    char* icon_theme;
+    int use_e_cursor;
+    int cursor_size;
+    char* desktop_default_background;
+    Eina_List* font_defaults;
+} E_Config; // Must be the same name as the top level struct in e.cfg
+
+    #define FF_EET_EINA_FILE_DATA_DESCRIPTOR_CLASS_SET(clas, type) \
+        (ffeet_eina_file_data_descriptor_class_set(clas, sizeof(*(clas)), #type, sizeof(type)))
+    #define FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, struct_type, member, type)                                                                                 \
+        do {                                                                                                                                                 \
+            struct_type ___ett;                                                                                                                              \
+            ffeet_data_descriptor_element_add(edd, #member, type, EET_G_UNKNOWN, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ NULL, NULL); \
+        } while (0)
+    #define FF_EET_DATA_DESCRIPTOR_ADD_LIST(edd, struct_type, member, subtype)                                                                                       \
+        do {                                                                                                                                                         \
+            struct_type ___ett;                                                                                                                                      \
+            ffeet_data_descriptor_element_add(edd, #member, EET_T_UNKNOW, EET_G_LIST, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ NULL, subtype); \
+        } while (0)
+
+bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
+    FF_LIBRARY_LOAD(libeet, false, "libeet" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_init, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_open, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_file_new, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_read, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_close, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_free, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_eina_file_data_descriptor_class_set, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_element_add, false);
+
+    if (ffeet_init() == 0) {
+        return false;
+    }
+
+    FF_STRBUF_AUTO_DESTROY fileName = ffStrbufCreateCopy(&instance.state.platform.homeDir);
+    ffStrbufAppendS(&fileName, ".e/e/config/standard/e.cfg");
+
+    Eet_File* ef = ffeet_open(fileName.chars, EET_FILE_MODE_READ);
+    if (!ef) {
+        return false;
+    }
+
+    Eet_Data_Descriptor_Class fontDdc;
+    FF_EET_EINA_FILE_DATA_DESCRIPTOR_CLASS_SET(&fontDdc, E_Font_Default);
+    Eet_Data_Descriptor* fontDdd = ffeet_data_descriptor_file_new(&fontDdc);
+    if (!fontDdd) {
+        ffeet_close(ef);
+        return false;
+    }
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(fontDdd, E_Font_Default, text_class, EET_T_STRING);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(fontDdd, E_Font_Default, font, EET_T_STRING);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(fontDdd, E_Font_Default, size, EET_T_INT);
+
+    Eet_Data_Descriptor_Class eddc;
+    FF_EET_EINA_FILE_DATA_DESCRIPTOR_CLASS_SET(&eddc, E_Config);
+    Eet_Data_Descriptor* edd = ffeet_data_descriptor_file_new(&eddc);
+    if (!edd) {
+        ffeet_data_descriptor_free(fontDdd);
+        ffeet_close(ef);
+        return false;
+    }
+
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, E_Config, theme_default_border_style, EET_T_STRING);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, E_Config, icon_theme, EET_T_STRING);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, E_Config, use_e_cursor, EET_T_INT);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, E_Config, cursor_size, EET_T_INT);
+    FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, E_Config, desktop_default_background, EET_T_STRING);
+    FF_EET_DATA_DESCRIPTOR_ADD_LIST(edd, E_Config, font_defaults, fontDdd);
+
+    E_Config* parsed = ffeet_data_read(ef, edd, "config");
+
+    if (parsed) {
+        // TODO: find a better method to get the main theme name
+        result->theme = parsed->theme_default_border_style;
+        result->icon_theme = parsed->icon_theme;
+        result->use_e_cursor = !!parsed->use_e_cursor;
+        result->cursor_size = parsed->cursor_size;
+        result->desktop_default_background = parsed->desktop_default_background;
+
+        E_Font_Default* firstFont = eina_list_data_get(parsed->font_defaults);
+        if (firstFont) {
+            result->font = firstFont->font;
+        }
+    }
+
+    ffeet_close(ef);
+    ffeet_data_descriptor_free(edd);
+    ffeet_data_descriptor_free(fontDdd);
+
+    return !!parsed;
+}
+#else
+bool ffSettingsGetEnlightenmentProperty(FF_A_UNUSED ffEnlightenmentSettings* result) {
+    return false;
+}
+#endif

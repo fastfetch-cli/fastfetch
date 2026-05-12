@@ -11,6 +11,7 @@ Features:
 * Adds Ubuntu Kylin and Ubuntu Unity flavor detection (OS, Linux)
 * Adds NebiDE support (WMTheme, Linux)
 * Adds package counting for `cards` on NuTyX (#2287, Packages, Linux)
+* Adds support for Enlightenment desktop environment (#2165, WM, Linux)
 
 Bugfixes:
 * Improves DisplayServer compatibility on Linux by handling newer `kde-output-device-v2` protocol updates (DisplayServer, Linux)

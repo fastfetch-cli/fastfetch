@@ -220,6 +220,10 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
         return detectOpenbox(&wm->dePrettyName, themeOrError);
     }
 
+    if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_ENLIGHTENMENT)) {
+        return detectGTKThemeAsWMTheme(themeOrError);
+    }
+
     ffStrbufAppendS(themeOrError, "Unknown WM: ");
     ffStrbufAppend(themeOrError, &wm->wmPrettyName);
     return false;

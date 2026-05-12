@@ -42,6 +42,7 @@
 #define FF_WM_PRETTY_FVWM "fvwm"
 #define FF_WM_PRETTY_CTWM "ctwm"
 #define FF_WM_PRETTY_RATPOISON "ratpoison"
+#define FF_WM_PRETTY_ENLIGHTENMENT "Enlightenment"
 
 #define FF_WM_PROTOCOL_TTY "TTY"
 #define FF_WM_PROTOCOL_X11 "X11"

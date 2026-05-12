@@ -30,6 +30,16 @@ FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* pro
 int ffSettingsGetSQLite3Int(const char* dbPath, const char* query);
 bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result);
 
+typedef struct {
+    char* theme;
+    char* icon_theme;
+    bool use_e_cursor;
+    int cursor_size;
+    char* desktop_default_background;
+    char* font;
+} ffEnlightenmentSettings;
+bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result);
+
 #ifdef __ANDROID__
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #elif defined(__FreeBSD__)

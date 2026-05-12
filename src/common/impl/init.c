@@ -203,6 +203,9 @@ void ffListFeatures(void) {
 #if FF_HAVE_DCONF
         "dconf\n"
 #endif
+#if FF_HAVE_EET
+        "eet\n"
+#endif
 #if FF_HAVE_DBUS
         "dbus\n"
 #endif

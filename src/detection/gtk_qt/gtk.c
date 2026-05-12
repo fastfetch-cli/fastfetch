@@ -95,6 +95,17 @@ static void detectGTKFromSettings(FFGTKResult* result) {
         cursorTheme = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
         wallpaper = ffSettingsGetGnome("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
+    } else if (
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_ENLIGHTENMENT)) {
+        ffEnlightenmentSettings settings;
+        if (ffSettingsGetEnlightenmentProperty(&settings)) {
+            themeName = settings.theme;
+            iconsName = settings.icon_theme;
+            fontName = settings.font;
+            cursorTheme = settings.use_e_cursor ? "Enlightenment" : "Application";
+            cursorSize = settings.cursor_size;
+            wallpaper = settings.desktop_default_background;
+        }
     }
 
     applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);
