@@ -244,9 +244,12 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
 
         abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionPlaybackInfo>* FF_AUTO_RELEASE_COM_OBJECT playbackInfo = NULL;
         hr = session->GetPlaybackInfo(reinterpret_cast<void**>(&playbackInfo));
+        bool isPlaying = false;
+        double playbackRate = 1.0;
         if (SUCCEEDED(hr) && playbackInfo) {
             int32_t playbackStatusValue = 0;
             if (SUCCEEDED(playbackInfo->get_PlaybackStatus(&playbackStatusValue))) {
+                isPlaying = playbackStatusValue == static_cast<int32_t>(winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing);
                 switch (static_cast<winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus>(playbackStatusValue)) {
     #define FF_MEDIA_SET_STATUS(status_code)                                                                       \
         case winrt::Windows::Media::Control::GlobalSystemMediaTransportControlsSessionPlaybackStatus::status_code: \
@@ -259,6 +262,13 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
                     FF_MEDIA_SET_STATUS(Playing)
                     FF_MEDIA_SET_STATUS(Paused)
     #undef FF_MEDIA_SET_STATUS
+                }
+            }
+
+            abi_t<winrt::Windows::Foundation::IReference<double>>* FF_AUTO_RELEASE_COM_OBJECT playbackRateRef = NULL;
+            if (SUCCEEDED(playbackInfo->get_PlaybackRate(reinterpret_cast<void**>(&playbackRateRef))) && playbackRateRef) {
+                if (SUCCEEDED(playbackRateRef->get_Value(&playbackRate)) && playbackRate < 0.0) {
+                    playbackRate = 0.0;
                 }
             }
         }
@@ -285,6 +295,29 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
         FF_A_CLEANUP(deleteHstring) HSTRING album = NULL;
         if (SUCCEEDED(mediaProps->get_AlbumTitle(reinterpret_cast<void**>(&album)))) {
             ffStrbufSetHstring(&result->album, album);
+        }
+
+        abi_t<winrt::Windows::Media::Control::IGlobalSystemMediaTransportControlsSessionTimelineProperties>* FF_AUTO_RELEASE_COM_OBJECT timelineProps = NULL;
+        hr = session->GetTimelineProperties(reinterpret_cast<void**>(&timelineProps));
+        if (SUCCEEDED(hr) && timelineProps) {
+            int64_t duration = 0;
+            if (SUCCEEDED(timelineProps->get_EndTime(&duration)) && duration > 0) {
+                result->length = (uint32_t) (duration / 10000); // Convert from 100-nanosecond units to milliseconds
+
+                int64_t position = 0;
+                if (SUCCEEDED(timelineProps->get_Position(&position))) {
+                    result->position = (uint32_t) (position / 10000); // Convert from 100-nanosecond units to milliseconds
+
+                    int64_t lastUpdatedTime = 0;
+                    if (isPlaying && SUCCEEDED(timelineProps->get_LastUpdatedTime(&lastUpdatedTime)) && lastUpdatedTime > 0) {
+                        uint64_t lastUpdatedTimeMs = ffFileTimeToUnixMs((uint64_t) lastUpdatedTime);
+                        uint64_t nowMs = ffTimeGetNow();
+                        if (nowMs > lastUpdatedTimeMs) {
+                            result->position += (uint32_t) (((double) (nowMs - lastUpdatedTimeMs)) * playbackRate);
+                        }
+                    }
+                }
+            }
         }
 
         abi_t<winrt::Windows::ApplicationModel::IAppInfoStatics>* FF_AUTO_RELEASE_COM_OBJECT appInfoStatics = NULL;
