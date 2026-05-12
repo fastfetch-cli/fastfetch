@@ -3254,6 +3254,9 @@
                                         "const": "media",
                                         "description": "Print the name of the currently playing song"
                                     },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

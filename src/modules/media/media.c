@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/percent.h"
 #include "detection/media/media.h"
 #include "modules/media/media.h"
 
@@ -88,6 +88,8 @@ bool ffPrintMedia(FFMediaOptions* options) {
         ffStrbufAppend(&songPretty, &media->song);
     }
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if (options->moduleArgs.outputFormat.length == 0) {
         // We don't expose artistPretty to the format, as it might be empty (when the think that the artist is already in the song title)
         FF_STRBUF_AUTO_DESTROY artistPretty = ffStrbufCreateCopy(&media->artist);
@@ -106,18 +108,85 @@ bool ffPrintMedia(FFMediaOptions* options) {
             fputs(" - ", stdout);
         }
 
+        if (media->length > 0) {
+            bool hasProgress = false;
+            ffStrbufAppendS(&songPretty, " (");
+            if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
+                uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
+                ffStrbufAppendF(&songPretty, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
+                hasProgress = true;
+            }
+
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
+                if (hasProgress) {
+                    ffStrbufAppendS(&songPretty, " - ");
+                }
+                ffPercentAppendNum(
+                    &songPretty,
+                    media->position * 100.0 / media->length,
+                    options->percent,
+                    true,
+                    &options->moduleArgs);
+                hasProgress = true;
+            }
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
+                if (hasProgress) {
+                    ffStrbufAppendS(&songPretty, " - ");
+                }
+                ffPercentAppendBar(
+                    &songPretty,
+                    media->position * 100.0 / media->length,
+                    options->percent,
+                    &options->moduleArgs);
+                hasProgress = true;
+            }
+
+            if (hasProgress) {
+                ffStrbufAppendC(&songPretty, ')');
+            } else {
+                ffStrbufSubstrBefore(&songPretty, songPretty.length - 2);
+            }
+        }
+
         if (media->status.length > 0) {
-            ffStrbufAppendF(&songPretty, " (%s)", media->status.chars);
+            ffStrbufAppendF(&songPretty, " [%s]", media->status.chars);
         }
 
         ffStrbufPutTo(&songPretty, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_STRBUF_AUTO_DESTROY progress = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
+        if (media->length > 0) {
+            if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
+                uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
+                ffStrbufSetF(&progress, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
+            }
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
+                ffPercentAppendNum(
+                    &percentageNum,
+                    media->position * 100.0 / media->length,
+                    options->percent,
+                    false,
+                    &options->moduleArgs);
+            }
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
+                ffPercentAppendBar(
+                    &percentageBar,
+                    media->position * 100.0 / media->length,
+                    options->percent,
+                    &options->moduleArgs);
+            }
+        }
+        FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                                                                                                           FF_ARG(songPretty, "combined"),
                                                                                                           FF_ARG(media->song, "title"),
                                                                                                           FF_ARG(media->artist, "artist"),
                                                                                                           FF_ARG(media->album, "album"),
                                                                                                           FF_ARG(media->status, "status"),
+                                                                                                          FF_ARG(progress, "progress"),
+                                                                                                          FF_ARG(percentageNum, "progress-num"),
+                                                                                                          FF_ARG(percentageBar, "progress-bar"),
                                                                                                           FF_ARG(media->player, "player-name"),
                                                                                                           FF_ARG(media->playerId, "player-id"),
                                                                                                           FF_ARG(media->url, "url"),
@@ -135,12 +204,18 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module) {
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent)) {
+            continue;
+        }
+
         ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
+
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 bool ffGenerateMediaJsonResult(FF_A_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
@@ -176,6 +251,8 @@ bool ffGenerateMediaJsonResult(FF_A_UNUSED FFMediaOptions* options, yyjson_mut_d
 
 void ffInitMediaOptions(FFMediaOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->percent = (FFPercentageModuleConfig){ 100, 100, 0 };
 }
 
 void ffDestroyMediaOptions(FFMediaOptions* options) {
@@ -191,11 +268,17 @@ FFModuleBaseInfo ffMediaModuleInfo = {
     .printModule = (void*) ffPrintMedia,
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,
     .generateJsonConfig = (void*) ffGenerateMediaJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "Pretty media name", "combined" },
         { "Media name", "title" },
         { "Artist name", "artist" },
         { "Album name", "album" },
         { "Status", "status" },
+        { "Progress in text", "progress" },
+        { "Progress in percentage (number)", "progress-num" },
+        { "Progress in percentage (bar)", "progress-bar" },
+        { "Player name", "player-name" },
+        { "Player ID", "player-id" },
+        { "URL", "url" },
     }))
 };
