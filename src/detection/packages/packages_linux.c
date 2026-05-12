@@ -56,6 +56,11 @@ static uint32_t getSQLite3Int(FFstrbuf* baseDir, const char* dbPath, const char*
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dbPath);
 
+    if (strstr(baseDir->chars, "..") != NULL) {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        return 0;
+    }
+
     FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
 
