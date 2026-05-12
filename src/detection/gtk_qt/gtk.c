@@ -97,7 +97,7 @@ static void detectGTKFromSettings(FFGTKResult* result) {
         wallpaper = ffSettingsGetGnome("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
     } else if (
         ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_ENLIGHTENMENT)) {
-        ffEnlightenmentSettings settings;
+        ffEnlightenmentSettings settings = {};
         if (ffSettingsGetEnlightenmentProperty(&settings)) {
             themeName = settings.theme;
             iconsName = settings.icon_theme;
