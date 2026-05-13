@@ -205,6 +205,16 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip kde_output_device_v2";
     }
+    // Destroy any mode proxies that were created during the listeners.
+    // wl proxies created for modes are not automatically freed by destroying
+    // the parent output proxy, so destroy them explicitly to avoid leaks.
+    FF_LIST_FOR_EACH (WaylandKdeMode, m, modes) {
+        if (m->pMode) {
+            wldata->ffwl_proxy_destroy((struct wl_proxy*) m->pMode);
+            m->pMode = NULL;
+        }
+    }
+
     wldata->ffwl_proxy_destroy(output);
 
     if (display.width <= 0 || display.height <= 0 || !display.internal) {
