@@ -529,6 +529,7 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_file_new, false);
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_read, false);
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_close, false);
+    FF_LIBRARY_LOAD_SYMBOL(libeet, eet_shutdown, false);
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_free, false);
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_eina_file_data_descriptor_class_set, false);
     FF_LIBRARY_LOAD_SYMBOL(libeet, eet_data_descriptor_element_add, false);
@@ -542,6 +543,7 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
 
     Eet_File* ef = ffeet_open(fileName.chars, EET_FILE_MODE_READ);
     if (!ef) {
+        ffeet_shutdown();
         return false;
     }
 
@@ -550,6 +552,7 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
     Eet_Data_Descriptor* fontDdd = ffeet_data_descriptor_file_new(&fontDdc);
     if (!fontDdd) {
         ffeet_close(ef);
+        ffeet_shutdown();
         return false;
     }
     FF_EET_DATA_DESCRIPTOR_ADD_BASIC(fontDdd, E_Font_Default, text_class, EET_T_STRING);
@@ -562,6 +565,7 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
     if (!edd) {
         ffeet_data_descriptor_free(fontDdd);
         ffeet_close(ef);
+        ffeet_shutdown();
         return false;
     }
 
@@ -591,6 +595,10 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
     ffeet_close(ef);
     ffeet_data_descriptor_free(edd);
     ffeet_data_descriptor_free(fontDdd);
+    if (!parsed) {
+        // We don't shutdown eet so that `result->*` are not freed
+        ffeet_shutdown();
+    }
 
     return !!parsed;
 }
