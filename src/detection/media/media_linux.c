@@ -95,8 +95,8 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                     }
                 }
             } else if (ffStrEquals(mpris, "length")) {
-                uint64_t length = 0; // microseconds
-                if (ffDBusGetUint(data, &dictIterator, &length)) {
+                int64_t length = 0; // microseconds
+                if (ffDBusGetInt(data, &dictIterator, &length) && length > 0) {
                     result->length = (uint32_t) (length / 1000);
                 }
             }
