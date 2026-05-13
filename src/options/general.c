@@ -53,7 +53,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
                 options->dsForceDrm = yyjson_get_bool(val) ? FF_DS_FORCE_DRM_TYPE_TRUE : FF_DS_FORCE_DRM_TYPE_FALSE;
             }
         }
-
+#endif
         else {
             return "Unknown general property";
         }
@@ -82,7 +82,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
             options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
         }
     }
-
+#endif
     else {
         return false;
     }
@@ -130,4 +130,5 @@ void ffOptionsGenerateGeneralJsonConfig(FFdata* data, FFOptionsGeneral* options)
             yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
             break;
     }
+#endif
 }
