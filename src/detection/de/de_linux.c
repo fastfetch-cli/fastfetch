@@ -228,7 +228,7 @@ static const char* getEnlightenmentByDbus(FF_A_UNUSED FFstrbuf* result) {
         dbus.lib->ffdbus_message_unref(reply);
         return "dbus_message_iter_init() failed";
     }
-    if (ffDBusGetString(&dbus, &rootIterator, result)) {
+    if (!ffDBusGetString(&dbus, &rootIterator, result)) {
         dbus.lib->ffdbus_message_unref(reply);
         return "ffDBusGetString() failed";
     }
