@@ -109,42 +109,28 @@ bool ffPrintMedia(FFMediaOptions* options) {
         }
 
         if (media->length > 0) {
-            bool hasProgress = false;
-            ffStrbufAppendS(&songPretty, " (");
             if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
+                ffStrbufAppendS(&songPretty, " - ");
                 uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
                 ffStrbufAppendF(&songPretty, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
-                hasProgress = true;
             }
 
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
-                if (hasProgress) {
-                    ffStrbufAppendS(&songPretty, " - ");
-                }
+                ffStrbufAppendC(&songPretty, ' ');
                 ffPercentAppendNum(
                     &songPretty,
                     media->position * 100.0 / media->length,
                     options->percent,
                     true,
                     &options->moduleArgs);
-                hasProgress = true;
             }
             if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
-                if (hasProgress) {
-                    ffStrbufAppendS(&songPretty, " - ");
-                }
+                ffStrbufAppendC(&songPretty, ' ');
                 ffPercentAppendBar(
                     &songPretty,
                     media->position * 100.0 / media->length,
                     options->percent,
                     &options->moduleArgs);
-                hasProgress = true;
-            }
-
-            if (hasProgress) {
-                ffStrbufAppendC(&songPretty, ')');
-            } else {
-                ffStrbufSubstrBefore(&songPretty, songPretty.length - 2);
             }
         }
 
