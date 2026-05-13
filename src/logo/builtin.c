@@ -5650,6 +5650,17 @@ static const FFlogo X[] = {
             FF_COLOR_FG_RGB "255;242;0",
         },
     },
+    // Ximper
+    {
+        .names = { "Ximper" },
+        .lines = FASTFETCH_DATATEXT_LOGO_XIMPER,
+        .colors = {
+            FF_COLOR_FG_256 "21",
+            FF_COLOR_FG_256 "57",
+            FF_COLOR_FG_256 "92",
+            FF_COLOR_FG_256 "128",
+        },
+    },
     // LAST
     {},
 };

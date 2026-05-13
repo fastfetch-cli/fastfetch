@@ -28,7 +28,7 @@ Bugfixes:
 * Various internal cleanups and optimizations
 
 Logos:
-* Adds KibaOS, NebiOS, XJ380 and openRuyi
+* Adds KibaOS, NebiOS, XJ380, openRuyi, Ximper
 * Fixes GNOME OS built-in logo detection (#2296)
 
 # 2.62.1
