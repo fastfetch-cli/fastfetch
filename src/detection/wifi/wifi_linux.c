@@ -8,13 +8,15 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <net/if.h>
-#include <linux/genetlink.h>
-#include <linux/nl80211.h>
 #include <linux/wireless.h>
 #include <unistd.h>
 
-// Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#if !__BIG_ENDIAN__
+    #include <linux/genetlink.h>
+    #include <linux/nl80211.h>
+
+    // Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
+    #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 typedef struct FFWifiNlContext {
     int sockFd;
@@ -22,10 +24,6 @@ typedef struct FFWifiNlContext {
     uint32_t portId;
     uint32_t seq;
 } FFWifiNlContext;
-
-typedef struct FFWifiIcContext {
-    int sockFd;
-} FFWifiIcContext;
 
 typedef struct FFWifiSecurityFlags {
     bool privacy : 1;
@@ -199,7 +197,7 @@ static bool ffWifiNlInit(FFWifiNlContext* ctx) {
             ctx->sockFd,
             SOL_SOCKET,
             SO_RCVTIMEO,
-            &(struct timeval) { .tv_sec = 0, .tv_usec = 250000 },
+            &(struct timeval){ .tv_sec = 0, .tv_usec = 250000 },
             sizeof(struct timeval)) < 0) {
         FF_DEBUG("Failed to set netlink receive timeout: %s", strerror(errno));
         return false;
@@ -694,6 +692,11 @@ static const char* detectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, u
     FF_DEBUG("Netlink wifi detection completed");
     return NULL;
 }
+#endif
+
+typedef struct FFWifiIcContext {
+    int sockFd;
+} FFWifiIcContext;
 
 static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, char ifName[static IFNAMSIZ]) {
     int sock = -1;
@@ -893,7 +896,9 @@ const char* ffDetectWifi(FFlist* result) {
         return "if_nameindex() failed";
     }
 
+#if !__BIG_ENDIAN__
     FFWifiNlContext nl = { .sockFd = -1 };
+#endif
     FFWifiIcContext ic = { .sockFd = -1 };
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -930,7 +935,10 @@ const char* ffDetectWifi(FFlist* result) {
 
         if (operstate == 'u') {
             ffStrbufSetStatic(&item->inf.status, "up");
+
+#if !__BIG_ENDIAN__
             detectWithNetlink(&nl, item, i->if_index);
+#endif
             detectWithIoctl(&ic, item, i->if_name);
         } else {
             ffStrbufSetStatic(&item->conn.status, "disconnected");
@@ -954,9 +962,11 @@ const char* ffDetectWifi(FFlist* result) {
     }
 
     if_freenameindex(infs);
+#if !__BIG_ENDIAN__
     if (nl.sockFd >= 0) {
         close(nl.sockFd);
     }
+#endif
     if (ic.sockFd >= 0) {
         close(ic.sockFd);
     }
