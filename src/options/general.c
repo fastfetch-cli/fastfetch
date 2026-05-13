@@ -53,11 +53,6 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
                 options->dsForceDrm = yyjson_get_bool(val) ? FF_DS_FORCE_DRM_TYPE_TRUE : FF_DS_FORCE_DRM_TYPE_FALSE;
             }
         }
-#elif defined(_WIN32)
-        else if (unsafe_yyjson_equals_str(key, "wmiTimeout")) {
-            options->wmiTimeout = (int32_t) yyjson_get_int(val);
-        }
-#endif
 
         else {
             return "Unknown general property";
@@ -87,11 +82,6 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
             options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
         }
     }
-#elif defined(_WIN32)
-    else if (ffStrEqualsIgnCase(key, "--wmi-timeout")) {
-        options->wmiTimeout = ffOptionParseInt32(key, value);
-    }
-#endif
 
     else {
         return false;
@@ -108,8 +98,6 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options) {
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
-#elif defined(_WIN32)
-    options->wmiTimeout = 5000;
 #endif
 }
 
@@ -142,10 +130,4 @@ void ffOptionsGenerateGeneralJsonConfig(FFdata* data, FFOptionsGeneral* options)
             yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
             break;
     }
-
-#elif defined(_WIN32)
-
-    yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
-
-#endif
 }

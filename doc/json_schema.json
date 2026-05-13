@@ -898,11 +898,6 @@
                     ],
                     "default": false
                 },
-                "wmiTimeout": {
-                    "type": "integer",
-                    "description": "Set the timeout (ms) for WMI queries, `-1` for no timeout. Windows only",
-                    "default": 5000
-                },
                 "processingTimeout": {
                     "type": "integer",
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
