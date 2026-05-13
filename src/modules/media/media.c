@@ -43,6 +43,15 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist) {
     return false;
 }
 
+static void appendProgress(FFstrbuf* buffer, const FFMediaResult* media) {
+    uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
+    if (sLen > 60 * 60) {
+        ffStrbufAppendF(buffer, "%02u:%02u:%02u / %02u:%02u:%02u", sPos / 3600, (sPos % 3600) / 60, sPos % 60, sLen / 3600, (sLen % 3600) / 60, sLen % 60);
+    } else {
+        ffStrbufAppendF(buffer, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
+    }
+}
+
 bool ffPrintMedia(FFMediaOptions* options) {
     const FFMediaResult* media = ffDetectMedia(false);
 
@@ -111,8 +120,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
         if (media->length > 0) {
             if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
                 ffStrbufAppendS(&songPretty, " - ");
-                uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
-                ffStrbufAppendF(&songPretty, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
+                appendProgress(&songPretty, media);
             }
 
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
@@ -145,8 +153,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
         if (media->length > 0) {
             if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
-                uint32_t sLen = media->length / 1000, sPos = media->position / 1000;
-                ffStrbufSetF(&progress, "%02u:%02u / %02u:%02u", sPos / 60, sPos % 60, sLen / 60, sLen % 60);
+                appendProgress(&progress, media);
             }
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
                 ffPercentAppendNum(
