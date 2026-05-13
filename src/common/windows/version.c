@@ -11,10 +11,7 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
     DWORD handle;
     DWORD size = GetFileVersionInfoSizeW(filePath, &handle);
     if (size == 0) {
-        DWORD err = GetLastError();
-        FF_DEBUG("GetFileVersionInfoSizeW failed: err=%lu (%s)",
-            (unsigned long) err,
-            ffDebugWin32Error(err));
+        FF_DEBUG("GetFileVersionInfoSizeW failed: %s", ffDebugWin32Error(GetLastError()));
         return false;
     }
 
@@ -29,10 +26,7 @@ bool ffGetFileVersion(const wchar_t* filePath, const wchar_t* stringName, FFstrb
     }
 
     if (!GetFileVersionInfoW(filePath, handle, size, versionData)) {
-        DWORD err = GetLastError();
-        FF_DEBUG("GetFileVersionInfoW failed: err=%lu (%s)",
-            (unsigned long) err,
-            ffDebugWin32Error(err));
+        FF_DEBUG("GetFileVersionInfoW failed: %s", ffDebugWin32Error(GetLastError()));
         return false;
     }
 

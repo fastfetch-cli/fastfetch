@@ -163,9 +163,10 @@ static bool detectDefaultTerminal(FFTerminalResult* result) {
     FF_AUTO_CLOSE_FD HANDLE hkcu = NULL;
     if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Console\\%%Startup", &hkcu, NULL) &&
         ffRegReadData(hkcu, L"DelegationTerminal", &(FFArgBuffer) {
-            .data = uuid,
-            .length = (uint32_t) (sizeof(regPath) - (size_t) (uuid - regPath) * sizeof(wchar_t)),
-        }, NULL)) {
+                                                       .data = uuid,
+                                                       .length = (uint32_t) (sizeof(regPath) - (size_t) (uuid - regPath) * sizeof(wchar_t)),
+                                                   },
+            NULL)) {
         if (wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0 || // Let Windows decide
             wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)   // Conhost
         {

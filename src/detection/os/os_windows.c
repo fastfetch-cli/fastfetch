@@ -1,5 +1,4 @@
 #include "os.h"
-#include "common/library.h"
 #include "common/stringUtils.h"
 #include "common/windows/registry.h"
 #include "common/windows/unicode.h"
@@ -56,6 +55,9 @@ void ffDetectOSImpl(FFOSResult* os) {
         if (ffStrbufStartsWithS(&os->variant, "Server ")) {
             ffStrbufAppendS(&os->name, " Server");
             ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
+        } else if (ffStrbufStartsWithS(&os->variant, "Embedded ")) {
+            ffStrbufAppendS(&os->name, " Embedded");
+            ffStrbufSubstrAfter(&os->variant, strlen(" Embedded") - 1);
         }
 
         if (ffStrbufStartsWithIgnCaseS(&os->variant, "(TM) ")) {

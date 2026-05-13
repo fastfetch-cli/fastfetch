@@ -24,14 +24,37 @@ const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result) {
         }
         return NULL;
     } else if (CFGetTypeID(cf) == CFDataGetTypeID()) {
-        if (CFDataGetLength((CFDataRef) cf) != sizeof(int)) {
-            return "Data length is not sizeof(int)";
+        if (CFDataGetLength((CFDataRef) cf) != sizeof(*result)) {
+            return "Data length is not sizeof(int32_t)";
         }
-        CFDataGetBytes((CFDataRef) cf, CFRangeMake(0, sizeof(int)), (uint8_t*) result);
+        CFDataGetBytes((CFDataRef) cf, CFRangeMake(0, sizeof(*result)), (uint8_t*) result);
         return NULL;
     }
 
     return "TypeID is neither 'CFNumber' nor 'CFData'";
+}
+
+const char* ffCfNumGetDouble(CFTypeRef cf, double* result) {
+    if (CFGetTypeID(cf) == CFNumberGetTypeID()) {
+        if (!CFNumberGetValue((CFNumberRef) cf, kCFNumberDoubleType, result) &&
+            !CFNumberGetValue((CFNumberRef) cf, kCFNumberFloatType, result)) {
+            return "Number type is not Double or Float";
+        }
+        return NULL;
+    }
+
+    return "TypeID is neither 'CFNumber'";
+}
+
+const char* ffCfDateGetEpoch(CFTypeRef cf, uint64_t* result) {
+    if (CFGetTypeID(cf) != CFDateGetTypeID()) {
+        return "TypeID is not 'CFDate'";
+    }
+
+    CFAbsoluteTime absTime = CFDateGetAbsoluteTime((CFDateRef) cf);
+    // Convert from seconds to milliseconds and add the difference between 1970 and 2001 in milliseconds
+    *result = (uint64_t) ((absTime + 978307200 /*kCFAbsoluteTimeIntervalSince1970*/) * 1000);
+    return NULL;
 }
 
 const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result) {
@@ -149,6 +172,15 @@ const char* ffCfDictGetInt64(CFDictionaryRef dict, CFStringRef key, int64_t* res
     return ffCfNumGetInt64(cf, result);
 }
 
+const char* ffCfDictGetDouble(CFDictionaryRef dict, CFStringRef key, double* result) {
+    CFTypeRef cf = (CFTypeRef) CFDictionaryGetValue(dict, key);
+    if (cf == NULL) {
+        return "CFDictionaryGetValue() failed";
+    }
+
+    return ffCfNumGetDouble(cf, result);
+}
+
 const char* ffCfDictGetData(CFDictionaryRef dict, CFStringRef key, uint32_t offset, uint32_t size, uint8_t* result, uint32_t* length) {
     CFTypeRef cf = (CFTypeRef) CFDictionaryGetValue(dict, key);
     if (cf == NULL) {
@@ -181,4 +213,13 @@ const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryR
 
     *result = cf;
     return NULL;
+}
+
+const char* ffCfDictGetDateAsEpoch(CFDictionaryRef dict, CFStringRef key, uint64_t* result) {
+    CFTypeRef cf = (CFTypeRef) CFDictionaryGetValue(dict, key);
+    if (cf == NULL) {
+        return "CFDictionaryGetValue() failed";
+    }
+
+    return ffCfDateGetEpoch(cf, result);
 }

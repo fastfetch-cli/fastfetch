@@ -71,7 +71,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 }
 
 bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
-    FF_AUTO_CLOSE_FD int pfRoute = socket(AF_INET, SOCK_RAW, AF_INET6);
+    FF_AUTO_CLOSE_FD int pfRoute = socket(AF_INET6, SOCK_RAW, AF_INET6);
     if (pfRoute < 0) {
         return false;
     }

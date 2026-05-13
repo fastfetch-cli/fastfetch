@@ -1,7 +1,6 @@
-# find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \) ! -path "src/3rdparty/*" -print0 | xargs -0 clang-format -i
+# find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.hpp" -o -name "*.m" -o -name "*.mm" \) -print0 | xargs -0 clang-format -i
 
 BasedOnStyle: LLVM
-Language: Cpp
 
 UseTab: Never
 IndentWidth: 4
@@ -81,3 +80,10 @@ AttributeMacros:
 
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
+
+---
+Language: ObjC
+ObjCBlockIndentWidth: 4
+ObjCSpaceAfterProperty: true
+ObjCSpaceBeforeProtocolList: true
+ObjCBreakBeforeNestedBlockParam: true

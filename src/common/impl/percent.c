@@ -59,9 +59,6 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
     const bool borderAsValue = options->barBorderLeftElapsed.length && options->barBorderRightElapsed.length;
 
-    uint8_t blocksPercent = (uint8_t) (percent / 100.0 * options->barWidth + 0.5);
-    assert(blocksPercent <= options->barWidth);
-
     if (!borderAsValue && options->barBorderLeft.length) {
         if (!options->pipe && options->barColorBorder.length > 0) {
             ffStrbufAppendF(buffer, "\e[%sm", options->barColorBorder.chars);
@@ -85,6 +82,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         const char* colorRed = options->percentColorRed.chars;
 
         FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
+
+        uint8_t blocksPercent = (uint8_t) (percent / 100.0 * options->barWidth + 0.5);
+        assert(blocksPercent <= options->barWidth);
 
         bool autoColorElapsed = ffStrbufIgnCaseEqualS(&options->barColorElapsed, "auto");
 
@@ -190,7 +190,11 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             }
         }
     }
-    ffStrbufAppendF(buffer, "%*.*f%s%%", options->percentWidth, options->percentNdigits, percent, options->percentSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
+    if (percent == -DBL_MAX) {
+        ffStrbufAppendS(buffer, "-");
+    } else {
+        ffStrbufAppendF(buffer, "%*.*f%s%%", options->percentWidth, options->percentNdigits, percent, options->percentSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
+    }
 
     if (colored && !options->pipe) {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);

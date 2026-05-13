@@ -27,8 +27,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
         char bandStr[8];
         if (item->conn.frequency > 58000) {
             strcpy(bandStr, "60");
-        }
-        if (item->conn.frequency > 40000) {
+        } else if (item->conn.frequency > 40000) {
             strcpy(bandStr, "45");
         } else if (item->conn.frequency > 5900) {
             strcpy(bandStr, "6");

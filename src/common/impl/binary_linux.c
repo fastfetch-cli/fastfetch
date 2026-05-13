@@ -112,8 +112,9 @@ const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* s
             if (*p == '\0') {
                 continue;
             }
-            uint32_t len = (uint32_t) strlen(p);
+            uint32_t len = (uint32_t) strnlen(p, data->d_size - off);
             if (len < minLength) {
+                off += len;
                 continue;
             }
             // Only process printable ASCII characters

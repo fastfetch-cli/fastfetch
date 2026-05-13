@@ -61,6 +61,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
             FF_PRINT_PACKAGE_NAME(brew, "brew")
             FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
         }
+        FF_PRINT_PACKAGE(cards)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(emerge)
@@ -151,6 +152,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.brew, "brew"),
                 FF_ARG(brewAll, "brew-all"),
                 FF_ARG(counts.brewCask, "brew-cask"),
+                FF_ARG(counts.cards, "cards"),
                 FF_ARG(counts.choco, "choco"),
                 FF_ARG(counts.dpkg, "dpkg"),
                 FF_ARG(counts.emerge, "emerge"),
@@ -247,6 +249,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                         case 'C':
                             if (false)
                                 ;
+                            FF_TEST_PACKAGE_NAME(CARDS)
                             FF_TEST_PACKAGE_NAME(CHOCO)
                             break;
                         case 'D':
@@ -371,6 +374,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(APK)
     FF_TEST_PACKAGE_NAME(APPIMAGE)
     FF_TEST_PACKAGE_NAME(BREW)
+    FF_TEST_PACKAGE_NAME(CARDS)
     FF_TEST_PACKAGE_NAME(CHOCO)
     FF_TEST_PACKAGE_NAME(DPKG)
     FF_TEST_PACKAGE_NAME(EMERGE)
@@ -429,6 +433,7 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
     FF_APPEND_PACKAGE_COUNT(apk)
     FF_APPEND_PACKAGE_COUNT(brew)
     FF_APPEND_PACKAGE_COUNT(brewCask)
+    FF_APPEND_PACKAGE_COUNT(cards)
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
     FF_APPEND_PACKAGE_COUNT(emerge)
@@ -502,6 +507,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of brew packages", "brew" },
         { "Total number of all brew packages", "brew-all" },
         { "Number of brew-cask packages", "brew-cask" },
+        { "Number of cards packages", "cards" },
         { "Number of choco packages", "choco" },
         { "Number of dpkg packages", "dpkg" },
         { "Number of emerge packages", "emerge" },

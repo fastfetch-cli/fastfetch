@@ -249,10 +249,12 @@ kde_output_device_registry_v2_destroy(struct kde_output_device_registry_v2* kde_
  * request until the kde_output_device_registry_v2.finished event is sent.
  */
 // static inline void
-// kde_output_device_registry_v2_stop(struct kde_output_device_registry_v2 *kde_output_device_registry_v2)
-// {
-// 	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_registry_v2,
-// 			 KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_registry_v2), 0);
+// kde_output_device_registry_v2_stop(struct kde_output_device_registry_v2* kde_output_device_registry_v2) {
+//     wl_proxy_marshal_flags((struct wl_proxy*) kde_output_device_registry_v2,
+//         KDE_OUTPUT_DEVICE_REGISTRY_V2_STOP,
+//         NULL,
+//         wl_proxy_get_version((struct wl_proxy*) kde_output_device_registry_v2),
+//         0);
 // }
 
 #ifndef KDE_OUTPUT_DEVICE_V2_SUBPIXEL_ENUM
@@ -383,6 +385,16 @@ enum kde_output_device_v2_capability {
      * @since 19
      */
     KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS = 0x4000,
+    /**
+     * if this outputdevice supports HDR ICC profiles
+     * @since 22
+     */
+    KDE_OUTPUT_DEVICE_V2_CAPABILITY_HDR_ICC_PROFILE = 0x8000,
+    /**
+     * if this outputdevice supports the abm level setting
+     * @since 23
+     */
+    KDE_OUTPUT_DEVICE_V2_CAPABILITY_ABM_LEVEL = 0x10000,
 };
     /**
      * @ingroup iface_kde_output_device_v2
@@ -432,6 +444,14 @@ enum kde_output_device_v2_capability {
      * @ingroup iface_kde_output_device_v2
      */
     #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS_SINCE_VERSION 19
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_HDR_ICC_PROFILE_SINCE_VERSION 22
+    /**
+     * @ingroup iface_kde_output_device_v2
+     */
+    #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_ABM_LEVEL_SINCE_VERSION 23
 #endif /* KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
@@ -772,7 +792,7 @@ struct kde_output_device_v2_listener {
         struct kde_output_device_v2* kde_output_device_v2,
         uint32_t policy);
     /**
-     * describes when auto rotate is used
+     * describes the path to the ICC profile used in SDR mode
      *
      *
      * @since 5
@@ -821,7 +841,7 @@ struct kde_output_device_v2_listener {
         struct kde_output_device_v2* kde_output_device_v2,
         uint32_t gamut_wideness);
     /**
-     * describes which source the compositor uses for the color profile on an output
+     * describes which source the compositor uses for the color profile on an output in SDR mode
      *
      *
      * @since 7
@@ -983,6 +1003,36 @@ struct kde_output_device_v2_listener {
      */
     void (*removed)(void* data,
         struct kde_output_device_v2* kde_output_device_v2);
+    /**
+     * describes the path to the ICC profile used in HDR mode
+     *
+     *
+     * @since 22
+     */
+    void (*hdr_icc_profile_path)(void* data,
+        struct kde_output_device_v2* kde_output_device_v2,
+        const char* profile_path);
+    /**
+     * describes which source the compositor uses for the color profile on an output in HDR mode
+     *
+     *
+     * @since 22
+     */
+    void (*hdr_color_profile_source)(void* data,
+        struct kde_output_device_v2* kde_output_device_v2,
+        uint32_t source);
+    /**
+     * allowed level of adaptive backlight modulation
+     *
+     * Adaptive backlight modulation is a feature that reduces the
+     * backlight and increases contrast of colors on the screen to
+     * improve power usage.
+     * @param level 0 is off, 4 is the maximum level
+     * @since 23
+     */
+    void (*abm_level)(void* data,
+        struct kde_output_device_v2* kde_output_device_v2,
+        uint32_t level);
 };
 
 /**
@@ -1147,6 +1197,18 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2* kde_output_device
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_REMOVED_SINCE_VERSION 21
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_HDR_ICC_PROFILE_PATH_SINCE_VERSION 22
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_HDR_COLOR_PROFILE_SOURCE_SINCE_VERSION 22
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_ABM_LEVEL_SINCE_VERSION 23
 
 /**
  * @ingroup iface_kde_output_device_v2
@@ -1183,10 +1245,12 @@ kde_output_device_v2_destroy(struct kde_output_device_v2* kde_output_device_v2) 
  * the kde_output_device_v2 object.
  */
 // static inline void
-// kde_output_device_v2_release(struct kde_output_device_v2 *kde_output_device_v2)
-// {
-// 	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_device_v2,
-// 			 KDE_OUTPUT_DEVICE_V2_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2), WL_MARSHAL_FLAG_DESTROY);
+// kde_output_device_v2_release(struct kde_output_device_v2* kde_output_device_v2) {
+//     wl_proxy_marshal_flags((struct wl_proxy*) kde_output_device_v2,
+//         KDE_OUTPUT_DEVICE_V2_RELEASE,
+//         NULL,
+//         wl_proxy_get_version((struct wl_proxy*) kde_output_device_v2),
+//         WL_MARSHAL_FLAG_DESTROY);
 // }
 
 #ifndef KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM

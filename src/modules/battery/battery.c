@@ -202,13 +202,6 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module) {
             continue;
         }
 
-#ifdef _WIN32
-        if (unsafe_yyjson_equals_str(key, "useSetupApi")) {
-            options->useSetupApi = yyjson_get_bool(val);
-            continue;
-        }
-#endif
-
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig)) {
             continue;
         }
@@ -223,10 +216,6 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module) {
 
 void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
-
-#ifdef _WIN32
-    yyjson_mut_obj_add_bool(doc, module, "useSetupApi", options->useSetupApi);
-#endif
 
     ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
     ffPercentGenerateJsonConfig(doc, module, options->percent);
@@ -302,10 +291,6 @@ void ffInitBatteryOptions(FFBatteryOptions* options) {
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-
-#ifdef _WIN32
-    options->useSetupApi = false;
-#endif
 }
 
 void ffDestroyBatteryOptions(FFBatteryOptions* options) {

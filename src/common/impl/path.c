@@ -128,13 +128,6 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
             errno = E2BIG;
             return NULL;
         }
-
-        if (outBytes > MAX_PATH) {
-            errno = E2BIG;
-            return NULL;
-        }
-
-        return resolved_name;
     } else {
         /* UTF-8 worst-case: up to 4 bytes per UTF-16 code unit */
         char tmp[(MAX_PATH + 4) * 4];
@@ -152,7 +145,6 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
         }
 
         memcpy(resolved_name, tmp, outBytes);
-        return resolved_name;
     }
 
     return resolved_name;

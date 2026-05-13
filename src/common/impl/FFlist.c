@@ -12,7 +12,7 @@ void* ffListAdd(FFlist* list, uint32_t elementSize) {
     return ffListGet(list, elementSize, list->length - 1);
 }
 
-bool ffListShift(FFlist* list, uint32_t elementSize, void* result) {
+bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result) {
     if (list->length == 0) {
         return false;
     }
@@ -23,7 +23,7 @@ bool ffListShift(FFlist* list, uint32_t elementSize, void* result) {
     return true;
 }
 
-bool ffListPop(FFlist* list, uint32_t elementSize, void* result) {
+bool ffListPop(FFlist* list, uint32_t elementSize, void* __restrict result) {
     if (list->length == 0) {
         return false;
     }

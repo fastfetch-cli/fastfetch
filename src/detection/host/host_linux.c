@@ -67,7 +67,6 @@ const char* ffDetectHost(FFHostResult* host) {
         if (ffStrbufStartsWithS(&host->name, "Standard PC")) {
             ffStrbufPrependS(&host->name, "KVM/QEMU ");
         }
-
 #if __aarch64__
         else if (host->family.length == 0 && ffStrbufEqualS(&host->vendor, "Apple Inc.") && ffStrbufStartsWithS(&host->name, "Mac")) {
             // Hack for Asahi Linux

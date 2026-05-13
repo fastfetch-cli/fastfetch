@@ -15,6 +15,8 @@
 #define FF_DE_PRETTY_CDE "CDE"
 #define FF_DE_PRETTY_UNITY "Unity"
 #define FF_DE_PRETTY_UKUI "UKUI"
+#define FF_DE_PRETTY_NEBIDE "NebiDE"
+#define FF_DE_PRETTY_ENLIGHTENMENT "Enlightenment"
 
 #define FF_WM_PRETTY_KWIN "KWin"
 #define FF_WM_PRETTY_MUTTER "Mutter"
@@ -40,6 +42,7 @@
 #define FF_WM_PRETTY_FVWM "fvwm"
 #define FF_WM_PRETTY_CTWM "ctwm"
 #define FF_WM_PRETTY_RATPOISON "ratpoison"
+#define FF_WM_PRETTY_ENLIGHTENMENT "Enlightenment"
 
 #define FF_WM_PROTOCOL_TTY "TTY"
 #define FF_WM_PROTOCOL_X11 "X11"

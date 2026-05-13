@@ -23,6 +23,8 @@ const FFMediaResult* ffDetectMedia(bool saveCover) {
         ffStrbufInit(&result.url);
         ffStrbufInit(&result.status);
         ffStrbufInit(&result.cover);
+        result.length = 0;
+        result.position = 0;
         result.removeCoverAfterUse = false;
         ffDetectMediaImpl(&result, saveCover);
 

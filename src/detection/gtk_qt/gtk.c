@@ -87,13 +87,25 @@ static void detectGTKFromSettings(FFGTKResult* result) {
         ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME) ||
         ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC) ||
         ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_UNITY) ||
-        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_BUDGIE)) {
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_BUDGIE) ||
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_NEBIDE)) {
         themeName = ffSettingsGetGnome("/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGetGnome("/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
         fontName = ffSettingsGetGnome("/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
         wallpaper = ffSettingsGetGnome("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
+    } else if (
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_ENLIGHTENMENT)) {
+        ffEnlightenmentSettings settings = {};
+        if (ffSettingsGetEnlightenmentProperty(&settings)) {
+            themeName = settings.theme;
+            iconsName = settings.icon_theme;
+            fontName = settings.font;
+            cursorTheme = settings.use_e_cursor ? "Enlightenment" : "Application";
+            cursorSize = settings.cursor_size;
+            wallpaper = settings.desktop_default_background;
+        }
     }
 
     applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);

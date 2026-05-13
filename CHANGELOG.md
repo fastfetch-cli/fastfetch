@@ -1,7 +1,43 @@
+# 2.63.0
+
+Changes:
+* Introduces a new optional dependency, `libefl`, for querying the Enlightenment window manager configuration:
+    * `libefl-all-dev` on Debian/Ubuntu
+    * `libefl-devel` on Fedora
+    * `efl` on Arch Linux
+* The Windows-specific options `battery.useSetupApi` and `global.wmiTimeout` have been removed. (Windows)
+
+Features:
+* Adds wallpaper detection support on Haiku (#2314, Wallpaper, Haiku)
+* Adds Wi-Fi 6 GHz channel detection and improves protocol reporting (Wifi, Linux)
+* Improves Deepin version detection using `/etc/os-version` (#2300, OS, Linux)
+* Adds Ubuntu Kylin and Ubuntu Unity flavor detection (OS, Linux)
+* Adds NebiDE support (WMTheme, Linux)
+* Adds package counting for `cards` on NuTyX (#2287, Packages, Linux)
+* Adds support for the Enlightenment desktop environment (#2165, WM, Linux)
+* Adds support for playback progress detection (Media)
+    * The module now prints the current playback position and total media duration when supported by the player. If you prefer the previous behavior, you can set `media.percent.type: ["hide-others"]` to hide the new fields.
+* Adds support for `global.playerName` for Windows (Media, Windows)
+    * This allows detecting a specified media player while ignoring others.
+* Multi-battery detection is enabled on Windows by default (Battery, Windows)
+
+Bugfixes:
+* Improves DisplayServer compatibility on Linux by handling newer `kde-output-device-v2` protocol updates (DisplayServer, Linux)
+    * This fixes a long-standing issue where display detection fails with an `interface 'kde_output_device_mode_v2' has no event X` error.
+* Improves Wi-Fi reliability on Linux by switching to a netlink implementation (Wifi, Linux)
+* Improves network interface reliability and default route selection on macOS and Windows (Netif, macOS / Windows)
+* Validates temperature color thresholds as integers when parsing JSON configs (Temps)
+* Fixes TDE Konsole version detection (#2319, Terminal, Linux)
+* Various internal cleanups and optimizations
+
+Logos:
+* Adds KibaOS, NebiOS, XJ380, openRuyi, Ximper
+* Fixes GNOME OS built-in logo detection (#2296)
+
 # 2.62.1
 
 Bugfixes:
-* Fixes Host module not working on some devices (#2279, Host, Linux)
+* Fixes the Host module not working on some devices (#2279, Host, Linux)
     * Regression from v2.61.0
 
 Logos:

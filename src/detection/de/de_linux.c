@@ -211,6 +211,45 @@ static const char* getCosmic(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options)
     return "All methods failed";
 }
 
+static const char* getEnlightenmentByDbus(FF_A_UNUSED FFstrbuf* result) {
+#ifdef FF_HAVE_DBUS
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
+    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL) {
+        return "ffDBusLoadData() failed";
+    }
+
+    DBusMessage* reply = ffDBusGetMethodReply(&dbus, "org.enlightenment.wm.service", "/org/enlightenment/wm/RemoteObject", "org.enlightenment.wm.Core", "Version", NULL, NULL);
+    if (!reply) {
+        return "ffDBusGetMethodReply() failed";
+    }
+
+    DBusMessageIter rootIterator;
+    if (!dbus.lib->ffdbus_message_iter_init(reply, &rootIterator)) {
+        dbus.lib->ffdbus_message_unref(reply);
+        return "dbus_message_iter_init() failed";
+    }
+    if (!ffDBusGetString(&dbus, &rootIterator, result)) {
+        dbus.lib->ffdbus_message_unref(reply);
+        return "ffDBusGetString() failed";
+    }
+    dbus.lib->ffdbus_message_unref(reply);
+
+    return NULL;
+#else  // FF_HAVE_DBUS
+    return "ffDBusLoadData() failed: dbus support not compiled in";
+#endif // FF_HAVE_DBUS
+}
+
+static void getEnlightenment(FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
+    getEnlightenmentByDbus(result);
+
+    if (result->length == 0) {
+        if (ffProcessAppendStdOut(result, (char* const[]) { "enlightenment", "--version", NULL }) == NULL) { // ...\nVersion: 0.27.1\n...
+            ffStrbufSubstrAfterFirstS(result, "Version: ");
+            ffStrbufSubstrBeforeFirstC(result, '\n');
+        }
+    }
+}
 const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOptions* options) {
     if (!instance.config.general.detectVersion) {
         return "Disabled by config";
@@ -236,6 +275,8 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getTrinity(result, options);
     } else if (ffStrbufEqualS(deName, "COSMIC")) {
         getCosmic(result, options);
+    } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_ENLIGHTENMENT)) {
+        getEnlightenment(result, options);
     } else {
         return "Unsupported DE";
     }

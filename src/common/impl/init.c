@@ -57,9 +57,9 @@ void ffInitInstance(void) {
     initState(&instance.state);
 }
 
-static volatile bool ffDisableLinewrap = true;
-static volatile bool ffHideCursor = true;
-#if _WIN32
+static volatile bool ffDisableLinewrap = false;
+static volatile bool ffHideCursor = false;
+#ifdef _WIN32
 static volatile UINT oldCp = CP_UTF8;
 #endif
 
@@ -122,7 +122,10 @@ void ffStart(void) {
     if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);
     }
-    struct sigaction action = { .sa_handler = exitSignalHandler };
+    struct sigaction action;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    action.sa_handler = exitSignalHandler;
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
@@ -200,6 +203,9 @@ void ffListFeatures(void) {
 #if FF_HAVE_DCONF
         "dconf\n"
 #endif
+#if FF_HAVE_EET
+        "eet\n"
+#endif
 #if FF_HAVE_DBUS
         "dbus\n"
 #endif
@@ -251,11 +257,11 @@ void ffListFeatures(void) {
 #if FF_HAVE_LINUX_VIDEODEV2
         "linux/videodev2\n"
 #endif
-#if FF_HAVE_LINUX_WIRELESS
-        "linux/wireless\n"
-#endif
 #if FF_HAVE_EMBEDDED_PCIIDS
         "Embedded pciids\n"
+#endif
+#if FF_HAVE_WINRT
+        "WinRT headers\n"
 #endif
 #if FF_WIN81_COMPAT
         "Windows 8.1 Compatibility\n"

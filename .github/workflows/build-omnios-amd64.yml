@@ -20,7 +20,7 @@ jobs:
           envs: 'CMAKE_BUILD_TYPE'
           prepare: |
             uname -a
-            pkg update --accept
+            pkg update --accept || true
             pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja
 
           run: |

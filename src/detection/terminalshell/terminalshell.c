@@ -365,7 +365,11 @@ FF_A_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* versi
         }
     }
 
-    return getExeVersionGeneral(exe, version);
+    // Likely TDE konsole. See #2319
+    if (!getExeVersionRaw(exe, version)) {
+        return false;
+    }
+    return ffStrbufSubstrAfterLastC(version, ' ');
 }
 
 FF_A_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version) {

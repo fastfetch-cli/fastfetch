@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 /// \file adl_defines.h
-/// \brief Contains all definitions exposed by ADL for \ALL platforms.\n <b>Included in ADL SDK</b>
+/// \brief Contains all definitions exposed by ADL for \WIN platforms.\n <b>Included in ADL SDK</b>
 ///
 /// This file contains all definitions used by ADL.
 /// The ADL definitions include the following:
@@ -61,6 +61,8 @@
 #define ADL_ADAPTER_INDEX_ALL                            -1
 ///    Defines APIs with iOption none
 #define ADL_MAIN_API_OPTION_NONE                        0
+///    Defines the maximum of RPC endpoint
+#define ADL_MAX_RPC_ENDPOINT                        32
 /// @}
 
 /// \name Definitions for iOption parameter used by
@@ -141,6 +143,12 @@
 #define ADL_ERR_FEATURESYNC_NOT_STARTED            -24
 /// Adapter is in an invalid power state
 #define ADL_ERR_INVALID_POWER_STATE             -25
+/// The RPC server is in busy state
+#define ADL_ERR_SERVER_BUSY             -26
+/// The GPU is occupied by application which cannot be powered off
+#define ADL_ERR_GPU_IN_USE            -27
+/// The general RPC connection error
+#define ADL_ERR_RPC            -28
 
 /// @}
 /// </A>
@@ -380,6 +388,7 @@
 #define ADL_BUSTYPE_PCIE_GEN2     3       /* PCI Express 2nd generation bus   */
 #define ADL_BUSTYPE_PCIE_GEN3     4       /* PCI Express 3rd generation bus   */
 #define ADL_BUSTYPE_PCIE_GEN4     5       /* PCI Express 4th generation bus   */
+#define ADL_BUSTYPE_PCIE_GEN5     6       /* PCI Express 5th generation bus   */
 /// @}
 
 /// \defgroup define_ws_caps    Workstation Capabilities
@@ -872,7 +881,7 @@
 typedef enum ADLThreadingModel
 {
     ADL_THREADING_UNLOCKED    = 0, /*!< Default behavior. ADL will not enforce serialization of ADL API executions by multiple threads.  Multiple threads will be allowed to enter to ADL at the same time. Note that ADL library is not guaranteed to be thread-safe. Client that calls ADL_Main_Control_Create have to provide its own mechanism for ADL calls serialization. */
-    ADL_THREADING_LOCKED     /*!< ADL will enforce serialization of ADL API when called by multiple threads.  Only single thread will be allowed to enter ADL API at the time. This option makes ADL calls thread-safe. You shouldn't use this option if ADL calls will be executed on Linux on x-server rendering thread. It can cause the application to hung.  */
+    ADL_THREADING_LOCKED     /*!< ADL will enforce serialization of ADL API when called by multiple threads.  Only single thread will be allowed to enter ADL API at the time. This option makes ADL calls thread-safe. */
 }ADLThreadingModel;
 
 /// @}
@@ -1844,12 +1853,12 @@ enum ADLOD8FeatureControl
     ADL_OD8_TEMPERATURE_FAN = 1 << 6,   //FanTargetTemperature
     ADL_OD8_TEMPERATURE_SYSTEM = 1 << 7,    //MaxOpTemp
     ADL_OD8_MEMORY_TIMING_TUNE = 1 << 8,
-    ADL_OD8_FAN_ZERO_RPM_CONTROL = 1 << 9 ,
-	ADL_OD8_AUTO_UV_ENGINE = 1 << 10,  //Auto under voltage
-	ADL_OD8_AUTO_OC_ENGINE = 1 << 11,  //Auto overclock engine
-	ADL_OD8_AUTO_OC_MEMORY = 1 << 12,  //Auto overclock memory
-	ADL_OD8_FAN_CURVE = 1 << 13,   //Fan curve
-	ADL_OD8_WS_AUTO_FAN_ACOUSTIC_LIMIT = 1 << 14, //Workstation Manual Fan controller
+    ADL_OD8_FAN_ZERO_RPM_CONTROL = 1 << 9,
+    ADL_OD8_AUTO_UV_ENGINE = 1 << 10,  //Auto under voltage
+    ADL_OD8_AUTO_OC_ENGINE = 1 << 11,  //Auto overclock engine
+    ADL_OD8_AUTO_OC_MEMORY = 1 << 12,  //Auto overclock memory
+    ADL_OD8_FAN_CURVE = 1 << 13,   //Fan curve
+    ADL_OD8_WS_AUTO_FAN_ACOUSTIC_LIMIT = 1 << 14, //Workstation Manual Fan controller
     ADL_OD8_GFXCLK_QUADRATIC_CURVE = 1 << 15,
     ADL_OD8_OPTIMIZED_GPU_POWER_MODE = 1 << 16,
     ADL_OD8_ODVOLTAGE_LIMIT = 1 << 17,
@@ -1860,43 +1869,45 @@ enum ADLOD8FeatureControl
     ADL_OD8_TDC_LIMIT = 1 << 22,  //TDC slider
     ADL_OD8_FULL_CONTROL_MODE = 1 << 23,  //Full control
     ADL_OD8_POWER_SAVING_FEATURE_CONTROL = 1 << 24,  //Power saving feature control
-    ADL_OD8_POWER_GAUGE = 1 << 25 //Power Gauge
+    ADL_OD8_ACTIMING_PARAMETERS_TUNE = 1 << 25,  // AC Timing Parameters Tuning
+    ADL_OD8_OVERDRIVE_INTERFACE = 1 << 26,  // Version info feature ID for RSX, do not expose in ADL.
+    ADL_OD8_AUTO_UV_ENGINE_V2 = 1 << 27,  // Auto UV 2.0 with actual stress testing.
+    ADL_OD8_POWER_GAUGE = 1 << 28 //Power Gauge
 };
-
 
 typedef enum ADLOD8SettingId
 {
-	OD8_GFXCLK_FMAX = 0,
-	OD8_GFXCLK_FMIN,
-	OD8_GFXCLK_FREQ1,
-	OD8_GFXCLK_VOLTAGE1,
-	OD8_GFXCLK_FREQ2,
-	OD8_GFXCLK_VOLTAGE2,
-	OD8_GFXCLK_FREQ3,
-	OD8_GFXCLK_VOLTAGE3,
-	OD8_UCLK_FMAX,
-	OD8_POWER_PERCENTAGE,
-	OD8_FAN_MIN_SPEED,
-	OD8_FAN_ACOUSTIC_LIMIT,
-	OD8_FAN_TARGET_TEMP,
-	OD8_OPERATING_TEMP_MAX,
-	OD8_AC_TIMING,
-	OD8_FAN_ZERORPM_CONTROL,
-	OD8_AUTO_UV_ENGINE_CONTROL,
-	OD8_AUTO_OC_ENGINE_CONTROL,
-	OD8_AUTO_OC_MEMORY_CONTROL,
-	OD8_FAN_CURVE_TEMPERATURE_1,
-	OD8_FAN_CURVE_SPEED_1,
-	OD8_FAN_CURVE_TEMPERATURE_2,
-	OD8_FAN_CURVE_SPEED_2,
-	OD8_FAN_CURVE_TEMPERATURE_3,
-	OD8_FAN_CURVE_SPEED_3,
-	OD8_FAN_CURVE_TEMPERATURE_4,
-	OD8_FAN_CURVE_SPEED_4,
-	OD8_FAN_CURVE_TEMPERATURE_5,
-	OD8_FAN_CURVE_SPEED_5,
-	OD8_WS_FAN_AUTO_FAN_ACOUSTIC_LIMIT,
-    OD8_GFXCLK_CURVE_COEFFICIENT_A, // As part of the agreement with UI team, the min/max voltage limits for the
+    OD8_GFXCLK_FMAX = 0,
+    OD8_GFXCLK_FMIN,
+    OD8_GFXCLK_FREQ1,
+    OD8_GFXCLK_VOLTAGE1,
+    OD8_GFXCLK_FREQ2,
+    OD8_GFXCLK_VOLTAGE2,
+    OD8_GFXCLK_FREQ3,
+    OD8_GFXCLK_VOLTAGE3,
+    OD8_UCLK_FMAX,
+    OD8_POWER_PERCENTAGE,
+    OD8_FAN_MIN_SPEED, //10
+    OD8_FAN_ACOUSTIC_LIMIT,
+    OD8_FAN_TARGET_TEMP,
+    OD8_OPERATING_TEMP_MAX,
+    OD8_AC_TIMING,
+    OD8_FAN_ZERORPM_CONTROL,
+    OD8_AUTO_UV_ENGINE_CONTROL,
+    OD8_AUTO_OC_ENGINE_CONTROL,
+    OD8_AUTO_OC_MEMORY_CONTROL,
+    OD8_FAN_CURVE_TEMPERATURE_1,
+    OD8_FAN_CURVE_SPEED_1, //20
+    OD8_FAN_CURVE_TEMPERATURE_2,
+    OD8_FAN_CURVE_SPEED_2,
+    OD8_FAN_CURVE_TEMPERATURE_3,
+    OD8_FAN_CURVE_SPEED_3,
+    OD8_FAN_CURVE_TEMPERATURE_4,
+    OD8_FAN_CURVE_SPEED_4,
+    OD8_FAN_CURVE_TEMPERATURE_5,
+    OD8_FAN_CURVE_SPEED_5,
+    OD8_WS_FAN_AUTO_FAN_ACOUSTIC_LIMIT,
+    OD8_GFXCLK_CURVE_COEFFICIENT_A, // 30 As part of the agreement with UI team, the min/max voltage limits for the
     OD8_GFXCLK_CURVE_COEFFICIENT_B, // quadratic curve graph will be stored in the min and max limits of
     OD8_GFXCLK_CURVE_COEFFICIENT_C, // coefficient a, b and c. A, b and c themselves do not have limits.
     OD8_GFXCLK_CURVE_VFT_FMIN,
@@ -1906,7 +1917,7 @@ typedef enum ADLOD8SettingId
     OD8_OD_VOLTAGE,// RSX - voltage offset feature
     OD8_ADV_OC_LIMITS_SETTING,
     OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_1,
-    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_2,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_2, //40
     OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_3,
     OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_4,
     OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_POINT_5,
@@ -1915,8 +1926,33 @@ typedef enum ADLOD8SettingId
     OD8_GFX_VOLTAGE_LIMIT_SETTING,
     OD8_TDC_PERCENTAGE,
     OD8_FULL_CONTROL_MODE_SETTING,
+    OD8_FULL_CONTROL_MODE_GFXCLK,
+    OD8_FULL_CONTROL_MODE_UCLK,               // 50,
     OD8_IDLE_POWER_SAVING_FEATURE_CONTROL,
     OD8_RUNTIME_POWER_SAVING_FEATURE_CONTROL,
+    OD8_FULL_CONTROL_MODE_FEATURE_CONTROL,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_1,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_2,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_3,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_4,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_5,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_FREQ_ANCHOR_6,
+    OD8_PER_ZONE_GFX_VOLTAGE_OFFSET_VOLTAGE_LIMIT, //60
+    OD8_ACTIMING_PARAMETER_TRRDS,
+    OD8_ACTIMING_PARAMETER_TCL,
+    OD8_ACTIMING_PARAMETER_TCWL,
+    OD8_ACTIMING_PARAMETER_TRCDRD,
+    OD8_ACTIMING_PARAMETER_TRCDWR,
+    OD8_ACTIMING_PARAMETER_TRAS,
+    OD8_ACTIMING_PARAMETER_TRPAB,
+    OD8_ACTIMING_PARAMETER_TRFC,
+    OD8_ACTIMING_PARAMETER_TRFCPB,
+    OD8_ACTIMING_PARAMETER_TRREFD, //70
+    OD8_ACTIMING_PARAMETER_TREF,
+    OD8_ACTIMING_PARAMETER_TWR,
+    OD8_ACTIMING_PARAMETER_TWTRS,
+    OD8_OVERDRIVE_INTERFACE_ID, //74
+    OD8_AUTO_UV_ENGINE_V2_ID,   //75
     OD8_POWER_GAUGE,
     OD8_COUNT
 } ADLOD8SettingId;
@@ -1980,28 +2016,28 @@ typedef enum ADLSensorType
     PMLOG_SSDGPU_POWERLIMIT     = 49, // DGPU Power limit
     PMLOG_TEMPERATURE_HOTSPOT_GCD      = 50,
     PMLOG_TEMPERATURE_HOTSPOT_MCD      = 51,
-    PMLOG_THROTTLER_TEMP_EDGE_PERCENTAGE        = 52,
-    PMLOG_THROTTLER_TEMP_HOTSPOT_PERCENTAGE     = 53,
-    PMLOG_THROTTLER_TEMP_HOTSPOT_GCD_PERCENTAGE = 54,
-    PMLOG_THROTTLER_TEMP_HOTSPOT_MCD_PERCENTAGE = 55,
-    PMLOG_THROTTLER_TEMP_MEM_PERCENTAGE     = 56,
-    PMLOG_THROTTLER_TEMP_VR_GFX_PERCENTAGE  = 57,
-    PMLOG_THROTTLER_TEMP_VR_MEM0_PERCENTAGE = 58,
-    PMLOG_THROTTLER_TEMP_VR_MEM1_PERCENTAGE = 59,
-    PMLOG_THROTTLER_TEMP_VR_SOC_PERCENTAGE  = 60,
-    PMLOG_THROTTLER_TEMP_LIQUID0_PERCENTAGE = 61,
-    PMLOG_THROTTLER_TEMP_LIQUID1_PERCENTAGE = 62,
-    PMLOG_THROTTLER_TEMP_PLX_PERCENTAGE = 63,
-    PMLOG_THROTTLER_TDC_GFX_PERCENTAGE  = 64,
-    PMLOG_THROTTLER_TDC_SOC_PERCENTAGE  = 65,
-    PMLOG_THROTTLER_TDC_USR_PERCENTAGE  = 66,
-    PMLOG_THROTTLER_PPT0_PERCENTAGE     = 67,
-    PMLOG_THROTTLER_PPT1_PERCENTAGE     = 68,
-    PMLOG_THROTTLER_PPT2_PERCENTAGE     = 69,
-    PMLOG_THROTTLER_PPT3_PERCENTAGE     = 70,
-    PMLOG_THROTTLER_FIT_PERCENTAGE           = 71,
-    PMLOG_THROTTLER_GFX_APCC_PLUS_PERCENTAGE = 72,
-    PMLOG_BOARD_POWER                        = 73,
+    PMLOG_THROTTLE_PERCENTAGE_TEMP_GFX = 52,
+    PMLOG_THROTTLE_PERCENTAGE_TEMP_MEM = 53,
+    PMLOG_THROTTLE_PERCENTAGE_TEMP_VR = 54,
+    PMLOG_THROTTLE_PERCENTAGE_POWER = 55,
+    PMLOG_THROTTLE_PERCENTAGE_TDC = 56,
+    PMLOG_THROTTLE_PERCENTAGE_VMAX = 57,
+    PMLOG_BUS_CURR_MAX_SPEED = 58, 
+    PMLOG_RESERVED_1 = 59, //Currently Unused
+    PMLOG_RESERVED_2 = 60, //Currently Unused
+    PMLOG_RESERVED_3 = 61, //Currently Unused
+    PMLOG_RESERVED_4 = 62, //Currently Unused
+    PMLOG_RESERVED_5 = 63, //Currently Unused
+    PMLOG_RESERVED_6 = 64, //Currently Unused
+    PMLOG_RESERVED_7 = 65, //Currently Unused
+    PMLOG_RESERVED_8 = 66, //Currently Unused
+    PMLOG_RESERVED_9 = 67, //Currently Unused
+    PMLOG_RESERVED_10 = 68, //Currently Unused
+    PMLOG_RESERVED_11 = 69, //Currently Unused
+    PMLOG_RESERVED_12 = 70, //Currently Unused
+    PMLOG_RESERVED_13 = 71, //Currently Unused
+    PMLOG_RESERVED_14 = 72,
+    PMLOG_BOARD_POWER = 73,
     PMLOG_MAX_SENSORS_REAL
 } ADLSensorType;
 
@@ -2068,28 +2104,29 @@ typedef enum ADL_PMLOG_SENSORS
     ADL_PMLOG_SSDGPU_POWERLIMIT     = 49, // DGPU Power limit
     ADL_PMLOG_TEMPERATURE_HOTSPOT_GCD      = 50,
     ADL_PMLOG_TEMPERATURE_HOTSPOT_MCD      = 51,
-    ADL_PMLOG_THROTTLER_TEMP_EDGE_PERCENTAGE        = 52,
-    ADL_PMLOG_THROTTLER_TEMP_HOTSPOT_PERCENTAGE     = 53,
-    ADL_PMLOG_THROTTLER_TEMP_HOTSPOT_GCD_PERCENTAGE = 54,
-    ADL_PMLOG_THROTTLER_TEMP_HOTSPOT_MCD_PERCENTAGE = 55,
-    ADL_PMLOG_THROTTLER_TEMP_MEM_PERCENTAGE     = 56,
-    ADL_PMLOG_THROTTLER_TEMP_VR_GFX_PERCENTAGE  = 57,
-    ADL_PMLOG_THROTTLER_TEMP_VR_MEM0_PERCENTAGE = 58,
-    ADL_PMLOG_THROTTLER_TEMP_VR_MEM1_PERCENTAGE = 59,
-    ADL_PMLOG_THROTTLER_TEMP_VR_SOC_PERCENTAGE  = 60,
-    ADL_PMLOG_THROTTLER_TEMP_LIQUID0_PERCENTAGE = 61,
-    ADL_PMLOG_THROTTLER_TEMP_LIQUID1_PERCENTAGE = 62,
-    ADL_PMLOG_THROTTLER_TEMP_PLX_PERCENTAGE = 63,
-    ADL_PMLOG_THROTTLER_TDC_GFX_PERCENTAGE  = 64,
-    ADL_PMLOG_THROTTLER_TDC_SOC_PERCENTAGE  = 65,
-    ADL_PMLOG_THROTTLER_TDC_USR_PERCENTAGE  = 66,
-    ADL_PMLOG_THROTTLER_PPT0_PERCENTAGE     = 67,
-    ADL_PMLOG_THROTTLER_PPT1_PERCENTAGE     = 68,
-    ADL_PMLOG_THROTTLER_PPT2_PERCENTAGE     = 69,
-    ADL_PMLOG_THROTTLER_PPT3_PERCENTAGE     = 70,
-    ADL_PMLOG_THROTTLER_FIT_PERCENTAGE           = 71,
-    ADL_PMLOG_THROTTLER_GFX_APCC_PLUS_PERCENTAGE = 72,
-    ADL_PMLOG_BOARD_POWER                        = 73,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_TEMP_GFX = 52,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_TEMP_MEM = 53,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_TEMP_VR = 54,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_POWER = 55,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_TDC = 56,
+    ADL_PMLOG_THROTTLE_PERCENTAGE_VMAX = 57,
+    ADL_PMLOG_BUS_CURR_MAX_SPEED = 58, 
+    ADL_PMLOG_RESERVED_1 = 59, //Currently Unused
+    ADL_PMLOG_RESERVED_2 = 60, //Currently Unused
+    ADL_PMLOG_RESERVED_3 = 61, //Currently Unused
+    ADL_PMLOG_RESERVED_4 = 62, //Currently Unused
+    ADL_PMLOG_RESERVED_5 = 63, //Currently Unused
+    ADL_PMLOG_RESERVED_6 = 64, //Currently Unused
+    ADL_PMLOG_RESERVED_7 = 65, //Currently Unused
+    ADL_PMLOG_RESERVED_8 = 66, //Currently Unused
+    ADL_PMLOG_RESERVED_9 = 67, //Currently Unused
+    ADL_PMLOG_RESERVED_10 = 68, //Currently Unused
+    ADL_PMLOG_RESERVED_11 = 69, //Currently Unused
+    ADL_PMLOG_RESERVED_12 = 70, //Currently Unused
+    ADL_PMLOG_CLK_NPUCLK = 71,      //NPU frequency
+    ADL_PMLOG_NPU_BUSY_AVG = 72,    //NPU busy
+    ADL_PMLOG_BOARD_POWER = 73,
+    ADL_PMLOG_TEMPERATURE_INTAKE = 74,
     ADL_PMLOG_MAX_SENSORS_REAL
 } ADL_PMLOG_SENSORS;
 
@@ -2393,6 +2430,9 @@ typedef enum ADL_PMLOG_SENSORS
 /// Indicates there is crossGPU clone
 #define ADL_CROSSGPUDISPLAYCLONE                  0x2
 
+
+/// @}
+
 /// @}
 
 /// \defgroup define_D3DKMT_HANDLE
@@ -2493,7 +2533,11 @@ typedef enum ADL_UIFEATURES_GROUP
 	ADL_UIFEATURES_GROUP_PROVSR = 12,
     ADL_UIFEATURES_GROUP_SMA = 13,
     ADL_UIFEATURES_GROUP_CAMERA = 14,
-    ADL_UIFEATURES_GROUP_FRTCPRO = 15
+    ADL_UIFEATURES_GROUP_FRTCPRO = 15,
+    ADL_UIFEATURES_GROUP_DELAGNEXT = 16,
+    ADL_UIFEATURES_GROUP_RTBOOST = 17,
+    ADL_UIFEATURES_GROUP_UAI = 18
+
 } ADL_UIFEATURES_GROUP;
 
 
@@ -2587,9 +2631,18 @@ typedef enum ADL_USER_SETTINGS
     ADL_USER_SETTINGS_USU_PROFILE = 1 << 4,  		//notify USU settings change
     ADL_USER_SETTINGS_CVDC_PROFILE = 1 << 5,			//notify Color Vision Deficiency Corretion settings change
     ADL_USER_SETTINGS_SCE_PROFILE = 1 << 6,
-    ADL_USER_SETTINGS_PROVSR = 1 << 7
+    ADL_USER_SETTINGS_PROVSR = 1 << 7,
+    ADL_USER_SETTINGS_RTBOOST_PROFILE=1 << 8,
+    ADL_USER_SETTINGS_USU2_PROFILE = 1 << 9,  		//notify USU2 settings change
    } ADL_USER_SETTINGS;
 
+//FRAME_TIMESTAMPS_SHARED_MEMORY type
+typedef enum FRAME_TIMESTAMPS_SHARED_MEMORY_TYPE
+{
+    FRAME_TIMESTAMPS_SHARED_MEMORY_TYPE_UNKNOWN = 0,
+    FRAME_TIMESTAMPS_SHARED_MEMORY_TYPE_LEGACY,
+    FRAME_TIMESTAMPS_SHARED_MEMORY_TYPE_INDEXED
+}FRAME_TIMESTAMPS_SHARED_MEMORY_TYPE;
 #define ADL_REG_DEVICE_FUNCTION_1            0x00000001
 #endif /* ADL_DEFINES_H_ */
 

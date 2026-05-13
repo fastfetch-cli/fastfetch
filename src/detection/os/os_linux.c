@@ -94,6 +94,14 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return true;
     }
 
+    // xdgConfigDirs contains plasma only
+    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE)) {
+        ffStrbufSetStatic(&result->name, "Ubuntu Studio");
+        ffStrbufSetStatic(&result->id, "ubuntu-studio");
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return false;
+    }
+
     const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
     if (!ffStrSet(xdgConfigDirs)) {
         return false;
@@ -141,9 +149,9 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
         return false;
     }
 
-    if (ffStrContains(xdgConfigDirs, "studio")) {
-        ffStrbufSetStatic(&result->name, "Ubuntu Studio");
-        ffStrbufSetStatic(&result->id, "ubuntu-studio");
+    if (ffStrContains(xdgConfigDirs, "ukui")) {
+        ffStrbufSetStatic(&result->name, "Ubuntu Kylin");
+        ffStrbufSetStatic(&result->id, "ubuntu-kylin");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return false;
     }
@@ -158,6 +166,13 @@ FF_A_UNUSED static bool getUbuntuFlavour(FFOSResult* result) {
     if (ffStrContains(xdgConfigDirs, "touch")) {
         ffStrbufSetStatic(&result->name, "Ubuntu Touch");
         ffStrbufSetStatic(&result->id, "ubuntu-touch");
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return false;
+    }
+
+    if (ffStrContains(xdgConfigDirs, "unity")) {
+        ffStrbufSetStatic(&result->name, "Ubuntu Unity");
+        ffStrbufSetStatic(&result->id, "ubuntu-unity");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return false;
     }
@@ -282,12 +297,40 @@ FF_A_UNUSED static bool detectFedoraVariant(FFOSResult* result) {
     return false;
 }
 
-static bool detectBedrock(FFOSResult* os) {
+FF_A_UNUSED static bool detectBedrock(FFOSResult* os) {
     const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
     if (bedrockRestrict && bedrockRestrict[0] == '1') {
         return false;
     }
     return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
+}
+
+FF_A_UNUSED static void detectDeepinEnhancement(FFOSResult* result) {
+    if (ffStrbufContainC(&result->prettyName, '(')) {
+        return;
+    }
+
+    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY edition = ffStrbufCreate();
+
+    if (!ffParsePropFileValues(
+            FASTFETCH_TARGET_DIR_ETC "/os-version",
+            2,
+            (FFpropquery[]) {
+                { "MinorVersion=", &minor },
+                { "EditionName=", &edition },
+            }) ||
+        minor.length == 0) {
+        return;
+    }
+
+    ffStrbufSet(&result->versionID, &minor);
+
+    if (edition.length > 0) {
+        ffStrbufSetF(&result->prettyName, "%s %s (%s)", result->name.chars, minor.chars, edition.chars);
+    } else {
+        ffStrbufSetF(&result->prettyName, "%s %s", result->name.chars, minor.chars);
+    }
 }
 
 static void detectOS(FFOSResult* os) {
@@ -299,13 +342,16 @@ static void detectOS(FFOSResult* os) {
     return;
 #endif
 
+#ifdef __linux__
     if (detectBedrock(os)) {
         return;
     }
+#endif
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+
     if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0) {
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     }
@@ -344,6 +390,8 @@ void ffDetectOSImpl(FFOSResult* os) {
             ffStrbufSetS(&os->id, "lmde");
             ffStrbufSetS(&os->idLike, "linuxmint");
         }
+    } else if (ffStrbufEqualS(&os->id, "deepin")) {
+        detectDeepinEnhancement(os);
     }
 #endif
 }
