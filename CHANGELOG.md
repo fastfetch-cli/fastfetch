@@ -1,7 +1,14 @@
+# 2.63.1
+
+Bugfixes:
+* Fixes media length detection for Chrome on Linux (Media, Linux)
+* Fixes segmentation fault when specifying unsupported modules on command line
+* Disables usage of Netlink for Wi-Fi detection on s390x architectures (Wifi, Linux)
+
 # 2.63.0
 
 Changes:
-* Introduces a new optional dependency, `libefl`, for querying the Enlightenment window manager configuration:
+* Introduces a new **build-only** dependency, `libefl`, for querying the Enlightenment window manager configuration:
     * `libefl-all-dev` on Debian/Ubuntu
     * `libefl-devel` on Fedora
     * `efl` on Arch Linux
@@ -14,6 +21,7 @@ Features:
 * Adds Ubuntu Kylin and Ubuntu Unity flavor detection (OS, Linux)
 * Adds NebiDE support (WMTheme, Linux)
 * Adds package counting for `cards` on NuTyX (#2287, Packages, Linux)
+* Adds `{am-pm}` to custom format for 12-hour time with am/pm (DateTime)
 * Adds support for the Enlightenment desktop environment (#2165, WM, Linux)
 * Adds support for playback progress detection (Media)
     * The module now prints the current playback position and total media duration when supported by the player. If you prefer the previous behavior, you can set `media.percent.type: ["hide-others"]` to hide the new fields.
