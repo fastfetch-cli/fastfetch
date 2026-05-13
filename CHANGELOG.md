@@ -1,9 +1,11 @@
 # 2.63.0
 
 Changes:
-* On Windows, multi-battery detection is now always enabled
-    * Removes the old Windows-specific `useSetupApi` option. (Battery, Windows)
-* The Windows-specific `wmiTimeout` option has been removed and is no longer supported. (Windows)
+* Introduces a new optional dependency, `libefl`, for querying the Enlightenment window manager configuration:
+    * `libefl-all-dev` on Debian/Ubuntu
+    * `libefl-devel` on Fedora
+    * `efl` on Arch Linux
+* The Windows-specific options `battery.useSetupApi` and `global.wmiTimeout` have been removed. (Windows)
 
 Features:
 * Adds wallpaper detection support on Haiku (#2314, Wallpaper, Haiku)
@@ -17,6 +19,7 @@ Features:
     * The module now prints the current playback position and total media duration when supported by the player. If you prefer the previous behavior, you can set `media.percent.type: ["hide-others"]` to hide the new fields.
 * Adds support for `global.playerName` for Windows (Media, Windows)
     * This allows detecting a specified media player while ignoring others.
+* Multi-battery detection is enabled on Windows by default (Battery, Windows)
 
 Bugfixes:
 * Improves DisplayServer compatibility on Linux by handling newer `kde-output-device-v2` protocol updates (DisplayServer, Linux)
