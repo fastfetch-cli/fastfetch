@@ -487,22 +487,12 @@ bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result) {
 #endif
 
 #ifdef FF_HAVE_EET
-    #if defined(__clang__)
-        #pragma clang diagnostic push
-        #pragma clang diagnostic ignored "-Weverything"
-    #elif defined(__GNUC__)
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wall"
-        #pragma GCC diagnostic ignored "-Wextra"
-        #pragma GCC diagnostic ignored "-Wpedantic"
-        #pragma GCC diagnostic ignored "-Wunknown-pragmas"
-    #endif
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wconversion"
+    #pragma GCC diagnostic ignored "-Wsign-conversion"
+    #pragma GCC diagnostic ignored "-Wfloat-conversion"
     #include <Eet.h>
-    #if defined(__clang__)
-        #pragma clang diagnostic pop
-    #elif defined(__GNUC__)
-        #pragma GCC diagnostic pop
-    #endif
+    #pragma GCC diagnostic pop
 
 typedef struct E_Font_Default {
     char* text_class;
