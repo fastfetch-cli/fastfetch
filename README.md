@@ -348,7 +348,7 @@ Fastfetch works especially well on CachyOS with Hyprland setups.
 
 ### Sample Config
 
-```json
+```jsonc
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "modules": [
