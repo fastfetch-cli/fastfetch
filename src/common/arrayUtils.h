@@ -2,6 +2,10 @@
 
 #include <assert.h>
 
+#ifdef __MINT__
+#define static_assert(x,y)
+#endif
+
 #ifdef __has_builtin
     #if !__cplusplus && FF_SUPPORTS_COUNT_OF
         #define ARRAY_SIZE(x) _Countof(x)

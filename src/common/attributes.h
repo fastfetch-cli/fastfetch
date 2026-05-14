@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __MINT__
+#define static_assert(x,y)
+#endif
+
 #ifndef __has_attribute
     #error Unsupported compiler
     #define __attribute__(x)
