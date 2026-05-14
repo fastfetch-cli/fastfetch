@@ -350,19 +350,19 @@ Fastfetch works especially well on CachyOS with Hyprland setups.
 
 ```json
 {
-  \"$schema\": \"https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json\",
-  \"modules\": [
-    \"title\",
-    \"os\",
-    \"kernel\",
-    \"uptime\",
-    \"packages\",
-    \"shell\",
-    \"wm\",
-    \"terminal\",
-    \"cpu\",
-    \"gpu\",
-    \"memory\"
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "modules": [
+    "title",
+    "os",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "wm",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory"
   ]
 }
 ```
