@@ -280,18 +280,22 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
         }
 
         bool isDir = false;
-#if !defined(__sun) && !defined(__HAIKU__)
+#if !defined(__sun) && !defined(__HAIKU__) && !defined(__MINT__)
         if (entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK) {
             isDir = entry->d_type == DT_DIR;
         } else
 #endif
         {
             struct stat stbuf;
+#ifndef __MINT__
             if (fstatat(dfd, entry->d_name, &stbuf, 0) < 0) {
+#endif
                 isDir = false;
+#ifndef __MINT__
             } else {
                 isDir = S_ISDIR(stbuf.st_mode);
             }
+#endif
         }
         if (isDir) {
             ffStrbufAppendS(folder, entry->d_name);
