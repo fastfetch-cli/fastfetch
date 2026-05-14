@@ -9,6 +9,11 @@
     #include <profileapi.h>
 #elif defined(__HAIKU__)
     #include <OS.h>
+#elif !defined(FF_HAVE_CLOCK_GETTIME)
+    #include <sys/time.h>
+#endif
+#ifdef __MINT__
+extern double mint_ticks_ms(void);
 #endif
 
 #include "common/arrayUtils.h"
@@ -22,10 +27,14 @@ static inline double ffTimeGetTick(void) // In msec
     return (double) start.QuadPart * ffQpcMultiplier;
 #elif defined(__HAIKU__)
     return (double) system_time() / 1000.;
-#else
+#elif defined(__MINT__)
+        return mint_ticks_ms();
+#elif defined(FF_HAVE_CLOCK_GETTIME)
     struct timespec timeNow;
     clock_gettime(CLOCK_MONOTONIC, &timeNow);
     return (double) timeNow.tv_sec * 1000. + (double) timeNow.tv_nsec / 1000000.;
+#else
+    #error UNIMPLEMENTED
 #endif
 }
 
@@ -44,10 +53,14 @@ static inline uint64_t ffTimeGetNow(void) {
     return ffFileTimeToUnixMs((uint64_t) timeNow);
 #elif defined(__HAIKU__)
     return (uint64_t) real_time_clock_usecs() / 1000u;
-#else
+#elif defined(FF_HAVE_CLOCK_GETTIME)
     struct timespec timeNow;
     clock_gettime(CLOCK_REALTIME, &timeNow);
     return (uint64_t) (((uint64_t) timeNow.tv_sec * 1000u) + ((uint64_t) timeNow.tv_nsec / 1000000u));
+#else
+    struct timeval timeNow;
+    (void)gettimeofday(&timeNow, NULL);
+    return (uint64_t) (((uint64_t) timeNow.tv_sec * 1000u) + ((uint64_t) timeNow.tv_usec / 1000u));
 #endif
 }
 

@@ -1338,6 +1338,7 @@ elseif(MINT)
         src/common/impl/processing_linux.c
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
+        src/common/mint/ticks.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_mint.c
         src/detection/board/board_mint.c
@@ -1422,6 +1423,7 @@ if(NOT HAVE_WCWIDTH)
     list(APPEND LIBFASTFETCH_SRC src/common/impl/wcwidth.c)
 endif()
 if(NOT WIN32)
+    check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
     check_function_exists(pipe2 HAVE_PIPE2)
 endif()
 check_function_exists(memrchr HAVE_MEMRCHR)
@@ -1588,6 +1590,10 @@ endif()
 
 if(HAVE_PIPE2)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PIPE2)
+endif()
+
+if(HAVE_CLOCK_GETTIME)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_CLOCK_GETTIME)
 endif()
 
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
