@@ -341,3 +341,36 @@ Give us a star to show your support!
     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date" />
   </picture>
 </a>
+
+## CachyOS Example
+
+Fastfetch works especially well on CachyOS with Hyprland setups.
+
+### Sample Config
+
+```json
+{
+  \"$schema\": \"https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json\",
+  \"modules\": [
+    \"title\",
+    \"os\",
+    \"kernel\",
+    \"uptime\",
+    \"packages\",
+    \"shell\",
+    \"wm\",
+    \"terminal\",
+    \"cpu\",
+    \"gpu\",
+    \"memory\"
+  ]
+}
+```
+
+### Tip
+
+You can place your config at:
+
+```bash
+~/.config/fastfetch/config.jsonc
+```
