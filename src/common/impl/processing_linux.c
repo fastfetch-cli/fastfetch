@@ -12,7 +12,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-#if !(__ANDROID__ || __OpenBSD__)
+#if !(__ANDROID__ || __OpenBSD__ || __MINT__)
     #include <spawn.h>
 #endif
 
@@ -66,7 +66,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     pid_t childPid = -1;
     int nullFile = ffGetNullFD();
 
-#if !(__ANDROID__ || __OpenBSD__)
+#if !(__ANDROID__ || __OpenBSD__ || __MINT__)
 
     // NetBSD / Darwin: native syscall
     // Linux (glibc): clone3-execve
