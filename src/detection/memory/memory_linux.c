@@ -4,11 +4,17 @@
 
 #include <inttypes.h>
 
+#ifdef __MINT__
+    #define FF_MEMINFO_PATH "/kern/meminfo"
+#else
+    #define FF_MEMINFO_PATH "/proc/meminfo"
+#endif
+
 const char* ffDetectMemory(FFMemoryResult* ram) {
     char buf[PROC_FILE_BUFFSIZ];
-    ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
+    ssize_t nRead = ffReadFileData(FF_MEMINFO_PATH, ARRAY_SIZE(buf) - 1, buf);
     if (nRead < 0) {
-        return "ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf)";
+        return "ffReadFileData(\"" FF_MEMINFO_PATH "\", ARRAY_SIZE(buf)-1, buf)";
     }
     buf[nRead] = '\0';
 
@@ -24,7 +30,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     if ((token = strstr(buf, "MemTotal:")) != NULL) {
         memTotal = strtoul(token + strlen("MemTotal:"), NULL, 10);
     } else {
-        return "MemTotal not found in /proc/meminfo";
+        return "MemTotal not found in " FF_MEMINFO_PATH;
     }
 
     if ((token = strstr(buf, "MemAvailable:")) != NULL) {
