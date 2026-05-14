@@ -45,6 +45,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Haiku")
     set(Haiku TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "GNU")
     set(GNU TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "MINT")
+    set(MINT TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -92,6 +94,7 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" 
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "NOT MINT" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -105,7 +108,6 @@ option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
-option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     option(ENABLE_WIN81_COMPAT "Enable legacy Windows compatibility (Windows 8.1 and later; Windows 7 unsupported)" ON)
 endif()
@@ -1327,6 +1329,74 @@ elseif(GNU)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
    )
+elseif(MINT)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/impl/dbus.c
+        src/common/impl/io_unix.c
+        src/common/impl/netif_nosupport.c
+        src/common/impl/networking_nosupport.c
+        src/common/impl/processing_linux.c
+        src/common/impl/FFPlatform_unix.c
+        src/common/impl/binary_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_mint.c
+        src/detection/board/board_mint.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_mint.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cursor/cursor_nosupport.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/disk/disk_nosupport.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/diskio/diskio_nosupport.c
+        src/detection/displayserver/displayserver_aes.c
+        src/detection/font/font_nosupport.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_nosupport.c
+        src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/libc/libc_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_linux.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_nosupport.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_nosupport.c
+        src/detection/netio/netio_nosupport.c
+        src/detection/opengl/opengl_nosupport.c
+        src/detection/os/os_linux.c
+        src/detection/packages/packages_nosupport.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_nosupport.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_nosupport.c
+        src/detection/swap/swap_nosupport.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
+        src/detection/uptime/uptime_nosupport.c
+        src/detection/users/users_nosupport.c
+        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_nosupport.c
+        src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/camera/camera_nosupport.c
+        src/detection/zpool/zpool.c
+    )
 endif()
 
 # Proprietary GPU driver APIs
@@ -1466,6 +1536,9 @@ elseif(Haiku)
 elseif(GNU)
     # On Hurd PATH_MAX is not defined. Set an arbitrary limit as workaround.
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE PATH_MAX=4096 O_PATH=0)
+elseif(MINT)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE _POSIX_SOURCE)
+    set(BINARY_LINK_TYPE "static")
 endif()
 
 if(APPLE)
@@ -1839,6 +1912,13 @@ elseif(Haiku)
         PRIVATE "be"
         PRIVATE "gnu"
     )
+elseif(MINT)
+    target_link_libraries(libfastfetch
+        PRIVATE "cflib"
+        PRIVATE "gem"
+        PRIVATE "m"
+        #PRIVATE "mintlib"
+    )
 endif()
 
 target_include_directories(libfastfetch
@@ -1846,9 +1926,11 @@ target_include_directories(libfastfetch
     PUBLIC ${PROJECT_SOURCE_DIR}/src
 )
 
+if(NOT MINT)
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
+endif()
 
 target_compile_options(libfastfetch PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>)
