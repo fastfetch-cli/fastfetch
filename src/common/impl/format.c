@@ -3,6 +3,7 @@
 #include "common/parsing.h"
 #include "common/textModifier.h"
 #include "common/stringUtils.h"
+#include "common/library.h"
 
 #include <inttypes.h>
 
@@ -112,8 +113,6 @@ static inline bool formatArgSet(const FFformatarg* arg) {
 }
 
 #if FF_HAVE_LUA
-    #include "common/library.h"
-
     #include <lua.h>
     #include <lauxlib.h>
     #include <lualib.h>
@@ -326,7 +325,174 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
     #undef fflua_pop
 #endif
 
+#if FF_HAVE_QUICKJS
+    #include <quickjs.h>
+
+struct FFQuickJSData {
+    FF_LIBRARY_SYMBOL(JS_NewRuntime)
+    FF_LIBRARY_SYMBOL(JS_NewContext)
+    FF_LIBRARY_SYMBOL(JS_FreeRuntime)
+    FF_LIBRARY_SYMBOL(JS_EvalThis)
+    FF_LIBRARY_SYMBOL(JS_GetException)
+    FF_LIBRARY_SYMBOL(JS_ToCStringLen2)
+    FF_LIBRARY_SYMBOL(JS_FreeCString)
+    FF_LIBRARY_SYMBOL(JS_NewStringLen)
+    FF_LIBRARY_SYMBOL(JS_NewArray)
+    FF_LIBRARY_SYMBOL(JS_NewBigUint64)
+    FF_LIBRARY_SYMBOL(JS_SetPropertyUint32)
+    FF_LIBRARY_SYMBOL(JS_NewObject)
+    FF_LIBRARY_SYMBOL(JS_SetPropertyStr)
+    FF_LIBRARY_SYMBOL(JS_FreeValue)
+
+    JSRuntime* rt;
+    JSContext* ctx;
+    bool inited;
+} qjsData;
+
+static const char* loadQuickJSState(void) {
+    if (qjsData.inited) {
+        if (qjsData.ctx == NULL) {
+            return "QuickJS is not available";
+        }
+        return NULL;
+    }
+
+    qjsData.inited = true;
+    #ifdef _WIN32
+    FF_LIBRARY_LOAD_MESSAGE(libqjs, "libqjs-0" FF_LIBRARY_EXTENSION, 0)
+    #else
+    FF_LIBRARY_LOAD_MESSAGE(libqjs, "libqjs" FF_LIBRARY_EXTENSION, 0)
+    #endif
+
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewRuntime)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewContext)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeRuntime)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_EvalThis)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_GetException)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_ToCStringLen2)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeCString)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewStringLen)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewArray)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewBigUint64)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyUint32)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewObject)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyStr)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeValue)
+
+    qjsData.rt = qjsData.ffJS_NewRuntime();
+    if (qjsData.rt == NULL) {
+        return "JS_NewRuntime() failed";
+    }
+
+    qjsData.ctx = qjsData.ffJS_NewContext(qjsData.rt);
+    if (qjsData.ctx == NULL) {
+        qjsData.ffJS_FreeRuntime(qjsData.rt);
+        qjsData.rt = NULL;
+        return "JS_NewContext() failed";
+    }
+
+    libqjs = NULL; // don't close quickjs
+
+    return NULL;
+}
+
+static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+    const char* err = loadQuickJSState();
+    if (err) {
+        ffStrbufAppendF(buffer, "QJS init error: %s", err);
+        return;
+    }
+    JSContext* ctx = qjsData.ctx;
+    JSValue argsObj = qjsData.ffJS_NewObject(ctx);
+
+    for (uint32_t i = 0; i < numArgs; ++i) {
+        const FFformatarg* arg = &arguments[i];
+
+        JSValue value;
+        switch (arg->type) {
+            case FF_ARG_TYPE_INT:
+                value = JS_NewInt32(ctx, *(int32_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT:
+                value = JS_NewUint32(ctx, *(uint32_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT64:
+                value = qjsData.ffJS_NewBigUint64(ctx, *(uint64_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT16:
+                value = JS_NewUint32(ctx, *(uint16_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT8:
+                value = JS_NewUint32(ctx, *(uint8_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_FLOAT:
+                value = JS_NewFloat64(ctx, *(float*) arg->value);
+                break;
+            case FF_ARG_TYPE_DOUBLE:
+                value = JS_NewFloat64(ctx, *(double*) arg->value);
+                break;
+            case FF_ARG_TYPE_BOOL:
+                value = JS_NewBool(ctx, *(bool*) arg->value);
+                break;
+            case FF_ARG_TYPE_STRING:
+                value = qjsData.ffJS_NewStringLen(ctx, (const char*) arg->value, strlen((const char*) arg->value));
+                break;
+            case FF_ARG_TYPE_STRBUF: {
+                const FFstrbuf* sb = (const FFstrbuf*) arg->value;
+                value = qjsData.ffJS_NewStringLen(ctx, sb->chars, sb->length);
+                break;
+            }
+            case FF_ARG_TYPE_LIST: {
+                const FFlist* list = (const FFlist*) arg->value;
+                JSValue arr = qjsData.ffJS_NewArray(ctx);
+                for (uint32_t li = 0; li < list->length; ++li) {
+                    const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
+                    JSValue itemValue = qjsData.ffJS_NewStringLen(ctx, item->chars, item->length);
+                    qjsData.ffJS_SetPropertyUint32(ctx, arr, li, itemValue);
+                }
+
+                value = arr;
+                break;
+            }
+            default:
+                value = JS_UNDEFINED;
+                break;
+        }
+        qjsData.ffJS_SetPropertyStr(ctx, argsObj, arg->name, value);
+    }
+    JSValue result = qjsData.ffJS_EvalThis(ctx, argsObj, script, scriptLen, "fastfetch-quickjs-format", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
+
+    qjsData.ffJS_FreeValue(ctx, argsObj);
+
+    if (JS_IsException(result)) {
+        JSValue exc = qjsData.ffJS_GetException(ctx);
+        const char* message = qjsData.ffJS_ToCStringLen2(ctx, NULL, exc, false);
+        qjsData.ffJS_FreeValue(ctx, exc);
+        ffStrbufAppendF(buffer, "QJS runtime error: %s", message ?: "unknown");
+        if (message) {
+            qjsData.ffJS_FreeCString(ctx, message);
+        }
+        return;
+    }
+
+    size_t len;
+    const char* res = qjsData.ffJS_ToCStringLen2(ctx, &len, result, false);
+    if (res) {
+        ffStrbufAppendNS(buffer, (uint32_t) len, res);
+        qjsData.ffJS_FreeCString(ctx, res);
+    }
+
+    qjsData.ffJS_FreeValue(ctx, result);
+}
+#endif
+
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+#if FF_HAVE_QUICKJS
+    if (ffStrbufStartsWithS(formatstr, "qjs:")) {
+        return parseQuickJSString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
 #if FF_HAVE_LUA
     if (ffStrbufStartsWithS(formatstr, "lua:")) {
         // If outputFormat starts with "lua:", treat the rest as a Lua script

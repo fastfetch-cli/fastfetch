@@ -106,6 +106,7 @@ option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" 
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LUA "Enable lua scripting for format strings" ON)
+option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     option(ENABLE_WIN81_COMPAT "Enable legacy Windows compatibility (Windows 8.1 and later; Windows 7 unsupported)" ON)
@@ -1694,6 +1695,12 @@ ff_lib_enable(LUA
     "lua"
     "Lua"
 )
+if(ENABLE_QUICKJS)
+    CHECK_INCLUDE_FILE("quickjs.h" HAVE_QUICKJS)
+    if(HAVE_QUICKJS)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_QUICKJS=1)
+    endif()
+endif()
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
