@@ -6,7 +6,6 @@
 #include "common/path.h"
 #include "common/stringUtils.h"
 #include "common/debug.h"
-#include "detection/displayserver/displayserver.h"
 
 const char* ffDetectWMPlugin(FF_A_UNUSED FFstrbuf* pluginName) {
     return "Not supported on this platform";
@@ -99,14 +98,23 @@ static const char* getHyprland(FFstrbuf* result) {
 }
 
 static bool extractSwayVersion(const char* line, FF_A_UNUSED uint32_t len, void* userdata) {
-    if (!ffStrStartsWith(line, "sway version ")) {
+    FFstrbuf* result = (FFstrbuf*) userdata;
+    if (!ffStrStartsWith(line, "sway")) {
         return true;
     }
+    if (ffStrStartsWith(line + 4, " version ")) {
+        ffStrbufSetNS(result, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
+        ffStrbufTrimRightSpace(result);
+        return false;
+    } else {
+        char swayfxVer[32], swayVer[32];
+        if (sscanf(line + 4, "fx version %31[^ ] (based on sway %31[^)])", swayfxVer, swayVer) == 2) {
+            ffStrbufSetF(result, "%s [swayfx %s]", swayVer, swayfxVer);
+            return false;
+        }
+    }
 
-    FFstrbuf* result = (FFstrbuf*) userdata;
-    ffStrbufSetNS(result, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
-    ffStrbufTrimRightSpace(result);
-    return false;
+    return true;
 }
 
 static const char* getSway(FFstrbuf* result) {
@@ -116,13 +124,14 @@ static const char* getSway(FFstrbuf* result) {
         return "Failed to find sway executable path";
     }
 
-    ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("v0.0.0"));
+    ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("sway version 0.0.0"));
     if (result->length > 0) {
         return NULL;
     }
 
     if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // sway version 1.10
         ffStrbufSubstrAfterLastC(result, ' ');
+        ffStrbufTrimRight(result, ')'); // swayfx
         ffStrbufTrimRightSpace(result);
         return NULL;
     }
