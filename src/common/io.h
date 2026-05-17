@@ -40,6 +40,14 @@ HANDLE openat(HANDLE dfd, const char* fileName, int oflag);
 HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif
 
+#ifdef __MINT__
+    #ifndef O_CLOEXEC
+        #warning "O_CLOEXEC missing"
+        #define O_CLOEXEC 0
+    #endif
+    #define openat(dfd, fileName, oflag) ({-1;})
+#endif
+
 static inline bool ffIsValidNativeFD(FFNativeFD fd) {
 #ifndef _WIN32
     return fd >= 0;
@@ -124,12 +132,16 @@ FF_A_NONNULL(1, 3) static inline ssize_t ffReadFileData(const char* fileName, si
 }
 
 FF_A_NONNULL(2, 4) static inline ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data) {
+#ifndef __MINT__
     FFNativeFD FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
     if (!ffIsValidNativeFD(fd)) {
+#endif
         return -1;
+#ifndef __MINT__
     }
 
     return ffReadFDData(fd, dataSize, data);
+#endif
 }
 
 FF_A_NONNULL(1, 2) static inline bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer) {
@@ -148,12 +160,16 @@ FF_A_NONNULL(1, 2) static inline bool ffAppendFileBuffer(const char* fileName, F
 }
 
 FF_A_NONNULL(2, 3) static inline bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer) {
+#ifndef __MINT__
     FFNativeFD FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
     if (!ffIsValidNativeFD(fd)) {
+#endif
         return false;
+#ifndef __MINT__
     }
 
     return ffAppendFDBuffer(fd, buffer);
+#endif
 }
 
 FF_A_NONNULL(2) static inline bool ffReadFDBuffer(FFNativeFD fd, FFstrbuf* buffer) {

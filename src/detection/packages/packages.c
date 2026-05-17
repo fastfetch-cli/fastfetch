@@ -30,11 +30,20 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
         return true;
     }
 
+    #ifndef __MINT__
     if (__builtin_expect(st.st_mtim.tv_sec <= 0, false)) {
         return false;
     }
+    #else
+    if (__builtin_expect(st.st_mtim.tv_nsec < 1000000000ull, false)) {
+        return false;
+    }
+    #endif
 
-    uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000ull + (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
+    uint64_t mtime_current = (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
+    #ifndef __MINT__
+    mtime_current += (uint64_t) st.st_mtim.tv_sec * 1000ull;
+    #endif
 #else
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -96,16 +105,18 @@ uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
         bool ok = false;
 
         if (entry->d_name[0] != '.') {
-    #if !defined(__sun) && !defined(__HAIKU__)
+    #if !defined(__sun) && !defined(__HAIKU__) && !defined(__MINT__)
             if (entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK) {
                 ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
             } else
     #endif
             {
                 struct stat stbuf;
+    #ifndef __MINT__
                 if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0) {
                     ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
                 }
+    #endif
             }
         }
 

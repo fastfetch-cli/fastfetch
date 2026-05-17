@@ -24,6 +24,9 @@
 #elif defined(__HAIKU__)
     #include <image.h>
     #include <OS.h>
+#elif defined(__MINT__)
+    #include <mint/basepage.h>
+    #include <math.h>
 #endif
 
 static void getExePath(FFPlatform* platform) {
@@ -142,6 +145,9 @@ static void getExePath(FFPlatform* platform) {
             break;
         }
     }
+#elif defined(__MINT__)
+    size_t exePathLen = strnlen(_base->p_cmdlin, sizeof(_base->p_cmdlin) - 1);
+    exePathLen = strlcpy(exePath, _base->p_cmdlin, min(exePathLen, PATH_MAX));
 #endif
     if (exePathLen > 0) {
         ffStrbufEnsureFree(&platform->exePath, PATH_MAX);

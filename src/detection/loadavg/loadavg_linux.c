@@ -1,7 +1,15 @@
 #include "detection/loadavg/loadavg.h"
 #include "common/io.h"
 
+#ifndef __MINT__
 #include <sys/sysinfo.h>
+#endif
+
+#ifdef __MINT__
+    #define FF_LOADAVG_PATH "/kern/loadavg"
+#else
+    #define FF_LOADAVG_PATH "/proc/loadavg"
+#endif
 
 const char* ffDetectLoadavg(double result[3]) {
 #ifndef __ANDROID__ // cat: /proc/loadavg: Permission denied
@@ -18,7 +26,7 @@ const char* ffDetectLoadavg(double result[3]) {
     }
 
 #endif
-#ifndef __GNU__
+#if !defined(__GNU__) && !defined(__MINT__)
     // getloadavg requires higher ANDROID_API version
     struct sysinfo si;
     if (sysinfo(&si) < 0) {

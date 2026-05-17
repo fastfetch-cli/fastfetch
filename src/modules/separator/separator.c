@@ -9,7 +9,7 @@
 
 #include <locale.h>
 
-#if __SIZEOF_WCHAR_T__ == 4
+#if __SIZEOF_WCHAR_T__ == 4 || (defined (__MINT__) && (__SIZEOF_WCHAR_T__ == 2))
 static inline size_t mbrtoc32(uint32_t* restrict pc32, const char* restrict s, size_t n, mbstate_t* restrict ps) {
     return mbrtowc((wchar_t*) pc32, s, n, ps);
 }
