@@ -89,8 +89,10 @@ void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
         ffStrbufAppendS(&buffer, "unknown");
     }
 
-    ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
-    ffStrbufPutTo(&buffer, stdout);
+    if (buffer.length) {
+        ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
+        ffStrbufPutTo(&buffer, stdout);
+    }
 }
 
 void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...) {
