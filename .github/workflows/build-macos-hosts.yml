@@ -25,7 +25,7 @@ jobs:
 
       - name: install required packages
         run: |
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick lua chafa
 
       - name: configure project
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
