@@ -105,6 +105,7 @@ option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_LUA "Enable lua scripting for format strings" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     option(ENABLE_WIN81_COMPAT "Enable legacy Windows compatibility (Windows 8.1 and later; Windows 7 unsupported)" ON)
@@ -1555,9 +1556,16 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
         find_package(${CMAKE_NAME} QUIET)
 
         set(${VARNAME}_FOUND ${${CMAKE_NAME}_FOUND})
-        set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
-        set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
-        set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+        if(${VARNAME} STREQUAL "LUA")
+            # Lua is a special case since its CMake config does not follow the usual pattern
+            set(${VARNAME}_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
+            set(${VARNAME}_LIBRARIES ${LUA_LIBRARY})
+            set(${VARNAME}_CFLAGS_OTHER "")
+        else()
+            set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
+            set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
+            set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+        endif()
     endif()
 
     if(NOT ${VARNAME}_FOUND)
@@ -1681,6 +1689,10 @@ ff_lib_enable(DDCUTIL
 ff_lib_enable(ELF
     "libelf"
     "libelf"
+)
+ff_lib_enable(LUA
+    "lua"
+    "Lua"
 )
 
 if(ENABLE_THREADS)

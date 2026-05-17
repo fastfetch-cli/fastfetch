@@ -111,7 +111,229 @@ static inline bool formatArgSet(const FFformatarg* arg) {
     return arg->value != NULL && ((arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) || (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) || (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) || (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0));
 }
 
+#if FF_HAVE_LUA
+    #include "common/library.h"
+
+    #include <lua.h>
+    #include <lauxlib.h>
+    #include <lualib.h>
+
+    #ifndef LUA_GNAME
+        #define LUA_GNAME "_G"
+    #endif
+
+struct FFLuaData {
+    FF_LIBRARY_SYMBOL(lua_settop)
+    FF_LIBRARY_SYMBOL(luaL_newstate)
+    #if LUA_VERSION_NUM >= 505
+    FF_LIBRARY_SYMBOL(luaL_openselectedlibs)
+    #else
+    FF_LIBRARY_SYMBOL(luaL_openlibs)
+    #endif
+    FF_LIBRARY_SYMBOL(luaL_loadbufferx)
+    FF_LIBRARY_SYMBOL(lua_tolstring)
+    FF_LIBRARY_SYMBOL(lua_createtable)
+    FF_LIBRARY_SYMBOL(lua_pushinteger)
+    FF_LIBRARY_SYMBOL(lua_pushnumber)
+    FF_LIBRARY_SYMBOL(lua_pushboolean)
+    FF_LIBRARY_SYMBOL(lua_pushstring)
+    FF_LIBRARY_SYMBOL(lua_pushlstring)
+    FF_LIBRARY_SYMBOL(lua_seti)
+    FF_LIBRARY_SYMBOL(lua_pushnil)
+    FF_LIBRARY_SYMBOL(lua_setfield)
+    FF_LIBRARY_SYMBOL(lua_pcallk)
+    FF_LIBRARY_SYMBOL(lua_gettop)
+    FF_LIBRARY_SYMBOL(luaL_tolstring)
+
+    lua_State* L;
+    bool inited;
+} luaData;
+
+    #define fflua_pop(L, n) luaData.fflua_settop(L, -(n) - 1)
+
+static const char* loadLuaState() {
+    if (luaData.inited) {
+        if (luaData.L == NULL) {
+            return "Lua library is not available";
+        }
+        return NULL;
+    }
+
+    luaData.inited = true;
+    // clang-format off
+    #ifdef _WIN32
+        #define FF_LOAD_LIBLUA(version) FF_LIBRARY_LOAD_MESSAGE(liblua, \
+            "lua5" #version FF_LIBRARY_EXTENSION, 0)
+    #else
+        #define FF_LOAD_LIBLUA(version) FF_LIBRARY_LOAD_MESSAGE(liblua, \
+            "liblua5." #version FF_LIBRARY_EXTENSION, 0, \
+            "liblua-5." #version FF_LIBRARY_EXTENSION, 0, \
+            "liblua5." #version FF_LIBRARY_EXTENSION ".5." #version, 0)
+    #endif
+    // clang-format on
+    #if LUA_VERSION_NUM == 505
+    FF_LOAD_LIBLUA(5)
+    #elif LUA_VERSION_NUM == 504
+    FF_LOAD_LIBLUA(4)
+    #elif LUA_VERSION_NUM == 503
+    FF_LOAD_LIBLUA(3)
+    #else
+        #error "Unsupported Lua version"
+    #endif
+    #undef FF_LOAD_LIBLUA
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaL_newstate)
+    #if LUA_VERSION_NUM >= 505
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaL_openselectedlibs)
+    #else
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaL_requiref)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_base)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_math)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_string)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_table)
+    #endif
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_settop)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_loadbufferx)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tolstring)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_createtable)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushinteger)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnumber)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushboolean)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushstring)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushlstring)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_seti)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnil)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_setfield)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pcallk)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_gettop)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_tolstring)
+
+    lua_State* L = ffluaL_newstate();
+    if (L == NULL) {
+        return "luaL_newstate() failed";
+    }
+    #if LUA_VERSION_NUM >= 505
+    ffluaL_openselectedlibs(L, LUA_GLIBK | LUA_MATHLIBK | LUA_STRLIBK | LUA_TABLIBK, 0);
+    #else
+    ffluaL_requiref(L, LUA_GNAME, ffluaopen_base, 1);
+    fflua_pop(L, 1);
+    ffluaL_requiref(L, LUA_MATHLIBNAME, ffluaopen_math, 1);
+    fflua_pop(L, 1);
+    ffluaL_requiref(L, LUA_STRLIBNAME, ffluaopen_string, 1);
+    fflua_pop(L, 1);
+    ffluaL_requiref(L, LUA_TABLIBNAME, ffluaopen_table, 1);
+    fflua_pop(L, 1);
+    #endif
+    luaData.L = L;
+    liblua = NULL; // don't close lua
+    return NULL;
+}
+
+static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+    const char* err = loadLuaState();
+    if (err) {
+        ffStrbufAppendF(buffer, "Lua init error: %s", err);
+        return;
+    }
+
+    lua_State* L = luaData.L;
+    // Clear stack and load chunk
+    luaData.fflua_settop(L, 0);
+    if (luaData.ffluaL_loadbufferx(L, script, scriptLen, "fastfetch-lua-format", NULL) != LUA_OK) {
+        const char* err = luaData.fflua_tolstring(L, -1, NULL);
+        ffStrbufAppendF(buffer, "Lua load error: %s", err ? err : "unknown");
+    } else {
+        // Build args table for name lookup only.
+        luaData.fflua_createtable(L, 0, 0);
+
+        for (uint32_t i = 0; i < numArgs; ++i) {
+            const FFformatarg* arg = &arguments[i];
+            if (arg->name && arg->name[0]) {
+                switch (arg->type) {
+                    case FF_ARG_TYPE_INT:
+                        luaData.fflua_pushinteger(L, (lua_Integer) * (int32_t*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_UINT:
+                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint32_t*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_UINT64:
+                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint64_t*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_UINT16:
+                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint16_t*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_UINT8:
+                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint8_t*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_FLOAT:
+                        luaData.fflua_pushnumber(L, (lua_Number) * (float*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_DOUBLE:
+                        luaData.fflua_pushnumber(L, (lua_Number) * (double*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_BOOL:
+                        luaData.fflua_pushboolean(L, *(bool*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_STRING:
+                        luaData.fflua_pushstring(L, (const char*) arg->value);
+                        break;
+                    case FF_ARG_TYPE_STRBUF: {
+                        const FFstrbuf* sb = (const FFstrbuf*) arg->value;
+                        luaData.fflua_pushlstring(L, sb->chars, sb->length);
+                        break;
+                    }
+                    case FF_ARG_TYPE_LIST: {
+                        const FFlist* list = (const FFlist*) arg->value;
+                        luaData.fflua_createtable(L, 0, 0);
+                        for (uint32_t li = 0; li < list->length; ++li) {
+                            const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
+                            luaData.fflua_pushlstring(L, item->chars, item->length);
+                            luaData.fflua_seti(L, -2, (lua_Integer) (li + 1));
+                        }
+                        break;
+                    }
+                    default:
+                        luaData.fflua_pushnil(L);
+                        break;
+                }
+
+                luaData.fflua_setfield(L, -2, arg->name);
+            }
+        }
+
+        if (luaData.fflua_pcallk(L, 1, LUA_MULTRET, 0, 0, NULL) != LUA_OK) {
+            const char* err = luaData.fflua_tolstring(L, -1, NULL);
+            ffStrbufAppendF(buffer, "Lua runtime error: %s", err ? err : "unknown");
+        } else {
+            int nresults = luaData.fflua_gettop(L);
+            if (nresults > 0) {
+                // Convert first result to string
+                const char* res = luaData.fflua_tolstring(L, 1, NULL);
+                if (res) {
+                    ffStrbufAppendS(buffer, res);
+                } else {
+                    // Fallback: use luaL_tolstring to get a reasonable representation
+                    luaData.ffluaL_tolstring(L, 1, NULL);
+                    const char* sval = luaData.fflua_tolstring(L, -1, NULL);
+                    if (sval) {
+                        ffStrbufAppendS(buffer, sval);
+                    }
+                    fflua_pop(L, 1);
+                }
+            }
+        }
+    }
+}
+    #undef fflua_pop
+#endif
+
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+#if FF_HAVE_LUA
+    if (ffStrbufStartsWithS(formatstr, "lua:")) {
+        // If outputFormat starts with "lua:", treat the rest as a Lua script
+        return parseLuaString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
     uint32_t argCounter = 0;
 
     uint32_t numOpenIfs = 0;

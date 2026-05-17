@@ -173,6 +173,10 @@ void ffDestroyInstance(void) {
     destroyState();
 }
 
+#if FF_HAVE_LUA
+    #include <lua.h>
+#endif
+
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures(void) {
     fputs(
@@ -268,6 +272,9 @@ void ffListFeatures(void) {
 #endif
 #if FF_APPLE_MEMSIZE_USABLE
         "Apple memsize_usable\n"
+#endif
+#if FF_HAVE_LUA
+        LUA_VERSION "\n"
 #endif
         "",
         stdout);
