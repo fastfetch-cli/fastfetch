@@ -37,7 +37,7 @@ jobs:
         with:
           msystem: ${{ inputs.msystem }}
           update: true
-          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
+          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-quickjs-ng mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
 
       - name: print msys version
         run: uname -a
@@ -49,7 +49,7 @@ jobs:
         run: cmake --build . --verbose -j4
 
       - name: copy necessary dlls
-        run: cp /${{ inputs.msystem-lower }}/bin/{OpenCL,vulkan-1}.dll .
+        run: cp /${{ inputs.msystem-lower }}/bin/{lua55,libqjs-0}.dll .
 
       - name: list features
         run: ./fastfetch --list-features
