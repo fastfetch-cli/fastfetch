@@ -1695,13 +1695,17 @@ ff_lib_enable(LUA
     "lua"
     "Lua"
 )
+# https://github.com/quickjs-ng/quickjs/discussions/1493#discussioncomment-16955262
+# ff_lib_enable(QUICKJS
+#     "qjs"
+#     "qjs"
+# )
 if(ENABLE_QUICKJS)
     CHECK_INCLUDE_FILE("quickjs.h" HAVE_QUICKJS)
     if(HAVE_QUICKJS)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_QUICKJS=1)
     endif()
 endif()
-
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
