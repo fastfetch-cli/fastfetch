@@ -31,12 +31,12 @@ const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFlist* re
             continue;
         }
 
-        uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
-        i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
+        uint8_t i2cIn[] = { FF_DDC_CI_VCP_COMMAND, FF_DDC_CI_MAKE_HEADER(2), FF_DDC_CI_GET_VCP, FF_DDC_CI_LUMINANCE_OPCODE, 0 };
+        i2cIn[4] = FF_DDC_CI_WRITE_ADDR ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
 
         int ret = ioctl(fd, I2CRDWR, &(struct iic_rdwr_data) {
             .msgs = &(struct iic_msg) {
-                .slave = 0x6E,
+                .slave = FF_DDC_CI_WRITE_ADDR,
                 .flags = IIC_M_WR,
                 .len = ARRAY_SIZE(i2cIn),
                 .buf = i2cIn
@@ -49,11 +49,11 @@ const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFlist* re
         }
 
         ffTimeSleep(options->ddcciSleep);
-        
+
         uint8_t i2cOut[12] = {};
         ret = ioctl(fd, I2CRDWR, &(struct iic_rdwr_data) {
             .msgs = &(struct iic_msg) {
-                .slave = 0x6F,
+                .slave = FF_DDC_CI_READ_ADDR, // LSB will be overridden by kernel to set read bit
                 .flags = IIC_M_RD,
                 .len = ARRAY_SIZE(i2cOut),
                 .buf = i2cOut

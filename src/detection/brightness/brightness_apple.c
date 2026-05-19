@@ -85,17 +85,17 @@ static const char* detectWithDdcci(FF_A_UNUSED const FFDisplayServerResult* disp
         }
 
         {
-            uint8_t i2cIn[4] = { 0x82, 0x01, 0x10 /* luminance */ };
-            i2cIn[3] = 0x6e ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2];
+            uint8_t i2cIn[4] = { FF_DDC_CI_MAKE_HEADER(2), FF_DDC_CI_GET_VCP, FF_DDC_CI_LUMINANCE_OPCODE };
+            i2cIn[3] = FF_DDC_CI_WRITE_ADDR ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2];
 
             for (uint32_t i = 0; i < 2; ++i) {
-                IOAVServiceWriteI2C(service, 0x37, 0x51, i2cIn, ARRAY_SIZE(i2cIn));
-                usleep(options->ddcciSleep * 1000);
+                IOAVServiceWriteI2C(service, FF_DDC_CI_ADDR, FF_DDC_CI_VCP_COMMAND, i2cIn, ARRAY_SIZE(i2cIn));
+                ffTimeSleep(options->ddcciSleep);
             }
         }
 
         uint8_t i2cOut[12] = {};
-        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cOut, ARRAY_SIZE(i2cOut)) == KERN_SUCCESS) {
+        if (IOAVServiceReadI2C(service, FF_DDC_CI_ADDR, FF_DDC_CI_VCP_COMMAND, i2cOut, ARRAY_SIZE(i2cOut)) == KERN_SUCCESS) {
             if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00) {
                 continue;
             }
@@ -185,18 +185,18 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                     continue;
                 }
 
-                uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
-                i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
+                uint8_t i2cIn[] = { FF_DDC_CI_VCP_COMMAND, FF_DDC_CI_MAKE_HEADER(2), FF_DDC_CI_GET_VCP, FF_DDC_CI_LUMINANCE_OPCODE, 0 };
+                i2cIn[4] = FF_DDC_CI_WRITE_ADDR ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
 
                 IOI2CRequest request = {
                     .commFlags = kNilOptions,
-                    .sendAddress = 0x6e,
+                    .sendAddress = FF_DDC_CI_WRITE_ADDR,
                     .sendTransactionType = kIOI2CSimpleTransactionType,
                     .sendBuffer = (vm_address_t) i2cIn,
                     .sendBytes = ARRAY_SIZE(i2cIn),
                     .minReplyDelay = options->ddcciSleep * 1000ULL,
-                    .replyAddress = 0x6F,
-                    .replySubAddress = 0x51,
+                    .replyAddress = FF_DDC_CI_READ_ADDR,
+                    .replySubAddress = FF_DDC_CI_VCP_COMMAND,
                     .replyTransactionType = transactionType,
                     .replyBytes = ARRAY_SIZE(i2cOut),
                     .replyBuffer = (vm_address_t) i2cOut,
