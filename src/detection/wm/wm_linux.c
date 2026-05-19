@@ -129,11 +129,9 @@ static const char* getSway(FFstrbuf* result) {
         return NULL;
     }
 
-    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // sway version 1.10
-        ffStrbufSubstrAfterLastC(result, ' ');
-        ffStrbufTrimRight(result, ')'); // swayfx
-        ffStrbufTrimRightSpace(result);
-        return NULL;
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buffer, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // sway version 1.10
+        return extractSwayVersion(buffer.chars, result->length, result) ? "Failed to parse sway version output" : NULL;
     }
 
     return "Failed to run command `sway --version`";
