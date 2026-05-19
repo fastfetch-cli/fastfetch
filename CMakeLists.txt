@@ -1566,6 +1566,33 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
             set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
             set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
             set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+
+            # Some CMake packages (e.g. quickjs) are target-based only and
+            # don't expose *_INCLUDE_DIRS/*_LIBRARIES variables.
+            set(_FF_CMAKE_TARGET "")
+            if(TARGET ${CMAKE_NAME}::${CMAKE_NAME})
+                set(_FF_CMAKE_TARGET ${CMAKE_NAME}::${CMAKE_NAME})
+            elseif(TARGET ${CMAKE_NAME})
+                set(_FF_CMAKE_TARGET ${CMAKE_NAME})
+            endif()
+
+            if(NOT _FF_CMAKE_TARGET STREQUAL "")
+                if(NOT DEFINED ${VARNAME}_INCLUDE_DIRS OR "${${VARNAME}_INCLUDE_DIRS}" STREQUAL "")
+                    get_target_property(_FF_CMAKE_TARGET_INCLUDES ${_FF_CMAKE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+                    if(_FF_CMAKE_TARGET_INCLUDES)
+                        set(${VARNAME}_INCLUDE_DIRS ${_FF_CMAKE_TARGET_INCLUDES})
+                    endif()
+                endif()
+
+                if(NOT DEFINED ${VARNAME}_LIBRARIES OR "${${VARNAME}_LIBRARIES}" STREQUAL "")
+                    get_target_property(_FF_CMAKE_TARGET_LIBRARIES ${_FF_CMAKE_TARGET} INTERFACE_LINK_LIBRARIES)
+                    if(_FF_CMAKE_TARGET_LIBRARIES)
+                        set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET_LIBRARIES})
+                    else()
+                        set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
+                    endif()
+                endif()
+            endif()
         endif()
     endif()
 
@@ -1695,17 +1722,11 @@ ff_lib_enable(LUA
     "lua"
     "Lua"
 )
-# https://github.com/quickjs-ng/quickjs/discussions/1493#discussioncomment-16955262
-# ff_lib_enable(QUICKJS
-#     "qjs"
-#     "qjs"
-# )
-if(ENABLE_QUICKJS)
-    CHECK_INCLUDE_FILE("quickjs.h" HAVE_QUICKJS)
-    if(HAVE_QUICKJS)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_QUICKJS=1)
-    endif()
-endif()
+# Requires https://github.com/quickjs-ng/quickjs/pull/1479
+ff_lib_enable(QUICKJS
+    "quickjs"
+    "quickjs"
+)
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
