@@ -4197,6 +4197,16 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_RED,
         },
     },
+    // Quasar
+    {
+        .names = { "Quasar" },
+        .lines = FASTFETCH_DATATEXT_LOGO_QUASAR,
+        .colors = {
+                    FF_COLOR_FG_WHITE
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // Qubes
     {
         .names = { "Qubes" },
