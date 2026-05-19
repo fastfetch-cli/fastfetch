@@ -780,6 +780,17 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, // grey
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // BerserkArch
+    {
+        .names = { "BerserkArch", "berserkarch" },
+        .lines = FASTFETCH_DATATEXT_LOGO_BERSERKARCH,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // BigLinux
     {
         .names = { "BigLinux" },
