@@ -3,6 +3,7 @@
 #include "common/io.h"
 #include "common/kmod.h"
 #include "common/debug.h"
+#include "common/time.h"
 
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
@@ -32,28 +33,35 @@ const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFlist* re
 
         uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
         i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
-        uint8_t i2cOut[12] = {};
-        struct iic_msg msgs[] = {
-            {
+
+        int ret = ioctl(fd, I2CRDWR, &(struct iic_rdwr_data) {
+            .msgs = &(struct iic_msg) {
                 .slave = 0x6E,
                 .flags = IIC_M_WR,
                 .len = ARRAY_SIZE(i2cIn),
                 .buf = i2cIn
             },
-            {
+            .nmsgs = 1
+        });
+        if (ret < 0) {
+            FF_DEBUG("First ioctl(/dev/iic%c, I2CRDWR) failed: %s", i, strerror(errno));
+            continue;
+        }
+
+        ffTimeSleep(options->ddcciSleep);
+        
+        uint8_t i2cOut[12] = {};
+        ret = ioctl(fd, I2CRDWR, &(struct iic_rdwr_data) {
+            .msgs = &(struct iic_msg) {
                 .slave = 0x6F,
                 .flags = IIC_M_RD,
                 .len = ARRAY_SIZE(i2cOut),
                 .buf = i2cOut
-            }
-        };
-
-        int ret = ioctl(fd, I2CRDWR, &(struct iic_rdwr_data) {
-            .msgs = msgs,
-            .nmsgs = ARRAY_SIZE(msgs)
+            },
+            .nmsgs = 1
         });
         if (ret < 0) {
-            FF_DEBUG("ioctl(/dev/iic%c, I2CRDWR) failed: %s", i, strerror(errno));
+            FF_DEBUG("Second ioctl(/dev/iic%c, I2CRDWR) failed: %s", i, strerror(errno));
             continue;
         }
         if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00) {
