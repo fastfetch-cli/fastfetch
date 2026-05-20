@@ -1714,10 +1714,9 @@ ff_lib_enable(ELF
     "libelf"
     "libelf"
 )
-# Requires https://github.com/quickjs-ng/quickjs/pull/1479
 ff_lib_enable(QUICKJS
-    "quickjs"
-    "quickjs"
+    "qjs"
+    "qjs"
     "qjs"
 )
 if(ENABLE_LUA)
