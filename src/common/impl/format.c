@@ -112,6 +112,21 @@ static inline bool formatArgSet(const FFformatarg* arg) {
     return arg->value != NULL && ((arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) || (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) || (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) || (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0));
 }
 
+FF_A_UNUSED static inline void normalizeArgName(FFstrbuf* dst, const char* src) {
+    ffStrbufClear(dst);
+    bool flag = false;
+    for (const char* p = src; *p; ++p) {
+        if (*p == '-') {
+            flag = true;
+        } else if (flag) {
+            ffStrbufAppendC(dst, (char) toupper((unsigned char) *p));
+            flag = false;
+        } else {
+            ffStrbufAppendC(dst, *p);
+        }
+    }
+}
+
 #if FF_HAVE_LUA
     #include <lua.h>
     #include <lauxlib.h>
@@ -234,6 +249,8 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
         return;
     }
 
+    FF_STRBUF_AUTO_DESTROY argNameBuf = ffStrbufCreate();
+
     lua_State* L = luaData.L;
     // Clear stack and load chunk
     luaData.fflua_settop(L, 0);
@@ -246,57 +263,59 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
 
         for (uint32_t i = 0; i < numArgs; ++i) {
             const FFformatarg* arg = &arguments[i];
-            if (arg->name && arg->name[0]) {
-                switch (arg->type) {
-                    case FF_ARG_TYPE_INT:
-                        luaData.fflua_pushinteger(L, (lua_Integer) * (int32_t*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_UINT:
-                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint32_t*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_UINT64:
-                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint64_t*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_UINT16:
-                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint16_t*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_UINT8:
-                        luaData.fflua_pushinteger(L, (lua_Integer) * (uint8_t*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_FLOAT:
-                        luaData.fflua_pushnumber(L, (lua_Number) * (float*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_DOUBLE:
-                        luaData.fflua_pushnumber(L, (lua_Number) * (double*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_BOOL:
-                        luaData.fflua_pushboolean(L, *(bool*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_STRING:
-                        luaData.fflua_pushstring(L, (const char*) arg->value);
-                        break;
-                    case FF_ARG_TYPE_STRBUF: {
-                        const FFstrbuf* sb = (const FFstrbuf*) arg->value;
-                        luaData.fflua_pushlstring(L, sb->chars, sb->length);
-                        break;
-                    }
-                    case FF_ARG_TYPE_LIST: {
-                        const FFlist* list = (const FFlist*) arg->value;
-                        luaData.fflua_createtable(L, 0, 0);
-                        for (uint32_t li = 0; li < list->length; ++li) {
-                            const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
-                            luaData.fflua_pushlstring(L, item->chars, item->length);
-                            luaData.fflua_seti(L, -2, (lua_Integer) (li + 1));
-                        }
-                        break;
-                    }
-                    default:
-                        luaData.fflua_pushnil(L);
-                        break;
+            switch (arg->type) {
+                case FF_ARG_TYPE_INT:
+                    luaData.fflua_pushinteger(L, (lua_Integer) * (int32_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT:
+                    luaData.fflua_pushinteger(L, (lua_Integer) * (uint32_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT64:
+                    luaData.fflua_pushinteger(L, (lua_Integer) * (uint64_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT16:
+                    luaData.fflua_pushinteger(L, (lua_Integer) * (uint16_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT8:
+                    luaData.fflua_pushinteger(L, (lua_Integer) * (uint8_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_FLOAT:
+                    luaData.fflua_pushnumber(L, (lua_Number) * (float*) arg->value);
+                    break;
+                case FF_ARG_TYPE_DOUBLE:
+                    luaData.fflua_pushnumber(L, (lua_Number) * (double*) arg->value);
+                    break;
+                case FF_ARG_TYPE_BOOL:
+                    luaData.fflua_pushboolean(L, *(bool*) arg->value);
+                    break;
+                case FF_ARG_TYPE_STRING:
+                    luaData.fflua_pushstring(L, (const char*) arg->value);
+                    break;
+                case FF_ARG_TYPE_STRBUF: {
+                    const FFstrbuf* sb = (const FFstrbuf*) arg->value;
+                    luaData.fflua_pushlstring(L, sb->chars, sb->length);
+                    break;
                 }
-
-                luaData.fflua_setfield(L, -2, arg->name);
+                case FF_ARG_TYPE_LIST: {
+                    const FFlist* list = (const FFlist*) arg->value;
+                    luaData.fflua_createtable(L, 0, 0);
+                    for (uint32_t li = 0; li < list->length; ++li) {
+                        const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
+                        luaData.fflua_pushlstring(L, item->chars, item->length);
+                        luaData.fflua_seti(L, -2, (lua_Integer) (li + 1));
+                    }
+                    break;
+                }
+                default:
+                    luaData.fflua_pushnil(L);
+                    break;
             }
+            if (arg->name && arg->name[0]) {
+                normalizeArgName(&argNameBuf, arg->name);
+            } else {
+                ffStrbufSetF(&argNameBuf, "arg%" PRIu32, i + 1);
+            }
+            luaData.fflua_setfield(L, -2, argNameBuf.chars);
         }
 
         if (luaData.fflua_pcallk(L, 1, LUA_MULTRET, 0, 0, NULL) != LUA_OK) {
@@ -404,6 +423,7 @@ static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
     }
     JSContext* ctx = qjsData.ctx;
     JSValue argsObj = qjsData.ffJS_NewObject(ctx);
+    FF_STRBUF_AUTO_DESTROY argNameBuf = ffStrbufCreate();
 
     for (uint32_t i = 0; i < numArgs; ++i) {
         const FFformatarg* arg = &arguments[i];
@@ -458,7 +478,13 @@ static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
                 value = JS_UNDEFINED;
                 break;
         }
-        qjsData.ffJS_SetPropertyStr(ctx, argsObj, arg->name, value);
+
+        if (arg->name && arg->name[0]) {
+            normalizeArgName(&argNameBuf, arg->name);
+        } else {
+            ffStrbufSetF(&argNameBuf, "arg%" PRIu32, i + 1);
+        }
+        qjsData.ffJS_SetPropertyStr(ctx, argsObj, argNameBuf.chars, value);
     }
     JSValue result = qjsData.ffJS_EvalThis(ctx, argsObj, script, scriptLen, "fastfetch-quickjs-format", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
 
