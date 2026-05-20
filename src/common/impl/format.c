@@ -392,7 +392,6 @@ static const char* loadQuickJSState(void) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeCString)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewStringLen)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewArray)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewBigUint64)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyUint32)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewObject)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyStr)
@@ -436,9 +435,15 @@ static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
             case FF_ARG_TYPE_UINT:
                 value = JS_NewUint32(ctx, *(uint32_t*) arg->value);
                 break;
-            case FF_ARG_TYPE_UINT64:
-                value = qjsData.ffJS_NewBigUint64(ctx, *(uint64_t*) arg->value);
+            case FF_ARG_TYPE_UINT64: {
+                uint64_t val = *(uint64_t*) arg->value;
+                if (val <= INT32_MAX) {
+                    value = JS_NewInt32(ctx, (int32_t) val);
+                } else {
+                    value = JS_NewFloat64(ctx, (double) val);
+                }
                 break;
+            }
             case FF_ARG_TYPE_UINT16:
                 value = JS_NewUint32(ctx, *(uint16_t*) arg->value);
                 break;
