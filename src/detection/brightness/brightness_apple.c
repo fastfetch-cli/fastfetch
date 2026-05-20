@@ -2,6 +2,7 @@
 #include "detection/displayserver/displayserver.h"
 #include "common/apple/cf_helpers.h"
 #include "common/edidHelper.h"
+#include "common/time.h"
 
 #include <CoreGraphics/CoreGraphics.h>
 
