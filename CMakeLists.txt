@@ -1544,53 +1544,56 @@ if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
     endif()
 endif()
 
-function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
+function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
     if(NOT ENABLE_${VARNAME})
         return()
     endif()
 
     if(PKG_CONFIG_FOUND)
         pkg_search_module(${VARNAME} QUIET ${PKGCONFIG_NAMES})
+        if(${VARNAME}_FOUND)
+            set(${VARNAME}_FOUND "pkg-config")
+        endif()
     endif()
 
     if(NOT ${VARNAME}_FOUND)
         find_package(${CMAKE_NAME} QUIET)
 
         set(${VARNAME}_FOUND ${${CMAKE_NAME}_FOUND})
-        if(${VARNAME} STREQUAL "LUA")
-            # Lua is a special case since its CMake config does not follow the usual pattern
-            set(${VARNAME}_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
-            set(${VARNAME}_LIBRARIES ${LUA_LIBRARY})
-            set(${VARNAME}_CFLAGS_OTHER "")
-        else()
-            set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
-            set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
-            set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+        if(${VARNAME}_FOUND)
+            set(${VARNAME}_FOUND "cmake")
 
-            # Some CMake packages (e.g. quickjs) are target-based only and
-            # don't expose *_INCLUDE_DIRS/*_LIBRARIES variables.
-            set(_FF_CMAKE_TARGET "")
-            if(TARGET ${CMAKE_NAME}::${CMAKE_NAME})
-                set(_FF_CMAKE_TARGET ${CMAKE_NAME}::${CMAKE_NAME})
-            elseif(TARGET ${CMAKE_NAME})
-                set(_FF_CMAKE_TARGET ${CMAKE_NAME})
-            endif()
+            if(${VARNAME} STREQUAL "LUA")
+                # Lua is a special case since its CMake config does not follow the usual pattern
+                set(${VARNAME}_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
+                set(${VARNAME}_LIBRARIES ${LUA_LIBRARY})
+                set(${VARNAME}_CFLAGS_OTHER "")
+            else()
+                # Some CMake packages (e.g. quickjs) are target-based only and
+                # don't expose *_INCLUDE_DIRS/*_LIBRARIES variables.
+                if(ARGC GREATER 3)
+                    set(_FF_CMAKE_TARGET ${ARGV3})
+                    if(NOT _FF_CMAKE_TARGET STREQUAL "")
+                        if(NOT DEFINED ${VARNAME}_INCLUDE_DIRS OR "${${VARNAME}_INCLUDE_DIRS}" STREQUAL "")
+                            get_target_property(_FF_CMAKE_TARGET_INCLUDES ${_FF_CMAKE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+                            if(_FF_CMAKE_TARGET_INCLUDES)
+                                set(${VARNAME}_INCLUDE_DIRS ${_FF_CMAKE_TARGET_INCLUDES})
+                            endif()
+                        endif()
 
-            if(NOT _FF_CMAKE_TARGET STREQUAL "")
-                if(NOT DEFINED ${VARNAME}_INCLUDE_DIRS OR "${${VARNAME}_INCLUDE_DIRS}" STREQUAL "")
-                    get_target_property(_FF_CMAKE_TARGET_INCLUDES ${_FF_CMAKE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
-                    if(_FF_CMAKE_TARGET_INCLUDES)
-                        set(${VARNAME}_INCLUDE_DIRS ${_FF_CMAKE_TARGET_INCLUDES})
+                        if(NOT DEFINED ${VARNAME}_LIBRARIES OR "${${VARNAME}_LIBRARIES}" STREQUAL "")
+                            get_target_property(_FF_CMAKE_TARGET_LIBRARIES ${_FF_CMAKE_TARGET} INTERFACE_LINK_LIBRARIES)
+                            if(_FF_CMAKE_TARGET_LIBRARIES)
+                                set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET_LIBRARIES})
+                            else()
+                                set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
+                            endif()
+                        endif()
                     endif()
-                endif()
-
-                if(NOT DEFINED ${VARNAME}_LIBRARIES OR "${${VARNAME}_LIBRARIES}" STREQUAL "")
-                    get_target_property(_FF_CMAKE_TARGET_LIBRARIES ${_FF_CMAKE_TARGET} INTERFACE_LINK_LIBRARIES)
-                    if(_FF_CMAKE_TARGET_LIBRARIES)
-                        set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET_LIBRARIES})
-                    else()
-                        set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
-                    endif()
+                else()
+                    set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
+                    set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
+                    set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
                 endif()
             endif()
         endif()
@@ -1601,7 +1604,7 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
         return()
     endif()
 
-    message(STATUS "Library: found ${VARNAME}")
+    message(STATUS "Library: found ${VARNAME} by ${${VARNAME}_FOUND}")
 
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
@@ -1726,6 +1729,7 @@ ff_lib_enable(LUA
 ff_lib_enable(QUICKJS
     "quickjs"
     "quickjs"
+    "qjs"
 )
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
