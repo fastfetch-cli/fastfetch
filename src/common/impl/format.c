@@ -543,6 +543,12 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         // jump to next char, the start of the placeholder value
         ++i;
 
+        // unmatched trailing '{'
+        if (i >= formatstr->length) {
+            ffStrbufAppendC(buffer, '{');
+            break;
+        }
+
         // double {{ elvaluates to a single { and doesn't count as start
         if (formatstr->chars[i] == '{') {
             ffStrbufAppendC(buffer, '{');
