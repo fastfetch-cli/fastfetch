@@ -1561,40 +1561,33 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
 
         set(${VARNAME}_FOUND ${${CMAKE_NAME}_FOUND})
         if(${VARNAME}_FOUND)
-            set(${VARNAME}_FOUND "cmake")
+            set(${VARNAME}_FOUND "CMake")
 
-            if(${VARNAME} STREQUAL "LUA")
-                # Lua is a special case since its CMake config does not follow the usual pattern
-                set(${VARNAME}_INCLUDE_DIRS ${LUA_INCLUDE_DIR})
-                set(${VARNAME}_LIBRARIES ${LUA_LIBRARY})
-                set(${VARNAME}_CFLAGS_OTHER "")
-            else()
-                # Some CMake packages (e.g. quickjs) are target-based only and
-                # don't expose *_INCLUDE_DIRS/*_LIBRARIES variables.
-                if(ARGC GREATER 3)
-                    set(_FF_CMAKE_TARGET ${ARGV3})
-                    if(NOT _FF_CMAKE_TARGET STREQUAL "")
-                        if(NOT DEFINED ${VARNAME}_INCLUDE_DIRS OR "${${VARNAME}_INCLUDE_DIRS}" STREQUAL "")
-                            get_target_property(_FF_CMAKE_TARGET_INCLUDES ${_FF_CMAKE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
-                            if(_FF_CMAKE_TARGET_INCLUDES)
-                                set(${VARNAME}_INCLUDE_DIRS ${_FF_CMAKE_TARGET_INCLUDES})
-                            endif()
-                        endif()
-
-                        if(NOT DEFINED ${VARNAME}_LIBRARIES OR "${${VARNAME}_LIBRARIES}" STREQUAL "")
-                            get_target_property(_FF_CMAKE_TARGET_LIBRARIES ${_FF_CMAKE_TARGET} INTERFACE_LINK_LIBRARIES)
-                            if(_FF_CMAKE_TARGET_LIBRARIES)
-                                set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET_LIBRARIES})
-                            else()
-                                set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
-                            endif()
+            # Some CMake packages (e.g. quickjs) are target-based only and
+            # don't expose *_INCLUDE_DIRS/*_LIBRARIES variables.
+            if(ARGC GREATER 3)
+                set(_FF_CMAKE_TARGET ${ARGV3})
+                if(NOT _FF_CMAKE_TARGET STREQUAL "")
+                    if(NOT DEFINED ${VARNAME}_INCLUDE_DIRS OR "${${VARNAME}_INCLUDE_DIRS}" STREQUAL "")
+                        get_target_property(_FF_CMAKE_TARGET_INCLUDES ${_FF_CMAKE_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+                        if(_FF_CMAKE_TARGET_INCLUDES)
+                            set(${VARNAME}_INCLUDE_DIRS ${_FF_CMAKE_TARGET_INCLUDES})
                         endif()
                     endif()
-                else()
-                    set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
-                    set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
-                    set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+
+                    if(NOT DEFINED ${VARNAME}_LIBRARIES OR "${${VARNAME}_LIBRARIES}" STREQUAL "")
+                        get_target_property(_FF_CMAKE_TARGET_LIBRARIES ${_FF_CMAKE_TARGET} INTERFACE_LINK_LIBRARIES)
+                        if(_FF_CMAKE_TARGET_LIBRARIES)
+                            set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET_LIBRARIES})
+                        else()
+                            set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
+                        endif()
+                    endif()
                 endif()
+            else()
+                set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
+                set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
+                set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
             endif()
         endif()
     endif()
@@ -1721,16 +1714,38 @@ ff_lib_enable(ELF
     "libelf"
     "libelf"
 )
-ff_lib_enable(LUA
-    "lua"
-    "Lua"
-)
 # Requires https://github.com/quickjs-ng/quickjs/pull/1479
 ff_lib_enable(QUICKJS
     "quickjs"
     "quickjs"
     "qjs"
 )
+if(ENABLE_LUA)
+    # Lua is a special case since its CMake config does not follow the usual pattern
+    find_package(Lua QUIET)
+    if(Lua_FOUND AND NOT DEFINED Lua_VERSION) # For CMake 4.2- compatible
+        set(Lua_VERSION ${LUA_VERSION_STRING})
+        set(Lua_VERSION_MAJOR ${LUA_VERSION_MAJOR})
+        set(Lua_VERSION_MINOR ${LUA_VERSION_MINOR})
+    endif()
+    if(Lua_FOUND)
+        if((NOT Lua_VERSION_MAJOR EQUAL 5) OR Lua_VERSION_MINOR LESS 3 OR Lua_VERSION_MINOR GREATER 5)
+            message(STATUS "Library: Lua version ${Lua_VERSION} is not supported, requires 5.3-5.5")
+            unset(Lua_FOUND)
+        else()
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LUA=1)
+            target_include_directories(libfastfetch PRIVATE ${LUA_INCLUDE_DIR})
+
+            if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+                target_link_libraries(libfastfetch PRIVATE ${LUA_LIBRARIES})
+            endif()
+            message(STATUS "Library: found LUA ${Lua_VERSION} by CMake")
+        endif()
+    else()
+        message(STATUS "Library: missing: LUA")
+    endif()
+endif()
+
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
