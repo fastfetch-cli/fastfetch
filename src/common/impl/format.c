@@ -163,8 +163,6 @@ struct FFLuaData {
     bool inited;
 } luaData;
 
-    #define fflua_pop(L, n) luaData.fflua_settop(L, -(n) - 1)
-
 static const char* loadLuaState() {
     if (luaData.inited) {
         if (luaData.L == NULL) {
@@ -229,17 +227,28 @@ static const char* loadLuaState() {
     ffluaL_openselectedlibs(L, LUA_GLIBK | LUA_MATHLIBK | LUA_STRLIBK | LUA_TABLIBK, 0);
     #else
     ffluaL_requiref(L, LUA_GNAME, ffluaopen_base, 1);
-    fflua_pop(L, 1);
     ffluaL_requiref(L, LUA_MATHLIBNAME, ffluaopen_math, 1);
-    fflua_pop(L, 1);
     ffluaL_requiref(L, LUA_STRLIBNAME, ffluaopen_string, 1);
-    fflua_pop(L, 1);
     ffluaL_requiref(L, LUA_TABLIBNAME, ffluaopen_table, 1);
-    fflua_pop(L, 1);
+    luaData.fflua_settop(L, 0);
     #endif
     luaData.L = L;
     liblua = NULL; // don't close lua
     return NULL;
+}
+
+static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
+    const char* err = luaData.fflua_tolstring(L, -1, NULL);
+    if (err) {
+        const char* tmp = strchr(err, ':');
+        if (tmp) {
+            err = tmp + 1;
+            while (*err == ' ') {
+                ++err;
+            }
+        }
+    }
+    ffStrbufAppendF(buffer, "%s: %s", prefix, err ? err : "unknown");
 }
 
 static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
@@ -254,9 +263,8 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
     lua_State* L = luaData.L;
     // Clear stack and load chunk
     luaData.fflua_settop(L, 0);
-    if (luaData.ffluaL_loadbufferx(L, script, scriptLen, "fastfetch-lua-format", NULL) != LUA_OK) {
-        const char* err = luaData.fflua_tolstring(L, -1, NULL);
-        ffStrbufAppendF(buffer, "Lua load error: %s", err ? err : "unknown");
+    if (luaData.ffluaL_loadbufferx(L, script, scriptLen, "", NULL) != LUA_OK) {
+        appendLuaError(buffer, "Lua load error", L);
     } else {
         // Build args table for name lookup only.
         luaData.fflua_createtable(L, 0, 0);
@@ -319,8 +327,7 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
         }
 
         if (luaData.fflua_pcallk(L, 1, LUA_MULTRET, 0, 0, NULL) != LUA_OK) {
-            const char* err = luaData.fflua_tolstring(L, -1, NULL);
-            ffStrbufAppendF(buffer, "Lua runtime error: %s", err ? err : "unknown");
+            appendLuaError(buffer, "Lua runtime error", L);
         } else {
             int nresults = luaData.fflua_gettop(L);
             if (nresults > 0) {
@@ -335,13 +342,12 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
                     if (sval) {
                         ffStrbufAppendS(buffer, sval);
                     }
-                    fflua_pop(L, 1);
                 }
             }
         }
     }
+    luaData.fflua_settop(L, 0);
 }
-    #undef fflua_pop
 #endif
 
 #if FF_HAVE_QUICKJS
