@@ -431,7 +431,7 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     uint32_t baseDirLen = baseDir->length;
     ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
-    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]) {
+    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]){
                                                                   { "DBPath =", &dbPath },
                                                                   { "RootDir =", &rootDir },
                                                               });
@@ -647,5 +647,20 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
     if (!(options->disabled & FF_PACKAGES_FLAG_APPIMAGE_BIT)) {
         result->appimage += getNumElementsBySuffix(&baseDir, "/AppImages", ".appimage");
         result->appimage += getNumElementsBySuffix(&baseDir, "/Applications", ".appimage");
+    }
+
+    if (!(options->disabled & FF_PACKAGES_FLAG_INSTALLRELEASE_BIT)) {
+        FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(&baseDir);
+        ffStrbufAppendS(&path, ".config/install_release/state.json");
+        if (ffPathExists(path.chars, FF_PATHTYPE_FILE)) {
+            yyjson_doc* doc = yyjson_read_file(path.chars, YYJSON_READ_NOFLAG, NULL, NULL);
+            if (doc != NULL) {
+                yyjson_val* root = yyjson_doc_get_root(doc);
+                if (yyjson_is_obj(root)) {
+                    result->installrelease = (uint32_t) yyjson_obj_size(root);
+                }
+                yyjson_doc_free(doc);
+            }
+        }
     }
 }

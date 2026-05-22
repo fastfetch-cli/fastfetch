@@ -89,6 +89,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         } else {
             FF_PRINT_PACKAGE_NAME(hpkgSystem, "hpkg")
         }
+        FF_PRINT_PACKAGE_NAME(installrelease, "install-release")
         FF_PRINT_PACKAGE(kiss)
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(lpkg)
@@ -167,6 +168,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(hpkgAll, "hpkg-all"),
                 FF_ARG(counts.hpkgSystem, "hpkg-system"),
                 FF_ARG(counts.hpkgUser, "hpkg-user"),
+                FF_ARG(counts.installrelease, "install-release"),
                 FF_ARG(counts.kiss, "kiss"),
                 FF_ARG(counts.linglong, "linglong"),
                 FF_ARG(counts.lpkg, "lpkg"),
@@ -277,6 +279,11 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(HPKG)
+                            break;
+                        case 'I':
+                            if (false)
+                                ;
+                            FF_TEST_PACKAGE_NAME(INSTALLRELEASE)
                             break;
                         case 'K':
                             if (false)
@@ -445,6 +452,7 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
     FF_APPEND_PACKAGE_COUNT(guixUser)
     FF_APPEND_PACKAGE_COUNT(hpkgSystem)
     FF_APPEND_PACKAGE_COUNT(hpkgUser)
+    FF_APPEND_PACKAGE_COUNT(installrelease)
     FF_APPEND_PACKAGE_COUNT(kiss)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(lpkg)
@@ -522,6 +530,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Number of hpkg-system packages", "hpkg-system" },
         { "Number of hpkg-user packages", "hpkg-user" },
+        { "Number of install-release packages", "install-release"},
         { "Number of kiss packages", "kiss" },
         { "Number of linglong packages", "linglong" },
         { "Number of lpkg packages", "lpkg" },
