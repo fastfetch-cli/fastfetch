@@ -431,7 +431,7 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     uint32_t baseDirLen = baseDir->length;
     ffStrbufAppendS(baseDir, "/etc/pacman.conf");
 
-    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]) {
+    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]){
                                                                   { "DBPath =", &dbPath },
                                                                   { "RootDir =", &rootDir },
                                                               });
@@ -647,5 +647,38 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
     if (!(options->disabled & FF_PACKAGES_FLAG_APPIMAGE_BIT)) {
         result->appimage += getNumElementsBySuffix(&baseDir, "/AppImages", ".appimage");
         result->appimage += getNumElementsBySuffix(&baseDir, "/Applications", ".appimage");
+    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_SDKMAN_BIT)) {
+        const char* sdkmanDir = getenv("SDKMAN_CANDIDATES_DIR");
+        if (sdkmanDir != NULL && sdkmanDir[0] != '\0') {
+            DIR* dir = opendir(sdkmanDir);
+            if (dir != NULL) {
+                struct dirent* entry;
+                while ((entry = readdir(dir)) != NULL) {
+                    if (entry->d_name[0] == '.') {
+                        continue;
+                    }
+
+                    char path[512];
+                    snprintf(path, sizeof(path), "%s/%s", sdkmanDir, entry->d_name);
+                    DIR* subdir = opendir(path);
+                    if (subdir != NULL) {
+                        bool hasContent = false;
+                        struct dirent* subentry;
+                        while ((subentry = readdir(subdir)) != NULL) {
+                            if (subentry->d_name[0] != '.') {
+                                hasContent = true;
+                                break;
+                            }
+                        }
+                        closedir(subdir);
+                        if (hasContent) {
+                            result->sdkman++;
+                        }
+                    }
+                }
+                closedir(dir);
+            }
+        }
     }
 }
