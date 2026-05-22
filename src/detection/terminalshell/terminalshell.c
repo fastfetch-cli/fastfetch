@@ -32,6 +32,8 @@ static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, F
 
 #elif __HAIKU__
     #include "common/haiku/version.h"
+#elif __APPLE__
+    #include "common/apple/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version) {
@@ -616,31 +618,8 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
         }
     }
     #elif __APPLE__
-    if (ffStrbufEndsWithS(exe, "/kitty.app/Contents/MacOS/kitty")) {
-        ffStrbufSet(version, exe);
-        ffStrbufSubstrBeforeLastC(version, '/');
-        ffStrbufSubstrBeforeLastC(version, '/');
-        ffStrbufAppendS(version, "/Info.plist");
-        char buf[4096];
-        ssize_t size = ffReadFileData(version->chars, ARRAY_SIZE(buf) - 1, buf);
-        if (size > 0) {
-            buf[size] = '\0';
-
-            const char* p = strstr(buf, "<key>CFBundleShortVersionString</key>");
-            if (p) {
-                p += strlen("<key>CFBundleShortVersionString</key>");
-                p = strchr(p, '>');
-                if (p) {
-                    p++;
-                    const char* end = strchr(p, '<');
-                    if (end) {
-                        ffStrbufSetNS(version, (uint32_t) (end - p), p);
-                        return true;
-                    }
-                }
-            }
-        }
-        ffStrbufClear(version);
+    if (ffGetAppNameAndVersion(exe->chars, NULL, version)) {
+        return true;
     }
     #endif
 
@@ -947,6 +926,10 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_A_UNUSED FFstrbuf* exe, FF
 #ifdef _WIN32
 
     return getFileVersion(exe, NULL, version);
+
+#elif __APPLE__
+
+    return ffGetAppNameAndVersion(exe->chars, NULL, version);
 
 #else
 

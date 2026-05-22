@@ -954,6 +954,7 @@ elseif(APPLE)
         src/common/apple/cf_helpers.c
         src/common/apple/osascript.m
         src/common/apple/smc_temps.c
+        src/common/apple/version.m
         src/detection/battery/battery_apple.c
         src/detection/bluetooth/bluetooth_apple.m
         src/detection/bluetoothradio/bluetoothradio_apple.m
