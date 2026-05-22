@@ -21,6 +21,12 @@ typedef struct FFconfig {
     FFOptionsGeneral general;
 } FFconfig;
 
+typedef struct FFLogoLineCacheState {
+    FFlist lines;
+    uint32_t nextLine;
+    uint32_t rightOffset;
+} FFLogoLineCacheState;
+
 typedef struct FFstate {
     uint32_t logoWidth;
     uint32_t logoHeight;
@@ -29,6 +35,7 @@ typedef struct FFstate {
     bool titleFqdn;
     uint32_t dynamicInterval;
     FFPlatform platform;
+    FFLogoLineCacheState logoLineCache;
 } FFstate;
 
 typedef struct FFinstance {

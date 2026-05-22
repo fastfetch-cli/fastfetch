@@ -12,6 +12,196 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct FFLogoCachedLine {
+    FFstrbuf chars;
+    uint32_t width;
+} FFLogoCachedLine;
+
+static void logoLineCacheClear(FFLogoLineCacheState* cache) {
+    FF_LIST_FOR_EACH (FFLogoCachedLine, line, cache->lines) {
+        ffStrbufDestroy(&line->chars);
+    }
+    ffListDestroy(&cache->lines);
+    cache->nextLine = 0;
+    cache->rightOffset = 0;
+}
+
+static void logoLineCachePush(const FFstrbuf* chars, uint32_t width, FFLogoLineCacheState* cache) {
+    FFLogoCachedLine* line = FF_LIST_ADD(FFLogoCachedLine, cache->lines);
+    if (width > 0) {
+        ffStrbufInitCopy(&line->chars, chars);
+    } else {
+        ffStrbufInit(&line->chars);
+    }
+    line->width = width;
+}
+
+static void logoLineCacheBuild(const char* data, bool doColorReplacement) {
+    FFOptionsLogo* options = &instance.config.logo;
+    bool left = options->position == FF_LOGO_POSITION_LEFT;
+    bool right = options->position == FF_LOGO_POSITION_RIGHT;
+    bool keepCarryColor = options->type != FF_LOGO_TYPE_IMAGE_CHAFA;
+    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
+
+    logoLineCacheClear(cache);
+
+    uint32_t maxLineWidth = 0;
+    uint32_t parsedHeight = 0;
+
+    FF_STRBUF_AUTO_DESTROY carryColor = ffStrbufCreate();
+    if (keepCarryColor && doColorReplacement && !instance.config.display.pipe) {
+        ffStrbufSetF(&carryColor, "\e[%sm", options->colors[0].chars);
+    }
+
+    for (uint32_t i = 0; i < options->paddingTop; ++i) {
+        logoLineCachePush(NULL, 0, cache);
+    }
+
+    if (*data != '\0') {
+        while (true) {
+            FF_STRBUF_AUTO_DESTROY line = ffStrbufCreateA(256);
+            uint32_t lineWidth = 0;
+
+            if (!instance.config.display.pipe && instance.config.display.brightColor) {
+                ffStrbufAppendS(&line, FASTFETCH_TEXT_MODIFIER_BOLT);
+            }
+
+            if (keepCarryColor && carryColor.length > 0) {
+                ffStrbufAppend(&line, &carryColor);
+            }
+
+            if (left && options->paddingLeft > 0) {
+                ffStrbufAppendNC(&line, options->paddingLeft, ' ');
+                lineWidth += options->paddingLeft;
+            }
+
+            while (*data != '\0' && *data != '\n' && !(*data == '\r' && *(data + 1) == '\n')) {
+                if (*data == '\t') {
+                    ffStrbufAppendNC(&line, 4, ' ');
+                    lineWidth += 4;
+                    ++data;
+                    continue;
+                }
+
+                if (*data == '\e' && *(data + 1) == '[') {
+                    const char* start = data;
+                    data += 2;
+
+                    while (ffCharIsDigit(*data) || *data == ';') {
+                        ++data;
+                    }
+
+                    if (isascii(*data)) {
+                        ++data;
+
+                        uint32_t escLen = (uint32_t) (data - start);
+                        ffStrbufAppendNS(&line, escLen, start);
+
+                        if (keepCarryColor && start[escLen - 1] == 'm') {
+                            ffStrbufSetNS(&carryColor, escLen, start);
+                        }
+                        continue;
+                    }
+
+                    lineWidth += (uint32_t) (data - start - 1);
+                }
+
+                if (doColorReplacement && *data == '$') {
+                    ++data;
+
+                    if (*data == '$' || *data == '\0') {
+                        ffStrbufAppendC(&line, '$');
+                        ++lineWidth;
+                        ++data;
+                        continue;
+                    }
+
+                    if (!instance.config.display.pipe) {
+                        int index = *data - '1';
+                        if (index >= 0 && index < FASTFETCH_LOGO_MAX_COLORS) {
+                            if (keepCarryColor) {
+                                ffStrbufSetF(&carryColor, "\e[%sm", options->colors[index].chars);
+                                ffStrbufAppend(&line, &carryColor);
+                            } else {
+                                ffStrbufAppendF(&line, "\e[%sm", options->colors[index].chars);
+                            }
+                            ++data;
+                            continue;
+                        }
+
+                        ffStrbufAppendC(&line, '$');
+                        ++lineWidth;
+                    } else {
+                        ++data;
+                        continue;
+                    }
+                }
+
+                ++lineWidth;
+
+                int codepoint = (unsigned char) *data;
+                uint8_t bytes;
+
+                if (codepoint <= 127) {
+                    bytes = 1;
+                } else if ((codepoint & 0xE0) == 0xC0) {
+                    bytes = 2;
+                } else if ((codepoint & 0xF0) == 0xE0) {
+                    bytes = 3;
+                } else if ((codepoint & 0xF8) == 0xF0) {
+                    bytes = 4;
+                } else {
+                    bytes = 1;
+                }
+
+                for (uint8_t i = 0; i < bytes; ++i) {
+                    if (*data == '\0') {
+                        break;
+                    }
+
+                    ffStrbufAppendC(&line, *data);
+                    ++data;
+                }
+            }
+
+            logoLineCachePush(&line, lineWidth, cache);
+            if (lineWidth > maxLineWidth) {
+                maxLineWidth = lineWidth;
+            }
+
+            if (*data == '\n' || (*data == '\r' && *(data + 1) == '\n')) {
+                if (*data == '\r') {
+                    ++data;
+                }
+                ++data;
+                ++parsedHeight;
+                continue;
+            }
+
+            break;
+        }
+    }
+
+    if (options->type != FF_LOGO_TYPE_IMAGE_CHAFA && options->height > parsedHeight) {
+        parsedHeight = options->height;
+    }
+
+    instance.state.logoHeight = options->paddingTop + parsedHeight;
+    if (left) {
+        instance.state.logoWidth = maxLineWidth + options->paddingRight;
+    } else if (right) {
+        instance.state.logoWidth = 0;
+    }
+
+    uint32_t totalLines = instance.state.logoHeight + 1;
+    while (cache->lines.length < totalLines) {
+        logoLineCachePush(NULL, 0, cache);
+    }
+
+    cache->nextLine = 0;
+    cache->rightOffset = maxLineWidth + options->paddingRight - 1;
+}
+
 static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError) {
     FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
@@ -248,6 +438,11 @@ static uint32_t logoAppendChars(const char* data, bool doColorReplacement, FFstr
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement) {
     FFOptionsLogo* options = &instance.config.logo;
+
+    if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT) {
+        logoLineCacheBuild(data, doColorReplacement);
+        return;
+    }
 
     if (options->position == FF_LOGO_POSITION_RIGHT) {
         logoAppendChars(data, doColorReplacement, NULL);
@@ -557,7 +752,7 @@ static bool logoTryKnownType(void) {
     if (options->type == FF_LOGO_TYPE_COMMAND_RAW) {
         FF_STRBUF_AUTO_DESTROY source = ffStrbufCreate();
 
-        const char* error = ffProcessAppendStdOut(&source, (char* const[]) {
+        const char* error = ffProcessAppendStdOut(&source, (char* const[]){
 #ifdef _WIN32
                                                                "cmd.exe", "/c",
 #else
@@ -684,8 +879,33 @@ void ffLogoPrint(void) {
 }
 
 void ffLogoPrintLine(void) {
+    uint32_t printedLineWidth = 0;
+    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
+    FFOptionsLogo* logo = &instance.config.logo;
+
+    if (cache->lines.length > 0 && (logo->position == FF_LOGO_POSITION_LEFT || logo->position == FF_LOGO_POSITION_RIGHT) && cache->nextLine < cache->lines.length) {
+        FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
+
+        if (logo->position == FF_LOGO_POSITION_RIGHT && line->chars.length > 0) {
+            printf("\033[9999999C\033[%uD", cache->rightOffset);
+            ffStrbufWriteTo(&line->chars, stdout);
+            fputs("\033[G", stdout);
+        } else {
+            ffStrbufWriteTo(&line->chars, stdout);
+            printedLineWidth = line->width;
+        }
+
+        ++cache->nextLine;
+    }
+
     if (instance.state.logoWidth > 0) {
-        printf("\033[%uC", instance.state.logoWidth);
+        if (instance.config.logo.position == FF_LOGO_POSITION_LEFT) {
+            uint32_t remaining = instance.state.logoWidth;
+            remaining = printedLineWidth < remaining ? remaining - printedLineWidth : 0;
+            ffPrintCharTimes(' ', remaining);
+        } else {
+            printf("\033[%uC", instance.state.logoWidth);
+        }
     }
 
     if (instance.state.dynamicInterval > 0) {
@@ -696,6 +916,30 @@ void ffLogoPrintLine(void) {
 }
 
 void ffLogoPrintRemaining(void) {
+    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
+    FFOptionsLogo* logo = &instance.config.logo;
+
+    if (cache->lines.length > 0 && (logo->position == FF_LOGO_POSITION_LEFT || logo->position == FF_LOGO_POSITION_RIGHT)) {
+        while (cache->nextLine < cache->lines.length) {
+            FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
+
+            if (logo->position == FF_LOGO_POSITION_RIGHT) {
+                printf("\033[9999999C\033[%uD", cache->rightOffset);
+            }
+            ffStrbufPutTo(&line->chars, stdout);
+
+            ++cache->nextLine;
+        }
+
+        if (!instance.config.display.pipe) {
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+        }
+
+        instance.state.keysHeight = instance.state.logoHeight + 1;
+        logoLineCacheClear(cache);
+        return;
+    }
+
     if (instance.state.keysHeight <= instance.state.logoHeight) {
         ffPrintCharTimes('\n', instance.state.logoHeight - instance.state.keysHeight + 1);
     }
