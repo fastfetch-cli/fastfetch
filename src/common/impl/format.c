@@ -251,14 +251,15 @@ static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
     ffStrbufAppendF(buffer, "%s: %s", prefix, err ? err : "unknown");
 }
 
-static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+static bool parseLuaString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
     const char* err = loadLuaState();
     if (err) {
         ffStrbufAppendF(buffer, "Lua init error: %s", err);
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY argNameBuf = ffStrbufCreate();
+    bool ret = false;
 
     lua_State* L = luaData.L;
     // Clear stack and load chunk
@@ -330,7 +331,9 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
             appendLuaError(buffer, "Lua runtime error", L);
         } else {
             int nresults = luaData.fflua_gettop(L);
-            if (nresults > 0) {
+            if (nresults == 0) {
+                ffStrbufAppendS(buffer, "Lua result error: no result");
+            } else {
                 // Convert first result to string
                 const char* res = luaData.fflua_tolstring(L, 1, NULL);
                 if (res) {
@@ -343,10 +346,12 @@ static void parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
                         ffStrbufAppendS(buffer, sval);
                     }
                 }
+                ret = true;
             }
         }
     }
     luaData.fflua_settop(L, 0);
+    return ret;
 }
 #endif
 
@@ -420,11 +425,11 @@ static const char* loadQuickJSState(void) {
     return NULL;
 }
 
-static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
     const char* err = loadQuickJSState();
     if (err) {
-        ffStrbufAppendF(buffer, "QJS init error: %s", err);
-        return;
+        ffStrbufAppendF(buffer, "Qjs init error: %s", err);
+        return false;
     }
     JSContext* ctx = qjsData.ctx;
     JSValue argsObj = qjsData.ffJS_NewObject(ctx);
@@ -497,33 +502,37 @@ static void parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
         }
         qjsData.ffJS_SetPropertyStr(ctx, argsObj, argNameBuf.chars, value);
     }
-    JSValue result = qjsData.ffJS_EvalThis(ctx, argsObj, script, scriptLen, "fastfetch-quickjs-format", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
+    JSValue result = qjsData.ffJS_EvalThis(ctx, argsObj, script, scriptLen, "", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
 
     qjsData.ffJS_FreeValue(ctx, argsObj);
 
+    bool ret = false;
     if (JS_IsException(result)) {
         JSValue exc = qjsData.ffJS_GetException(ctx);
         const char* message = qjsData.ffJS_ToCStringLen2(ctx, NULL, exc, false);
         qjsData.ffJS_FreeValue(ctx, exc);
-        ffStrbufAppendF(buffer, "QJS runtime error: %s", message ?: "unknown");
+        ffStrbufAppendF(buffer, "Qjs runtime error: %s", message ?: "unknown");
         if (message) {
             qjsData.ffJS_FreeCString(ctx, message);
         }
-        return;
-    }
-
-    size_t len;
-    const char* res = qjsData.ffJS_ToCStringLen2(ctx, &len, result, false);
-    if (res) {
-        ffStrbufAppendNS(buffer, (uint32_t) len, res);
-        qjsData.ffJS_FreeCString(ctx, res);
+    } else if (JS_IsUndefined(result)) {
+        ffStrbufAppendS(buffer, "Qjs result error: undefined result");
+    } else {
+        size_t len;
+        const char* res = qjsData.ffJS_ToCStringLen2(ctx, &len, result, false);
+        if (res) {
+            ffStrbufAppendNS(buffer, (uint32_t) len, res);
+            qjsData.ffJS_FreeCString(ctx, res);
+        }
+        ret = true;
     }
 
     qjsData.ffJS_FreeValue(ctx, result);
+    return ret;
 }
 #endif
 
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+bool ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
 #if FF_HAVE_QUICKJS
     if (ffStrbufStartsWithS(formatstr, "qjs:")) {
         return parseQuickJSString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
@@ -806,4 +815,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
     if (!instance.config.display.pipe) {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
     }
+
+    return true;
 }

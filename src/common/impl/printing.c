@@ -81,18 +81,24 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     }
 }
 
-void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments) {
+bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    if (moduleArgs) {
-        ffParseFormatString(&buffer, &moduleArgs->outputFormat, numArgs, arguments);
+    bool success;
+    if (__builtin_expect(moduleArgs != NULL, 1)) {
+        success = ffParseFormatString(&buffer, &moduleArgs->outputFormat, numArgs, arguments);
     } else {
-        ffStrbufAppendS(&buffer, "unknown");
+        ffStrbufSetStatic(&buffer, "undefined format");
+        success = false;
     }
 
-    if (buffer.length) {
+    if (success) {
         ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
         ffStrbufPutTo(&buffer, stdout);
+    } else {
+        ffPrintError(moduleName, moduleIndex, moduleArgs, printType, "%s", buffer.chars);
     }
+
+    return success;
 }
 
 void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...) {
