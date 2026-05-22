@@ -532,20 +532,7 @@ static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
 }
 #endif
 
-bool ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
-#if FF_HAVE_QUICKJS
-    if (ffStrbufStartsWithS(formatstr, "qjs:")) {
-        return parseQuickJSString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
-    }
-#endif
-
-#if FF_HAVE_LUA
-    if (ffStrbufStartsWithS(formatstr, "lua:")) {
-        // If outputFormat starts with "lua:", treat the rest as a Lua script
-        return parseLuaString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
-    }
-#endif
-
+static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
     uint32_t argCounter = 0;
 
     uint32_t numOpenIfs = 0;
@@ -817,4 +804,21 @@ bool ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
     }
 
     return true;
+}
+
+bool ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+#if FF_HAVE_QUICKJS
+    if (ffStrbufStartsWithS(formatstr, "qjs:")) {
+        return parseQuickJSString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
+#if FF_HAVE_LUA
+    if (ffStrbufStartsWithS(formatstr, "lua:")) {
+        // If outputFormat starts with "lua:", treat the rest as a Lua script
+        return parseLuaString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
+    return parseFormatString(buffer, formatstr, numArgs, arguments);
 }
