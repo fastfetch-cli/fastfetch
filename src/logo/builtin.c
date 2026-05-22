@@ -1916,6 +1916,53 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // Finix
+    {
+        .names = { "Finix" },
+        .lines = FASTFETCH_DATATEXT_LOGO_FINIX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+    },
+    // FinixSmall
+    {
+        .names = { "Finix_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FINIX_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+    },
+    // FinixOld
+    {
+        .names = { "Finix_old" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FINIX_OLD,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+    },
+    // FinixOldSmall
+    {
+        .names = { "Finix_old_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FINIX_OLD_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+    },
     // Floflis
     {
         .names = { "Floflis" },
