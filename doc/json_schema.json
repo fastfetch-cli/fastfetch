@@ -731,6 +731,11 @@
                                     "description": "Top padding of the logo",
                                     "minimum": 0
                                 },
+                                "bottom": {
+                                    "type": "integer",
+                                    "description": "Bottom padding of the logo; only supported when position is `top`",
+                                    "minimum": 0
+                                },
                                 "left": {
                                     "type": "integer",
                                     "description": "Left padding of the logo",

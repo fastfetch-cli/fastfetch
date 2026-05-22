@@ -12,6 +12,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->width = 0;
     options->height = 0; // preserve aspect ratio
     options->paddingTop = 0;
+    options->paddingBottom = 0;
     options->paddingLeft = 0;
     options->paddingRight = 4;
     options->printRemaining = true;
@@ -92,6 +93,8 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             options->paddingRight = padding;
         } else if (ffStrEqualsIgnCase(subKey, "padding-top")) {
             options->paddingTop = ffOptionParseUInt32(key, value);
+        } else if (ffStrEqualsIgnCase(subKey, "padding-bottom")) {
+            options->paddingBottom = ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subKey, "padding-left")) {
             options->paddingLeft = ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subKey, "padding-right")) {
@@ -212,6 +215,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     if (yyjson_is_null(object)) {
         options->type = FF_LOGO_TYPE_NONE;
         options->paddingTop = 0;
+        options->paddingBottom = 0;
         options->paddingRight = 0;
         options->paddingLeft = 0;
         return NULL;
@@ -312,6 +316,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             FF_PARSE_PADDING_POSITON(left, paddingLeft);
             FF_PARSE_PADDING_POSITON(top, paddingTop);
             FF_PARSE_PADDING_POSITON(right, paddingRight);
+            FF_PARSE_PADDING_POSITON(bottom, paddingBottom);
 #undef FF_PARSE_PADDING_POSITON
             continue;
         } else if (unsafe_yyjson_equals_str(key, "printRemaining")) {
@@ -494,6 +499,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         yyjson_mut_val* padding = yyjson_mut_obj_add_obj(doc, obj, "padding");
         yyjson_mut_obj_add_uint(doc, padding, "top", options->paddingTop);
         yyjson_mut_obj_add_uint(doc, padding, "left", options->paddingLeft);
+        yyjson_mut_obj_add_uint(doc, padding, "bottom", options->paddingBottom);
         yyjson_mut_obj_add_uint(doc, padding, "right", options->paddingRight);
     }
 

@@ -275,214 +275,23 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
     return true;
 }
 
-// If result is NULL, calculate logo width
-// Returns logo height
-static uint32_t logoAppendChars(const char* data, bool doColorReplacement, FFstrbuf* result) {
-    FFOptionsLogo* options = &instance.config.logo;
-    uint32_t currentlineLength = options->type == FF_LOGO_TYPE_IMAGE_CHAFA ? 0 : options->width; // For chafa, unit of options->width is pixels
-    uint32_t logoHeight = 0;
-
-    if (result) {
-        if (options->position != FF_LOGO_POSITION_RIGHT) {
-            ffStrbufAppendNC(result, options->paddingLeft, ' ');
-        } else {
-            ffStrbufAppendF(result, "\e[9999999C\e[%dD", options->paddingRight + instance.state.logoWidth);
-        }
-    }
-
-    while (*data != '\0') {
-        // We are at the end of a line. Print paddings and update max line length
-        if (*data == '\n' || (*data == '\r' && *(data + 1) == '\n')) {
-            // We have \r\n, skip the \r
-            if (*data == '\r') {
-                ++data;
-            }
-
-            if (result) {
-                ffStrbufAppendC(result, '\n');
-            }
-            ++data;
-
-            if (result) {
-                if (options->position != FF_LOGO_POSITION_RIGHT) {
-                    ffStrbufAppendNC(result, options->paddingLeft, ' ');
-                } else {
-                    ffStrbufAppendF(result, "\e[9999999C\e[%dD", options->paddingRight + instance.state.logoWidth);
-                }
-            }
-
-            if (currentlineLength > instance.state.logoWidth) {
-                instance.state.logoWidth = currentlineLength;
-            }
-
-            currentlineLength = 0;
-            ++logoHeight;
-            continue;
-        }
-
-        // Always print tabs as 4 spaces, to have consistent spacing
-        if (*data == '\t') {
-            if (result) {
-                ffStrbufAppendNC(result, 4, ' ');
-            }
-            ++data;
-            continue;
-        }
-
-        // We have an escape sequence directly as bytes. We print it, but don't increase the line length
-        if (*data == '\e' && *(data + 1) == '[') {
-            const char* start = data;
-
-            if (result) {
-                ffStrbufAppendS(result, "\e[");
-            }
-            data += 2;
-
-            while (ffCharIsDigit(*data) || *data == ';') {
-                if (result) {
-                    ffStrbufAppendC(result, *data); // number
-                }
-                ++data;
-            }
-
-            // We have a valid control sequence, print it and continue with next char
-            if (isascii(*data)) {
-                if (result) {
-                    ffStrbufAppendC(result, *data); // single letter, end of control sequence
-                }
-                ++data;
-                continue;
-            }
-
-            // Invalid control sequence, try to get most accurate length
-            currentlineLength += (uint32_t) (data - start - 1); //-1 for \033 which for sure doesn't take any space
-
-            // Don't continue here, print the char after the letters with the unicode printing
-        }
-
-        // We have a fastfetch color placeholder. Replace it with the esacape sequence, don't increase the line length
-        if (doColorReplacement && *data == '$') {
-            ++data;
-
-            // If we have $$, or $\0, print it as single $
-            if (*data == '$' || *data == '\0') {
-                if (result) {
-                    ffStrbufAppendC(result, '$');
-                }
-                ++currentlineLength;
-                ++data;
-                continue;
-            }
-
-            if (!instance.config.display.pipe) {
-                // Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-                int index = *data - '1';
-
-                // If the index is valid, print the color. Otherwise continue as normal
-                if (index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS) {
-                    if (result) {
-                        ffStrbufAppendC(result, '$');
-                    }
-                    ++currentlineLength;
-                    // Don't continue here, we want to print the current char as unicode
-                } else {
-                    if (result) {
-                        ffStrbufAppendF(result, "\e[%sm", options->colors[index].chars);
-                    }
-                    ++data;
-                    continue;
-                }
-            } else {
-                ++data;
-                continue;
-            }
-        }
-
-        // Do the printing, respecting unicode
-
-        ++currentlineLength;
-
-        int codepoint = (unsigned char) *data;
-        uint8_t bytes;
-
-        if (codepoint <= 127) {
-            bytes = 1;
-        } else if ((codepoint & 0xE0) == 0xC0) {
-            bytes = 2;
-        } else if ((codepoint & 0xF0) == 0xE0) {
-            bytes = 3;
-        } else if ((codepoint & 0xF8) == 0xF0) {
-            bytes = 4;
-        } else {
-            bytes = 1; // Invalid utf8, print it as is, byte by byte
-        }
-
-        for (uint8_t i = 0; i < bytes; ++i) {
-            if (*data == '\0') {
-                break;
-            }
-
-            if (result) {
-                ffStrbufAppendC(result, *data);
-            }
-            ++data;
-        }
-    }
-    // Happens if the last line is the longest
-    if (currentlineLength > instance.state.logoWidth) {
-        instance.state.logoWidth = currentlineLength;
-    }
-
-    return options->type != FF_LOGO_TYPE_IMAGE_CHAFA && options->height > logoHeight ? options->height : logoHeight;
-}
-
 void ffLogoPrintChars(const char* data, bool doColorReplacement) {
     FFOptionsLogo* options = &instance.config.logo;
 
-    if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT) {
-        logoLineCacheBuild(data, doColorReplacement);
+    logoLineCacheBuild(data, doColorReplacement);
+
+    if (options->position != FF_LOGO_POSITION_TOP) {
         return;
     }
 
-    if (options->position == FF_LOGO_POSITION_RIGHT) {
-        logoAppendChars(data, doColorReplacement, NULL);
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    FF_LIST_FOR_EACH (FFLogoCachedLine, line, instance.state.logoLineCache.lines) {
+        ffStrbufAppend(&result, &line->chars);
+        ffStrbufAppendC(&result, '\n');
     }
-
-    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
-
-    if (!instance.config.display.pipe && instance.config.display.brightColor) {
-        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
-    }
-
-    ffStrbufAppendNC(&result, options->paddingTop, '\n');
-
-    // Use logoColor[0] as the default color
-    if (doColorReplacement && !instance.config.display.pipe) {
-        ffStrbufAppendF(&result, "\e[%sm", options->colors[0].chars);
-    }
-
-    instance.state.logoHeight = options->paddingTop + logoAppendChars(data, doColorReplacement, &result);
-
-    if (!instance.config.display.pipe) {
-        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
-    }
-
-    if (options->position == FF_LOGO_POSITION_LEFT) {
-        instance.state.logoWidth += options->paddingLeft + options->paddingRight;
-
-        // Go to the leftmost position and go up the height
-        ffStrbufAppendF(&result, "\e[1G\e[%uA", instance.state.logoHeight);
-    } else if (options->position == FF_LOGO_POSITION_RIGHT) {
-        instance.state.logoWidth = 0;
-
-        // Go to the leftmost position and go up the height
-        ffStrbufAppendF(&result, "\e[1G\e[%uA", instance.state.logoHeight);
-    } else if (options->position == FF_LOGO_POSITION_TOP) {
-        instance.state.logoWidth = instance.state.logoHeight = 0;
-        ffStrbufAppendNC(&result, options->paddingRight, '\n');
-    }
-
+    ffStrbufAppendNC(&result, options->paddingBottom, '\n');
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &result);
+    instance.state.logoWidth = instance.state.logoHeight = 0;
 }
 
 static void logoApplyColors(const FFlogo* logo, bool replacement) {
