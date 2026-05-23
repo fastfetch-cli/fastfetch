@@ -30,6 +30,9 @@ static void logoLineCachePush(const FFstrbuf* chars, uint32_t width, FFLogoLineC
     FFLogoCachedLine* line = FF_LIST_ADD(FFLogoCachedLine, cache->lines);
     if (width > 0) {
         ffStrbufInitCopy(&line->chars, chars);
+        if (!instance.config.display.pipe) {
+            ffStrbufAppendS(&line->chars, FASTFETCH_TEXT_MODIFIER_RESET);
+        }
     } else {
         ffStrbufInit(&line->chars);
     }
