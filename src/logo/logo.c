@@ -45,7 +45,9 @@ static void logoLineCacheBuild(const char* data, bool doColorReplacement) {
 
     logoLineCacheClear(cache);
 
-    uint32_t maxLineWidth = 0;
+    // Overrides the auto detected max-width with the configured width, if set.
+    // In case we fail to get the actual width of the logo, as we don't use `wcwidth`
+    uint32_t maxLineWidth = options->width;
     uint32_t parsedHeight = 0;
 
     FF_STRBUF_AUTO_DESTROY carryColor = ffStrbufCreate();
