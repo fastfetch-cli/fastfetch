@@ -322,7 +322,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                                                                                                                      : FF_COLOR_FG_RED),
                         ms);
                 }
-                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len - 1, str); // Save; Up 1; Right 9999999; Left <len - 1>; Print <str>; Load
             }
         }
 
