@@ -1750,10 +1750,18 @@
                                         "$ref": "#/$defs/percent"
                                     },
                                     "ddcciSleep": {
-                                        "type": "integer",
-                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
-                                        "minimum": 0,
-                                        "maximum": 400,
+                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSet to null to skip DDC/CI detection\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
+                                        "oneOf": [
+                                            {
+                                                "type": "null",
+                                                "description": "Skip DDC/CI detection"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 400
+                                            }
+                                        ],
                                         "default": 10
                                     },
                                     "compact": {

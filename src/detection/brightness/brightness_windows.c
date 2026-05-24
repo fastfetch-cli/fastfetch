@@ -213,7 +213,7 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
         detectWithWmi(result);
     }
 
-    if (result->length < displayServer->displays.length) {
+    if (options->ddcciSleep != FF_BRIGHTNESS_DDCCI_SLEEP_SKIP && result->length < displayServer->displays.length) {
         FF_DEBUG("resultCount=%u < displayCount=%u, trying DDC/CI", result->length, displayServer->displays.length);
         detectWithDdcci(displayServer, result);
     }

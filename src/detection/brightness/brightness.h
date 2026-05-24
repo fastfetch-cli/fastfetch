@@ -20,6 +20,7 @@ enum {
     FF_DDC_CI_COMMAND_PACKET = 0x80u,
     FF_DDC_CI_LUMINANCE_OPCODE = 0x10u,
 };
+#define FF_BRIGHTNESS_DDCCI_SLEEP_SKIP ((uint32_t) -1)
 #define FF_DDC_CI_MAKE_HEADER(len) (FF_DDC_CI_COMMAND_PACKET | ((len) & 0x7F))
 
 const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result); // list of FFBrightnessResult

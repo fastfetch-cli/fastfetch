@@ -139,7 +139,8 @@ const char* detectWithBacklight(FF_A_UNUSED FFBrightnessOptions* options, FF_A_U
 
 const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
     detectWithBacklight(options, result);
-    if (result->length == 0) {
+
+    if (options->ddcciSleep != FF_BRIGHTNESS_DDCCI_SLEEP_SKIP && result->length == 0) {
         detectWithDdcci(options, result);
     }
     return NULL;

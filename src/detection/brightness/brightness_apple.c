@@ -236,7 +236,7 @@ const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result) {
 
     detectWithDisplayServices(displayServer, result);
 
-    if (displayServer->displays.length > result->length) {
+    if (options->ddcciSleep != FF_BRIGHTNESS_DDCCI_SLEEP_SKIP && displayServer->displays.length > result->length) {
         detectWithDdcci(displayServer, options, result);
     }
 

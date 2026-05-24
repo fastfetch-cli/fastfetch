@@ -164,9 +164,11 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
     detectWithBacklight(result);
 
 #ifdef FF_HAVE_DDCUTIL
-    const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
-    if (result->length < displayServer->displays.length) {
-        detectWithDdcci(options, result);
+    if (options->ddcciSleep != FF_BRIGHTNESS_DDCCI_SLEEP_SKIP) {
+        const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
+        if (result->length < displayServer->displays.length) {
+            detectWithDdcci(options, result);
+        }
     }
 #endif
 
