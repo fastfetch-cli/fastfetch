@@ -39,12 +39,9 @@ static void logoLineCachePush(const FFstrbuf* chars, uint32_t width, FFLogoLineC
     line->width = width;
 }
 
-static void logoLineCacheBuild(const char* data, bool doColorReplacement) {
+static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bool doColorReplacement) {
     FFOptionsLogo* options = &instance.config.logo;
-    bool left = options->position == FF_LOGO_POSITION_LEFT;
-    bool right = options->position == FF_LOGO_POSITION_RIGHT;
     bool keepCarryColor = options->type != FF_LOGO_TYPE_IMAGE_CHAFA;
-    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
 
     logoLineCacheClear(cache);
 
@@ -75,7 +72,7 @@ static void logoLineCacheBuild(const char* data, bool doColorReplacement) {
                 ffStrbufAppend(&line, &carryColor);
             }
 
-            if (left && options->paddingLeft > 0) {
+            if ((options->position != FF_LOGO_POSITION_RIGHT) && options->paddingLeft > 0) {
                 ffStrbufAppendNC(&line, options->paddingLeft, ' ');
                 lineWidth += options->paddingLeft;
             }
@@ -192,9 +189,9 @@ static void logoLineCacheBuild(const char* data, bool doColorReplacement) {
     }
 
     instance.state.logoHeight = options->paddingTop + parsedHeight;
-    if (left) {
+    if (options->position == FF_LOGO_POSITION_LEFT) {
         instance.state.logoWidth = maxLineWidth + options->paddingRight;
-    } else if (right) {
+    } else {
         instance.state.logoWidth = 0;
     }
 
@@ -282,21 +279,23 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement) {
     FFOptionsLogo* options = &instance.config.logo;
+    FFLogoLineCacheState* cache = &instance.state.logoLineCache;
 
-    logoLineCacheBuild(data, doColorReplacement);
+    logoLineCacheBuild(cache, data, doColorReplacement);
 
     if (options->position != FF_LOGO_POSITION_TOP) {
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    FF_LIST_FOR_EACH (FFLogoCachedLine, line, instance.state.logoLineCache.lines) {
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(4096);
+    FF_LIST_FOR_EACH (FFLogoCachedLine, line, cache->lines) {
         ffStrbufAppend(&result, &line->chars);
         ffStrbufAppendC(&result, '\n');
     }
     ffStrbufAppendNC(&result, options->paddingBottom, '\n');
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &result);
     instance.state.logoWidth = instance.state.logoHeight = 0;
+    logoLineCacheClear(cache);
 }
 
 static void logoApplyColors(const FFlogo* logo, bool replacement) {
