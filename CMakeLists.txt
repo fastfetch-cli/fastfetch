@@ -409,6 +409,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
     src/common/impl/smbios.c
+    src/common/impl/wcwidth.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -1355,10 +1356,6 @@ if(WIN32)
     endif()
 endif()
 include(CheckFunctionExists)
-check_function_exists(wcwidth HAVE_WCWIDTH)
-if(NOT HAVE_WCWIDTH)
-    list(APPEND LIBFASTFETCH_SRC src/common/impl/wcwidth.c)
-endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
 endif()
@@ -1515,10 +1512,6 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
     endif()
     unset(CMAKE_REQUIRED_DEFINITIONS)
-endif()
-
-if(HAVE_WCWIDTH)
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WCWIDTH)
 endif()
 
 if(HAVE_PIPE2)
@@ -2083,12 +2076,20 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-strutil
+        tests/strutil.c
+    )
+    target_link_libraries(fastfetch-test-strutil
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)
     add_test(NAME test-color COMMAND fastfetch-test-color)
     add_test(NAME test-duration COMMAND fastfetch-test-duration)
+    add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
 endif()
 
 ##################
