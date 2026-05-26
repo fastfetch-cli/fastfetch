@@ -1,63 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/stringUtils.h"
-#include "common/mallocHelper.h"
-#include "common/wcwidth.h"
 #include "common/textModifier.h"
 #include "logo/logo.h"
 #include "modules/separator/separator.h"
-
-#include <locale.h>
-
-#if __SIZEOF_WCHAR_T__ == 4
-static inline size_t mbrtoc32(uint32_t* restrict pc32, const char* restrict s, size_t n, mbstate_t* restrict ps) {
-    return mbrtowc((wchar_t*) pc32, s, n, ps);
-}
-#else
-    #include <uchar.h>
-#endif
-
-static uint8_t getMbrWidth(const char* mbstr, uint32_t length, const char** next, mbstate_t* state) {
-    if (__builtin_expect((uint8_t) *mbstr < 0x80, true)) // ASCII fast path
-    {
-        if (next) {
-            *next = mbstr + 1;
-        }
-        return 1;
-    }
-
-    uint32_t c32;
-    uint32_t len = (uint32_t) mbrtoc32(&c32, mbstr, length, state);
-    if (len >= (uint32_t) -3) {
-        // Invalid or incomplete multibyte sequence
-        if (next) {
-            *next = mbstr + 1;
-        }
-        return 1;
-    }
-
-    if (next) {
-        *next = mbstr + len;
-    }
-    int width = mk_wcwidth(c32);
-    return width < 0 ? 0 : (uint8_t) width;
-}
-
-static uint32_t getWcsWidth(const FFstrbuf* mbstr) {
-    mbstate_t state = {};
-    uint32_t remainLength = mbstr->length;
-    uint32_t result = 0;
-
-    const char* ptr = mbstr->chars;
-    while (remainLength > 0 && *ptr != '\0') {
-        const char* lastPtr = NULL;
-        result += getMbrWidth(ptr, remainLength, &lastPtr, &state);
-        remainLength -= (uint32_t) (lastPtr - ptr);
-        ptr = lastPtr;
-    }
-
-    return result > 0 ? (uint32_t) result : mbstr->length;
-}
 
 bool ffPrintSeparator(FFSeparatorOptions* options) {
     ffLogoPrintLine();
@@ -75,17 +21,16 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
             }
         }
     } else {
-        setlocale(LC_CTYPE, "");
         const FFPlatform* platform = &instance.state.platform;
 
         uint32_t titleLength = 1                                                                                      // @
-            + getWcsWidth(&platform->userName)                                                                        // user name
+            + ffUtf8StrWidth(platform->userName.chars, platform->userName.length)                                     // user name
             + (instance.state.titleFqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
 
         if (__builtin_expect(options->string.length == 1, 1)) {
             ffPrintCharTimes(options->string.chars[0], titleLength);
         } else {
-            uint32_t wcsLength = getWcsWidth(&options->string);
+            uint32_t wcsLength = ffUtf8StrWidth(options->string.chars, options->string.length);
 
             int remaining = (int) titleLength;
             // Write the whole separator as often as it fits fully into titleLength
@@ -98,11 +43,17 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
                 if (wcsLength != options->string.length) {
                     // Unicode chars
                     const char* ptr = options->string.chars;
-                    mbstate_t state = {};
-                    const char* next = NULL;
-                    while (remaining > 0 && *ptr != '\0') {
-                        remaining -= (int) getMbrWidth(ptr, (uint32_t) (options->string.length - (ptr - options->string.chars)), &next, &state);
-                        ptr = next;
+                    uint32_t remainBytes = options->string.length;
+                    while (remaining > 0 && remainBytes > 0 && *ptr != '\0') {
+                        uint8_t charWidth = 0;
+                        uint8_t bytes = ffUtf8CharLenWidth(ptr, remainBytes, &charWidth);
+                        if (__builtin_expect(bytes == 0, false)) {
+                            break;
+                        }
+
+                        remaining -= (int) charWidth;
+                        ptr += bytes;
+                        remainBytes -= bytes;
                     }
                     fwrite(options->string.chars, (size_t) (ptr - options->string.chars), 1, stdout);
                 } else {
@@ -110,7 +61,6 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
                 }
             }
         }
-        setlocale(LC_CTYPE, "C");
     }
 
     if (options->outputColor.length && !instance.config.display.pipe) {

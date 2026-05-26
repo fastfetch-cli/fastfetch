@@ -139,22 +139,9 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
                     }
                 }
 
-                ++lineWidth;
-
-                int codepoint = (unsigned char) *data;
-                uint8_t bytes;
-
-                if (codepoint <= 127) {
-                    bytes = 1;
-                } else if ((codepoint & 0xE0) == 0xC0) {
-                    bytes = 2;
-                } else if ((codepoint & 0xF0) == 0xE0) {
-                    bytes = 3;
-                } else if ((codepoint & 0xF8) == 0xF0) {
-                    bytes = 4;
-                } else {
-                    bytes = 1;
-                }
+                uint8_t charWidth;
+                uint8_t bytes = ffUtf8CharLenWidth(data, UINT32_MAX, &charWidth);
+                lineWidth += charWidth;
 
                 for (uint8_t i = 0; i < bytes; ++i) {
                     if (*data == '\0') {
