@@ -110,7 +110,7 @@ static bool ffWifiNlGetFamilyId(FFWifiNlContext* ctx) {
         },
         .genl = {
             .cmd = CTRL_CMD_GETFAMILY,
-            .version = 1,
+            .version = 1, // generic netlink control protocol version
         },
     };
 
@@ -197,7 +197,7 @@ static bool ffWifiNlInit(FFWifiNlContext* ctx) {
             ctx->sockFd,
             SOL_SOCKET,
             SO_RCVTIMEO,
-            &(struct timeval){ .tv_sec = 0, .tv_usec = 250000 },
+            &(struct timeval){ .tv_sec = 0, .tv_usec = 250000 }, // 250 ms recv timeout
             sizeof(struct timeval)) < 0) {
         FF_DEBUG("Failed to set netlink receive timeout: %s", strerror(errno));
         return false;
@@ -243,12 +243,12 @@ static double ffWifiParseBitrateFromRateInfo(const struct nlattr* rateAttr, FFst
                 break;
             case NL80211_RATE_INFO_BITRATE32:
                 if (payload >= sizeof(uint32_t)) {
-                    rate = *(uint32_t*) ffWifiNlAttrData(info) / 10.0;
+                    rate = *(uint32_t*) ffWifiNlAttrData(info) / 10.0; // nl80211 bitrate unit: 100 kbps => Mbps
                 }
                 break;
             case NL80211_RATE_INFO_BITRATE:
                 if (payload >= sizeof(uint16_t) && rate == -DBL_MAX) {
-                    rate = *(uint16_t*) ffWifiNlAttrData(info) / 10.0;
+                    rate = *(uint16_t*) ffWifiNlAttrData(info) / 10.0; // nl80211 bitrate unit: 100 kbps => Mbps
                 }
                 break;
         }
@@ -291,54 +291,54 @@ static void ffWifiApplySecurityFlags(FFWifiResult* item, const FFWifiSecurityFla
 }
 
 static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags* sec) {
-    if (len < 8) {
+    if (len < 8) { // version(2) + group cipher suite(4) + pairwise count(2)
         return;
     }
 
     sec->wpa2 = true;
     size_t pos = 0;
 
-    pos += 2;
-    if (pos + 4 > len) {
+    pos += 2; // RSN version field length
+    if (pos + 4 > len) { // group cipher suite selector length
         return;
     }
-    pos += 4;
+    pos += 4; // skip group cipher suite selector
 
-    if (pos + 2 > len) {
+    if (pos + 2 > len) { // pairwise cipher suite count field length
         return;
     }
     uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
-    pos += 2;
+    pos += 2; // skip pairwise cipher suite count field
 
-    size_t pairwiseLen = (size_t) pairwiseCount * 4;
+    size_t pairwiseLen = (size_t) pairwiseCount * 4; // each suite selector is 4 bytes
     if (pos + pairwiseLen > len) {
         return;
     }
     pos += pairwiseLen;
 
-    if (pos + 2 > len) {
+    if (pos + 2 > len) { // AKM suite count field length
         return;
     }
     uint16_t akmCount = *(uint16_t*) (ie + pos);
-    pos += 2;
+    pos += 2; // skip AKM suite count field
 
-    for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) {
+    for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
         const uint8_t* akm = ie + pos;
-        if (akm[0] != 0x00 || akm[1] != 0x0f || akm[2] != 0xac) {
+        if (akm[0] != 0x00 || akm[1] != 0x0f || akm[2] != 0xac) { // RSN OUI 00:0f:ac
             continue;
         }
 
         switch (akm[3]) {
-            case 1:
-            case 5:
-            case 11:
-            case 12:
+            case 1:  // 802.1X
+            case 5:  // FT/802.1X
+            case 11: // 802.1X-SHA256
+            case 12: // FT/802.1X-SHA384 (suite selector value)
                 sec->eap = true;
                 break;
-            case 8:
+            case 8:  // SAE (WPA3-Personal)
                 sec->wpa3 = true;
                 break;
-            case 18:
+            case 18: // OWE
                 sec->owe = true;
                 break;
             default:
@@ -352,45 +352,45 @@ static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags*
 }
 
 static void ffWifiParseWpaVendorIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags* sec) {
-    if (len < 8) {
+    if (len < 8) { // OUI+type(4) + version(2) + multicast cipher suite(4) starts here
         return;
     }
 
-    if (!(ie[0] == 0x00 && ie[1] == 0x50 && ie[2] == 0xf2 && ie[3] == 0x01)) {
+    if (!(ie[0] == 0x00 && ie[1] == 0x50 && ie[2] == 0xf2 && ie[3] == 0x01)) { // Microsoft WPA OUI/type
         return;
     }
 
     sec->wpa = true;
 
-    size_t pos = 4;
-    if (pos + 2 > len) {
+    size_t pos = 4; // WPA vendor OUI/type selector length
+    if (pos + 2 > len) { // WPA version field length
         return;
     }
-    pos += 2;
+    pos += 2; // skip WPA version
 
-    if (pos + 4 > len) {
+    if (pos + 4 > len) { // multicast cipher suite selector length
         return;
     }
-    pos += 4;
+    pos += 4; // skip multicast cipher suite selector
 
-    if (pos + 2 > len) {
+    if (pos + 2 > len) { // unicast cipher suite count field length
         return;
     }
     uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
-    pos += 2 + (size_t) pairwiseCount * 4;
+    pos += 2 + (size_t) pairwiseCount * 4; // count field(2) + N unicast suite selectors(4 each)
 
-    if (pos + 2 > len) {
+    if (pos + 2 > len) { // AKM suite count field length
         return;
     }
     uint16_t akmCount = *(uint16_t*) (ie + pos);
-    pos += 2;
+    pos += 2; // skip AKM suite count field
 
-    for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) {
+    for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
         const uint8_t* akm = ie + pos;
-        if (!(akm[0] == 0x00 && akm[1] == 0x50 && akm[2] == 0xf2)) {
+        if (!(akm[0] == 0x00 && akm[1] == 0x50 && akm[2] == 0xf2)) { // WPA vendor OUI 00:50:f2
             continue;
         }
-        if (akm[3] == 1) {
+        if (akm[3] == 1) { // WPA Enterprise (802.1X)
             sec->eap = true;
         }
     }
@@ -407,11 +407,11 @@ static void ffWifiParseInformationElements(const uint8_t* ies, size_t length, FF
         }
 
         const uint8_t* ie = ies + pos;
-        if (id == 0) {
+        if (id == 0) { // SSID element ID
             ffStrbufSetNS(&item->conn.ssid, len, (const char*) ie);
-        } else if (id == 48) {
+        } else if (id == 48) { // RSN element ID
             ffWifiParseRsnIe(ie, len, sec);
-        } else if (id == 221) {
+        } else if (id == 221) { // vendor-specific element ID (WPA IE lives here)
             ffWifiParseWpaVendorIe(ie, len, sec);
         }
 
@@ -452,11 +452,11 @@ static void ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item)
             item->conn.frequency = (uint16_t) *(uint32_t*) ffWifiNlAttrData(attr);
             item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
         } else if (type == NL80211_BSS_SIGNAL_MBM && payload >= sizeof(int32_t)) {
-            int rssi = *(int32_t*) ffWifiNlAttrData(attr) / 100;
+            int rssi = *(int32_t*) ffWifiNlAttrData(attr) / 100; // mBm (100 * dBm) => dBm
             item->conn.signalQuality = rssiToSignalQuality(rssi);
         } else if (type == NL80211_BSS_CAPABILITY && payload >= sizeof(uint16_t)) {
             uint16_t capability = *(uint16_t*) ffWifiNlAttrData(attr);
-            sec.privacy = (capability & (1u << 4u)) != 0;
+            sec.privacy = (capability & (1u << 4u)) != 0; // IEEE 802.11 capability bit 4: privacy
         } else if (type == NL80211_BSS_INFORMATION_ELEMENTS || type == NL80211_BSS_BEACON_IES) {
             ffWifiParseInformationElements((const uint8_t*) ffWifiNlAttrData(attr), payload, item, &sec);
         }
@@ -481,7 +481,7 @@ static bool ffWifiFetchScanInfo(FFWifiNlContext* ctx, FFWifiResult* item, uint32
         },
         .genl = {
             .cmd = NL80211_CMD_GET_SCAN,
-            .version = 0,
+            .version = 0, // nl80211 command version
         },
     };
 
@@ -595,7 +595,7 @@ static bool ffWifiFetchStationInfo(FFWifiNlContext* ctx, FFWifiResult* item, uin
         },
         .genl = {
             .cmd = NL80211_CMD_GET_STATION,
-            .version = 0,
+            .version = 0, // nl80211 command version
         },
     };
 
@@ -667,7 +667,7 @@ static const char* detectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, u
         if (ctx->sockFd == -1) {
             if (!ffWifiNlInit(ctx)) {
                 FF_DEBUG("Failed to initialize netlink context, skipping");
-                ctx->sockFd = -2; // Don't try again
+                ctx->sockFd = -2; // sentinel: permanent netlink failure, don't retry
                 return "Netlink initialization failed";
             }
         } else {
@@ -705,7 +705,7 @@ static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, cha
             sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
             if (sock < 0) {
                 FF_DEBUG("Failed to initialize ioctl context, skipping: %s", strerror(errno));
-                ctx->sockFd = -2; // Don't try again
+                ctx->sockFd = -2; // sentinel: permanent ioctl failure, don't retry
                 return "socket() failed";
             }
             ctx->sockFd = sock;
@@ -793,7 +793,7 @@ static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, cha
         FF_DEBUG("Getting bitrate via ioctl");
         if (ioctl(sock, SIOCGIWRATE, &iwr) >= 0) {
             if (iwr.u.bitrate.value > 0) {
-                item->conn.txRate = iwr.u.bitrate.value / 1000000.;
+                item->conn.txRate = iwr.u.bitrate.value / 1000000.; // bps => Mbps
                 FF_DEBUG("TX bitrate: %.2f Mbps", item->conn.txRate);
             } else {
                 FF_DEBUG("Bitrate value is zero or negative, ignoring");
@@ -806,16 +806,16 @@ static const char* detectWithIoctl(FFWifiIcContext* ctx, FFWifiResult* item, cha
     if (item->conn.frequency == 0 && item->conn.channel == 0) {
         FF_DEBUG("Getting frequency via ioctl");
         if (ioctl(sock, SIOCGIWFREQ, &iwr) >= 0) {
-            if (iwr.u.freq.e == 0 && iwr.u.freq.m <= 1000) {
+            if (iwr.u.freq.e == 0 && iwr.u.freq.m <= 1000) { // kernel may return direct channel number
                 item->conn.channel = (uint16_t) iwr.u.freq.m;
                 FF_DEBUG("Direct channel value: %u", item->conn.channel);
             } else {
                 // convert it to MHz
-                while (iwr.u.freq.e < 6) {
+                while (iwr.u.freq.e < 6) { // normalize exponent to 10^6 (MHz)
                     iwr.u.freq.m /= 10;
                     iwr.u.freq.e++;
                 }
-                while (iwr.u.freq.e > 6) {
+                while (iwr.u.freq.e > 6) { // normalize exponent to 10^6 (MHz)
                     iwr.u.freq.m *= 10;
                     iwr.u.freq.e--;
                 }
@@ -952,7 +952,7 @@ const char* ffDetectWifi(FFlist* result) {
             }
             flags[len] = '\0';
 
-            unsigned flagsVal = (unsigned) strtoul(flags, NULL, 16);
+            unsigned flagsVal = (unsigned) strtoul(flags, NULL, 16); // parse /sys flags as hexadecimal
             if (flagsVal & IFF_UP) {
                 ffStrbufSetStatic(&item->inf.status, "up");
             } else {
