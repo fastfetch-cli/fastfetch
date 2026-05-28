@@ -294,11 +294,16 @@ static void setShellInfoDetails(FFShellResult* result) {
 }
 
 static void setTerminalInfoDetails(FFTerminalResult* result) {
-    if (ffStrbufStartsWithC(&result->processName, '.') && ffStrbufContainS(&result->processName, "-wrap")) {
-        // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
-        // We use processName when detecting version and font, overriding it for simplification
-        ffStrbufSubstrBeforeLastC(&result->processName, '-');
+    // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
+    // We use processName when detecting version and font, overriding it for simplification
+    if (ffStrbufStartsWithC(&result->processName, '.')) {
         ffStrbufSubstrAfter(&result->processName, 0);
+        if (ffStrbufContainS(&result->processName, "-wra")) {
+            ffStrbufSubstrBeforeLastC(&result->processName, '-');
+        }
+        if (ffStrbufEndsWithC(&result->processName, '-')) {
+            ffStrbufSubstrBefore(&result->processName, result->processName.length - 1);
+        }
     }
 
     if (ffStrbufEqualS(&result->processName, "wezterm-gui")) {
