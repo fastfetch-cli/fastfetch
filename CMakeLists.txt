@@ -377,7 +377,7 @@ endif()
 # Ascii image data #
 ####################
 
-file(GLOB LOGO_FILES CONFIGURE_DEPENDS "src/logo/ascii/*.txt")
+file(GLOB LOGO_FILES CONFIGURE_DEPENDS "src/logo/ascii/[a-z_]/*.txt")
 set(LOGO_BUILTIN_H "#pragma once\n#pragma GCC diagnostic ignored \"-Wtrigraphs\"\n\n")
 foreach(file ${LOGO_FILES})
     fastfetch_load_text("${file}" content)
