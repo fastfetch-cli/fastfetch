@@ -137,6 +137,17 @@ static const FFlogo N[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NIXOS_OLD_SMALL
+    // NixOS2
+    {
+        .names = { "NixOS2" },
+        .lines = FASTFETCH_DATATEXT_LOGO_NIXOS2,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_NETBSD
     // NetBSD
     {
