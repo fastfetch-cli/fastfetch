@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo W[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_WII_LINUX
     // WiiLinux
     {
         .names = { "WiiLinuxNgx", "WiiLinux", "Wii-Linux", "Wii Linux" },
@@ -12,6 +13,8 @@ static const FFlogo W[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS_2025
     // Windows2025
     {
         .names = { "Windows Server 2025" },
@@ -25,6 +28,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS_11
     // Windows11
     {
         .names = { "Windows 11", "Windows Server 2022" },
@@ -38,6 +43,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS_11_SMALL
     // Windows11Small
     {
         .names = { "Windows 11_small" },
@@ -52,6 +59,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS_8
     // Windows8
     {
         .names = { "Windows 8", "Windows 8.1", "Windows 10", "Windows Server 2012", "Windows Server 2012 R2", "Windows Server 2016", "Windows Server 2019" },
@@ -65,6 +74,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS
     // Windows
     {
         .names = { "Windows", "Windows 7", "Windows Server 2008", "Windows Server 2008 R2" },
@@ -78,6 +89,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WINDOWS_95
     // Windows95
     {
         .names = { "Windows 95", "Windows 9x" },
@@ -93,6 +106,8 @@ static const FFlogo W[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_WOLFOS
     // WolfOS
     {
         .names = { "WolfOS" },
@@ -102,6 +117,7 @@ static const FFlogo W[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
     // LAST
     {},
 };

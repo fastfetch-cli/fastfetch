@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo G[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_GALLIUMOS
     // GalliumOS
     {
         .names = { "GalliumOS" },
@@ -14,6 +15,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GARUDA
     // Garuda
     {
         .names = { "Garuda", "garuda-linux" },
@@ -24,6 +27,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GARUDA_DRAGON
     // GarudaDragon
     {
         .names = { "GarudaDragon", "garuda-dragon" },
@@ -34,6 +39,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GARUDA_SMALL
     // GarudaSmall
     {
         .names = { "Garuda_small", "garuda-linux_small" },
@@ -45,6 +52,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GENTOO
     // Gentoo
     {
         .names = { "Gentoo" },
@@ -56,6 +65,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GENTOO_SMALL
     // GentooSmall
     {
         .names = { "Gentoo_small" },
@@ -68,6 +79,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GHOSTBSD
     // GhostBSD
     {
         .names = { "GhostBSD" },
@@ -78,6 +91,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GHOSTFREAK
     // GhostFreak
     {
         .names = { "GhostFreak" },
@@ -88,6 +103,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GLAUCUS
     // Glaucus
     {
         .names = { "Glaucus" },
@@ -98,6 +115,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GNEWSENSE
     // GNewSense
     {
         .names = { "gNewSense" },
@@ -108,6 +127,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GNOME
     // GNOME OS
     {
         .names = { "GNOME OS" }, // matches "NAME"
@@ -118,6 +139,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GNU
     // GNU
     {
         .names = { "GNU" },
@@ -128,6 +151,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GOBOLINUX
     // GoboLinux
     {
         .names = { "GoboLinux", "Gobo" },
@@ -138,6 +163,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GOLDENDOGLINUX
     // GoldenDogLinux
     {
         .names = { "GoldenDog Linux", "GDL", "goldendoglinux" },
@@ -148,6 +175,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GRAPHENEOS
     // GrapheneOS
     {
         .names = { "GrapheneOS" },
@@ -158,6 +187,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GROMBYANG
     // Grombyang
     {
         .names = { "Grombyang" },
@@ -170,6 +201,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GUIX
     // Guix
     {
         .names = { "Guix" },
@@ -180,6 +213,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GUIX_SMALL
     // GuixSmall
     {
         .names = { "Guix_small" },
@@ -191,6 +226,8 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GXDE
     // GXDE
     {
         .names = { "GXDE" },
@@ -201,6 +238,7 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
     // LAST
     {},
 };

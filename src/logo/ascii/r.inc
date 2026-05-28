@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo R[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_RADIX
     // Radix
     {
         .names = { "Radix" },
@@ -12,6 +13,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RASPBIAN
     // Raspbian
     {
         .names = { "raspbian" },
@@ -23,6 +26,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RASPBIAN_SMALL
     // RaspbianSmall
     {
         .names = { "raspbian_small" },
@@ -35,6 +40,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RAVYNOS
     // RavynOS
     {
         .names = { "RavynOS" },
@@ -44,6 +51,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REBORNOS
     // RebornOS
     {
         .names = { "RebornOS" },
@@ -56,6 +65,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REBORNOS_SMALL
     // RebornSmall
     {
         .names = { "RebornOS_small" },
@@ -67,6 +78,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REDCORE
     // RedCore
     {
         .names = { "RedCore" },
@@ -76,6 +89,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RHEL
     // RedHatEnterpriseLinux
     {
         .names = { "rhel", "redhat" },
@@ -86,6 +101,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RHEL_SMALL
     // RedHatEnterpriseLinux
     {
         .names = { "rhel_small", "redhat_small" },
@@ -97,6 +114,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RHEL_OLD
     // RedHatEnterpriseLinux_old
     {
         .names = { "rhel_old", "redhat_old" },
@@ -107,6 +126,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REDOS
     // RedOS
     {
         .names = { "RedOS" },
@@ -118,6 +139,8 @@ static const FFlogo R[] = {
         .colorTitle = FF_COLOR_FG_RED,
         .colorKeys = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REDOS_SMALL
     // RedOS small
     {
         .names = { "RedOS_small" },
@@ -130,6 +153,8 @@ static const FFlogo R[] = {
         .colorTitle = FF_COLOR_FG_RED,
         .colorKeys = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REDSTAR
     // RedstarOS
     {
         .names = { "redstar", "redstar-os", "redstaros" },
@@ -140,6 +165,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REDROSE
     // Redrose
     {
         .names = { "Redrose" },
@@ -151,6 +178,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REFRACTA
     // Refracta
     {
         .names = { "Refracta" },
@@ -162,6 +191,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REGATA
     // Regata
     {
         .names = { "Regata" },
@@ -175,6 +206,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_REGOLITH
     // Regolith
     {
         .names = { "Regolith" },
@@ -184,6 +217,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RHAYMOS
     // RhaymOS
     {
         .names = { "RhaymOS" },
@@ -193,6 +228,8 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ROCKY
     // RockyLinux
     {
         .names = { "rocky" },
@@ -203,6 +240,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ROCKY_SMALL
     // RockyLinuxSmall
     {
         .names = { "rocky_small" },
@@ -214,6 +253,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ROSA
     // RosaLinux
     {
         .names = { "rosa", "rosa-linux", "rosalinux" },
@@ -225,6 +266,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_RGB "100;165;225",
         .colorTitle = FF_COLOR_FG_RGB "100;165;225",
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RHINO
     // RhinoLinux
     {
         .names = { "Rhino Linux" },
@@ -238,6 +281,8 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RENGEOS
     {
         .names = { "RengeOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_RENGEOS,
@@ -246,6 +291,7 @@ static const FFlogo R[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
     // LAST
     {},
 };

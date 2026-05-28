@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo A[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_ADELIE
     // Adélie
     {
         .names = { "Adélie", "Adelie" },
@@ -13,6 +14,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AEROS
     // AerOS
     {
         .names = { "aerOS" },
@@ -22,6 +25,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AEON
     // Aeon
     {
         .names = { "Aeon" },
@@ -31,6 +36,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_256 "36",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AERYNOS
     // AerynOS
     {
         .names = { "AerynOS" },
@@ -40,6 +47,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AERYNOS_OLD
     // AerynOS_old
     {
         .names = { "AerynOS_old" },
@@ -50,6 +59,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AFTERGLOW
     // Afterglow
     {
         .names = { "Afterglow" },
@@ -61,6 +72,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AIX
     // AIX
     {
         .names = { "aix" },
@@ -72,6 +85,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALMALINUX
     // AlmaLinux
     {
         .names = { "Almalinux" },
@@ -86,6 +101,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALPINE
     // Alpine
     {
         .names = { "Alpine" },
@@ -96,6 +113,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALPINE2
     // Alpine2
     {
         .names = { "Alpine2" },
@@ -108,6 +127,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALPINE_SMALL
     // AlpineSmall
     {
         .names = { "Alpine_small" },
@@ -120,6 +141,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALPINE2_SMALL
     // Alpine2Small
     {
         .names = { "alpine2_small" },
@@ -132,6 +155,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALPINE3_SMALL
     // Alpine3Small
     {
         .names = { "alpine3_small" },
@@ -143,6 +168,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALTER
     // Alter
     {
         .names = { "Alter" },
@@ -153,6 +180,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ALTLINUX
     // ALTLinux
     {
         .names = { "ALTLinux" },
@@ -165,6 +194,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AMAZON
     // Amazon
     {
         .names = { "Amazon" },
@@ -174,6 +205,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AMAZON_LINUX
     // AmazonLinux
     {
         .names = { "Amazon Linux", "amzn" },
@@ -183,6 +216,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_256 "178",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AMIGA
     // Amiga
     {
         .names = { "Amiga" },
@@ -197,6 +232,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AMOGOS
     // AmogOS
     {
         .names = { "AmogOS" },
@@ -208,6 +245,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANARCHY
     // Anarchy
     {
         .names = { "Anarchy" },
@@ -219,6 +258,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANDROID
     // Android
     {
         .names = { "android" },
@@ -230,6 +271,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANDROID_SMALL
     // AndroidSmall
     {
         .names = { "android_small" },
@@ -241,6 +284,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANDUINOS
     // AnduinOS
     {
         .names = { "anduinos" },
@@ -252,6 +297,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANTERGOS
     // Antergos
     {
         .names = { "Antergos" },
@@ -263,6 +310,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANTIX
     // Antix
     {
         .names = { "antiX" },
@@ -273,6 +322,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANUSHOS
     // AnushOS
     {
         .names = { "AnushOS" },
@@ -287,6 +338,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO
     // AoscOsRetro
     {
         .names = { "Aosc OS/Retro", "aoscosretro" },
@@ -298,6 +351,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO_SMALL
     // AoscOsRetro_small
     {
         .names = { "Aosc OS/Retro_small", "aoscosretro_small" },
@@ -310,6 +365,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AOSCOS
     // AoscOS
     {
         .names = { "Aosc OS", "aoscos" },
@@ -321,6 +378,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AOSCOS_OLD
     // AoscOS_old
     {
         .names = { "Aosc OS_old", "aoscos_old" },
@@ -332,6 +391,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_APERTURE
     // Aperture
     {
         .names = { "Aperture" },
@@ -349,6 +410,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS
     // Apple
     {
         .names = { "Apple" },
@@ -364,6 +427,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS_SMALL
     // AppleSmall
     {
         .names = { "Apple_small" },
@@ -379,6 +444,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_APRICITY
     // Apricity
     {
         .names = { "Apricity" },
@@ -389,6 +456,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCHBOX
     // ArchBox
     {
         .names = { "ArchBox" },
@@ -399,6 +468,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCHCRAFT
     // Archcraft
     {
         .names = { "Archcraft" },
@@ -409,6 +480,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCHCRAFT2
     // Archcraft2
     {
         .names = { "Archcraft2" },
@@ -420,6 +493,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCH
     // Arch
     {
         .names = { "arch", "archmerge" },
@@ -429,6 +504,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCH2
     // Arch2
     {
         .names = { "arch2" },
@@ -439,6 +516,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCH3
     // Arch3
     {
         .names = { "arch3" },
@@ -449,6 +528,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCH_SMALL
     // ArchSmall
     {
         .names = { "arch_small" },
@@ -459,6 +540,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCH_OLD
     // ArchOld
     {
         .names = { "arch_old" },
@@ -471,6 +554,8 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
         .colorKeys = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCHLABS
     // Archlabs
     {
         .names = { "ARCHlabs" },
@@ -482,6 +567,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCHSTRIKE
     // ArchStrike
     {
         .names = { "ArchStrike" },
@@ -493,6 +580,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARKANE
     // Arkane
     {
         .names = { "Arkane", "Arkane Linux" },
@@ -505,6 +594,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_256 "130",
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARMBIAN
     // Armbian
     {
         .names = { "Armbian" },
@@ -516,6 +607,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARMBIAN2
     // Armbian2
     {
         .names = { "Armbian2" },
@@ -527,6 +620,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARTIX
     // Artix
     {
         .names = { "artix" },
@@ -537,6 +632,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARTIX_SMALL
     // ArtixSmall
     {
         .names = { "artix_small" },
@@ -548,6 +645,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARTIX2_SMALL
     // Artix2Small
     {
         .names = { "artix2_small" },
@@ -559,6 +658,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCO
     // ArcoLinux (Discontinued)
     {
         .names = { "arco", "arcolinux" }, // ID=arcolinux
@@ -570,6 +671,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARCO_SMALL
     // ArcoLinuxSmall
     {
         .names = { "arco_small", "arcolinux_small" },
@@ -582,6 +685,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARSELINUX
     // ArseLinux
     {
         .names = { "arse", "arselinux", "arse-linux" },
@@ -593,6 +698,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARYA
     // Arya
     {
         .names = { "Arya" },
@@ -604,6 +711,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASAHI
     // Asahi
     {
         .names = { "asahi", "asahi-linux" },
@@ -620,6 +729,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASAHI2
     // Asahi2
     {
         .names = { "asahi2", "asahi-linux2" },
@@ -637,6 +748,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTER
     // Aster
     {
         .names = { "aster" },
@@ -647,6 +760,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTEROIDOS
     // AsteroidOS
     {
         .names = { "AsteroidOS" },
@@ -660,6 +775,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_256 "160",
         .colorTitle = FF_COLOR_FG_256 "208",
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTOS
     // AstOS
     {
         .names = { "astOS" },
@@ -670,6 +787,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTRA_LINUX
     // Astra
     {
         .names = { "Astra", "Astra Linux", "astralinux" },
@@ -681,6 +800,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_JANUSLINUX
     // Ataraxia
     {
         .names = { "Ataraxia Linux", "Ataraxia" },
@@ -692,6 +813,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ATHENAOS
     // AthenaOS
     {
         .names = { "AthenaOS" },
@@ -703,6 +826,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_LIGHT_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ATHENAOS_OLD
     // AthenaOS_old
     {
         .names = { "AthenaOS_old" },
@@ -715,6 +840,8 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AURORA
     // Aurora
     {
         .names = { "Aurora" },
@@ -726,6 +853,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AXOS
     // AxOS
     {
         .names = { "AxOS" },
@@ -735,6 +864,8 @@ static const FFlogo A[] = {
             FF_COLOR_FG_RGB "222;6;255",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AZOS
     // Azos
     {
         .names = { "Azos" },
@@ -744,6 +875,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
     // LAST
     {},
 };

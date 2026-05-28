@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo Z[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZORIN
     // Zorin
     {
         .names = { "Zorin" },
@@ -13,6 +14,8 @@ static const FFlogo Z[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZOS
     // Z/OS
     {
         .names = { "z/OS", "zos" },
@@ -21,6 +24,8 @@ static const FFlogo Z[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZRAXYL
     // Zraxyl
     {
         .names = { "Zraxyl" },
@@ -31,6 +36,7 @@ static const FFlogo Z[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
     // LAST
     {},
 };

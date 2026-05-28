@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo K[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_KAISEN
     // Kaisen
     {
         .names = { "Kaisen" },
@@ -14,6 +15,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KALI
     // Kali
     {
         .names = { "Kali" },
@@ -25,6 +28,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KALI_SMALL
     // KaliSmall
     {
         .names = { "Kali_small" },
@@ -37,6 +42,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KALPA_DESKTOP
     // Kalpa Desktop
     {
         .names = { "kalpa-desktop" },
@@ -47,6 +54,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KAOS
     // KaOS
     {
         .names = { "KaOS" },
@@ -58,6 +67,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KERNELOS
     // KernelOS
     {
         .names = { "KernelOS" },
@@ -67,6 +78,8 @@ static const FFlogo K[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KDELINUX
     // KDELinux
     {
         .names = { "kdelinux", "kde-linux" },
@@ -76,6 +89,8 @@ static const FFlogo K[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KDENEON
     // KDE Neon
     {
         .names = { "KDE Neon" }, // Distro ID is "neon"; Distro name is "KDE Neon"
@@ -85,6 +100,8 @@ static const FFlogo K[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KIBAOS
     // KibaOS
     {
         .names = { "KibaOS" },
@@ -94,6 +111,8 @@ static const FFlogo K[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KIBOJOE
     // Kibojoe
     {
         .names = { "Kibojoe" },
@@ -106,6 +125,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KISS
     // KISSLinux
     {
         .names = { "KISS", "kiss-linux", "kisslinux" },
@@ -118,6 +139,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KISS2
     // KISSLinux2
     {
         .names = { "kiss2" },
@@ -130,6 +153,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KOGAION
     // Kogaion
     {
         .names = { "Kogaion" },
@@ -141,6 +166,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KORORA
     // Korora
     {
         .names = { "Korora" },
@@ -152,6 +179,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KRASSOS
     // KrassOS
     {
         .names = { "KrassOS", "Krass" },
@@ -163,6 +192,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KSLINUX
     // KSLinux
     {
         .names = { "KSLinux" },
@@ -174,6 +205,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KUBUNTU
     // Kubuntu
     {
         .names = { "Kubuntu", "kubuntu-linux", "kde-ubuntu" },
@@ -185,6 +218,8 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KYLIN
     // Kylin
     {
         .names = { "Kylin" },
@@ -198,6 +233,7 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
     // LAST
     {},
 };

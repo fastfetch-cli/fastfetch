@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo M[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACARONIOS
     // Macaroni
     {
         .names = { "Macaroni" },
@@ -14,6 +15,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS
     // MacOS
     {
         .names = { "macOS" },
@@ -29,6 +32,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS_SMALL
     // MacOSSmall
     {
         .names = { "macOS_small" },
@@ -44,6 +49,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS2
     // MacOS2
     {
         .names = { "macOS2" },
@@ -60,6 +67,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS2_SMALL
     // MacOS2Small
     {
         .names = { "macOS2_small" },
@@ -75,6 +84,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS3
     // MacOS3
     {
         .names = { "macOS3" },
@@ -91,6 +102,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAINSAILOS
     // MainsailOS
     {
         .names = { "MainsailOS" },
@@ -99,6 +112,8 @@ static const FFlogo M[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAINSAILOS_SMALL
     // MainsailOSSmall
     {
         .names = { "MainsailOS_small" },
@@ -108,6 +123,8 @@ static const FFlogo M[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAGEIA
     // Mageia
     {
         .names = { "Mageia" },
@@ -119,6 +136,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAGEIA_SMALL
     // MageiaSmall
     {
         .names = { "Mageia_small" },
@@ -131,6 +150,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAGIX
     // Magix
     {
         .names = { "Magix", "MagixOS" },
@@ -142,6 +163,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_LIGHT_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAGPIEOS
     // MagpieOS
     {
         .names = { "MagpieOS", "Magpie" },
@@ -155,6 +178,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MANDRIVA
     // Mandriva
     {
         .names = { "mandriva", "mandrake" },
@@ -166,6 +191,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MANJARO
     // Manjaro
     {
         .names = { "manjaro", "manjaro-arm" },
@@ -176,6 +203,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MANJARO_SMALL
     // ManjaroSmall
     {
         .names = { "manjaro_small", "manjaro-arm_small" },
@@ -187,6 +216,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MASSOS
     // MassOS
     {
         .names = { "MassOS" },
@@ -197,6 +228,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MATUUSOS
     // MatuusOS
     {
         .names = { "MatuusOS", "Matuus" },
@@ -208,6 +241,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAUI
     // MaUI
     {
         .names = { "MaUI" },
@@ -218,6 +253,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MAUNA
     // Mauna
     {
         .names = { "Mauna" },
@@ -227,6 +264,8 @@ static const FFlogo M[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MEOWIX
     // Meowix
     {
         .names = { "Meowix" },
@@ -240,6 +279,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MER
     // Mer
     {
         .names = { "Mer" },
@@ -250,6 +291,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MIDNIGHTBSD
     // MidnightBSD
     {
         .names = { "MidnightBSD" },
@@ -260,6 +303,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MIDOS
     // MidOS
     {
         .names = { "MidOS" },
@@ -270,6 +315,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MIDOS_OLD
     // MidOSOld
     {
         .names = { "MidOS_old" },
@@ -282,6 +329,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MINIMAL
     // Minimal System
     {
         .names = { "Minimal_System" },
@@ -292,6 +341,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MINIX
     // Minix
     {
         .names = { "Minix" },
@@ -304,6 +355,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MIRACLE_LINUX
     // MiracleLinux
     {
         .names = { "miraclelinux" },
@@ -314,6 +367,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_256 "29",
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MOS
     // MOS
     {
         .names = { "MOS" },
@@ -323,6 +378,8 @@ static const FFlogo M[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MSYS2
     // Msys2
     {
         .names = { "Msys2" },
@@ -335,6 +392,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MX
     // MX
     {
         .names = { "MX" },
@@ -345,6 +404,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MX_SMALL
     // MXSmall
     {
         .names = { "MX_small" },
@@ -356,6 +417,8 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MX2
     // MX2
     {
         .names = { "MX2" },
@@ -367,6 +430,7 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
     // LAST
     {},
 };

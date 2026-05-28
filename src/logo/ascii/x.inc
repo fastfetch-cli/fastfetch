@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo X[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_XCP_NG
     // XCP-ng
     {
         .names = { "XCP-ng", "xenenterprise" },
@@ -15,6 +16,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_YELLOW,
         } },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XENIA
     // Xenia
     {
         .names = { "Xenia" },
@@ -26,6 +29,8 @@ static const FFlogo X[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XENIA_OLD
     // Xenia_old
     {
         .names = { "Xenia_old" },
@@ -37,6 +42,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XEROARCH
     // XeroArch
     {
         .names = { "XeroArch" },
@@ -50,6 +57,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "15",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XFERIENCE
     // Xferience
     {
         .names = { "Xferience" },
@@ -59,6 +68,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XUBUNTU
     // Xubuntu
     {
         .names = { "Xubuntu" },
@@ -68,6 +79,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XRAY_OS
     // Xray_OS
     {
         .names = { "Xray_OS" },
@@ -78,6 +91,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "16",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XINUX
     // Xinux
     {
         .names = { "Xinux" },
@@ -87,6 +102,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XJ380
     // XJ380
     {
         .names = { "XJ380" },
@@ -96,6 +113,8 @@ static const FFlogo X[] = {
             FF_COLOR_FG_RGB "255;242;0",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_XIMPER
     // Ximper
     {
         .names = { "Ximper" },
@@ -107,6 +126,7 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "128",
         },
     },
+    #endif
     // LAST
     {},
 };

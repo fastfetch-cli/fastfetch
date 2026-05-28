@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo C[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_CACHYOS
     // CachyOS
     {
         .names = { "CachyOS" },
@@ -15,6 +16,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CACHYOS_SMALL
     // CachyOSSmall
     {
         .names = { "CachyOS_small" },
@@ -26,6 +29,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CALCULATE
     // Calculate
     {
         .names = { "Calculate" },
@@ -37,6 +42,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CALINIXOS
     // CalinixOS
     {
         .names = { "Calinix", "calinixos" },
@@ -47,6 +54,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL
     // CalinixOSSmall
     {
         .names = { "Calinix_small", "calinixos_small" },
@@ -58,6 +67,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CARBS
     // Carbs
     {
         .names = { "Carbs" },
@@ -68,6 +79,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CBL_MARINER
     // CBL-Mariner
     {
         .names = { "CBL-Mariner" },
@@ -78,6 +91,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CELOS
     // CelOS
     {
         .names = { "Cel", "celos", "cel-linux", "celos-linux" },
@@ -89,6 +104,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CENTER
     // Center
     {
         .names = { "Center" },
@@ -99,6 +116,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CENTOS
     // CentOS
     {
         .names = { "CentOS" },
@@ -113,6 +132,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CENTOS_SMALL
     // CentOSSmall
     {
         .names = { "CentOS_small" },
@@ -127,6 +148,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CEREUS
     // Cereus
     {
         .names = { "Cereus", "Cereus Linux" },
@@ -141,6 +164,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_256 "108",
         .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_WHITE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHAKRA
     // Chakra
     {
         .names = { "Chakra" },
@@ -151,6 +176,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHALETOS
     // ChaletOS
     {
         .names = { "ChaletOS" },
@@ -162,6 +189,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHAPEAU
     // Chapeau
     {
         .names = { "Chapeau" },
@@ -173,6 +202,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX
     // Chimera
     {
         .names = { "Chimera" },
@@ -186,6 +217,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHONKYSEALOS
     // ChonkySealOS
     {
         .names = { "ChonkySealOS" },
@@ -196,6 +229,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHROM
     // Chrom
     {
         .names = { "Chrom", "ChromeOS" },
@@ -210,6 +245,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CLEANJARO
     // Cleanjaro
     {
         .names = { "Cleanjaro" },
@@ -220,6 +257,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CLEANJARO_SMALL
     // CleanjaroSmall
     {
         .names = { "Cleanjaro_small" },
@@ -231,6 +270,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CLEAR_LINUX
     // ClearLinux
     {
         .names = { "Clear Linux", "clearlinux", "Clear Linux OS" },
@@ -242,6 +283,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CLEAROS
     // ClearOS
     {
         .names = { "ClearOS" },
@@ -252,6 +295,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CLOVER
     // Clover
     {
         .names = { "Clover" },
@@ -263,6 +308,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_COBALT
     // Cobalt
     {
         .names = { "Cobalt" },
@@ -277,6 +324,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CODEX
     // Codex Linux (reMarkable OS)
     {
         .names = { "Codex Linux" },
@@ -285,6 +334,8 @@ static const FFlogo C[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CONDRES
     // Condres
     {
         .names = { "Condres" },
@@ -297,6 +348,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS
     // ContainerLinux
     {
         .names = { "ContainerLinux", "Container Linux", "Container Linux by CoreOS" },
@@ -309,6 +362,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TORIZONCORE
     // Common Torizon
     {
         .names = { "common-torizon" },
@@ -319,6 +374,8 @@ static const FFlogo C[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_COSMIC
     // Cosmic DE
     {
         .names = { "Cosmic" },
@@ -333,6 +390,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CRUX
     // CRUX
     {
         .names = { "CRUX" },
@@ -345,6 +404,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CRUX_SMALL
     // CRUXSmall
     {
         .names = { "CRUX_small" },
@@ -358,6 +419,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CRYSTAL
     // CrystalLinux
     {
         .names = { "Crystal", "Crystal", "crystal-linux", "Crystal-Linux" },
@@ -368,6 +431,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CUCUMBER
     // Cucumber
     {
         .names = { "Cucumber", "CucumberOS" },
@@ -379,6 +444,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CUERDOS
     // CuerdOS
     {
         .names = { "CuerdOS", "CuerdOS GNU/Linux" },
@@ -390,6 +457,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CUTEFISHOS
     // CutefishOS
     {
         .names = { "CutefishOS" },
@@ -400,6 +469,8 @@ static const FFlogo C[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CUTEOS
     // CuteOS
     {
         .names = { "CuteOS" },
@@ -412,6 +483,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CYBEROS
     // CyberOS
     {
         .names = { "CyberOS" },
@@ -424,6 +497,8 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CYCLEDREAM
     // cycledream
     {
         .names = { "cycledream" },
@@ -434,6 +509,7 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
     // LAST
     {},
 };

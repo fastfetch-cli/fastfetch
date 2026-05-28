@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo J[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_JANUSLINUX
     // Januslinux
     {
         .names = { "januslinux", "janus" },
@@ -14,6 +15,7 @@ static const FFlogo J[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
     // LAST
     {},
 };

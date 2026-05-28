@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo Q[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_QTS
     // QTS
     {
         .names = { "qts" },
@@ -14,6 +15,8 @@ static const FFlogo Q[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_Q4OS
     // Q4OS
     {
         .names = { "Q4OS" },
@@ -23,6 +26,8 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUBES
     // Qubes
     {
         .names = { "Qubes" },
@@ -32,6 +37,8 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUBYT
     // Qubyt
     {
         .names = { "Qubyt" },
@@ -42,6 +49,8 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_BLACK,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUIBIAN
     // Quibian
     {
         .names = { "Quibian" },
@@ -51,6 +60,8 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUIRINUX
     // Quirinux
     {
         .names = { "Quirinux" },
@@ -60,6 +71,7 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
     // LAST
     {},
 };

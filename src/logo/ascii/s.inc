@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo S[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_SABAYON
     // Sabayon
     {
         .names = { "Sabayon" },
@@ -12,6 +13,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SABOTAGE
     // Sabotage
     {
         .names = { "Sabotage" },
@@ -22,6 +25,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SAILFISH
     // Sailfish
     {
         .names = { "Sailfish" },
@@ -31,6 +36,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SALENTOS
     // SalentOS
     {
         .names = { "SalentOS" },
@@ -42,6 +49,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SALIENTOS
     // SalientOS
     {
         .names = { "Salient OS", "SalientOS" },
@@ -51,6 +60,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SALIX
     // Salix
     {
         .names = { "Salix" },
@@ -60,6 +71,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SAMBABOX
     // SambaBOX
     {
         .names = { "SambaBOX", "Profelis SambaBOX" },
@@ -69,6 +82,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SASANQUA
     // Sasanqua
     {
         .names = { "Sasanqua" },
@@ -78,6 +93,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SCIENTIFIC
     // Scientific
     {
         .names = { "Scientific" },
@@ -88,6 +105,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SECUREBLUE
     // Secureblue
     {
         .names = { "secureblue" },
@@ -98,6 +117,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SERPENT_OS
     // Serpent OS
     {
         .names = { "Serpent OS" },
@@ -106,6 +127,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SEMC
     // Semc
     {
         .names = { "semc" },
@@ -116,6 +139,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SEPTOR
     // Septor
     {
         .names = { "Septor" },
@@ -126,6 +151,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SERENE
     // Serene
     {
         .names = { "Serene" },
@@ -135,6 +162,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SHARKLINUX
     // SharkLinux
     {
         .names = { "SharkLinux" },
@@ -144,6 +173,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SHASTRAOS
     // ShastraOS
     {
         .names = { "ShastraOS" },
@@ -153,6 +184,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SHEBANG
     // Shebang
     {
         .names = { "Shebang" },
@@ -162,6 +195,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SIDUCTION
     // Siduction
     {
         .names = { "Siduction" },
@@ -171,6 +206,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SKIFFOS
     // SkiffOS
     {
         .names = { "SkiffOS" },
@@ -180,6 +217,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLEEPEROS
     // SleeperOS
     {
         .names = { "SleeperOS" },
@@ -189,6 +228,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLEEPEROS_SMALL
     // SleeperOSSmall
     {
         .names = { "SleeperOS_small" },
@@ -199,6 +240,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLITAZ
     // Slitaz
     {
         .names = { "Slitaz" },
@@ -208,6 +251,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SPOINKOS
     // SpoinkOS
     {
         .names = { "SpoinkOS", "spoink-os" },
@@ -216,6 +261,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLACKEL
     // Slackel
     {
         .names = { "Slackel" },
@@ -225,6 +272,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLACKWARE
     // Slackware
     {
         .names = { "Slackware" },
@@ -236,6 +285,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SLACKWARE_SMALL
     // SlackwareSmall
     {
         .names = { "Slackware_small" },
@@ -248,6 +299,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SMARTOS
     // SmartOS
     {
         .names = { "SmartOS" },
@@ -257,6 +310,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SNIGDHAOS
     // SnigdhaOS
     {
         .names = { "SnigdhaOS", "Snigdha" },
@@ -266,6 +321,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SODA
     // Soda
     {
         .names = { "Soda" },
@@ -275,6 +332,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SOURCE_MAGE
     // Source Mage
     {
         .names = { "Source Mage", "Source Mage GNU/Linux", "source_mage", "sourcemage" },
@@ -285,6 +344,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SOLARIS
     // Solaris
     {
         .names = { "solaris", "sunos" },
@@ -295,6 +356,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SOLARIS_SMALL
     // SolarisSmall
     {
         .names = { "solaris_small", "sunos_small" },
@@ -306,6 +369,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SOLUS
     // Solus
     {
         .names = { "Solus", "solus-linux" },
@@ -317,6 +382,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SPARKY
     // Sparky
     {
         .names = { "Sparky" },
@@ -326,6 +393,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STAR
     // Star
     {
         .names = { "Star" },
@@ -335,6 +404,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STOCK_LINUX
     // StockLinux
     {
         .names = { "Stock Linux" },
@@ -344,6 +415,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STEAMOS
     // SteamOS
     {
         .names = { "SteamOS" },
@@ -355,6 +428,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STEAMDECK
     // Steam Deck
     {
         .names = { "SteamDeck" },
@@ -366,6 +441,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STEAMDECK_SMALL
     // Steam Deck Small
     {
         .names = { "SteamDeck_small" },
@@ -377,6 +454,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_STEAMDECK
     // Steam Deck OLED
     {
         .names = { "SteamDeckOled" },
@@ -388,6 +467,8 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SULIN
     // Sulin
     {
         .names = { "Sulin" },
@@ -397,6 +478,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SUMMITOS
     // SummitOS
     {
         .names = { "SummitOS" },
@@ -407,6 +490,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RGB "181;225;102",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SUSE
     // Suse
     {
         .names = { "suse", "suse-linux" },
@@ -416,6 +501,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL
     // SuseSmall
     {
         .names = { "suse_small", "suse-linux_small" },
@@ -426,6 +513,8 @@ static const FFlogo S[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SWAGARCH
     // Swagarch
     {
         .names = { "Swagarch" },
@@ -435,6 +524,7 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
     // LAST
     {},
 };

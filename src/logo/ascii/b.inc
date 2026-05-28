@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo B[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_BEDROCK
     // Bedrock
     {
         .names = { "bedrock" },
@@ -14,6 +15,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, // grey
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BEDROCK_SMALL
     // BedrockSmall
     {
         .names = { "bedrock_small" },
@@ -26,6 +29,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, // grey
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BIGLINUX
     // BigLinux
     {
         .names = { "BigLinux" },
@@ -38,6 +43,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BITRIG
     // Bitrig
     {
         .names = { "Bitrig" },
@@ -48,6 +55,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLACKARCH
     // BlackArch
     {
         .names = { "Blackarch" },
@@ -60,6 +69,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLACKMESA
     // BlackMesa
     {
         .names = { "BlackMesa", "black-mesa" },
@@ -70,6 +81,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLACKPANTHER
     // BlackPanther
     {
         .names = { "BlackPanther" },
@@ -82,6 +95,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLAG
     // BLAG
     {
         .names = { "BLAG" },
@@ -92,6 +107,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLANKON
     // BlankOn
     {
         .names = { "BlankOn" },
@@ -103,6 +120,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BLUELIGHT
     // BlueLight
     {
         .names = { "BlueLight" },
@@ -114,6 +133,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BODHI
     // Bodhi
     {
         .names = { "Bodhi" },
@@ -126,6 +147,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BONSAI
     // Bonsai
     {
         .names = { "Bonsai" },
@@ -138,6 +161,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BREDOS
     // BredOS
     {
         .names = { "Bredos" },
@@ -148,6 +173,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_RGB "198;151;66",
         .colorTitle = FF_COLOR_FG_RGB "198;151;66",
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BSD
     // BSD
     {
         .names = { "BSD" },
@@ -162,6 +189,8 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BUNSENLABS
     // BunsenLabs
     {
         .names = { "BunsenLabs" },
@@ -172,6 +201,7 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
     // LAST
     {},
 };

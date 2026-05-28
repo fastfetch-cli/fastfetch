@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo N[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_NAMIB
     // Namib
     {
         .names = { "Namib" },
@@ -12,6 +13,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NEBIOS
     // NebiOS
     {
         .names = { "NebiOS" },
@@ -22,6 +25,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_RGB "248;196;72",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NEKOS
     // Nekos
     {
         .names = { "Nekos" },
@@ -32,6 +37,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NEPTUNE
     // Neptune
     {
         .names = { "Neptune" },
@@ -41,6 +48,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NETRUNNER
     // NetRunner
     {
         .names = { "NetRunner" },
@@ -50,6 +59,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NEXALINUX
     // NexaLinux
     {
         .names = { "nexalinux" },
@@ -59,6 +70,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_LIGHT_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NITRUX
     // Nitrux
     {
         .names = { "Nitrux" },
@@ -68,6 +81,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NIXOS
     // NixOS
     {
         .names = { "NixOS" },
@@ -81,6 +96,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL
     // NixOSSmall
     {
         .names = { "NixOS_small" },
@@ -95,6 +112,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NIXOS_OLD
     // NixOSOld
     {
         .names = { "nixos_old" },
@@ -105,6 +124,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NIXOS_OLD_SMALL
     // NixOsOldSmall
     {
         .names = { "nixos_old_small" },
@@ -115,6 +136,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NETBSD
     // NetBSD
     {
         .names = { "NetBSD" },
@@ -126,6 +149,8 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NETBSD2
     // NetBSD2
     {
         .names = { "NetBSD2" },
@@ -138,6 +163,8 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NETBSD_SMALL
     // NetBSD Small
     {
         .names = { "NetBSD_small" },
@@ -150,6 +177,8 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NOBARA
     // Nobara
     {
         .names = { "nobara" },
@@ -160,6 +189,8 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NOMADBSD
     // NomadBSD
     {
         .names = { "nomadbsd" },
@@ -170,6 +201,8 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NUROS
     // NurOS
     {
         .names = { "NurOS" },
@@ -179,6 +212,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NURUNNER
     // Nurunner
     {
         .names = { "Nurunner" },
@@ -188,6 +223,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NUTYX
     // NuTyX
     {
         .names = { "NuTyX" },
@@ -197,6 +234,8 @@ static const FFlogo N[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NETHYDRA
     // NetHydra
     {
         .names = { "NetHydra" },
@@ -206,6 +245,7 @@ static const FFlogo N[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
     // LAST
     {},
 };

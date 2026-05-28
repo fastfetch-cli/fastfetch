@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo P[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_PACBSD
     // PacBSD
     {
         .names = { "PacBSD" },
@@ -12,6 +13,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PANWAH
     // Panwah
     {
         .names = { "Panwah" },
@@ -22,6 +25,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_BLACK,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA
     // Parabola
     {
         .names = { "parabola", "parabola-gnulinux" },
@@ -32,6 +37,8 @@ static const FFlogo P[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA_SMALL
     // ParabolaSmall
     {
         .names = { "parabola_small", "parabola-gnulinux_small" },
@@ -43,6 +50,8 @@ static const FFlogo P[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARCH
     // Parch
     {
         .names = { "Parch" },
@@ -53,6 +62,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARDUS
     // Pardus
     {
         .names = { "Pardus" },
@@ -62,6 +73,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARROT
     // Parrot
     {
         .names = { "Parrot" },
@@ -71,6 +84,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARSIX
     // Parsix
     {
         .names = { "Parsix" },
@@ -82,6 +97,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PCBSD
     // PCBSD
     {
         .names = { "PCBSD", "TrueOS" },
@@ -91,6 +108,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PCLINUXOS
     // PCLinuxOS
     {
         .names = { "PCLinuxOS" },
@@ -100,6 +119,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PEAROS
     // PearOS
     {
         .names = { "PearOS" },
@@ -112,6 +133,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PENGWIN
     // Pengwin
     {
         .names = { "Pengwin" },
@@ -122,6 +145,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_MAGENTA,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PENTOO
     // Pentoo
     {
         .names = { "Pentoo" },
@@ -131,6 +156,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PEPPERMINT
     // Peppermint
     {
         .names = { "Peppermint" },
@@ -140,6 +167,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PEROPESIS
     // Peropesis
     {
         .names = { "Peropesis", "Peropesis Linux" },
@@ -148,6 +177,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PHYOS
     // PhyOS
     {
         .names = { "PhyOS" },
@@ -157,6 +188,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PIKAOS
     // PikaOS
     {
         .names = { "PikaOS" },
@@ -165,6 +198,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PISI
     // PisiLinux
     {
         .names = { "PisiLinux" },
@@ -174,6 +209,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PNM_LINUX
     // PNMLinux
     {
         .names = { "PNM Linux" },
@@ -185,6 +222,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_256 "202",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_POP
     // Pop
     {
         .names = { "pop", "popos" },
@@ -196,6 +235,8 @@ static const FFlogo P[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_POP_SMALL
     // PopSmall
     {
         .names = { "pop_small", "popos_small" },
@@ -207,6 +248,8 @@ static const FFlogo P[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PORTEUS
     // Porteus
     {
         .names = { "Porteus" },
@@ -216,6 +259,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_POSTMARKETOS
     // PostMarketOS
     {
         .names = { "PostMarketOS" },
@@ -225,6 +270,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_POSTMARKETOS_SMALL
     // PostMarketOSSmall
     {
         .names = { "PostMarketOS_small" },
@@ -235,6 +282,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PROXMOX
     // Proxmox
     {
         .names = { "Proxmox", "pve" },
@@ -246,6 +295,8 @@ static const FFlogo P[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_256 "202",
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PUFFOS
     // PuffOS
     {
         .names = { "PuffOS" },
@@ -255,6 +306,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PUPPY
     // Puppy
     {
         .names = { "Puppy" },
@@ -264,6 +317,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PUREOS
     // PureOS
     {
         .names = { "PureOS" },
@@ -273,6 +328,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PUREOS_SMALL
     // PureOSSmall
     {
         .names = { "PureOS_small" },
@@ -283,6 +340,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PRISMLINUX
     // PrismLinux
     {
         .names = { "PrismLinux" },
@@ -292,6 +351,8 @@ static const FFlogo P[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PRISMLINUX_SMALL
     // PrismLinuxSmall
     {
         .names = { "PrismLinux_small" },
@@ -302,6 +363,7 @@ static const FFlogo P[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
     // LAST
     {},
 };

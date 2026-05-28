@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo F[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_FASTFETCH
     // Fastfetch
     {
         .names = { "Fastfetch", "FF" },
@@ -19,6 +20,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA
     // Fedora
     {
         .names = { "Fedora" },
@@ -30,6 +33,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASAHI
     // FedoraAsahiRemix
     {
         .names = { "fedora-asahi-remix" },
@@ -46,6 +51,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_SMALL
     // FedoraSmall
     {
         .names = { "Fedora_small" },
@@ -57,6 +64,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA2_SMALL
     {
         .names = { "Fedora2_small" },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
@@ -67,6 +76,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_OLD
     // FedoraOld
     {
         .names = { "Fedora_old" },
@@ -79,6 +90,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_SILVERBLUE
     // FedoraSilverblue
     {
         .names = { "Fedora-Silverblue" },
@@ -91,6 +104,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_KINOITE
     // FedoraKinoite
     {
         .names = { "Fedora-Kinoite" },
@@ -102,6 +117,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_SERICEA
     // FedoraSericea
     {
         .names = { "Fedora-Sericea" },
@@ -113,6 +130,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS
     // FedoraCoreOS
     {
         .names = { "Fedora-CoreOS" },
@@ -125,6 +144,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEMBOYOS
     // FemboyOS
     {
         .names = { "FemboyOS" },
@@ -135,6 +156,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FEREN
     // Feren
     {
         .names = { "Feren" },
@@ -145,6 +168,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FILOTIMO
     // Filotimo
     {
         .names = { "filotimo" },
@@ -155,6 +180,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FINNIX
     // Finnix
     {
         .names = { "Finnix" },
@@ -166,6 +193,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FLOFLIS
     // Floflis
     {
         .names = { "Floflis" },
@@ -176,6 +205,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FREEBSD
     // FreeBSD
     {
         .names = { "Freebsd" },
@@ -187,6 +218,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FREEBSD_SMALL
     // FreeBSDSmall
     {
         .names = { "freebsd_small" },
@@ -198,6 +231,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FREEMINT
     // FreeMiNT
     {
         .names = { "FreeMiNT" },
@@ -208,6 +243,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FRUGALWARE
     // Frugalware
     {
         .names = { "Frugalware", "frugalware-linux" },
@@ -219,6 +256,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FUNTOO
     // Funtoo
     {
         .names = { "Funtoo" },
@@ -230,6 +269,8 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FURRETO
     // Furreto
     {
         .names = { "Furreto" },
@@ -241,6 +282,7 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
     // LAST
     {},
 };

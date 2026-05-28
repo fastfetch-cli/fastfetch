@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo Y[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_YIFFOS
     // YiffOS
     {
         .names = { "YiffOS" },
@@ -12,6 +13,7 @@ static const FFlogo Y[] = {
             FF_COLOR_FG_256 "92",
         },
     },
+    #endif
     // LAST
     {},
 };

@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo V[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_VALHALLA
     // Valhalla
     {
         .names = { "Valhalla", "valhallaos", "valhalla-linux" },
@@ -13,6 +14,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VANILLA
     // Vanilla
     {
         .names = { "vanilla" },
@@ -23,6 +26,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VANILLA2
     // Vanilla2
     {
         .names = { "vanilla2" },
@@ -34,6 +39,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VANILLA_SMALL
     // VanillaSmall
     {
         .names = { "vanilla_small" },
@@ -44,6 +51,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VENOM
     // Venom
     {
         .names = { "Venom" },
@@ -53,6 +62,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VENOM_SMALL
     // VenomSmall
     {
         .names = { "Venom_small" },
@@ -63,6 +74,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VINCENTOS
     // VincentOS
     {
         .names = { "VincentOS" },
@@ -72,6 +85,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VNUX
     // Vnux
     {
         .names = { "Vnux" },
@@ -84,6 +99,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VZLINUX
     // Vzlinux
     {
         .names = { "Vzlinux" },
@@ -94,6 +111,8 @@ static const FFlogo V[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VOID
     // Void
     {
         .names = { "void" },
@@ -105,6 +124,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VOID_SMALL
     // VoidSmall
     {
         .names = { "void_small" },
@@ -116,6 +137,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VOID2
     // Void2
     {
         .names = { "void2" },
@@ -128,6 +151,8 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VOID2_SMALL
     // Void2Small
     {
         .names = { "void2_small" },
@@ -139,6 +164,7 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
     // LAST
     {},
 };

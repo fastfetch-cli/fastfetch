@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo I[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_IGLUNIX
     // Iglunix
     {
         .names = { "Iglunix", "Iglu" },
@@ -13,6 +14,8 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_INSTANTOS
     // InstantOS
     {
         .names = { "InstantOS" },
@@ -24,6 +27,8 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_INTERIX
     // Interix
     {
         .names = { "Interix" },
@@ -36,6 +41,8 @@ static const FFlogo I[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_IRIX
     // IRIX
     {
         .names = { "IRIX" },
@@ -46,6 +53,8 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_IRONCLAD
     // Ironclad
     {
         .names = { "Ironclad" },
@@ -56,6 +65,8 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ITC
     // Itc
     {
         .names = { "Itc" },
@@ -66,6 +77,7 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
     // LAST
     {},
 };

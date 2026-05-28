@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo E[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_ELBRUS
     // Elbrus
     {
         .names = { "elbrus" },
@@ -13,6 +14,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ELEMENTARY
     // Elementary
     {
         .names = { "Elementary" },
@@ -23,6 +26,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ELEMENTARY_SMALL
     // ElementarySmall
     {
         .names = { "Elementary_small" },
@@ -34,6 +39,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ELIVE
     // Elive
     {
         .names = { "Elive" },
@@ -46,6 +53,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EMMABUNTUS
     // Emmabuntüs
     {
         .names = { "Emmabuntus" },
@@ -55,6 +64,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EMPEROROS
     // EmperorOS
     {
         .names = { "Emperor" },
@@ -64,6 +75,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENOS
     // EN-OS
     {
         .names = { "ENOS" },
@@ -74,6 +87,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
         .colorTitle = FF_COLOR_FG_LIGHT_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENCRYPTOS
     // EncryptOS
     {
         .names = { "EncryptOS" },
@@ -84,6 +99,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENDEAVOUROS
     // EndeavourOS
     {
         .names = { "EndeavourOS" },
@@ -96,6 +113,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENDEAVOUROS_SMALL
     // EndeavourOSSmall
     {
         .names = { "EndeavourOS_small" },
@@ -107,6 +126,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENDLESS
     // Endless
     {
         .names = { "Endless" },
@@ -118,6 +139,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENSO
     // Enso
     {
         .names = { "Enso" },
@@ -128,6 +151,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ESHANIZEDOS
     // EshanizedOS
     {
         .names = { "EshanizedOS" },
@@ -137,6 +162,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EUROLINUX
     // EuroLinux
     {
         .names = { "EuroLinux" },
@@ -148,6 +175,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS
     // EvolutionOS
     {
         .names = { "EvolutionOS" },
@@ -157,6 +186,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS_SMALL
     // EvolutionOSSmall
     {
         .names = { "EvolutionOS_small" },
@@ -167,6 +198,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EVOLUTIONOS_OLD
     // EvolutionOS_old
     {
         .names = { "EvolutionOS_old" },
@@ -177,6 +210,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EWEOS
     // eweOS
     {
         .names = { "eweOS" },
@@ -189,6 +224,8 @@ static const FFlogo E[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EXHERBO
     // Exherbo
     {
         .names = { "Exherbo" },
@@ -201,6 +238,8 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_EXODIA_PREDATOR
     // ExodiaOS
     {
         .names = { "Exodia" },
@@ -211,6 +250,7 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
     // LAST
     {},
 };

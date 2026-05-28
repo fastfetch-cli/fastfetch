@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo T[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_T2
     // T2
     {
         .names = { "T2", "T2 SDE", "T2/Linux" },
@@ -14,6 +15,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_T2_SMALL
     // T2Small
     {
         .names = { "T2_small", "T2 SDE_small", "T2/Linux_small" },
@@ -24,6 +27,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TAILS
     // Tails
     {
         .names = { "Tails" },
@@ -33,6 +38,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TATRA
     // Tatra
     {
         .names = { "Tatra" },
@@ -42,6 +49,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TEARCH
     // TeArch
     {
         .names = { "TeArch" },
@@ -51,6 +60,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TEMPLEOS
     // TempleOS
     {
         .names = { "TempleOS" },
@@ -61,6 +72,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TILEOS
     // TileOS
     {
         .names = { "TileOS" },
@@ -71,6 +84,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TORIZONCORE
     // Torizon OS
     {
         .names = { "Torizon OS", "TorizonCore" },
@@ -81,6 +96,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TRISQUEL
     // Trisquel
     {
         .names = { "Trisquel" },
@@ -90,6 +107,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TRUENAS_SCALE
     // TrueNAS Scale
     {
         .names = { "TrueNAS-Scale" },
@@ -102,6 +121,8 @@ static const FFlogo T[] = {
         .colorKeys = FF_COLOR_FG_256 "248",
         .colorTitle = FF_COLOR_FG_256 "32",
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TUXEDO_OS
     // TuxedoOS
     {
         .names = { "Tuxedo OS", "tuxedo" },
@@ -111,6 +132,8 @@ static const FFlogo T[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TWISTER
     // Twister
     {
         .names = { "Twister" },
@@ -123,6 +146,7 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
     // LAST
     {},
 };

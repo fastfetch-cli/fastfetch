@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo U[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBLINUX
     // UBLinux
     {
         .names = { "UBLinux" },
@@ -15,6 +16,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_256 "38",
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBLINUX_SMALL
     // UBLinuxSmall
     {
         .names = { "UBLinux_small" },
@@ -28,6 +31,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_256 "38",
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU
     // Ubuntu
     {
         .names = { "ubuntu", "ubuntu-linux" },
@@ -37,6 +42,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL
     // UbuntuSmall
     {
         .names = { "ubuntu_small", "ubuntu-linux_small" },
@@ -47,6 +54,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_RED,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD
     // UbuntuOld
     {
         .names = { "ubuntu_old", "ubuntu-linux_old" },
@@ -59,6 +68,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2
     // UbuntuOld2
     {
         .names = { "ubuntu_old2" },
@@ -72,6 +83,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2_SMALL
     // UbuntuOld2Small
     {
         .names = { "ubuntu_old2_small", "ubuntu_old2_small" },
@@ -83,6 +96,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_BUDGIE
     // UbuntuBudgie
     {
         .names = { "ubuntu budgie", "ubuntu-budgie" },
@@ -95,6 +110,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_CINNAMON
     // UbuntuCinnamon
     {
         .names = { "ubuntu cinnamon", "ubuntu-cinnamon" },
@@ -104,6 +121,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_GNOME
     // UbuntuGNOME
     {
         .names = { "ubuntu gnome", "ubuntu-gnome" },
@@ -117,6 +136,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_KYLIN
     // UbuntuKylin
     {
         .names = { "ubuntu kylin", "ubuntu-kylin" },
@@ -129,6 +150,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_MATE
     // UbuntuMate
     {
         .names = { "ubuntu mate", "ubuntu-mate" },
@@ -140,6 +163,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_STUDIO
     // UbuntuStudio
     {
         .names = { "ubuntu studio", "ubuntu-studio" },
@@ -149,6 +174,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_SWAY
     // UbuntuSway
     {
         .names = { "ubuntu sway", "ubuntu-sway" },
@@ -158,6 +185,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_TOUCH
     // UbuntuTouch
     {
         .names = { "ubuntu touch", "ubuntu-touch" },
@@ -167,6 +196,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_UNITY
     // UbuntuUnity
     {
         .names = { "ubuntu unity", "ubuntu-unity" },
@@ -176,6 +207,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ULTRAMARINE
     // Ultramarine
     {
         .names = { "Ultramarine", "Ultramarine Linux" },
@@ -185,6 +218,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ULTRAMARINE_SMALL
     // Ultramarine Small
     {
         .names = { "Ultramarine_small" },
@@ -194,6 +229,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UNIFI
     // Unifi
     {
         .names = { "Unifi" },
@@ -203,6 +240,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UNIVALENT
     // Univalent
     {
         .names = { "Univalent" },
@@ -212,6 +251,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UNIVENTION
     // Univention
     {
         .names = { "Univention" },
@@ -221,6 +262,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UOS
     // UOS
     {
         .names = { "UOS" },
@@ -231,6 +274,8 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_URUKOS
     // UrukOS
     {
         .names = { "UrukOS" },
@@ -243,6 +288,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UWUNTU
     // Uwuntu
     {
         .names = { "uwuntu" },
@@ -253,6 +300,8 @@ static const FFlogo U[] = {
             FF_COLOR_FG_256 "52",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UZBEK
     // Uzbek
     {
         .names = { "Uzbek" },
@@ -261,6 +310,7 @@ static const FFlogo U[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
     // LAST
     {},
 };

@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo H[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_HAIKU
     // Haiku
     {
         .names = { "Haiku" },
@@ -14,6 +15,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HAIKU2
     // Haiku2
     {
         .names = { "Haiku2" },
@@ -25,6 +28,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HAIKU_SMALL
     // HaikuSmall
     {
         .names = { "Haiku_small" },
@@ -36,6 +41,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HAMONIKR
     // HamoniKR
     {
         .names = { "HamoniKR" },
@@ -48,6 +55,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HARDCLANZ
     // HarDClanZ
     {
         .names = { "HarDClanZ" },
@@ -60,6 +69,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FREEBSD
     // HardenedBSD
     {
         .names = { "HardenedBSD" },
@@ -71,6 +82,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HARMONYOS
     // HarmonyOS
     {
         .names = { "HarmonyOS" },
@@ -82,6 +95,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HASH
     // Hash
     {
         .names = { "Hash" },
@@ -91,6 +106,8 @@ static const FFlogo H[] = {
             FF_COLOR_FG_256 "123",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HELIUMOS
     // HeliumOS
     {
         .names = { "HeliumOS" },
@@ -101,6 +118,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_256 "81",
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HCE
     // Huawei Cloud EulerOS
     {
         .names = { "Huawei Cloud EulerOS", "hce" },
@@ -111,6 +130,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HUAYRA
     // Huayra
     {
         .names = { "Huayra" },
@@ -121,6 +142,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HYBRID
     // Hybrid
     {
         .names = { "Hybrid" },
@@ -132,6 +155,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HYDROOS
     // HydroOS
     {
         .names = { "HydroOS" },
@@ -142,6 +167,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HYPROS
     // HyprOS
     {
         .names = { "hypros" },
@@ -153,6 +180,8 @@ static const FFlogo H[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HYPERBOLA
     // Hyperbola
     {
         .names = { "Hyperbola" },
@@ -163,6 +192,8 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_HYPERBOLA_SMALL
     // HyperbolaSmall
     {
         .names = { "Hyperbola_small" },
@@ -174,6 +205,7 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
     // LAST
     {},
 };

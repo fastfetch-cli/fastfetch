@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo D[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_DAHLIA
     // DahliaOS
     {
         .names = { "dahliaOS" },
@@ -13,6 +14,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DARKOS
     // DarkOS
     {
         .names = { "DarkOS" },
@@ -27,6 +30,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEBIAN
     // Debian
     {
         .names = { "Debian" },
@@ -38,6 +43,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEBIAN_SMALL
     // DebianSmall
     {
         .names = { "Debian_small" },
@@ -49,6 +56,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEEPIN
     // Deepin
     {
         .names = { "Deepin" },
@@ -59,6 +68,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DESAOS
     // DesaOS
     {
         .names = { "DesaOS" },
@@ -70,6 +81,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEVUAN
     // Devuan
     {
         .names = { "Devuan" },
@@ -80,6 +93,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEVUAN_SMALL
     // DevuanSmall
     {
         .names = { "Devuan_small" },
@@ -91,6 +106,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DIETPI
     // DietPi
     {
         .names = { "DietPi" },
@@ -102,6 +119,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DRACOS
     // DracOS
     {
         .names = { "DracOS" },
@@ -113,6 +132,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DRAGONFLY
     // DragonFly
     {
         .names = { "DragonFly" },
@@ -124,6 +145,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DRAGONFLY_SMALL
     // DragonFlySmall
     {
         .names = { "DragonFly_small" },
@@ -136,6 +159,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DRAGONFLY_OLD
     // DragonFlyOld
     {
         .names = { "DragonFly_old" },
@@ -149,6 +174,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DRAUGER
     // DraugerOS
     {
         .names = { "DraugerOS", "Drauger" },
@@ -160,6 +187,8 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DROIDIAN
     // Droidian
     {
         .names = { "Droidian" },
@@ -171,6 +200,7 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_LIGHT_GREEN,
     },
+    #endif
     // LAST
     {},
 };

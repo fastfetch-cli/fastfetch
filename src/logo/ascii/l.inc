@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo L[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_LAINOS
     // LainOS
     {
         .names = { "LainOS" },
@@ -13,6 +14,8 @@ static const FFlogo L[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LANGITKETUJUH
     // LangitKetujuh
     {
         .names = { "langitketujuh", "l7" },
@@ -24,6 +27,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LAXEROS
     // Laxeros
     {
         .names = { "Laxeros" },
@@ -35,6 +40,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LEDE
     // LEDE
     {
         .names = { "LEDE" },
@@ -46,6 +53,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LIBREELEC
     // LibreELEC
     {
         .names = { "LibreELEC" },
@@ -60,6 +69,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LILIDOG
     // Lilidog
     {
         .names = { "Lilidog" },
@@ -70,6 +81,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINGMO
     // Lingmo OS
     {
         .names = { "Lingmo", "LingmoOS" },
@@ -81,6 +94,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LIMEOS
     // LimeOS
     {
         .names = { "LimeOS" },
@@ -91,6 +106,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINSPIRE
     // Linspire
     {
         .names = { "Linspire", "Lindows" },
@@ -102,6 +119,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUX
     // Linux
     {
         .names = { "Linux", "linux-generic" },
@@ -114,6 +133,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LFS
     // LinuxFromScratch
     {
         .names = { "LinuxFromScratch", "lfs" },
@@ -126,6 +147,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLACK,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUX_SMALL
     // LinuxSmall
     {
         .names = { "Linux_small", "linux-generic_small" },
@@ -139,6 +162,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXLITE
     // LinuxLite
     {
         .names = { "LinuxLite" },
@@ -150,6 +175,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXLITE_SMALL
     // LinuxLiteSmall
     {
         .names = { "LinuxLite_small" },
@@ -162,6 +189,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT
     // LinuxMint
     {
         .names = { "linuxmint" },
@@ -173,6 +202,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT_SMALL
     // LinuxMintSmall
     {
         .names = { "linuxmint_small" },
@@ -185,6 +216,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT2
     // LinuxMint2
     {
         .names = { "linuxmint2" },
@@ -197,6 +230,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT_OLD
     // LinuxMintOld
     {
         .names = { "linuxmint_old" },
@@ -209,6 +244,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LIVE_RAIZO
     // Live_Raizo
     {
         .names = { "Live Raizo", "Live_Raizo" },
@@ -219,6 +256,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LLIUREX
     // LliureX
     {
         .names = { "LliureX" },
@@ -229,6 +268,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LMDE
     // LMDE
     {
         .names = { "LMDE" },
@@ -240,6 +281,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LOCOS
     // Loc-OS
     {
         .names = { "locos", "loc-os", "Loc-OS Linux" },
@@ -252,6 +295,8 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LUBUNTU
     // Lubuntu
     {
         .names = { "lubuntu" },
@@ -261,6 +306,8 @@ static const FFlogo L[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LUNAR
     // Lunar
     {
         .names = { "Lunar" },
@@ -273,6 +320,7 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
     // LAST
     {},
 };

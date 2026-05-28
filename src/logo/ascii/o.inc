@@ -3,6 +3,7 @@
 #include "common/color.h"
 
 static const FFlogo O[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_OBARUN
     // Obarun
     {
         .names = { "Obarun" },
@@ -12,6 +13,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OBREVENGE
     // OBRevenge
     {
         .names = { "OBRevenge" },
@@ -21,6 +24,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OBSIDIANOS
     // ObsidianOS
     {
         .names = { "ObsidianOS" },
@@ -31,6 +36,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_LIGHT_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OMNIOS
     // OmniOS
     {
         .names = { "OmniOS" },
@@ -41,6 +48,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENKYLIN
     // OpenKylin
     {
         .names = { "openkylin", "open-kylin" },
@@ -52,6 +61,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENBSD
     // OpenBSD
     {
         .names = { "openbsd" },
@@ -66,6 +77,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENBSD_SMALL
     // OpenBSDSmall
     {
         .names = { "openbsd_small" },
@@ -78,6 +91,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENEULER
     // OpenEuler
     {
         .names = { "OpenEuler" },
@@ -87,6 +102,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENINDIANA
     // OpenIndiana
     {
         .names = { "OpenIndiana" },
@@ -96,6 +113,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENMAMBA
     // OpenMamba
     {
         .names = { "OpenMamba" },
@@ -105,6 +124,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENRUYI
     // openRuyi
     {
         .names = { "openRuyi" },
@@ -117,6 +138,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSTAGE
     // OpenStage
     {
         .names = { "OpenStage" },
@@ -126,6 +149,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE
     // OpenSuse
     {
         .names = { "opensuse" },
@@ -137,6 +162,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_SMALL
     // OpenSuseSmall
     {
         .names = { "opensuse_small" },
@@ -148,6 +175,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_MICROOS
     // openSuseMicroOS
     {
         .names = { "opensuse-microos" },
@@ -156,6 +185,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_GREEN,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP
     // OpenSuseLeap
     {
         .names = { "opensuse-leap" },
@@ -166,6 +197,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP_OLD
     // OpenSuseLeapOld
     {
         .names = { "opensuse-leap_old" },
@@ -177,6 +210,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED
     // OpenSuseTumbleweed
     {
         .names = { "opensuse-tumbleweed" },
@@ -187,6 +222,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_SMALL
     // OpenSuseTumbleweedSmall
     {
         .names = { "opensuse-tumbleweed_small" },
@@ -198,6 +235,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_OLD
     // OpenSuseTumbleweedOld
     {
         .names = { "opensuse-tumbleweed_old" },
@@ -209,6 +248,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2
     // OpenSuseTumbleweed2
     {
         .names = { "opensuse-tumbleweed2" },
@@ -220,6 +261,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_SLOWROLL
     // openSUSESlowroll
     {
         .names = { "opensuse-slowroll", "opensuse-tumbleweed-slowroll" },
@@ -230,6 +273,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENMANDRIVA
     // OpenMandriva
     {
         .names = { "openmandriva", "open-mandriva", "open_mandriva", "openmandriva lx" },
@@ -240,6 +285,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENWRT
     // OpenWrt
     {
         .names = { "openwrt" },
@@ -250,6 +297,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPNSENSE
     // OPNsense
     {
         .names = { "OPNsense" },
@@ -259,6 +308,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_256 "202",
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ORACLE
     // Oracle
     {
         .names = { "oracle", "oracle linux", "oracle linux server" },
@@ -269,6 +320,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ORCHID
     // Orchid
     {
         .names = { "orchid" },
@@ -281,6 +334,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ORCHID_SMALL
     // OrchidSmall
     {
         .names = { "orchid_small" },
@@ -294,6 +349,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OREON
     // Oreon
     {
         .names = { "Oreon" },
@@ -303,6 +360,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OS2WARP
     // OS/2 Warp
     {
         .names = { "OS2Warp" },
@@ -312,6 +371,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_LIGHT_BLUE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OS_ELBRUS
     // OS_Elbrus
     {
         .names = { "OS Elbrus" },
@@ -321,6 +382,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OSMC
     // OSMC
     {
         .names = { "OSMC", "Open Source Media Center" },
@@ -330,6 +393,8 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS
     // OSX
     {
         .names = { "OSX" },
@@ -345,6 +410,8 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS_SMALL
     // OSXSmall
     {
         .names = { "OSX_small" },
@@ -360,6 +427,7 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    #endif
     // LAST
     {},
 };
