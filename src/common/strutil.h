@@ -7,6 +7,12 @@
 
 #include "common/wcwidth.h"
 
+#ifdef _WIN32
+// #include <shlwapi.h>
+__stdcall char* StrStrIA(const char* lpFirst, const char* lpSrch);
+    #define strcasestr StrStrIA
+#endif
+
 static inline bool ffStrSet(const char* str) {
     if (str == NULL) {
         return false;

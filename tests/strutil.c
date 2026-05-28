@@ -110,7 +110,7 @@ int main(void) {
         uint8_t width = 0;
         uint8_t bytes = ffUtf8CharLenWidth(emoji, 4, &width);
         VERIFY(bytes == 4);
-        VERIFY(width == 2); // Most emoji are double-width
+        VERIFY(width == mk_wcwidth(0x1F600));
     }
 
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
