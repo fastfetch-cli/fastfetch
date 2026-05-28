@@ -235,10 +235,6 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version) {
 #endif
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) {
-    if (!instance.config.general.detectVersion) {
-        return false;
-    }
-
     if (ffStrEqualsIgnCase(exeName, "sh")) { // #849
         return false;
     }
@@ -727,10 +723,6 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version) {
 #endif
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_A_UNUSED FFstrbuf* exe, FFstrbuf* version) {
-    if (!instance.config.general.detectVersion) {
-        return false;
-    }
-
 #ifdef __ANDROID__
 
     if (ffStrbufEqualS(processName, "com.termux")) {

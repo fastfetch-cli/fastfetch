@@ -280,14 +280,7 @@ static void getUserShellFromEnv(FFShellResult* result) {
     }
 }
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
-
-bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
-
 static void setShellInfoDetails(FFShellResult* result) {
-    ffStrbufClear(&result->version);
-    fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
-
     if (ffStrbufEqualS(&result->processName, "pwsh")) {
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
     } else if (ffStrbufEqualS(&result->processName, "nu")) {
@@ -369,8 +362,6 @@ static void setTerminalInfoDetails(FFTerminalResult* result) {
     } else {
         ffStrbufInitCopy(&result->prettyName, &result->processName);
     }
-
-    fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
 }
 
 #if defined(MAXPATH)
@@ -408,7 +399,13 @@ const FFShellResult* ffDetectShell() {
 
     ppid = getShellInfo(&result, ppid);
     getUserShellFromEnv(&result);
-    setShellInfoDetails(&result);
+
+    if (result.processName.length > 0) {
+        setShellInfoDetails(&result);
+        if (instance.config.general.detectVersion) {
+            fftsGetShellVersion(result.exePath.length > 0 ? &result.exePath : &result.exe, result.exeName, &result.version);
+        }
+    }
 
     return &result;
 }
@@ -436,7 +433,13 @@ const FFTerminalResult* ffDetectTerminal() {
         ppid = getTerminalInfo(&result, ppid);
     }
     getTerminalFromEnv(&result);
-    setTerminalInfoDetails(&result);
+
+    if (result.processName.length > 0) {
+        setTerminalInfoDetails(&result);
+        if (instance.config.general.detectVersion) {
+            fftsGetTerminalVersion(&result.processName, result.exePath.length > 0 ? &result.exePath : &result.exe, &result.version);
+        }
+    }
 
     return &result;
 }
