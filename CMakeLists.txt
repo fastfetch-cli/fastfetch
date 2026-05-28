@@ -116,6 +116,14 @@ if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
 endif()
 
+file(GLOB FF_MODULE_DIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/")
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
+        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+        option(MODULE_${FF_MODULE_UPPER} "Enable module ${FF_MODULE_DIR}" ON)
+    endif()
+endforeach()
+
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
 set_property(CACHE BINARY_LINK_TYPE PROPERTY STRINGS ${BINARY_LINK_TYPE_OPTIONS})
@@ -1383,6 +1391,17 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
+        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+        if(MODULE_${FF_MODULE_UPPER})
+            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_${FF_MODULE_UPPER}=1)
+        else()
+            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_${FF_MODULE_UPPER}=0)
+        endif()
+    endif()
+endforeach()
 
 include(CheckCSourceCompiles)
 check_c_source_compiles("int main(void){int arr[1];return _Countof(arr);}" COMPILER_SUPPORTS_COUNT_OF)

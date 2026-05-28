@@ -29,6 +29,7 @@ static void initState(FFstate* state) {
     ffPlatformInit(&state->platform);
     state->dynamicInterval = 0;
 
+    #if FF_MODULE_TERMINALTHEME
     {
         // don't enable bright color if the terminal is in light mode
         FFTerminalThemeResult result;
@@ -36,6 +37,7 @@ static void initState(FFstate* state) {
             state->terminalLightTheme = true;
         }
     }
+    #endif
 }
 
 static void defaultConfig(void) {

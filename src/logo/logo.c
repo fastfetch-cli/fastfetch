@@ -461,6 +461,7 @@ static bool updateLogoPath(void) {
         return true;
     }
 
+    #if FF_MODULE_MEDIA
     if (ffStrbufIgnCaseEqualS(&options->source, "media-cover")) {
         const FFMediaResult* media = ffDetectMedia(true);
         if (media->cover.length == 0) {
@@ -469,6 +470,7 @@ static bool updateLogoPath(void) {
         ffStrbufSet(&options->source, &media->cover);
         return true;
     }
+    #endif
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreateA(128);
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE)) {
@@ -637,6 +639,7 @@ void ffLogoPrint(void) {
         }
 
         if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt")) {
+            #if FF_MODULE_TERMINAL
             const FFTerminalResult* terminal = ffDetectTerminal();
 
             bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
@@ -658,6 +661,9 @@ void ffLogoPrint(void) {
                 ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
 #endif
                 false;
+            #else
+            bool supportsKitty = false;
+            #endif
 
             // Try to load the logo as an image. If it succeeds, print it and return.
             if (logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false)) {

@@ -133,6 +133,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
+        #if FF_MODULE_CPUUSAGE
         case 'c':
         case 'C': {
             if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
@@ -147,6 +148,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if FF_MODULE_DISKIO
         case 'd':
         case 'D': {
             if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME)) {
@@ -159,6 +163,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if FF_MODULE_NETIO
         case 'n':
         case 'N': {
             if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME)) {
@@ -171,6 +178,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if FF_MODULE_PUBLICIP
         case 'p':
         case 'P': {
             if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME)) {
@@ -183,6 +193,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if FF_MODULE_WEATHER
         case 'w':
         case 'W': {
             if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME)) {
@@ -195,6 +208,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
     }
 }
 
