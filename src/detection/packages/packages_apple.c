@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static void countBrewPackages(FFstrbuf* baseDir, FFPackagesResult* result) {
     uint32_t baseDirLength = baseDir->length;

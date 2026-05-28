@@ -1,7 +1,7 @@
 #include "FFPlatform_private.h"
 #include "common/io.h"
 #include "common/library.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/windows/nt.h"

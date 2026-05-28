@@ -1,6 +1,6 @@
 #include "netio.h"
 #include "common/netif.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <kstat.h>
 

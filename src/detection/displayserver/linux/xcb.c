@@ -6,7 +6,7 @@
     #include "common/properties.h"
     #include "common/edidHelper.h"
     #include "common/mallocHelper.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
 
     #include <stdlib.h>
     #include <string.h>

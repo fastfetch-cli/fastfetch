@@ -2,7 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/textModifier.h"
 #include "common/color.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "logo/logo.h"
 #include "modules/colors/colors.h"
 

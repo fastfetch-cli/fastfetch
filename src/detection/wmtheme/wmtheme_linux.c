@@ -3,7 +3,7 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"

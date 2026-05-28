@@ -4,7 +4,7 @@
 #include "common/io.h"
 #include "common/binary.h"
 #include "common/path.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/debug.h"
 
 const char* ffDetectWMPlugin(FF_A_UNUSED FFstrbuf* pluginName) {

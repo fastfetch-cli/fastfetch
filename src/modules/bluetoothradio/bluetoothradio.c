@@ -1,7 +1,7 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/bluetoothradio/bluetoothradio.h"
 #include "modules/bluetoothradio/bluetoothradio.h"
 

@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/users/users.h"
 #include "modules/users/users.h"
 

@@ -3,7 +3,7 @@
 #include "common/printing.h"
 #include "common/time.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "fastfetch_datatext.h"
 #include "modules/modules.h"
 

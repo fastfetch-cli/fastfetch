@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/library.h"
 #include "common/networking.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/debug.h"
 
 #ifdef FF_HAVE_ZLIB

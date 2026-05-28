@@ -1,6 +1,6 @@
 #include "packages.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/path.h"
 #include "common/windows/unicode.h"
 #include "common/mallocHelper.h"

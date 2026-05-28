@@ -3,7 +3,7 @@
 #include "common/percent.h"
 #include "common/duration.h"
 #include "common/temps.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
 

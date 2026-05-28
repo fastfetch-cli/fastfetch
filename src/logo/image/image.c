@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/base64.h"
 #include "detection/terminalsize/terminalsize.h"
 

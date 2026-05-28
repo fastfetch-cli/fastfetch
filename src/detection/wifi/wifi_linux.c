@@ -1,7 +1,7 @@
 #include "wifi.h"
 #include "common/io.h"
 #include "common/debug.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <sys/time.h>
 #include <sys/socket.h>

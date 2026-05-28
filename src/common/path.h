@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/FFstrbuf.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result);
 static inline bool ffIsAbsolutePath(const char* path) {

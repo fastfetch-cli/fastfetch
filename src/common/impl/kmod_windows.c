@@ -1,7 +1,7 @@
 #include "common/kmod.h"
 #include "common/windows/nt.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 bool ffKmodLoaded(const char* modName) {
     ULONG bufferSize = 0;

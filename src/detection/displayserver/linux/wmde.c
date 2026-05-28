@@ -1,7 +1,7 @@
 #include "displayserver_linux.h"
 #include "common/io.h"
 #include "common/properties.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 
 #include <stdlib.h>

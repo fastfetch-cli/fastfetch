@@ -1,6 +1,6 @@
 extern "C" {
 #include "sound.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 }
 #include <MediaAddOn.h>
 #include <MediaNode.h>

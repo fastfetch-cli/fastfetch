@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/option.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/os/os.h"
 #include "modules/os/os.h"
 

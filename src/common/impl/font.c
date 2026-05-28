@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/FFlist.h"
 #include "common/FFstrbuf.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/font.h"
 
 #include <string.h>

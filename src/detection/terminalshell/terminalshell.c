@@ -3,7 +3,7 @@
 #include "common/processing.h"
 #include "common/properties.h"
 #include "common/path.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/binary.h"
 
 #include <ctype.h>

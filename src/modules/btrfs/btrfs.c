@@ -2,7 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/btrfs/btrfs.h"
 #include "modules/btrfs/btrfs.h"
 

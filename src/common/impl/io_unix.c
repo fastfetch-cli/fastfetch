@@ -1,6 +1,6 @@
 #include "common/io.h"
 #include "fastfetch.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/time.h"
 
 #include <fcntl.h>

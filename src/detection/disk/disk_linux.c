@@ -1,7 +1,7 @@
 #include "disk.h"
 
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <limits.h>
 #include <ctype.h>

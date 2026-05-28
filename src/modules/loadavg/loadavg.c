@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/loadavg/loadavg.h"
 #include "detection/cpu/cpu.h"
 #include "modules/loadavg/loadavg.h"

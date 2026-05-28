@@ -1,6 +1,6 @@
 #include "mouse.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/input/");

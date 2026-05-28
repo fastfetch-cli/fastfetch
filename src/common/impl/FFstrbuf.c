@@ -1,6 +1,6 @@
 #include "common/FFstrbuf.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <ctype.h>
 #include <inttypes.h>

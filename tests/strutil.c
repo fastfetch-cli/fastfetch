@@ -1,4 +1,4 @@
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/textModifier.h"
 
 #include <stdint.h>

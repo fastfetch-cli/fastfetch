@@ -2,7 +2,7 @@
 #include "common/format.h"
 #include "common/parsing.h"
 #include "common/textModifier.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/library.h"
 
 #include <inttypes.h>

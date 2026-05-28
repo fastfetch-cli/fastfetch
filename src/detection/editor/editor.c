@@ -1,7 +1,7 @@
 #include "editor.h"
 #include "common/processing.h"
 #include "common/library.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/path.h"
 #include "common/binary.h"
 

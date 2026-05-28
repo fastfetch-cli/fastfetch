@@ -3,7 +3,7 @@
 #include "common/parsing.h"
 #include "common/io.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <string.h>
 #include <stdlib.h>

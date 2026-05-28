@@ -7,7 +7,7 @@
 #include "common/windows/unicode.h"
 #include "common/windows/version.h"
 #include "common/windows/nt.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <stdalign.h>
 #include <windows.h>

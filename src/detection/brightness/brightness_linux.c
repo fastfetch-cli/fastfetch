@@ -1,7 +1,7 @@
 #include "brightness.h"
 #include "common/io.h"
 #include "common/edidHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <dirent.h>
 #include <limits.h>

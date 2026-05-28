@@ -1,5 +1,5 @@
 #include "initsystem.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/haiku/version.h"
 #include "common/io.h"
 

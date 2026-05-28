@@ -6,7 +6,7 @@
 #include "common/io.h"
 #include "common/processing.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/binary.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"

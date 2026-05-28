@@ -1,7 +1,7 @@
 #include "displayserver_linux.h"
 #include "common/io.h"
 #include "common/edidHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #ifdef __linux__
     #include <dirent.h>

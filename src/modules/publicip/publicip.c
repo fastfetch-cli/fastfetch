@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "modules/publicip/publicip.h"
 #include "detection/publicip/publicip.h"
 

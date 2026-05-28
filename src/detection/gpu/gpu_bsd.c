@@ -32,7 +32,7 @@ static void fillGPUTypeGeneric(FFGPUResult* gpu) {
 
 #if FF_HAVE_DRM
     #include "common/library.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
 
     #include <xf86drm.h>
 

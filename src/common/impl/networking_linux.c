@@ -2,7 +2,7 @@
 #include "common/networking.h"
 #include "common/time.h"
 #include "common/library.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "common/debug.h"
 

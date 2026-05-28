@@ -1,7 +1,7 @@
 #include "os.h"
 #include "common/io.h"
 #include "common/sysctl.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 
 #include <stdlib.h>

@@ -4,7 +4,7 @@
 #include "common/printing.h"
 #include "common/io.h"
 #include "common/time.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/version/version.h"
 #include "modules/modules.h"
 

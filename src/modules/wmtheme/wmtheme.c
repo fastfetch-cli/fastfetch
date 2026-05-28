@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/wmtheme/wmtheme.h"
 #include "modules/wmtheme/wmtheme.h"
 

@@ -1,6 +1,6 @@
 #include "gamepad.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path) {
     uint32_t baseLen = path->length;

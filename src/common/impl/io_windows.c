@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 

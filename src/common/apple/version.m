@@ -1,5 +1,5 @@
 #include "common/apple/version.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #import <Foundation/Foundation.h>
 

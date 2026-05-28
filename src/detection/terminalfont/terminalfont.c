@@ -3,7 +3,7 @@
 #include "common/properties.h"
 #include "common/processing.h"
 #include "common/debug.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/terminalshell/terminalshell.h"
 
 static void detectAlacritty(FFTerminalFontResult* terminalFont) {

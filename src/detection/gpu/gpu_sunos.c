@@ -1,5 +1,5 @@
 #include "gpu.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <libdevinfo.h>
 

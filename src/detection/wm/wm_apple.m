@@ -2,7 +2,7 @@
 
 #include "common/sysctl.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/apple/version.h"
 
 #include <ctype.h>
