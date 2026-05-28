@@ -108,6 +108,7 @@ option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(
 option(ENABLE_LUA "Enable lua scripting for format strings" ON)
 option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" ON)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
+option(ENABLE_WCWIDTH "Detect wide-width characters with wcwidth when calculating logo and separator width. Disable for a smaller and slightly faster build, but logos containing CJK/emoji may be measured too narrow and render incorrectly. Such usecases are uncommon." ON)
 if(WIN32 AND NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
     option(ENABLE_WIN81_COMPAT "Enable legacy Windows compatibility (Windows 8.1 and later; Windows 7 unsupported)" ON)
 endif()
@@ -409,7 +410,6 @@ set(LIBFASTFETCH_SRC
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
     src/common/impl/smbios.c
-    src/common/impl/wcwidth.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -1363,6 +1363,9 @@ check_function_exists(memrchr HAVE_MEMRCHR)
 if(NOT HAVE_MEMRCHR)
     list(APPEND LIBFASTFETCH_SRC src/common/impl/memrchr.c)
 endif()
+if(ENABLE_WCWIDTH)
+    list(APPEND LIBFASTFETCH_SRC src/common/impl/wcwidth.c)
+endif()
 
 if(ENABLE_SYSTEM_YYJSON)
     find_package(yyjson)
@@ -1765,6 +1768,9 @@ if(ENABLE_LIBZFS)
             PRIVATE "zfs"
         )
     endif()
+endif()
+if(ENABLE_WCWIDTH)
+    target_compile_definitions(libfastfetch PRIVATE FF_ENABLE_WCWIDTH=1)
 endif()
 if(NOT HAVE_MEMRCHR)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_CUSTOM_MEMRCHR=1)
