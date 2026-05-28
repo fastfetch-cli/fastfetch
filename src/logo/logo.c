@@ -436,7 +436,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size) {
     return true;
 }
 
-static inline void logoPrintDetected(FFLogoSize size) {
+void ffLogoPrintDetected(FFLogoSize size) {
     logoPrintStruct(logoGetBuiltinDetected(size));
 }
 
@@ -606,7 +606,7 @@ void ffLogoPrint(void) {
 
     // If the source is not set, we can directly print the detected logo.
     if (options->source.length == 0) {
-        logoPrintDetected(options->type == FF_LOGO_TYPE_SMALL ? FF_LOGO_SIZE_SMALL : FF_LOGO_SIZE_NORMAL);
+        ffLogoPrintDetected(options->type == FF_LOGO_TYPE_SMALL ? FF_LOGO_SIZE_SMALL : FF_LOGO_SIZE_NORMAL);
         return;
     }
 
@@ -620,7 +620,7 @@ void ffLogoPrint(void) {
                 }
             }
 
-            logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+            ffLogoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
         }
         return;
     }
@@ -681,7 +681,7 @@ void ffLogoPrint(void) {
         }
     }
 
-    logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+    ffLogoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }
 
 void ffLogoPrintLine(void) {

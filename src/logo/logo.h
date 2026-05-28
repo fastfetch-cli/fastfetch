@@ -32,6 +32,7 @@ void ffLogoPrintRemaining(void);
 void ffLogoBuiltinPrint(void);
 void ffLogoBuiltinList(void);
 void ffLogoBuiltinListAutocompletion(void);
+void ffLogoPrintDetected(FFLogoSize size);
 const FFlogo* ffLogoGetBuiltinForName(const FFstrbuf* name, FFLogoSize size);
 const FFlogo* ffLogoGetBuiltinDetected(FFLogoSize size);
 
