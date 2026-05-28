@@ -357,6 +357,9 @@ static void detectExynos(FFCPUResult* cpu) {
     const char* name = NULL;
 
     switch (code) {
+        case 9965:
+            name = "2600";
+            break;
         case 9955:
             name = "2500";
             break;
