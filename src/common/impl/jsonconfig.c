@@ -133,7 +133,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
-        #if FF_MODULE_CPUUSAGE
+        #if !FF_DISABLE_MODULE_CPUUSAGE
         case 'c':
         case 'C': {
             if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
@@ -150,7 +150,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         }
         #endif
 
-        #if FF_MODULE_DISKIO
+        #if !FF_DISABLE_MODULE_DISKIO
         case 'd':
         case 'D': {
             if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME)) {
@@ -165,7 +165,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         }
         #endif
 
-        #if FF_MODULE_NETIO
+        #if !FF_DISABLE_MODULE_NETIO
         case 'n':
         case 'N': {
             if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME)) {
@@ -180,7 +180,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         }
         #endif
 
-        #if FF_MODULE_PUBLICIP
+        #if !FF_DISABLE_MODULE_PUBLICIP
         case 'p':
         case 'P': {
             if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME)) {
@@ -195,7 +195,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         }
         #endif
 
-        #if FF_MODULE_WEATHER
+        #if !FF_DISABLE_MODULE_WEATHER
         case 'w':
         case 'W': {
             if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME)) {

@@ -121,7 +121,7 @@ file(GLOB FF_MODULE_DIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${C
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
     if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
         string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        option(MODULE_${FF_MODULE_UPPER} "Enable module ${FF_MODULE_DIR}" ON)
+        option(DISABLE_MODULE_${FF_MODULE_UPPER} "Disable module ${FF_MODULE_DIR}" OFF)
     endif()
 endforeach()
 
@@ -377,7 +377,7 @@ endif()
 # Ascii image data #
 ####################
 
-file(GLOB LOGO_FILES CONFIGURE_DEPENDS "src/logo/ascii/[a-z_]/*.txt")
+file(GLOB LOGO_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/logo/ascii/[a-z_]/*.txt")
 set(LOGO_BUILTIN_H "#pragma once\n#pragma GCC diagnostic ignored \"-Wtrigraphs\"\n\n")
 foreach(file ${LOGO_FILES})
     fastfetch_load_text("${file}" content)
@@ -1395,10 +1395,8 @@ add_library(libfastfetch OBJECT
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
     if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
         string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        if(MODULE_${FF_MODULE_UPPER})
-            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_${FF_MODULE_UPPER}=1)
-        else()
-            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_${FF_MODULE_UPPER}=0)
+        if(DISABLE_MODULE_${FF_MODULE_UPPER})
+            target_compile_definitions(libfastfetch PUBLIC FF_DISABLE_MODULE_${FF_MODULE_UPPER}=1)
         endif()
     endif()
 endforeach()

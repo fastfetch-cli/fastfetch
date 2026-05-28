@@ -1,7 +1,7 @@
 #include "modules/modules.h"
 
 // Note:
-// FF_MODULE_<module> only controls if the module is registered,
+// FF_DISABLE_MODULE_<module> only controls if the module is registered,
 // the module code itself is still compiled.
 // We rely `LTO` to remove the unused code (only enabled in Release mode)
 
@@ -10,125 +10,125 @@ static FFModuleBaseInfo* A[] = {
 };
 
 static FFModuleBaseInfo* B[] = {
-#if FF_MODULE_BATTERY
+#if !FF_DISABLE_MODULE_BATTERY
     &ffBatteryModuleInfo,
 #endif
-#if FF_MODULE_BIOS
+#if !FF_DISABLE_MODULE_BIOS
     &ffBiosModuleInfo,
 #endif
-#if FF_MODULE_BLUETOOTH
+#if !FF_DISABLE_MODULE_BLUETOOTH
     &ffBluetoothModuleInfo,
 #endif
-#if FF_MODULE_BLUETOOTHRADIO
+#if !FF_DISABLE_MODULE_BLUETOOTHRADIO
     &ffBluetoothRadioModuleInfo,
 #endif
-#if FF_MODULE_BOARD
+#if !FF_DISABLE_MODULE_BOARD
     &ffBoardModuleInfo,
 #endif
-#if FF_MODULE_BOOTMGR
+#if !FF_DISABLE_MODULE_BOOTMGR
     &ffBootmgrModuleInfo,
 #endif
-#if FF_MODULE_BREAK
+#if !FF_DISABLE_MODULE_BREAK
     &ffBreakModuleInfo,
 #endif
-#if FF_MODULE_BRIGHTNESS
+#if !FF_DISABLE_MODULE_BRIGHTNESS
     &ffBrightnessModuleInfo,
 #endif
-#if FF_MODULE_BTRFS
+#if !FF_DISABLE_MODULE_BTRFS
     &ffBtrfsModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* C[] = {
-#if FF_MODULE_CAMERA
+#if !FF_DISABLE_MODULE_CAMERA
     &ffCameraModuleInfo,
 #endif
-#if FF_MODULE_CHASSIS
+#if !FF_DISABLE_MODULE_CHASSIS
     &ffChassisModuleInfo,
 #endif
-#if FF_MODULE_COMMAND
+#if !FF_DISABLE_MODULE_COMMAND
     &ffCommandModuleInfo,
 #endif
-#if FF_MODULE_COLORS
+#if !FF_DISABLE_MODULE_COLORS
     &ffColorsModuleInfo,
 #endif
-#if FF_MODULE_CPU
+#if !FF_DISABLE_MODULE_CPU
     &ffCPUModuleInfo,
 #endif
-#if FF_MODULE_CPUCACHE
+#if !FF_DISABLE_MODULE_CPUCACHE
     &ffCPUCacheModuleInfo,
 #endif
-#if FF_MODULE_CPUUSAGE
+#if !FF_DISABLE_MODULE_CPUUSAGE
     &ffCPUUsageModuleInfo,
 #endif
-#if FF_MODULE_CURSOR
+#if !FF_DISABLE_MODULE_CURSOR
     &ffCursorModuleInfo,
 #endif
-#if FF_MODULE_CUSTOM
+#if !FF_DISABLE_MODULE_CUSTOM
     &ffCustomModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* D[] = {
-#if FF_MODULE_DATETIME
+#if !FF_DISABLE_MODULE_DATETIME
     &ffDateTimeModuleInfo,
 #endif
-#if FF_MODULE_DE
+#if !FF_DISABLE_MODULE_DE
     &ffDEModuleInfo,
 #endif
-#if FF_MODULE_DISPLAY
+#if !FF_DISABLE_MODULE_DISPLAY
     &ffDisplayModuleInfo,
 #endif
-#if FF_MODULE_DISK
+#if !FF_DISABLE_MODULE_DISK
     &ffDiskModuleInfo,
 #endif
-#if FF_MODULE_DISKIO
+#if !FF_DISABLE_MODULE_DISKIO
     &ffDiskIOModuleInfo,
 #endif
-#if FF_MODULE_DNS
+#if !FF_DISABLE_MODULE_DNS
     &ffDNSModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* E[] = {
-#if FF_MODULE_EDITOR
+#if !FF_DISABLE_MODULE_EDITOR
     &ffEditorModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* F[] = {
-#if FF_MODULE_FONT
+#if !FF_DISABLE_MODULE_FONT
     &ffFontModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* G[] = {
-#if FF_MODULE_GAMEPAD
+#if !FF_DISABLE_MODULE_GAMEPAD
     &ffGamepadModuleInfo,
 #endif
-#if FF_MODULE_GPU
+#if !FF_DISABLE_MODULE_GPU
     &ffGPUModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* H[] = {
-#if FF_MODULE_HOST
+#if !FF_DISABLE_MODULE_HOST
     &ffHostModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* I[] = {
-#if FF_MODULE_ICONS
+#if !FF_DISABLE_MODULE_ICONS
     &ffIconsModuleInfo,
 #endif
-#if FF_MODULE_INITSYSTEM
+#if !FF_DISABLE_MODULE_INITSYSTEM
     &ffInitSystemModuleInfo,
 #endif
     NULL,
@@ -139,90 +139,90 @@ static FFModuleBaseInfo* J[] = {
 };
 
 static FFModuleBaseInfo* K[] = {
-#if FF_MODULE_KERNEL
+#if !FF_DISABLE_MODULE_KERNEL
     &ffKernelModuleInfo,
 #endif
-#if FF_MODULE_KEYBOARD
+#if !FF_DISABLE_MODULE_KEYBOARD
     &ffKeyboardModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* L[] = {
-#if FF_MODULE_LM
+#if !FF_DISABLE_MODULE_LM
     &ffLMModuleInfo,
 #endif
-#if FF_MODULE_LOADAVG
+#if !FF_DISABLE_MODULE_LOADAVG
     &ffLoadavgModuleInfo,
 #endif
-#if FF_MODULE_LOCALE
+#if !FF_DISABLE_MODULE_LOCALE
     &ffLocaleModuleInfo,
 #endif
-#if FF_MODULE_LOCALIP
+#if !FF_DISABLE_MODULE_LOCALIP
     &ffLocalIPModuleInfo,
 #endif
-#if FF_MODULE_LOGO
+#if !FF_DISABLE_MODULE_LOGO
     &ffLogoModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* M[] = {
-#if FF_MODULE_MEDIA
+#if !FF_DISABLE_MODULE_MEDIA
     &ffMediaModuleInfo,
 #endif
-#if FF_MODULE_MEMORY
+#if !FF_DISABLE_MODULE_MEMORY
     &ffMemoryModuleInfo,
 #endif
-#if FF_MODULE_MONITOR
+#if !FF_DISABLE_MODULE_MONITOR
     &ffMonitorModuleInfo,
 #endif
-#if FF_MODULE_MOUSE
+#if !FF_DISABLE_MODULE_MOUSE
     &ffMouseModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* N[] = {
-#if FF_MODULE_NETIO
+#if !FF_DISABLE_MODULE_NETIO
     &ffNetIOModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* O[] = {
-#if FF_MODULE_OPENCL
+#if !FF_DISABLE_MODULE_OPENCL
     &ffOpenCLModuleInfo,
 #endif
-#if FF_MODULE_OPENGL
+#if !FF_DISABLE_MODULE_OPENGL
     &ffOpenGLModuleInfo,
 #endif
-#if FF_MODULE_OS
+#if !FF_DISABLE_MODULE_OS
     &ffOSModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* P[] = {
-#if FF_MODULE_PACKAGES
+#if !FF_DISABLE_MODULE_PACKAGES
     &ffPackagesModuleInfo,
 #endif
-#if FF_MODULE_PHYSICALDISK
+#if !FF_DISABLE_MODULE_PHYSICALDISK
     &ffPhysicalDiskModuleInfo,
 #endif
-#if FF_MODULE_PHYSICALMEMORY
+#if !FF_DISABLE_MODULE_PHYSICALMEMORY
     &ffPhysicalMemoryModuleInfo,
 #endif
-#if FF_MODULE_PLAYER
+#if !FF_DISABLE_MODULE_PLAYER
     &ffPlayerModuleInfo,
 #endif
-#if FF_MODULE_POWERADAPTER
+#if !FF_DISABLE_MODULE_POWERADAPTER
     &ffPowerAdapterModuleInfo,
 #endif
-#if FF_MODULE_PROCESSES
+#if !FF_DISABLE_MODULE_PROCESSES
     &ffProcessesModuleInfo,
 #endif
-#if FF_MODULE_PUBLICIP
+#if !FF_DISABLE_MODULE_PUBLICIP
     &ffPublicIPModuleInfo,
 #endif
     NULL,
@@ -237,80 +237,80 @@ static FFModuleBaseInfo* R[] = {
 };
 
 static FFModuleBaseInfo* S[] = {
-#if FF_MODULE_SEPARATOR
+#if !FF_DISABLE_MODULE_SEPARATOR
     &ffSeparatorModuleInfo,
 #endif
-#if FF_MODULE_SHELL
+#if !FF_DISABLE_MODULE_SHELL
     &ffShellModuleInfo,
 #endif
-#if FF_MODULE_SOUND
+#if !FF_DISABLE_MODULE_SOUND
     &ffSoundModuleInfo,
 #endif
-#if FF_MODULE_SWAP
+#if !FF_DISABLE_MODULE_SWAP
     &ffSwapModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* T[] = {
-#if FF_MODULE_TERMINAL
+#if !FF_DISABLE_MODULE_TERMINAL
     &ffTerminalModuleInfo,
 #endif
-#if FF_MODULE_TERMINALFONT
+#if !FF_DISABLE_MODULE_TERMINALFONT
     &ffTerminalFontModuleInfo,
 #endif
-#if FF_MODULE_TERMINALSIZE
+#if !FF_DISABLE_MODULE_TERMINALSIZE
     &ffTerminalSizeModuleInfo,
 #endif
-#if FF_MODULE_TERMINALTHEME
+#if !FF_DISABLE_MODULE_TERMINALTHEME
     &ffTerminalThemeModuleInfo,
 #endif
-#if FF_MODULE_TITLE
+#if !FF_DISABLE_MODULE_TITLE
     &ffTitleModuleInfo,
 #endif
-#if FF_MODULE_THEME
+#if !FF_DISABLE_MODULE_THEME
     &ffThemeModuleInfo,
 #endif
-#if FF_MODULE_TPM
+#if !FF_DISABLE_MODULE_TPM
     &ffTPMModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* U[] = {
-#if FF_MODULE_UPTIME
+#if !FF_DISABLE_MODULE_UPTIME
     &ffUptimeModuleInfo,
 #endif
-#if FF_MODULE_USERS
+#if !FF_DISABLE_MODULE_USERS
     &ffUsersModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* V[] = {
-#if FF_MODULE_VERSION
+#if !FF_DISABLE_MODULE_VERSION
     &ffVersionModuleInfo,
 #endif
-#if FF_MODULE_VULKAN
+#if !FF_DISABLE_MODULE_VULKAN
     &ffVulkanModuleInfo,
 #endif
     NULL,
 };
 
 static FFModuleBaseInfo* W[] = {
-#if FF_MODULE_WALLPAPER
+#if !FF_DISABLE_MODULE_WALLPAPER
     &ffWallpaperModuleInfo,
 #endif
-#if FF_MODULE_WEATHER
+#if !FF_DISABLE_MODULE_WEATHER
     &ffWeatherModuleInfo,
 #endif
-#if FF_MODULE_WM
+#if !FF_DISABLE_MODULE_WM
     &ffWMModuleInfo,
 #endif
-#if FF_MODULE_WIFI
+#if !FF_DISABLE_MODULE_WIFI
     &ffWifiModuleInfo,
 #endif
-#if FF_MODULE_WMTHEME
+#if !FF_DISABLE_MODULE_WMTHEME
     &ffWMThemeModuleInfo,
 #endif
     NULL,
@@ -325,7 +325,7 @@ static FFModuleBaseInfo* Y[] = {
 };
 
 static FFModuleBaseInfo* Z[] = {
-#if FF_MODULE_ZPOOL
+#if !FF_DISABLE_MODULE_ZPOOL
     &ffZpoolModuleInfo,
 #endif
     NULL,

@@ -70,7 +70,7 @@ void ffPrepareCommandOption(FFdata* data) {
 #define FF_IF_MODULE_MATCH(moduleNameConstant) if (moduleLen == strlen(moduleNameConstant) && ffStrEqualsIgnCase(moduleType, moduleNameConstant) && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
         switch (moduleType[0]) {
-            #if FF_MODULE_CPUUSAGE
+            #if !FF_DISABLE_MODULE_CPUUSAGE
             case 'C':
             case 'c':
                 FF_IF_MODULE_MATCH(FF_CPUUSAGE_MODULE_NAME)
@@ -78,7 +78,7 @@ void ffPrepareCommandOption(FFdata* data) {
                 break;
             #endif
 
-            #if FF_MODULE_DISKIO
+            #if !FF_DISABLE_MODULE_DISKIO
             case 'D':
             case 'd':
                 FF_IF_MODULE_MATCH(FF_DISKIO_MODULE_NAME) {
@@ -89,7 +89,7 @@ void ffPrepareCommandOption(FFdata* data) {
                 break;
             #endif
 
-            #if FF_MODULE_NETIO
+            #if !FF_DISABLE_MODULE_NETIO
             case 'N':
             case 'n':
                 FF_IF_MODULE_MATCH(FF_NETIO_MODULE_NAME) {
@@ -100,7 +100,7 @@ void ffPrepareCommandOption(FFdata* data) {
                 break;
             #endif
 
-            #if FF_MODULE_PUBLICIP
+            #if !FF_DISABLE_MODULE_PUBLICIP
             case 'P':
             case 'p':
                 FF_IF_MODULE_MATCH(FF_PUBLICIP_MODULE_NAME) {
@@ -111,7 +111,7 @@ void ffPrepareCommandOption(FFdata* data) {
                 break;
             #endif
 
-            #if FF_MODULE_WEATHER
+            #if !FF_DISABLE_MODULE_WEATHER
             case 'W':
             case 'w':
                 FF_IF_MODULE_MATCH(FF_WEATHER_MODULE_NAME) {

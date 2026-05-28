@@ -110,7 +110,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
     return error;
 }
 
-#if FF_MODULE_MEDIA
+#if !FF_DISABLE_MODULE_MEDIA
 __attribute__((visibility("default"), used))
 int ffPrintMediaByMediaRemote(bool saveCover) {
     FFMediaResult media = {
