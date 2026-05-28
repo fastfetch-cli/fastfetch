@@ -33,7 +33,7 @@ endBold = r"\fR" # end bold text tag
 # path to the current directory
 pathToCurrentDir = path.dirname(__file__)
 # path to the JSON option file
-pathToHelpFile = path.join(pathToCurrentDir, "../src/data/help.json")
+pathToHelpFile = path.join(pathToCurrentDir, "../doc/help.json")
 # man page section
 manSection = 1
 # title (center header)

@@ -298,14 +298,14 @@ find_package(Python)
 if(Python_FOUND)
     message(STATUS "Minifying 'help.json'")
     execute_process(COMMAND ${Python_EXECUTABLE} -c "import json,sys;json.dump(json.load(sys.stdin),sys.stdout,separators=(',',':'))"
-                    INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
+                    INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/doc/help.json"
                     OUTPUT_VARIABLE DATATEXT_JSON_HELP)
     if(DATATEXT_JSON_HELP STREQUAL "")
         message(ERROR "DATATEXT_JSON_HELP is empty, which should not happen!")
     endif()
 else()
     message(WARNING "Python3 is not found, 'help.json' will not be minified")
-    file(READ "src/data/help.json" DATATEXT_JSON_HELP)
+    file(READ "doc/help.json" DATATEXT_JSON_HELP)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
