@@ -30,6 +30,17 @@ static const FFlogo B[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_BERSERKARCH
+    // BerserkArch
+    {
+        .names = { "BerserkArch" },
+        .lines = FASTFETCH_DATATEXT_LOGO_BERSERKARCH,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_BIGLINUX
     // BigLinux
     {
