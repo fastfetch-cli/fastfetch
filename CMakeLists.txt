@@ -1204,7 +1204,7 @@ elseif(Haiku)
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
-        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/bootmgr/bootmgr_haiku.cpp
         src/detection/brightness/brightness_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
