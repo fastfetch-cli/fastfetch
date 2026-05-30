@@ -461,7 +461,7 @@ static bool updateLogoPath(void) {
         return true;
     }
 
-    #if !FF_DISABLE_MODULE_MEDIA
+    #if !FF_MODULE_DISABLE_MEDIA
     if (ffStrbufIgnCaseEqualS(&options->source, "media-cover")) {
         const FFMediaResult* media = ffDetectMedia(true);
         if (media->cover.length == 0) {
@@ -639,7 +639,7 @@ void ffLogoPrint(void) {
         }
 
         if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt")) {
-            #if !FF_DISABLE_MODULE_TERMINAL
+            #if !FF_MODULE_DISABLE_TERMINAL
             const FFTerminalResult* terminal = ffDetectTerminal();
 
             bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
