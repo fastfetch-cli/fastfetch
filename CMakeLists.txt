@@ -1257,7 +1257,7 @@ elseif(Haiku)
         src/detection/wifi/wifi_nosupport.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
-        src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/wmtheme/wmtheme_haiku.cpp
         src/detection/camera/camera_nosupport.c
     )
 elseif(GNU)
