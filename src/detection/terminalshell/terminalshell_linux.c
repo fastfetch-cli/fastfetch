@@ -294,11 +294,13 @@ static void setShellInfoDetails(FFShellResult* result) {
 }
 
 static void setTerminalInfoDetails(FFTerminalResult* result) {
-    if (ffStrbufStartsWithC(&result->processName, '.') && ffStrbufContainS(&result->processName, "-wrap")) {
-        // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
-        // We use processName when detecting version and font, overriding it for simplification
-        ffStrbufSubstrBeforeLastC(&result->processName, '-');
+    // For Nixpkgs. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
+    // We use processName when detecting version and font, overriding it for simplification
+    if (ffStrbufStartsWithC(&result->processName, '.') && ffStrbufStartsWithS(&result->exePath,"/nix/store")) {
         ffStrbufSubstrAfter(&result->processName, 0);
+        if (strlen(result->exeName) < 15) {
+            ffStrbufSubstrBeforeLastC(&result->processName, '-');
+        }
     }
 
     if (ffStrbufEqualS(&result->processName, "wezterm-gui")) {
@@ -357,7 +359,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result) {
 
 #endif
 
-    else if (strncmp(result->exeName, result->processName.chars, result->processName.length) == 0) { // if exeName starts with processName, print it. Otherwise print processName
+    else if (strncmp(result->exeName, result->processName.chars, result->processName.length) == 0 || (ffStrbufStartsWithS(&result->exePath,"/nix/store") && strlen(result->exeName) > 15)) { // if exeName starts with processName, print it. Otherwise print processName. For nixpkgs, use exeName if processName can't be unwrapped
         ffStrbufInitS(&result->prettyName, result->exeName);
     } else {
         ffStrbufInitCopy(&result->prettyName, &result->processName);
