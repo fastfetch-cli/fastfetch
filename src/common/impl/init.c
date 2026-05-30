@@ -271,6 +271,9 @@ void ffListFeatures(void) {
 #if FF_HAVE_EMBEDDED_PCIIDS
         "Embedded pciids\n"
 #endif
+#if FF_ENABLE_WCWIDTH
+        "Embedded wcwidth\n"
+#endif
 #if FF_HAVE_WINRT
         "WinRT headers\n"
 #endif
