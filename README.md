@@ -90,7 +90,7 @@ You may also download the program directly from [the GitHub releases page](https
 
 ## Build from source
 
-See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
+[See the Wiki](https://github.com/fastfetch-cli/fastfetch/wiki/Building)
 
 ## Usage
 
