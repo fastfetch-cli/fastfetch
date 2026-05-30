@@ -296,7 +296,7 @@ static void setShellInfoDetails(FFShellResult* result) {
 static void setTerminalInfoDetails(FFTerminalResult* result) {
     // For Nixpkgs. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
     // We use processName when detecting version and font, overriding it for simplification
-    if (ffStrbufStartsWithS(&result->exePath,"/nix/store") && ffStrbufStartsWithC(&result->processName, '.')) {
+    if (ffStrbufStartsWithC(&result->processName, '.') && ffStrbufStartsWithS(&result->exePath,"/nix/store")) {
         ffStrbufSubstrAfter(&result->processName, 0);
         if (strlen(result->exeName) < 15) {
             ffStrbufSubstrBeforeLastC(&result->processName, '-');
