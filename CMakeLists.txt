@@ -470,6 +470,7 @@ set(LIBFASTFETCH_SRC
     src/modules/custom/custom.c
     src/modules/command/command.c
     src/modules/datetime/datetime.c
+    src/modules/decoder/decoder.c
     src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/diskio/diskio.c

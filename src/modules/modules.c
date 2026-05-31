@@ -78,6 +78,9 @@ static FFModuleBaseInfo* D[] = {
 #if !FF_MODULE_DISABLE_DE
     &ffDEModuleInfo,
 #endif
+#if !FF_MODULE_DISABLE_DECODER
+    &ffDecoderModuleInfo,
+#endif
 #if !FF_MODULE_DISABLE_DISPLAY
     &ffDisplayModuleInfo,
 #endif
