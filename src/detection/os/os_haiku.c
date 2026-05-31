@@ -1,7 +1,7 @@
 #include "os.h"
 #include <OS.h>
 #include <image.h>
-#include <SupportDefs.h>
+#include <inttypes.h>
 
 void ffDetectOSImpl(FFOSResult* os) {
     ffStrbufSetStatic(&os->name, "Haiku");
@@ -33,7 +33,7 @@ void ffDetectOSImpl(FFOSResult* os) {
             int32 relVer = ver / 0x10000;
             ver %= 0x10000;
             if (ver == 0) {
-                ffStrbufSetF(&os->version, "R%" B_PRId32, relVer);
+                ffStrbufSetF(&os->version, "R%" PRIi32, relVer);
             } else {
                 relVer++;
 
@@ -41,16 +41,16 @@ void ffDetectOSImpl(FFOSResult* os) {
                 if (ver < B_HAIKU_VERSION_1_PRE_BETA_1) {
                     int32 alphaVer = ver / 0x100;
                     if (isPre) {
-                        ffStrbufSetF(&os->version, "R%" B_PRId32 "A%ld-", relVer, alphaVer + 1);
+                        ffStrbufSetF(&os->version, "R%" PRId32 "A%" PRIi32 "-", relVer, alphaVer + 1);
                     } else {
-                        ffStrbufSetF(&os->version, "R%" B_PRId32 "A%ld", relVer, alphaVer);
+                        ffStrbufSetF(&os->version, "R%" PRIi32 "A%" PRIi32, relVer, alphaVer);
                     }
                 } else if (ver < 0x00010000 /* B_HAIKU_VERSION_1 */) {
                     int32 betaVer = (ver - B_HAIKU_VERSION_1_ALPHA_4) / 0x100;
                     if (isPre) {
-                        ffStrbufSetF(&os->version, "R%" B_PRId32 "B%ld-", relVer, betaVer + 1);
+                        ffStrbufSetF(&os->version, "R%" PRIi32 "B%" PRIi32 "-", relVer, betaVer + 1);
                     } else {
-                        ffStrbufSetF(&os->version, "R%" B_PRId32 "B%ld", relVer, betaVer);
+                        ffStrbufSetF(&os->version, "R%" PRIi32 "B%" PRIi32, relVer, betaVer);
                     }
                 }
             }
@@ -60,7 +60,7 @@ void ffDetectOSImpl(FFOSResult* os) {
     if (!os->version.length) {
         system_info sys;
         if (get_system_info(&sys) == B_OK) {
-            ffStrbufAppendF(&os->version, "R%" B_PRIx64, sys.kernel_version);
+            ffStrbufAppendF(&os->version, "R%" PRIx64, sys.kernel_version);
         }
     }
 }

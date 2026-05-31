@@ -29,10 +29,10 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
         FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
 
         if (err == B_OK) {
-            ffStrbufInitF(&brightness->name, "%s %s (%ld)", monitor.vendor, monitor.name, screen.ID().id);
+            ffStrbufInitF(&brightness->name, "%s %s (%d)", monitor.vendor, monitor.name, screen.ID().id);
             ffStrbufTrimRightSpace(&brightness->name);
         } else {
-            ffStrbufInitF(&brightness->name, "Screen %ld", screen.ID().id);
+            ffStrbufInitF(&brightness->name, "Screen %d", screen.ID().id);
         }
 
         brightness->max = 1.0f;
