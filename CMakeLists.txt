@@ -463,6 +463,7 @@ set(LIBFASTFETCH_SRC
     src/modules/btrfs/btrfs.c
     src/modules/camera/camera.c
     src/modules/chassis/chassis.c
+    src/modules/codec/codec.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
     src/modules/cpucache/cpucache.c
@@ -471,7 +472,6 @@ set(LIBFASTFETCH_SRC
     src/modules/custom/custom.c
     src/modules/command/command.c
     src/modules/datetime/datetime.c
-    src/modules/decoder/decoder.c
     src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/diskio/diskio.c
@@ -550,11 +550,11 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/btrfs/btrfs_linux.c
         src/detection/chassis/chassis_linux.c
+        src/detection/codec/codec_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpucache/cpucache_linux.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
-        src/detection/decoder/decoder_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/disk/disk_linux.c
@@ -712,11 +712,11 @@ elseif(FreeBSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_bsd.c
+        src/detection/codec/codec_linux.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
-        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_bsd.c
@@ -807,11 +807,11 @@ elseif(NetBSD)
         src/detection/brightness/brightness_nbsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
+        src/detection/codec/codec_linux.c
         src/detection/cpu/cpu_nbsd.c
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
-        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nbsd.c
@@ -892,11 +892,11 @@ elseif(OpenBSD)
         src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
+        src/detection/codec/codec_linux.c
         src/detection/cpu/cpu_obsd.c
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
-        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_obsd.c
@@ -976,11 +976,11 @@ elseif(APPLE)
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/btrfs/btrfs_nosupport.c
+        src/detection/codec/codec_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
-        src/detection/decoder/decoder_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
@@ -1067,11 +1067,11 @@ elseif(WIN32)
         src/detection/brightness/brightness_windows.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
+        src/detection/codec/codec_windows.cpp
         src/detection/cpu/cpu_windows.c
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
-        src/detection/decoder/decoder_windows.cpp
         src/detection/disk/disk_windows.c
         src/detection/physicaldisk/physicaldisk_windows.c
         src/detection/diskio/diskio_windows.c
@@ -1139,7 +1139,7 @@ elseif(SunOS)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/decoder/decoder_linux.c
+        src/detection/codec/codec_linux.c
         src/detection/disk/disk_sunos.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_sunos.c
@@ -1223,7 +1223,7 @@ elseif(Haiku)
         src/detection/cursor/cursor_nosupport.c
         src/detection/bluetooth/bluetooth_haiku.cpp
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/decoder/decoder_linux.c
+        src/detection/codec/codec_linux.c
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_haiku.c
@@ -1293,8 +1293,8 @@ elseif(GNU)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/codec/codec_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/decoder/decoder_linux.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_nosupport.c

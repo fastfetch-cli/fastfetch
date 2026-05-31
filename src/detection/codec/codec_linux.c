@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "codec.h"
 
 #if FF_HAVE_DRM && FF_HAVE_VA
 
@@ -13,22 +13,22 @@
 #include <va/va_drm.h>
 #include <xf86drm.h>
 
-static FFDecoderType ffDecoderProfileToType(VAProfile profile) {
+static FFCodecType ffCodecProfileToType(VAProfile profile) {
     switch (profile) {
         case 11: // VAProfileH263Baseline
-            return FF_DECODER_TYPE_H263;
+            return FF_CODEC_TYPE_H263;
 
         case 12: // VAProfileJPEGBaseline
-            return FF_DECODER_TYPE_MJPEG;
+            return FF_CODEC_TYPE_MJPEG;
 
         case 0: // VAProfileMPEG2Simple
         case 1: // VAProfileMPEG2Main
-            return FF_DECODER_TYPE_MPEG2;
+            return FF_CODEC_TYPE_MPEG2;
 
         case 2: // VAProfileMPEG4Simple
         case 3: // VAProfileMPEG4AdvancedSimple
         case 4: // VAProfileMPEG4Main
-            return FF_DECODER_TYPE_DIVX_XVID;
+            return FF_CODEC_TYPE_DIVX_XVID;
 
         case 5:  // VAProfileH264Baseline
         case 6:  // VAProfileH264Main
@@ -38,15 +38,15 @@ static FFDecoderType ffDecoderProfileToType(VAProfile profile) {
         case 16: // VAProfileH264StereoHigh
         case 36: // VAProfileH264High10
         case 40: // VAProfileH264High422
-            return FF_DECODER_TYPE_H264;
+            return FF_CODEC_TYPE_H264;
 
         case 8:  // VAProfileVC1Simple
         case 9:  // VAProfileVC1Main
         case 10: // VAProfileVC1Advanced
-            return FF_DECODER_TYPE_VC1;
+            return FF_CODEC_TYPE_VC1;
 
         case 14: // VAProfileVP8Version0_3
-            return FF_DECODER_TYPE_VP8;
+            return FF_CODEC_TYPE_VP8;
 
         case 17: // VAProfileHEVCMain
         case 18: // VAProfileHEVCMain10
@@ -60,29 +60,29 @@ static FFDecoderType ffDecoderProfileToType(VAProfile profile) {
         case 30: // VAProfileHEVCSccMain10
         case 31: // VAProfileHEVCSccMain444
         case 34: // VAProfileHEVCSccMain444_10
-            return FF_DECODER_TYPE_HEVC;
+            return FF_CODEC_TYPE_HEVC;
 
         case 19: // VAProfileVP9Profile0
         case 20: // VAProfileVP9Profile1
         case 21: // VAProfileVP9Profile2
         case 22: // VAProfileVP9Profile3
-            return FF_DECODER_TYPE_VP9;
+            return FF_CODEC_TYPE_VP9;
 
         case 32: // VAProfileAV1Profile0
         case 33: // VAProfileAV1Profile1
         case 39: // VAProfileAV1Profile2
-            return FF_DECODER_TYPE_AV1;
+            return FF_CODEC_TYPE_AV1;
 
         case 37: // VAProfileVVCMain10
         case 38: // VAProfileVVCMultilayerMain10
-            return FF_DECODER_TYPE_VVC;
+            return FF_CODEC_TYPE_VVC;
 
         default:
-            return FF_DECODER_TYPE_UNKNOWN;
+            return FF_CODEC_TYPE_UNKNOWN;
     }
 }
 
-static bool ffDecoderEntrypointIsDecode(VAEntrypoint entrypoint) {
+static bool ffCodecEntrypointIsDecode(VAEntrypoint entrypoint) {
     switch (entrypoint) {
         case VAEntrypointVLD:
         case VAEntrypointIDCT:
@@ -93,13 +93,26 @@ static bool ffDecoderEntrypointIsDecode(VAEntrypoint entrypoint) {
     }
 }
 
-static bool ffDecoderProfileHasOutput(
+static bool ffCodecEntrypointIsEncode(VAEntrypoint entrypoint) {
+    switch (entrypoint) {
+        case VAEntrypointEncSlice:
+        case VAEntrypointEncPicture:
+        case VAEntrypointEncSliceLP:
+        case VAEntrypointEncFEI:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static bool ffCodecProfileHasOutput(
     VADisplay display,
     __typeof__(vaQueryConfigEntrypoints)* ffvaQueryConfigEntrypoints,
     __typeof__(vaGetConfigAttributes)* ffvaGetConfigAttributes,
     int maxEntrypoints,
     VAEntrypoint* entrypoints,
-    VAProfile profile
+    VAProfile profile,
+    bool encode
 ) {
     int numEntrypoints = maxEntrypoints;
     if (ffvaQueryConfigEntrypoints(display, profile, entrypoints, &numEntrypoints) != VA_STATUS_SUCCESS) {
@@ -107,7 +120,7 @@ static bool ffDecoderProfileHasOutput(
     }
 
     for (int i = 0; i < numEntrypoints; ++i) {
-        if (!ffDecoderEntrypointIsDecode(entrypoints[i])) {
+        if (encode ? !ffCodecEntrypointIsEncode(entrypoints[i]) : !ffCodecEntrypointIsDecode(entrypoints[i])) {
             continue;
         }
 
@@ -126,7 +139,7 @@ static bool ffDecoderProfileHasOutput(
     return false;
 }
 
-static void ffDecoderFillGpuName(const drmDevice* dev, const char* path, FFstrbuf* name) {
+static void ffCodecFillGpuName(const drmDevice* dev, const char* path, FFstrbuf* name) {
     ffStrbufInit(name);
 
     switch (dev->bustype) {
@@ -167,7 +180,7 @@ static void ffDecoderFillGpuName(const drmDevice* dev, const char* path, FFstrbu
     }
 }
 
-const char* ffDetectDecoder(FF_A_UNUSED FFDecoderOptions* options, FFlist* result /* list of FFDecoderResult */) {
+const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
@@ -243,26 +256,45 @@ const char* ffDetectDecoder(FF_A_UNUSED FFDecoderOptions* options, FFlist* resul
             continue;
         }
 
-        FFDecoderType types = FF_DECODER_TYPE_NONE;
+        FFCodecType decoderTypes = FF_CODEC_TYPE_NONE;
+        FFCodecType encoderTypes = FF_CODEC_TYPE_NONE;
         for (int j = 0; j < numProfiles; ++j) {
-            if (!ffDecoderProfileHasOutput(
-                    display,
-                    ffvaQueryConfigEntrypoints,
-                    ffvaGetConfigAttributes,
-                    maxEntrypoints,
-                    entrypoints,
-                    profiles[j])) {
+            bool hasDecoder = ffCodecProfileHasOutput(
+                display,
+                ffvaQueryConfigEntrypoints,
+                ffvaGetConfigAttributes,
+                maxEntrypoints,
+                entrypoints,
+                profiles[j],
+                false);
+
+            bool hasEncoder = ffCodecProfileHasOutput(
+                display,
+                ffvaQueryConfigEntrypoints,
+                ffvaGetConfigAttributes,
+                maxEntrypoints,
+                entrypoints,
+                profiles[j],
+                true);
+
+            if (!hasDecoder && !hasEncoder) {
                 continue;
             }
 
-            FFDecoderType type = ffDecoderProfileToType(profiles[j]);
-            types = (FFDecoderType) ((uint32_t) types | (uint32_t) type);
+            FFCodecType type = ffCodecProfileToType(profiles[j]);
+            if (hasDecoder) {
+                decoderTypes = (FFCodecType) ((uint32_t) decoderTypes | (uint32_t) type);
+            }
+            if (hasEncoder) {
+                encoderTypes = (FFCodecType) ((uint32_t) encoderTypes | (uint32_t) type);
+            }
         }
 
-        if (types != FF_DECODER_TYPE_NONE) {
-            FFDecoderResult* item = FF_LIST_ADD(FFDecoderResult, *result);
-            ffDecoderFillGpuName(dev, path, &item->gpu);
-            item->types = types;
+        if (decoderTypes != FF_CODEC_TYPE_NONE || encoderTypes != FF_CODEC_TYPE_NONE) {
+            FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
+            ffCodecFillGpuName(dev, path, &item->gpu);
+            item->decoders = decoderTypes;
+            item->encoders = encoderTypes;
         }
 
         ffvaTerminate(display);
@@ -274,7 +306,7 @@ const char* ffDetectDecoder(FF_A_UNUSED FFDecoderOptions* options, FFlist* resul
 
 #else
 
-const char* ffDetectDecoder(FFDecoderOptions* options, FFlist* result /* list of FFDecoderResult */) {
+const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_UNUSED(options, result);
     return "Fastfetch was built without DRM / VA-API headers";
 }
