@@ -1,13 +1,14 @@
 #include "codec.h"
 
 #ifdef FF_HAVE_VULKAN
-
-    #include "common/debug.h"
-    #include "common/io.h"
-    #include "common/library.h"
-    #include "common/mallocHelper.h"
-
     #include <vulkan/vulkan.h>
+
+    #if VK_KHR_video_decode_queue && VK_KHR_video_encode_queue
+
+        #include "common/debug.h"
+        #include "common/io.h"
+        #include "common/library.h"
+        #include "common/mallocHelper.h"
 
 static FFCodecType ffCodecDecodeOperationsToTypes(VkVideoCodecOperationFlagsKHR operations) {
     FFCodecType types = FF_CODEC_TYPE_NONE;
@@ -58,16 +59,16 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
     FF_DEBUG("Starting Vulkan codec detection");
 
     FF_LIBRARY_LOAD_MESSAGE(vulkan,
-    #if __APPLE__
+        #if __APPLE__
         "libMoltenVK" FF_LIBRARY_EXTENSION,
         -1
-    #elif _WIN32
+        #elif _WIN32
         "vulkan-1" FF_LIBRARY_EXTENSION,
         -1
-    #else
+        #else
         "libvulkan" FF_LIBRARY_EXTENSION,
         2
-    #endif
+        #endif
     )
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkGetInstanceProcAddr)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(vulkan, vkCreateInstance)
@@ -263,5 +264,14 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
     return sawVideoQueueExtension ? "No supported Vulkan video codec operations found"
                                   : "VK_KHR_video_queue is not supported by any Vulkan physical device";
 }
+
+    #else
+
+const char* ffDetectCodecVulkan(FFlist* result) {
+    FF_UNUSED(result);
+    return "Vulkan video queue extensions are not supported by this Vulkan implementation";
+}
+
+    #endif
 
 #endif
