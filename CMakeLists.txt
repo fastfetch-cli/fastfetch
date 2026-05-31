@@ -639,6 +639,7 @@ elseif(ANDROID)
         src/detection/brightness/brightness_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
+        src/detection/codec/codec_android.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpucache/cpucache_linux.c
         src/detection/cursor/cursor_linux.c
