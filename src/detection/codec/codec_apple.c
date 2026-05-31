@@ -89,6 +89,7 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
         ffStrbufInitStatic(&item->gpu, "Default");
         item->decoders = decoders;
         item->encoders = encoders;
+        item->platformApi = "videotoolbox";
     }
 
     return NULL;
