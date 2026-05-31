@@ -33,6 +33,8 @@ static const char* ffDecoderTypeToString(FFDecoderType type) {
             return "VP9";
         case FF_DECODER_TYPE_AV1:
             return "AV1";
+        case FF_DECODER_TYPE_VVC:
+            return "VVC / H.266";
         case FF_DECODER_TYPE_UNKNOWN:
         default:
             return "Unknown";

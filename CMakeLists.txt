@@ -74,6 +74,7 @@ cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeB
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_VA "Enable libva" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD OR GNU" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
@@ -553,6 +554,7 @@ if(LINUX)
         src/detection/cpucache/cpucache_linux.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
+        src/detection/decoder/decoder_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/disk/disk_linux.c
@@ -714,6 +716,7 @@ elseif(FreeBSD)
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
+        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_bsd.c
@@ -808,6 +811,7 @@ elseif(NetBSD)
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
+        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nbsd.c
@@ -892,6 +896,7 @@ elseif(OpenBSD)
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
+        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_obsd.c
@@ -1133,6 +1138,7 @@ elseif(SunOS)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_sunos.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_sunos.c
@@ -1216,6 +1222,7 @@ elseif(Haiku)
         src/detection/cursor/cursor_nosupport.c
         src/detection/bluetooth/bluetooth_haiku.cpp
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/decoder/decoder_linux.c
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_haiku.c
@@ -1286,6 +1293,7 @@ elseif(GNU)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/decoder/decoder_linux.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
@@ -1655,6 +1663,10 @@ ff_lib_enable(XRANDR
 ff_lib_enable(DRM
     "libdrm"
     "Libdrm"
+)
+ff_lib_enable(VA
+    "libva"
+    "Libva"
 )
 ff_lib_enable(DRM_AMDGPU
     "libdrm_amdgpu"
