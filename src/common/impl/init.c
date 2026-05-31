@@ -262,6 +262,12 @@ void ffListFeatures(void) {
 #if FF_HAVE_LIBZFS
         "libzfs\n"
 #endif
+#if FF_HAVE_VA
+        "va\n"
+#endif
+#if FF_HAVE_VDPAU
+        "vdpau\n"
+#endif
 #if FF_USE_SYSTEM_YYJSON
         "System yyjson\n"
 #endif

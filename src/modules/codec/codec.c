@@ -49,7 +49,7 @@ static const char* ffCodecTypeToString(FFCodecType type) {
     }
 }
 
-static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbuf* gpu, const char* direction, FFCodecType types) {
+static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbuf* gpu, const char* direction, FFCodecType types, const char* platformApi) {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (gpu->length > 0) {
@@ -91,6 +91,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
                                                                                                      FF_ARG(*gpu, "gpu"),
                                                                                                      FF_ARG(direction, "direction"),
                                                                                                      FF_ARG(typeList, "types"),
+                                                                                                     FF_ARG(platformApi, "platform-api"),
                                                                                                  }));
         // No need to destroy strings in lists, as they are static strings
     }
@@ -115,8 +116,8 @@ bool ffPrintCodec(FFCodecOptions* options) {
         for (uint32_t i = 0; i < result.length; ++i) {
             FFCodecResult* item = FF_LIST_GET(FFCodecResult, result, i);
             uint8_t index = (uint8_t) (result.length == 1 ? 0 : i + 1);
-            printCodecLine(options, index, &item->gpu, "Encoder", item->encoders);
-            printCodecLine(options, index, &item->gpu, "Decoder", item->decoders);
+            printCodecLine(options, index, &item->gpu, "Encoder", item->encoders, item->platformApi);
+            printCodecLine(options, index, &item->gpu, "Decoder", item->decoders, item->platformApi);
         }
     } else {
         FFCodecResult merged = {
@@ -128,9 +129,10 @@ bool ffPrintCodec(FFCodecOptions* options) {
         FF_LIST_FOR_EACH (FFCodecResult, item, result) {
             merged.decoders |= item->decoders;
             merged.encoders |= item->encoders;
+            merged.platformApi = item->platformApi;
         }
-        printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders);
-        printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders);
+        printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders, merged.platformApi);
+        printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders, merged.platformApi);
     }
 
     FF_LIST_FOR_EACH (FFCodecResult, item, result) {
@@ -187,6 +189,7 @@ bool ffGenerateCodecJsonResult(FF_A_UNUSED FFCodecOptions* options, yyjson_mut_d
                 yyjson_mut_arr_add_str(doc, decoders, ffCodecTypeToString(type));
             }
         }
+        yyjson_mut_obj_add_str(doc, obj, "platformApi", item->platformApi);
     }
 
     FF_LIST_FOR_EACH (FFCodecResult, item, result) {
@@ -217,5 +220,6 @@ FFModuleBaseInfo ffCodecModuleInfo = {
         { "GPU name", "gpu" },
         { "Decoder / Encoder", "direction" },
         { "Compatibility alias of codec types", "types" },
+        { "Platform API used for detection", "platform-api" },
     }))
 };

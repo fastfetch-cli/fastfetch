@@ -33,6 +33,7 @@ typedef struct FFCodecResult {
     FFstrbuf gpu;
     FFCodecType decoders;
     FFCodecType encoders;
+    const char* platformApi;
 } FFCodecResult;
 
 const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/);

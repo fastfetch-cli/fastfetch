@@ -1,17 +1,41 @@
 #include "codec.h"
 
 #if FF_HAVE_DRM && FF_HAVE_VA
+    #define FF_CODEC_HAVE_VA 1
+#endif
 
-#include "detection/gpu/gpu.h"
-#include "common/io.h"
-#include "common/library.h"
-#include "common/mallocHelper.h"
+#if FF_HAVE_VDPAU
+    #define FF_CODEC_HAVE_VDPAU 1
+#endif
 
-#include <fcntl.h>
-#include <string.h>
-#include <va/va.h>
-#include <va/va_drm.h>
-#include <xf86drm.h>
+#if FF_CODEC_HAVE_VA || FF_CODEC_HAVE_VDPAU
+
+    #include "common/library.h"
+    #include "common/mallocHelper.h"
+
+    #if FF_CODEC_HAVE_VA
+        #include "detection/gpu/gpu.h"
+        #include "common/io.h"
+
+        #include <fcntl.h>
+        #include <va/va.h>
+        #include <va/va_drm.h>
+        #include <xf86drm.h>
+    #endif
+
+    #include <string.h>
+
+    #if FF_CODEC_HAVE_VDPAU
+        #include <stdlib.h>
+        #include <vdpau/vdpau.h>
+
+VdpStatus vdp_device_create_x11(void* display, int screen, VdpDevice* device, VdpGetProcAddress** get_proc_address);
+void* XOpenDisplay(const char* display_name);
+int XCloseDisplay(void* display);
+int XDefaultScreen(void* display);
+    #endif
+
+    #if FF_CODEC_HAVE_VA
 
 static FFCodecType ffCodecProfileToType(VAProfile profile) {
     switch (profile) {
@@ -98,7 +122,7 @@ static bool ffCodecEntrypointIsEncode(VAEntrypoint entrypoint) {
         case VAEntrypointEncSlice:
         case VAEntrypointEncPicture:
         case VAEntrypointEncSliceLP:
-        case VAEntrypointEncFEI:
+        case VAEntrypointFEI:
             return true;
         default:
             return false;
@@ -112,8 +136,7 @@ static bool ffCodecProfileHasOutput(
     int maxEntrypoints,
     VAEntrypoint* entrypoints,
     VAProfile profile,
-    bool encode
-) {
+    bool encode) {
     int numEntrypoints = maxEntrypoints;
     if (ffvaQueryConfigEntrypoints(display, profile, entrypoints, &numEntrypoints) != VA_STATUS_SUCCESS) {
         return false;
@@ -180,7 +203,9 @@ static void ffCodecFillGpuName(const drmDevice* dev, const char* path, FFstrbuf*
     }
 }
 
-const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+static const char* ffDetectCodecByVa(FFlist* result, bool* initialized) {
+    *initialized = false;
+
     FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
@@ -205,6 +230,8 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
     if (numDevices == 0) {
         return NULL;
     }
+
+    const char* error = NULL;
 
     for (int i = 0; i < numDevices; ++i) {
         drmDevice* dev = devices[i];
@@ -235,6 +262,7 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
         if (ffvaInitialize(display, &major, &minor) != VA_STATUS_SUCCESS) {
             continue;
         }
+        *initialized = true;
 
         int maxProfiles = ffvaMaxNumProfiles(display);
         int maxEntrypoints = ffvaMaxNumEntrypoints(display);
@@ -247,7 +275,8 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
         FF_AUTO_FREE VAEntrypoint* entrypoints = (VAEntrypoint*) malloc(sizeof(VAEntrypoint) * (size_t) maxEntrypoints);
         if (!profiles || !entrypoints) {
             ffvaTerminate(display);
-            return "malloc() failed";
+            error = "malloc() failed";
+            break;
         }
 
         int numProfiles = maxProfiles;
@@ -295,20 +324,234 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
             ffCodecFillGpuName(dev, path, &item->gpu);
             item->decoders = decoderTypes;
             item->encoders = encoderTypes;
+            item->platformApi = "vaapi";
         }
 
         ffvaTerminate(display);
     }
 
     ffdrmFreeDevices(devices, numDevices);
+    return error;
+}
+    #endif
+
+    #if FF_CODEC_HAVE_VDPAU
+
+static const struct FFCodecVdpauCodec {
+    VdpDecoderProfile profile;
+    FFCodecType type;
+} FF_CODEC_VDPAU_CODECS[] = {
+        #ifdef VDP_DECODER_PROFILE_MPEG1
+    { VDP_DECODER_PROFILE_MPEG1, FF_CODEC_TYPE_MPEG1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_MPEG2_SIMPLE
+    { VDP_DECODER_PROFILE_MPEG2_SIMPLE, FF_CODEC_TYPE_MPEG2 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_MPEG2_MAIN
+    { VDP_DECODER_PROFILE_MPEG2_MAIN, FF_CODEC_TYPE_MPEG2 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_MPEG4_PART2_SP
+    { VDP_DECODER_PROFILE_MPEG4_PART2_SP, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_MPEG4_PART2_ASP
+    { VDP_DECODER_PROFILE_MPEG4_PART2_ASP, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX4_QMOBILE
+    { VDP_DECODER_PROFILE_DIVX4_QMOBILE, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX4_MOBILE
+    { VDP_DECODER_PROFILE_DIVX4_MOBILE, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX4_HOME_THEATER
+    { VDP_DECODER_PROFILE_DIVX4_HOME_THEATER, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX4_HD_1080P
+    { VDP_DECODER_PROFILE_DIVX4_HD_1080P, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX5_QMOBILE
+    { VDP_DECODER_PROFILE_DIVX5_QMOBILE, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX5_MOBILE
+    { VDP_DECODER_PROFILE_DIVX5_MOBILE, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX5_HOME_THEATER
+    { VDP_DECODER_PROFILE_DIVX5_HOME_THEATER, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_DIVX5_HD_1080P
+    { VDP_DECODER_PROFILE_DIVX5_HD_1080P, FF_CODEC_TYPE_DIVX_XVID },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_BASELINE
+    { VDP_DECODER_PROFILE_H264_BASELINE, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_MAIN
+    { VDP_DECODER_PROFILE_H264_MAIN, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_HIGH
+    { VDP_DECODER_PROFILE_H264_HIGH, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_CONSTRAINED_BASELINE
+    { VDP_DECODER_PROFILE_H264_CONSTRAINED_BASELINE, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_EXTENDED
+    { VDP_DECODER_PROFILE_H264_EXTENDED, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_PROGRESSIVE_HIGH
+    { VDP_DECODER_PROFILE_H264_PROGRESSIVE_HIGH, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_CONSTRAINED_HIGH
+    { VDP_DECODER_PROFILE_H264_CONSTRAINED_HIGH, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE
+    { VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE, FF_CODEC_TYPE_H264 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VC1_SIMPLE
+    { VDP_DECODER_PROFILE_VC1_SIMPLE, FF_CODEC_TYPE_VC1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VC1_MAIN
+    { VDP_DECODER_PROFILE_VC1_MAIN, FF_CODEC_TYPE_VC1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VC1_ADVANCED
+    { VDP_DECODER_PROFILE_VC1_ADVANCED, FF_CODEC_TYPE_VC1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN
+    { VDP_DECODER_PROFILE_HEVC_MAIN, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_10
+    { VDP_DECODER_PROFILE_HEVC_MAIN_10, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_STILL
+    { VDP_DECODER_PROFILE_HEVC_MAIN_STILL, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_12
+    { VDP_DECODER_PROFILE_HEVC_MAIN_12, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_444
+    { VDP_DECODER_PROFILE_HEVC_MAIN_444, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_444_10
+    { VDP_DECODER_PROFILE_HEVC_MAIN_444_10, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_HEVC_MAIN_444_12
+    { VDP_DECODER_PROFILE_HEVC_MAIN_444_12, FF_CODEC_TYPE_HEVC },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VP9_PROFILE_0
+    { VDP_DECODER_PROFILE_VP9_PROFILE_0, FF_CODEC_TYPE_VP9 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VP9_PROFILE_1
+    { VDP_DECODER_PROFILE_VP9_PROFILE_1, FF_CODEC_TYPE_VP9 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VP9_PROFILE_2
+    { VDP_DECODER_PROFILE_VP9_PROFILE_2, FF_CODEC_TYPE_VP9 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_VP9_PROFILE_3
+    { VDP_DECODER_PROFILE_VP9_PROFILE_3, FF_CODEC_TYPE_VP9 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_AV1_MAIN
+    { VDP_DECODER_PROFILE_AV1_MAIN, FF_CODEC_TYPE_AV1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_AV1_HIGH
+    { VDP_DECODER_PROFILE_AV1_HIGH, FF_CODEC_TYPE_AV1 },
+        #endif
+        #ifdef VDP_DECODER_PROFILE_AV1_PROFESSIONAL
+    { VDP_DECODER_PROFILE_AV1_PROFESSIONAL, FF_CODEC_TYPE_AV1 },
+        #endif
+};
+
+static const char* ffDetectCodecByVdpau(FFlist* result) {
+    FF_LIBRARY_LOAD_MESSAGE(libX11, "libX11" FF_LIBRARY_EXTENSION, 6)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XOpenDisplay)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XCloseDisplay)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XDefaultScreen)
+
+    FF_LIBRARY_LOAD_MESSAGE(libvdpau, "libvdpau" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvdpau, vdp_device_create_x11)
+
+    void* x11Display = ffXOpenDisplay(NULL);
+    if (!x11Display) {
+        return NULL;
+    }
+
+    VdpDevice device = VDP_INVALID_HANDLE;
+    VdpGetProcAddress* ffvdp_get_proc_address = NULL;
+    if (ffvdp_device_create_x11(x11Display, ffXDefaultScreen(x11Display), &device, &ffvdp_get_proc_address) != VDP_STATUS_OK ||
+        device == VDP_INVALID_HANDLE ||
+        ffvdp_get_proc_address == NULL) {
+        ffXCloseDisplay(x11Display);
+        return NULL;
+    }
+
+    VdpDeviceDestroy* ffvdp_device_destroy = NULL;
+    VdpDecoderQueryCapabilities* ffvdp_decoder_query_capabilities = NULL;
+    if (ffvdp_get_proc_address(device, VDP_FUNC_ID_DEVICE_DESTROY, (void**) &ffvdp_device_destroy) != VDP_STATUS_OK ||
+        ffvdp_get_proc_address(device, VDP_FUNC_ID_DECODER_QUERY_CAPABILITIES, (void**) &ffvdp_decoder_query_capabilities) != VDP_STATUS_OK ||
+        ffvdp_device_destroy == NULL ||
+        ffvdp_decoder_query_capabilities == NULL) {
+        if (ffvdp_device_destroy) {
+            ffvdp_device_destroy(device);
+        }
+        ffXCloseDisplay(x11Display);
+        return NULL;
+    }
+
+    FFCodecType decoderTypes = FF_CODEC_TYPE_NONE;
+
+    for (uint32_t i = 0; i < ARRAY_SIZE(FF_CODEC_VDPAU_CODECS); ++i) {
+        VdpBool isSupported = VDP_FALSE;
+        uint32_t maxLevel = 0, maxMacroblocks = 0, maxWidth = 0, maxHeight = 0;
+        if (ffvdp_decoder_query_capabilities(device, FF_CODEC_VDPAU_CODECS[i].profile, &isSupported, &maxLevel, &maxMacroblocks, &maxWidth, &maxHeight) != VDP_STATUS_OK ||
+            !isSupported) {
+            continue;
+        }
+
+        decoderTypes |= FF_CODEC_VDPAU_CODECS[i].type;
+    }
+
+    ffvdp_device_destroy(device);
+    ffXCloseDisplay(x11Display);
+
+    if (decoderTypes == FF_CODEC_TYPE_NONE) {
+        return NULL;
+    }
+
+    FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
+    ffStrbufInit(&item->gpu);
+    const char* driver = getenv("VDPAU_DRIVER");
+    if (driver && *driver) {
+        ffStrbufSetS(&item->gpu, driver);
+    } else {
+        ffStrbufSetStatic(&item->gpu, "Default");
+    }
+    item->decoders = decoderTypes;
+    item->encoders = FF_CODEC_TYPE_NONE;
+    item->platformApi = "vdpau";
+
     return NULL;
+}
+    #endif
+
+const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+    FF_SUPPRESS_IO();
+
+    #if FF_CODEC_HAVE_VA
+    bool vaInitialized = false;
+    const char* vaError = ffDetectCodecByVa(result, &vaInitialized);
+
+    if (vaError == NULL && vaInitialized) {
+        return NULL;
+    }
+    #endif
+    #if FF_CODEC_HAVE_VDPAU
+    return ffDetectCodecByVdpau(result);
+    #endif
+
+    return "Fastfetch was built without DRM / VA-API / VDPAU headers";
 }
 
 #else
 
 const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_UNUSED(options, result);
-    return "Fastfetch was built without DRM / VA-API headers";
+    return "Fastfetch was built without DRM / VA-API / VDPAU headers";
 }
 
 #endif
