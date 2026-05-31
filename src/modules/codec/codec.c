@@ -49,66 +49,48 @@ static const char* ffCodecTypeToString(FFCodecType type) {
     }
 }
 
-static void ffCodecAppendTypeList(FFlist* list, FFCodecType types) {
-    for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
-        if ((types & type) == 0) {
-            continue;
-        }
-        ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, *list), ffCodecTypeToString(type));
-    }
-}
-
-static void ffCodecAppendTypeJoined(FFstrbuf* buffer, FFCodecType types) {
-    for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
-        if ((types & type) == 0) {
-            continue;
-        }
-        if (buffer->length > 0) {
-            ffStrbufAppendS(buffer, ", ");
-        }
-        ffStrbufAppendS(buffer, ffCodecTypeToString(type));
-    }
-}
-
-static void ffDestroyCodecResults(FFlist* result) {
-    FF_LIST_FOR_EACH (FFCodecResult, item, *result) {
-        ffStrbufDestroy(&item->gpu);
-    }
-}
-
-static void printCodec(const FFCodecOptions* options, const FFCodecResult* result, uint8_t index) {
+static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbuf* gpu, const char* direction, FFCodecType types) {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufSetF(&key, "%s (%s)", FF_CODEC_MODULE_NAME, result->gpu.chars);
+        if (gpu->length > 0) {
+            ffStrbufSetF(&key, "%s (%s - %s)", FF_CODEC_MODULE_NAME, direction, gpu->chars);
+        } else {
+            ffStrbufSetF(&key, "%s (%s)", FF_CODEC_MODULE_NAME, direction);
+        }
     } else {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]){
-                                                                           FF_ARG(result->gpu, "gpu"),
-                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
                                                                            FF_ARG(index, "index"),
+                                                                           FF_ARG(*gpu, "gpu"),
+                                                                           FF_ARG(direction, "direction"),
+                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
                                                                        }));
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        FF_STRBUF_AUTO_DESTROY decodersJoined = ffStrbufCreate();
-        FF_STRBUF_AUTO_DESTROY encodersJoined = ffStrbufCreate();
-        ffCodecAppendTypeJoined(&decodersJoined, result->decoders);
-        ffCodecAppendTypeJoined(&encodersJoined, result->encoders);
-
+        FF_STRBUF_AUTO_DESTROY typesJoined = ffStrbufCreate();
+        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+            if ((types & type) == 0) {
+                continue;
+            }
+            if (typesJoined.length > 0) {
+                ffStrbufAppendS(&typesJoined, ", ");
+            }
+            ffStrbufAppendS(&typesJoined, ffCodecTypeToString(type));
+        }
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
-        printf("Decode: %s | Encode: %s", decodersJoined.length ? decodersJoined.chars : "None", encodersJoined.length ? encodersJoined.chars : "None");
-        putchar('\n');
+        puts(typesJoined.length ? typesJoined.chars : "None");
     } else {
-        FF_LIST_AUTO_DESTROY decoders = ffListCreate(); // Use list instead of pre-joined string for qjs and lua
-        FF_LIST_AUTO_DESTROY encoders = ffListCreate();
-        ffCodecAppendTypeList(&decoders, result->decoders);
-        ffCodecAppendTypeList(&encoders, result->encoders);
-
+        FF_LIST_AUTO_DESTROY typeList = ffListCreate(); // Use list instead of pre-joined string for qjs and lua
+        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+            if ((types & type) == 0) {
+                continue;
+            }
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, typeList), ffCodecTypeToString(type));
+        }
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
-                                                                                                     FF_ARG(result->gpu, "gpu"),
-                                                                                                     FF_ARG(decoders, "decoders"),
-                                                                                                     FF_ARG(encoders, "encoders"),
-                                                                                                     FF_ARG(decoders, "types"),
+                                                                                                     FF_ARG(*gpu, "gpu"),
+                                                                                                     FF_ARG(direction, "direction"),
+                                                                                                     FF_ARG(typeList, "types"),
                                                                                                  }));
         // No need to destroy strings in lists, as they are static strings
     }
@@ -116,7 +98,7 @@ static void printCodec(const FFCodecOptions* options, const FFCodecResult* resul
 
 bool ffPrintCodec(FFCodecOptions* options) {
     FF_LIST_AUTO_DESTROY result = ffListCreate();
-    const char* error = ffDetectCodec(NULL, &result);
+    const char* error = ffDetectCodec(options, &result);
 
     if (error) {
         ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
@@ -128,12 +110,32 @@ bool ffPrintCodec(FFCodecOptions* options) {
         return false;
     }
 
-    for (uint32_t i = 0; i < result.length; ++i) {
-        uint8_t index = (uint8_t) (result.length == 1 ? 0 : i + 1);
-        printCodec(options, FF_LIST_GET(FFCodecResult, result, i), index);
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+    if (options->splitGPU) {
+        for (uint32_t i = 0; i < result.length; ++i) {
+            FFCodecResult* item = FF_LIST_GET(FFCodecResult, result, i);
+            uint8_t index = (uint8_t) (result.length == 1 ? 0 : i + 1);
+            printCodecLine(options, index, &item->gpu, "Encoder", item->encoders);
+            printCodecLine(options, index, &item->gpu, "Decoder", item->decoders);
+        }
+    } else {
+        FFCodecResult merged = {
+            .gpu = ffStrbufCreate(),
+            .decoders = FF_CODEC_TYPE_NONE,
+            .encoders = FF_CODEC_TYPE_NONE,
+        };
+
+        FF_LIST_FOR_EACH (FFCodecResult, item, result) {
+            merged.decoders |= item->decoders;
+            merged.encoders |= item->encoders;
+        }
+        printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders);
+        printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders);
     }
 
-    ffDestroyCodecResults(&result);
+    FF_LIST_FOR_EACH (FFCodecResult, item, result) {
+        ffStrbufDestroy(&item->gpu);
+    }
     return true;
 }
 
@@ -145,12 +147,18 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "splitGPU")) {
+            options->splitGPU = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCodecJsonConfig(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "splitGPU", options->splitGPU);
 }
 
 bool ffGenerateCodecJsonResult(FF_A_UNUSED FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
@@ -168,28 +176,28 @@ bool ffGenerateCodecJsonResult(FF_A_UNUSED FFCodecOptions* options, yyjson_mut_d
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "gpu", &item->gpu);
 
-        yyjson_mut_val* decoders = yyjson_mut_obj_add_arr(doc, obj, "decoders");
         yyjson_mut_val* encoders = yyjson_mut_obj_add_arr(doc, obj, "encoders");
-        yyjson_mut_val* types = yyjson_mut_obj_add_arr(doc, obj, "types"); // compatibility alias for decoders
+        yyjson_mut_val* decoders = yyjson_mut_obj_add_arr(doc, obj, "decoders");
 
         for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
-            if ((item->decoders & type) != 0) {
-                const char* name = ffCodecTypeToString(type);
-                yyjson_mut_arr_add_str(doc, decoders, name);
-                yyjson_mut_arr_add_str(doc, types, name);
-            }
-            if ((item->encoders & type) != 0) {
+            if (item->encoders & type) {
                 yyjson_mut_arr_add_str(doc, encoders, ffCodecTypeToString(type));
+            }
+            if (item->decoders & type) {
+                yyjson_mut_arr_add_str(doc, decoders, ffCodecTypeToString(type));
             }
         }
     }
 
-    ffDestroyCodecResults(&result);
+    FF_LIST_FOR_EACH (FFCodecResult, item, result) {
+        ffStrbufDestroy(&item->gpu);
+    }
     return true;
 }
 
 void ffInitCodecOptions(FFCodecOptions* options) {
-    ffOptionInitModuleArg(&options->moduleArgs, "󰚔");
+    ffOptionInitModuleArg(&options->moduleArgs, "󰈫");
+    options->splitGPU = false;
 }
 
 void ffDestroyCodecOptions(FFCodecOptions* options) {
@@ -207,8 +215,7 @@ FFModuleBaseInfo ffCodecModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateCodecJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "GPU name", "gpu" },
-        { "Decoder codec type list", "decoders" },
-        { "Encoder codec type list", "encoders" },
-        { "Compatibility alias of decoders", "types" },
+        { "Decoder / Encoder", "direction" },
+        { "Compatibility alias of codec types", "types" },
     }))
 };
