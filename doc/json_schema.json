@@ -1909,6 +1909,11 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "useVulkan": {
+                                        "description": "Whether to use Vulkan for codec detection instead of other platform-specific APIs",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

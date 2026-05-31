@@ -80,7 +80,7 @@ static FFCodecType ffCodecDetectDecoders() {
     return types;
 }
 
-const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FFCodecType decoders = ffCodecDetectDecoders();
     FFCodecType encoders = ffCodecDetectEncoders();
 

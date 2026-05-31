@@ -54,7 +54,7 @@ static bool ffCodecIsHardwareAccelerated(
     return isHardware;
 }
 
-const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FF_LIBRARY_LOAD_MESSAGE(mediandk, "libmediandk.so", 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createDecoderByType)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createEncoderByType)
@@ -93,6 +93,6 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
         item->encoders = encoders;
         item->platformApi = "AMediaCodec";
     }
-    
+
     return NULL;
 }

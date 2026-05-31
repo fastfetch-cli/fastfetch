@@ -423,6 +423,8 @@ set(LIBFASTFETCH_SRC
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
+    src/detection/codec/codec.c
+    src/detection/codec/codec_vulkan.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
     src/detection/command/command.c

@@ -154,6 +154,11 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "useVulkan")) {
+            options->useVulkan = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -161,11 +166,12 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
 void ffGenerateCodecJsonConfig(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "splitGPU", options->splitGPU);
+    yyjson_mut_obj_add_bool(doc, module, "useVulkan", options->useVulkan);
 }
 
-bool ffGenerateCodecJsonResult(FF_A_UNUSED FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateCodecJsonResult(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate();
-    const char* error = ffDetectCodec(NULL, &result);
+    const char* error = ffDetectCodec(options, &result);
 
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
@@ -201,6 +207,7 @@ bool ffGenerateCodecJsonResult(FF_A_UNUSED FFCodecOptions* options, yyjson_mut_d
 void ffInitCodecOptions(FFCodecOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰈫");
     options->splitGPU = false;
+    options->useVulkan = false;
 }
 
 void ffDestroyCodecOptions(FFCodecOptions* options) {

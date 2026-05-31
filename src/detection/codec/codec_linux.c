@@ -12,10 +12,10 @@
 
     #include "common/library.h"
     #include "common/mallocHelper.h"
+    #include "common/io.h"
 
     #if FF_CODEC_HAVE_VA
         #include "detection/gpu/gpu.h"
-        #include "common/io.h"
 
         #include <fcntl.h>
         #include <va/va.h>
@@ -529,7 +529,7 @@ static const char* ffDetectCodecByVdpau(FFlist* result) {
 }
     #endif
 
-const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_SUPPRESS_IO();
 
     #if FF_CODEC_HAVE_VA
@@ -549,7 +549,7 @@ const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*
 
 #else
 
-const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_UNUSED(options, result);
     return "Fastfetch was built without DRM / VA-API / VDPAU headers";
 }

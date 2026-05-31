@@ -422,7 +422,7 @@ const char* detectD3d12va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
     return nullptr;
 }
 
-const char* ffDetectCodec(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FF_LIBRARY_LOAD_MESSAGE(dxgi, "dxgi" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxgi, CreateDXGIFactory1)
 

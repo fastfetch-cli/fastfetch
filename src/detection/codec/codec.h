@@ -37,3 +37,8 @@ typedef struct FFCodecResult {
 } FFCodecResult;
 
 const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/);
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/);
+
+#ifdef FF_HAVE_VULKAN
+const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/);
+#endif
