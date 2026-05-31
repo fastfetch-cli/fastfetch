@@ -314,7 +314,7 @@
             "type": "string"
         },
         "codecFormat": {
-            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name\n    2. {direction}: Decoder / Encoder\n    3. {types}: Compatibility alias of codec types",
+            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name\n    2. {direction}: Decoder / Encoder\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
             "type": "string"
         },
         "commandFormat": {
