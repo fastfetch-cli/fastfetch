@@ -980,6 +980,7 @@ elseif(APPLE)
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
+        src/detection/decoder/decoder_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
@@ -1834,6 +1835,7 @@ elseif(APPLE)
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework SystemConfiguration"
+        PRIVATE "-framework VideoToolbox"
         PRIVATE "-weak_framework CoreDisplay"
 
         PRIVATE "-F /System/Library/PrivateFrameworks"

@@ -35,6 +35,14 @@ static const char* ffDecoderTypeToString(FFDecoderType type) {
             return "AV1";
         case FF_DECODER_TYPE_VVC:
             return "VVC / H.266";
+        case FF_DECODER_TYPE_DOLBY_VISION_HEVC:
+            return "Dolby Vision (HEVC)";
+        case FF_DECODER_TYPE_PRORES:
+            return "Apple ProRes";
+        case FF_DECODER_TYPE_PRORES_RAW:
+            return "Apple ProRes RAW";
+        case FF_DECODER_TYPE_JPEG_XL:
+            return "JPEG XL";
         case FF_DECODER_TYPE_UNKNOWN:
         default:
             return "Unknown";
