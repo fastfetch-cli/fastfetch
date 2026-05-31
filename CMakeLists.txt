@@ -1065,6 +1065,7 @@ elseif(WIN32)
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
+        src/detection/decoder/decoder_windows.cpp
         src/detection/disk/disk_windows.c
         src/detection/physicaldisk/physicaldisk_windows.c
         src/detection/diskio/diskio_windows.c
