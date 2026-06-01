@@ -131,7 +131,7 @@ static const char* getSway(FFstrbuf* result) {
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buffer, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // sway version 1.10
-        return extractSwayVersion(buffer.chars, result->length, result) ? "Failed to parse sway version output" : NULL;
+        return extractSwayVersion(buffer.chars, buffer.length, result) ? "Failed to parse sway version output" : NULL;
     }
 
     return "Failed to run command `sway --version`";
