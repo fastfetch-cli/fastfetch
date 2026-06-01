@@ -55,6 +55,18 @@ static const FFlogo C[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_COOKIEOS
+    // CookieOS
+    {
+        .names = { "CookieOS", "cookieos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_COOKIEOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_YELLOW,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL
     // CalinixOSSmall
     {
