@@ -25,7 +25,7 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa lua54
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa lua54 libva libvdpau
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
