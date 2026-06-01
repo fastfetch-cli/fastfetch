@@ -16,6 +16,18 @@ static const FFlogo Q[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUASAR
+    // Quasar
+    {
+        .names = { "Quasar" },
+        .lines = FASTFETCH_DATATEXT_LOGO_QUASAR,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_Q4OS
     // Q4OS
     {
