@@ -3,7 +3,7 @@
 const char* ffDetectCodec(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     if (options->useVulkan) {
 #ifdef FF_HAVE_VULKAN
-        return ffDetectCodecVulkan(result);
+        return ffDetectCodecVulkan(options, result);
 #else
         FF_UNUSED(result);
         return "Fastfetch was built without Vulkan support";
