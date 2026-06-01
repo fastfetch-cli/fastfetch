@@ -260,8 +260,8 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
 
     #else
 
-const char* ffDetectCodecVulkan(FFlist* result) {
-    FF_UNUSED(result);
+const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result) {
+    FF_UNUSED(options, result);
     return "Vulkan video queue extensions are not supported by this Vulkan implementation";
 }
 
