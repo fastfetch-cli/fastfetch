@@ -68,7 +68,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
 
     if (options->moduleArgs.outputFormat.length == 0) {
         FF_STRBUF_AUTO_DESTROY typesJoined = ffStrbufCreate();
-        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+        for (FFCodecType type = FF_CODEC_TYPE_H261; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
             if ((types & type) == 0) {
                 continue;
             }
@@ -81,7 +81,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
         puts(typesJoined.length ? typesJoined.chars : "None");
     } else {
         FF_LIST_AUTO_DESTROY typeList = ffListCreate(); // Use list instead of pre-joined string for qjs and lua
-        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+        for (FFCodecType type = FF_CODEC_TYPE_H261; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
             if ((types & type) == 0) {
                 continue;
             }
