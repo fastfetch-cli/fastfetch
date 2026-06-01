@@ -324,7 +324,7 @@ static const char* ffDetectCodecByVa(FFlist* result, bool* initialized) {
             ffCodecFillGpuName(dev, path, &item->gpu);
             item->decoders = decoderTypes;
             item->encoders = encoderTypes;
-            item->platformApi = "vaapi";
+            item->platformApi = "VA-API";
         }
 
         ffvaTerminate(display);
@@ -523,7 +523,7 @@ static const char* ffDetectCodecByVdpau(FFlist* result) {
     }
     item->decoders = decoderTypes;
     item->encoders = FF_CODEC_TYPE_NONE;
-    item->platformApi = "vdpau";
+    item->platformApi = "VDPAU";
 
     return NULL;
 }

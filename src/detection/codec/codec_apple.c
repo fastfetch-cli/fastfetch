@@ -89,7 +89,7 @@ const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* res
         ffStrbufInitStatic(&item->gpu, "Default");
         item->decoders = decoders;
         item->encoders = encoders;
-        item->platformApi = "videotoolbox";
+        item->platformApi = "VideoToolbox";
     }
 
     return NULL;

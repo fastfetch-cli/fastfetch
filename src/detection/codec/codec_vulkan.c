@@ -251,7 +251,7 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
         ffStrbufInitS(&item->gpu, properties.deviceName);
         item->decoders = decoders;
         item->encoders = encoders;
-        item->platformApi = "vulkan_video";
+        item->platformApi = "Vulkan Video";
         FF_DEBUG("Added Vulkan codec result for '%s': decoders=%u encoders=%u", properties.deviceName, (unsigned) decoders, (unsigned) encoders);
     }
 

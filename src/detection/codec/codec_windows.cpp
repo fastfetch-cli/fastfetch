@@ -412,7 +412,7 @@ const char* detectD3d11va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
         ffStrbufInitWS(&gpuResult->gpu, desc.Description);
         gpuResult->decoders = decoders;
         gpuResult->encoders = encoders;
-        gpuResult->platformApi = "d3d11va-mft";
+        gpuResult->platformApi = "D3D11VA+MFT";
     });
 
     return nullptr;
@@ -500,7 +500,7 @@ const char* detectD3d12va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
         ffStrbufInitWS(&gpuResult->gpu, desc.Description);
         gpuResult->decoders = decoders;
         gpuResult->encoders = encoders;
-        gpuResult->platformApi = "d3d12va";
+        gpuResult->platformApi = "D3D12VA";
     });
 
     if (result->length == resultLengthBefore) {
