@@ -120,7 +120,6 @@ static bool ffCodecEntrypointIsDecode(VAEntrypoint entrypoint) {
 static bool ffCodecEntrypointIsEncode(VAEntrypoint entrypoint) {
     switch (entrypoint) {
         case VAEntrypointEncSlice:
-        case VAEntrypointEncPicture:
         case VAEntrypointEncSliceLP:
         case VAEntrypointFEI:
             return true;
