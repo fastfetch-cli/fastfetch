@@ -116,8 +116,12 @@ bool ffPrintCodec(FFCodecOptions* options) {
         for (uint32_t i = 0; i < result.length; ++i) {
             FFCodecResult* item = FF_LIST_GET(FFCodecResult, result, i);
             uint8_t index = (uint8_t) (result.length == 1 ? 0 : i + 1);
-            printCodecLine(options, index, &item->gpu, "Encoder", item->encoders, item->platformApi);
-            printCodecLine(options, index, &item->gpu, "Decoder", item->decoders, item->platformApi);
+            if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+                printCodecLine(options, index, &item->gpu, "Encoder", item->encoders, item->platformApi);
+            }
+            if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+                printCodecLine(options, index, &item->gpu, "Decoder", item->decoders, item->platformApi);
+            }
         }
     } else {
         FFCodecResult merged = {
@@ -131,8 +135,12 @@ bool ffPrintCodec(FFCodecOptions* options) {
             merged.encoders |= item->encoders;
             merged.platformApi = item->platformApi;
         }
-        printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders, merged.platformApi);
-        printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders, merged.platformApi);
+        if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+            printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders, merged.platformApi);
+        }
+        if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+            printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders, merged.platformApi);
+        }
     }
 
     FF_LIST_FOR_EACH (FFCodecResult, item, result) {
@@ -196,7 +204,6 @@ void ffGenerateCodecJsonConfig(FFCodecOptions* options, yyjson_mut_doc* doc, yyj
         default:
             break;
     }
-
 }
 
 bool ffGenerateCodecJsonResult(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
