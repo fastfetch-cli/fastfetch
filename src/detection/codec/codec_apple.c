@@ -80,9 +80,9 @@ static FFCodecType ffCodecDetectDecoders() {
     return types;
 }
 
-const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
-    FFCodecType decoders = ffCodecDetectDecoders();
-    FFCodecType encoders = ffCodecDetectEncoders();
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
+    FFCodecType decoders = options & FF_CODEC_SHOW_TYPE_DECODER ? ffCodecDetectDecoders() : FF_CODEC_TYPE_NONE;
+    FFCodecType encoders = options & FF_CODEC_SHOW_TYPE_ENCODER ? ffCodecDetectEncoders() : FF_CODEC_TYPE_NONE;
 
     if (decoders != FF_CODEC_TYPE_NONE || encoders != FF_CODEC_TYPE_NONE) {
         FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
