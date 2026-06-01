@@ -402,6 +402,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/init.c
     src/common/impl/jsonconfig.c
     src/common/impl/library.c
+    src/common/impl/lua.c
     src/common/impl/netif.c
     src/common/impl/networking_common.c
     src/common/impl/option.c
