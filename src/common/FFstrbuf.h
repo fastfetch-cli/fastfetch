@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "common/memrchr.h"
 
 #ifdef FF_USE_SYSTEM_YYJSON
     #include <yyjson.h>
@@ -70,11 +71,6 @@ void ffStrbufTrimRightSpace(FFstrbuf* strbuf);
 bool ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str);
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[]);
-
-FF_A_NODISCARD uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
-FF_A_NODISCARD uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str);
-
-FF_A_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c);
 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
@@ -415,6 +411,27 @@ static inline FF_A_NODISCARD bool ffStrbufContainIgnCaseS(const FFstrbuf* strbuf
 
 static inline FF_A_NODISCARD bool ffStrbufContainIgnCase(const FFstrbuf* strbuf, const FFstrbuf* str) {
     return ffStrbufContainIgnCaseS(strbuf, str->chars);
+}
+
+FF_A_NODISCARD static inline uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c) {
+    assert(start <= strbuf->length);
+
+    const char* ptr = (const char*) memchr(strbuf->chars + start, c, strbuf->length - start);
+    return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
+}
+
+FF_A_NODISCARD static inline uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str) {
+    assert(start <= strbuf->length);
+
+    const char* ptr = strstr(strbuf->chars + start, str);
+    return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
+}
+
+FF_A_NODISCARD static inline uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c) {
+    assert(start <= strbuf->length);
+
+    const char* ptr = (const char*) memrchr(strbuf->chars, c, start + 1);
+    return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
 }
 
 static inline FF_A_NODISCARD uint32_t ffStrbufFirstIndexC(const FFstrbuf* strbuf, char c) {
