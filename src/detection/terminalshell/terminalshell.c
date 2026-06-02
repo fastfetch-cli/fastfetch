@@ -168,7 +168,18 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version) {
     return getExeVersionRaw(exe, version); // 0.73.0
 }
 
+static bool extractBusyboxVersion(const char* line, uint32_t len, void* userdata) {
+    if (!ffStrStartsWith(line, "BusyBox v")) {
+        return true;
+    }
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len - strlen("BusyBox v"), line + strlen("BusyBox v"));
+    return false;
+}
+
 static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version) {
+    ffBinaryExtractStrings(exe->chars, extractBusyboxVersion, version, (uint32_t) strlen("BusyBox v0.0.0"));
+
     const char* error = ffStrbufEndsWithS(exe, "busybox")
         ? ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "ash", "--help", NULL })
         : ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--help", NULL });
