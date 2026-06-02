@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "common/arrayUtils.h"
+#include "common/arrutil.h"
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"
 #include "common/FFPlatform.h"

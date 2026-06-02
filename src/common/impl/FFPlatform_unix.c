@@ -1,6 +1,6 @@
 #include "FFPlatform_private.h"
 #include "common/FFstrbuf.h"
-#include "common/arrayUtils.h"
+#include "common/arrutil.h"
 #include "common/strutil.h"
 #include "common/io.h"
 #include "fastfetch_config.h"

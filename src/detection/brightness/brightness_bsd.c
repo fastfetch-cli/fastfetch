@@ -1,5 +1,5 @@
 #include "brightness.h"
-#include "common/arrayUtils.h"
+#include "common/arrutil.h"
 #include "common/io.h"
 #include "common/kmod.h"
 #include "common/debug.h"
