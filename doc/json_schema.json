@@ -1449,6 +1449,7 @@
                             "cpu",
                             "cpucache",
                             "cpuusage",
+                            "codec",
                             "command",
                             "colors",
                             "cursor",
