@@ -421,6 +421,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/path.c
     src/common/impl/FFPlatform.c
     src/common/impl/smbios.c
+    src/common/impl/strutil.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
