@@ -614,7 +614,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
 
         char* pSep = placeholderValue.chars;
         char cSep = '\0';
-        while (*pSep && *pSep != ':' && *pSep != '<' && *pSep != '>' && *pSep != '~') {
+        while (*pSep && *pSep != ':' && *pSep != '<' && *pSep != '>' && *pSep != '|' && *pSep != '~') {
             ++pSep;
         }
         if (*pSep) {
@@ -717,12 +717,17 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             } else if (cSep == ':') {
                 ffStrbufAppend(buffer, &tempString);
             } else {
-                if (cSep == '<') {
+                if (cSep == '<') { // left align
                     ffStrbufAppend(buffer, &tempString);
                     ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
-                } else {
+                } else if (cSep == '>') { // right align
                     ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
                     ffStrbufAppend(buffer, &tempString);
+                } else if (cSep == '|') { // center align
+                    uint32_t padding = ((uint32_t) truncLength - tempString.length) / 2;
+                    ffStrbufAppendNC(buffer, padding, ' ');
+                    ffStrbufAppend(buffer, &tempString);
+                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length - padding, ' ');
                 }
             }
 

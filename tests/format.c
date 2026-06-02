@@ -63,6 +63,18 @@ int main(void) {
     }
 
     {
+        VERIFY("output({1|20})", "12345 67890", "output(    12345 67890     )");
+        VERIFY("output({1|-20})", "12345 67890", "output(    12345 67890     )");
+        VERIFY("output({1|11})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1|-11})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1|6})", "12345 67890", "output(12345 )");
+        VERIFY("output({|6})", "12345 67890", "output(12345 )");
+        VERIFY("output({|-6})", "12345 67890", "output(12345…)");
+        VERIFY("output({|0})", "12345 67890", "output()");
+        VERIFY("output({|})", "12345 67890", "output()");
+    }
+
+    {
         VERIFY("output({1n>20})", "12345 67890", "output({1n>20})");
         VERIFY("output({120})", "12345 67890", "output({120})");
         VERIFY("output({1:11})", "", "output()");
@@ -123,6 +135,8 @@ int main(void) {
         VERIFY("output({1<8})", "\e[1m12345\e[m", "output(\e[1m12345   \e[m)");
         VERIFY("output({1>8})", "\e[1m12345\e[m", "output(\e[1m   12345\e[m)");
         VERIFY("output({1<1})", "\e[30;47m12345\e[m", "output(\e[30;47m1\e[m)");
+        VERIFY("output({1|8})", "\e[1m12345\e[m", "output(\e[1m 12345  \e[m)");
+        VERIFY("output({1|1})", "\e[30;47m12345\e[m", "output(\e[30;47m1\e[m)");
     }
 
     {
