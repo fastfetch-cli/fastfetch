@@ -1,20 +1,12 @@
 #include "codec.h"
 
-#if FF_HAVE_DRM && FF_HAVE_VA
-    #define FF_CODEC_HAVE_VA 1
-#endif
-
-#if FF_HAVE_VDPAU
-    #define FF_CODEC_HAVE_VDPAU 1
-#endif
-
-#if FF_CODEC_HAVE_VA || FF_CODEC_HAVE_VDPAU
+#if (FF_HAVE_DRM && FF_HAVE_VA) || FF_HAVE_VDPAU
 
     #include "common/library.h"
     #include "common/mallocHelper.h"
     #include "common/io.h"
 
-    #if FF_CODEC_HAVE_VA
+    #if FF_HAVE_DRM && FF_HAVE_VA
         #include "detection/gpu/gpu.h"
 
         #include <fcntl.h>
@@ -25,7 +17,7 @@
 
     #include <string.h>
 
-    #if FF_CODEC_HAVE_VDPAU
+    #if FF_HAVE_VDPAU
         #include <stdlib.h>
         #include <vdpau/vdpau.h>
 
@@ -35,7 +27,7 @@ int XCloseDisplay(void* display);
 int XDefaultScreen(void* display);
     #endif
 
-    #if FF_CODEC_HAVE_VA
+    #if FF_HAVE_DRM && FF_HAVE_VA
 
 static FFCodecType ffCodecProfileToType(VAProfile profile) {
     switch (profile) {
@@ -106,25 +98,18 @@ static FFCodecType ffCodecProfileToType(VAProfile profile) {
     }
 }
 
-static bool ffCodecEntrypointIsDecode(VAEntrypoint entrypoint) {
+static FFCodecShowType ffCodecGetEntrypointType(VAEntrypoint entrypoint) {
     switch (entrypoint) {
         case VAEntrypointVLD:
         case VAEntrypointIDCT:
         case VAEntrypointMoComp:
-            return true;
-        default:
-            return false;
-    }
-}
-
-static bool ffCodecEntrypointIsEncode(VAEntrypoint entrypoint) {
-    switch (entrypoint) {
+            return FF_CODEC_SHOW_TYPE_DECODER;
         case VAEntrypointEncSlice:
         case VAEntrypointEncSliceLP:
         case VAEntrypointFEI:
-            return true;
+            return FF_CODEC_SHOW_TYPE_ENCODER;
         default:
-            return false;
+            return FF_CODEC_SHOW_TYPE_NONE;
     }
 }
 
@@ -135,14 +120,14 @@ static bool ffCodecProfileHasOutput(
     int maxEntrypoints,
     VAEntrypoint* entrypoints,
     VAProfile profile,
-    bool encode) {
+    FFCodecShowType entrypointType) {
     int numEntrypoints = maxEntrypoints;
     if (ffvaQueryConfigEntrypoints(display, profile, entrypoints, &numEntrypoints) != VA_STATUS_SUCCESS) {
         return false;
     }
 
     for (int i = 0; i < numEntrypoints; ++i) {
-        if (encode ? !ffCodecEntrypointIsEncode(entrypoints[i]) : !ffCodecEntrypointIsDecode(entrypoints[i])) {
+        if (ffCodecGetEntrypointType(entrypoints[i]) != entrypointType) {
             continue;
         }
 
@@ -202,9 +187,7 @@ static void ffCodecFillGpuName(const drmDevice* dev, const char* path, FFstrbuf*
     }
 }
 
-static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bool* initialized) {
-    *initialized = false;
-
+static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
@@ -227,10 +210,10 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
         return "drmGetDevices() failed";
     }
     if (numDevices == 0) {
-        return NULL;
+        return "No DRM devices found";
     }
 
-    const char* error = NULL;
+    const char* error = "No DRM device could initialize VA-API";
 
     for (int i = 0; i < numDevices; ++i) {
         drmDevice* dev = devices[i];
@@ -261,7 +244,7 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
         if (ffvaInitialize(display, &major, &minor) != VA_STATUS_SUCCESS) {
             continue;
         }
-        *initialized = true;
+        error = NULL;
 
         int maxProfiles = ffvaMaxNumProfiles(display);
         int maxEntrypoints = ffvaMaxNumEntrypoints(display);
@@ -272,11 +255,6 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
 
         FF_AUTO_FREE VAProfile* profiles = (VAProfile*) malloc(sizeof(VAProfile) * (size_t) maxProfiles);
         FF_AUTO_FREE VAEntrypoint* entrypoints = (VAEntrypoint*) malloc(sizeof(VAEntrypoint) * (size_t) maxEntrypoints);
-        if (!profiles || !entrypoints) {
-            ffvaTerminate(display);
-            error = "malloc() failed";
-            break;
-        }
 
         int numProfiles = maxProfiles;
         if (ffvaQueryConfigProfiles(display, profiles, &numProfiles) != VA_STATUS_SUCCESS) {
@@ -287,7 +265,10 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
         FFCodecType decoderTypes = FF_CODEC_TYPE_NONE;
         FFCodecType encoderTypes = FF_CODEC_TYPE_NONE;
         for (int j = 0; j < numProfiles; ++j) {
+            FFCodecType type = ffCodecProfileToType(profiles[j]);
+
             bool hasDecoder = (options->showType & FF_CODEC_SHOW_TYPE_DECODER) &&
+                !(decoderTypes & type) &&
                 ffCodecProfileHasOutput(
                     display,
                     ffvaQueryConfigEntrypoints,
@@ -295,9 +276,10 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
                     maxEntrypoints,
                     entrypoints,
                     profiles[j],
-                    false);
+                    FF_CODEC_SHOW_TYPE_DECODER);
 
             bool hasEncoder = (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) &&
+                !(encoderTypes & type) &&
                 ffCodecProfileHasOutput(
                     display,
                     ffvaQueryConfigEntrypoints,
@@ -305,13 +287,12 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
                     maxEntrypoints,
                     entrypoints,
                     profiles[j],
-                    true);
+                    FF_CODEC_SHOW_TYPE_ENCODER);
 
             if (!hasDecoder && !hasEncoder) {
                 continue;
             }
 
-            FFCodecType type = ffCodecProfileToType(profiles[j]);
             if (hasDecoder) {
                 decoderTypes |= type;
             }
@@ -336,7 +317,7 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result, bo
 }
     #endif
 
-    #if FF_CODEC_HAVE_VDPAU
+    #if FF_HAVE_VDPAU
 
 static const struct FFCodecVdpauCodec {
     VdpDecoderProfile profile;
@@ -397,7 +378,7 @@ static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result)
 
     void* x11Display = ffXOpenDisplay(NULL);
     if (!x11Display) {
-        return NULL;
+        return "XOpenDisplay() failed";
     }
 
     VdpDevice device = VDP_INVALID_HANDLE;
@@ -406,7 +387,7 @@ static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result)
         device == VDP_INVALID_HANDLE ||
         ffvdp_get_proc_address == NULL) {
         ffXCloseDisplay(x11Display);
-        return NULL;
+        return "vdp_device_create_x11() failed";
     }
 
     VdpDeviceDestroy* ffvdp_device_destroy = NULL;
@@ -419,20 +400,24 @@ static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result)
             ffvdp_device_destroy(device);
         }
         ffXCloseDisplay(x11Display);
-        return NULL;
+        return "ffvdp_get_proc_address() failed";
     }
 
     FFCodecType decoderTypes = FF_CODEC_TYPE_NONE;
 
     for (uint32_t i = 0; i < ARRAY_SIZE(FF_CODEC_VDPAU_CODECS); ++i) {
+        const struct FFCodecVdpauCodec* codec = &FF_CODEC_VDPAU_CODECS[i];
+        if (decoderTypes & codec->type) {
+            continue;
+        }
         VdpBool isSupported = VDP_FALSE;
         uint32_t maxLevel = 0, maxMacroblocks = 0, maxWidth = 0, maxHeight = 0;
-        if (ffvdp_decoder_query_capabilities(device, FF_CODEC_VDPAU_CODECS[i].profile, &isSupported, &maxLevel, &maxMacroblocks, &maxWidth, &maxHeight) != VDP_STATUS_OK ||
+        if (ffvdp_decoder_query_capabilities(device, codec->profile, &isSupported, &maxLevel, &maxMacroblocks, &maxWidth, &maxHeight) != VDP_STATUS_OK ||
             !isSupported) {
             continue;
         }
 
-        decoderTypes |= FF_CODEC_VDPAU_CODECS[i].type;
+        decoderTypes |= codec->type;
     }
 
     ffvdp_device_destroy(device);
@@ -461,19 +446,18 @@ static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result)
 const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_SUPPRESS_IO();
 
-    #if FF_CODEC_HAVE_VA
-    bool vaInitialized = false;
-    const char* vaError = ffDetectCodecByVa(options, result, &vaInitialized);
-
-    if (vaError == NULL && vaInitialized) {
+    #if FF_HAVE_DRM && FF_HAVE_VA
+    if (ffDetectCodecByVa(options, result) == NULL) {
         return NULL;
     }
     #endif
-    #if FF_CODEC_HAVE_VDPAU
-    return ffDetectCodecByVdpau(options, result);
+    #if FF_HAVE_VDPAU
+    if (ffDetectCodecByVdpau(options, result) == NULL) {
+        return NULL;
+    }
     #endif
 
-    return "Fastfetch was built without DRM / VA-API / VDPAU headers";
+    return "Both libva and libvdpau fail to initialize";
 }
 
 #else
