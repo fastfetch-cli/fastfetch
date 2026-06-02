@@ -110,6 +110,29 @@ int main(void) {
         VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "", "output(NOT OK)");
     }
 
+    {
+        VERIFY("output({1:3})", "\e[1m12345", "output(\e[1m123)");
+        VERIFY("output({1:-3})", "\e[1m12345", "output(\e[1m123…)");
+        VERIFY("output({1:3})", "\e[1m12345\e[m", "output(\e[1m123\e[m)");
+        VERIFY("output({1:-3})", "\e[1m12345\e[m", "output(\e[1m123…\e[m)");
+    }
+
+    {
+        VERIFY("output({1<8})", "\e[1m12345", "output(\e[1m12345   )");
+        VERIFY("output({1>8})", "\e[1m12345", "output(\e[1m   12345)");
+        VERIFY("output({1<8})", "\e[1m12345\e[m", "output(\e[1m12345   \e[m)");
+        VERIFY("output({1>8})", "\e[1m12345\e[m", "output(\e[1m   12345\e[m)");
+        VERIFY("output({1<1})", "\e[30;47m12345\e[m", "output(\e[30;47m1\e[m)");
+    }
+
+    {
+        VERIFY("output({1~0})", "\e[1m12345", "output(\e[1m12345)");
+        VERIFY("output({1~1})", "\e[1m12345", "output(\e[1m2345)");
+        VERIFY("output({1~0})", "\e[1m12345\e[m", "output(\e[1m12345\e[m)");
+        VERIFY("output({1~1})", "\e[1m12345\e[m", "output(\e[1m2345\e[m)");
+        VERIFY("output({1~2})", "\e[30;47m12345\e[m", "output(\e[30;47m345\e[m)");
+    }
+
 #ifndef _WIN32 // Windows doesn't have setenv
     {
         ffListInit(&instance.config.display.constants);

@@ -425,6 +425,33 @@ static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
 }
 #endif
 
+static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape) {
+    if (__builtin_expect(in->chars[0] == '\e' && in->chars[1] == '[', false)) {
+        // skip ANSI escape codes at the start of the string for truncation
+        const char* p = in->chars + 2;
+        while (*p && (ffCharIsDigit(*p) || *p == ';')) {
+            ++p;
+        }
+        if (*p && isascii(*p)) {
+            ++p;
+        }
+        uint32_t prefixLen = (uint32_t) (p - in->chars);
+        ffStrbufAppendNS(out, prefixLen, in->chars);
+        ffStrbufSubstrAfter(in, prefixLen - 1);
+
+        if (trailingEscape) {
+            // likely have a `CSI m` reset at the end of the string
+            uint32_t iLastEscape = ffStrbufLastIndexC(in, '\e');
+            if (iLastEscape != in->length) {
+                ffStrbufSetNS(trailingEscape, in->length - iLastEscape, in->chars + iLastEscape);
+                ffStrbufSubstrBefore(in, iLastEscape);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
     uint32_t argCounter = 0;
 
@@ -617,6 +644,8 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
         } else if (cSep == '~') {
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
             ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+            FF_STRBUF_AUTO_DESTROY trailingEscape = ffStrbufCreate();
+            skipAnsiEscape(&tempString, buffer, &trailingEscape);
 
             char* pEnd = NULL;
             int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
@@ -642,6 +671,10 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
                 }
             }
 
+            if (trailingEscape.length > 0) {
+                ffStrbufAppend(buffer, &trailingEscape);
+            }
+
             if (*pEnd) {
                 *pSep = cSep;
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
@@ -664,6 +697,9 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
 
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
             ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+            FF_STRBUF_AUTO_DESTROY trailingEscape = ffStrbufCreate();
+            skipAnsiEscape(&tempString, buffer, &trailingEscape);
+
             if (tempString.length == (uint32_t) truncLength) {
                 ffStrbufAppend(buffer, &tempString);
             } else if (tempString.length > (uint32_t) truncLength) {
@@ -688,6 +724,10 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
                     ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
                     ffStrbufAppend(buffer, &tempString);
                 }
+            }
+
+            if (trailingEscape.length > 0) {
+                ffStrbufAppend(buffer, &trailingEscape);
             }
         }
     }
