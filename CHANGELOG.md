@@ -46,7 +46,7 @@ Features:
     * Previously, `--logo-padding-right` was used for both right and bottom padding.
 * Adds `Samsung Exynos 2600` to CPU detection (CPU, Android)
 * Adds terminal font detection support for the Muxy terminal (TerminalFont, macOS)
-* Improves the performance of BusyBox (ash) version detection (Shell, Linux)
+* Improves the performance of BusyBox (ash) version detection and always reports `ash` as the pretty name (Shell, Linux)
 
 Bugfixes:
 * Fixes SwayFX version detection (WM, Linux)
