@@ -14,13 +14,13 @@
 static FFCodecType ffCodecDecodeOperationsToTypes(VkVideoCodecOperationFlagsKHR operations) {
     FFCodecType types = FF_CODEC_TYPE_NONE;
 
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR) {
+    if (operations & 0x00000001 /*VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_H264;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_H265_BIT_KHR) {
+    if (operations & 0x00000002 /*VK_VIDEO_CODEC_OPERATION_DECODE_H265_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_HEVC;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR) {
+    if (operations & 0x00000004 /*VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_AV1;
     }
     if (operations & 0x00000008 /*VK_VIDEO_CODEC_OPERATION_DECODE_VP9_BIT_KHR*/) {
@@ -33,13 +33,13 @@ static FFCodecType ffCodecDecodeOperationsToTypes(VkVideoCodecOperationFlagsKHR 
 static FFCodecType ffCodecEncodeOperationsToTypes(VkVideoCodecOperationFlagsKHR operations) {
     FFCodecType types = FF_CODEC_TYPE_NONE;
 
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_KHR) {
+    if (operations & 0x00010000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_H264;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_KHR) {
+    if (operations & 0x00020000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_HEVC;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_AV1_BIT_KHR) {
+    if (operations & 0x00040000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_AV1_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_AV1;
     }
 
