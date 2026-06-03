@@ -173,7 +173,14 @@ static bool extractBusyboxVersion(const char* line, uint32_t len, void* userdata
         return true;
     }
 
-    ffStrbufSetNS((FFstrbuf*) userdata, len - strlen("BusyBox v"), line + strlen("BusyBox v"));
+    line += strlen("BusyBox v");
+    len -= (uint32_t) strlen("BusyBox v");
+    const char* space = memchr(line, ' ', len);
+    if (space) {
+        len = (uint32_t) (space - line);
+    }
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
     return false;
 }
 
