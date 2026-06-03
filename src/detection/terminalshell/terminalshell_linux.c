@@ -287,6 +287,8 @@ static void setShellInfoDetails(FFShellResult* result) {
         ffStrbufInitStatic(&result->prettyName, "nushell");
     } else if (ffStrbufEqualS(&result->processName, "oil.ovm")) {
         ffStrbufInitStatic(&result->prettyName, "Oils");
+    } else if (ffStrbufEqualS(&result->processName, "busybox")) {
+        ffStrbufInitStatic(&result->prettyName, "ash");
     } else {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
         ffStrbufInitS(&result->prettyName, result->exeName);
