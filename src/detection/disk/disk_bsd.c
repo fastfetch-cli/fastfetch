@@ -1,6 +1,6 @@
 #include "disk.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <stdalign.h>
 #include <sys/mount.h>

@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/textModifier.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "modules/custom/custom.h"
 
 bool ffPrintCustom(FFCustomOptions* options) {

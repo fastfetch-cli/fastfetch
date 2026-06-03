@@ -1,6 +1,6 @@
 #include "wifi.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #define COMPAT_FREEBSD_NET80211 1
 #include <sys/ioctl.h>

@@ -1,6 +1,6 @@
 #include "common/FFstrbuf.h"
 #include "common/mallocHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -409,32 +409,6 @@ void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* st
     for (uint32_t i = 0; i < numStrings; i++) {
         ffStrbufRemoveS(strbuf, strings[i]);
     }
-}
-
-uint32_t ffStrbufNextIndexC(const FFstrbuf* strbuf, uint32_t start, char c) {
-    assert(start <= strbuf->length);
-
-    const char* ptr = (const char*) memchr(strbuf->chars + start, c, strbuf->length - start);
-    return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
-}
-
-uint32_t ffStrbufNextIndexS(const FFstrbuf* strbuf, uint32_t start, const char* str) {
-    assert(start <= strbuf->length);
-
-    const char* ptr = strstr(strbuf->chars + start, str);
-    return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
-}
-
-uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c) {
-    assert(start <= strbuf->length);
-
-    // We need to loop one higher than the actual index, because uint32_t is guaranteed to be >= 0, so this statement would always be true
-    for (uint32_t i = start + 1; i > 0; i--) {
-        if (strbuf->chars[i - 1] == c) {
-            return i - 1;
-        }
-    }
-    return strbuf->length;
 }
 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace) {

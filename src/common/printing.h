@@ -13,7 +13,7 @@ typedef enum FF_A_PACKED FFPrintType {
 } FFPrintType;
 
 void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType);
-void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments);
+bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments);
 #define FF_PRINT_FORMAT_CHECKED(moduleName, moduleIndex, moduleArgs, printType, arguments) \
     ffPrintFormat((moduleName), (moduleIndex), (moduleArgs), (printType), (sizeof(arguments) / sizeof(*arguments)), (arguments));
 FF_A_PRINTF(5, 6) void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...);

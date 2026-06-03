@@ -2,7 +2,7 @@
 
 #include "common/io.h"
 #include "common/netif.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <fcntl.h>
 #include <net/if.h>

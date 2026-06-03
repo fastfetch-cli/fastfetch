@@ -1,6 +1,3 @@
-// Load with --config examples/2.jsonc
-// Note that you must replace the image path to an existing image to display it.
-
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "display": {

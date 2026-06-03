@@ -1,5 +1,5 @@
 #include "common/kmod.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <sys/module.h>
 #include <sys/param.h>

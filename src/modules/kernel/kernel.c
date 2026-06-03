@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "modules/kernel/kernel.h"
 
 bool ffPrintKernel(FFKernelOptions* options) {

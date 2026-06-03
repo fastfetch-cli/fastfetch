@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/de/de.h"
 #include "modules/de/de.h"

@@ -1,7 +1,7 @@
 #include "processes.h"
 
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 const char* ffDetectProcesses(uint32_t* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");

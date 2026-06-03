@@ -29,6 +29,7 @@ static void initState(FFstate* state) {
     ffPlatformInit(&state->platform);
     state->dynamicInterval = 0;
 
+    #if !FF_MODULE_DISABLE_TERMINALTHEME
     {
         // don't enable bright color if the terminal is in light mode
         FFTerminalThemeResult result;
@@ -36,6 +37,7 @@ static void initState(FFstate* state) {
             state->terminalLightTheme = true;
         }
     }
+    #endif
 }
 
 static void defaultConfig(void) {
@@ -173,6 +175,15 @@ void ffDestroyInstance(void) {
     destroyState();
 }
 
+#if FF_HAVE_LUA
+    #include <lua.h>
+#endif
+#if FF_HAVE_QUICKJS
+    #include <quickjs.h>
+    #define FF_STR_INDIR(x) #x
+    #define FF_STR(x) FF_STR_INDIR(x)
+#endif
+
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures(void) {
     fputs(
@@ -251,6 +262,12 @@ void ffListFeatures(void) {
 #if FF_HAVE_LIBZFS
         "libzfs\n"
 #endif
+#if FF_HAVE_VA
+        "va\n"
+#endif
+#if FF_HAVE_VDPAU
+        "vdpau\n"
+#endif
 #if FF_USE_SYSTEM_YYJSON
         "System yyjson\n"
 #endif
@@ -260,6 +277,9 @@ void ffListFeatures(void) {
 #if FF_HAVE_EMBEDDED_PCIIDS
         "Embedded pciids\n"
 #endif
+#if FF_ENABLE_WCWIDTH
+        "Embedded wcwidth\n"
+#endif
 #if FF_HAVE_WINRT
         "WinRT headers\n"
 #endif
@@ -268,6 +288,12 @@ void ffListFeatures(void) {
 #endif
 #if FF_APPLE_MEMSIZE_USABLE
         "Apple memsize_usable\n"
+#endif
+#if FF_HAVE_LUA
+        LUA_VERSION "\n"
+#endif
+#if FF_HAVE_QUICKJS
+        "QuickJS " FF_STR(QJS_VERSION_MAJOR) "." FF_STR(QJS_VERSION_MINOR) "." FF_STR(QJS_VERSION_PATCH) QJS_VERSION_SUFFIX "\n"
 #endif
         "",
         stdout);

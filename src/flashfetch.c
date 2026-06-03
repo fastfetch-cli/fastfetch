@@ -23,7 +23,7 @@ int main(void) {
     ffStart();
 
     // Print logo
-    ffLogoPrint();
+    ffLogoPrintDetected(FF_LOGO_SIZE_NORMAL);
 
     // Print all modules
     {

@@ -11,7 +11,7 @@ static const char* detectSecureBoot(bool* result) {
         return "IORegistryEntryFromPath() failed";
     }
 
-    FF_CFTYPE_AUTO_RELEASE CFTypeRef prop = IORegistryEntryCreateCFProperty(entryDevice, CFSTR("secure-boot"), kCFAllocatorDefault, 0);
+    FF_CFTYPE_AUTO_RELEASE CFTypeRef prop = IORegistryEntryCreateCFProperty(entryDevice, CFSTR("secure-boot"), kCFAllocatorDefault, kNilOptions);
     if (!prop) {
         return "IORegistryEntryCreateCFProperty() failed";
     }
@@ -47,7 +47,21 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
         ffStrbufSetStatic(&result->firmware, "/System/Library/CoreServices/boot.efi");
     }
 
-    ffStrbufSetStatic(&result->name, "iBoot");
+    #ifdef __aarch64__
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceChosen = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
+    if (deviceChosen) {
+        FF_CFTYPE_AUTO_RELEASE CFStringRef tag = IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("iboot-stage-two-tag"), kCFAllocatorDefault, kNilOptions)
+            ?: IORegistryEntryCreateCFProperty(deviceChosen, CFSTR("system-firmware-version"), kCFAllocatorDefault, kNilOptions);
+        if (tag) {
+            ffCfStrGetString(tag, &result->name);
+            ffStrbufSubstrBeforeFirstC(&result->name, '-');
+        }
+    }
+    #endif
+
+    if (!result->name.length) {
+        ffStrbufSetStatic(&result->name, "iBoot");
+    }
 
     detectSecureBoot(&result->secureBoot);
 

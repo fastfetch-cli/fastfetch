@@ -2,7 +2,7 @@
 #include "common/color.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "options/display.h"
 
 #include <unistd.h>

@@ -40,6 +40,7 @@ typedef struct FFOptionsLogo {
     uint32_t paddingTop;
     uint32_t paddingLeft;
     uint32_t paddingRight;
+    uint32_t paddingBottom;
     bool printRemaining;
     bool preserveAspectRatio;
     bool recache;

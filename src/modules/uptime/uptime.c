@@ -2,7 +2,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
 

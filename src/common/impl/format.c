@@ -2,7 +2,8 @@
 #include "common/format.h"
 #include "common/parsing.h"
 #include "common/textModifier.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
+#include "common/library.h"
 
 #include <inttypes.h>
 
@@ -111,7 +112,347 @@ static inline bool formatArgSet(const FFformatarg* arg) {
     return arg->value != NULL && ((arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) || (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) || (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) || (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0));
 }
 
-void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+FF_A_UNUSED static inline void normalizeArgName(FFstrbuf* dst, const char* src) {
+    ffStrbufClear(dst);
+    bool flag = false;
+    for (const char* p = src; *p; ++p) {
+        if (*p == '-') {
+            flag = true;
+        } else if (flag) {
+            ffStrbufAppendC(dst, (char) toupper((unsigned char) *p));
+            flag = false;
+        } else {
+            ffStrbufAppendC(dst, *p);
+        }
+    }
+}
+
+#if FF_HAVE_LUA
+    #include "common/lua.h"
+
+static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
+    const char* err = lua_tolstring(L, -1, NULL);
+    if (err) {
+        const char* tmp = strchr(err, ':');
+        if (tmp) {
+            err = tmp + 1;
+            while (*err == ' ') {
+                ++err;
+            }
+        }
+    }
+    ffStrbufAppendF(buffer, "%s: %s", prefix, err ? err : "unknown");
+}
+
+static bool parseLuaString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+    const char* err = ffLuaLoadState();
+    if (err) {
+        ffStrbufAppendF(buffer, "Lua init error: %s", err);
+        return false;
+    }
+
+    FF_STRBUF_AUTO_DESTROY argNameBuf = ffStrbufCreate();
+    bool ret = false;
+
+    lua_State* L = luaData.L;
+    // Clear stack and load chunk
+    lua_settop(L, 0);
+    if (luaL_loadbuffer(L, script, scriptLen, "") != LUA_OK) {
+        appendLuaError(buffer, "Lua load error", L);
+    } else {
+        // Build args table for name lookup only.
+        lua_createtable(L, 0, 0);
+
+        for (uint32_t i = 0; i < numArgs; ++i) {
+            const FFformatarg* arg = &arguments[i];
+            switch (arg->type) {
+                case FF_ARG_TYPE_INT:
+                    lua_pushinteger(L, (lua_Integer) * (int32_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT:
+                    lua_pushinteger(L, (lua_Integer) * (uint32_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT64:
+                    lua_pushinteger(L, (lua_Integer) * (uint64_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT16:
+                    lua_pushinteger(L, (lua_Integer) * (uint16_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_UINT8:
+                    lua_pushinteger(L, (lua_Integer) * (uint8_t*) arg->value);
+                    break;
+                case FF_ARG_TYPE_FLOAT:
+                    lua_pushnumber(L, (lua_Number) * (float*) arg->value);
+                    break;
+                case FF_ARG_TYPE_DOUBLE:
+                    lua_pushnumber(L, (lua_Number) * (double*) arg->value);
+                    break;
+                case FF_ARG_TYPE_BOOL:
+                    lua_pushboolean(L, *(bool*) arg->value);
+                    break;
+                case FF_ARG_TYPE_STRING:
+                    lua_pushstring(L, (const char*) arg->value);
+                    break;
+                case FF_ARG_TYPE_STRBUF: {
+                    const FFstrbuf* sb = (const FFstrbuf*) arg->value;
+                    lua_pushlstring(L, sb->chars, sb->length);
+                    break;
+                }
+                case FF_ARG_TYPE_LIST: {
+                    const FFlist* list = (const FFlist*) arg->value;
+                    lua_createtable(L, 0, 0);
+                    for (uint32_t li = 0; li < list->length; ++li) {
+                        const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
+                        lua_pushlstring(L, item->chars, item->length);
+                        lua_seti(L, -2, (lua_Integer) (li + 1));
+                    }
+                    break;
+                }
+                default:
+                    lua_pushnil(L);
+                    break;
+            }
+            if (arg->name && arg->name[0]) {
+                normalizeArgName(&argNameBuf, arg->name);
+            } else {
+                ffStrbufSetF(&argNameBuf, "arg%" PRIu32, i + 1);
+            }
+            lua_setfield(L, -2, argNameBuf.chars);
+        }
+
+        if (lua_pcall(L, 1, LUA_MULTRET, 0) != LUA_OK) {
+            appendLuaError(buffer, "Lua runtime error", L);
+        } else {
+            int nresults = lua_gettop(L);
+            if (nresults == 0) {
+                ffStrbufAppendS(buffer, "Lua result error: no result");
+            } else {
+                // Convert first result to string
+                const char* res = lua_tolstring(L, 1, NULL);
+                if (res) {
+                    ffStrbufAppendS(buffer, res);
+                } else {
+                    // Fallback: use luaL_tolstring to get a reasonable representation
+                    luaL_tolstring(L, 1, NULL);
+                    const char* sval = lua_tolstring(L, -1, NULL);
+                    if (sval) {
+                        ffStrbufAppendS(buffer, sval);
+                    }
+                }
+                ret = true;
+            }
+        }
+    }
+    lua_settop(L, 0);
+    return ret;
+}
+#endif
+
+#if FF_HAVE_QUICKJS
+    #include <quickjs.h>
+
+struct FFQuickJSData {
+    FF_LIBRARY_SYMBOL(JS_NewRuntime)
+    FF_LIBRARY_SYMBOL(JS_NewContext)
+    FF_LIBRARY_SYMBOL(JS_FreeRuntime)
+    FF_LIBRARY_SYMBOL(JS_EvalThis)
+    FF_LIBRARY_SYMBOL(JS_GetException)
+    FF_LIBRARY_SYMBOL(JS_ToCStringLen2)
+    FF_LIBRARY_SYMBOL(JS_FreeCString)
+    FF_LIBRARY_SYMBOL(JS_NewStringLen)
+    FF_LIBRARY_SYMBOL(JS_NewArray)
+    FF_LIBRARY_SYMBOL(JS_NewBigUint64)
+    FF_LIBRARY_SYMBOL(JS_SetPropertyUint32)
+    FF_LIBRARY_SYMBOL(JS_NewObject)
+    FF_LIBRARY_SYMBOL(JS_SetPropertyStr)
+    FF_LIBRARY_SYMBOL(JS_FreeValue)
+
+    JSRuntime* rt;
+    JSContext* ctx;
+    bool inited;
+} qjsData;
+
+static const char* loadQuickJSState(void) {
+    if (qjsData.inited) {
+        if (qjsData.ctx == NULL) {
+            return "QuickJS is not available";
+        }
+        return NULL;
+    }
+
+    qjsData.inited = true;
+    #ifdef _WIN32
+    FF_LIBRARY_LOAD_MESSAGE(libqjs, "libqjs-0" FF_LIBRARY_EXTENSION, 0)
+    #else
+    FF_LIBRARY_LOAD_MESSAGE(libqjs, "libqjs" FF_LIBRARY_EXTENSION, 0)
+    #endif
+
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewRuntime)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewContext)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeRuntime)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_EvalThis)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_GetException)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_ToCStringLen2)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeCString)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewStringLen)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewArray)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyUint32)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_NewObject)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_SetPropertyStr)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeValue)
+
+    qjsData.rt = qjsData.ffJS_NewRuntime();
+    if (qjsData.rt == NULL) {
+        return "JS_NewRuntime() failed";
+    }
+
+    qjsData.ctx = qjsData.ffJS_NewContext(qjsData.rt);
+    if (qjsData.ctx == NULL) {
+        qjsData.ffJS_FreeRuntime(qjsData.rt);
+        qjsData.rt = NULL;
+        return "JS_NewContext() failed";
+    }
+
+    libqjs = NULL; // don't close quickjs
+
+    return NULL;
+}
+
+static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
+    const char* err = loadQuickJSState();
+    if (err) {
+        ffStrbufAppendF(buffer, "Qjs init error: %s", err);
+        return false;
+    }
+    JSContext* ctx = qjsData.ctx;
+    JSValue argsObj = qjsData.ffJS_NewObject(ctx);
+    FF_STRBUF_AUTO_DESTROY argNameBuf = ffStrbufCreate();
+
+    for (uint32_t i = 0; i < numArgs; ++i) {
+        const FFformatarg* arg = &arguments[i];
+
+        JSValue value;
+        switch (arg->type) {
+            case FF_ARG_TYPE_INT:
+                value = JS_NewInt32(ctx, *(int32_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT:
+                value = JS_NewUint32(ctx, *(uint32_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT64: {
+                uint64_t val = *(uint64_t*) arg->value;
+                if (val <= INT32_MAX) {
+                    value = JS_NewInt32(ctx, (int32_t) val);
+                } else {
+                    value = JS_NewFloat64(ctx, (double) val);
+                }
+                break;
+            }
+            case FF_ARG_TYPE_UINT16:
+                value = JS_NewUint32(ctx, *(uint16_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_UINT8:
+                value = JS_NewUint32(ctx, *(uint8_t*) arg->value);
+                break;
+            case FF_ARG_TYPE_FLOAT:
+                value = JS_NewFloat64(ctx, *(float*) arg->value);
+                break;
+            case FF_ARG_TYPE_DOUBLE:
+                value = JS_NewFloat64(ctx, *(double*) arg->value);
+                break;
+            case FF_ARG_TYPE_BOOL:
+                value = JS_NewBool(ctx, *(bool*) arg->value);
+                break;
+            case FF_ARG_TYPE_STRING:
+                value = qjsData.ffJS_NewStringLen(ctx, (const char*) arg->value, strlen((const char*) arg->value));
+                break;
+            case FF_ARG_TYPE_STRBUF: {
+                const FFstrbuf* sb = (const FFstrbuf*) arg->value;
+                value = qjsData.ffJS_NewStringLen(ctx, sb->chars, sb->length);
+                break;
+            }
+            case FF_ARG_TYPE_LIST: {
+                const FFlist* list = (const FFlist*) arg->value;
+                JSValue arr = qjsData.ffJS_NewArray(ctx);
+                for (uint32_t li = 0; li < list->length; ++li) {
+                    const FFstrbuf* item = FF_LIST_GET(FFstrbuf, *list, li);
+                    JSValue itemValue = qjsData.ffJS_NewStringLen(ctx, item->chars, item->length);
+                    qjsData.ffJS_SetPropertyUint32(ctx, arr, li, itemValue);
+                }
+
+                value = arr;
+                break;
+            }
+            default:
+                value = JS_UNDEFINED;
+                break;
+        }
+
+        if (arg->name && arg->name[0]) {
+            normalizeArgName(&argNameBuf, arg->name);
+        } else {
+            ffStrbufSetF(&argNameBuf, "arg%" PRIu32, i + 1);
+        }
+        qjsData.ffJS_SetPropertyStr(ctx, argsObj, argNameBuf.chars, value);
+    }
+    JSValue result = qjsData.ffJS_EvalThis(ctx, argsObj, script, scriptLen, "", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
+
+    qjsData.ffJS_FreeValue(ctx, argsObj);
+
+    bool ret = false;
+    if (JS_IsException(result)) {
+        JSValue exc = qjsData.ffJS_GetException(ctx);
+        const char* message = qjsData.ffJS_ToCStringLen2(ctx, NULL, exc, false);
+        qjsData.ffJS_FreeValue(ctx, exc);
+        ffStrbufAppendF(buffer, "Qjs runtime error: %s", message ?: "unknown");
+        if (message) {
+            qjsData.ffJS_FreeCString(ctx, message);
+        }
+    } else if (JS_IsUndefined(result)) {
+        ffStrbufAppendS(buffer, "Qjs result error: undefined result");
+    } else {
+        size_t len;
+        const char* res = qjsData.ffJS_ToCStringLen2(ctx, &len, result, false);
+        if (res) {
+            ffStrbufAppendNS(buffer, (uint32_t) len, res);
+            qjsData.ffJS_FreeCString(ctx, res);
+        }
+        ret = true;
+    }
+
+    qjsData.ffJS_FreeValue(ctx, result);
+    return ret;
+}
+#endif
+
+static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape) {
+    if (__builtin_expect(in->chars[0] == '\e' && in->chars[1] == '[', false)) {
+        // skip ANSI escape codes at the start of the string for truncation
+        const char* p = in->chars + 2;
+        while (*p && (ffCharIsDigit(*p) || *p == ';')) {
+            ++p;
+        }
+        if (*p && isascii(*p)) {
+            ++p;
+        }
+        uint32_t prefixLen = (uint32_t) (p - in->chars);
+        ffStrbufAppendNS(out, prefixLen, in->chars);
+        ffStrbufSubstrAfter(in, prefixLen - 1);
+
+        if (trailingEscape) {
+            // likely have a `CSI m` reset at the end of the string
+            uint32_t iLastEscape = ffStrbufLastIndexC(in, '\e');
+            if (iLastEscape != in->length) {
+                ffStrbufSetNS(trailingEscape, in->length - iLastEscape, in->chars + iLastEscape);
+                ffStrbufSubstrBefore(in, iLastEscape);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
     uint32_t argCounter = 0;
 
     uint32_t numOpenIfs = 0;
@@ -128,6 +469,12 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
         // jump to next char, the start of the placeholder value
         ++i;
+
+        // unmatched trailing '{'
+        if (i >= formatstr->length) {
+            ffStrbufAppendC(buffer, '{');
+            break;
+        }
 
         // double {{ elvaluates to a single { and doesn't count as start
         if (formatstr->chars[i] == '{') {
@@ -267,7 +614,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
         char* pSep = placeholderValue.chars;
         char cSep = '\0';
-        while (*pSep && *pSep != ':' && *pSep != '<' && *pSep != '>' && *pSep != '~') {
+        while (*pSep && *pSep != ':' && *pSep != '<' && *pSep != '>' && *pSep != '|' && *pSep != '~') {
             ++pSep;
         }
         if (*pSep) {
@@ -297,6 +644,8 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         } else if (cSep == '~') {
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
             ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+            FF_STRBUF_AUTO_DESTROY trailingEscape = ffStrbufCreate();
+            skipAnsiEscape(&tempString, buffer, &trailingEscape);
 
             char* pEnd = NULL;
             int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
@@ -322,6 +671,10 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
                 }
             }
 
+            if (trailingEscape.length > 0) {
+                ffStrbufAppend(buffer, &trailingEscape);
+            }
+
             if (*pEnd) {
                 *pSep = cSep;
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
@@ -344,6 +697,9 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
             ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+            FF_STRBUF_AUTO_DESTROY trailingEscape = ffStrbufCreate();
+            skipAnsiEscape(&tempString, buffer, &trailingEscape);
+
             if (tempString.length == (uint32_t) truncLength) {
                 ffStrbufAppend(buffer, &tempString);
             } else if (tempString.length > (uint32_t) truncLength) {
@@ -361,13 +717,22 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             } else if (cSep == ':') {
                 ffStrbufAppend(buffer, &tempString);
             } else {
-                if (cSep == '<') {
+                if (cSep == '<') { // left align
                     ffStrbufAppend(buffer, &tempString);
                     ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
-                } else {
+                } else if (cSep == '>') { // right align
                     ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
                     ffStrbufAppend(buffer, &tempString);
+                } else if (cSep == '|') { // center align
+                    uint32_t padding = ((uint32_t) truncLength - tempString.length) / 2;
+                    ffStrbufAppendNC(buffer, padding, ' ');
+                    ffStrbufAppend(buffer, &tempString);
+                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length - padding, ' ');
                 }
+            }
+
+            if (trailingEscape.length > 0) {
+                ffStrbufAppend(buffer, &trailingEscape);
             }
         }
     }
@@ -375,4 +740,23 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
     if (!instance.config.display.pipe) {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
     }
+
+    return true;
+}
+
+bool ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
+#if FF_HAVE_QUICKJS
+    if (ffStrbufStartsWithS(formatstr, "qjs:")) {
+        return parseQuickJSString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
+#if FF_HAVE_LUA
+    if (ffStrbufStartsWithS(formatstr, "lua:")) {
+        // If outputFormat starts with "lua:", treat the rest as a Lua script
+        return parseLuaString(buffer, formatstr->chars + 4, formatstr->length - 4, numArgs, arguments);
+    }
+#endif
+
+    return parseFormatString(buffer, formatstr, numArgs, arguments);
 }

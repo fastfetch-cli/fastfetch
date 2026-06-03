@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/opengl/opengl.h"
 #include "modules/opengl/opengl.h"
 

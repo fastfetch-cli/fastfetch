@@ -1,0 +1,553 @@
+extern "C" {
+#include "codec.h"
+#include "common/library.h"
+#include "common/windows/com.h"
+#include "common/windows/unicode.h"
+#include "common/windows/nt.h"
+}
+
+#include <d3d11.h>
+#include <d3d12.h>
+#include <dxgi.h>
+#include <initguid.h>
+#include <dxva.h>
+#include <d3d12video.h>
+#include <mfapi.h>
+
+typedef struct D3D12_FEATURE_DATA_VIDEO_ENCODER_CODEC {
+    UINT NodeIndex;
+    D3D12_VIDEO_ENCODER_CODEC Codec;
+    BOOL IsSupported;
+} D3D12_FEATURE_DATA_VIDEO_ENCODER_CODEC;
+
+HRESULT MFTEnum2(
+    _In_ GUID guidCategory,
+    _In_ UINT32 Flags,
+    _In_ const MFT_REGISTER_TYPE_INFO* pInputType,
+    _In_ const MFT_REGISTER_TYPE_INFO* pOutputType,
+    _In_opt_ IMFAttributes* pAttributes,
+    _Out_ IMFActivate*** pppMFTActivate,
+    _Out_ UINT32* pnumMFTActivate);
+
+// clang-format off
+#ifndef MFT_ENUM_ADAPTER_LUID
+// {1D39518C-E220-4DA8-A07F-BA172552D6B1}
+DEFINE_GUID(MFT_ENUM_ADAPTER_LUID,
+    0x1d39518c, 0xe220, 0x4da8, 0xa0, 0x7f, 0xba, 0x17, 0x25, 0x52, 0xd6, 0xb1);
+#endif
+// clang-format on
+
+static const DXGI_FORMAT FF_NATIVE_CODEC_FORMATS[] = {
+    DXGI_FORMAT_420_OPAQUE,
+    DXGI_FORMAT_NV12,
+    DXGI_FORMAT_P010,
+    DXGI_FORMAT_P016,
+    DXGI_FORMAT_YUY2,
+    DXGI_FORMAT_Y210,
+    DXGI_FORMAT_Y216,
+    DXGI_FORMAT_AYUV,
+    DXGI_FORMAT_Y410,
+    DXGI_FORMAT_Y416,
+};
+
+static FFCodecType ffCodecProfileToTypeDx11(const GUID& profile) {
+    // clang-format off
+    if (IsEqualGUID(profile, DXVA_ModeH261_A) ||
+        IsEqualGUID(profile, DXVA_ModeH261_B)) {
+        return FF_CODEC_TYPE_H261;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeH263_A) ||
+        IsEqualGUID(profile, DXVA_ModeH263_B) ||
+        IsEqualGUID(profile, DXVA_ModeH263_C) ||
+        IsEqualGUID(profile, DXVA_ModeH263_D) ||
+        IsEqualGUID(profile, DXVA_ModeH263_E) ||
+        IsEqualGUID(profile, DXVA_ModeH263_F)) {
+        return FF_CODEC_TYPE_H263;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeMJPEG_VLD_420) ||
+        IsEqualGUID(profile, DXVA_ModeMJPEG_VLD_422) ||
+        IsEqualGUID(profile, DXVA_ModeMJPEG_VLD_444) ||
+        IsEqualGUID(profile, DXVA_ModeMJPEG_VLD_4444) ||
+        IsEqualGUID(profile, DXVA_ModeJPEG_VLD_420) ||
+        IsEqualGUID(profile, DXVA_ModeJPEG_VLD_422) ||
+        IsEqualGUID(profile, DXVA_ModeJPEG_VLD_444)) {
+        return FF_CODEC_TYPE_MJPEG;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeMPEG1_A) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG1_VLD)) {
+        return FF_CODEC_TYPE_MPEG1;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeMPEG2_A) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG2_B) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG2_C) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG2_D) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG2and1_VLD)) {
+        return FF_CODEC_TYPE_MPEG2;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeMPEG4pt2_VLD_Simple) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG4pt2_VLD_AdvSimple_NoGMC) ||
+        IsEqualGUID(profile, DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC)) {
+        return FF_CODEC_TYPE_DIVX_XVID;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeH264_E) ||
+        IsEqualGUID(profile, DXVA_ModeH264_F) ||
+        IsEqualGUID(profile, DXVA_ModeH264_VLD_WithFMOASO_NoFGT) ||
+        IsEqualGUID(profile, DXVA_ModeH264_VLD_Stereo_Progressive_NoFGT) ||
+        IsEqualGUID(profile, DXVA_ModeH264_VLD_Stereo_NoFGT) ||
+        IsEqualGUID(profile, DXVA_ModeH264_VLD_Multiview_NoFGT)) {
+        return FF_CODEC_TYPE_H264;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeWMV8_A) ||
+        IsEqualGUID(profile, DXVA_ModeWMV8_B)) {
+        return FF_CODEC_TYPE_WMV8;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeWMV9_A) ||
+        IsEqualGUID(profile, DXVA_ModeWMV9_B) ||
+        IsEqualGUID(profile, DXVA_ModeWMV9_C)) {
+        return FF_CODEC_TYPE_WMV9;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeVC1_A) ||
+        IsEqualGUID(profile, DXVA_ModeVC1_B) ||
+        IsEqualGUID(profile, DXVA_ModeVC1_C) ||
+        IsEqualGUID(profile, DXVA_ModeVC1_D) ||
+        IsEqualGUID(profile, DXVA_ModeVC1_D2010)) {
+        return FF_CODEC_TYPE_VC1;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeVP8_VLD)) {
+        return FF_CODEC_TYPE_VP8;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main10) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main12) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main10_422) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main12_422) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main_444) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main10_Ext) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main10_444) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main12_444) ||
+        IsEqualGUID(profile, DXVA_ModeHEVC_VLD_Main16)) {
+        return FF_CODEC_TYPE_HEVC;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeVP9_VLD_Profile0) ||
+        IsEqualGUID(profile, DXVA_ModeVP9_VLD_10bit_Profile2)) {
+        return FF_CODEC_TYPE_VP9;
+    }
+
+    if (IsEqualGUID(profile, DXVA_ModeAV1_VLD_Profile0) ||
+        IsEqualGUID(profile, DXVA_ModeAV1_VLD_Profile1) ||
+        IsEqualGUID(profile, DXVA_ModeAV1_VLD_Profile2) ||
+        IsEqualGUID(profile, DXVA_ModeAV1_VLD_12bit_Profile2) ||
+        IsEqualGUID(profile, DXVA_ModeAV1_VLD_12bit_Profile2_420)) {
+        return FF_CODEC_TYPE_AV1;
+    }
+    // clang-format on
+
+    return FF_CODEC_TYPE_UNKNOWN;
+}
+
+static FFCodecType ffCodecProfileToTypeDx12(const GUID& profile) {
+    // clang-format off
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_MPEG1_AND_MPEG2)) {
+        return FFCodecType(FF_CODEC_TYPE_MPEG1 | FF_CODEC_TYPE_MPEG2);
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_MPEG2)) {
+        return FF_CODEC_TYPE_MPEG2;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_MPEG4PT2_SIMPLE) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_MPEG4PT2_ADVSIMPLE_NOGMC)) {
+        return FF_CODEC_TYPE_DIVX_XVID;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_H264) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_H264_STEREO_PROGRESSIVE) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_H264_STEREO) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_H264_MULTIVIEW)) {
+        return FF_CODEC_TYPE_H264;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_VC1) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_VC1_D2010)) {
+        return FF_CODEC_TYPE_VC1;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_VP8)) {
+        return FF_CODEC_TYPE_VP8;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_HEVC_MAIN) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_HEVC_MAIN10)) {
+        return FF_CODEC_TYPE_HEVC;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_VP9) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_VP9_10BIT_PROFILE2)) {
+        return FF_CODEC_TYPE_VP9;
+    }
+
+    if (IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE0) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE1) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE2) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_AV1_12BIT_PROFILE2) ||
+        IsEqualGUID(profile, D3D12_VIDEO_DECODE_PROFILE_AV1_12BIT_PROFILE2_420)) {
+        return FF_CODEC_TYPE_AV1;
+    }
+    // clang-format on
+
+    return FF_CODEC_TYPE_UNKNOWN;
+}
+
+static bool ffCodecProfileHasNativeOutput(ID3D11VideoDevice* videoDevice, const GUID& profile) {
+    for (uint32_t i = 0; i < ARRAY_SIZE(FF_NATIVE_CODEC_FORMATS); ++i) {
+        BOOL supported = FALSE;
+        if (SUCCEEDED(videoDevice->CheckVideoDecoderFormat(&profile, FF_NATIVE_CODEC_FORMATS[i], &supported)) && supported) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool ffCodecProfileHasNativeOutput(ID3D12VideoDevice* videoDevice, const GUID& profile, UINT nodeIndex) {
+    for (uint32_t i = 0; i < ARRAY_SIZE(FF_NATIVE_CODEC_FORMATS); ++i) {
+        D3D12_FEATURE_DATA_VIDEO_DECODE_SUPPORT support = {
+            .NodeIndex = nodeIndex,
+            .Configuration = {
+                .DecodeProfile = profile,
+                .BitstreamEncryption = D3D12_BITSTREAM_ENCRYPTION_TYPE_NONE,
+                .InterlaceType = D3D12_VIDEO_FRAME_CODED_INTERLACE_TYPE_NONE,
+            },
+            .Width = 1920,
+            .Height = 1080,
+            .DecodeFormat = FF_NATIVE_CODEC_FORMATS[i],
+            .FrameRate = {
+                .Numerator = 30,
+                .Denominator = 1,
+            },
+            .BitRate = 10000000,
+            .SupportFlags = D3D12_VIDEO_DECODE_SUPPORT_FLAG_NONE,
+            .ConfigurationFlags = D3D12_VIDEO_DECODE_CONFIGURATION_FLAG_NONE,
+            .DecodeTier = D3D12_VIDEO_DECODE_TIER_NOT_SUPPORTED,
+        };
+
+        if (SUCCEEDED(videoDevice->CheckFeatureSupport(D3D12_FEATURE_VIDEO_DECODE_SUPPORT, &support, sizeof(support))) &&
+            (support.SupportFlags & D3D12_VIDEO_DECODE_SUPPORT_FLAG_SUPPORTED)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool ffCodecEncoderSupportedD3d12(ID3D12VideoDevice* videoDevice, D3D12_VIDEO_ENCODER_CODEC codec, UINT nodeIndex) {
+    D3D12_FEATURE_DATA_VIDEO_ENCODER_CODEC encoderCodec = {
+        .NodeIndex = nodeIndex,
+        .Codec = codec,
+        .IsSupported = FALSE,
+    };
+
+    return SUCCEEDED(videoDevice->CheckFeatureSupport(
+               D3D12_FEATURE_VIDEO_ENCODER_CODEC,
+               &encoderCodec,
+               sizeof(encoderCodec))) &&
+        encoderCodec.IsSupported;
+}
+
+typedef struct FFCodecMftEncoderSubtype {
+    const GUID* subtype;
+    FFCodecType codecType;
+} FFCodecMftEncoderSubtype;
+
+static const FFCodecMftEncoderSubtype FF_D3D11VA_MFT_ENCODER_SUBTYPES[] = {
+    { &MFVideoFormat_H264, FF_CODEC_TYPE_H264 },
+    { &MFVideoFormat_HEVC, FF_CODEC_TYPE_HEVC },
+    { &MFVideoFormat_AV1, FF_CODEC_TYPE_AV1 },
+};
+
+static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, __typeof__(&D3D11CreateDevice) ffD3D11CreateDevice) {
+    ID3D11Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
+    D3D_FEATURE_LEVEL featureLevel;
+    if (FAILED(ffD3D11CreateDevice(
+            adapter,
+            D3D_DRIVER_TYPE_UNKNOWN,
+            nullptr,
+            D3D11_CREATE_DEVICE_VIDEO_SUPPORT,
+            nullptr,
+            0,
+            D3D11_SDK_VERSION,
+            &d3dDevice,
+            &featureLevel,
+            nullptr)) ||
+        !d3dDevice) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    ID3D11VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
+    if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D11VideoDevice), (void**) &videoDevice)) || !videoDevice) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    FFCodecType decoders = FF_CODEC_TYPE_NONE;
+    UINT profileCount = videoDevice->GetVideoDecoderProfileCount();
+    for (UINT profileIndex = 0; profileIndex < profileCount; ++profileIndex) {
+        GUID profile;
+        if (FAILED(videoDevice->GetVideoDecoderProfile(profileIndex, &profile))) {
+            continue;
+        }
+
+        FFCodecType type = ffCodecProfileToTypeDx11(profile);
+
+        if ((decoders & type) || !ffCodecProfileHasNativeOutput(videoDevice, profile)) {
+            continue;
+        }
+
+        decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) type));
+    }
+    return decoders;
+}
+
+static FFCodecType ffDetectD3d11MftEncoders(const LUID& adapterLuid, __typeof__(&MFCreateAttributes) ffMFCreateAttributes, __typeof__(&MFTEnum2) ffMFTEnum2) {
+    IMFAttributes* FF_AUTO_RELEASE_COM_OBJECT attributes = nullptr;
+    if (FAILED(ffMFCreateAttributes(&attributes, 1)) || !attributes) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    if (FAILED(attributes->SetBlob(MFT_ENUM_ADAPTER_LUID, (const UINT8*) &adapterLuid, sizeof(adapterLuid)))) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    FFCodecType encoders = FF_CODEC_TYPE_NONE;
+
+    for (uint32_t subtypeIndex = 0; subtypeIndex < ARRAY_SIZE(FF_D3D11VA_MFT_ENCODER_SUBTYPES); ++subtypeIndex) {
+        const FFCodecMftEncoderSubtype& subtype = FF_D3D11VA_MFT_ENCODER_SUBTYPES[subtypeIndex];
+        if (encoders & subtype.codecType) {
+            continue;
+        }
+
+        MFT_REGISTER_TYPE_INFO outputType = {
+            .guidMajorType = MFMediaType_Video,
+            .guidSubtype = *subtype.subtype,
+        };
+
+        IMFActivate** activateList = nullptr;
+        UINT32 activateCount = 0;
+
+        if (SUCCEEDED(ffMFTEnum2(
+                MFT_CATEGORY_VIDEO_ENCODER,
+                MFT_ENUM_FLAG_HARDWARE | MFT_ENUM_FLAG_SORTANDFILTER,
+                nullptr,
+                &outputType,
+                attributes,
+                &activateList,
+                &activateCount)) &&
+            activateCount > 0) {
+            encoders = (FFCodecType) (((uint32_t) encoders) | ((uint32_t) subtype.codecType));
+        }
+
+        for (uint32_t i = 0; i < activateCount; ++i) {
+            activateList[i]->Release();
+        }
+        CoTaskMemFree(activateList);
+    }
+
+    return encoders;
+}
+
+static FFCodecType ffCodecEncoderToType(D3D12_VIDEO_ENCODER_CODEC codec) {
+    switch (codec) {
+        case D3D12_VIDEO_ENCODER_CODEC_H264:
+            return FF_CODEC_TYPE_H264;
+        case D3D12_VIDEO_ENCODER_CODEC_HEVC:
+            return FF_CODEC_TYPE_HEVC;
+        case D3D12_VIDEO_ENCODER_CODEC_AV1:
+            return FF_CODEC_TYPE_AV1;
+        default:
+            return FF_CODEC_TYPE_UNKNOWN;
+    }
+}
+
+template <typename Func>
+static void ffEnumHardwareAdapters(IDXGIFactory1* factory, Func&& onAdapter) {
+    for (UINT adapterIndex = 0;; ++adapterIndex) {
+        IDXGIAdapter1* FF_AUTO_RELEASE_COM_OBJECT adapter = nullptr;
+        HRESULT adapterStatus = factory->EnumAdapters1(adapterIndex, &adapter);
+        if (adapterStatus == DXGI_ERROR_NOT_FOUND) {
+            break;
+        }
+        if (FAILED(adapterStatus) || !adapter) {
+            continue;
+        }
+
+        DXGI_ADAPTER_DESC1 desc;
+        if (FAILED(adapter->GetDesc1(&desc))) {
+            continue;
+        }
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
+            continue;
+        }
+
+        onAdapter(adapter, desc);
+    }
+}
+
+const char* detectD3d11va(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
+    FF_LIBRARY_LOAD_MESSAGE(d3d11, "d3d11" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(d3d11, D3D11CreateDevice)
+    FF_LIBRARY_LOAD_MESSAGE(mfplat, "mfplat" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFTEnum2)
+
+    ffEnumHardwareAdapters(factory, [&](IDXGIAdapter1* adapter, const DXGI_ADAPTER_DESC1& desc) {
+        FFCodecType decoders = (options->showType & FF_CODEC_SHOW_TYPE_DECODER)
+            ? ffDetectD3d11vaDecoders(adapter, ffD3D11CreateDevice)
+            : FF_CODEC_TYPE_NONE;
+        FFCodecType encoders = (options->showType & FF_CODEC_SHOW_TYPE_ENCODER)
+            ? ffDetectD3d11MftEncoders(desc.AdapterLuid, ffMFCreateAttributes, ffMFTEnum2)
+            : FF_CODEC_TYPE_NONE;
+
+        if (decoders == FF_CODEC_TYPE_NONE && encoders == FF_CODEC_TYPE_NONE) {
+            return;
+        }
+
+        FFCodecResult* gpuResult = FF_LIST_ADD(FFCodecResult, *result);
+        ffStrbufInitWS(&gpuResult->gpu, desc.Description);
+        gpuResult->decoders = decoders;
+        gpuResult->encoders = encoders;
+        gpuResult->platformApi = "D3D11VA+MFT";
+    });
+
+    return nullptr;
+}
+
+const char* detectD3d12va(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
+    FF_LIBRARY_LOAD_MESSAGE(d3d12, "d3d12" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(d3d12, D3D12CreateDevice)
+
+    static const GUID FF_D3D12_DECODE_PROFILES[] = {
+        D3D12_VIDEO_DECODE_PROFILE_MPEG2,
+        D3D12_VIDEO_DECODE_PROFILE_MPEG1_AND_MPEG2,
+        D3D12_VIDEO_DECODE_PROFILE_H264,
+        D3D12_VIDEO_DECODE_PROFILE_H264_STEREO_PROGRESSIVE,
+        D3D12_VIDEO_DECODE_PROFILE_H264_STEREO,
+        D3D12_VIDEO_DECODE_PROFILE_H264_MULTIVIEW,
+        D3D12_VIDEO_DECODE_PROFILE_VC1,
+        D3D12_VIDEO_DECODE_PROFILE_VC1_D2010,
+        D3D12_VIDEO_DECODE_PROFILE_MPEG4PT2_SIMPLE,
+        D3D12_VIDEO_DECODE_PROFILE_MPEG4PT2_ADVSIMPLE_NOGMC,
+        D3D12_VIDEO_DECODE_PROFILE_HEVC_MAIN,
+        D3D12_VIDEO_DECODE_PROFILE_HEVC_MAIN10,
+        D3D12_VIDEO_DECODE_PROFILE_VP9,
+        D3D12_VIDEO_DECODE_PROFILE_VP9_10BIT_PROFILE2,
+        D3D12_VIDEO_DECODE_PROFILE_VP8,
+        D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE0,
+        D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE1,
+        D3D12_VIDEO_DECODE_PROFILE_AV1_PROFILE2,
+        D3D12_VIDEO_DECODE_PROFILE_AV1_12BIT_PROFILE2,
+        D3D12_VIDEO_DECODE_PROFILE_AV1_12BIT_PROFILE2_420,
+    };
+
+    static const D3D12_VIDEO_ENCODER_CODEC FF_D3D12_ENCODER_CODECS[] = {
+        D3D12_VIDEO_ENCODER_CODEC_H264,
+        D3D12_VIDEO_ENCODER_CODEC_HEVC,
+        D3D12_VIDEO_ENCODER_CODEC_AV1,
+    };
+
+    const uint32_t resultLengthBefore = result->length;
+
+    ffEnumHardwareAdapters(factory, [&](IDXGIAdapter1* adapter, const DXGI_ADAPTER_DESC1& desc) {
+        ID3D12Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
+        if (FAILED(ffD3D12CreateDevice(
+                adapter,
+                D3D_FEATURE_LEVEL_11_0,
+                __uuidof(ID3D12Device),
+                (void**) &d3dDevice)) ||
+            !d3dDevice) {
+            return;
+        }
+
+        ID3D12VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
+        if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D12VideoDevice), (void**) &videoDevice)) || !videoDevice) {
+            return;
+        }
+
+        FFCodecType decoders = FF_CODEC_TYPE_NONE;
+        if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+            for (uint32_t profileIndex = 0; profileIndex < ARRAY_SIZE(FF_D3D12_DECODE_PROFILES); ++profileIndex) {
+                const GUID& profile = FF_D3D12_DECODE_PROFILES[profileIndex];
+                FFCodecType codecType = ffCodecProfileToTypeDx12(profile);
+
+                if ((decoders & codecType) || !ffCodecProfileHasNativeOutput(videoDevice, profile, 0)) {
+                    continue;
+                }
+
+                decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) codecType));
+            }
+        }
+
+        FFCodecType encoders = FF_CODEC_TYPE_NONE;
+        if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+            for (uint32_t codecIndex = 0; codecIndex < ARRAY_SIZE(FF_D3D12_ENCODER_CODECS); ++codecIndex) {
+                D3D12_VIDEO_ENCODER_CODEC codec = FF_D3D12_ENCODER_CODECS[codecIndex];
+                FFCodecType codecType = ffCodecEncoderToType(codec);
+
+                if ((encoders & codecType) || !ffCodecEncoderSupportedD3d12(videoDevice, codec, 0)) {
+                    continue;
+                }
+
+                encoders = (FFCodecType) (((uint32_t) encoders) | ((uint32_t) codecType));
+            }
+        }
+
+        if (decoders == FF_CODEC_TYPE_NONE && encoders == FF_CODEC_TYPE_NONE) {
+            return;
+        }
+
+        FFCodecResult* gpuResult = FF_LIST_ADD(FFCodecResult, *result);
+        ffStrbufInitWS(&gpuResult->gpu, desc.Description);
+        gpuResult->decoders = decoders;
+        gpuResult->encoders = encoders;
+        gpuResult->platformApi = "D3D12VA";
+    });
+
+    if (result->length == resultLengthBefore) {
+        return "No D3D12 video acceleration support";
+    }
+
+    return nullptr;
+}
+
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+    FF_LIBRARY_LOAD_MESSAGE(dxgi, "dxgi" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxgi, CreateDXGIFactory1)
+
+    const char* error = ffInitCom();
+    if (error) {
+        return error;
+    }
+
+    IDXGIFactory1* FF_AUTO_RELEASE_COM_OBJECT factory = nullptr;
+    if (FAILED(ffCreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) &factory)) || !factory) {
+        return "CreateDXGIFactory1() failed";
+    }
+
+    if (ffIsWindows11OrGreater()) {
+        // D3D12 video encoding is supported only on Windows 11
+        if (detectD3d12va(options, result, factory) == nullptr) {
+            return nullptr;
+        }
+    }
+    return detectD3d11va(options, result, factory);
+}

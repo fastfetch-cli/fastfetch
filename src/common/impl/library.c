@@ -1,8 +1,8 @@
 #include "fastfetch.h"
 #include "common/library.h"
+#include "common/debug.h"
 
 #if _WIN32
-    #include "common/debug.h"
     #include "common/windows/nt.h"
     #include <errno.h>
     #include <ntstatus.h>
@@ -50,6 +50,10 @@ static void* libraryLoad(const char* path, int maxVersion) {
 
     #else
 
+    if (result == NULL) {
+        FF_DEBUG("dlopen(\"%s\"): %s", path, dlerror());
+    }
+
     if (result != NULL || maxVersion < 0) {
         return result;
     }
@@ -65,6 +69,8 @@ static void* libraryLoad(const char* path, int maxVersion) {
         result = dlopen(pathbuf.chars, FF_DLOPEN_FLAGS);
         if (result != NULL) {
             break;
+        } else {
+            FF_DEBUG("dlopen(\"%s\"): %s", pathbuf.chars, dlerror());
         }
 
         ffStrbufSubstrBefore(&pathbuf, originalLength);

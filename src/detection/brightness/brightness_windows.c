@@ -159,7 +159,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
         NTSTATUS monitorStatus = ffGetPhysicalMonitors(&deviceName, 1, &monitorCount, &physicalMonitor);
         if (NT_SUCCESS(monitorStatus) && monitorCount >= 1) {
             DWORD curr = 0, max = 0;
-            if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, 0x10 /* luminance */, NULL, &curr, &max))) {
+            if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, FF_DDC_CI_LUMINANCE_OPCODE, NULL, &curr, &max))) {
                 FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 if (display->name.length > 0) {
                     ffStrbufInitCopy(&brightness->name, &display->name);
@@ -213,7 +213,7 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
         detectWithWmi(result);
     }
 
-    if (result->length < displayServer->displays.length) {
+    if (options->ddcciSleep != FF_BRIGHTNESS_DDCCI_SLEEP_SKIP && result->length < displayServer->displays.length) {
         FF_DEBUG("resultCount=%u < displayCount=%u, trying DDC/CI", result->length, displayServer->displays.length);
         detectWithDdcci(displayServer, result);
     }

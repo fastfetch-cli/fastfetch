@@ -3,7 +3,7 @@
 #include "common/printing.h"
 #include "common/time.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "fastfetch_datatext.h"
 #include "modules/modules.h"
 
@@ -70,12 +70,15 @@ void ffPrepareCommandOption(FFdata* data) {
 #define FF_IF_MODULE_MATCH(moduleNameConstant) if (moduleLen == strlen(moduleNameConstant) && ffStrEqualsIgnCase(moduleType, moduleNameConstant) && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
         switch (moduleType[0]) {
+            #if !FF_MODULE_DISABLE_CPUUSAGE
             case 'C':
             case 'c':
                 FF_IF_MODULE_MATCH(FF_CPUUSAGE_MODULE_NAME)
                 ffPrepareCPUUsage();
                 break;
+            #endif
 
+            #if !FF_MODULE_DISABLE_DISKIO
             case 'D':
             case 'd':
                 FF_IF_MODULE_MATCH(FF_DISKIO_MODULE_NAME) {
@@ -84,7 +87,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareDiskIO(&options);
                 }
                 break;
+            #endif
 
+            #if !FF_MODULE_DISABLE_NETIO
             case 'N':
             case 'n':
                 FF_IF_MODULE_MATCH(FF_NETIO_MODULE_NAME) {
@@ -93,7 +98,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareNetIO(&options);
                 }
                 break;
+            #endif
 
+            #if !FF_MODULE_DISABLE_PUBLICIP
             case 'P':
             case 'p':
                 FF_IF_MODULE_MATCH(FF_PUBLICIP_MODULE_NAME) {
@@ -102,7 +109,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPreparePublicIp(&options);
                 }
                 break;
+            #endif
 
+            #if !FF_MODULE_DISABLE_WEATHER
             case 'W':
             case 'w':
                 FF_IF_MODULE_MATCH(FF_WEATHER_MODULE_NAME) {
@@ -111,6 +120,7 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareWeather(&options);
                 }
                 break;
+            #endif
         }
 
 #undef FF_IF_MODULE_MATCH
@@ -221,7 +231,7 @@ void ffPrintCommandOption(FFdata* data) {
                                                                                                                      : FF_COLOR_FG_RED),
                         ms);
                 }
-                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len - 1, str); // Save; Up 1; Right 9999999; Left <len - 1>; Print <str>; Load
             }
         }
 

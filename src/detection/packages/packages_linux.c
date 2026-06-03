@@ -3,7 +3,7 @@
 #include "common/parsing.h"
 #include "common/properties.h"
 #include "common/settings.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/os/os.h"
 
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir) {

@@ -8,7 +8,7 @@
     #include "common/io.h"
     #include "common/library.h"
     #include "common/mallocHelper.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
 
     #include "intel_drm.h"
     #include "asahi_drm.h"

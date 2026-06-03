@@ -1,6 +1,6 @@
 #include "smc_temps.h"
 #include "common/apple/cf_helpers.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <stdint.h>
 #include <IOKit/IOKitLib.h>

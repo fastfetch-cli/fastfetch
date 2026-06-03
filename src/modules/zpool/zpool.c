@@ -3,7 +3,7 @@
 #include "common/percent.h"
 #include "common/size.h"
 #include "common/FFstrbuf.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/zpool/zpool.h"
 #include "modules/zpool/zpool.h"
 

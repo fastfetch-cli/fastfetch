@@ -19,11 +19,11 @@ int mk_wcwidth(uint32_t wc) {
         case widechar_widened_in_9:
             // Our renderer supports Unicode 9
             return 2;
-        // case widechar_nonprint:
-        // case widechar_combining:
-        // case widechar_unassigned:
-        // case widechar_non_character:
-        //    return -1;
+        case widechar_nonprint:
+        case widechar_combining:
+        case widechar_unassigned:
+        case widechar_non_character:
+           return 0;
         default:
             // Use the width widechar_width gave us.
             return width;

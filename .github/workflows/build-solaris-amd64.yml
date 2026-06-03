@@ -21,7 +21,7 @@ jobs:
           release: "11.4-gcc-14"
           prepare: |
             uname -a
-            pkg install cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja dconf mesa
+            pkg install cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja dconf mesa lua
 
           run: |
             export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig

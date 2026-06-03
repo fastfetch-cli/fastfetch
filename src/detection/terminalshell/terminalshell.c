@@ -3,7 +3,7 @@
 #include "common/processing.h"
 #include "common/properties.h"
 #include "common/path.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/binary.h"
 
 #include <ctype.h>
@@ -32,6 +32,8 @@ static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, F
 
 #elif __HAIKU__
     #include "common/haiku/version.h"
+#elif __APPLE__
+    #include "common/apple/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version) {
@@ -166,7 +168,25 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version) {
     return getExeVersionRaw(exe, version); // 0.73.0
 }
 
+static bool extractBusyboxVersion(const char* line, uint32_t len, void* userdata) {
+    if (!ffStrStartsWith(line, "BusyBox v")) {
+        return true;
+    }
+
+    line += strlen("BusyBox v");
+    len -= (uint32_t) strlen("BusyBox v");
+    const char* space = memchr(line, ' ', len);
+    if (space) {
+        len = (uint32_t) (space - line);
+    }
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
+    return false;
+}
+
 static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version) {
+    ffBinaryExtractStrings(exe->chars, extractBusyboxVersion, version, (uint32_t) strlen("BusyBox v0.0.0"));
+
     const char* error = ffStrbufEndsWithS(exe, "busybox")
         ? ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "ash", "--help", NULL })
         : ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--help", NULL });
@@ -233,10 +253,6 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version) {
 #endif
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) {
-    if (!instance.config.general.detectVersion) {
-        return false;
-    }
-
     if (ffStrEqualsIgnCase(exeName, "sh")) { // #849
         return false;
     }
@@ -616,31 +632,8 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
         }
     }
     #elif __APPLE__
-    if (ffStrbufEndsWithS(exe, "/kitty.app/Contents/MacOS/kitty")) {
-        ffStrbufSet(version, exe);
-        ffStrbufSubstrBeforeLastC(version, '/');
-        ffStrbufSubstrBeforeLastC(version, '/');
-        ffStrbufAppendS(version, "/Info.plist");
-        char buf[4096];
-        ssize_t size = ffReadFileData(version->chars, ARRAY_SIZE(buf) - 1, buf);
-        if (size > 0) {
-            buf[size] = '\0';
-
-            const char* p = strstr(buf, "<key>CFBundleShortVersionString</key>");
-            if (p) {
-                p += strlen("<key>CFBundleShortVersionString</key>");
-                p = strchr(p, '>');
-                if (p) {
-                    p++;
-                    const char* end = strchr(p, '<');
-                    if (end) {
-                        ffStrbufSetNS(version, (uint32_t) (end - p), p);
-                        return true;
-                    }
-                }
-            }
-        }
-        ffStrbufClear(version);
+    if (ffGetAppNameAndVersion(exe->chars, NULL, version)) {
+        return true;
     }
     #endif
 
@@ -748,10 +741,6 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version) {
 #endif
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_A_UNUSED FFstrbuf* exe, FFstrbuf* version) {
-    if (!instance.config.general.detectVersion) {
-        return false;
-    }
-
 #ifdef __ANDROID__
 
     if (ffStrbufEqualS(processName, "com.termux")) {
@@ -947,6 +936,10 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_A_UNUSED FFstrbuf* exe, FF
 #ifdef _WIN32
 
     return getFileVersion(exe, NULL, version);
+
+#elif __APPLE__
+
+    return ffGetAppNameAndVersion(exe->chars, NULL, version);
 
 #else
 

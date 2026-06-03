@@ -189,7 +189,7 @@ static void closeDxgfd(void) {
     }
 }
 
-static inline const char* ffDebugNtStatus(NTSTATUS status) {
+FF_A_UNUSED static inline const char* ffDebugNtStatus(NTSTATUS status) {
     return status < 0 ? strerror(-status) : "Success";
 }
 #endif

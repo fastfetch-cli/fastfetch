@@ -5,7 +5,7 @@
 #include "common/io.h"
 #include "common/library.h"
 #include "common/FFstrbuf.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "modules/gpu/option.h"
 

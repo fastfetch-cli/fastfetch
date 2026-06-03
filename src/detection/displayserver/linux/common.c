@@ -1,5 +1,5 @@
 #include "displayserver_linux.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 FFDisplayType ffdsGetDisplayType(const char* name) {
     if (ffStrStartsWith(name, "eDP-") || ffStrStartsWith(name, "LVDS-")) {

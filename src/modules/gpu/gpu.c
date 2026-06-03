@@ -4,7 +4,7 @@
 #include "common/temps.h"
 #include "common/size.h"
 #include "common/frequency.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"

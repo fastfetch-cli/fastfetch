@@ -7,7 +7,7 @@
 #include "common/io.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "fastfetch_datatext.h"
 

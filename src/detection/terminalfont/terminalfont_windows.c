@@ -5,7 +5,7 @@
 #include "common/properties.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
 

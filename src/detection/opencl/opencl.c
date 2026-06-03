@@ -9,7 +9,7 @@
 
     #include "common/library.h"
     #include "common/parsing.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
     #include <string.h>
 
     #define CL_TARGET_OPENCL_VERSION 110

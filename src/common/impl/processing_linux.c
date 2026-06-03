@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 
 #include <stdlib.h>

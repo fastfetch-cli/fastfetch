@@ -1,6 +1,6 @@
 #include "keyboard.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <linux/input-event-codes.h>
 

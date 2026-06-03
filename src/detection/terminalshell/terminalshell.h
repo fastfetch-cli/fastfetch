@@ -30,3 +30,6 @@ typedef struct FFTerminalResult {
 
 const FFShellResult* ffDetectShell();
 const FFTerminalResult* ffDetectTerminal();
+
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
+bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);

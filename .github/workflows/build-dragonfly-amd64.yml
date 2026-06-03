@@ -21,7 +21,7 @@ jobs:
           prepare: |
             uname -a
             pkg update
-            pkg install -y llvm cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa libelf
+            pkg install -y llvm cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa libelf lua54 libva libvdpau
 
           run: |
             env CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .

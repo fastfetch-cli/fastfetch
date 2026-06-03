@@ -1,5 +1,5 @@
 #include "bluetoothradio.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #ifdef FF_HAVE_DBUS
     #include "common/dbus.h"

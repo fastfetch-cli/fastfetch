@@ -1,6 +1,6 @@
 #include "displayserver.h"
 #include "common/apple/cf_helpers.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/edidHelper.h"
 #include "detection/os/os.h"
 

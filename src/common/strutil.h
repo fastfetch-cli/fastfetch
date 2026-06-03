@@ -5,6 +5,14 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "common/wcwidth.h"
+
+#ifdef _WIN32
+// #include <shlwapi.h>
+__stdcall char* StrStrIA(const char* lpFirst, const char* lpSrch);
+    #define strcasestr StrStrIA
+#endif
+
 static inline bool ffStrSet(const char* str) {
     if (str == NULL) {
         return false;
@@ -70,6 +78,13 @@ static inline bool ffCharIsEnglishAlphabet(char c) {
 static inline bool ffCharIsDigit(char c) {
     return '0' <= c && c <= '9';
 }
+
+// Parse one UTF-8 character, returning consumed byte count and display width.
+// Invalid / incomplete sequence falls back to one-byte width=1.
+// If the Unicode codepoint is non-printable, width becomes 0.
+uint8_t ffUtf8CharLenWidth(const char* str, uint32_t length, uint8_t* width);
+
+uint32_t ffUtf8StrWidth(const char* str, uint32_t length);
 
 static inline bool ffCharIsHexDigit(char c) {
     return ffCharIsDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');

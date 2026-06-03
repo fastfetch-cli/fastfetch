@@ -1,6 +1,6 @@
 #include "cpucache.h"
 #include "common/sysctl.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result) {
     // https://developer.apple.com/documentation/kernel/1387446-sysctlbyname/determining_system_capabilities#3901385
