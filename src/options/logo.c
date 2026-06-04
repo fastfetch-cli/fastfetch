@@ -20,11 +20,13 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->recache = false;
     options->position = FF_LOGO_POSITION_LEFT;
 
+#if FF_HAVE_CHAFA
     options->chafaFgOnly = false;
     ffStrbufInitStatic(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
     options->chafaCanvasMode = UINT32_MAX;
     options->chafaColorSpace = UINT32_MAX;
     options->chafaDitherMode = UINT32_MAX;
+#endif
 }
 
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value) {
@@ -160,6 +162,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
         if (subKey[0] == '\0') {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_IMAGE_CHAFA;
+#if FF_HAVE_CHAFA
         } else if (ffStrEqualsIgnCase(subKey, "fg-only")) {
             options->chafaFgOnly = ffOptionParseBoolean(value);
         } else if (ffStrEqualsIgnCase(subKey, "symbols")) {
@@ -189,6 +192,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                                     { "DIFFUSION", 2 },
                                                                                     {},
                                                                                 });
+#endif
         } else {
             return false;
         }
@@ -201,7 +205,9 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
 
 void ffOptionsDestroyLogo(FFOptionsLogo* options) {
     ffStrbufDestroy(&options->source);
+#if FF_HAVE_CHAFA
     ffStrbufDestroy(&options->chafaSymbols);
+#endif
     for (uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i) {
         ffStrbufDestroy(&options->colors[i]);
     }
@@ -342,6 +348,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             options->position = (FFLogoPosition) value;
             continue;
+#if FF_HAVE_CHAFA
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
             if (!yyjson_is_obj(val)) {
                 return "Chafa config must be an object";
@@ -409,6 +416,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 options->chafaDitherMode = (uint32_t) value;
             }
             continue;
+#endif
         } else {
             return "Unknown logo key";
         }
@@ -515,6 +523,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
                                                      "right",
                                                  })[options->position]);
 
+#if FF_HAVE_CHAFA
     {
         yyjson_mut_val* chafa = yyjson_mut_obj(doc);
         yyjson_mut_obj_add_bool(doc, chafa, "fgOnly", options->chafaFgOnly);
@@ -547,6 +556,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
 
         yyjson_mut_obj_add_val(doc, obj, "chafa", chafa);
     }
+#endif
 
     yyjson_mut_obj_add_val(doc, doc->root, "logo", obj);
 }
