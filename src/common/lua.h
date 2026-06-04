@@ -24,39 +24,32 @@
     #include "common/library.h"
 
 extern struct FFLuaData {
-    FF_LIBRARY_SYMBOL(luaL_newstate)
-    #if LUA_VERSION_NUM >= 505
-    FF_LIBRARY_SYMBOL(luaL_openselectedlibs)
-    #else
-    FF_LIBRARY_SYMBOL(luaL_openlibs)
-    #endif
-    FF_LIBRARY_SYMBOL(lua_settop)
-    FF_LIBRARY_SYMBOL(luaL_loadbufferx)
-    FF_LIBRARY_SYMBOL(lua_tolstring)
-    FF_LIBRARY_SYMBOL(lua_createtable)
-    FF_LIBRARY_SYMBOL(lua_pushinteger)
-    FF_LIBRARY_SYMBOL(lua_pushnumber)
-    FF_LIBRARY_SYMBOL(lua_pushboolean)
-    FF_LIBRARY_SYMBOL(lua_pushstring)
-    FF_LIBRARY_SYMBOL(lua_pushlstring)
-    FF_LIBRARY_SYMBOL(lua_pushvalue)
-    FF_LIBRARY_SYMBOL(lua_seti)
-    FF_LIBRARY_SYMBOL(lua_pushnil)
-    FF_LIBRARY_SYMBOL(lua_setfield)
-    FF_LIBRARY_SYMBOL(lua_pcallk)
-    FF_LIBRARY_SYMBOL(lua_gettop)
-    FF_LIBRARY_SYMBOL(luaL_tolstring)
-    FF_LIBRARY_SYMBOL(luaL_error)
-    FF_LIBRARY_SYMBOL(lua_pushcclosure)
     FF_LIBRARY_SYMBOL(luaL_checkany)
+    FF_LIBRARY_SYMBOL(luaL_loadbufferx)
+    FF_LIBRARY_SYMBOL(luaL_tolstring)
     FF_LIBRARY_SYMBOL(lua_callk)
+    FF_LIBRARY_SYMBOL(lua_createtable)
+    FF_LIBRARY_SYMBOL(lua_error)
+    FF_LIBRARY_SYMBOL(lua_gettop)
     FF_LIBRARY_SYMBOL(lua_isinteger)
     FF_LIBRARY_SYMBOL(lua_next)
+    FF_LIBRARY_SYMBOL(lua_pcallk)
+    FF_LIBRARY_SYMBOL(lua_pushboolean)
+    FF_LIBRARY_SYMBOL(lua_pushcclosure)
+    FF_LIBRARY_SYMBOL(lua_pushinteger)
+    FF_LIBRARY_SYMBOL(lua_pushlstring)
+    FF_LIBRARY_SYMBOL(lua_pushnil)
+    FF_LIBRARY_SYMBOL(lua_pushnumber)
+    FF_LIBRARY_SYMBOL(lua_pushvalue)
     FF_LIBRARY_SYMBOL(lua_rawgeti)
     FF_LIBRARY_SYMBOL(lua_rawlen)
+    FF_LIBRARY_SYMBOL(lua_setfield)
     FF_LIBRARY_SYMBOL(lua_setglobal)
+    FF_LIBRARY_SYMBOL(lua_seti)
+    FF_LIBRARY_SYMBOL(lua_settop)
     FF_LIBRARY_SYMBOL(lua_toboolean)
     FF_LIBRARY_SYMBOL(lua_tointegerx)
+    FF_LIBRARY_SYMBOL(lua_tolstring)
     FF_LIBRARY_SYMBOL(lua_tonumberx)
     FF_LIBRARY_SYMBOL(lua_type)
 
@@ -94,10 +87,6 @@ FF_A_ALWAYS_INLINE void(lua_pushboolean)(lua_State* L, int b) {
     return luaData.fflua_pushboolean(L, b);
 }
 
-FF_A_ALWAYS_INLINE const char*(lua_pushstring) (lua_State * L, const char* s) {
-    return luaData.fflua_pushstring(L, s);
-}
-
 FF_A_ALWAYS_INLINE const char*(lua_pushlstring) (lua_State * L, const char* s, size_t len) {
     return luaData.fflua_pushlstring(L, s, len);
 }
@@ -130,7 +119,9 @@ FF_A_ALWAYS_INLINE const char*(luaL_tolstring) (lua_State * L, int idx, size_t* 
     return luaData.ffluaL_tolstring(L, idx, len);
 }
 
-    #define luaL_error(L, fmt, ...) luaData.ffluaL_error(L, fmt, ##__VA_ARGS__)
+FF_A_ALWAYS_INLINE int(lua_error)(lua_State* L) {
+    return luaData.fflua_error(L);
+}
 
 FF_A_ALWAYS_INLINE void(lua_pushcclosure)(lua_State* L, lua_CFunction fn, int n) {
     return luaData.fflua_pushcclosure(L, fn, n);
@@ -156,7 +147,13 @@ FF_A_ALWAYS_INLINE int(lua_rawgeti)(lua_State* L, int idx, lua_Integer n) {
     return luaData.fflua_rawgeti(L, idx, n);
 }
 
-FF_A_ALWAYS_INLINE lua_Unsigned(lua_rawlen)(lua_State* L, int idx) {
+FF_A_ALWAYS_INLINE
+    #if LUA_VERSION_NUM > 503
+lua_Unsigned
+    #else
+size_t
+    #endif
+    (lua_rawlen)(lua_State* L, int idx) {
     return luaData.fflua_rawlen(L, idx);
 }
 

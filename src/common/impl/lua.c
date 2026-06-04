@@ -102,8 +102,9 @@ static int yyjsonEncode(lua_State* L) {
     }
 
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
-    if (!doc) {
-        return luaL_error(L, "failed to create yyjson document");
+    if (__builtin_expect(!doc, false)) {
+        lua_pushlstring(L, "yyjson: yyjson_mut_doc_new() failed", strlen("yyjson: yyjson_mut_doc_new() failed"));
+        return lua_error(L);
     }
 
     yyjson_mut_val* root = lua2yyjson(L, 1, doc);
@@ -113,13 +114,19 @@ static int yyjsonEncode(lua_State* L) {
     yyjson_write_err err = {};
     FF_AUTO_FREE const char* jsonStr = yyjson_mut_write_opts(doc, YYJSON_WRITE_ALLOW_INF_AND_NAN | (pretty ? YYJSON_WRITE_PRETTY_TWO_SPACES : 0), NULL, &jsonLen, &err);
 
-    if (jsonStr) {
+    if (__builtin_expect(jsonStr != NULL, true)) {
         lua_pushlstring(L, jsonStr, jsonLen);
         yyjson_mut_doc_free(doc);
         return 1;
     } else {
         yyjson_mut_doc_free(doc);
-        return luaL_error(L, "failed to encode JSON: %s", err.msg);
+        {
+            FF_STRBUF_AUTO_DESTROY errBuf = ffStrbufCreateStatic("yyjson: yyjson_mut_write_opts() failed: ");
+            ffStrbufAppendS(&errBuf, err.msg);
+            lua_pushlstring(L, errBuf.chars, errBuf.length);
+        }
+
+        return lua_error(L); // longjmp
     }
 }
 
@@ -163,33 +170,32 @@ const char* ffLuaLoadState() {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_string)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_table)
     #endif
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_settop)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_loadbufferx)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tolstring)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_createtable)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushinteger)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnumber)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushboolean)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushstring)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushlstring)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushvalue)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_seti)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnil)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_setfield)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pcallk)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_gettop)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_tolstring)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_error)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushcclosure)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_checkany)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_loadbufferx)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_tolstring)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_callk)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_createtable)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_error)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_gettop)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_isinteger)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_next)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pcallk)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushboolean)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushcclosure)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushinteger)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushlstring)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnil)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushnumber)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_pushvalue)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_rawgeti)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_rawlen)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_setfield)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_setglobal)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_seti)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_settop)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_toboolean)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tointegerx)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tolstring)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tonumberx)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_type)
 
