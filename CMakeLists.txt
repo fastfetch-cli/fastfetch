@@ -134,7 +134,25 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS AM APPIMAGE APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
+set(PACKAGE_MANAGERS
+    AM APK APPIMAGE
+    BREW
+    CARDS CHOCO
+    DPKG
+    EMERGE EOPKG
+    FLATPAK
+    GUIX
+    HPKG
+    KISS
+    LINGLONG LPKG LPKGBUILD
+    MACPORTS MOSS MPORT
+    NIX
+    OPKG
+    PACMAN PACSTALL PALUDIS PISI PKG PKGSRC PKGTOOL
+    RPM
+    SCOOP SNAP SOAR SORCERY
+    WINGET
+    XBPS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -142,6 +160,7 @@ foreach(package_manager ${PACKAGE_MANAGERS})
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" OFF)
     endif()
 endforeach()
+option(PACKAGES_REMOVE_DISABLED "Remove disabled package managers from the build entirely, instead of just skipping them at runtime" OFF)
 
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
@@ -2021,7 +2040,10 @@ else()
     list(TRANSFORM PACKAGES_DISABLE_LIST APPEND "_BIT")
     list(JOIN PACKAGES_DISABLE_LIST " | " PACKAGES_DISABLE_LIST)
 endif()
-target_compile_definitions(libfastfetch PRIVATE FF_PACKAGES_DISABLE_LIST=${PACKAGES_DISABLE_LIST})
+target_compile_definitions(libfastfetch PRIVATE "FF_PACKAGES_DISABLE_LIST=${PACKAGES_DISABLE_LIST}")
+if(PACKAGES_REMOVE_DISABLED)
+    target_compile_definitions(libfastfetch PRIVATE FF_PACKAGES_REMOVE_DISABLED=1)
+endif()
 
 ######################
 # Executable targets #
