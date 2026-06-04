@@ -1,3 +1,13 @@
+# 2.64.1
+
+Features:
+* Adds a CMake option `-DPACKAGES_REMOVE_DISABLED` to remove detection code of disabled packages (`-DPACKAGES_DISABLE_<PACKAGE_NAME>`) for slightly smaller binary size (Packages)
+
+Bugfixes:
+* Fixes compatibility issues with Lua 5.3
+* Avoid possible infinite recursion in `encode_json` when encoding deeply nested tables or circular references
+* Fixes compilation issues when building with old macOS SDKs
+
 # 2.64.0
 
 New **optional build** dependencies:
