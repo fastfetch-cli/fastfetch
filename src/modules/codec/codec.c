@@ -41,8 +41,6 @@ static const char* ffCodecTypeToString(FFCodecType type) {
             return "Apple ProRes";
         case FF_CODEC_TYPE_PRORES_RAW:
             return "Apple ProRes RAW";
-        case FF_CODEC_TYPE_JPEG_XL:
-            return "JPEG XL";
         case FF_CODEC_TYPE_UNKNOWN:
         default:
             return "Unknown";
