@@ -2,7 +2,7 @@
 #include <dirent.h>
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PKG)) {
         yyjson_doc* doc = yyjson_read_file(FASTFETCH_TARGET_DIR_ROOT "/var/pkg/state/installed/catalog.attrs", YYJSON_READ_NOFLAG, NULL, NULL);
         if (doc) {
             yyjson_val* packageCount = yyjson_obj_get(yyjson_doc_get_root(doc), "package-count");
@@ -11,7 +11,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
             }
         }
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PKGSRC)) {
         result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/usr/pkg/pkgdb", true);
     }
 }

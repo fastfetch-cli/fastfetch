@@ -459,85 +459,85 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
 }
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options) {
-    if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, APK)) {
         packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, DPKG)) {
         packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, LPKG)) {
         packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, EMERGE)) {
         packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, EOPKG)) {
         packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, FLATPAK)) {
         packageCounts->flatpakSystem += getFlatpakPackages(baseDir, "/var/lib");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, KISS)) {
         packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         packageCounts->nixDefault += ffPackagesGetNix(baseDir, "/nix/var/nix/profiles/default");
         packageCounts->nixSystem += ffPackagesGetNix(baseDir, "/run/current-system");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PACMAN)) {
         packageCounts->pacman += getPacmanPackages(baseDir);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, LPKGBUILD)) {
         packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", false);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PKGTOOL)) {
         packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", false);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, RPM)) {
         // `Sigmd5` is the only table that doesn't contain the virtual `gpg-pubkey` package
         packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Sigmd5", "rpm");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_SNAP_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, SNAP)) {
         packageCounts->snap += getSnap(baseDir);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_XBPS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, XBPS)) {
         packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, BREW)) {
         packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", true);
         packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", true);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PALUDIS)) {
         packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, OPKG)) {
         packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:", "opkg"); // openwrt
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, AM)) {
         packageCounts->amSystem = getAMSystem(baseDir);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, SORCERY)) {
         packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, GUIX)) {
         packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, LINGLONG)) {
         packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/layers", true);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PACSTALL)) {
         packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PISI)) {
         packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PKGSRC)) {
         packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_MOSS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, MOSS)) {
         packageCounts->moss += getSQLite3Int(baseDir, "/.moss/db/state", "SELECT COUNT(*) FROM state_selections WHERE state_id = (SELECT MAX(id) FROM state)", "moss");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_CARDS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, CARDS)) {
         packageCounts->cards += getNumElements(baseDir, "/var/lib/pkg/DB", true);
     }
 }
@@ -545,7 +545,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options) {
     getPackageCounts(baseDir, packageCounts, options);
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PACMAN)) {
         uint32_t baseDirLength = baseDir->length;
         ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC "/pacman-mirrors.conf");
         if (ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0) {
@@ -600,13 +600,13 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
 // This is needed on openSUSE, which seems to use a proprietary database file
 // This method doesn't work on bedrock, so we do it here.
 #ifdef FF_HAVE_RPM
-    if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT) && result->rpm == 0) {
+    if (FF_PACKAGES_IS_ENABLED(options, RPM) && result->rpm == 0) {
         result->rpm = getRpmFromLibrpm();
     }
 #endif
 
     ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         // Count packages from $HOME/.nix-profile
         result->nixUser += ffPackagesGetNix(&baseDir, ".nix-profile");
 
@@ -627,24 +627,24 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         result->nixUser += ffPackagesGetNix(&userPkgsDir, instance.state.platform.userName.chars);
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, GUIX)) {
         result->guixUser += getGuixPackages(&baseDir, ".guix-profile");
         result->guixHome += getGuixPackages(&baseDir, ".guix-home/profile");
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, FLATPAK)) {
         result->flatpakUser = getFlatpakPackages(&baseDir, "/.local/share");
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, AM)) {
         result->amUser = getAMUser();
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_SOAR_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, SOAR)) {
         result->soar += getSQLite3Int(&baseDir, ".local/share/soar/db/soar.db", "SELECT COUNT(DISTINCT pkg_id || pkg_name) FROM packages WHERE is_installed = true", "soar");
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_APPIMAGE_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, APPIMAGE)) {
         result->appimage += getNumElementsBySuffix(&baseDir, "/AppImages", ".appimage");
         result->appimage += getNumElementsBySuffix(&baseDir, "/Applications", ".appimage");
     }

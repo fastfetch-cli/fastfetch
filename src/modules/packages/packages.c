@@ -211,6 +211,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
             continue;
         }
 
+#if !FF_PACKAGES_REMOVE_DISABLED
         if (unsafe_yyjson_equals_str(key, "disabled")) {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val)) {
                 ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
@@ -229,10 +230,10 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                     }
                     const char* flag = unsafe_yyjson_get_str(flagObj);
 
-#define FF_TEST_PACKAGE_NAME(name)                          \
-    else if (ffStrEqualsIgnCase(flag, #name)) {             \
-        options->disabled |= FF_PACKAGES_FLAG_##name##_BIT; \
-    }
+    #define FF_TEST_PACKAGE_NAME(name)                          \
+        else if (ffStrEqualsIgnCase(flag, #name)) {             \
+            options->disabled |= FF_PACKAGES_FLAG_##name##_BIT; \
+        }
                     switch (toupper(flag[0])) {
                         case 'A':
                             if (false)
@@ -342,11 +343,12 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             FF_TEST_PACKAGE_NAME(XBPS)
                             break;
                     }
-#undef FF_TEST_PACKAGE_NAME
+    #undef FF_TEST_PACKAGE_NAME
                 }
                 continue;
             }
         }
+#endif
 
         if (unsafe_yyjson_equals_str(key, "combined")) {
             options->combined = yyjson_get_bool(val);
@@ -360,14 +362,15 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
 void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
+#if !FF_PACKAGES_REMOVE_DISABLED
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
-#define FF_TEST_PACKAGE_NAME(name)                                  \
-    else if ((options->disabled & FF_PACKAGES_FLAG_##name##_BIT)) { \
-        ffStrbufSetS(&buf, #name);                                  \
-        ffStrbufLowerCase(&buf);                                    \
-        yyjson_mut_arr_add_strbuf(doc, arr, &buf);                  \
-    }
+    #define FF_TEST_PACKAGE_NAME(name)                                  \
+        else if ((options->disabled & FF_PACKAGES_FLAG_##name##_BIT)) { \
+            ffStrbufSetS(&buf, #name);                                  \
+            ffStrbufLowerCase(&buf);                                    \
+            yyjson_mut_arr_add_strbuf(doc, arr, &buf);                  \
+        }
     if (false)
         ;
     FF_TEST_PACKAGE_NAME(AM)
@@ -405,12 +408,13 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(SORCERY)
     FF_TEST_PACKAGE_NAME(WINGET)
     FF_TEST_PACKAGE_NAME(XBPS)
-#undef FF_TEST_PACKAGE_NAME
+    #undef FF_TEST_PACKAGE_NAME
+#endif
 
     yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
-bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
@@ -481,7 +485,9 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
 void ffInitPackagesOptions(FFPackagesOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
+    #if !FF_PACKAGES_REMOVE_DISABLED
     options->disabled = FF_PACKAGES_DISABLE_LIST;
+    #endif
     options->combined = false;
 }
 

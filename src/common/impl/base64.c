@@ -34,7 +34,7 @@ void ffBase64EncodeRaw(uint32_t size, const char* str, uint32_t* out_size, char*
 
 static uint8_t decode_table[256];
 
-void init_decode_table() {
+static void init_decode_table() {
     uint8_t ch = 0;
     do {
         int32_t code = -1;
