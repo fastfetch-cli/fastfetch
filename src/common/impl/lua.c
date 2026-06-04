@@ -5,7 +5,17 @@
 
 struct FFLuaData luaData;
 
-static yyjson_mut_val* lua2yyjson(lua_State* L, int idx, yyjson_mut_doc* doc) {
+static yyjson_mut_val* lua2yyjson(lua_State* L, int idx, yyjson_mut_doc* doc, int depth) {
+    if (__builtin_expect(depth > 15, false)) {
+        yyjson_mut_doc_free(doc);
+        lua_pushlstring(
+            L, "yyjson: recursion depth exceeded; possible circular reference",
+            strlen("yyjson: recursion depth exceeded; possible circular reference")
+        );
+        lua_error(L); // noreturn
+        __builtin_unreachable();
+    }
+
     if (idx < 0) {
         idx = lua_gettop(L) + idx + 1;
     }
@@ -66,7 +76,7 @@ static yyjson_mut_val* lua2yyjson(lua_State* L, int idx, yyjson_mut_doc* doc) {
                 yyjson_mut_val* arr = yyjson_mut_arr(doc);
                 for (lua_Unsigned i = 1; i <= len; i++) {
                     lua_rawgeti(L, idx, (lua_Integer) i);
-                    yyjson_mut_val* val = lua2yyjson(L, -1, doc);
+                    yyjson_mut_val* val = lua2yyjson(L, -1, doc, depth + 1);
                     yyjson_mut_arr_append(arr, val);
                     lua_pop(L, 1);
                 }
@@ -80,7 +90,7 @@ static yyjson_mut_val* lua2yyjson(lua_State* L, int idx, yyjson_mut_doc* doc) {
                     yyjson_mut_val* key = yyjson_mut_strncpy(doc, key_str, klen);
                     lua_pop(L, 1);
 
-                    yyjson_mut_val* val = lua2yyjson(L, -1, doc);
+                    yyjson_mut_val* val = lua2yyjson(L, -1, doc, depth + 1);
                     yyjson_mut_obj_add(obj, key, val);
                     lua_pop(L, 1);
                 }
@@ -107,7 +117,7 @@ static int yyjsonEncode(lua_State* L) {
         return lua_error(L);
     }
 
-    yyjson_mut_val* root = lua2yyjson(L, 1, doc);
+    yyjson_mut_val* root = lua2yyjson(L, 1, doc, 0);
     yyjson_mut_doc_set_root(doc, root);
 
     size_t jsonLen;
