@@ -770,6 +770,7 @@ static void run(FFdata* data) {
             fflush(stdout);
             ffTimeSleep(instance.state.dynamicInterval);
             fputs("\e[H", stdout); // Move cursor to the top left corner to overwrite the previous output
+            instance.state.keysHeight = 0; // Reset keysHeight so `ffLogoPrintRemaining` will recalculate it
         } else {
             break;
         }
