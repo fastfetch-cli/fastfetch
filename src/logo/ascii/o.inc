@@ -292,6 +292,33 @@ static const FFlogo O[] = {
         .names = { "openwrt" },
         .lines = FASTFETCH_DATATEXT_LOGO_OPENWRT,
         .colors = {
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENWRT_SMALL
+    // OpenWrtSmall
+    {
+        .names = { "openwrt_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENWRT_SMALL,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENWRT_OLD
+    // OpenWrtOld
+    {
+        .names = { "openwrt_old" },
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENWRT_OLD,
+        .colors = {
             FF_COLOR_FG_BLUE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
