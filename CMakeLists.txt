@@ -1696,8 +1696,8 @@ ff_lib_enable(DRM
     "Libdrm"
 )
 ff_lib_enable(VA
-    "libva"
-    "Libva"
+    "libva-drm"
+    "Libva-drm"
 )
 ff_lib_enable(VDPAU
     "vdpau"
