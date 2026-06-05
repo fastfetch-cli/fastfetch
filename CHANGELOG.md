@@ -6,6 +6,10 @@ Bugfixes:
 * Fixes ASCII logo from being overwritten in `--dynamic-interval` mode
     * Regression from v2.64.0
 
+Logos:
+* Updates OpenWrt and adds a small variant (#2376)
+    * The old one is renamed to `openwrt_old`
+
 # 2.64.1
 
 Features:
