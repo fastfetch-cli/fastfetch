@@ -138,7 +138,7 @@ static int yyjsonEncode(lua_State* L) {
     }
 }
 
-const char* ffLuaLoadState() {
+const char* ffLuaLoadState(void) {
     if (luaData.inited) {
         if (luaData.L == NULL) {
             return "Lua library is not available";
