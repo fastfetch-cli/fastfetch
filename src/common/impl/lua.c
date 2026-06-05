@@ -9,9 +9,7 @@ static yyjson_mut_val* lua2yyjson(lua_State* L, int idx, yyjson_mut_doc* doc, in
     if (__builtin_expect(depth > 15, false)) {
         yyjson_mut_doc_free(doc);
         lua_pushlstring(
-            L, "yyjson: recursion depth exceeded; possible circular reference",
-            strlen("yyjson: recursion depth exceeded; possible circular reference")
-        );
+            L, "yyjson: recursion depth exceeded; possible circular reference", strlen("yyjson: recursion depth exceeded; possible circular reference"));
         lua_error(L); // noreturn
         __builtin_unreachable();
     }
@@ -180,6 +178,8 @@ const char* ffLuaLoadState() {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_string)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(liblua, luaopen_table)
     #endif
+
+    #if !FF_DISABLE_DLOPEN
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_checkany)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_loadbufferx)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, luaL_tolstring)
@@ -208,6 +208,7 @@ const char* ffLuaLoadState() {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tolstring)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_tonumberx)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(liblua, luaData, lua_type)
+    #endif
 
     lua_State* L = ffluaL_newstate();
     if (L == NULL) {

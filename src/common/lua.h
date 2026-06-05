@@ -3,16 +3,19 @@
 #include "fastfetch.h"
 
 #if FF_HAVE_LUA
-    // Hack. LUA_API is defined as extern which prevents us from implementing the functions ourselves.
-    #include <luaconf.h>
-    #undef LUA_API
-    #undef LUALIB_API
-    #undef LUAMOD_API
-    #define LUA_API static inline
-    #define LUALIB_API LUA_API
-    #define LUAMOD_API LUA_API
+    #if !FF_DISABLE_DLOPEN
+        // Hack. LUA_API is defined as extern which prevents us from implementing the functions ourselves.
+        #include <luaconf.h>
+        #undef LUA_API
+        #undef LUALIB_API
+        #undef LUAMOD_API
+        #define LUA_API static inline
+        #define LUALIB_API LUA_API
+        #define LUAMOD_API LUA_API
 
-    #pragma GCC diagnostic ignored "-Wunused-function"
+        #pragma GCC diagnostic ignored "-Wunused-function"
+    #endif
+
     #include <lua.h>
     #include <lauxlib.h>
     #include <lualib.h>
@@ -24,6 +27,7 @@
     #include "common/library.h"
 
 extern struct FFLuaData {
+    #if !FF_DISABLE_DLOPEN
     FF_LIBRARY_SYMBOL(luaL_checkany)
     FF_LIBRARY_SYMBOL(luaL_loadbufferx)
     FF_LIBRARY_SYMBOL(luaL_tolstring)
@@ -52,13 +56,13 @@ extern struct FFLuaData {
     FF_LIBRARY_SYMBOL(lua_tolstring)
     FF_LIBRARY_SYMBOL(lua_tonumberx)
     FF_LIBRARY_SYMBOL(lua_type)
+    #endif
 
     lua_State* L;
     bool inited;
 } luaData;
 
-const char* ffLuaLoadState();
-
+    #if !FF_DISABLE_DLOPEN
 FF_A_ALWAYS_INLINE void(lua_settop)(lua_State* L, int idx) {
     return luaData.fflua_settop(L, idx);
 }
@@ -148,11 +152,11 @@ FF_A_ALWAYS_INLINE int(lua_rawgeti)(lua_State* L, int idx, lua_Integer n) {
 }
 
 FF_A_ALWAYS_INLINE
-    #if LUA_VERSION_NUM > 503
+        #if LUA_VERSION_NUM > 503
 lua_Unsigned
-    #else
+        #else
 size_t
-    #endif
+        #endif
     (lua_rawlen)(lua_State* L, int idx) {
     return luaData.fflua_rawlen(L, idx);
 }
@@ -176,5 +180,8 @@ FF_A_ALWAYS_INLINE lua_Number(lua_tonumberx)(lua_State* L, int idx, int* isnum) 
 FF_A_ALWAYS_INLINE int(lua_type)(lua_State* L, int idx) {
     return luaData.fflua_type(L, idx);
 }
+    #endif
+
+const char* ffLuaLoadState(void);
 
 #endif
