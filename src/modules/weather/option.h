@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFWeatherOptions
-{
+typedef struct FFWeatherOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf location;

@@ -6,8 +6,7 @@ extern "C" {
 #include <NetworkInterface.h>
 #include <NetworkRoster.h>
 
-const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
-{
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
     BNetworkRoster& roster = BNetworkRoster::Default();
 
     BNetworkInterface interface;
@@ -15,22 +14,26 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 
     uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
 
-    while (roster.GetNextInterface(&cookie, interface) == B_OK)
-    {
-        if (!interface.Exists())
+    while (roster.GetNextInterface(&cookie, interface) == B_OK) {
+        if (!interface.Exists()) {
             continue;
+        }
 
         bool defaultRoute = interface.Index() == defaultRouteIfIndex;
-        if (options->defaultRouteOnly && !defaultRoute)
+        if (options->defaultRouteOnly && !defaultRoute) {
             continue;
+        }
 
-        if (options->namePrefix.length && strncmp(interface.Name(), options->namePrefix.chars, options->namePrefix.length) != 0)
+        if (options->namePrefix.length && strncmp(interface.Name(), options->namePrefix.chars, options->namePrefix.length) != 0) {
             continue;
+        }
 
         ifreq_stats stats = {};
-        if (interface.GetStats(stats) != B_OK) continue;
+        if (interface.GetStats(stats) != B_OK) {
+            continue;
+        }
 
-        FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
         *counters = (FFNetIOResult) {
             .name = ffStrbufCreateS(interface.Name()),
             .defaultRoute = defaultRoute,

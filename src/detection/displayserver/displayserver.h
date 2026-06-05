@@ -15,6 +15,8 @@
 #define FF_DE_PRETTY_CDE "CDE"
 #define FF_DE_PRETTY_UNITY "Unity"
 #define FF_DE_PRETTY_UKUI "UKUI"
+#define FF_DE_PRETTY_NEBIDE "NebiDE"
+#define FF_DE_PRETTY_ENLIGHTENMENT "Enlightenment"
 
 #define FF_WM_PRETTY_KWIN "KWin"
 #define FF_WM_PRETTY_MUTTER "Mutter"
@@ -39,48 +41,47 @@
 #define FF_WM_PRETTY_DTWM "dtwm"
 #define FF_WM_PRETTY_FVWM "fvwm"
 #define FF_WM_PRETTY_CTWM "ctwm"
+#define FF_WM_PRETTY_COSMIC_COMP "cosmic-comp"
 #define FF_WM_PRETTY_RATPOISON "ratpoison"
+#define FF_WM_PRETTY_ENLIGHTENMENT "Enlightenment"
 
 #define FF_WM_PROTOCOL_TTY "TTY"
 #define FF_WM_PROTOCOL_X11 "X11"
 #define FF_WM_PROTOCOL_WAYLAND "Wayland"
 #define FF_WM_PROTOCOL_SURFACEFLINGER "SurfaceFlinger"
 
-typedef enum __attribute__((__packed__)) FFDisplayType {
+typedef enum FF_A_PACKED FFDisplayType {
     FF_DISPLAY_TYPE_UNKNOWN,
     FF_DISPLAY_TYPE_BUILTIN,
     FF_DISPLAY_TYPE_EXTERNAL,
 } FFDisplayType;
 
-typedef enum __attribute__((__packed__)) FFDisplayHdrStatus
-{
+typedef enum FF_A_PACKED FFDisplayHdrStatus {
     FF_DISPLAY_HDR_STATUS_UNKNOWN,
     FF_DISPLAY_HDR_STATUS_UNSUPPORTED,
     FF_DISPLAY_HDR_STATUS_SUPPORTED,
     FF_DISPLAY_HDR_STATUS_ENABLED,
 } FFDisplayHdrStatus;
 
-typedef enum __attribute__((__packed__)) FFDisplayVrrStatus
-{
+typedef enum FF_A_PACKED FFDisplayVrrStatus {
     FF_DISPLAY_DRR_STATUS_UNKNOWN,
     FF_DISPLAY_DRR_STATUS_DISABLED,
     FF_DISPLAY_DRR_STATUS_ENABLED,
 } FFDisplayVrrStatus;
 
-typedef struct FFDisplayResult
-{
-    uint32_t width; // in px
-    uint32_t height; // in px
-    double refreshRate; // in Hz
-    uint32_t dpi; // Base 96
-    uint32_t preferredWidth; // in px
-    uint32_t preferredHeight; // in px
+typedef struct FFDisplayResult {
+    uint32_t width;              // in px
+    uint32_t height;             // in px
+    double refreshRate;          // in Hz
+    uint32_t dpi;                // Base 96
+    uint32_t preferredWidth;     // in px
+    uint32_t preferredHeight;    // in px
     double preferredRefreshRate; // in Hz
     FFstrbuf name;
     FFDisplayType type;
     uint32_t rotation;
-    uint64_t id; // platform dependent
-    uint32_t physicalWidth; // in mm
+    uint64_t id;             // platform dependent
+    uint32_t physicalWidth;  // in mm
     uint32_t physicalHeight; // in mm
     bool primary;
     const char* platformApi;
@@ -92,14 +93,13 @@ typedef struct FFDisplayResult
     FFDisplayVrrStatus drrStatus;
 } FFDisplayResult;
 
-typedef struct FFDisplayServerResult
-{
+typedef struct FFDisplayServerResult {
     FFstrbuf wmProcessName;
     FFstrbuf wmPrettyName;
     FFstrbuf wmProtocolName;
     FFstrbuf deProcessName;
     FFstrbuf dePrettyName;
-    FFlist displays; //List of FFDisplayResult
+    FFlist displays; // List of FFDisplayResult
 } FFDisplayServerResult;
 
 const FFDisplayServerResult* ffConnectDisplayServer();

@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFWallpaperOptions
-{
+typedef struct FFWallpaperOptions {
     FFModuleArgs moduleArgs;
 } FFWallpaperOptions;
 

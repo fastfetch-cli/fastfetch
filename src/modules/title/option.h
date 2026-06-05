@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFTitleOptions
-{
+typedef struct FFTitleOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf colorUser;

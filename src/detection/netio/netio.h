@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/netio/option.h"
 
-typedef struct FFNetIOResult
-{
+typedef struct FFNetIOResult {
     FFstrbuf name;
     bool defaultRoute;
     uint64_t txBytes;

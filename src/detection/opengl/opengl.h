@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/opengl/option.h"
 
-typedef struct FFOpenGLResult
-{
+typedef struct FFOpenGLResult {
     FFstrbuf version;
     FFstrbuf renderer;
     FFstrbuf vendor;

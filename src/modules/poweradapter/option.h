@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFPowerAdapterOptions
-{
+typedef struct FFPowerAdapterOptions {
     FFModuleArgs moduleArgs;
 } FFPowerAdapterOptions;
 

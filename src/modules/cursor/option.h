@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCursorOptions
-{
+typedef struct FFCursorOptions {
     FFModuleArgs moduleArgs;
 } FFCursorOptions;
 

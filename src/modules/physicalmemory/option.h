@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFPhysicalMemoryOptions
-{
+typedef struct FFPhysicalMemoryOptions {
     FFModuleArgs moduleArgs;
     bool showEmptySlots;
 } FFPhysicalMemoryOptions;

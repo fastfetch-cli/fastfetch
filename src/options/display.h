@@ -5,38 +5,33 @@
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"
 
-typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
-{
+typedef enum FF_A_PACKED FFSizeBinaryPrefixType {
     FF_SIZE_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
     FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 kB, 1000 kB = 1 MB, ...
     FF_SIZE_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 KB, 1024 KB = 1 MB, ...
 } FFSizeBinaryPrefixType;
 
-typedef enum __attribute__((__packed__)) FFTemperatureUnit
-{
+typedef enum FF_A_PACKED FFTemperatureUnit {
     FF_TEMPERATURE_UNIT_DEFAULT,
     FF_TEMPERATURE_UNIT_CELSIUS,
     FF_TEMPERATURE_UNIT_FAHRENHEIT,
     FF_TEMPERATURE_UNIT_KELVIN,
 } FFTemperatureUnit;
 
-typedef enum __attribute__((__packed__)) FFSpaceBeforeUnitType
-{
+typedef enum FF_A_PACKED FFSpaceBeforeUnitType {
     FF_SPACE_BEFORE_UNIT_DEFAULT,
     FF_SPACE_BEFORE_UNIT_ALWAYS,
     FF_SPACE_BEFORE_UNIT_NEVER,
 } FFSpaceBeforeUnitType;
 
-typedef enum __attribute__((__packed__)) FFFractionTrailingZerosType
-{
+typedef enum FF_A_PACKED FFFractionTrailingZerosType {
     FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT,
     FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS,
     FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER,
 } FFFractionTrailingZerosType;
 
-typedef struct FFOptionsDisplay
-{
-    //If one of those is empty, ffLogoPrint will set them
+typedef struct FFOptionsDisplay {
+    // If one of those is empty, ffLogoPrint will set them
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
     FFstrbuf colorOutput;
@@ -47,11 +42,11 @@ typedef struct FFOptionsDisplay
     FFstrbuf keyValueSeparator;
 
     int32_t stat; // <0: disable stat; 0: no threshold; >0: threshold in ms
-    bool pipe; //disables all escape sequences
+    bool pipe;    // disables all escape sequences
     bool showErrors;
-    #ifndef NDEBUG
+#ifndef NDEBUG
     bool debugMode;
-    #endif
+#endif
     bool disableLinewrap;
     bool durationAbbreviation;
     FFSpaceBeforeUnitType durationSpaceBeforeUnit;
@@ -73,8 +68,8 @@ typedef struct FFOptionsDisplay
     FFstrbuf barBorderLeftElapsed;
     FFstrbuf barBorderRightElapsed;
     FFstrbuf barColorElapsed; // "auto" for auto selection from percent config; empty for no custom color (inherits)
-    FFstrbuf barColorTotal; // empty for no custom color (inherits)
-    FFstrbuf barColorBorder; // empty for no custom color (inherits)
+    FFstrbuf barColorTotal;   // empty for no custom color (inherits)
+    FFstrbuf barColorBorder;  // empty for no custom color (inherits)
     uint8_t barWidth;
     FFPercentageTypeFlags percentType;
     uint8_t percentNdigits;

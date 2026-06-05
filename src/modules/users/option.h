@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFUsersOptions
-{
+typedef struct FFUsersOptions {
     FFModuleArgs moduleArgs;
 
     bool compact;

@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 
-typedef struct FFMouseDevice
-{
+typedef struct FFMouseDevice {
     FFstrbuf serial;
     FFstrbuf name;
 } FFMouseDevice;

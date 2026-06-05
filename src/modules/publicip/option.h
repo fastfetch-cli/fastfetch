@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFPublicIPOptions
-{
+typedef struct FFPublicIPOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf url;

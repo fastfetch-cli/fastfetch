@@ -5,18 +5,15 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
-const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
-{
+const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
     // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
     DWORD adapter_addresses_buffer_size = 0;
-    for (int attempts = 0;; ++attempts)
-    {
-        if (adapter_addresses_buffer_size)
-        {
-            adapter_addresses = (IP_ADAPTER_ADDRESSES*)realloc(adapter_addresses, adapter_addresses_buffer_size);
+    for (int attempts = 0;; ++attempts) {
+        if (adapter_addresses_buffer_size) {
+            adapter_addresses = (IP_ADAPTER_ADDRESSES*) realloc(adapter_addresses, adapter_addresses_buffer_size);
             assert(adapter_addresses);
         }
 
@@ -29,32 +26,32 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
             adapter_addresses,
             &adapter_addresses_buffer_size);
 
-        if (error == ERROR_SUCCESS)
+        if (error == ERROR_SUCCESS) {
             break;
-        else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4)
+        } else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4) {
             continue;
-        else
+        } else {
             return "GetAdaptersAddresses() failed";
+        }
     }
 
     uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
     // Iterate through all of the adapters
-    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
-    {
-        if (adapter->IfIndex != defaultRouteIfIndex) continue;
-        if (adapter->OperStatus != IfOperStatusUp) continue;
+    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next) {
+        if (adapter->IfIndex != defaultRouteIfIndex) {
+            continue;
+        }
+        if (adapter->OperStatus != IfOperStatusUp) {
+            continue;
+        }
 
-        for (IP_ADAPTER_DNS_SERVER_ADDRESS_XP * ifa = adapter->FirstDnsServerAddress; ifa; ifa = ifa->Next)
-        {
-            FFstrbuf* item = (FFstrbuf*) ffListAdd(results);
-            if (ifa->Address.lpSockaddr->sa_family == AF_INET)
-            {
+        for (IP_ADAPTER_DNS_SERVER_ADDRESS_XP* ifa = adapter->FirstDnsServerAddress; ifa; ifa = ifa->Next) {
+            FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
+            if (ifa->Address.lpSockaddr->sa_family == AF_INET) {
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 ffStrbufInitA(item, INET_ADDRSTRLEN);
                 item->length = (uint32_t) (RtlIpv4AddressToStringA(&ipv4->sin_addr, item->chars) - item->chars);
-            }
-            else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
-            {
+            } else if (ifa->Address.lpSockaddr->sa_family == AF_INET6) {
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 ffStrbufInitA(item, INET6_ADDRSTRLEN);
                 item->length = (uint32_t) (RtlIpv6AddressToStringA(&ipv6->sin6_addr, item->chars) - item->chars);

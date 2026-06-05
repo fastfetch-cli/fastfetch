@@ -24,31 +24,29 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     {},
 };
 
-const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
-{
+const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
     FF_DEBUG("Starting local IP detection with showType=0x%X, namePrefix='%.*s'",
-             options->showType, (int)options->namePrefix.length, options->namePrefix.chars);
+        options->showType,
+        (int) options->namePrefix.length,
+        options->namePrefix.chars);
 
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
     // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
     DWORD adapter_addresses_buffer_size = 0;
-    for (int attempts = 0;; ++attempts)
-    {
+    for (int attempts = 0;; ++attempts) {
         FF_DEBUG("Attempt %d to get adapter addresses, buffer size: %lu", attempts + 1, adapter_addresses_buffer_size);
 
-        if (adapter_addresses_buffer_size)
-        {
-            adapter_addresses = (IP_ADAPTER_ADDRESSES*)realloc(adapter_addresses, adapter_addresses_buffer_size);
+        if (adapter_addresses_buffer_size) {
+            adapter_addresses = (IP_ADAPTER_ADDRESSES*) realloc(adapter_addresses, adapter_addresses_buffer_size);
             assert(adapter_addresses);
         }
 
         DWORD family = options->showType & FF_LOCALIP_TYPE_IPV4_BIT
             ? options->showType & FF_LOCALIP_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
             : AF_INET6;
-        FF_DEBUG("Calling GetAdaptersAddresses with family=%u, flags=0x%X", (unsigned)family,
-                 GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER);
+        FF_DEBUG("Calling GetAdaptersAddresses with family=%u, flags=0x%X", (unsigned) family, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER);
 
         DWORD error = GetAdaptersAddresses(
             family,
@@ -57,72 +55,66 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             adapter_addresses,
             &adapter_addresses_buffer_size);
 
-        if (error == ERROR_SUCCESS)
-        {
+        if (error == ERROR_SUCCESS) {
             FF_DEBUG("GetAdaptersAddresses succeeded on attempt %d", attempts + 1);
             break;
-        }
-        else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4)
-        {
+        } else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4) {
             FF_DEBUG("Buffer overflow, need %lu bytes, retrying", adapter_addresses_buffer_size);
             continue;
-        }
-        else
-        {
+        } else {
             FF_DEBUG("GetAdaptersAddresses failed with error %lu after %d attempts", error, attempts + 1);
             return "GetAdaptersAddresses() failed";
         }
     }
 
-    FF_MAYBE_UNUSED int adapterCount = 0, processedCount = 0;
+    FF_A_UNUSED int adapterCount = 0, processedCount = 0;
 
     // Iterate through all of the adapters
-    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
-    {
+    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next) {
         adapterCount++;
 
         FF_DEBUG("Processing adapter %d: IfIndex=%u, IfType=%u, OperStatus=%u",
-                 adapterCount, (unsigned)adapter->IfIndex, (unsigned)adapter->IfType, (unsigned)adapter->OperStatus);
+            adapterCount,
+            (unsigned) adapter->IfIndex,
+            (unsigned) adapter->IfType,
+            (unsigned) adapter->OperStatus);
 
-        if (adapter->OperStatus != IfOperStatusUp)
-        {
-            FF_DEBUG("Skipping adapter %u (not operational, status=%d)", (unsigned)adapter->IfIndex, adapter->OperStatus);
+        if (adapter->OperStatus != IfOperStatusUp) {
+            FF_DEBUG("Skipping adapter %u (not operational, status=%d)", (unsigned) adapter->IfIndex, adapter->OperStatus);
             continue;
         }
 
         bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
-        FF_DEBUG("Adapter %u: isLoopback=%s", (unsigned)adapter->IfIndex, isLoop ? "true" : "false");
+        FF_DEBUG("Adapter %u: isLoopback=%s", (unsigned) adapter->IfIndex, isLoop ? "true" : "false");
 
-        if (isLoop && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
-        {
-            FF_DEBUG("Skipping loopback adapter %u (loopback not requested)", (unsigned)adapter->IfIndex);
+        if (isLoop && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT)) {
+            FF_DEBUG("Skipping loopback adapter %u (loopback not requested)", (unsigned) adapter->IfIndex);
             continue;
         }
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(adapter->FriendlyName);
-        FF_DEBUG("Adapter %u name: '%s'", (unsigned)adapter->IfIndex, name.chars);
+        FF_DEBUG("Adapter %u name: '%s'", (unsigned) adapter->IfIndex, name.chars);
 
-        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
-        {
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix)) {
             FF_DEBUG("Skipping adapter %u (name doesn't match prefix '%.*s')",
-                     (unsigned)adapter->IfIndex, (int)options->namePrefix.length, options->namePrefix.chars);
+                (unsigned) adapter->IfIndex,
+                (int) options->namePrefix.length,
+                options->namePrefix.chars);
             continue;
         }
 
-        if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
-        {
+        if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) {
             if (!((options->showType & FF_LOCALIP_TYPE_IPV4_BIT) && ffNetifGetDefaultRouteV4()->ifIndex == adapter->IfIndex) &&
-                !((options->showType & FF_LOCALIP_TYPE_IPV6_BIT) && ffNetifGetDefaultRouteV6()->ifIndex == adapter->IfIndex))
-            {
-                FF_DEBUG("Skipping interface %u (not default route interface)", (unsigned)adapter->IfIndex);
+                !((options->showType & FF_LOCALIP_TYPE_IPV6_BIT) && ffNetifGetDefaultRouteV6()->ifIndex == adapter->IfIndex)) {
+                FF_DEBUG("Skipping interface %u (not default route interface)", (unsigned) adapter->IfIndex);
                 continue;
             }
         }
 
         processedCount++;
-        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned)adapter->IfIndex, name.chars);
+        FF_DEBUG("Creating result item for adapter %u ('%s')", (unsigned) adapter->IfIndex, name.chars);
 
-        FFLocalIpResult* item = (FFLocalIpResult*) ffListAdd(results);
+        FFLocalIpResult* item = FF_LIST_ADD(FFLocalIpResult, *results);
         ffStrbufInitMove(&item->name, &name);
         ffStrbufInit(&item->ipv4);
         ffStrbufInit(&item->ipv6);
@@ -133,25 +125,24 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         item->mtu = -1;
 
         uint32_t typesToAdd = options->showType & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT);
-        FF_DEBUG("Types to add for adapter %u: 0x%X", (unsigned)adapter->IfIndex, typesToAdd);
+        FF_DEBUG("Types to add for adapter %u: 0x%X", (unsigned) adapter->IfIndex, typesToAdd);
 
-        FF_MAYBE_UNUSED int ipv4Count = 0, ipv6Count = 0;
+        FF_A_UNUSED int ipv4Count = 0, ipv6Count = 0;
 
-        for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
-        {
+        for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next) {
             FF_DEBUG("Processing unicast address: prefix origin=%d, suffix origin=%d, family=%d, DadState=%d",
-                     ifa->PrefixOrigin, ifa->SuffixOrigin, ifa->Address.lpSockaddr->sa_family, ifa->DadState);
+                ifa->PrefixOrigin,
+                ifa->SuffixOrigin,
+                ifa->Address.lpSockaddr->sa_family,
+                ifa->DadState);
 
-            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
-            {
-                if (ifa->DadState != IpDadStatePreferred)
-                {
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)) {
+                if (ifa->DadState != IpDadStatePreferred) {
                     FF_DEBUG("Skipping address (not preferred)");
                     continue;
                 }
 
-                if (ifa->SuffixOrigin == IpSuffixOriginRandom)
-                {
+                if (ifa->SuffixOrigin == IpSuffixOriginRandom) {
                     FF_DEBUG("Skipping temporary address (random suffix)");
                     continue;
                 }
@@ -159,17 +150,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 // MIB_UNICASTIPADDRESS_ROW::SkipAsSource
             }
 
-            if (ifa->Address.lpSockaddr->sa_family == AF_INET)
-            {
-                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT)))
-                {
+            if (ifa->Address.lpSockaddr->sa_family == AF_INET) {
+                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) {
                     FF_DEBUG("Skipping IPv4 address (not requested in typesToAdd=0x%X)", typesToAdd);
                     continue;
                 }
 
                 bool isDefaultRoute = ((options->showType & FF_LOCALIP_TYPE_IPV4_BIT) && ffNetifGetDefaultRouteV4()->ifIndex == adapter->IfIndex);
-                if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
-                {
+                if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute) {
                     FF_DEBUG("Skipping IPv4 address (not on default route interface)");
                     continue;
                 }
@@ -178,23 +166,27 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 char addressBuffer[INET_ADDRSTRLEN + 10];
                 char* end = RtlIpv4AddressToStringA(&ipv4->sin_addr, addressBuffer);
 
-                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength) {
                     end += snprintf(end, 10, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                }
 
                 FF_DEBUG("Adding IPv4 address: %s (isDefaultRoute=%s)", addressBuffer, isDefaultRoute ? "true" : "false");
 
-                if (item->ipv4.length) ffStrbufAppendC(&item->ipv4, ',');
+                if (item->ipv4.length) {
+                    ffStrbufAppendC(&item->ipv4, ',');
+                }
                 ffStrbufAppendNS(&item->ipv4, (uint32_t) (end - addressBuffer), addressBuffer);
-                if (isDefaultRoute) item->defaultRoute |= FF_LOCALIP_TYPE_IPV4_BIT;
+                if (isDefaultRoute) {
+                    item->defaultRoute |= FF_LOCALIP_TYPE_IPV4_BIT;
+                }
 
                 ipv4Count++;
                 typesToAdd &= ~(unsigned) FF_LOCALIP_TYPE_IPV4_BIT;
-                if (typesToAdd == 0) break;
-            }
-            else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
-            {
-                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT)))
-                {
+                if (typesToAdd == 0) {
+                    break;
+                }
+            } else if (ifa->Address.lpSockaddr->sa_family == AF_INET6) {
+                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) {
                     FF_DEBUG("Skipping IPv6 address (not requested in typesToAdd=0x%X)", typesToAdd);
                     continue;
                 }
@@ -202,20 +194,23 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
 
                 FFLocalIpIpv6Type ipv6Type = FF_LOCALIP_IPV6_TYPE_NONE;
-                if (IN6_IS_ADDR_GLOBAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_GUA_BIT;
-                else if (IN6_IS_ADDR_UNIQUE_LOCAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_ULA_BIT;
-                else if (IN6_IS_ADDR_LINKLOCAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_LLA_BIT;
-                else ipv6Type |= FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT;
+                if (IN6_IS_ADDR_GLOBAL(&ipv6->sin6_addr)) {
+                    ipv6Type |= FF_LOCALIP_IPV6_TYPE_GUA_BIT;
+                } else if (IN6_IS_ADDR_UNIQUE_LOCAL(&ipv6->sin6_addr)) {
+                    ipv6Type |= FF_LOCALIP_IPV6_TYPE_ULA_BIT;
+                } else if (IN6_IS_ADDR_LINKLOCAL(&ipv6->sin6_addr)) {
+                    ipv6Type |= FF_LOCALIP_IPV6_TYPE_LLA_BIT;
+                } else {
+                    ipv6Type |= FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT;
+                }
 
-                if (!(options->ipv6Type & ipv6Type))
-                {
+                if (!(options->ipv6Type & ipv6Type)) {
                     FF_DEBUG("Skipping IPv6 address (doesn't match requested type 0x%X)", options->ipv6Type);
                     continue;
                 }
 
                 bool isDefaultRoute = ((options->showType & FF_LOCALIP_TYPE_IPV6_BIT) && ffNetifGetDefaultRouteV6()->ifIndex == adapter->IfIndex);
-                if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
-                {
+                if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute) {
                     FF_DEBUG("Skipping IPv6 address (not on default route interface)");
                     continue;
                 }
@@ -223,48 +218,53 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 char addressBuffer[INET6_ADDRSTRLEN + 10];
                 char* end = RtlIpv6AddressToStringA(&ipv6->sin6_addr, addressBuffer);
 
-                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength) {
                     end += snprintf(end, 10, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                }
 
                 FF_DEBUG("Adding IPv6 address: %s (isDefaultRoute=%s)", addressBuffer, isDefaultRoute ? "true" : "false");
 
-                if (item->ipv6.length) ffStrbufAppendC(&item->ipv6, ',');
+                if (item->ipv6.length) {
+                    ffStrbufAppendC(&item->ipv6, ',');
+                }
                 ffStrbufAppendNS(&item->ipv6, (uint32_t) (end - addressBuffer), addressBuffer);
-                if (isDefaultRoute) item->defaultRoute |= FF_LOCALIP_TYPE_IPV6_BIT;
+                if (isDefaultRoute) {
+                    item->defaultRoute |= FF_LOCALIP_TYPE_IPV6_BIT;
+                }
 
                 ipv6Count++;
                 typesToAdd &= ~(unsigned) FF_LOCALIP_TYPE_IPV6_BIT;
-                if (typesToAdd == 0) break;
+                if (typesToAdd == 0) {
+                    break;
+                }
             }
         }
 
-        FF_DEBUG("Adapter %u: collected %d IPv4 and %d IPv6 addresses", (unsigned)adapter->IfIndex, ipv4Count, ipv6Count);
+        FF_DEBUG("Adapter %u: collected %d IPv4 and %d IPv6 addresses", (unsigned) adapter->IfIndex, ipv4Count, ipv6Count);
 
-        if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
-        {
+        if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT) {
             item->speed = (int32_t) (adapter->ReceiveLinkSpeed / 1000000);
-            FF_DEBUG("Adapter %u speed: %d Mbps (raw: %llu)", (unsigned)adapter->IfIndex, item->speed, adapter->ReceiveLinkSpeed);
+            FF_DEBUG("Adapter %u speed: %d Mbps (raw: %llu)", (unsigned) adapter->IfIndex, item->speed, adapter->ReceiveLinkSpeed);
         }
-        if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
-        {
+        if (options->showType & FF_LOCALIP_TYPE_MTU_BIT) {
             item->mtu = (int32_t) adapter->Mtu;
-            FF_DEBUG("Adapter %u MTU: %d", (unsigned)adapter->IfIndex, item->mtu);
+            FF_DEBUG("Adapter %u MTU: %d", (unsigned) adapter->IfIndex, item->mtu);
         }
-        if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
-        {
+        if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT) {
             ffLocalIpFillNIFlags(&item->flags, adapter->Flags, niFlagOptions);
-            FF_DEBUG("Adapter %u flags: 0x%lX -> '%s'", (unsigned)adapter->IfIndex, adapter->Flags, item->flags.chars);
+            FF_DEBUG("Adapter %u flags: 0x%lX -> '%s'", (unsigned) adapter->IfIndex, adapter->Flags, item->flags.chars);
         }
-        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT && adapter->PhysicalAddressLength == 6)
-        {
+        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT && adapter->PhysicalAddressLength == 6) {
             uint8_t* ptr = adapter->PhysicalAddress;
             ffStrbufSetF(&item->mac, "%02x:%02x:%02x:%02x:%02x:%02x", ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            FF_DEBUG("Adapter %u MAC: %s", (unsigned)adapter->IfIndex, item->mac.chars);
+            FF_DEBUG("Adapter %u MAC: %s", (unsigned) adapter->IfIndex, item->mac.chars);
         }
     }
 
     FF_DEBUG("Local IP detection completed: scanned %d adapters, processed %d, results count: %u",
-             adapterCount, processedCount, results->length);
+        adapterCount,
+        processedCount,
+        results->length);
 
     return NULL;
 }

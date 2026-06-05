@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFTPMOptions
-{
+typedef struct FFTPMOptions {
     FFModuleArgs moduleArgs;
 } FFTPMOptions;
 

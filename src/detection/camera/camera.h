@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/camera/option.h"
 
-typedef struct FFCameraResult
-{
+typedef struct FFCameraResult {
     FFstrbuf name;
     FFstrbuf vendor;
     FFstrbuf id;

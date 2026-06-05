@@ -2,8 +2,7 @@
 
 #include <oleauto.h>
 
-FFWmiVariant::FFWmiVariant(std::initializer_list<PCWSTR> strings): FFWmiVariant()
-{
+FFWmiVariant::FFWmiVariant(std::initializer_list<PCWSTR> strings) : FFWmiVariant() {
     SAFEARRAYBOUND bound = {
         .cElements = (ULONG) strings.size(),
         .lLbound = 0,

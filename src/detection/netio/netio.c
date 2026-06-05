@@ -5,65 +5,68 @@
 static FFlist ioCounters1;
 static uint64_t time1;
 
-void ffPrepareNetIO(FFNetIOOptions* options)
-{
-    if (options->detectTotal) return;
+void ffPrepareNetIO(FFNetIOOptions* options) {
+    if (options->detectTotal) {
+        return;
+    }
 
-    if (time1 != 0) return; // Already prepared
+    if (time1 != 0) {
+        return; // Already prepared
+    }
 
-    ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+    ffListInit(&ioCounters1);
     ffNetIOGetIoCounters(&ioCounters1, options);
     time1 = ffTimeGetNow();
 }
 
-const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options)
-{
+const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options) {
     const char* error = NULL;
 
-    if (options->detectTotal)
-    {
+    if (options->detectTotal) {
         error = ffNetIOGetIoCounters(result, options);
-        if (error)
+        if (error) {
             return error;
+        }
         return NULL;
     }
 
-    if (time1 == 0)
-    {
-        ffListInit(&ioCounters1, sizeof(FFNetIOResult));
+    if (time1 == 0) {
+        ffListInit(&ioCounters1);
         error = ffNetIOGetIoCounters(&ioCounters1, options);
-        if (error)
+        if (error) {
             return error;
+        }
         time1 = ffTimeGetNow();
     }
 
-    if (ioCounters1.length == 0)
+    if (ioCounters1.length == 0) {
         return "No network interfaces found";
+    }
 
     uint64_t time2 = ffTimeGetNow();
-    while (time2 - time1 < options->waitTime)
-    {
+    while (time2 - time1 < options->waitTime) {
         ffTimeSleep((uint32_t) (options->waitTime - (time2 - time1)));
         time2 = ffTimeGetNow();
     }
 
     error = ffNetIOGetIoCounters(result, options);
-    if (error)
+    if (error) {
         return error;
+    }
 
-    if (result->length != ioCounters1.length)
+    if (result->length != ioCounters1.length) {
         return "Different number of network interfaces. Network change?";
+    }
 
-    for (uint32_t i = 0; i < result->length; ++i)
-    {
+    for (uint32_t i = 0; i < result->length; ++i) {
         FFNetIOResult* icPrev = FF_LIST_GET(FFNetIOResult, ioCounters1, i);
         FFNetIOResult* icCurr = FF_LIST_GET(FFNetIOResult, *result, i);
-        if (!ffStrbufEqual(&icPrev->name, &icCurr->name))
+        if (!ffStrbufEqual(&icPrev->name, &icCurr->name)) {
             return "Network interface name changed";
+        }
 
         static_assert(sizeof(FFNetIOResult) - offsetof(FFNetIOResult, txBytes) == sizeof(uint64_t) * 8, "Unexpected struct FFNetIOResult layout");
-        for (size_t off = offsetof(FFNetIOResult, txBytes); off < sizeof(FFNetIOResult); off += sizeof(uint64_t))
-        {
+        for (size_t off = offsetof(FFNetIOResult, txBytes); off < sizeof(FFNetIOResult); off += sizeof(uint64_t)) {
             uint64_t* prevValue = (uint64_t*) ((uint8_t*) icPrev + off);
             uint64_t* currValue = (uint64_t*) ((uint8_t*) icCurr + off);
             uint64_t temp = *currValue;

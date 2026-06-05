@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 /// \file adl_structures.h
-///\brief This file contains the structure declarations that are used by the public ADL interfaces for \ALL platforms.\n <b>Included in ADL SDK</b>
+///\brief This file contains the structure declarations that are used by the public ADL interfaces for \WIN platforms.\n <b>Included in ADL SDK</b>
 ///
 /// All data structures used in AMD Display Library (ADL) public interfaces should be defined in this header file.
 ///
@@ -41,7 +41,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct AdapterInfo
 {
-/// \ALL_STRUCT_MEM
+/// \WIN_STRUCT_MEM
 
 /// Size of the structure.
     int iSize;
@@ -59,7 +59,7 @@ typedef struct AdapterInfo
     int iVendorID;
 /// Adapter name.
     char strAdapterName[ADL_MAX_PATH];
-/// Display name. For example, "\\\\Display0" for Windows or ":0:0" for Linux.
+/// Display name. For example, "\\\\Display0" for Windows.
     char strDisplayName[ADL_MAX_PATH];
 /// Present or not; 1 if present and 0 if not present.It the logical adapter is present, the display name such as \\\\.\\Display1 can be found from OS
     int iPresent;
@@ -80,37 +80,7 @@ typedef struct AdapterInfo
 
 #endif /* (_WIN32) || (_WIN64) */
 
-#if defined (LINUX)
-/// \LNX_STRUCT_MEM
-
-/// Internal X screen number from GPUMapInfo (DEPRICATED use XScreenInfo)
-    int iXScreenNum;
-/// Internal driver index from GPUMapInfo
-    int iDrvIndex;
-/// \deprecated Internal x config file screen identifier name. Use XScreenInfo instead.
-    char strXScreenConfigName[ADL_MAX_PATH];
-
-#endif /* (LINUX) */
 } AdapterInfo, *LPAdapterInfo;
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-///\brief Structure containing information about the Linux X screen information.
-///
-/// This structure is used to store the current screen number and xorg.conf ID name assoicated with an adapter index.
-/// This structure is updated during ADL_Main_Control_Refresh or ADL_ScreenInfo_Update.
-/// Note:  This structure should be used in place of iXScreenNum and strXScreenConfigName in AdapterInfo as they will be
-/// deprecated.
-/// \nosubgrouping
-////////////////////////////////////////////////////////////////////////////////////////////
-#if defined (LINUX)
-typedef struct XScreenInfo
-{
-/// Internal X screen number from GPUMapInfo.
-    int iXScreenNum;
-/// Internal x config file screen identifier name.
-    char strXScreenConfigName[ADL_MAX_PATH];
-} XScreenInfo, *LPXScreenInfo;
-#endif /* (LINUX) */
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///\brief Structure containing information about an controller mode
@@ -453,8 +423,12 @@ typedef struct ADLDDCInfo2
     int ulMaxBacklightMinLuminanceData;
     int ulMinBacklightMinLuminanceData;
 
+    // Display screen width/height
+    int ulScreenWidth;
+    int ulScreenHeight;
+
     // Reserved for future use
-    int iReserved[4];
+    int iReserved[2];
 } ADLDDCInfo2, *LPADLDDCInfo2;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -3614,6 +3588,23 @@ typedef struct ADL_BOOST_SETTINGS
 	int GlobalMinRes_Step; //Gloabl Min Resolution step  value
 }ADL_BOOST_SETTINGS;
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+///\brief Structure containing information about BOOST Settings
+///
+///  Elements of BOOST settings.
+/// \nosubgrouping
+////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct ADL_BOOST_SETTINGSX2
+{
+    int Hotkey; // Hotkey value
+    int GlobalEnable; //Global enable value
+    int GlobalMinRes; //Gloabl Min Resolution value
+    int GlobalMinRes_MinLimit; //Gloabl Min Resolution slider min limit value
+    int GlobalMinRes_MaxLimit; //Gloabl Min Resolution slider max limit value
+    int GlobalMinRes_Step; //Gloabl Min Resolution step  value
+    int VsrSupported; //Allows for interop with Upscaling/RSR
+}ADL_BOOST_SETTINGSX2;
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ///\brief Structure containing information about ProVSR Settings change reason
@@ -3817,7 +3808,7 @@ typedef struct ADL_RADEON_LED_PATTERN_CONFIG
 ////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct AdapterInfoX2
 {
-    /// \ALL_STRUCT_MEM
+    /// \WIN_STRUCT_MEM
 
     /// Size of the structure.
     int iSize;
@@ -4164,6 +4155,7 @@ typedef struct ADLHDCPSettings
 ///
 /// This structure is used to store the Mantle Driver information
 /// \nosubgrouping
+/// \deprecated This structure has been deprecated.
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct ADLMantleAppInfo
@@ -4286,4 +4278,5 @@ typedef struct ADLSmartShiftSettings
 	int iCurrentValue;
     int iFlags; //refer to define_smartshift_bits
 }ADLSmartShiftSettings, *LPADLSmartShiftSettings;
+
 #endif /* ADL_STRUCTURES_H_ */

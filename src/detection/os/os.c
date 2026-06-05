@@ -2,11 +2,9 @@
 
 void ffDetectOSImpl(FFOSResult* os);
 
-const FFOSResult* ffDetectOS(void)
-{
+const FFOSResult* ffDetectOS(void) {
     static FFOSResult result;
-    if (result.name.chars == NULL)
-    {
+    if (result.name.chars == NULL) {
         ffStrbufInit(&result.name);
         ffStrbufInit(&result.prettyName);
         ffStrbufInit(&result.id);

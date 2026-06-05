@@ -1,8 +1,7 @@
 #include "os.h"
 #include "common/settings.h"
 
-void ffDetectOSImpl(FFOSResult* os)
-{
+void ffDetectOSImpl(FFOSResult* os) {
     ffStrbufSetStatic(&os->name, "Android");
 
     ffStrbufSetStatic(&os->id, "android");

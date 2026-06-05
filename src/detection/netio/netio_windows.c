@@ -7,18 +7,15 @@
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
 
-const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
-{
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
     IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
 
     // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
     DWORD adapter_addresses_buffer_size = 0;
-    for (int attempts = 0;; ++attempts)
-    {
-        if (adapter_addresses_buffer_size)
-        {
-            adapter_addresses = (IP_ADAPTER_ADDRESSES*)realloc(adapter_addresses, adapter_addresses_buffer_size);
+    for (int attempts = 0;; ++attempts) {
+        if (adapter_addresses_buffer_size) {
+            adapter_addresses = (IP_ADAPTER_ADDRESSES*) realloc(adapter_addresses, adapter_addresses_buffer_size);
             assert(adapter_addresses);
         }
 
@@ -29,31 +26,32 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             adapter_addresses,
             &adapter_addresses_buffer_size);
 
-        if (error == ERROR_SUCCESS)
+        if (error == ERROR_SUCCESS) {
             break;
-        else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4)
+        } else if (ERROR_BUFFER_OVERFLOW == error && attempts < 4) {
             continue;
-        else
+        } else {
             return "GetAdaptersAddresses() failed";
+        }
     }
 
     uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
 
     // Iterate through all of the adapters
-    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
-    {
+    for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next) {
         bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
-        if (options->defaultRouteOnly && !isDefaultRoute)
+        if (options->defaultRouteOnly && !isDefaultRoute) {
             continue;
+        }
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(adapter->FriendlyName);
-        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix)) {
             continue;
+        }
 
         MIB_IF_ROW2 ifRow = { .InterfaceIndex = adapter->IfIndex };
-        if (GetIfEntry2(&ifRow) == NO_ERROR)
-        {
-            FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
+        if (GetIfEntry2(&ifRow) == NO_ERROR) {
+            FFNetIOResult* counters = FF_LIST_ADD(FFNetIOResult, *result);
             *counters = (FFNetIOResult) {
                 .name = ffStrbufCreateMove(&name),
                 .txBytes = ifRow.OutOctets,

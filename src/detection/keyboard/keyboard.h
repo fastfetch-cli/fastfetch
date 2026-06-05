@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 
-typedef struct FFKeyboardDevice
-{
+typedef struct FFKeyboardDevice {
     FFstrbuf serial;
     FFstrbuf name;
 } FFKeyboardDevice;

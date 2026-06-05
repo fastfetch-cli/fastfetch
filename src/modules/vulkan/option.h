@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFVulkanOptions
-{
+typedef struct FFVulkanOptions {
     FFModuleArgs moduleArgs;
 } FFVulkanOptions;
 

@@ -53,60 +53,109 @@
 #define BTH_MFG_ARUBA_NETWORKS 283
 #define BTH_MFG_INTERNAL_USE 65535
 
-const char* ffBluetoothRadioGetVendor(uint32_t manufacturerId)
-{
-    switch (manufacturerId)
-    {
-        case BTH_MFG_ERICSSON: return "Ericsson";
-        case BTH_MFG_NOKIA: return "Nokia";
-        case BTH_MFG_INTEL: return "Intel";
-        case BTH_MFG_IBM: return "IBM";
-        case BTH_MFG_TOSHIBA: return "Toshiba";
-        case BTH_MFG_3COM: return "3Com";
-        case BTH_MFG_MICROSOFT: return "Microsoft";
-        case BTH_MFG_LUCENT: return "Lucent";
-        case BTH_MFG_MOTOROLA: return "Motorola";
-        case BTH_MFG_INFINEON: return "Infineon";
-        case BTH_MFG_CSR: return "CSR";
-        case BTH_MFG_SILICONWAVE: return "Silicon-Wave";
-        case BTH_MFG_DIGIANSWER: return "Digi-Answer";
-        case BTH_MFG_TI: return "Ti";
-        case BTH_MFG_PARTHUS: return "Parthus";
-        case BTH_MFG_BROADCOM: return "Broadcom";
-        case BTH_MFG_MITEL: return "Mitel";
-        case BTH_MFG_WIDCOMM: return "Widcomm";
-        case BTH_MFG_ZEEVO: return "Zeevo";
-        case BTH_MFG_ATMEL: return "Atmel";
-        case BTH_MFG_MITSIBUSHI: return "Mitsubishi";
-        case BTH_MFG_RTX_TELECOM: return "RTX Telecom";
-        case BTH_MFG_KC_TECHNOLOGY: return "KC Technology";
-        case BTH_MFG_NEWLOGIC: return "Newlogic";
-        case BTH_MFG_TRANSILICA: return "Transilica";
-        case BTH_MFG_ROHDE_SCHWARZ: return "Rohde-Schwarz";
-        case BTH_MFG_TTPCOM: return "TTPCom";
-        case BTH_MFG_SIGNIA: return "Signia";
-        case BTH_MFG_CONEXANT: return "Conexant";
-        case BTH_MFG_QUALCOMM: return "Qualcomm";
-        case BTH_MFG_INVENTEL: return "Inventel";
-        case BTH_MFG_AVM_BERLIN: return "AVM Berlin";
-        case BTH_MFG_BANDSPEED: return "Bandspeed";
-        case BTH_MFG_MANSELLA: return "Mansella";
-        case BTH_MFG_NEC: return "NEC";
-        case BTH_MFG_WAVEPLUS_TECHNOLOGY_CO: return "Waveplus";
-        case BTH_MFG_ALCATEL: return "Alcatel";
-        case BTH_MFG_PHILIPS_SEMICONDUCTOR: return "Philips Semiconductors";
-        case BTH_MFG_C_TECHNOLOGIES: return "C Technologies";
-        case BTH_MFG_OPEN_INTERFACE: return "Open Interface";
-        case BTH_MFG_RF_MICRO_DEVICES: return "RF Micro Devices";
-        case BTH_MFG_HITACHI: return "Hitachi";
-        case BTH_MFG_SYMBOL_TECHNOLOGIES: return "Symbol Technologies";
-        case BTH_MFG_TENOVIS: return "Tenovis";
-        case BTH_MFG_MACRONIX_INTERNATIONAL: return "Macronix International";
-        case BTH_MFG_MARVELL: return "Marvell";
-        case BTH_MFG_APPLE: return "Apple";
-        case BTH_MFG_NORDIC_SEMICONDUCTORS_ASA: return "Nordic Semiconductor ASA";
-        case BTH_MFG_ARUBA_NETWORKS: return "Aruba Networks";
-        case BTH_MFG_INTERNAL_USE: return "Internal Use";
-        default: return "Unknown";
+const char* ffBluetoothRadioGetVendor(uint32_t manufacturerId) {
+    switch (manufacturerId) {
+        case BTH_MFG_ERICSSON:
+            return "Ericsson";
+        case BTH_MFG_NOKIA:
+            return "Nokia";
+        case BTH_MFG_INTEL:
+            return "Intel";
+        case BTH_MFG_IBM:
+            return "IBM";
+        case BTH_MFG_TOSHIBA:
+            return "Toshiba";
+        case BTH_MFG_3COM:
+            return "3Com";
+        case BTH_MFG_MICROSOFT:
+            return "Microsoft";
+        case BTH_MFG_LUCENT:
+            return "Lucent";
+        case BTH_MFG_MOTOROLA:
+            return "Motorola";
+        case BTH_MFG_INFINEON:
+            return "Infineon";
+        case BTH_MFG_CSR:
+            return "CSR";
+        case BTH_MFG_SILICONWAVE:
+            return "Silicon-Wave";
+        case BTH_MFG_DIGIANSWER:
+            return "Digi-Answer";
+        case BTH_MFG_TI:
+            return "Ti";
+        case BTH_MFG_PARTHUS:
+            return "Parthus";
+        case BTH_MFG_BROADCOM:
+            return "Broadcom";
+        case BTH_MFG_MITEL:
+            return "Mitel";
+        case BTH_MFG_WIDCOMM:
+            return "Widcomm";
+        case BTH_MFG_ZEEVO:
+            return "Zeevo";
+        case BTH_MFG_ATMEL:
+            return "Atmel";
+        case BTH_MFG_MITSIBUSHI:
+            return "Mitsubishi";
+        case BTH_MFG_RTX_TELECOM:
+            return "RTX Telecom";
+        case BTH_MFG_KC_TECHNOLOGY:
+            return "KC Technology";
+        case BTH_MFG_NEWLOGIC:
+            return "Newlogic";
+        case BTH_MFG_TRANSILICA:
+            return "Transilica";
+        case BTH_MFG_ROHDE_SCHWARZ:
+            return "Rohde-Schwarz";
+        case BTH_MFG_TTPCOM:
+            return "TTPCom";
+        case BTH_MFG_SIGNIA:
+            return "Signia";
+        case BTH_MFG_CONEXANT:
+            return "Conexant";
+        case BTH_MFG_QUALCOMM:
+            return "Qualcomm";
+        case BTH_MFG_INVENTEL:
+            return "Inventel";
+        case BTH_MFG_AVM_BERLIN:
+            return "AVM Berlin";
+        case BTH_MFG_BANDSPEED:
+            return "Bandspeed";
+        case BTH_MFG_MANSELLA:
+            return "Mansella";
+        case BTH_MFG_NEC:
+            return "NEC";
+        case BTH_MFG_WAVEPLUS_TECHNOLOGY_CO:
+            return "Waveplus";
+        case BTH_MFG_ALCATEL:
+            return "Alcatel";
+        case BTH_MFG_PHILIPS_SEMICONDUCTOR:
+            return "Philips Semiconductors";
+        case BTH_MFG_C_TECHNOLOGIES:
+            return "C Technologies";
+        case BTH_MFG_OPEN_INTERFACE:
+            return "Open Interface";
+        case BTH_MFG_RF_MICRO_DEVICES:
+            return "RF Micro Devices";
+        case BTH_MFG_HITACHI:
+            return "Hitachi";
+        case BTH_MFG_SYMBOL_TECHNOLOGIES:
+            return "Symbol Technologies";
+        case BTH_MFG_TENOVIS:
+            return "Tenovis";
+        case BTH_MFG_MACRONIX_INTERNATIONAL:
+            return "Macronix International";
+        case BTH_MFG_MARVELL:
+            return "Marvell";
+        case BTH_MFG_APPLE:
+            return "Apple";
+        case BTH_MFG_NORDIC_SEMICONDUCTORS_ASA:
+            return "Nordic Semiconductor ASA";
+        case BTH_MFG_ARUBA_NETWORKS:
+            return "Aruba Networks";
+        case BTH_MFG_INTERNAL_USE:
+            return "Internal Use";
+        default:
+            return "Unknown";
     }
 }

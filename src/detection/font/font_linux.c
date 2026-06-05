@@ -4,17 +4,13 @@
 #include "detection/gtk_qt/gtk_qt.h"
 #include "font.h"
 
-static void generateString(FFFontResult* font)
-{
-    if(font->fonts[0].length > 0)
-    {
+static void generateString(FFFontResult* font) {
+    if (font->fonts[0].length > 0) {
         ffStrbufAppend(&font->display, &font->fonts[0]);
         ffStrbufAppendS(&font->display, " [Qt]");
 
-        for(uint8_t i = 1; i < ARRAY_SIZE(font->fonts); i++)
-        {
-            if(font->fonts[i].length > 0)
-            {
+        for (uint8_t i = 1; i < ARRAY_SIZE(font->fonts); i++) {
+            if (font->fonts[i].length > 0) {
                 ffStrbufAppendS(&font->display, ", ");
                 break;
             }
@@ -24,12 +20,12 @@ static void generateString(FFFontResult* font)
     ffParseGTK(&font->display, &font->fonts[1], &font->fonts[2], &font->fonts[3]);
 }
 
-const char* ffDetectFontImpl(FFFontResult* result)
-{
+const char* ffDetectFontImpl(FFFontResult* result) {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
+    if (ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY)) {
         return "Font isn't supported in TTY";
+    }
 
     FFfont qt;
     ffFontInitQt(&qt, ffDetectQt()->font.chars);

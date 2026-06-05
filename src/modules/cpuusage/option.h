@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFCPUUsageOptions
-{
+typedef struct FFCPUUsageOptions {
     FFModuleArgs moduleArgs;
 
     bool separate;

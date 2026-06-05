@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/diskio/option.h"
 
-typedef struct FFDiskIOResult
-{
+typedef struct FFDiskIOResult {
     FFstrbuf name;
     FFstrbuf devPath;
     uint64_t bytesRead;

@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include "wayland-client.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -26,7 +26,7 @@ extern "C" {
 struct kde_output_order_v1;
 
 #ifndef KDE_OUTPUT_ORDER_V1_INTERFACE
-#define KDE_OUTPUT_ORDER_V1_INTERFACE
+    #define KDE_OUTPUT_ORDER_V1_INTERFACE
 /**
  * @page page_iface_kde_output_order_v1 kde_output_order_v1
  * @section page_iface_kde_output_order_v1_desc Description
@@ -50,34 +50,35 @@ extern const struct wl_interface kde_output_order_v1_interface;
  * @struct kde_output_order_v1_listener
  */
 struct kde_output_order_v1_listener {
-	/**
-	 * output name
-	 *
-	 * Specifies the output identified by their wl_output.name.
-	 * @param output_name the name of the output
-	 */
-	void (*output)(void *data,
-		       struct kde_output_order_v1 *kde_output_order_v1,
-		       const char *output_name);
-	/**
-	 * done
-	 *
-	 * Specifies that the output list is complete. On the next output
-	 * event, a new list begins.
-	 */
-	void (*done)(void *data,
-		     struct kde_output_order_v1 *kde_output_order_v1);
+    /**
+     * output name
+     *
+     * Specifies the output identified by their wl_output.name.
+     * @param output_name the name of the output
+     */
+    void (*output)(void* data,
+        struct kde_output_order_v1* kde_output_order_v1,
+        const char* output_name);
+    /**
+     * done
+     *
+     * Specifies that the output list is complete. On the next output
+     * event, a new list begins.
+     */
+    void (*done)(void* data,
+        struct kde_output_order_v1* kde_output_order_v1);
 };
 
 /**
  * @ingroup iface_kde_output_order_v1
  */
 static inline int
-kde_output_order_v1_add_listener(struct kde_output_order_v1 *kde_output_order_v1,
-				 const struct kde_output_order_v1_listener *listener, void *data)
-{
-	return wl_proxy_add_listener((struct wl_proxy *) kde_output_order_v1,
-				     (void (**)(void)) listener, data);
+kde_output_order_v1_add_listener(struct kde_output_order_v1* kde_output_order_v1,
+    const struct kde_output_order_v1_listener* listener,
+    void* data) {
+    return wl_proxy_add_listener((struct wl_proxy*) kde_output_order_v1,
+        (void (**)(void)) listener,
+        data);
 }
 
 #define KDE_OUTPUT_ORDER_V1_DESTROY 0
@@ -126,7 +127,7 @@ kde_output_order_v1_add_listener(struct kde_output_order_v1 *kde_output_order_v1
 // 			 KDE_OUTPUT_ORDER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_order_v1), WL_MARSHAL_FLAG_DESTROY);
 // }
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

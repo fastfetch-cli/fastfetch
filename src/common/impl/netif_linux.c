@@ -7,35 +7,44 @@
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 
-bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
-{
+static uint32_t ffNetifGetNetlinkPortId(int sock_fd) {
+    struct sockaddr_nl addr = {};
+    socklen_t addrLen = sizeof(addr);
+    if (getsockname(sock_fd, (struct sockaddr*) &addr, &addrLen) < 0) {
+        FF_DEBUG("Failed to query netlink socket address (use PID instead): %s", strerror(errno));
+        return instance.state.platform.pid;
+    } else {
+        FF_DEBUG("Netlink port ID: %u", addr.nl_pid);
+        return addr.nl_pid;
+    }
+}
+
+bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     FF_DEBUG("Starting IPv4 default route detection");
 
     FF_AUTO_CLOSE_FD int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
-    if (sock_fd < 0)
-    {
+    if (sock_fd < 0) {
         FF_DEBUG("Failed to create netlink socket: %s", strerror(errno));
         return false;
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
 
-    uint32_t pid = instance.state.platform.pid;
-    FF_DEBUG("Process PID: %u", pid);
-
     // Bind socket
     struct sockaddr_nl addr = {
         .nl_family = AF_NETLINK,
-        .nl_pid = 0,         // Let kernel choose PID
-        .nl_groups = 0,      // No multicast groups
+        .nl_pid = 0,    // Let kernel choose PID
+        .nl_groups = 0, // No multicast groups
     };
 
-    if (bind(sock_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    if (bind(sock_fd, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
         FF_DEBUG("Failed to bind socket: %s", strerror(errno));
         return false;
     }
     FF_DEBUG("Successfully bound socket");
 
-    struct __attribute__((__packed__)) {
+    uint32_t pid = ffNetifGetNetlinkPortId(sock_fd);
+
+    struct FF_A_PACKED {
         struct nlmsghdr nlh;
         struct rtmsg rtm;
         struct rtattr rta;
@@ -52,8 +61,8 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
         // Route message
         .rtm = {
             .rtm_family = AF_INET,
-            .rtm_dst_len = 0,  // Match all destinations
-            .rtm_src_len = 0,  // Match all sources
+            .rtm_dst_len = 0, // Match all destinations
+            .rtm_src_len = 0, // Match all sources
             .rtm_tos = 0,
             .rtm_table = RT_TABLE_UNSPEC,
             .rtm_protocol = RTPROT_UNSPEC,
@@ -71,12 +80,11 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 
     struct sockaddr_nl dest_addr = {
         .nl_family = AF_NETLINK,
-        .nl_pid = 0,         // Kernel
-        .nl_groups = 0,      // No multicast groups
+        .nl_pid = 0,    // Kernel
+        .nl_groups = 0, // No multicast groups
     };
 
-    ssize_t sent = sendto(sock_fd, &req, sizeof(req), 0,
-        (struct sockaddr*)&dest_addr, sizeof(dest_addr));
+    ssize_t sent = sendto(sock_fd, &req, sizeof(req), 0, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
 
     if (sent != sizeof(req)) {
         FF_DEBUG("Failed to send netlink request: sent=%zd, expected=%zu", sent, sizeof(req));
@@ -89,19 +97,17 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    FF_MAYBE_UNUSED int routeCount = 0;
+    FF_A_UNUSED int routeCount = 0;
 
-    while (true)
-    {
-        ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0,
-            (struct sockaddr*)&src_addr, &src_addr_len);
+    while (true) {
+        ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0, (struct sockaddr*) &src_addr, &src_addr_len);
 
         if (received < 0) {
             FF_DEBUG("Failed to receive netlink response: %s", strerror(errno));
             return false;
         }
 
-        if (received >= (ssize_t)sizeof(buffer)) {
+        if (received >= (ssize_t) sizeof(buffer)) {
             FF_DEBUG("Received truncated message: received %zd, bufsize %zu", received, sizeof(buffer));
             return false;
         }
@@ -117,20 +123,19 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             uint32_t prefsrc;
         } entry;
 
-        for (const struct nlmsghdr* nlh = (struct nlmsghdr*)buffer;
+        for (const struct nlmsghdr* nlh = (struct nlmsghdr*) buffer;
             NLMSG_OK(nlh, received);
-            nlh = NLMSG_NEXT(nlh, received))
-        {
-            if (nlh->nlmsg_seq != 1 || nlh->nlmsg_pid != pid)
+            nlh = NLMSG_NEXT(nlh, received)) {
+            if (nlh->nlmsg_seq != 1 || nlh->nlmsg_pid != pid) {
                 continue;
-            if (nlh->nlmsg_type == NLMSG_DONE)
-            {
+            }
+            if (nlh->nlmsg_type == NLMSG_DONE) {
                 FF_DEBUG("Received NLMSG_DONE, processed %d routes", routeCount);
                 goto exit;
             }
 
             if (nlh->nlmsg_type == NLMSG_ERROR) {
-                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*)NLMSG_DATA(nlh))->error));
+                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*) NLMSG_DATA(nlh))->error));
                 continue;
             }
 
@@ -140,7 +145,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             }
 
             routeCount++;
-            struct rtmsg* rtm = (struct rtmsg*)NLMSG_DATA(nlh);
+            struct rtmsg* rtm = (struct rtmsg*) NLMSG_DATA(nlh);
             if (rtm->rtm_family != AF_INET) {
                 FF_DEBUG("Skipping non-IPv4 route #%d (family=%d)", routeCount, rtm->rtm_family);
                 continue;
@@ -158,16 +163,16 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             }
 
             FF_DEBUG("Processing IPv4 default route candidate #%d", routeCount);
-            entry = (__typeof__(entry)) { }; // Default to zero metric (no RTA_PRIORITY found)
+            entry = (__typeof__(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
 
             // Parse route attributes
             size_t rtm_len = RTM_PAYLOAD(nlh);
             for (struct rtattr* rta = RTM_RTA(rtm);
                 RTA_OK(rta, rtm_len);
-                rta = RTA_NEXT(rta, rtm_len))
-            {
-                if (RTA_PAYLOAD(rta) < sizeof(uint32_t))
+                rta = RTA_NEXT(rta, rtm_len)) {
+                if (RTA_PAYLOAD(rta) < sizeof(uint32_t)) {
                     continue; // Skip invalid attributes
+                }
 
                 uint32_t rta_data = *(uint32_t*) RTA_DATA(rta);
                 switch (rta->rta_type) {
@@ -179,23 +184,26 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
                         FF_DEBUG("Found interface index: %u", entry.ifindex);
                         break;
                     case RTA_GATEWAY:
-                        FF_DEBUG("Found gateway: %s", inet_ntoa(*(struct in_addr*)&rta_data));
-                        if (rta_data == 0) goto next;
+                        FF_DEBUG("Found gateway: %s", inet_ntoa(*(struct in_addr*) &rta_data));
+                        if (rta_data == 0) {
+                            goto next;
+                        }
                         break;
                     case RTA_PRIORITY:
                         FF_DEBUG("Found metric: %u", rta_data);
-                        if (rta_data >= minMetric) goto next;
+                        if (rta_data >= minMetric) {
+                            goto next;
+                        }
                         entry.metric = rta_data;
                         break;
                     case RTA_PREFSRC:
                         entry.prefsrc = rta_data;
-                        FF_DEBUG("Found preferred source: %s", inet_ntoa(*(struct in_addr*)&rta_data));
+                        FF_DEBUG("Found preferred source: %s", inet_ntoa(*(struct in_addr*) &rta_data));
                         break;
                 }
             }
 
-            if (entry.ifindex == 0 || entry.metric >= minMetric)
-            {
+            if (entry.ifindex == 0 || entry.metric >= minMetric) {
             next:
                 FF_DEBUG("Skipping route: ifindex=%u, metric=%u", entry.ifindex, entry.metric);
                 continue;
@@ -204,8 +212,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             result->ifIndex = entry.ifindex;
             FF_DEBUG("Updated best route: ifindex=%u, metric=%u, prefsrc=%x", entry.ifindex, entry.metric, entry.prefsrc);
             result->preferredSourceAddrV4 = entry.prefsrc;
-            if (minMetric == 0)
-            {
+            if (minMetric == 0) {
                 FF_DEBUG("Found zero metric route, stopping further processing");
                 break; // Stop processing if we found a zero metric route
             }
@@ -213,8 +220,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     }
 
 exit:
-    if (minMetric < UINT32_MAX)
-    {
+    if (minMetric < UINT32_MAX) {
         if_indextoname(result->ifIndex, result->ifName);
         FF_DEBUG("Found default IPv4 route: interface=%s, index=%u, metric=%u", result->ifName, result->ifIndex, minMetric);
         return true;
@@ -223,35 +229,32 @@ exit:
     return false;
 }
 
-bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
-{
+bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     FF_DEBUG("Starting IPv6 default route detection");
 
     FF_AUTO_CLOSE_FD int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
-    if (sock_fd < 0)
-    {
+    if (sock_fd < 0) {
         FF_DEBUG("Failed to create netlink socket: %s", strerror(errno));
         return false;
     }
     FF_DEBUG("Created netlink socket: fd=%d", sock_fd);
 
-    uint32_t pid = instance.state.platform.pid;
-    FF_DEBUG("Process PID: %u", pid);
-
     // Bind socket
     struct sockaddr_nl addr = {
         .nl_family = AF_NETLINK,
-        .nl_pid = 0,         // Let kernel choose PID
-        .nl_groups = 0,      // No multicast groups
+        .nl_pid = 0,    // Let kernel choose PID
+        .nl_groups = 0, // No multicast groups
     };
 
-    if (bind(sock_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    if (bind(sock_fd, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
         FF_DEBUG("Failed to bind socket: %s", strerror(errno));
         return false;
     }
     FF_DEBUG("Successfully bound socket");
 
-    struct __attribute__((__packed__)) {
+    uint32_t pid = ffNetifGetNetlinkPortId(sock_fd);
+
+    struct FF_A_PACKED {
         struct nlmsghdr nlh;
         struct rtmsg rtm;
         struct rtattr rta;
@@ -267,9 +270,9 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
         },
         // Route message
         .rtm = {
-            .rtm_family = AF_INET6,    // IPv6 instead of IPv4
-            .rtm_dst_len = 0,  // Match all destinations
-            .rtm_src_len = 0,  // Match all sources
+            .rtm_family = AF_INET6, // IPv6 instead of IPv4
+            .rtm_dst_len = 0,       // Match all destinations
+            .rtm_src_len = 0,       // Match all sources
             .rtm_tos = 0,
             .rtm_table = RT_TABLE_UNSPEC,
             .rtm_protocol = RTPROT_UNSPEC,
@@ -287,12 +290,11 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
 
     struct sockaddr_nl dest_addr = {
         .nl_family = AF_NETLINK,
-        .nl_pid = 0,         // Kernel
-        .nl_groups = 0,      // No multicast groups
+        .nl_pid = 0,    // Kernel
+        .nl_groups = 0, // No multicast groups
     };
 
-    ssize_t sent = sendto(sock_fd, &req, sizeof(req), 0,
-        (struct sockaddr*)&dest_addr, sizeof(dest_addr));
+    ssize_t sent = sendto(sock_fd, &req, sizeof(req), 0, (struct sockaddr*) &dest_addr, sizeof(dest_addr));
 
     if (sent != sizeof(req)) {
         FF_DEBUG("Failed to send netlink request: sent=%zd, expected=%zu", sent, sizeof(req));
@@ -305,19 +307,17 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    FF_MAYBE_UNUSED int routeCount = 0;
+    FF_A_UNUSED int routeCount = 0;
 
-    while (true)
-    {
-        ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0,
-            (struct sockaddr*)&src_addr, &src_addr_len);
+    while (true) {
+        ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0, (struct sockaddr*) &src_addr, &src_addr_len);
 
         if (received < 0) {
             FF_DEBUG("Failed to receive netlink response: %s", strerror(errno));
             return false;
         }
 
-        if (received >= (ssize_t)sizeof(buffer)) {
+        if (received >= (ssize_t) sizeof(buffer)) {
             FF_DEBUG("Received truncated message: received %zd, bufsize %zu", received, sizeof(buffer));
             return false;
         }
@@ -332,20 +332,19 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             uint32_t ifindex;
         } entry;
 
-        for (const struct nlmsghdr* nlh = (struct nlmsghdr*)buffer;
+        for (const struct nlmsghdr* nlh = (struct nlmsghdr*) buffer;
             NLMSG_OK(nlh, received);
-            nlh = NLMSG_NEXT(nlh, received))
-        {
-            if (nlh->nlmsg_seq != 1 || nlh->nlmsg_pid != pid)
+            nlh = NLMSG_NEXT(nlh, received)) {
+            if (nlh->nlmsg_seq != 1 || nlh->nlmsg_pid != pid) {
                 continue;
-            if (nlh->nlmsg_type == NLMSG_DONE)
-            {
+            }
+            if (nlh->nlmsg_type == NLMSG_DONE) {
                 FF_DEBUG("Received NLMSG_DONE, processed %d routes", routeCount);
                 goto exit;
             }
 
             if (nlh->nlmsg_type == NLMSG_ERROR) {
-                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*)NLMSG_DATA(nlh))->error));
+                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*) NLMSG_DATA(nlh))->error));
                 continue;
             }
 
@@ -355,7 +354,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             }
 
             routeCount++;
-            struct rtmsg* rtm = (struct rtmsg*)NLMSG_DATA(nlh);
+            struct rtmsg* rtm = (struct rtmsg*) NLMSG_DATA(nlh);
             if (rtm->rtm_family != AF_INET6) {
                 FF_DEBUG("Skipping non-IPv6 route #%d (family=%d)", routeCount, rtm->rtm_family);
                 continue;
@@ -373,18 +372,17 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             }
 
             FF_DEBUG("Processing IPv6 default route candidate #%d", routeCount);
-            entry = (__typeof__(entry)) { }; // Default to zero metric (no RTA_PRIORITY found)
+            entry = (__typeof__(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
 
             // Parse route attributes
             size_t rtm_len = RTM_PAYLOAD(nlh);
             for (struct rtattr* rta = RTM_RTA(rtm);
                 RTA_OK(rta, rtm_len);
-                rta = RTA_NEXT(rta, rtm_len))
-            {
+                rta = RTA_NEXT(rta, rtm_len)) {
                 switch (rta->rta_type) {
                     case RTA_DST:
                         if (RTA_PAYLOAD(rta) >= sizeof(struct in6_addr)) {
-                            FF_MAYBE_UNUSED char str[INET6_ADDRSTRLEN];
+                            FF_A_UNUSED char str[INET6_ADDRSTRLEN];
                             FF_DEBUG("Unexpected RTA_DST: %s", inet_ntop(AF_INET6, RTA_DATA(rta), str, sizeof(str)));
                             goto next;
                         }
@@ -398,8 +396,10 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
                     case RTA_GATEWAY:
                         if (RTA_PAYLOAD(rta) >= sizeof(struct in6_addr)) {
                             struct in6_addr* gw = (struct in6_addr*) RTA_DATA(rta);
-                            if (IN6_IS_ADDR_UNSPECIFIED(gw)) goto next;
-                            FF_MAYBE_UNUSED char str[INET6_ADDRSTRLEN];
+                            if (IN6_IS_ADDR_UNSPECIFIED(gw)) {
+                                goto next;
+                            }
+                            FF_A_UNUSED char str[INET6_ADDRSTRLEN];
                             FF_DEBUG("Found gateway: %s", inet_ntop(AF_INET6, gw, str, sizeof(str)));
                         }
                         break;
@@ -407,15 +407,16 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
                         if (RTA_PAYLOAD(rta) >= sizeof(uint32_t)) {
                             uint32_t metric = *(uint32_t*) RTA_DATA(rta);
                             FF_DEBUG("Found metric: %u", metric);
-                            if (metric >= minMetric) goto next;
+                            if (metric >= minMetric) {
+                                goto next;
+                            }
                             entry.metric = metric;
                         }
                         break;
                 }
             }
 
-            if (entry.ifindex == 0 || entry.metric >= minMetric)
-            {
+            if (entry.ifindex == 0 || entry.metric >= minMetric) {
             next:
                 FF_DEBUG("Skipping route: ifindex=%u, metric=%u", entry.ifindex, entry.metric);
                 continue;
@@ -424,8 +425,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             result->ifIndex = entry.ifindex;
             FF_DEBUG("Updated best route: ifindex=%u, metric=%u", entry.ifindex, entry.metric);
 
-            if (minMetric == 0)
-            {
+            if (minMetric == 0) {
                 FF_DEBUG("Found zero metric route, stopping further processing");
                 break; // Stop processing if we found a zero metric route
             }
@@ -433,8 +433,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     }
 
 exit:
-    if (minMetric < UINT32_MAX)
-    {
+    if (minMetric < UINT32_MAX) {
         if_indextoname(result->ifIndex, result->ifName);
         FF_DEBUG("Found default IPv6 route: interface=%s, index=%u, metric=%u", result->ifName, result->ifIndex, minMetric);
         return true;

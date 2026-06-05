@@ -9,16 +9,15 @@
 #include <ntstatus.h>
 #include <stdalign.h>
 
-const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
-{
+const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     PROCESS_DEVICEMAP_INFORMATION_EX info = {};
     ULONG size = 0;
-    if(!NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size)))
+    if (!NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size))) {
         return "NtQueryInformationProcess(ProcessDeviceMap) failed";
+    }
 
     // For cross-platform portability; used by `presets/examples/13.jsonc`
-    if (options->folders.length == 1 && options->folders.chars[0] == '/')
-    {
+    if (options->folders.length == 1 && options->folders.chars[0] == '/') {
         options->folders.chars[0] = (char) SharedUserData->NtSystemRoot[0];
         ffStrbufAppendS(&options->folders, ":\\");
     }
@@ -26,29 +25,31 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     wchar_t mountpointW[] = L"X:\\";
     char mountpointA[] = "X:\\";
 
-    for (wchar_t i = L'A'; i <= L'Z'; i++)
-    {
-        if (!(info.Query.DriveMap & (1 << (i - L'A'))))
+    for (wchar_t i = L'A'; i <= L'Z'; i++) {
+        if (!(info.Query.DriveMap & (1 << (i - L'A')))) {
             continue;
+        }
         mountpointW[0] = i;
         mountpointA[0] = (char) i;
 
         UINT driveType = info.Query.DriveType[i - L'A'];
 
-        if (__builtin_expect((long) options->folders.length, 0))
-        {
-            if (!ffStrbufSeparatedContainNS(&options->folders, 3, mountpointA, FF_DISK_FOLDER_SEPARATOR))
+        if (__builtin_expect((long) options->folders.length, 0)) {
+            if (!ffStrbufSeparatedContainNS(&options->folders, 3, mountpointA, FF_DISK_FOLDER_SEPARATOR)) {
                 continue;
+            }
+        } else if (driveType == DRIVE_NO_ROOT_DIR) {
+            continue;
         }
-        else if(driveType == DRIVE_NO_ROOT_DIR)
-            continue;
 
-        if (options->hideFolders.length && ffStrbufSeparatedContainNS(&options->hideFolders, 3, mountpointA, FF_DISK_FOLDER_SEPARATOR))
+        if (options->hideFolders.length && ffStrbufSeparatedContainNS(&options->hideFolders, 3, mountpointA, FF_DISK_FOLDER_SEPARATOR)) {
             continue;
+        }
 
         FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(mountpointW, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-        if (handle == INVALID_HANDLE_VALUE)
+        if (handle == INVALID_HANDLE_VALUE) {
             continue;
+        }
 
         IO_STATUS_BLOCK iosb;
 
@@ -58,14 +59,14 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             : NULL;
 
         FF_STRBUF_AUTO_DESTROY diskFileSystemBuf = ffStrbufCreate();
-        if (fsAttr)
-        {
+        if (fsAttr) {
             ffStrbufSetNWS(&diskFileSystemBuf, fsAttr->FileSystemNameLength / sizeof(WCHAR), fsAttr->FileSystemName);
-            if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &diskFileSystemBuf, ':'))
+            if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &diskFileSystemBuf, ':')) {
                 continue;
+            }
         }
 
-        FFDisk* disk = ffListAdd(disks);
+        FFDisk* disk = FF_LIST_ADD(FFDisk, *disks);
 
         disk->filesUsed = 0;
         disk->filesTotal = 0;
@@ -81,14 +82,15 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         disk->type = driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM
             ? FF_DISK_VOLUME_TYPE_EXTERNAL_BIT
             : driveType == DRIVE_FIXED
-                ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
-                : FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+            ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
+            : FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
 
         {
             wchar_t volumeName[MAX_PATH + 1];
             mountpointW[2] = L'\0';
-            if(QueryDosDeviceW(mountpointW, volumeName, ARRAY_SIZE(volumeName)))
+            if (QueryDosDeviceW(mountpointW, volumeName, ARRAY_SIZE(volumeName))) {
                 ffStrbufSetWS(&disk->mountFrom, volumeName);
+            }
             mountpointW[2] = L'\\';
         }
 
@@ -97,24 +99,24 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             ? (FILE_FS_VOLUME_INFORMATION*) bufFsVolume
             : NULL;
 
-        if (fsVolume)
-        {
-            if (fsVolume->VolumeLabelLength > 0)
+        if (fsVolume) {
+            if (fsVolume->VolumeLabelLength > 0) {
                 ffStrbufSetNWS(&disk->name, fsVolume->VolumeLabelLength / sizeof(WCHAR), fsVolume->VolumeLabel);
-            if (fsVolume->VolumeCreationTime.QuadPart)
+            }
+            if (fsVolume->VolumeCreationTime.QuadPart) {
                 disk->createTime = ffFileTimeToUnixMs((uint64_t) fsVolume->VolumeCreationTime.QuadPart);
+            }
         }
 
-        if (fsAttr)
-        {
+        if (fsAttr) {
             ffStrbufInitMove(&disk->filesystem, &diskFileSystemBuf);
-            if(fsAttr->FileSystemAttributes & FILE_READ_ONLY_VOLUME)
+            if (fsAttr->FileSystemAttributes & FILE_READ_ONLY_VOLUME) {
                 disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+            }
         }
 
         FILE_FS_FULL_SIZE_INFORMATION fsFullSize;
-        if (NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, &fsFullSize, sizeof(fsFullSize), FileFsFullSizeInformation)))
-        {
+        if (NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, &fsFullSize, sizeof(fsFullSize), FileFsFullSizeInformation))) {
             uint64_t units = fsFullSize.BytesPerSector * fsFullSize.SectorsPerAllocationUnit;
             disk->bytesTotal = (uint64_t) fsFullSize.TotalAllocationUnits.QuadPart * units;
             disk->bytesFree = (uint64_t) fsFullSize.ActualAvailableAllocationUnits.QuadPart * units;

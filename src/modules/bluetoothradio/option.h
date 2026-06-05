@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFBluetoothRadioOptions
-{
+typedef struct FFBluetoothRadioOptions {
     FFModuleArgs moduleArgs;
 } FFBluetoothRadioOptions;
 

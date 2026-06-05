@@ -4,20 +4,18 @@
 
 #include <stdint.h>
 
-typedef struct FFVersion
-{
+typedef struct FFVersion {
     uint32_t major;
     uint32_t minor;
     uint32_t patch;
 } FFVersion;
 
-typedef struct FFColorRangeConfig
-{
+typedef struct FFColorRangeConfig {
     uint8_t green;
     uint8_t yellow;
 } FFColorRangeConfig;
 
-#define FF_VERSION_INIT ((FFVersion) {0})
+#define FF_VERSION_INIT ((FFVersion) { 0 })
 
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4);

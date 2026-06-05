@@ -3,11 +3,10 @@
 #include "common/properties.h"
 #include "common/processing.h"
 #include "common/debug.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/terminalshell/terminalshell.h"
 
-static void detectAlacritty(FFTerminalFontResult* terminalFont)
-{
+static void detectAlacritty(FFTerminalFontResult* terminalFont) {
     // Maybe using a toml parser to read the config file is better?
     // https://github.com/cktan/tomlc17
 
@@ -19,21 +18,23 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont)
 
     do {
         FFpropquery fontQueryToml[] = {
-            {"normal =", &fontNormal},
-            {"size =", &fontSize},
+            { "normal =", &fontNormal },
+            { "size =", &fontSize },
         };
 
         // alacritty parses config files in this order
-        if(ffParsePropFileConfigValues("alacritty/alacritty.toml", 2, fontQueryToml))
+        if (ffParsePropFileConfigValues("alacritty/alacritty.toml", 2, fontQueryToml)) {
             break;
-        if(ffParsePropFileConfigValues("alacritty.toml", 2, fontQueryToml))
+        }
+        if (ffParsePropFileConfigValues("alacritty.toml", 2, fontQueryToml)) {
             break;
-        if(ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml))
+        }
+        if (ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml)) {
             break;
+        }
     } while (false);
 
-    if(fontNormal.length > 0)
-    {
+    if (fontNormal.length > 0) {
         // { family = "Fira Code", style = "Medium" }
         ffStrbufTrimSpace(&fontNormal);
         ffStrbufTrimRight(&fontNormal, '}');
@@ -46,71 +47,104 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont)
         ffParsePropLines(fontNormal.chars, "style =", &fontStyle);
     }
 
-    if (fontFamily.length == 0)
-    {
-        #if __APPLE__
+    if (fontFamily.length == 0) {
+#if __APPLE__
         ffStrbufSetStatic(&fontFamily, "Menlo");
-        #elif _WIN32
+#elif _WIN32
         ffStrbufSetStatic(&fontFamily, "Consolas");
-        #else
+#else
         ffStrbufSetStatic(&fontFamily, "monospace");
-        #endif
+#endif
     }
-    if (fontStyle.length == 0)
+    if (fontStyle.length == 0) {
         ffStrbufSetStatic(&fontStyle, "Regular");
+    }
 
-    if(fontSize.length == 0)
+    if (fontSize.length == 0) {
         ffStrbufSetStatic(&fontSize, "11.25");
+    }
 
     ffFontInitMoveValues(&terminalFont->font, &fontFamily, &fontSize, &fontStyle);
 }
 
-static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFont)
-{
+static bool parseGhosttyConfig(FFstrbuf* path, FFstrbuf* fontName, FFstrbuf* fontNameFallback, FFstrbuf* fontSize) {
+    FF_DEBUG("parsing config: %s", path->chars);
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY temp = ffStrbufCreate();
+    if (!ffAppendFileBuffer(path->chars, &buffer)) {
+        FF_DEBUG("cannot read config: %s", path->chars);
+        return false;
+    }
+
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetline(&line, &len, &buffer)) {
+        if (ffParsePropLine(line, "font-family =", &temp)) {
+            FF_DEBUG("found font-family='%s' in %s", temp.chars, path->chars);
+            if (fontName->length > 0) {
+                ffStrbufDestroy(fontNameFallback);
+                ffStrbufInitMove(fontNameFallback, fontName);
+            }
+            ffStrbufDestroy(fontName);
+            ffStrbufInitMove(fontName, &temp);
+        } else if (ffParsePropLine(line, "font-size =", fontSize)) {
+            FF_DEBUG("found font-size='%s' in %s", temp.chars, path->chars);
+            // Latter overrides former
+            ffStrbufDestroy(fontSize);
+            ffStrbufInitMove(fontSize, &temp);
+        }
+    }
+    return true;
+}
+
+static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFont, const char* configPathMac, const char* configPathUnix) {
     FF_DEBUG("detectGhostty: start");
     FF_STRBUF_AUTO_DESTROY configPath = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontNameFallback = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    // Try ghostty +show-config first
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]){
-        exe->chars,
-        "+show-config",
-        NULL,
-    });
-    if(error != NULL)
-    {
-        FF_DEBUG("`ghostty +show-config` failed: %s", error);
-        return;
-    }
+    if (configPathMac && configPathUnix) {
+#if __APPLE__
+        ffStrbufSet(&configPath, &instance.state.platform.homeDir);
+        ffStrbufAppendS(&configPath, "Library/Application Support/");
+        ffStrbufAppendS(&configPath, configPathMac); // com.mitchellh.ghostty/config
+        parseGhosttyConfig(&configPath, &fontName, &fontNameFallback, &fontSize);
+#endif
 
-    char* line = NULL;
-    size_t len = 0;
-    while (ffStrbufGetline(&line, &len, &buffer))
-    {
-        if (!fontName.length || !fontNameFallback.length)
-        {
-            if (ffStrStartsWith(line, "font-family = ")) {
-                FF_DEBUG("found %s", line);
-                ffStrbufSetNS(
-                    !fontName.length ? &fontName : &fontNameFallback,
-                    (uint32_t) (len - strlen("font-family = ")),
-                    line + strlen("font-family = "));
-                continue;
-            }
+        if (instance.state.platform.configDirs.length > 0) {
+            ffStrbufSet(&configPath, FF_LIST_FIRST(FFstrbuf, instance.state.platform.configDirs));
+            ffStrbufAppendS(&configPath, configPathUnix); // ghostty/config
+            parseGhosttyConfig(&configPath, &fontName, &fontNameFallback, &fontSize);
         }
-        if (!fontSize.length)
-        {
-            if (ffStrStartsWith(line, "font-size = ")) {
-                FF_DEBUG("found fallback %s", line);
-                ffStrbufSetNS(
-                    &fontSize,
-                    (uint32_t) (len - strlen("font-size = ")),
-                    line + strlen("font-size = "));
-                continue;
+    } else {
+        // Try ghostty +show-config first
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        const char* error = ffProcessAppendStdOut(&buffer, (char* const[]){
+                                                               exe->chars,
+                                                               "+show-config",
+                                                               NULL,
+                                                           });
+        if (error == NULL) {
+            char* line = NULL;
+            size_t len = 0;
+            while (ffStrbufGetline(&line, &len, &buffer)) {
+                if (ffStrStartsWith(line, "font-family = ")) {
+                    FF_DEBUG("found %s", line);
+                    if (fontName.length > 0) {
+                        ffStrbufDestroy(&fontNameFallback);
+                        ffStrbufInitMove(&fontNameFallback, &fontName);
+                    }
+                    ffStrbufSetNS(&fontName, (uint32_t) (len - strlen("font-family = ")), line + strlen("font-family = "));
+                } else if (ffStrStartsWith(line, "font-size = ")) {
+                    FF_DEBUG("found %s", line);
+                    // `ghostty +show-config` reports only one font size even if the config has multiple font sizes
+                    ffStrbufSetNS(&fontSize, (uint32_t) (len - strlen("font-size = ")), line + strlen("font-size = "));
+                }
             }
+        } else {
+            FF_DEBUG("`ghostty +show-config` failed: %s", error);
         }
     }
 
@@ -121,11 +155,11 @@ static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFon
 
     if (fontSize.length == 0) {
         ffStrbufAppendS(&fontSize,
-            #if __APPLE__
-                "13"
-            #else
-                "12"
-            #endif
+#if __APPLE__
+            "13"
+#else
+            "12"
+#endif
         );
         FF_DEBUG("using default size='%s'", fontSize.chars);
     }
@@ -139,82 +173,75 @@ static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFon
     FF_DEBUG("detectGhostty: end");
 }
 
-FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
-{
+FF_A_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/vconsole.conf", "Font =", &fontName);
+    ffParsePropFile(FASTFETCH_TARGET_DIR_ETC "/vconsole.conf", "Font =", &fontName);
 
-    if(fontName.length == 0)
-    {
+    if (fontName.length == 0) {
         ffStrbufAppendS(&fontName, "VGA default kernel font ");
-        ffProcessAppendStdOut(&fontName, (char* const[]){
-            "showconsolefont",
-            "--info",
-            NULL
-        });
+        ffProcessAppendStdOut(&fontName, (char* const[]){ "showconsolefont", "--info", NULL });
 
         ffStrbufTrimRight(&fontName, ' ');
     }
 
-    if(fontName.length > 0)
+    if (fontName.length > 0) {
         ffFontInitCopy(&terminalFont->font, fontName.chars);
-    else
-        ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in "FASTFETCH_TARGET_DIR_ETC"/vconsole.conf");
+    } else {
+        ffStrbufAppendS(&terminalFont->error, "Couldn't find Font in " FASTFETCH_TARGET_DIR_ETC "/vconsole.conf");
+    }
 }
 
-FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result)
-{
+FF_A_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     char fontHex[512] = "", sizeHex[512] = "";
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
     if (ffGetTerminalResponse(
-        "\eP+q6b697474792d71756572792d666f6e745f66616d696c79;6b697474792d71756572792d666f6e745f73697a65\e\\", // kitty-query-font_family;kitty-query-font_size
-        2,
-        "\eP1+r%*[^=]=%511[^\e]\e\\\eP1+r%*[^=]=%511[^\e]\e\\", fontHex, sizeHex) == NULL && *fontHex && *sizeHex)
-    {
+            "\eP+q6b697474792d71756572792d666f6e745f66616d696c79;6b697474792d71756572792d666f6e745f73697a65\e\\", // kitty-query-font_family;kitty-query-font_size
+            2,
+            "\eP1+r%*[^=]=%511[^\e]\e\\\eP1+r%*[^=]=%511[^\e]\e\\",
+            fontHex,
+            sizeHex) == NULL &&
+        *fontHex && *sizeHex) {
         // decode hex string
-        for (const char* p = fontHex; p[0] && p[1]; p += 2)
-        {
+        for (const char* p = fontHex; p[0] && p[1]; p += 2) {
             unsigned value;
-            if (sscanf(p, "%2x", &value) == 1)
+            if (sscanf(p, "%2x", &value) == 1) {
                 ffStrbufAppendC(&fontName, (char) value);
+            }
         }
-        for (const char* p = sizeHex; p[0] && p[1]; p += 2)
-        {
+        for (const char* p = sizeHex; p[0] && p[1]; p += 2) {
             unsigned value;
-            if (sscanf(p, "%2x", &value) == 1)
+            if (sscanf(p, "%2x", &value) == 1) {
                 ffStrbufAppendC(&fontSize, (char) value);
+            }
         }
-    }
-    else
-    {
+    } else {
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-        if(!ffProcessAppendStdOut(&buf, (char* const[]){
-            exe->chars,
-            "+kitten",
-            "query-terminal",
-            NULL,
-        }))
-        {
+        if (!ffProcessAppendStdOut(&buf, (char* const[]){
+                                             exe->chars,
+                                             "+kitten",
+                                             "query-terminal",
+                                             NULL,
+                                         })) {
             ffParsePropLines(buf.chars, "font_family: ", &fontName);
             ffParsePropLines(buf.chars, "font_size: ", &fontSize);
-        }
-        else
-        {
+        } else {
             FFpropquery fontQuery[] = {
-                {"font_family ", &fontName},
-                {"font_size ", &fontSize},
+                { "font_family ", &fontName },
+                { "font_size ", &fontSize },
             };
 
             ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
 
-            if(fontName.length == 0)
+            if (fontName.length == 0) {
                 ffStrbufSetS(&fontName, "monospace");
-            if(fontSize.length == 0)
+            }
+            if (fontSize.length == 0) {
                 ffStrbufSetS(&fontSize, "11.0");
+            }
         }
     }
 
@@ -223,109 +250,103 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
     return true;
 }
 
-static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result)
-{
+static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
     ffStrbufSubstrBeforeLastC(&cli, '-');
 
-    #ifdef _WIN32
+#ifdef _WIN32
     ffStrbufAppendS(&cli, ".exe");
-    #endif
+#endif
 
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
-        cli.chars,
-        "ls-fonts",
-        "--text",
-        "a",
-        NULL
-    }));
-    if(result->error.length)
+    ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){ cli.chars, "ls-fonts", "--text", "a", NULL }));
+    if (result->error.length) {
         return false;
+    }
 
-    //LeftToRight
-    // 0 a    \u{61}       x_adv=7  cells=1  glyph=a,180  wezterm.font("JetBrains Mono", {weight="Regular", stretch="Normal", style="Normal"})
-    //                                      <built-in>, BuiltIn
+    // LeftToRight
+    //  0 a    \u{61}       x_adv=7  cells=1  glyph=a,180  wezterm.font("JetBrains Mono", {weight="Regular", stretch="Normal", style="Normal"})
+    //                                       <built-in>, BuiltIn
     ffStrbufSubstrAfterFirstC(&fontName, '"');
     ffStrbufSubstrBeforeFirstC(&fontName, '"');
 
-    if(!fontName.length)
+    if (!fontName.length) {
         return false;
+    }
 
     ffFontInitCopy(&result->font, fontName.chars);
     return true;
 }
 
-static bool detectTabby(FFTerminalFontResult* result)
-{
+static bool detectTabby(FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQuery[] = {
-        {"font: ", &fontName},
-        {"fontSize: ", &fontSize},
+        { "font: ", &fontName },
+        { "fontSize: ", &fontSize },
     };
 
-    if(!ffParsePropFileConfigValues("tabby/config.yaml", 2, fontQuery))
+    if (!ffParsePropFileConfigValues("tabby/config.yaml", 2, fontQuery)) {
         return false;
+    }
 
-    if(fontName.length == 0)
+    if (fontName.length == 0) {
         ffStrbufSetS(&fontName, "monospace");
-    if(fontSize.length == 0)
+    }
+    if (fontSize.length == 0) {
         ffStrbufSetS(&fontSize, "14");
+    }
 
     ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
 
     return true;
 }
 
-static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result)
-{
+static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if(ffProcessAppendStdOut(&buf, (char* const[]){
-        exe->chars,
-        "font-locator",
-        NULL
-    }))
-    {
+    if (ffProcessAppendStdOut(&buf, (char* const[]){ exe->chars, "font-locator", NULL })) {
         ffStrbufAppendS(&result->error, "`contour font-locator` failed");
         return false;
     }
 
     //[error] Missing key .logging.enabled. Using default: false.
     //[error] ...
-    //Matching fonts using  : Fontconfig
-    //Font description      : (family=Sarasa Term SC Nerd weight=Regular slant=Roman spacing=Monospace, strict_spacing=yes)
-    //Number of fonts found : 49
+    // Matching fonts using  : Fontconfig
+    // Font description      : (family=Sarasa Term SC Nerd weight=Regular slant=Roman spacing=Monospace, strict_spacing=yes)
+    // Number of fonts found : 49
     //  path /usr/share/fonts/google-noto/NotoSansMono-Regular.ttf Regular Roman
     //  path ...
 
     uint32_t index = ffStrbufFirstIndexS(&buf, "Font description      : (family=");
-    if(index >= buf.length) return false;
+    if (index >= buf.length) {
+        return false;
+    }
     index += (uint32_t) strlen("Font description      : (family=");
     ffStrbufSubstrBefore(&buf, ffStrbufNextIndexS(&buf, index, " weight="));
     ffFontInitCopy(&result->font, buf.chars + index);
     return true;
 }
 
-static bool detectRio(FFTerminalFontResult* terminalFont)
-{
+static bool detectRio(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     FFpropquery fontQueryToml[] = {
-        {"family =", &fontName},
-        {"size =", &fontSize},
+        { "family =", &fontName },
+        { "size =", &fontSize },
     };
 
     ffParsePropFileConfigValues("rio/config.toml", 2, fontQueryToml);
 
-    if(fontName.length == 0)
+    if (fontName.length == 0) {
         ffStrbufAppendS(&fontName, "Cascadia Code");
+    }
 
-    if(fontSize.length == 0)
+    if (fontSize.length == 0) {
         ffStrbufAppendS(&fontSize, "18");
+    }
 
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 
@@ -334,48 +355,53 @@ static bool detectRio(FFTerminalFontResult* terminalFont)
 
 bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
 
-static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
-{
-    if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "alacritty"))
+static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont) {
+    if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "alacritty")) {
         detectAlacritty(terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "wezterm-gui"))
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "wezterm-gui")) {
         detectWezterm(&terminal->exe, terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "tabby"))
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "tabby")) {
         detectTabby(terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour"))
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour")) {
         detectContour(&terminal->exe, terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty"))
-        detectGhostty(&terminal->exe, terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio"))
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty")) {
+        detectGhostty(&terminal->exe, terminalFont, NULL, NULL);
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "Muxy")) {
+        detectGhostty(&terminal->exe, terminalFont, "Muxy/ghostty.conf", "muxy/ghostty.conf");
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio")) {
         detectRio(terminalFont);
-
-    #ifndef _WIN32
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/pts/"))
+    }
+#ifndef _WIN32
+    else if (ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/pts/")) {
         ffStrbufAppendS(&terminalFont->error, "Terminal font detection is not supported on PTS");
-    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "kitty"))
+    } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "kitty")) {
         detectKitty(&terminal->exe, terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/tty"))
+    } else if (ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/tty")) {
         detectTTY(terminalFont);
-    #endif
+    }
+#endif
 
-    else
+    else {
         return false;
+    }
 
     return true;
 }
 
-bool ffDetectTerminalFont(FFTerminalFontResult* result)
-{
+bool ffDetectTerminalFont(FFTerminalFontResult* result) {
     const FFTerminalResult* terminal = ffDetectTerminal();
 
-    if(terminal->processName.length == 0)
+    if (terminal->processName.length == 0) {
         ffStrbufAppendS(&result->error, "Terminal font needs successful terminal detection");
+    }
 
-    else if(!detectTerminalFontCommon(terminal, result))
+    else if (!detectTerminalFontCommon(terminal, result)) {
         ffDetectTerminalFontPlatform(terminal, result);
+    }
 
-    if(result->error.length == 0 && result->font.pretty.length == 0)
+    if (result->error.length == 0 && result->font.pretty.length == 0) {
         ffStrbufAppendF(&result->error, "Unknown terminal: %s", terminal->processName.chars);
+    }
 
     return result->error.length == 0;
 }

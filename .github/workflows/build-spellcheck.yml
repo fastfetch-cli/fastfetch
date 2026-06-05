@@ -1,0 +1,24 @@
+name: Reusable Spellcheck
+
+on:
+  workflow_call:
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install codespell
+        shell: bash
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y codespell
+
+      - name: Run Spellchecker
+        run: codespell

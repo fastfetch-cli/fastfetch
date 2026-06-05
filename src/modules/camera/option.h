@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCameraOptions
-{
+typedef struct FFCameraOptions {
     FFModuleArgs moduleArgs;
 } FFCameraOptions;
 

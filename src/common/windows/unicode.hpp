@@ -3,23 +3,20 @@
 #ifdef __cplusplus
 
 extern "C" {
-#include "unicode.h"
+    #include "unicode.h"
 }
 
-#include <string_view>
+    #include <string_view>
 
-static inline void ffStrbufInitWSV(FFstrbuf* result, const std::wstring_view source)
-{
+static inline void ffStrbufInitWSV(FFstrbuf* result, const std::wstring_view source) {
     return ffStrbufInitNWS(result, (uint32_t) source.size(), source.data());
 }
 
-static inline FFstrbuf ffStrbufCreateWSV(const std::wstring_view source)
-{
+static inline FFstrbuf ffStrbufCreateWSV(const std::wstring_view source) {
     return ffStrbufCreateNWS((uint32_t) source.size(), source.data());
 }
 
-static inline void ffStrbufSetWSV(FFstrbuf* result, const std::wstring_view source)
-{
+static inline void ffStrbufSetWSV(FFstrbuf* result, const std::wstring_view source) {
     return ffStrbufSetNWS(result, (uint32_t) source.size(), source.data());
 }
 

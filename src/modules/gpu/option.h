@@ -3,16 +3,14 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum __attribute__((__packed__)) FFGPUType
-{
-    FF_GPU_TYPE_NONE,      // Indicates no specific GPU type. Useful as a hide filter only.
-    FF_GPU_TYPE_UNKNOWN,   // Indicates an unknown or unrecognized GPU type.
+typedef enum FF_A_PACKED FFGPUType {
+    FF_GPU_TYPE_NONE,    // Indicates no specific GPU type. Useful as a hide filter only.
+    FF_GPU_TYPE_UNKNOWN, // Indicates an unknown or unrecognized GPU type.
     FF_GPU_TYPE_INTEGRATED,
     FF_GPU_TYPE_DISCRETE,
 } FFGPUType;
 
-typedef enum __attribute__((__packed__)) FFGPUDetectionMethod
-{
+typedef enum FF_A_PACKED FFGPUDetectionMethod {
     FF_GPU_DETECTION_METHOD_AUTO,
     FF_GPU_DETECTION_METHOD_PCI,
     FF_GPU_DETECTION_METHOD_VULKAN,
@@ -20,8 +18,7 @@ typedef enum __attribute__((__packed__)) FFGPUDetectionMethod
     FF_GPU_DETECTION_METHOD_OPENGL,
 } FFGPUDetectionMethod;
 
-typedef struct FFGPUOptions
-{
+typedef struct FFGPUOptions {
     FFModuleArgs moduleArgs;
 
     FFGPUType hideType;

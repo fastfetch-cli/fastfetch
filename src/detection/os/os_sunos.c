@@ -1,10 +1,10 @@
 #include "os.h"
 #include "common/io.h"
 
-void ffDetectOSImpl(FFOSResult* os)
-{
-    if (!ffReadFileBuffer("/etc/release", &os->prettyName))
+void ffDetectOSImpl(FFOSResult* os) {
+    if (!ffReadFileBuffer("/etc/release", &os->prettyName)) {
         return;
+    }
 
     ffStrbufSubstrBeforeFirstC(&os->prettyName, '\n');
     ffStrbufSubstrBeforeLastC(&os->prettyName, '(');

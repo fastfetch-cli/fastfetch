@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFUptimeOptions
-{
+typedef struct FFUptimeOptions {
     FFModuleArgs moduleArgs;
 } FFUptimeOptions;
 

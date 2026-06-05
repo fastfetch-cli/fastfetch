@@ -2,8 +2,7 @@
 
 #include "fastfetch.h"
 
-typedef struct FFLibcResult
-{
+typedef struct FFLibcResult {
     const char* name;
     const char* version;
 } FFLibcResult;

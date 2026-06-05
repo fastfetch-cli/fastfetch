@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/poweradapter/option.h"
 
-typedef struct FFPowerAdapterResult
-{
+typedef struct FFPowerAdapterResult {
     FFstrbuf description;
     FFstrbuf name;
     FFstrbuf modelName;

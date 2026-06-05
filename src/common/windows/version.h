@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 
-
 /**
  * @brief Retrieves a specific version string for a Windows file.
  *

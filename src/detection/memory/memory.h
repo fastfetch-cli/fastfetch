@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/memory/option.h"
 
-typedef struct FFMemoryResult
-{
+typedef struct FFMemoryResult {
     uint64_t bytesUsed;
     uint64_t bytesTotal;
 } FFMemoryResult;

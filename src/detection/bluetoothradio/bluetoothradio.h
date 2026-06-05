@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/bluetoothradio/option.h"
 
-typedef struct FFBluetoothRadioResult
-{
+typedef struct FFBluetoothRadioResult {
     FFstrbuf name;
     FFstrbuf address;
     FFstrbuf vendor;

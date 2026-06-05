@@ -2,8 +2,7 @@
 
 #include "fastfetch.h"
 
-typedef struct FFGTKResult
-{
+typedef struct FFGTKResult {
     FFstrbuf theme;
     FFstrbuf icons;
     FFstrbuf font;
@@ -12,8 +11,7 @@ typedef struct FFGTKResult
     FFstrbuf wallpaper;
 } FFGTKResult;
 
-typedef struct FFQtResult
-{
+typedef struct FFQtResult {
     FFstrbuf widgetStyle;
     FFstrbuf colorScheme;
     FFstrbuf icons;

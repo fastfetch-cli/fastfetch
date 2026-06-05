@@ -1,3 +1,207 @@
+# 2.64.2
+
+Bugfixes:
+* Fixes image rendering being wiped quickly (#2374)
+    * Regression from v2.64.0
+* Fixes ASCII logo being overwritten in `--dynamic-interval` mode
+    * Regression from v2.64.0
+
+Logos:
+* Updates OpenWrt and adds a small variant (#2376)
+    * The old one is renamed to `openwrt_old`
+
+# 2.64.1
+
+Features:
+* Adds a CMake option `-DPACKAGES_REMOVE_DISABLED` to remove detection code of disabled packages (`-DPACKAGES_DISABLE_<PACKAGE_NAME>`) for slightly smaller binary size (Packages)
+
+Bugfixes:
+* Fixes compatibility issues with Lua 5.3
+* Avoid possible infinite recursion in `encode_json` when encoding deeply nested tables or circular references
+* Fixes compilation issues when building with old macOS SDKs
+
+# 2.64.0
+
+New **optional build** dependencies:
+* [`libva`](https://github.com/intel/libva) and [`libvdpau`](https://www.freedesktop.org/wiki/Software/VDPAU) for the new `Codec` module.
+* [Lua 5.3 to 5.5](https://www.lua.org/) for Lua scripting support, or [QuickJS](https://github.com/quickjs-ng/quickjs) v0.15.0 or newer for JavaScript scripting support.
+
+Features:
+* Adds `Codec` module support for Windows, macOS, Linux, and Android for hardware-accelerated video codec detection (Codec)
+    * Backends used (results may vary depending on the backend due to driver differences):
+        * Linux and BSD: VA-API (default) and VDPAU (fallback for NVIDIA). Fastfetch must be built with `libva` and `libvdpau` support to enable these backends.
+        * Windows: D3D12VA (Windows 11) and D3D11VA+MFT (Windows 10 or older)
+        * macOS: VideoToolbox
+        * Android: AMediaCodec
+        * Common: Vulkan Video (disabled by default; can be enabled with `"useVulkan": true`)
+    * By default, both encoders and decoders are reported. If no codecs are detected for a given type, `None` is reported. This behavior can be configured using the `"showType": "encoder|decoder"` option.
+* Adds experimental Lua script support for custom formats (Global)
+    * Basic usage (using `Title` as an example): `{ "type": "title", "format": "lua:return string.format('Hello %s@%s', (...).userName, (...).hostName)" }`. The `lua:` prefix indicates a Lua script. A `return` statement is required to pass the final result back to the fastfetch module; otherwise, `nil` is returned implicitly and the entire module output is skipped.
+    * Parameters are passed via variable arguments `(...)`. Users can assign them to named variables for better readability. For example: `lua:local args = ...; string.format('Hello %s@%s', args.userName, args.hostName)`.
+    * The Lua interpreter instance is shared across all modules. This allows users to store and manipulate data across modules. For example:
+        * `{ "type": "shell", "format": "lua:shell = ..." } // Note: no "return" here`
+        * `{ "type": "terminal", "format": "lua:return shell.prettyName .. ' in ' .. (...).prettyName" } // This will print the detected shell and terminal names`
+    * A `json_encode(table, is_pretty)` function has been added to the Lua API for easier debugging. For example, `lua:return json_encode(...)` will print all available variables and their values in JSON format.
+    * Supported Lua versions: Lua 5.3 to 5.5 (Lua 5.1 and LuaJIT are not supported). The Lua version is auto-detected at build time. Once built, users can check the configured Lua version using `fastfetch --list-features`.
+* Adds experimental QuickJS script support for custom formats as an alternative to Lua (Global)
+    * Basic usage: `{ "type": "title", "format": "qjs:`Hello ${this.userName}@${this.hostName}`" }`. The `qjs:` prefix indicates a JavaScript script. No `return` statement is needed; the final result is simply the evaluated value of the script.
+    * Parameters are passed via the `this` object. Usage is mostly the same as Lua, but using JavaScript syntax.
+    * Requires [quickjs-ng v0.15.0](https://github.com/quickjs-ng/quickjs/releases/tag/v0.15.0) or newer.
+* Adds CMake options `-DMODULE_DISABLE_<MODULE_NAME>=ON` to disable modules at compile time for a smaller binary size
+    * Use `cmake -L . | grep MODULE_DISABLE_` to list all available options.
+    * These options rely on LTO for dead code elimination (`-DCMAKE_BUILD_TYPE=Release` should enable LTO by default).
+* Adds the ability to remove unneeded ASCII logos without modifying the fastfetch source code, further reducing binary size
+    * Simply remove the corresponding logo file from the logo directory (`src/logo/ascii/[a-z]/*`) and re-run `cmake`.
+* Improves string manipulation specifiers in custom formats
+    * They are now ANSI escape-aware and work correctly with colored output (e.g., percentages with `num-color`) (#2364). Limitations:
+        * They are still not wide-character aware and treat CJK and emoji characters as raw bytes.
+        * Escape sequences in the middle of strings are not supported.
+    * A new `|` specifier has been added to center strings. For example, `{user-name|20}` will center the username in a 20-character-wide field.
+* Adds preliminary `Bootmgr`, `Brightness`, and `WMTheme` detection support for Haiku (#2358, Haiku)
+* Adds `Wallpaper` and `WMTheme` detection support for the COSMIC desktop environment (Linux)
+* Improves terminal name detection for Nix packages (#2352, Terminal, Linux)
+* Adds DDC/CI brightness detection support for FreeBSD (Brightness, FreeBSD)
+    * DDC/CI communication can be very slow. Users can set the `ddcciSleep: null` option to skip DDC/CI detection.
+* Reworks the built-in logo printing logic. ASCII logos and modules are now printed line by line, avoiding issues like #2239
+    * Note: Image logos are not affected by this change and still print the entire image first before printing any modules.
+* Adds a new `--logo-padding-bottom` option to control the padding between the bottom of the logo and the first module when `--logo-position top` is used
+    * Previously, `--logo-padding-right` was used for both right and bottom padding.
+* Adds `Samsung Exynos 2600` to CPU detection (CPU, Android)
+* Adds terminal font detection support for the Muxy terminal (TerminalFont, macOS)
+* Improves the performance of BusyBox (ash) version detection and always reports `ash` as the pretty name (Shell, Linux)
+
+Bugfixes:
+* Fixes SwayFX version detection (WM, Linux)
+* Fixes fallback font detection for Ghostty (TerminalFont, macOS)
+* Fixes `--stat` output to correctly align with the right border (Global)
+* Fixes boot manager on macOS 26 (mBoot) is incorrectly reported as `iBoot` (Bootmgr, macOS)
+
+Logos:
+* Adds Quasar (#2338, #2323), Origami, Origami_small (#2321, #2322), BerserkArch (#2324, #2310), and NixOS2 (#2346)
+* Minor tweaks and color fixes for the NixOS_small logo (#2357)
+* Updates NurOS (#2366)
+
+# 2.63.1
+
+Bugfixes:
+* Fixes media length detection for Chrome on Linux (Media, Linux)
+* Fixes segmentation fault when specifying unsupported modules on command line
+* Disables usage of Netlink for Wi-Fi detection on s390x architectures (Wifi, Linux)
+
+# 2.63.0
+
+Changes:
+* Introduces a new **build-only** dependency, `libefl`, for querying the Enlightenment window manager configuration:
+    * `libefl-all-dev` on Debian/Ubuntu
+    * `libefl-devel` on Fedora
+    * `efl` on Arch Linux
+* The Windows-specific options `battery.useSetupApi` and `global.wmiTimeout` have been removed. (Windows)
+
+Features:
+* Adds wallpaper detection support on Haiku (#2314, Wallpaper, Haiku)
+* Adds Wi-Fi 6 GHz channel detection and improves protocol reporting (Wifi, Linux)
+* Improves Deepin version detection using `/etc/os-version` (#2300, OS, Linux)
+* Adds Ubuntu Kylin and Ubuntu Unity flavor detection (OS, Linux)
+* Adds NebiDE support (WMTheme, Linux)
+* Adds package counting for `cards` on NuTyX (#2287, Packages, Linux)
+* Adds `{am-pm}` to custom format for 12-hour time with am/pm (DateTime)
+* Adds support for the Enlightenment desktop environment (#2165, WM, Linux)
+* Adds support for playback progress detection (Media)
+    * The module now prints the current playback position and total media duration when supported by the player. If you prefer the previous behavior, you can set `media.percent.type: ["hide-others"]` to hide the new fields.
+* Adds support for `global.playerName` for Windows (Media, Windows)
+    * This allows detecting a specified media player while ignoring others.
+* Multi-battery detection is enabled on Windows by default (Battery, Windows)
+
+Bugfixes:
+* Improves DisplayServer compatibility on Linux by handling newer `kde-output-device-v2` protocol updates (DisplayServer, Linux)
+    * This fixes a long-standing issue where display detection fails with an `interface 'kde_output_device_mode_v2' has no event X` error.
+* Improves Wi-Fi reliability on Linux by switching to a netlink implementation (Wifi, Linux)
+* Improves network interface reliability and default route selection on macOS and Windows (Netif, macOS / Windows)
+* Validates temperature color thresholds as integers when parsing JSON configs (Temps)
+* Fixes TDE Konsole version detection (#2319, Terminal, Linux)
+* Various internal cleanups and optimizations
+
+Logos:
+* Adds KibaOS, NebiOS, XJ380, openRuyi, Ximper
+* Fixes GNOME OS built-in logo detection (#2296)
+
+# 2.62.1
+
+Bugfixes:
+* Fixes the Host module not working on some devices (#2279, Host, Linux)
+    * Regression from v2.61.0
+
+Logos:
+* Adds EN-OS, LimeOS, Redrose and Uzbek
+
+# 2.62.0
+
+Changes:
+* Sort package managers alphabetically in output and format arguments (Packages)
+    * The positional order of format arguments has changed — this is a breaking change for users relying on numeric placeholders. Named arguments are always preferred; e.g., use `{pacman}` (refer to `fastfetch -h packages-format`) instead of `{1}` to keep your config future-proof.
+
+Features:
+* Reports `Unused` instead of `Disabled` for zero-size swap on macOS (#2248, Swap, macOS)
+* Improves the robustness of default route detection on Linux (#2252, LocalIP, Linux)
+* PhysicalDisk module improvements
+    * Detects virtual disks and adds support for hiding them via `hideVirtual` option (defaults to `false`)
+    * Detects unused/disconnected disks and adds support for hiding them via `hideUnused` option (defaults to `true`)
+    * Adds support for OpenBSD and NetBSD (root privileges are required to access disk information)
+    * Improves interconnect type detection on SunOS
+    * Adds floppy drive support on Windows
+* Rewrites Windows GPU detection with D3DKMT APIs, unifying it with WSL GPU detection (GPU, Windows)
+* Verifies that the battery and power adapter are present before detection (Battery / PowerAdapter, Linux)
+* Improves PhysicalMemory reliability on OpenBSD and FreeBSD, including support for x86 UEFI systems on OpenBSD and non-UEFI systems on FreeBSD (PhysicalMemory, OpenBSD / FreeBSD)
+* Adds `display.common.(ndigits|spaceBeforeUnit)` options to configure common formatting for duration, percent, size, frequency and temperature values (#2234)
+* Slightly improves performance by skipping probes for ignored device types (Sound)
+* Adds support for AppImage package detection (#2179, Packages, Linux)
+
+Bugfixes:
+* Fixes a potential crash on certain Intel GPU models when using `--gpu-driver-specific` (#2259, GPU, Linux)
+* Doesn't report partitions as physical disks (DiskIO, NetBSD)
+* Fixes a typo (#2260, Wifi, macOS)
+* Corrects documentation for zpool format placeholders (#2261, Zpool)
+* Restores Windows 8.1 support (Cursor, Windows)
+* Fixes an out-of-bounds memory access when swaps are disabled (Swap, Windows)
+* Fixes battery status being incorrectly reported as `Charging` on systems with multiple batteries (#2263, Battery, Linux)
+* Fixes ash shell version detection (#2271, Shell, Linux)
+* Uses the `iterm` image protocol automatically on iTerm terminals for auto logo type (Logo)
+* Adds missing options when generating full config file
+
+Logos:
+* Updates AerynOS (#2272)
+
+# 2.61.0
+
+Changes:
+* Support for Windows 7 and 8 has been removed.
+    * Windows 8.1 is now the oldest version supported by fastfetch.
+* The GPU module on WSL no longer relies on `DXCore`.
+    * The `directx-headers` dependency is no longer required.
+    * Fastfetch on Linux is now pure C; a C++ compiler is no longer required.
+    * GPU type detection is now slightly less accurate, but detection speed should be slightly faster.
+* The GPU module on Windows now uses `DXCore` for more accurate GPU type detection (requires Windows 10 or later).
+    * This feature is built only when `DXCore` headers are available, which requires installing `mingw-w64-<msystem>-x86_64-directx-headers` on MSYS2.
+
+Features:
+* Adds a `brightness` option for color display configuration (#2238, Colors)
+* Adds support for detecting Bluetooth keyboards on Linux (#2220, Keyboard)
+* Adds support for detecting GlazeWM (WM, macOS)
+* Adds a `showEmptySlots` option to display empty memory slots on Linux (#2222, PhysicalMemory)
+* Adds marketing product name detection on Asahi Linux (Host, Linux)
+* Adds support for new M5 Mac models (Host, macOS)
+* Improves SMBIOS robustness by validating malformed data and improving error handling
+* Improves reliability when terminating child processes (Processing, Windows)
+* Improves Intel Mac support by querying SMBIOS data directly (Global, macOS)
+* Includes numerous internal cleanups and optimizations
+
+Bugfixes:
+* Fixes missing memory devices on some machines (PhysicalMemory)
+* Fixes CPUCache deduplication for shared caches (#2228, CPUCache, Linux)
+* Fixes WM version reporting for niri (#2218, WM, Linux)
+* Fixes SSID decoding issues from `iw` output (Wifi, Linux)
+* Fixes the CMD code page being changed after running fastfetch on Windows (#2245, Windows)
+
 # 2.60.0
 
 Changes:

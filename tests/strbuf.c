@@ -4,10 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdnoreturn.h>
 
-__attribute__((__noreturn__))
-static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo)
-{
+noreturn static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineNo) {
     fputs(FASTFETCH_TEXT_MODIFIER_ERROR, stderr);
     fprintf(stderr, "[%d] %s, strbuf:", lineNo, expression);
     ffStrbufWriteTo(strbuf, stderr);
@@ -16,22 +15,22 @@ static void testFailed(const FFstrbuf* strbuf, const char* expression, int lineN
     exit(1);
 }
 
-#define VERIFY(expression) if(!(expression)) testFailed(&strbuf, #expression, __LINE__)
+#define VERIFY(expression) \
+    if (!(expression)) testFailed(&strbuf, #expression, __LINE__)
 
 int shouldNotBeCalled(int c) {
-    (void)c;
+    (void) c;
     exit(1);
 }
 
-int main(void)
-{
+int main(void) {
     FFstrbuf strbuf;
 
-    //destroy 0
+    // destroy 0
     ffStrbufInit(&strbuf);
     ffStrbufDestroy(&strbuf);
 
-    //initA
+    // initA
 
     ffStrbufInit(&strbuf);
 
@@ -45,7 +44,7 @@ int main(void)
     VERIFY(!ffStrbufEndsWithS(&strbuf, "0"));
     VERIFY(ffStrbufCountC(&strbuf, '0') == 0);
 
-    //Ensure following functions work with non-allocated string
+    // Ensure following functions work with non-allocated string
     ffStrbufAppendS(&strbuf, "");
     ffStrbufAppendF(&strbuf, "%s", "");
     ffStrbufAppendTransformS(&strbuf, "", shouldNotBeCalled);
@@ -56,7 +55,7 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     VERIFY(strbuf.length == 0);
 
-    //append(N)C
+    // append(N)C
 
     ffStrbufAppendC(&strbuf, '1');
     VERIFY(ffStrbufEqualS(&strbuf, "1"));
@@ -66,7 +65,7 @@ int main(void)
     VERIFY(strbuf.allocated >= 6);
     ffStrbufClear(&strbuf);
 
-    //appendS
+    // appendS
 
     ffStrbufAppendS(&strbuf, "12345");
     ffStrbufAppendS(&strbuf, NULL);
@@ -75,7 +74,7 @@ int main(void)
     VERIFY(strbuf.allocated >= 6);
     VERIFY(ffStrbufEqualS(&strbuf, "12345"));
 
-    //appendNS
+    // appendNS
 
     ffStrbufAppendNS(&strbuf, 4, "67890");
     ffStrbufAppendNS(&strbuf, 0, NULL);
@@ -84,14 +83,14 @@ int main(void)
     VERIFY(strbuf.allocated >= 10);
     VERIFY(ffStrbufEqualS(&strbuf, "123456789"));
 
-    //appendS long
+    // appendS long
 
     ffStrbufAppendS(&strbuf, "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
     VERIFY(strbuf.length == 109);
     VERIFY(strbuf.allocated >= 110);
     VERIFY(strbuf.chars[strbuf.length] == 0);
 
-    //substr
+    // substr
 
     VERIFY(ffStrbufSubstrBefore(&strbuf, 9));
     VERIFY(strbuf.length == 9);
@@ -113,52 +112,52 @@ int main(void)
 
     ffStrbufSetS(&strbuf, "123456789");
 
-    //startsWithC
+    // startsWithC
 
     VERIFY(ffStrbufStartsWithC(&strbuf, '1'));
     VERIFY(!ffStrbufStartsWithC(&strbuf, '2'));
 
-    //startsWithS
+    // startsWithS
 
     VERIFY(ffStrbufStartsWithS(&strbuf, "123"));
     VERIFY(ffStrbufStartsWithS(&strbuf, "123456789"));
     VERIFY(!ffStrbufStartsWithS(&strbuf, "1234567890123"));
 
-    //endsWithC
+    // endsWithC
     VERIFY(ffStrbufEndsWithC(&strbuf, '9'));
     VERIFY(!ffStrbufEndsWithC(&strbuf, '1'));
 
-    //endsWithS
+    // endsWithS
 
     VERIFY(ffStrbufEndsWithS(&strbuf, "789"));
     VERIFY(ffStrbufEndsWithS(&strbuf, "123456789"));
     VERIFY(!ffStrbufEndsWithS(&strbuf, "1234567890123"));
 
-    //toNumber
+    // toNumber
 
     VERIFY(ffStrbufToDouble(&strbuf, -DBL_MAX) == 123456789.0);
     VERIFY(ffStrbufToUInt(&strbuf, 999) == 123456789);
 
-    //countC
+    // countC
 
     VERIFY(ffStrbufCountC(&strbuf, '1') == 1);
     VERIFY(ffStrbufCountC(&strbuf, '0') == 0);
 
-    //removeS
+    // removeS
 
     ffStrbufRemoveS(&strbuf, "78");
 
     VERIFY(strbuf.length == 7);
     VERIFY(strcmp(strbuf.chars, "1234569") == 0);
 
-    //removeStrings
+    // removeStrings
 
     ffStrbufRemoveStrings(&strbuf, 3, (const char*[]) { "23", "45", "9" });
 
     VERIFY(strbuf.length == 2);
     VERIFY(strcmp(strbuf.chars, "16") == 0);
 
-    //PrependS
+    // PrependS
 
     ffStrbufPrependS(&strbuf, "123");
     ffStrbufPrependS(&strbuf, NULL);
@@ -166,7 +165,7 @@ int main(void)
     VERIFY(strbuf.length == 5);
     VERIFY(strcmp(strbuf.chars, "12316") == 0);
 
-    //indexC
+    // indexC
     VERIFY(ffStrbufFirstIndexC(&strbuf, '1') == 0);
     VERIFY(ffStrbufNextIndexC(&strbuf, 1, '1') == 3);
     VERIFY(ffStrbufNextIndexC(&strbuf, 4, '1') == 5);
@@ -175,12 +174,12 @@ int main(void)
     VERIFY(ffStrbufPreviousIndexC(&strbuf, 0, '1') == 0);
     VERIFY(ffStrbufPreviousIndexC(&strbuf, 0, '2') == 5);
 
-    //indexS
+    // indexS
     VERIFY(ffStrbufFirstIndexS(&strbuf, "12316") == 0);
     VERIFY(ffStrbufNextIndexS(&strbuf, 1, "1") == 3);
     VERIFY(ffStrbufNextIndexS(&strbuf, 4, "1") == 5);
 
-    //ignCase
+    // ignCase
     ffStrbufSetS(&strbuf, "AbCdEfG");
 
     VERIFY(ffStrbufIgnCaseCompS(&strbuf, "aBcDeFg") == 0);
@@ -189,25 +188,25 @@ int main(void)
     VERIFY(!ffStrbufStartsWithIgnCaseS(&strbuf, "aBcDeFgH"));
     VERIFY(!ffStrbufEndsWithIgnCaseS(&strbuf, "0aBcDeFg"));
 
-    //ensure
+    // ensure
     ffStrbufEnsureEndsWithC(&strbuf, '$');
     VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG$"));
     ffStrbufEnsureEndsWithC(&strbuf, '$');
     VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG$"));
 
-    //trimRight
+    // trimRight
     ffStrbufTrimRight(&strbuf, '$');
     VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG"));
     ffStrbufTrimRight(&strbuf, '$');
     VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG"));
 
-    //clear
+    // clear
     ffStrbufClear(&strbuf);
     VERIFY(strbuf.allocated > 0);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.chars && strbuf.chars[0] == 0);
 
-    //Destroy
+    // Destroy
 
     ffStrbufDestroy(&strbuf);
 
@@ -215,21 +214,21 @@ int main(void)
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.chars && strbuf.chars[0] == 0);
 
-    //initA
+    // initA
     ffStrbufInitA(&strbuf, 32);
 
     VERIFY(strbuf.allocated == 32);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.chars && strbuf.chars[0] == 0);
 
-    //appendF
+    // appendF
     ffStrbufAppendF(&strbuf, "%s", "1234567890123456789012345678901");
     VERIFY(strbuf.allocated == 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
     ffStrbufDestroy(&strbuf);
 
-    //initMoveS
+    // initMoveS
     {
         char* heapStr = strdup("1234567890");
         ffStrbufInitMoveS(&strbuf, heapStr);
@@ -238,34 +237,34 @@ int main(void)
         ffStrbufDestroy(&strbuf);
     }
 
-    //initF
+    // initF
     ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
     VERIFY(strbuf.allocated >= 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
-    //containC
+    // containC
     VERIFY(ffStrbufContainC(&strbuf, '1'));
     VERIFY(!ffStrbufContainC(&strbuf, '-'));
 
-    //replaceAllC
+    // replaceAllC
     ffStrbufReplaceAllC(&strbuf, '1', '-');
     VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
     ffStrbufReplaceAllC(&strbuf, '1', '-');
     VERIFY(ffStrbufEqualS(&strbuf, "-234567890-234567890-234567890-"));
 
-    //trim
+    // trim
     ffStrbufTrim(&strbuf, '-');
     VERIFY(ffStrbufEqualS(&strbuf, "234567890-234567890-234567890"));
 
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateS
+    // ffStrbufCreateS
     {
         FF_STRBUF_AUTO_DESTROY testCreate = ffStrbufCreateS("TEST");
         VERIFY(ffStrbufEqualS(&testCreate, "TEST"));
     }
 
-    //ffStrbufCreateStatic
+    // ffStrbufCreateStatic
     ffStrbufInitStatic(&strbuf, "TEST");
     VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
     VERIFY(strbuf.length == 4);
@@ -275,14 +274,14 @@ int main(void)
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
 
-    //ffStrbufCreateStatic / Allocate
+    // ffStrbufCreateStatic / Allocate
     ffStrbufInitStatic(&strbuf, "TEST");
     ffStrbufEnsureFree(&strbuf, 0);
     VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
     VERIFY(strbuf.length == 4);
     VERIFY(strbuf.allocated > 0);
 
-    //ffStrbufCreateStatic / Append
+    // ffStrbufCreateStatic / Append
     ffStrbufInitStatic(&strbuf, "TEST");
     ffStrbufAppendS(&strbuf, "_TEST");
     VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST"));
@@ -294,7 +293,7 @@ int main(void)
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
 
-    //ffStrbufCreateStatic / Prepend
+    // ffStrbufCreateStatic / Prepend
     ffStrbufInitStatic(&strbuf, "TEST");
     ffStrbufPrependS(&strbuf, "TEST_");
     VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST"));
@@ -306,14 +305,14 @@ int main(void)
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
 
-    //ffStrbufCreateStatic / Clear
+    // ffStrbufCreateStatic / Clear
     ffStrbufInitStatic(&strbuf, "TEST");
     ffStrbufClear(&strbuf);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Set
+    // ffStrbufCreateStatic / Set
     ffStrbufInitStatic(&strbuf, "TEST"); // static
     ffStrbufSetStatic(&strbuf, "test");
     VERIFY(ffStrbufEqualS(&strbuf, "test"));
@@ -321,7 +320,7 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Set
+    // ffStrbufCreateStatic / Set
     ffStrbufInitS(&strbuf, "TEST"); // allocated
     ffStrbufSetStatic(&strbuf, "test");
     VERIFY(ffStrbufEqualS(&strbuf, "test"));
@@ -329,7 +328,7 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / TrimL
+    // ffStrbufCreateStatic / TrimL
     ffStrbufInitStatic(&strbuf, "_TEST_");
     ffStrbufTrimLeft(&strbuf, '_');
     VERIFY(ffStrbufEqualS(&strbuf, "TEST_"));
@@ -337,7 +336,7 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / TrimR
+    // ffStrbufCreateStatic / TrimR
     ffStrbufInitStatic(&strbuf, "_TEST_");
     ffStrbufTrimRight(&strbuf, ' ');
     VERIFY(strbuf.allocated == 0);
@@ -348,7 +347,7 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Substr
+    // ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
     VERIFY(ffStrbufRemoveSubstr(&strbuf, 0, 6));
     VERIFY(ffStrbufEqualS(&strbuf, "__"));
@@ -356,7 +355,7 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Substr
+    // ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
     VERIFY(ffStrbufRemoveSubstr(&strbuf, 2, 8));
     VERIFY(ffStrbufEqualS(&strbuf, "__"));
@@ -364,7 +363,7 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Substr
+    // ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
     VERIFY(ffStrbufRemoveSubstr(&strbuf, 2, 6));
     VERIFY(ffStrbufEqualS(&strbuf, "____"));
@@ -372,7 +371,7 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / ReplaceAllC
+    // ffStrbufCreateStatic / ReplaceAllC
     ffStrbufInitStatic(&strbuf, "__TEST__");
     ffStrbufReplaceAllC(&strbuf, '_', '-');
     VERIFY(ffStrbufEqualS(&strbuf, "--TEST--"));
@@ -380,7 +379,7 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / TrimSpace
+    // ffStrbufCreateStatic / TrimSpace
     ffStrbufInitStatic(&strbuf, "\n TEST\n ");
     ffStrbufTrimSpace(&strbuf);
     VERIFY(strbuf.length == 4);
@@ -388,7 +387,7 @@ int main(void)
     VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreate / TrimSpace
+    // ffStrbufCreate / TrimSpace
     ffStrbufInitS(&strbuf, "\n TEST\n ");
     ffStrbufTrimSpace(&strbuf);
     VERIFY(strbuf.length == 4);
@@ -396,7 +395,7 @@ int main(void)
     VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufEnsureFixedLengthFree / empty buffer
+    // ffStrbufEnsureFixedLengthFree / empty buffer
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);
     VERIFY(strbuf.length == 0);
@@ -411,14 +410,14 @@ int main(void)
     VERIFY(strbuf.allocated == 13);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufEnsureFixedLengthFree / empty buffer with zero free length
+    // ffStrbufEnsureFixedLengthFree / empty buffer with zero free length
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 0);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufEnsureFixedLengthFree / empty buffer but oldFree >= newFree
+    // ffStrbufEnsureFixedLengthFree / empty buffer but oldFree >= newFree
     ffStrbufInitA(&strbuf, 11);
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);
     VERIFY(strbuf.length == 0);
@@ -430,7 +429,7 @@ int main(void)
     VERIFY(strbuf.allocated == 12);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufEnsureFixedLengthFree / non empty buffer
+    // ffStrbufEnsureFixedLengthFree / non empty buffer
     ffStrbufAppendF(&strbuf, "%s", "1234567890");
     VERIFY(strbuf.length == 10);
     VERIFY(strbuf.allocated == 32);
@@ -448,7 +447,7 @@ int main(void)
     VERIFY(strbuf.allocated == 33);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufEnsureFixedLengthFree / static buffer
+    // ffStrbufEnsureFixedLengthFree / static buffer
     ffStrbufInitStatic(&strbuf, "__TEST__");
     VERIFY(strbuf.length > 0);
     VERIFY(strbuf.allocated == 0);
@@ -458,7 +457,7 @@ int main(void)
     VERIFY(ffStrbufEqualS(&strbuf, "__TEST__"));
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufInsertNC
+    // ffStrbufInsertNC
     ffStrbufInitStatic(&strbuf, "123456");
     ffStrbufInsertNC(&strbuf, 0, 2, 'A');
     VERIFY(ffStrbufEqualS(&strbuf, "AA123456"));
@@ -490,11 +489,9 @@ int main(void)
         const char* text = "Processor\t: ARMv7\nprocessor\t: 0\nBogoMIPS\t: 38.00\n\nprocessor\t: 1\nBogoMIPS\t: 38.00";
         ffStrbufSetS(&strbuf, text);
 
-        while (ffStrbufGetline(&lineptr, &n, &strbuf))
-        {
+        while (ffStrbufGetline(&lineptr, &n, &strbuf)) {
             ++i;
-            switch (i)
-            {
+            switch (i) {
                 case 1:
                     VERIFY(strcmp(lineptr, "Processor\t: ARMv7") == 0);
                     VERIFY(n == strlen("Processor\t: ARMv7"));
@@ -533,11 +530,9 @@ int main(void)
         i = 0;
         text = "\n";
         ffStrbufSetS(&strbuf, text);
-        while (ffStrbufGetline(&lineptr, &n, &strbuf))
-        {
+        while (ffStrbufGetline(&lineptr, &n, &strbuf)) {
             ++i;
-            switch (i)
-            {
+            switch (i) {
                 case 1:
                     VERIFY(strcmp(lineptr, "") == 0);
                     VERIFY(n == 0);
@@ -556,11 +551,9 @@ int main(void)
         i = 0;
         text = "abcd";
         ffStrbufSetS(&strbuf, text);
-        while (ffStrbufGetline(&lineptr, &n, &strbuf))
-        {
+        while (ffStrbufGetline(&lineptr, &n, &strbuf)) {
             ++i;
-            switch (i)
-            {
+            switch (i) {
                 case 1:
                     VERIFY(strcmp(lineptr, "abcd") == 0);
                     VERIFY(n == strlen("abcd"));
@@ -579,8 +572,7 @@ int main(void)
         i = 0;
         text = "";
         ffStrbufSetS(&strbuf, text);
-        while (ffStrbufGetline(&lineptr, &n, &strbuf))
-        {
+        while (ffStrbufGetline(&lineptr, &n, &strbuf)) {
             ++i;
             VERIFY(false);
         }
@@ -1035,7 +1027,30 @@ int main(void)
         ffStrbufDestroy(&strbuf);
     }
 
-    //setS
+    // decode hex escape sequences
+    {
+        ffStrbufSetS(&strbuf, "Basic\\x20data\\x20partition");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == true);
+        VERIFY(ffStrbufEqualS(&strbuf, "Basic data partition"));
+
+        ffStrbufSetS(&strbuf, "\\x41\\x42\\x43");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == true);
+        VERIFY(ffStrbufEqualS(&strbuf, "ABC"));
+
+        ffStrbufSetS(&strbuf, "abc\\x4");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\x4"));
+
+        ffStrbufSetS(&strbuf, "abc\\xZZ");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\xZZ"));
+
+        ffStrbufSetS(&strbuf, "abc\\x2G");
+        VERIFY(ffStrbufDecodeHexEscapeSequences(&strbuf) == false);
+        VERIFY(ffStrbufEqualS(&strbuf, "abc\\x2G"));
+    }
+
+    // setS
     ffStrbufInitStatic(&strbuf, "STATIC");
     ffStrbufSetS(&strbuf, "DYNAMIC");
     VERIFY(ffStrbufEqualS(&strbuf, "DYNAMIC"));
@@ -1078,7 +1093,7 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //set
+    // set
     ffStrbufInitStatic(&strbuf, "STATIC");
     {
         FF_STRBUF_AUTO_DESTROY other = ffStrbufCreateS("DYNAMIC");
@@ -1124,6 +1139,6 @@ int main(void)
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
 
-    //Success
+    // Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

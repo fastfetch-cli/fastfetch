@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/users/option.h"
 
-typedef struct FFUserResult
-{
+typedef struct FFUserResult {
     FFstrbuf name;
     FFstrbuf hostName;
     FFstrbuf clientIp;

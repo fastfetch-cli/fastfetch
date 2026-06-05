@@ -6,25 +6,30 @@
 #include <windows.h>
 #include <stdalign.h>
 
-const char* ffDetectSwap(FFlist* result)
-{
+const char* ffDetectSwap(FFlist* result) {
     alignas(SYSTEM_PAGEFILE_INFORMATION) uint8_t buffer[4096];
     ULONG size = sizeof(buffer);
     SYSTEM_PAGEFILE_INFORMATION* pstart = (SYSTEM_PAGEFILE_INFORMATION*) buffer;
-    if(!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size)))
+    if (!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size))) {
         return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
+    }
+
+    if (size == 0) {
+        return NULL;
+    }
 
     uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
-    for (SYSTEM_PAGEFILE_INFORMATION* current = pstart; ; current = (SYSTEM_PAGEFILE_INFORMATION*)((uint8_t*) current + current->NextEntryOffset))
-    {
-        FFSwapResult* swap = ffListAdd(result);
+    for (SYSTEM_PAGEFILE_INFORMATION* current = pstart;; current = (SYSTEM_PAGEFILE_INFORMATION*) ((uint8_t*) current + current->NextEntryOffset)) {
+        FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
         ffStrbufInitNWS(&swap->name, current->FileName.Length / sizeof(wchar_t), current->FileName.Buffer);
-        if (ffStrbufStartsWithS(&swap->name, "\\??\\"))
+        if (ffStrbufStartsWithS(&swap->name, "\\??\\")) {
             ffStrbufSubstrAfter(&swap->name, strlen("\\??\\") - 1);
+        }
         swap->bytesUsed = (uint64_t) current->TotalUsed * pageSize;
         swap->bytesTotal = (uint64_t) current->CurrentSize * pageSize;
-        if (current->NextEntryOffset == 0)
+        if (current->NextEntryOffset == 0) {
             break;
+        }
     }
     return NULL;
 }

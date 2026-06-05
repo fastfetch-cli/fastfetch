@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFInitSystemOptions
-{
+typedef struct FFInitSystemOptions {
     FFModuleArgs moduleArgs;
 } FFInitSystemOptions;
 

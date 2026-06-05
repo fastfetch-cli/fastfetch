@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFBiosOptions
-{
+typedef struct FFBiosOptions {
     FFModuleArgs moduleArgs;
 } FFBiosOptions;
 
