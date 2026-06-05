@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.64.1
+    VERSION 2.64.2
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1638,6 +1638,11 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
                             set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
                         endif()
                     endif()
+
+                    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+                        # INTERFACE_LINK_LIBRARIES doesn't expose libvarname.a
+                        target_link_libraries(libfastfetch PRIVATE ${_FF_CMAKE_TARGET})
+                    endif()
                 endif()
             else()
                 set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
@@ -1691,8 +1696,8 @@ ff_lib_enable(DRM
     "Libdrm"
 )
 ff_lib_enable(VA
-    "libva"
-    "Libva"
+    "libva-drm"
+    "Libva-drm"
 )
 ff_lib_enable(VDPAU
     "vdpau"

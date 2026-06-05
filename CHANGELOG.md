@@ -1,3 +1,15 @@
+# 2.64.2
+
+Bugfixes:
+* Fixes image rendering being wiped quickly (#2374)
+    * Regression from v2.64.0
+* Fixes ASCII logo being overwritten in `--dynamic-interval` mode
+    * Regression from v2.64.0
+
+Logos:
+* Updates OpenWrt and adds a small variant (#2376)
+    * The old one is renamed to `openwrt_old`
+
 # 2.64.1
 
 Features:
