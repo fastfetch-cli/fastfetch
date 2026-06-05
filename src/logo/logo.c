@@ -715,8 +715,9 @@ void ffLogoPrintLine(void) {
         printf("\033[%uC", instance.state.logoWidth);
     }
 
-    if (instance.state.dynamicInterval > 0) {
+    if (instance.state.dynamicInterval > 0 && logo->position == FF_LOGO_POSITION_LEFT) {
         fputs("\033[K", stdout); // Clear to the end of the line
+        // Note that we don't clear the line when the logo is on the right, as it will also clear the logo itself
     }
 
     ++instance.state.keysHeight;
