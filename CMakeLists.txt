@@ -1638,6 +1638,11 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
                             set(${VARNAME}_LIBRARIES ${_FF_CMAKE_TARGET})
                         endif()
                     endif()
+
+                    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+                        # INTERFACE_LINK_LIBRARIES doesn't expose libvarname.a
+                        target_link_libraries(libfastfetch PRIVATE ${_FF_CMAKE_TARGET})
+                    endif()
                 endif()
             else()
                 set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
