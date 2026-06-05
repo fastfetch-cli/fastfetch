@@ -461,7 +461,7 @@ static bool updateLogoPath(void) {
         return true;
     }
 
-    #if !FF_MODULE_DISABLE_MEDIA
+#if !FF_MODULE_DISABLE_MEDIA
     if (ffStrbufIgnCaseEqualS(&options->source, "media-cover")) {
         const FFMediaResult* media = ffDetectMedia(true);
         if (media->cover.length == 0) {
@@ -470,7 +470,7 @@ static bool updateLogoPath(void) {
         ffStrbufSet(&options->source, &media->cover);
         return true;
     }
-    #endif
+#endif
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreateA(128);
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE)) {
@@ -639,7 +639,7 @@ void ffLogoPrint(void) {
         }
 
         if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt")) {
-            #if !FF_MODULE_DISABLE_TERMINAL
+#if !FF_MODULE_DISABLE_TERMINAL
             const FFTerminalResult* terminal = ffDetectTerminal();
 
             bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
@@ -655,15 +655,15 @@ void ffLogoPrint(void) {
                 ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
                 ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
                 ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
-#ifdef __APPLE__
+    #ifdef __APPLE__
                 ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
-#else
+    #else
                 ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
-#endif
+    #endif
                 false;
-            #else
+#else
             bool supportsKitty = false;
-            #endif
+#endif
 
             // Try to load the logo as an image. If it succeeds, print it and return.
             if (logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false)) {
@@ -685,33 +685,34 @@ void ffLogoPrint(void) {
 }
 
 void ffLogoPrintLine(void) {
-    uint32_t printedLineWidth = 0;
     FFLogoLineCacheState* cache = &instance.state.logoLineCache;
     FFOptionsLogo* logo = &instance.config.logo;
 
-    if (cache->lines.length > 0 && (logo->position == FF_LOGO_POSITION_LEFT || logo->position == FF_LOGO_POSITION_RIGHT) && cache->nextLine < cache->lines.length) {
-        FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
+    if (cache->lines.length > 0) {
+        // Line cache is enabled. Always move cursor with whitespaces to make lolcat happy
+        if (cache->nextLine < cache->lines.length) {
+            // Print logo line and move cursor
+            FFLogoCachedLine* line = FF_LIST_GET(FFLogoCachedLine, cache->lines, cache->nextLine);
 
-        if (logo->position == FF_LOGO_POSITION_RIGHT && line->chars.length > 0) {
-            printf("\033[9999999C\033[%uD", cache->rightOffset);
-            ffStrbufWriteTo(&line->chars, stdout);
-            fputs("\033[G", stdout);
-        } else {
-            ffStrbufWriteTo(&line->chars, stdout);
-            printedLineWidth = line->width;
+            if (logo->position == FF_LOGO_POSITION_RIGHT) {
+                printf("\033[9999999C\033[%uD", cache->rightOffset);
+                ffStrbufWriteTo(&line->chars, stdout);
+
+                fputs("\033[G", stdout);
+            } else {
+                ffStrbufWriteTo(&line->chars, stdout);
+
+                uint32_t remaining = instance.state.logoWidth;
+                remaining = line->width < remaining ? remaining - line->width : 0;
+                ffPrintCharTimes(' ', remaining);
+            }
+            ++cache->nextLine;
+        } else if (logo->position == FF_LOGO_POSITION_LEFT) {
+            // Move cursor to the start position
+            ffPrintCharTimes(' ', instance.state.logoWidth);
         }
-
-        ++cache->nextLine;
-    }
-
-    if (instance.state.logoWidth > 0) {
-        if (instance.config.logo.position == FF_LOGO_POSITION_LEFT) {
-            uint32_t remaining = instance.state.logoWidth;
-            remaining = printedLineWidth < remaining ? remaining - printedLineWidth : 0;
-            ffPrintCharTimes(' ', remaining);
-        } else {
-            printf("\033[%uC", instance.state.logoWidth);
-        }
+    } else if (instance.state.logoWidth > 0) {
+        printf("\033[%uC", instance.state.logoWidth);
     }
 
     if (instance.state.dynamicInterval > 0) {
