@@ -317,6 +317,7 @@ static const FFlogo O[] = {
     // OpenWrtOld
     {
         .names = { "openwrt_old" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_OPENWRT_OLD,
         .colors = {
             FF_COLOR_FG_BLUE,
