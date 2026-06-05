@@ -1,7 +1,7 @@
 # 2.64.2
 
 Bugfixes:
-* Fixes image renders but quickly gets wiped (#2374)
+* Fixes image rendering being wiped quickly (#2374)
     * Regression from v2.64.0
 * Fixes ASCII logo from being overwritten in `--dynamic-interval` mode
     * Regression from v2.64.0
