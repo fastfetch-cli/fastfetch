@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "common/attributes.h"
 #include "common/wcwidth.h"
 
 #ifdef _WIN32
@@ -25,14 +26,17 @@ static inline bool ffStrSet(const char* str) {
     return *str != '\0';
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrStartsWithIgnCase(const char* str, const char* compareTo) {
     return strncasecmp(str, compareTo, strlen(compareTo)) == 0;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrEqualsIgnCase(const char* str, const char* compareTo) {
     return strcasecmp(str, compareTo) == 0;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrStartsWith(const char* str, const char* compareTo) {
     return strncmp(str, compareTo, strlen(compareTo)) == 0;
 }
@@ -55,26 +59,32 @@ static inline bool ffStrEndsWithIgnCase(const char* str, const char* compareTo) 
     return strncasecmp(str + strLength - compareToLength, compareTo, compareToLength) == 0;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrEquals(const char* str, const char* compareTo) {
     return strcmp(str, compareTo) == 0;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrContains(const char* str, const char* compareTo) {
     return strstr(str, compareTo) != NULL;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrContainsIgnCase(const char* str, const char* compareTo) {
     return strcasestr(str, compareTo) != NULL;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffStrContainsC(const char* str, char compareTo) {
     return strchr(str, compareTo) != NULL;
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffCharIsEnglishAlphabet(char c) {
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
+FF_A_ALWAYS_INLINE
 static inline bool ffCharIsDigit(char c) {
     return '0' <= c && c <= '9';
 }
@@ -86,6 +96,7 @@ uint8_t ffUtf8CharLenWidth(const char* str, uint32_t length, uint8_t* width);
 
 uint32_t ffUtf8StrWidth(const char* str, uint32_t length);
 
+FF_A_ALWAYS_INLINE
 static inline bool ffCharIsHexDigit(char c) {
     return ffCharIsDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
 }
