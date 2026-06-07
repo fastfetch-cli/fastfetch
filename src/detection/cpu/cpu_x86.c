@@ -1153,7 +1153,7 @@ const struct match_entry_t cpudb_amd[] = {
 
 /********************************************************************************** */
 
-// https://github.com/anrieff/libcpuid/blob/2e4456ae0165db3155da2e8fba92afd5c090ca1b/libcpuid/recog_centaur.c
+// https://github.com/anrieff/libcpuid/blob/ff6b7500351293259ca808783ee81e8ab5b7c0cb/libcpuid/recog_centaur.c
 /*
  * Copyright 2023  Veselin Georgiev,
  * anrieffNOSPAM @ mgail_DOT.com (convert to gmail)
