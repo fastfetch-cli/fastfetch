@@ -2,6 +2,7 @@
 
 #ifdef FF_HAVE_VULKAN
     #include <vulkan/vulkan.h>
+    #include "common/strutil.h"
 
     #if VK_KHR_video_decode_queue && VK_KHR_video_encode_queue
 
@@ -13,13 +14,13 @@
 static FFCodecType ffCodecDecodeOperationsToTypes(VkVideoCodecOperationFlagsKHR operations) {
     FFCodecType types = FF_CODEC_TYPE_NONE;
 
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR) {
+    if (operations & 0x00000001 /*VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_H264;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_H265_BIT_KHR) {
+    if (operations & 0x00000002 /*VK_VIDEO_CODEC_OPERATION_DECODE_H265_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_HEVC;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR) {
+    if (operations & 0x00000004 /*VK_VIDEO_CODEC_OPERATION_DECODE_AV1_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_AV1;
     }
     if (operations & 0x00000008 /*VK_VIDEO_CODEC_OPERATION_DECODE_VP9_BIT_KHR*/) {
@@ -32,13 +33,13 @@ static FFCodecType ffCodecDecodeOperationsToTypes(VkVideoCodecOperationFlagsKHR 
 static FFCodecType ffCodecEncodeOperationsToTypes(VkVideoCodecOperationFlagsKHR operations) {
     FFCodecType types = FF_CODEC_TYPE_NONE;
 
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_KHR) {
+    if (operations & 0x00010000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_H264;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_KHR) {
+    if (operations & 0x00020000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_HEVC;
     }
-    if (operations & VK_VIDEO_CODEC_OPERATION_ENCODE_AV1_BIT_KHR) {
+    if (operations & 0x00040000 /*VK_VIDEO_CODEC_OPERATION_ENCODE_AV1_BIT_KHR*/) {
         types |= FF_CODEC_TYPE_AV1;
     }
 
@@ -47,7 +48,7 @@ static FFCodecType ffCodecEncodeOperationsToTypes(VkVideoCodecOperationFlagsKHR 
 
 static bool ffCodecHasDeviceExtension(const VkExtensionProperties* extensions, uint32_t extensionCount, const char* extensionName) {
     for (uint32_t i = 0; i < extensionCount; ++i) {
-        if (strcmp(extensions[i].extensionName, extensionName) == 0) {
+        if (ffStrEquals(extensions[i].extensionName, extensionName)) {
             return true;
         }
     }
@@ -55,7 +56,7 @@ static bool ffCodecHasDeviceExtension(const VkExtensionProperties* extensions, u
     return false;
 }
 
-const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
+const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FF_DEBUG("Starting Vulkan codec detection");
 
     FF_LIBRARY_LOAD_MESSAGE(vulkan,
@@ -151,10 +152,6 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
     }
 
     FF_AUTO_FREE VkPhysicalDevice* physicalDevices = (VkPhysicalDevice*) malloc(sizeof(VkPhysicalDevice) * (size_t) physicalDeviceCount);
-    if (!physicalDevices) {
-        ffvkDestroyInstance(vkInstance, NULL);
-        return "malloc() failed";
-    }
 
     res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices);
     if (res != VK_SUCCESS) {
@@ -176,23 +173,23 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
             continue;
         }
 
-        FF_AUTO_FREE VkExtensionProperties* extensions = NULL;
-        if (extensionCount > 0) {
-            extensions = (VkExtensionProperties*) malloc(sizeof(VkExtensionProperties) * (size_t) extensionCount);
-            if (!extensions) {
-                ffvkDestroyInstance(vkInstance, NULL);
-                return "malloc() failed";
-            }
-
-            res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], NULL, &extensionCount, extensions);
-            if (res != VK_SUCCESS) {
-                FF_DEBUG("vkEnumerateDeviceExtensionProperties(list) failed for '%s' with VkResult=%d", properties.deviceName, res);
-                continue;
-            }
+        if (extensionCount == 0) {
+            FF_DEBUG("Skipping Vulkan device '%s' because it has no extensions", properties.deviceName);
+            continue;
         }
 
-        bool hasVideoDecode = ffCodecHasDeviceExtension(extensions, extensionCount, VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME);
-        bool hasVideoEncode = ffCodecHasDeviceExtension(extensions, extensionCount, VK_KHR_VIDEO_ENCODE_QUEUE_EXTENSION_NAME);
+        FF_AUTO_FREE VkExtensionProperties* extensions = (VkExtensionProperties*) malloc(sizeof(VkExtensionProperties) * (size_t) extensionCount);
+
+        res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], NULL, &extensionCount, extensions);
+        if (res != VK_SUCCESS) {
+            FF_DEBUG("vkEnumerateDeviceExtensionProperties(list) failed for '%s' with VkResult=%d", properties.deviceName, res);
+            continue;
+        }
+
+        bool hasVideoDecode = (options->showType & FF_CODEC_SHOW_TYPE_DECODER) &&
+            ffCodecHasDeviceExtension(extensions, extensionCount, VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME);
+        bool hasVideoEncode = (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) &&
+            ffCodecHasDeviceExtension(extensions, extensionCount, VK_KHR_VIDEO_ENCODE_QUEUE_EXTENSION_NAME);
 
         if (!hasVideoDecode && !hasVideoEncode) {
             FF_DEBUG("Skipping Vulkan device '%s' because it does not support video queue extensions", properties.deviceName);
@@ -209,10 +206,6 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
 
         FF_AUTO_FREE VkQueueFamilyProperties2* queueFamilyProperties = (VkQueueFamilyProperties2*) malloc(sizeof(VkQueueFamilyProperties2) * (size_t) queueFamilyCount);
         FF_AUTO_FREE VkQueueFamilyVideoPropertiesKHR* queueFamilyVideoProperties = (VkQueueFamilyVideoPropertiesKHR*) malloc(sizeof(VkQueueFamilyVideoPropertiesKHR) * (size_t) queueFamilyCount);
-        if (!queueFamilyProperties || !queueFamilyVideoProperties) {
-            ffvkDestroyInstance(vkInstance, NULL);
-            return "malloc() failed";
-        }
 
         for (uint32_t queueIndex = 0; queueIndex < queueFamilyCount; ++queueIndex) {
             queueFamilyVideoProperties[queueIndex] = (VkQueueFamilyVideoPropertiesKHR){
@@ -267,8 +260,8 @@ const char* ffDetectCodecVulkan(FFlist* result /*list of FFCodecResult*/) {
 
     #else
 
-const char* ffDetectCodecVulkan(FFlist* result) {
-    FF_UNUSED(result);
+const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result) {
+    FF_UNUSED(options, result);
     return "Vulkan video queue extensions are not supported by this Vulkan implementation";
 }
 

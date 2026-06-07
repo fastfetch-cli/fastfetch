@@ -63,6 +63,18 @@ int main(void) {
     }
 
     {
+        VERIFY("output({1|20})", "12345 67890", "output(    12345 67890     )");
+        VERIFY("output({1|-20})", "12345 67890", "output(    12345 67890     )");
+        VERIFY("output({1|11})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1|-11})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1|6})", "12345 67890", "output(12345 )");
+        VERIFY("output({|6})", "12345 67890", "output(12345 )");
+        VERIFY("output({|-6})", "12345 67890", "output(12345…)");
+        VERIFY("output({|0})", "12345 67890", "output()");
+        VERIFY("output({|})", "12345 67890", "output()");
+    }
+
+    {
         VERIFY("output({1n>20})", "12345 67890", "output({1n>20})");
         VERIFY("output({120})", "12345 67890", "output({120})");
         VERIFY("output({1:11})", "", "output()");
@@ -108,6 +120,31 @@ int main(void) {
         VERIFY("output({1:20}{1<20}{1>20})", "12345 67890", "output(12345 6789012345 67890                  12345 67890)");
         VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "12345 67890", "output(OK)");
         VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "", "output(NOT OK)");
+    }
+
+    {
+        VERIFY("output({1:3})", "\e[1m12345", "output(\e[1m123)");
+        VERIFY("output({1:-3})", "\e[1m12345", "output(\e[1m123…)");
+        VERIFY("output({1:3})", "\e[1m12345\e[m", "output(\e[1m123\e[m)");
+        VERIFY("output({1:-3})", "\e[1m12345\e[m", "output(\e[1m123…\e[m)");
+    }
+
+    {
+        VERIFY("output({1<8})", "\e[1m12345", "output(\e[1m12345   )");
+        VERIFY("output({1>8})", "\e[1m12345", "output(\e[1m   12345)");
+        VERIFY("output({1<8})", "\e[1m12345\e[m", "output(\e[1m12345   \e[m)");
+        VERIFY("output({1>8})", "\e[1m12345\e[m", "output(\e[1m   12345\e[m)");
+        VERIFY("output({1<1})", "\e[30;47m12345\e[m", "output(\e[30;47m1\e[m)");
+        VERIFY("output({1|8})", "\e[1m12345\e[m", "output(\e[1m 12345  \e[m)");
+        VERIFY("output({1|1})", "\e[30;47m12345\e[m", "output(\e[30;47m1\e[m)");
+    }
+
+    {
+        VERIFY("output({1~0})", "\e[1m12345", "output(\e[1m12345)");
+        VERIFY("output({1~1})", "\e[1m12345", "output(\e[1m2345)");
+        VERIFY("output({1~0})", "\e[1m12345\e[m", "output(\e[1m12345\e[m)");
+        VERIFY("output({1~1})", "\e[1m12345\e[m", "output(\e[1m2345\e[m)");
+        VERIFY("output({1~2})", "\e[30;47m12345\e[m", "output(\e[30;47m345\e[m)");
     }
 
 #ifndef _WIN32 // Windows doesn't have setenv

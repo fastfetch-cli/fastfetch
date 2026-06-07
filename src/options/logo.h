@@ -45,11 +45,13 @@ typedef struct FFOptionsLogo {
     bool preserveAspectRatio;
     bool recache;
 
+#if FF_HAVE_CHAFA
     bool chafaFgOnly;
     FFstrbuf chafaSymbols;
     uint32_t chafaCanvasMode;
     uint32_t chafaColorSpace;
     uint32_t chafaDitherMode;
+#endif
 } FFOptionsLogo;
 
 void ffOptionsInitLogo(FFOptionsLogo* options);

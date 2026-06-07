@@ -93,6 +93,8 @@ static void setShellInfoDetails(FFShellResult* result) {
         ffStrbufSetS(&result->prettyName, "nushell");
     } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")) {
         ffStrbufSetS(&result->prettyName, "Windows Explorer");
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "busybox")) {
+        ffStrbufInitStatic(&result->prettyName, "ash");
     }
 }
 

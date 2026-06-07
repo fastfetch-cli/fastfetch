@@ -277,6 +277,48 @@ static const FFCodecMftEncoderSubtype FF_D3D11VA_MFT_ENCODER_SUBTYPES[] = {
     { &MFVideoFormat_AV1, FF_CODEC_TYPE_AV1 },
 };
 
+static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, __typeof__(&D3D11CreateDevice) ffD3D11CreateDevice) {
+    ID3D11Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
+    D3D_FEATURE_LEVEL featureLevel;
+    if (FAILED(ffD3D11CreateDevice(
+            adapter,
+            D3D_DRIVER_TYPE_UNKNOWN,
+            nullptr,
+            D3D11_CREATE_DEVICE_VIDEO_SUPPORT,
+            nullptr,
+            0,
+            D3D11_SDK_VERSION,
+            &d3dDevice,
+            &featureLevel,
+            nullptr)) ||
+        !d3dDevice) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    ID3D11VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
+    if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D11VideoDevice), (void**) &videoDevice)) || !videoDevice) {
+        return FF_CODEC_TYPE_NONE;
+    }
+
+    FFCodecType decoders = FF_CODEC_TYPE_NONE;
+    UINT profileCount = videoDevice->GetVideoDecoderProfileCount();
+    for (UINT profileIndex = 0; profileIndex < profileCount; ++profileIndex) {
+        GUID profile;
+        if (FAILED(videoDevice->GetVideoDecoderProfile(profileIndex, &profile))) {
+            continue;
+        }
+
+        FFCodecType type = ffCodecProfileToTypeDx11(profile);
+
+        if ((decoders & type) || !ffCodecProfileHasNativeOutput(videoDevice, profile)) {
+            continue;
+        }
+
+        decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) type));
+    }
+    return decoders;
+}
+
 static FFCodecType ffDetectD3d11MftEncoders(const LUID& adapterLuid, __typeof__(&MFCreateAttributes) ffMFCreateAttributes, __typeof__(&MFTEnum2) ffMFTEnum2) {
     IMFAttributes* FF_AUTO_RELEASE_COM_OBJECT attributes = nullptr;
     if (FAILED(ffMFCreateAttributes(&attributes, 1)) || !attributes) {
@@ -291,6 +333,10 @@ static FFCodecType ffDetectD3d11MftEncoders(const LUID& adapterLuid, __typeof__(
 
     for (uint32_t subtypeIndex = 0; subtypeIndex < ARRAY_SIZE(FF_D3D11VA_MFT_ENCODER_SUBTYPES); ++subtypeIndex) {
         const FFCodecMftEncoderSubtype& subtype = FF_D3D11VA_MFT_ENCODER_SUBTYPES[subtypeIndex];
+        if (encoders & subtype.codecType) {
+            continue;
+        }
+
         MFT_REGISTER_TYPE_INFO outputType = {
             .guidMajorType = MFMediaType_Video,
             .guidSubtype = *subtype.subtype,
@@ -357,52 +403,20 @@ static void ffEnumHardwareAdapters(IDXGIFactory1* factory, Func&& onAdapter) {
     }
 }
 
-const char* detectD3d11va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
+const char* detectD3d11va(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
     FF_LIBRARY_LOAD_MESSAGE(d3d11, "d3d11" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(d3d11, D3D11CreateDevice)
     FF_LIBRARY_LOAD_MESSAGE(mfplat, "mfplat" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFTEnum2)
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(mfplat, MFTEnum2) // Not available on Windows 8.1
 
     ffEnumHardwareAdapters(factory, [&](IDXGIAdapter1* adapter, const DXGI_ADAPTER_DESC1& desc) {
-        ID3D11Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
-        D3D_FEATURE_LEVEL featureLevel;
-        if (FAILED(ffD3D11CreateDevice(
-                adapter,
-                D3D_DRIVER_TYPE_UNKNOWN,
-                nullptr,
-                D3D11_CREATE_DEVICE_VIDEO_SUPPORT,
-                nullptr,
-                0,
-                D3D11_SDK_VERSION,
-                &d3dDevice,
-                &featureLevel,
-                nullptr)) ||
-            !d3dDevice) {
-            return;
-        }
-
-        ID3D11VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
-        if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D11VideoDevice), (void**) &videoDevice)) || !videoDevice) {
-            return;
-        }
-
-        FFCodecType decoders = FF_CODEC_TYPE_NONE;
-        UINT profileCount = videoDevice->GetVideoDecoderProfileCount();
-        for (UINT profileIndex = 0; profileIndex < profileCount; ++profileIndex) {
-            GUID profile;
-            if (FAILED(videoDevice->GetVideoDecoderProfile(profileIndex, &profile))) {
-                continue;
-            }
-
-            if (!ffCodecProfileHasNativeOutput(videoDevice, profile)) {
-                continue;
-            }
-
-            decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) ffCodecProfileToTypeDx11(profile)));
-        }
-
-        FFCodecType encoders = ffDetectD3d11MftEncoders(desc.AdapterLuid, ffMFCreateAttributes, ffMFTEnum2);
+        FFCodecType decoders = (options->showType & FF_CODEC_SHOW_TYPE_DECODER)
+            ? ffDetectD3d11vaDecoders(adapter, ffD3D11CreateDevice)
+            : FF_CODEC_TYPE_NONE;
+        FFCodecType encoders = ffMFTEnum2 && (options->showType & FF_CODEC_SHOW_TYPE_ENCODER)
+            ? ffDetectD3d11MftEncoders(desc.AdapterLuid, ffMFCreateAttributes, ffMFTEnum2)
+            : FF_CODEC_TYPE_NONE;
 
         if (decoders == FF_CODEC_TYPE_NONE && encoders == FF_CODEC_TYPE_NONE) {
             return;
@@ -412,13 +426,13 @@ const char* detectD3d11va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
         ffStrbufInitWS(&gpuResult->gpu, desc.Description);
         gpuResult->decoders = decoders;
         gpuResult->encoders = encoders;
-        gpuResult->platformApi = "D3D11VA+MFT";
+        gpuResult->platformApi = ffMFTEnum2 ? "D3D11VA+MFT" : "D3D11VA";
     });
 
     return nullptr;
 }
 
-const char* detectD3d12va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
+const char* detectD3d12va(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/, IDXGIFactory1* factory) {
     FF_LIBRARY_LOAD_MESSAGE(d3d12, "d3d12" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(d3d12, D3D12CreateDevice)
 
@@ -470,26 +484,31 @@ const char* detectD3d12va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
         }
 
         FFCodecType decoders = FF_CODEC_TYPE_NONE;
-        FFCodecType encoders = FF_CODEC_TYPE_NONE;
+        if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+            for (uint32_t profileIndex = 0; profileIndex < ARRAY_SIZE(FF_D3D12_DECODE_PROFILES); ++profileIndex) {
+                const GUID& profile = FF_D3D12_DECODE_PROFILES[profileIndex];
+                FFCodecType codecType = ffCodecProfileToTypeDx12(profile);
 
-        for (uint32_t profileIndex = 0; profileIndex < ARRAY_SIZE(FF_D3D12_DECODE_PROFILES); ++profileIndex) {
-            const GUID& profile = FF_D3D12_DECODE_PROFILES[profileIndex];
-            if (!ffCodecProfileHasNativeOutput(videoDevice, profile, 0)) {
-                continue;
+                if ((decoders & codecType) || !ffCodecProfileHasNativeOutput(videoDevice, profile, 0)) {
+                    continue;
+                }
+
+                decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) codecType));
             }
-
-            FFCodecType codecType = ffCodecProfileToTypeDx12(profile);
-            decoders = (FFCodecType) (((uint32_t) decoders) | ((uint32_t) codecType));
         }
 
-        for (uint32_t codecIndex = 0; codecIndex < ARRAY_SIZE(FF_D3D12_ENCODER_CODECS); ++codecIndex) {
-            D3D12_VIDEO_ENCODER_CODEC codec = FF_D3D12_ENCODER_CODECS[codecIndex];
-            if (!ffCodecEncoderSupportedD3d12(videoDevice, codec, 0)) {
-                continue;
-            }
+        FFCodecType encoders = FF_CODEC_TYPE_NONE;
+        if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+            for (uint32_t codecIndex = 0; codecIndex < ARRAY_SIZE(FF_D3D12_ENCODER_CODECS); ++codecIndex) {
+                D3D12_VIDEO_ENCODER_CODEC codec = FF_D3D12_ENCODER_CODECS[codecIndex];
+                FFCodecType codecType = ffCodecEncoderToType(codec);
 
-            FFCodecType codecType = ffCodecEncoderToType(codec);
-            encoders = (FFCodecType) (((uint32_t) encoders) | ((uint32_t) codecType));
+                if ((encoders & codecType) || !ffCodecEncoderSupportedD3d12(videoDevice, codec, 0)) {
+                    continue;
+                }
+
+                encoders = (FFCodecType) (((uint32_t) encoders) | ((uint32_t) codecType));
+            }
         }
 
         if (decoders == FF_CODEC_TYPE_NONE && encoders == FF_CODEC_TYPE_NONE) {
@@ -510,7 +529,7 @@ const char* detectD3d12va(FFlist* result /*list of FFCodecResult*/, IDXGIFactory
     return nullptr;
 }
 
-const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FF_LIBRARY_LOAD_MESSAGE(dxgi, "dxgi" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxgi, CreateDXGIFactory1)
 
@@ -526,9 +545,9 @@ const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* res
 
     if (ffIsWindows11OrGreater()) {
         // D3D12 video encoding is supported only on Windows 11
-        if (detectD3d12va(result, factory) == nullptr) {
+        if (detectD3d12va(options, result, factory) == nullptr) {
             return nullptr;
         }
     }
-    return detectD3d11va(result, factory);
+    return detectD3d11va(options, result, factory);
 }

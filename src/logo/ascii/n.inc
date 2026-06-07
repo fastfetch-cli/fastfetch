@@ -219,9 +219,13 @@ static const FFlogo N[] = {
         .names = { "NurOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_NUROS,
         .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RGB "41;19;182",
+            FF_COLOR_FG_RGB "31;59;205",
+            FF_COLOR_FG_RGB "18;95;225",
+            FF_COLOR_FG_RGB "13;125;250",
         },
+        .colorKeys = FF_COLOR_FG_RGB "13;125;250",
+        .colorTitle = FF_COLOR_FG_RGB "41;19;182",
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_NURUNNER

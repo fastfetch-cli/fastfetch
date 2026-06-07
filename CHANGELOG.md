@@ -1,3 +1,86 @@
+# 2.64.2
+
+Bugfixes:
+* Fixes image rendering being wiped quickly (#2374)
+    * Regression from v2.64.0
+* Fixes ASCII logo being overwritten in `--dynamic-interval` mode
+    * Regression from v2.64.0
+
+Logos:
+* Updates OpenWrt and adds a small variant (#2376)
+    * The old one is renamed to `openwrt_old`
+
+# 2.64.1
+
+Features:
+* Adds a CMake option `-DPACKAGES_REMOVE_DISABLED` to remove detection code of disabled packages (`-DPACKAGES_DISABLE_<PACKAGE_NAME>`) for slightly smaller binary size (Packages)
+
+Bugfixes:
+* Fixes compatibility issues with Lua 5.3
+* Avoid possible infinite recursion in `encode_json` when encoding deeply nested tables or circular references
+* Fixes compilation issues when building with old macOS SDKs
+
+# 2.64.0
+
+New **optional build** dependencies:
+* [`libva`](https://github.com/intel/libva) and [`libvdpau`](https://www.freedesktop.org/wiki/Software/VDPAU) for the new `Codec` module.
+* [Lua 5.3 to 5.5](https://www.lua.org/) for Lua scripting support, or [QuickJS](https://github.com/quickjs-ng/quickjs) v0.15.0 or newer for JavaScript scripting support.
+
+Features:
+* Adds `Codec` module support for Windows, macOS, Linux, and Android for hardware-accelerated video codec detection (Codec)
+    * Backends used (results may vary depending on the backend due to driver differences):
+        * Linux and BSD: VA-API (default) and VDPAU (fallback for NVIDIA). Fastfetch must be built with `libva` and `libvdpau` support to enable these backends.
+        * Windows: D3D12VA (Windows 11) and D3D11VA+MFT (Windows 10 or older)
+        * macOS: VideoToolbox
+        * Android: AMediaCodec
+        * Common: Vulkan Video (disabled by default; can be enabled with `"useVulkan": true`)
+    * By default, both encoders and decoders are reported. If no codecs are detected for a given type, `None` is reported. This behavior can be configured using the `"showType": "encoder|decoder"` option.
+* Adds experimental Lua script support for custom formats (Global)
+    * Basic usage (using `Title` as an example): `{ "type": "title", "format": "lua:return string.format('Hello %s@%s', (...).userName, (...).hostName)" }`. The `lua:` prefix indicates a Lua script. A `return` statement is required to pass the final result back to the fastfetch module; otherwise, `nil` is returned implicitly and the entire module output is skipped.
+    * Parameters are passed via variable arguments `(...)`. Users can assign them to named variables for better readability. For example: `lua:local args = ...; string.format('Hello %s@%s', args.userName, args.hostName)`.
+    * The Lua interpreter instance is shared across all modules. This allows users to store and manipulate data across modules. For example:
+        * `{ "type": "shell", "format": "lua:shell = ..." } // Note: no "return" here`
+        * `{ "type": "terminal", "format": "lua:return shell.prettyName .. ' in ' .. (...).prettyName" } // This will print the detected shell and terminal names`
+    * A `json_encode(table, is_pretty)` function has been added to the Lua API for easier debugging. For example, `lua:return json_encode(...)` will print all available variables and their values in JSON format.
+    * Supported Lua versions: Lua 5.3 to 5.5 (Lua 5.1 and LuaJIT are not supported). The Lua version is auto-detected at build time. Once built, users can check the configured Lua version using `fastfetch --list-features`.
+* Adds experimental QuickJS script support for custom formats as an alternative to Lua (Global)
+    * Basic usage: `{ "type": "title", "format": "qjs:`Hello ${this.userName}@${this.hostName}`" }`. The `qjs:` prefix indicates a JavaScript script. No `return` statement is needed; the final result is simply the evaluated value of the script.
+    * Parameters are passed via the `this` object. Usage is mostly the same as Lua, but using JavaScript syntax.
+    * Requires [quickjs-ng v0.15.0](https://github.com/quickjs-ng/quickjs/releases/tag/v0.15.0) or newer.
+* Adds CMake options `-DMODULE_DISABLE_<MODULE_NAME>=ON` to disable modules at compile time for a smaller binary size
+    * Use `cmake -L . | grep MODULE_DISABLE_` to list all available options.
+    * These options rely on LTO for dead code elimination (`-DCMAKE_BUILD_TYPE=Release` should enable LTO by default).
+* Adds the ability to remove unneeded ASCII logos without modifying the fastfetch source code, further reducing binary size
+    * Simply remove the corresponding logo file from the logo directory (`src/logo/ascii/[a-z]/*`) and re-run `cmake`.
+* Improves string manipulation specifiers in custom formats
+    * They are now ANSI escape-aware and work correctly with colored output (e.g., percentages with `num-color`) (#2364). Limitations:
+        * They are still not wide-character aware and treat CJK and emoji characters as raw bytes.
+        * Escape sequences in the middle of strings are not supported.
+    * A new `|` specifier has been added to center strings. For example, `{user-name|20}` will center the username in a 20-character-wide field.
+* Adds preliminary `Bootmgr`, `Brightness`, and `WMTheme` detection support for Haiku (#2358, Haiku)
+* Adds `Wallpaper` and `WMTheme` detection support for the COSMIC desktop environment (Linux)
+* Improves terminal name detection for Nix packages (#2352, Terminal, Linux)
+* Adds DDC/CI brightness detection support for FreeBSD (Brightness, FreeBSD)
+    * DDC/CI communication can be very slow. Users can set the `ddcciSleep: null` option to skip DDC/CI detection.
+* Reworks the built-in logo printing logic. ASCII logos and modules are now printed line by line, avoiding issues like #2239
+    * Note: Image logos are not affected by this change and still print the entire image first before printing any modules.
+* Adds a new `--logo-padding-bottom` option to control the padding between the bottom of the logo and the first module when `--logo-position top` is used
+    * Previously, `--logo-padding-right` was used for both right and bottom padding.
+* Adds `Samsung Exynos 2600` to CPU detection (CPU, Android)
+* Adds terminal font detection support for the Muxy terminal (TerminalFont, macOS)
+* Improves the performance of BusyBox (ash) version detection and always reports `ash` as the pretty name (Shell, Linux)
+
+Bugfixes:
+* Fixes SwayFX version detection (WM, Linux)
+* Fixes fallback font detection for Ghostty (TerminalFont, macOS)
+* Fixes `--stat` output to correctly align with the right border (Global)
+* Fixes boot manager on macOS 26 (mBoot) is incorrectly reported as `iBoot` (Bootmgr, macOS)
+
+Logos:
+* Adds Quasar (#2338, #2323), Origami, Origami_small (#2321, #2322), BerserkArch (#2324, #2310), and NixOS2 (#2346)
+* Minor tweaks and color fixes for the NixOS_small logo (#2357)
+* Updates NurOS (#2366)
+
 # 2.63.1
 
 Bugfixes:

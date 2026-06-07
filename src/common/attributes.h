@@ -16,4 +16,4 @@
 #define FF_A_UNUSED __attribute__((__unused__))
 #define FF_A_PACKED __attribute__((__packed__))
 #define FF_A_WEAK_IMPORT __attribute__((__weak_import__))
-#define FF_A_ALWAYS_INLINE inline __attribute__((__always_inline__))
+#define FF_A_ALWAYS_INLINE __attribute__((__always_inline__))

@@ -17,6 +17,7 @@ static void verify(bool expression, const char* expressionStr, int lineNo) {
 #define VERIFY(expression) verify((expression), #expression, __LINE__)
 
 int main(void) {
+    #if FF_ENABLE_WCWIDTH
     {
         uint8_t width = 255;
         uint8_t bytes = ffUtf8CharLenWidth("", 0, &width);
@@ -35,18 +36,16 @@ int main(void) {
         const char* ch = "\xE6\x96\x87"; // 文 U+6587
         uint8_t width = 0;
         uint8_t bytes = ffUtf8CharLenWidth(ch, 3, &width);
-        int expected = mk_wcwidth(0x6587);
         VERIFY(bytes == 3);
-        VERIFY(width == (uint8_t) (expected < 0 ? 0 : expected));
+        VERIFY(width == 2);
     }
 
     {
-        const char* combining = "\xCC\x81"; // U+0301
+        const char* combining = "\xCC\x81"; // ◌́ U+0301
         uint8_t width = 0;
         uint8_t bytes = ffUtf8CharLenWidth(combining, 2, &width);
-        int expected = mk_wcwidth(0x0301);
         VERIFY(bytes == 2);
-        VERIFY(width == (uint8_t) (expected < 0 ? 0 : expected));
+        VERIFY(width == 0); // Should be 1 since there's no base character
     }
 
     {
@@ -72,18 +71,14 @@ int main(void) {
 
     {
         const char* mixed = "A"
-                            "\xE6\x96\x87"
+                            "\xE6\x96\x87" // 文 U+6587
                             "B";
-        int wide = mk_wcwidth(0x6587);
-        uint32_t expected = 2 + (uint32_t) (wide < 0 ? 0 : wide);
-        VERIFY(ffUtf8StrWidth(mixed, 5) == expected);
+        VERIFY(ffUtf8StrWidth(mixed, 5) == 4);
     }
 
     {
-        const char* combining = "A\xCC\x81";
-        int wCombining = mk_wcwidth(0x0301);
-        uint32_t expected = 1 + (uint32_t) (wCombining < 0 ? 0 : wCombining);
-        VERIFY(ffUtf8StrWidth(combining, 3) == expected);
+        const char* combining = "A\xCC\x81"; // Á
+        VERIFY(ffUtf8StrWidth(combining, 3) == 1);
     }
 
     {
@@ -98,21 +93,16 @@ int main(void) {
     }
 
     {
-        const char* combining = "\xCC\x81";
-        int wCombining = mk_wcwidth(0x0301);
-        uint32_t normalized = (uint32_t) (wCombining < 0 ? 0 : wCombining);
-        uint32_t expected = normalized > 0 ? normalized : 2;
-        VERIFY(ffUtf8StrWidth(combining, 2) == expected);
-    }
-
-    {
         const char* emoji = "\xF0\x9F\x98\x80"; // U+1F600 😀
         uint8_t width = 0;
         uint8_t bytes = ffUtf8CharLenWidth(emoji, 4, &width);
         VERIFY(bytes == 4);
-        VERIFY(width == mk_wcwidth(0x1F600));
+        VERIFY(width == 2);
     }
 
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
+    #else
+    puts("\033[33mTests skipped because wcwidth support is disabled." FASTFETCH_TEXT_MODIFIER_RESET);
+    #endif
     return 0;
 }

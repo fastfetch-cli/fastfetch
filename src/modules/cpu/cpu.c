@@ -102,6 +102,10 @@ bool ffPrintCPU(FFCPUOptions* options) {
                                                                                                             FF_ARG(cpu.packages, "packages"),
                                                                                                             FF_ARG(cpu.march, "march"),
                                                                                                             FF_ARG(cpu.numaNodes, "numa-nodes"),
+                                                                                                            #if __i386__ || __x86_64__
+                                                                                                            FF_ARG(cpu.codeName, "code-name"),
+                                                                                                            FF_ARG(cpu.technology, "technology"),
+                                                                                                            #endif
                                                                                                         }));
         }
         success = true;
@@ -214,6 +218,20 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
             yyjson_mut_obj_add_null(doc, obj, "numaNodes");
         }
 
+        #if __i386__ || __x86_64__
+        if (cpu.codeName) {
+            yyjson_mut_obj_add_str(doc, obj, "codeName", cpu.codeName);
+        } else {
+            yyjson_mut_obj_add_null(doc, obj, "codeName");
+        }
+
+        if (cpu.technology) {
+            yyjson_mut_obj_add_str(doc, obj, "technology", cpu.technology);
+        } else {
+            yyjson_mut_obj_add_null(doc, obj, "technology");
+        }
+        #endif
+
         success = true;
     }
 
@@ -258,5 +276,9 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         { "Processor package count", "packages" },
         { "CPU microarchitecture", "march" },
         { "NUMA node count", "numa-nodes" },
+        #if __i386__ || __x86_64__
+        { "CPU code name", "code-name" },
+        { "CPU technology", "technology" },
+        #endif
     }))
 };

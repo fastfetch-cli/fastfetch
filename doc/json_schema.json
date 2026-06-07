@@ -1449,6 +1449,7 @@
                             "cpu",
                             "cpucache",
                             "cpuusage",
+                            "codec",
                             "command",
                             "colors",
                             "cursor",
@@ -1913,6 +1914,25 @@
                                         "description": "Whether to use Vulkan for codec detection instead of other platform-specific APIs",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "showType": {
+                                        "description": "Which types of codecs to detect and show",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "both",
+                                                "description": "Show both decoders and encoders"
+                                            },
+                                            {
+                                                "const": "decoder",
+                                                "description": "Show only decoders"
+                                            },
+                                            {
+                                                "const": "encoder",
+                                                "description": "Show only encoders"
+                                            }
+                                        ],
+                                        "default": "both"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

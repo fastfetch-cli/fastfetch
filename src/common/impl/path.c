@@ -1,6 +1,6 @@
 #include "common/path.h"
 #include "common/io.h"
-#include "common/arrayUtils.h"
+#include "common/arrutil.h"
 
 #if !_WIN32
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {

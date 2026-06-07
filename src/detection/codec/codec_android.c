@@ -54,7 +54,7 @@ static bool ffCodecIsHardwareAccelerated(
     return isHardware;
 }
 
-const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FF_LIBRARY_LOAD_MESSAGE(mediandk, "libmediandk.so", 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createDecoderByType)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createEncoderByType)
@@ -69,20 +69,24 @@ const char* ffDetectCodecNative(FF_A_UNUSED FFCodecOptions* options, FFlist* res
         const char* mime = FF_CODEC_MIME_TO_TYPE[i].mime;
         FFCodecType type = FF_CODEC_MIME_TO_TYPE[i].type;
 
-        AMediaCodec* decoder = ffAMediaCodec_createDecoderByType(mime);
-        if (decoder) {
-            if (ffCodecIsHardwareAccelerated(decoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
-                decoders |= type;
+        if ((options->showType & FF_CODEC_SHOW_TYPE_DECODER) && !(decoders & type)) {
+            AMediaCodec* decoder = ffAMediaCodec_createDecoderByType(mime);
+            if (decoder) {
+                if (ffCodecIsHardwareAccelerated(decoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
+                    decoders |= type;
+                }
+                ffAMediaCodec_delete(decoder);
             }
-            ffAMediaCodec_delete(decoder);
         }
 
-        AMediaCodec* encoder = ffAMediaCodec_createEncoderByType(mime);
-        if (encoder) {
-            if (ffCodecIsHardwareAccelerated(encoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
-                encoders |= type;
+        if ((options->showType & FF_CODEC_SHOW_TYPE_ENCODER) && !(encoders & type)) {
+            AMediaCodec* encoder = ffAMediaCodec_createEncoderByType(mime);
+            if (encoder) {
+                if (ffCodecIsHardwareAccelerated(encoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
+                    encoders |= type;
+                }
+                ffAMediaCodec_delete(encoder);
             }
-            ffAMediaCodec_delete(encoder);
         }
     }
 

@@ -41,8 +41,6 @@ static const char* ffCodecTypeToString(FFCodecType type) {
             return "Apple ProRes";
         case FF_CODEC_TYPE_PRORES_RAW:
             return "Apple ProRes RAW";
-        case FF_CODEC_TYPE_JPEG_XL:
-            return "JPEG XL";
         case FF_CODEC_TYPE_UNKNOWN:
         default:
             return "Unknown";
@@ -68,7 +66,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
 
     if (options->moduleArgs.outputFormat.length == 0) {
         FF_STRBUF_AUTO_DESTROY typesJoined = ffStrbufCreate();
-        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+        for (FFCodecType type = FF_CODEC_TYPE_H261; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
             if ((types & type) == 0) {
                 continue;
             }
@@ -81,7 +79,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
         puts(typesJoined.length ? typesJoined.chars : "None");
     } else {
         FF_LIST_AUTO_DESTROY typeList = ffListCreate(); // Use list instead of pre-joined string for qjs and lua
-        for (FFCodecType type = FF_CODEC_TYPE_UNKNOWN; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
+        for (FFCodecType type = FF_CODEC_TYPE_H261; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
             if ((types & type) == 0) {
                 continue;
             }
@@ -116,8 +114,12 @@ bool ffPrintCodec(FFCodecOptions* options) {
         for (uint32_t i = 0; i < result.length; ++i) {
             FFCodecResult* item = FF_LIST_GET(FFCodecResult, result, i);
             uint8_t index = (uint8_t) (result.length == 1 ? 0 : i + 1);
-            printCodecLine(options, index, &item->gpu, "Encoder", item->encoders, item->platformApi);
-            printCodecLine(options, index, &item->gpu, "Decoder", item->decoders, item->platformApi);
+            if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+                printCodecLine(options, index, &item->gpu, "Encoder", item->encoders, item->platformApi);
+            }
+            if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+                printCodecLine(options, index, &item->gpu, "Decoder", item->decoders, item->platformApi);
+            }
         }
     } else {
         FFCodecResult merged = {
@@ -131,8 +133,12 @@ bool ffPrintCodec(FFCodecOptions* options) {
             merged.encoders |= item->encoders;
             merged.platformApi = item->platformApi;
         }
-        printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders, merged.platformApi);
-        printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders, merged.platformApi);
+        if (options->showType & FF_CODEC_SHOW_TYPE_ENCODER) {
+            printCodecLine(options, 0, &merged.gpu, "Encoder", merged.encoders, merged.platformApi);
+        }
+        if (options->showType & FF_CODEC_SHOW_TYPE_DECODER) {
+            printCodecLine(options, 0, &merged.gpu, "Decoder", merged.decoders, merged.platformApi);
+        }
     }
 
     FF_LIST_FOR_EACH (FFCodecResult, item, result) {
@@ -159,6 +165,22 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "showType")) {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]){
+                                                                       { "encoder", FF_CODEC_SHOW_TYPE_ENCODER },
+                                                                       { "decoder", FF_CODEC_SHOW_TYPE_DECODER },
+                                                                       { "both", FF_CODEC_SHOW_TYPE_BOTH },
+                                                                       {},
+                                                                   });
+            if (error) {
+                ffPrintError(FF_CODEC_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            } else {
+                options->showType = (FFCodecShowType) value;
+            }
+            continue;
+        }
+
         ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -167,6 +189,19 @@ void ffGenerateCodecJsonConfig(FFCodecOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "splitGPU", options->splitGPU);
     yyjson_mut_obj_add_bool(doc, module, "useVulkan", options->useVulkan);
+    switch (options->showType) {
+        case FF_CODEC_SHOW_TYPE_ENCODER:
+            yyjson_mut_obj_add_str(doc, module, "showType", "encoder");
+            break;
+        case FF_CODEC_SHOW_TYPE_DECODER:
+            yyjson_mut_obj_add_str(doc, module, "showType", "decoder");
+            break;
+        case FF_CODEC_SHOW_TYPE_BOTH:
+            yyjson_mut_obj_add_str(doc, module, "showType", "both");
+            break;
+        default:
+            break;
+    }
 }
 
 bool ffGenerateCodecJsonResult(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
@@ -208,6 +243,7 @@ void ffInitCodecOptions(FFCodecOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰈫");
     options->splitGPU = false;
     options->useVulkan = false;
+    options->showType = FF_CODEC_SHOW_TYPE_BOTH;
 }
 
 void ffDestroyCodecOptions(FFCodecOptions* options) {

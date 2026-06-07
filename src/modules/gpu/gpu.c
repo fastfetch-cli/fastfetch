@@ -196,16 +196,17 @@ bool ffPrintGPU(FFGPUOptions* options) {
         ++i;
     }
 
-    if (selectedGPUs.length == 0) {
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No GPUs found");
-    }
-
     FF_LIST_FOR_EACH (FFGPUResult, gpu, gpus) {
         ffStrbufDestroy(&gpu->vendor);
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
         ffStrbufDestroy(&gpu->platformApi);
         ffStrbufDestroy(&gpu->memoryType);
+    }
+
+    if (selectedGPUs.length == 0) {
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (gpus.length > 0 ? "GPUs found but all hidden by hideType option" : "No GPUs detected"));
+        return false;
     }
 
     return true;
@@ -230,7 +231,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
 
         if (unsafe_yyjson_equals_str(key, "detectionMethod")) {
             int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]){
                                                                        { "auto", FF_GPU_DETECTION_METHOD_AUTO },
                                                                        { "pci", FF_GPU_DETECTION_METHOD_PCI },
                                                                        { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
@@ -251,7 +252,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
                 options->hideType = FF_GPU_TYPE_NONE;
             } else {
                 int value;
-                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]){
                                                                            { "none", FF_GPU_TYPE_NONE },
                                                                            { "unknown", FF_GPU_TYPE_UNKNOWN },
                                                                            { "integrated", FF_GPU_TYPE_INTEGRATED },
@@ -445,8 +446,8 @@ void ffInitGPUOptions(FFGPUOptions* options) {
         ;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_NONE;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->tempConfig = (FFColorRangeConfig){ 60, 80 };
+    options->percent = (FFPercentageModuleConfig){ 50, 80, 0 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options) {
@@ -462,7 +463,7 @@ FFModuleBaseInfo ffGPUModuleInfo = {
     .printModule = (void*) ffPrintGPU,
     .generateJsonResult = (void*) ffGenerateGPUJsonResult,
     .generateJsonConfig = (void*) ffGenerateGPUJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "GPU vendor", "vendor" },
         { "GPU name", "name" },
         { "GPU driver", "driver" },

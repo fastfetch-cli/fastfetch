@@ -11,7 +11,7 @@
     #include <OS.h>
 #endif
 
-#include "common/arrayUtils.h"
+#include "common/arrutil.h"
 
 static inline double ffTimeGetTick(void) // In msec
 {
