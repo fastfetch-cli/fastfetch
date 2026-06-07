@@ -408,13 +408,13 @@ const char* detectD3d11va(FFCodecOptions* options, FFlist* result /*list of FFCo
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(d3d11, D3D11CreateDevice)
     FF_LIBRARY_LOAD_MESSAGE(mfplat, "mfplat" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFTEnum2)
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(mfplat, MFTEnum2) // Not available on Windows 8.1
 
     ffEnumHardwareAdapters(factory, [&](IDXGIAdapter1* adapter, const DXGI_ADAPTER_DESC1& desc) {
         FFCodecType decoders = (options->showType & FF_CODEC_SHOW_TYPE_DECODER)
             ? ffDetectD3d11vaDecoders(adapter, ffD3D11CreateDevice)
             : FF_CODEC_TYPE_NONE;
-        FFCodecType encoders = (options->showType & FF_CODEC_SHOW_TYPE_ENCODER)
+        FFCodecType encoders = ffMFTEnum2 && (options->showType & FF_CODEC_SHOW_TYPE_ENCODER)
             ? ffDetectD3d11MftEncoders(desc.AdapterLuid, ffMFCreateAttributes, ffMFTEnum2)
             : FF_CODEC_TYPE_NONE;
 
@@ -426,7 +426,7 @@ const char* detectD3d11va(FFCodecOptions* options, FFlist* result /*list of FFCo
         ffStrbufInitWS(&gpuResult->gpu, desc.Description);
         gpuResult->decoders = decoders;
         gpuResult->encoders = encoders;
-        gpuResult->platformApi = "D3D11VA+MFT";
+        gpuResult->platformApi = ffMFTEnum2 ? "D3D11VA+MFT" : "D3D11VA";
     });
 
     return nullptr;
