@@ -1284,25 +1284,13 @@ bool ffCPUDetectX86Specific(FFCPUResult* cpu) {
         return false;
     }
 
-    ffStrbufClear(&cpu->vendor);
-    ffStrbufEnsureFixedLengthFree(&cpu->vendor, 12);
-    memcpy(cpu->vendor.chars + 0, &ebx, 4);
-    memcpy(cpu->vendor.chars + 4, &edx, 4);
-    memcpy(cpu->vendor.chars + 8, &ecx, 4);
-    cpu->vendor.chars[12] = '\0';
-    cpu->vendor.length = 12;
-
-    // Brand String (CPUID Leaves 0x80000002 - 0x80000004)
-    char brand[49] = {};
-    unsigned int ext_eax;
-    if (__get_cpuid(0x80000000, &ext_eax, &ebx, &ecx, &edx)) {
-        if (ext_eax >= 0x80000004) {
-            unsigned int* brand_ptr = (unsigned int*) brand;
-            __get_cpuid(0x80000002, &brand_ptr[0], &brand_ptr[1], &brand_ptr[2], &brand_ptr[3]);
-            __get_cpuid(0x80000003, &brand_ptr[4], &brand_ptr[5], &brand_ptr[6], &brand_ptr[7]);
-            __get_cpuid(0x80000004, &brand_ptr[8], &brand_ptr[9], &brand_ptr[10], &brand_ptr[11]);
-            brand[48] = '\0';
-        }
+    if (!cpu->vendor.length) {
+        ffStrbufEnsureFixedLengthFree(&cpu->vendor, 12);
+        memcpy(cpu->vendor.chars + 0, &ebx, 4);
+        memcpy(cpu->vendor.chars + 4, &edx, 4);
+        memcpy(cpu->vendor.chars + 8, &ecx, 4);
+        cpu->vendor.chars[12] = '\0';
+        cpu->vendor.length = 12;
     }
 
     // CPU Version Info (CPUID Leaf 1)
@@ -1375,7 +1363,7 @@ bool ffCPUDetectX86Specific(FFCPUResult* cpu) {
         }
 
         if (entry->brand.pattern[0] != '\0') {
-            if (match_brand_pattern(entry->brand.pattern, brand)) {
+            if (match_brand_pattern(entry->brand.pattern, cpu->name.chars)) {
                 score += entry->brand.score;
             } else {
                 continue;
