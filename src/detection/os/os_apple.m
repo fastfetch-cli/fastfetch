@@ -44,6 +44,7 @@ static bool detectOSCodeName(FFOSResult* os)
 
     switch (num)
     {
+        case 27: ffStrbufSetStatic(&os->codename, "Golden Gate"); return true;
         case 26:
         case 16: ffStrbufSetStatic(&os->codename, "Tahoe"); return true;
         case 15: ffStrbufSetStatic(&os->codename, "Sequoia"); return true;
