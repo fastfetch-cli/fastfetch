@@ -17,6 +17,7 @@
 #define FF_DE_PRETTY_UKUI "UKUI"
 #define FF_DE_PRETTY_NEBIDE "NebiDE"
 #define FF_DE_PRETTY_ENLIGHTENMENT "Enlightenment"
+#define FF_DE_PRETTY_GAUDYSTACK "GaudyStack"
 
 #define FF_WM_PRETTY_KWIN "KWin"
 #define FF_WM_PRETTY_MUTTER "Mutter"

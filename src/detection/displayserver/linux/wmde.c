@@ -272,6 +272,11 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->deProcessName, "enlightenment_start");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_ENLIGHTENMENT);
     }
+
+    else if (ffStrEqualsIgnCase(name, "GaudyStack")) {
+        ffStrbufSetS(&result->deProcessName, "gaudystack");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GAUDYSTACK);
+    }
 }
 
 static const char* getFromProcesses(FFDisplayServerResult* result) {
