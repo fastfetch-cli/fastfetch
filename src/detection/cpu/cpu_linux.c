@@ -773,6 +773,7 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
     if (!dir) {
+        close(dfd);
         return "fdopendir(dfd) failed";
     }
 
@@ -785,7 +786,7 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
             continue;
         }
 
-        FF_AUTO_CLOSE_FD int cpuxfd = openat(dirfd(dir), entry->d_name, O_RDONLY | O_DIRECTORY);
+        FF_AUTO_CLOSE_FD int cpuxfd = openat(dirfd(dir), entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
         if (cpuxfd < 0) {
             continue;
         }
@@ -801,22 +802,23 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
             unsigned long long id = strtoul(buf, NULL, 10);
             if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
                 pkgHigh |= 1ULL << (id - 64);
-            } else {
+            } else if (__builtin_expect(id <= 64, true)) {
                 pkgLow |= 1ULL << id;
             }
         }
 
         // Check if the directory contains a file named "topology/core_cpus_list"
-        // that lists the physical cores in the package.
+        // that lists the logical cores in the same physical core.
 
         len = ffReadFileDataRelative(cpuxfd, "topology/core_cpus_list", sizeof(buf) - 1, buf);
         if (len > 0) {
-            buf[len] = '\0'; // low-high or low
+            buf[len] = '\0'; // low[-high, low-high, ...]
 
-            for (const char* p = buf; *p;) {
                 char* pend;
-                uint32_t coreId = (uint32_t) strtoul(p, &pend, 10);
-                if (pend == p) {
+            // We assume that the different physical cores exposes different logical core ids,
+            // so that the first `low` is always different between different physical cores.
+            uint32_t coreId = (uint32_t) strtoul(buf, &pend, 10);
+            if (pend == buf) {
                     break;
                 }
 
@@ -831,13 +833,6 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
                 if (!found) {
                     *FF_LIST_ADD(uint32_t, cpuList) = coreId;
                 }
-
-                p = strchr(pend, ',');
-                if (!p) {
-                    break;
-                }
-                ++p;
-            }
         }
     }
 
