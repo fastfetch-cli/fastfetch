@@ -305,11 +305,12 @@ static bool detectBedrock(FFOSResult* os)
 
     if (ffPathExists(
             FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/enux",
-            FF_PATHTYPE_DIRECTORY))
-    {
-        return parseOsRelease(
+            FF_PATHTYPE_DIRECTORY) &&
+        parseOsRelease(
             FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/enux/etc/os-release",
-            os);
+            os))
+    {
+        return true;
     }
 
     return parseOsRelease(
