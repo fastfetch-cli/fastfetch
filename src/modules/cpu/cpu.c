@@ -246,7 +246,7 @@ void ffInitCPUOptions(FFCPUOptions* options) {
     ffStrbufInit(&options->tempSensor);
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->showPeCoreCount = false;
+    options->showPeCoreCount = true;
 }
 
 void ffDestroyCPUOptions(FFCPUOptions* options) {
