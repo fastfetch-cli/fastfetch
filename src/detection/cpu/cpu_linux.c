@@ -619,19 +619,14 @@ static const char* parseCpuInfo(
     return NULL;
 }
 
-static uint32_t getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, const char* scalingFileName, FFstrbuf* buffer) {
-    uint32_t baseLen = basePath->length;
-    ffStrbufAppendS(basePath, cpuinfoFileName);
-    bool ok = ffReadFileBuffer(basePath->chars, buffer);
-    ffStrbufSubstrBefore(basePath, baseLen);
+static uint32_t getFrequency(int policyFd, const char* cpuinfoFileName, const char* scalingFileName, FFstrbuf* buffer) {
+    bool ok = ffReadFileBufferRelative(policyFd, cpuinfoFileName, buffer);
     if (ok) {
         return (uint32_t) (ffStrbufToUInt(buffer, 0) / 1000);
     }
 
     if (scalingFileName) {
-        ffStrbufAppendS(basePath, scalingFileName);
-        ok = ffReadFileBuffer(basePath->chars, buffer);
-        ffStrbufSubstrBefore(basePath, baseLen);
+        ok = ffReadFileBufferRelative(policyFd, scalingFileName, buffer);
         if (ok) {
             return (uint32_t) (ffStrbufToUInt(buffer, 0) / 1000);
         }
@@ -640,55 +635,38 @@ static uint32_t getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, co
     return 0;
 }
 
-static uint8_t getNumCores(FFstrbuf* basePath, FFstrbuf* buffer) {
-    uint32_t baseLen = basePath->length;
-    ffStrbufAppendS(basePath, "/affected_cpus");
-    bool ok = ffReadFileBuffer(basePath->chars, buffer);
-    ffStrbufSubstrBefore(basePath, baseLen);
-    if (ok) {
-        return (uint8_t) (ffStrbufCountC(buffer, ' ') + 1);
-    }
-
-    ffStrbufAppendS(basePath, "/related_cpus");
-    ok = ffReadFileBuffer(basePath->chars, buffer);
-    ffStrbufSubstrBefore(basePath, baseLen);
-    if (ok) {
-        return (uint8_t) (ffStrbufCountC(buffer, ' ') + 1);
-    }
-
-    return 0;
-}
-
 static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/devices/system/cpu/cpufreq/");
-    FF_AUTO_CLOSE_DIR DIR* dir = opendir(path.chars);
+    const char* basePath = "/sys/devices/system/cpu/cpufreq/";
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath);
     if (!dir) {
         return false;
     }
+    int freqFd = dirfd(dir);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    uint32_t baseLen = path.length;
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
         if (ffStrStartsWith(entry->d_name, "policy") && ffCharIsDigit(entry->d_name[strlen("policy")])) {
-            ffStrbufAppendS(&path, entry->d_name);
+            FF_AUTO_CLOSE_FD int policyFd = openat(freqFd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_PATH);
+            if (policyFd < 0) {
+                continue;
+            }
 
-            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            uint32_t fmax = getFrequency(policyFd, "cpuinfo_max_freq", "scaling_max_freq", &buffer);
             if (fmax == 0) {
                 continue;
             }
 
             if (cpu->frequencyMax >= fmax) {
                 if (!options->showPeCoreCount) {
-                    ffStrbufSubstrBefore(&path, baseLen);
                     continue;
                 }
             } else {
                 cpu->frequencyMax = fmax;
             }
 
-            uint32_t fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
+            uint32_t fbase = getFrequency(policyFd, "base_frequency", NULL, &buffer);
             if (fbase > 0) {
                 cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
             }
@@ -702,9 +680,10 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
                 if (cpu->coreTypes[ifreq].freq == 0) {
                     cpu->coreTypes[ifreq].freq = freq;
                 }
-                cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
+                if (ffReadFileBufferRelative(policyFd, "affected_cpus", &buffer)) {
+                    cpu->coreTypes[ifreq].count += ffStrbufCountC(&buffer, ' ') + 1;
+                }
             }
-            ffStrbufSubstrBefore(&path, baseLen);
         }
     }
     return true;
@@ -814,25 +793,25 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         if (len > 0) {
             buf[len] = '\0'; // low[-high, low-high, ...]
 
-                char* pend;
+            char* pend;
             // We assume that the different physical cores exposes different logical core ids,
             // so that the first `low` is always different between different physical cores.
             uint32_t coreId = (uint32_t) strtoul(buf, &pend, 10);
             if (pend == buf) {
+                break;
+            }
+
+            bool found = false;
+            FF_LIST_FOR_EACH (uint32_t, id, cpuList) {
+                if (*id == coreId) {
+                    // This core is already counted
+                    found = true;
                     break;
                 }
-
-                bool found = false;
-                FF_LIST_FOR_EACH (uint32_t, id, cpuList) {
-                    if (*id == coreId) {
-                        // This core is already counted
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    *FF_LIST_ADD(uint32_t, cpuList) = coreId;
-                }
+            }
+            if (!found) {
+                *FF_LIST_ADD(uint32_t, cpuList) = coreId;
+            }
         }
     }
 
