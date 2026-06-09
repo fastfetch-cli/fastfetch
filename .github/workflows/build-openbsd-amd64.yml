@@ -20,7 +20,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.8'
+          version: '7.9'
           environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
