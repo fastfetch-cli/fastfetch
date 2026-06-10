@@ -483,6 +483,59 @@ static void detectHaikuTerminal(FFTerminalFontResult* terminalFont) {
 }
 #endif
 
+static void detectKmscon(FFTerminalFontResult* terminalFont, const FFTerminalResult* terminal) {
+    FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cmdlinePath = ffStrbufCreateF("/proc/%u/cmdline", terminal->pid);
+    if (!ffAppendFileBuffer(cmdlinePath.chars, &cmdline)) {
+        ffStrbufAppendF(&terminalFont->error, "Failed to open %s", cmdlinePath.chars);
+        return;
+    }
+
+    // Search for --configdir in NUL-separated cmdline (safe: memmem/memchr, no strlen)
+    FF_STRBUF_AUTO_DESTROY configdir = ffStrbufCreate();
+    const char* p = memmem(cmdline.chars, cmdline.length, "\0--configdir\0", sizeof("\0--configdir\0") - 1);
+    if (p) {
+        const char* val = p + sizeof("\0--configdir\0") - 1;
+        const char* end = cmdline.chars + cmdline.length;
+        if (val < end) {
+            const char* valEnd = memchr(val, '\0', (size_t)(end - val));
+            if (valEnd && valEnd > val)
+                ffStrbufSetNS(&configdir, (uint32_t)(valEnd - val), val);
+        }
+    }
+
+    // Build config file path — only accept absolute paths
+    FF_STRBUF_AUTO_DESTROY configPath = ffStrbufCreate();
+    if (configdir.length > 0 && configdir.chars[0] == '/') {
+        ffStrbufAppendS(&configPath, configdir.chars);
+        ffStrbufAppendS(&configPath, "/kmscon.conf");
+    } else {
+        ffStrbufAppendS(&configPath, FASTFETCH_TARGET_DIR_ETC "/kmscon/kmscon.conf");
+    }
+
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    if (!ffParsePropFileValues(configPath.chars, 2, (FFpropquery[]) {
+                                                        { "font-name=", &fontName },
+                                                        { "font-size=", &fontSize },
+                                                    })) {
+        ffStrbufAppendF(&terminalFont->error, "Couldn't read kmscon config: %s", configPath.chars);
+        return;
+    }
+
+    if (fontName.length == 0) {
+        ffStrbufAppendF(&terminalFont->error, "Couldn't find font-name in %s", configPath.chars);
+        return;
+    }
+
+    if (fontSize.length == 0) {
+        ffStrbufSetStatic(&fontSize, "16");
+    }
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 bool
 #ifdef __ANDROID__
 ffDetectTerminalFontPlatformLinux
@@ -538,6 +591,8 @@ ffDetectTerminalFontPlatform
         detectFromConfigFile("termite/config", "font =", terminalFont);
     } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "rxvt") || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvt") || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvtd")) {
         detectUrxvt(terminalFont);
+    } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "kmscon")) {
+        detectKmscon(terminalFont, terminal);
     } else {
         return false;
     }
