@@ -5,6 +5,16 @@
 
 #ifdef __linux__
     #include <dirent.h>
+    // cppcheck-suppress missingIncludeSystem
+    #include <sys/ioctl.h>
+    #include <fcntl.h>
+    // cppcheck-suppress missingIncludeSystem
+    #include <stdlib.h>
+
+    // cppcheck-suppress missingIncludeSystem
+    #include <drm/drm.h>
+    // cppcheck-suppress missingIncludeSystem
+    #include <drm/drm_mode.h>
 
 static const char* drmParseSysfs(FFDisplayServerResult* result) {
     const char* drmDirPath = "/sys/class/drm/";
@@ -74,6 +84,53 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
             ffEdidGetName(edidData, &name);
             ffEdidGetPreferredResolutionAndRefreshRate(edidData, &width, &height, &refreshRate);
             ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+        }
+
+        // Try to get the actual active refresh rate from the CRTC.
+        // EDID preferred timing (e.g. 60Hz) can differ from the active mode (e.g. 240Hz)
+        // when the display is set to a non-preferred mode with the same resolution.
+        if (width > 0 && height > 0) {
+            // Extract card number from entry name like "card1-eDP-1"
+            const char* entryName = entry->d_name;
+            if (ffStrStartsWith(entryName, "card")) {
+                entryName += sizeof("card") - 1;
+                // Parse card number directly from d_name
+                int cardNum = 0;
+                for (const char* p = entryName; *p >= '0' && *p <= '9'; p++)
+                    cardNum = cardNum * 10 + (*p - '0');
+
+                if (cardNum >= 0) {
+                    FF_STRBUF_AUTO_DESTROY cardPath = ffStrbufCreateF("/dev/dri/card%d", cardNum);
+
+                    // Read connector_id from sysfs
+                    FF_STRBUF_AUTO_DESTROY connIdPath = ffStrbufCreateA(64);
+                    ffStrbufAppendS(&connIdPath, drmDirPath);
+                    ffStrbufAppendS(&connIdPath, entry->d_name);
+                    ffStrbufAppendS(&connIdPath, "/connector_id");
+                    char connIdBuf[16] = {};
+                    if (ffReadFileData(connIdPath.chars, ARRAY_SIZE(connIdBuf), connIdBuf) > 0) {
+                        uint32_t connId = (uint32_t)strtoul(connIdBuf, NULL, 10);
+                        if (connId > 0) {
+                            int fd = open(cardPath.chars, O_RDONLY | O_CLOEXEC);
+                            if (fd >= 0) {
+                                // Query active CRTC mode via raw DRM ioctls
+                                struct drm_mode_get_connector conn = { .connector_id = connId };
+                                if (ioctl(fd, DRM_IOCTL_MODE_GETCONNECTOR, &conn) >= 0 && conn.encoder_id) {
+                                    struct drm_mode_get_encoder enc = { .encoder_id = conn.encoder_id };
+                                    if (ioctl(fd, DRM_IOCTL_MODE_GETENCODER, &enc) >= 0 && enc.crtc_id) {
+                                        struct drm_mode_crtc crtc = { .crtc_id = enc.crtc_id };
+                                        if (ioctl(fd, DRM_IOCTL_MODE_GETCRTC, &crtc) >= 0) {
+                                            if (crtc.mode_valid && crtc.mode.hdisplay == (uint16_t)width && crtc.mode.vdisplay == (uint16_t)height)
+                                                refreshRate = (double)crtc.mode.vrefresh;
+                                        }
+                                    }
+                                }
+                                close(fd);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         FFDisplayResult* item = ffdsAppendDisplay(
