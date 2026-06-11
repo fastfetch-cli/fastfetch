@@ -269,7 +269,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             }
         }
 
-        if (exePath->length == 0) {
+        if (exePath->length == 0 && access(filePath, X_OK) == 0) {
             ffStrbufSetS(exePath, filePath);
         }
     }
