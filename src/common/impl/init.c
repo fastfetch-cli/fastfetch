@@ -46,10 +46,30 @@ static void defaultConfig(void) {
     ffOptionsInitDisplay(&instance.config.display);
 }
 
+#ifdef _WIN32
+static volatile UINT oldCp = CP_UTF8;
+void resetConsoleCP(void) {
+    if (oldCp != CP_UTF8) {
+        SetConsoleOutputCP(oldCp);
+    }
+}
+#endif
+
 void ffInitInstance(void) {
 #ifdef _WIN32
     // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
     setlocale(LC_ALL, ".UTF8");
+
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    if (GetConsoleMode(hStdout, &mode)) {
+        SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        oldCp = GetConsoleOutputCP();
+        if (oldCp != CP_UTF8) {
+            SetConsoleOutputCP(CP_UTF8);
+            atexit(resetConsoleCP);
+        }
+    }
 #else
     // Never use `setlocale(LC_ALL, "")`
     setlocale(LC_TIME, "");
@@ -61,9 +81,6 @@ void ffInitInstance(void) {
 
 static volatile bool ffDisableLinewrap = false;
 static volatile bool ffHideCursor = false;
-#ifdef _WIN32
-static volatile UINT oldCp = CP_UTF8;
-#endif
 
 static void resetConsole(void) {
     if (ffDisableLinewrap) {
@@ -80,10 +97,6 @@ static void resetConsole(void) {
 
 #if defined(_WIN32)
     fflush(stdout);
-
-    if (oldCp != CP_UTF8) {
-        SetConsoleOutputCP(oldCp);
-    }
 #endif
 }
 
@@ -111,15 +124,6 @@ void ffStart(void) {
         setvbuf(stdout, NULL, _IOFBF, 4096);
     }
     SetConsoleCtrlHandler(consoleHandler, TRUE);
-    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD mode = 0;
-    if (GetConsoleMode(hStdout, &mode)) {
-        SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        oldCp = GetConsoleOutputCP();
-        if (oldCp != CP_UTF8) {
-            SetConsoleOutputCP(CP_UTF8);
-        }
-    }
 #else
     if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);

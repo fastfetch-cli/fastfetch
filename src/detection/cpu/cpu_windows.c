@@ -216,7 +216,21 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu) {
     return NULL;
 }
 
-static const char* detectNCores(FFCPUResult* cpu) {
+static uint32_t getNumLogicalCores(const SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr) {
+    uint32_t num = 0;
+    for (uint32_t i = 0; i < ptr->Processor.GroupCount; ++i) {
+        num += (uint32_t)
+#if _WIN64
+            __builtin_popcountll
+#else
+            __builtin_popcountl
+#endif
+            (ptr->Processor.GroupMask[i].Mask);
+    }
+    return num;
+}
+
+static const char* detectNCores(const FFCPUOptions* options, FFCPUResult* cpu) {
     LOGICAL_PROCESSOR_RELATIONSHIP lpr = RelationAll;
     ULONG length = 0;
     NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), NULL, 0, &length);
@@ -242,6 +256,19 @@ static const char* detectNCores(FFCPUResult* cpu) {
             }
         } else if (ptr->Relationship == RelationProcessorCore) {
             ++cpu->coresPhysical;
+
+            if (options->showPeCoreCount) {
+                for (uint32_t i = 0; i < ARRAY_SIZE(cpu->coreTypes); ++i) {
+                    if (ptr->Processor.EfficiencyClass + 1 == cpu->coreTypes[i].freq) {
+                        cpu->coreTypes[i].count += getNumLogicalCores(ptr);
+                        break;
+                    } else if (cpu->coreTypes[i].freq == 0) {
+                        cpu->coreTypes[i].freq = ptr->Processor.EfficiencyClass + 1;
+                        cpu->coreTypes[i].count += getNumLogicalCores(ptr);
+                        break;
+                    }
+                }
+            }
         } else if (ptr->Relationship == RelationProcessorPackage) {
             ++cpu->packages;
         } else if (ptr->Relationship == RelationNumaNode) {
@@ -258,7 +285,7 @@ static const char* detectByRegistry(FFCPUResult* cpu) {
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
     }
 
-    if (ffRegReadValues(hKey, 3, (FFRegValueArg[]) {
+    if (ffRegReadValues(hKey, 3, (FFRegValueArg[]){
                                      FF_ARG(cpu->name, L"ProcessorNameString"),
                                      FF_ARG(cpu->vendor, L"VendorIdentifier"),
                                      FF_ARG(cpu->frequencyBase, L"~MHz"),
@@ -272,31 +299,8 @@ static const char* detectByRegistry(FFCPUResult* cpu) {
     return NULL;
 }
 
-static const char* detectCoreTypes(FFCPUResult* cpu) {
-    FF_AUTO_FREE PROCESSOR_POWER_INFORMATION* pinfo = calloc(cpu->coresLogical, sizeof(PROCESSOR_POWER_INFORMATION));
-    if (!NT_SUCCESS(NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, (ULONG) sizeof(PROCESSOR_POWER_INFORMATION) * cpu->coresLogical))) {
-        return "NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, size) failed";
-    }
-
-    for (uint32_t icore = 0; icore < cpu->coresLogical && pinfo[icore].MhzLimit; ++icore) {
-        uint32_t ifreq = 0;
-        while (cpu->coreTypes[ifreq].freq != pinfo[icore].MhzLimit && cpu->coreTypes[ifreq].freq > 0) {
-            ++ifreq;
-        }
-        if (cpu->coreTypes[ifreq].freq == 0) {
-            cpu->coreTypes[ifreq].freq = pinfo[icore].MhzLimit;
-        }
-        ++cpu->coreTypes[ifreq].count;
-    }
-
-    if (cpu->frequencyBase == 0) {
-        cpu->frequencyBase = pinfo->MaxMhz;
-    }
-    return NULL;
-}
-
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    detectNCores(cpu);
+    detectNCores(options, cpu);
 
     const char* error = detectByRegistry(cpu);
     if (error) {
@@ -304,9 +308,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
     }
 
     ffCPUDetectByCpuid(cpu);
-    if (options->showPeCoreCount) {
-        detectCoreTypes(cpu);
-    }
 
     if (cpu->frequencyMax == 0) {
         detectMaxSpeedBySmbios(cpu);

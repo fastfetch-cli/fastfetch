@@ -231,6 +231,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
         return "drmGetDevices() failed";
     }
 
+    int nSuccess = 0;
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
     for (int iDev = 0; iDev < nDevices; ++iDev) {
@@ -260,6 +261,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
         if (!res) {
             continue;
         }
+
+        ++nSuccess;
 
         for (int iConn = 0; iConn < res->count_connectors; ++iConn) {
             drmModeConnector* conn = ffdrmModeGetConnectorCurrent(primaryFd, res->connectors[iConn]);
@@ -415,7 +418,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
 
     ffdrmFreeDevices(devices, nDevices);
 
-    return NULL;
+    return nSuccess > 0 ? NULL : "No DRM devices succeeded to connect";
 }
 
 #endif

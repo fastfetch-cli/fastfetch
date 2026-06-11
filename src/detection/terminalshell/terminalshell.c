@@ -503,6 +503,36 @@ FF_A_UNUSED static bool getTerminalVersionWeston(FF_A_UNUSED FFstrbuf* exe, FFst
     return version->length > 0;
 }
 
+FF_A_UNUSED static bool extractKmsconVersion(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
+    if (!ffStrStartsWith(str, "v")) {
+        return true;
+    }
+    int count = 0;
+    sscanf(str, "v%*d.%*d.%*d%n", &count);
+    if (count == 0) {
+        return true;
+    }
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) count - 1, str + 1);
+    return false;
+}
+
+FF_A_UNUSED static bool getTerminalVersionKmscon(FFstrbuf* exe, FFstrbuf* version) {
+    if (ffIsAbsolutePath(exe->chars)) {
+        ffBinaryExtractStrings(exe->chars, extractKmsconVersion, version, (uint32_t) strlen("v0.0.0"));
+        if (version->length) {
+            return true;
+        }
+    }
+
+    if (!getExeVersionRaw(exe, version)) {
+        return false;
+    }
+
+    // kmscon version v10.0.0
+    ffStrbufSubstrAfterLastC(version, ' ');
+    return version->length > 0;
+}
+
 static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version) {
     const char* env = getenv("TERMINAL_VERSION_STRING");
     if (env) {
@@ -836,6 +866,14 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_A_UNUSED FFstrbuf* exe, FF
 
     if (ffStrbufIgnCaseEqualS(processName, "cosmic-term")) {
         return getTerminalVersionTmux(exe, version);
+    }
+
+#endif
+
+#ifdef __linux__
+
+    if (ffStrbufIgnCaseEqualS(processName, "kmscon")) {
+        return getTerminalVersionKmscon(exe, version);
     }
 
 #endif
