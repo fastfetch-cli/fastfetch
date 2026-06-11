@@ -191,6 +191,16 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
             ffStrbufSetStatic(&ds->wmProcessName, "WindowServer");
             ffStrbufSetStatic(&ds->wmPrettyName, "Quartz Compositor");
         }
+        if (getenv("WAYLAND_DISPLAY")) { // Is user on wayland?
+            const char *desktop = getenv("XDG_CURRENT_DESKTOP");
+
+            ffStrbufSetStatic(&ds->wmProcessName, "Wayland");
+            if (desktop  && *desktop) { // If user is on a custom WM that sets XDG_CURRENT_DESKTOP?
+                ffStrbufSetStatic(&ds->wmPrettyName, desktop);
+            } // if not it says Quartz Compositor
+
+            ffStrbufSetS(&ds->wmProtocolName, FF_WM_PROTOCOL_WAYLAND); // Adds (Wayland) at the end of WM
+        }
     }
 
     detectDisplays(ds);
