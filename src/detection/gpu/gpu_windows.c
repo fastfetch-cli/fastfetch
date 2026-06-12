@@ -553,25 +553,8 @@ ffGPUDetectWsl2
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN) {
-            FF_DEBUG("Using fallback GPU type detection");
-            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA) {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla")) {
-                    gpu->type = FF_GPU_TYPE_DISCRETE;
-                }
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS) {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT ")) { gpu->type = FF_GPU_TYPE_DISCRETE; }
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
-                // 0000:00:02.0 is reserved for Intel integrated graphics
-                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_VMWARE || gpu->vendor.chars == FF_GPU_VENDOR_NAME_PARALLELS) {
-                // Virtualized GPUs
-                gpu->type = FF_GPU_TYPE_INTEGRATED;
-            }
-
-            if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
-                FF_DEBUG("Determined GPU type based on vendor (%s) and name: %u", gpu->vendor.chars, gpu->type);
+            if (ffGPUFillVendorByDeviceName(gpu)) {
+                // OK
             }
 #if _WIN32
             else if (ffIsWindows10OrGreater()) {

@@ -87,3 +87,5 @@ static inline uint64_t ffGPUGeneral2Id(uint64_t originalId) {
     // Note: originalId may already have the MSB set
     return (1ULL << 63) | originalId;
 }
+
+bool ffGPUFillVendorByDeviceName(FFGPUResult* gpu);

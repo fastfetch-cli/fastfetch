@@ -11,31 +11,12 @@
     #include <bus/pci/pcireg.h> // DragonFly
 #endif
 
-static void fillGPUTypeGeneric(FFGPUResult* gpu) {
-    if (gpu->type == FF_GPU_TYPE_UNKNOWN) {
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA) {
-            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
-                ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla")) {
-                gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-        } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS) {
-            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT ")) {
-                gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-        } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
-            // 0000:00:02.0 is reserved for Intel integrated graphics
-            gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-        }
-    }
-}
-
 #if FF_HAVE_DRM
     #include "common/library.h"
     #include "common/strutil.h"
 
     #include <drm.h>
-    
+
     // https://github.com/freebsd/drm-kmod/blob/8fea1f06b3ac3fa24217e24ba7b2133abad705a9/include/uapi/drm/drm.h#L1095
     struct drm_pciinfo {
         uint16_t	domain;
@@ -86,14 +67,14 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus) {
         // dev.drm.drm_debug_persist: 0
         // dev.drm.skip_ddb: 0
         // dev.drm.__drm_debug: 0
-        
+
         // hw.dri.timestamp_precision: 20
         // hw.dri.vblank_offdelay: 5000
         // hw.dri.0.modesetting: 1
         // hw.dri.0.busid: pci:0000:01:00.0
-        // hw.dri.0.vblank: 
+        // hw.dri.0.vblank:
         // crtc ref count    last     enabled inmodeset
-        // hw.dri.0.clients: 
+        // hw.dri.0.clients:
         // a dev            pid   uid      magic     ioctls
         // y drm/128      101655     0          0          0
         // n drm/128      101655     0          0          0
@@ -180,7 +161,7 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus) {
             }
         }
 
-        fillGPUTypeGeneric(gpu);
+        ffGPUFillVendorByDeviceName(gpu);
     }
 
     return NULL;
@@ -252,7 +233,7 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
             }
         }
 
-        fillGPUTypeGeneric(gpu);
+        ffGPUFillVendorByDeviceName(gpu);
     }
 
     return NULL;
