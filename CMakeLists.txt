@@ -766,6 +766,7 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_bsd.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
+        src/detection/gpu/gpu_bsddrm.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c

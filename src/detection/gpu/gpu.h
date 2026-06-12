@@ -74,6 +74,9 @@ const char* ffDrmDetectI915(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectXe(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
+        #if __FreeBSD__ || __OpenBSD__ // DRM is not available on NetBSD
+const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus);
+        #endif
     #endif // FF_HAVE_DRM
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
