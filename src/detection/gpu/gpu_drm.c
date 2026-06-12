@@ -356,6 +356,7 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
 #include "gpu_driver_specific.h"
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId) {
+#if !__OpenBSD__
     __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
     const char* soName;
     if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &soName) && (options->temp || options->driverSpecific)) {
@@ -375,6 +376,7 @@ const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* 
             },
             soName);
     }
+#endif
 
     return "No driver-specific detection function found for the GPU vendor";
 }
