@@ -106,12 +106,18 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
 }
 #endif
 
-#ifdef FF_HAVE_DRM
+#if FF_HAVE_DRM || __has_include(<drm/drm.h>)
 
     #include <fcntl.h>
     #include <sys/ioctl.h>
-    #include <drm.h>
-    #include <drm_mode.h>
+    #if FF_HAVE_DRM
+        #include <drm.h>
+        #include <drm_mode.h>
+    #else
+        #define FF_HAVE_DRM 1
+        #include <drm/drm.h>
+        #include <drm/drm_mode.h>
+    #endif
 
 // https://gitlab.freedesktop.org/mesa/drm/-/blob/main/xf86drmMode.c#L1785
 // It's not supported on Ubuntu 20.04
@@ -432,7 +438,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
 #endif
 
 const char* ffdsConnectDrm(FF_A_UNUSED FFDisplayServerResult* result) {
-#ifdef FF_HAVE_DRM
+#if FF_HAVE_DRM
     if (instance.config.general.dsForceDrm != FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY) {
         if (drmConnectLibdrm(result) == NULL) {
             return NULL;
