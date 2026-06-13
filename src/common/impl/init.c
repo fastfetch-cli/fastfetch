@@ -17,6 +17,9 @@
 #else
     #include <signal.h>
 #endif
+#if __linux__
+    #include <linux/version.h>
+#endif
 
 FFinstance instance; // Global singleton
 
@@ -190,6 +193,9 @@ void ffDestroyInstance(void) {
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures(void) {
     fputs(
+#if __linux__
+        "linux-headers " FF_STR(LINUX_VERSION_MAJOR) "." FF_STR(LINUX_VERSION_PATCHLEVEL) "." FF_STR(LINUX_VERSION_SUBLEVEL) "\n"
+#endif
 #if FF_HAVE_THREADS
         "threads\n"
 #endif

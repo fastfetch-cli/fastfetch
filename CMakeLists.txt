@@ -63,6 +63,13 @@ endif()
 
 include(CheckIncludeFile)
 
+if(LINUX)
+    CHECK_INCLUDE_FILE("linux/version.h" HAVE_LINUX_VERSION_H)
+    if(NOT HAVE_LINUX_VERSION_H)
+        message(FATAL_ERROR "Linux headers (linux/version.h) not found! Please install linux-headers package.")
+    endif()
+endif()
+
 #####################
 # Configure options #
 #####################
