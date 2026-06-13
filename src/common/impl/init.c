@@ -3,6 +3,7 @@
 #include "common/parsing.h"
 #include "common/thread.h"
 #include "common/textModifier.h"
+#include "common/strutil.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/terminaltheme/terminaltheme.h"
 #include "logo/logo.h"
@@ -184,8 +185,6 @@ void ffDestroyInstance(void) {
 #endif
 #if FF_HAVE_QUICKJS
     #include <quickjs.h>
-    #define FF_STR_INDIR(x) #x
-    #define FF_STR(x) FF_STR_INDIR(x)
 #endif
 
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets

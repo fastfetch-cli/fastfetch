@@ -14,6 +14,9 @@ __stdcall char* StrStrIA(const char* lpFirst, const char* lpSrch);
     #define strcasestr StrStrIA
 #endif
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 static inline bool ffStrSet(const char* str) {
     if (str == NULL) {
         return false;

@@ -8,9 +8,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
-
 static bool parseLsbRelease(const char* fileName, FFOSResult* result) {
     return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {
                                                   { "DISTRIB_ID =", &result->id },
