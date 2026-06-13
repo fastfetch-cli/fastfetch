@@ -1,39 +1,11 @@
 #include "detection/gpu/gpu.h"
-#include "detection/vulkan/vulkan.h"
-#include "detection/cpu/cpu.h"
-#include "detection/gpu/gpu_driver_specific.h"
 #include "common/io.h"
-#include "common/library.h"
 #include "common/FFstrbuf.h"
 #include "common/strutil.h"
-#include "common/mallocHelper.h"
 #include "modules/gpu/option.h"
 
 #include <inttypes.h>
 #include <stdint.h>
-
-#ifdef FF_HAVE_DRM_AMDGPU
-    #include <amdgpu.h>
-    #include <amdgpu_drm.h>
-    #include <fcntl.h>
-#endif
-
-#ifdef FF_HAVE_DRM
-    #include "intel_drm.h"
-    #include <fcntl.h>
-    #include <sys/ioctl.h>
-#endif
-
-#if defined(FF_HAVE_DRM) && defined(__aarch64__)
-    // https://github.com/alyssarosenzweig/linux/blob/agx-uapi-v7/include/uapi/drm/asahi_drm.h
-    // Found in kernel-headers-6.14.4-400.asahi.fc42.aarch64
-    #if __has_include(<drm/asahi_drm.h>)
-        #include <drm/asahi_drm.h>
-    #else
-        #include "asahi_drm.h"
-    #endif
-    #define FF_HAVE_DRM_ASAHI 1
-#endif
 
 static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
     uint32_t pciDirLength = pciDir->length;
@@ -246,7 +218,6 @@ static void pciDetectIntelSpecific(const FFGPUOptions* options, FFGPUResult* gpu
 }
 
 static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer) {
-#if FF_HAVE_DRM
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
@@ -260,10 +231,6 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
         return ffDrmDetectI915(gpu, fd);
     }
     return "Unknown Intel GPU driver";
-#else
-    FF_UNUSED(gpu, drmKey, buffer);
-    return "Fastfetch is not compiled with drm support";
-#endif
 }
 
 static const char* pciDetectTempGeneral(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer) {
@@ -294,7 +261,6 @@ static const char* pciDetectTempGeneral(const FFGPUOptions* options, FFGPUResult
 }
 
 static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer) {
-#if FF_HAVE_DRM
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
@@ -303,10 +269,6 @@ static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey
     }
 
     return ffDrmDetectNouveau(gpu, fd);
-#else
-    FF_UNUSED(gpu, drmKey, buffer);
-    return "Fastfetch is not compiled with drm support";
-#endif
 }
 
 static const char* pciDetectZxSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer) {
@@ -484,6 +446,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 }
 
 #if __aarch64__
+#include "detection/cpu/cpu.h"
 
 FF_A_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FF_A_UNUSED FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
     if (sscanf(name, "agx-t%lu", &gpu->deviceId) == 1) {
@@ -491,14 +454,12 @@ FF_A_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const ch
     }
     ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
 
-    #if FF_HAVE_DRM_ASAHI
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd >= 0) {
         return ffDrmDetectAsahi(gpu, fd);
     }
-    #endif
 
     return NULL;
 }

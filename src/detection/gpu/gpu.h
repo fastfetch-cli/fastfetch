@@ -67,7 +67,7 @@ typedef struct FFGpuDriverPciBusId {
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu);
 
-    #if FF_HAVE_DRM
+    #if FF_HAVE_DRM || __has_include(<drm/drm.h>)
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath);
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath);
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd);
@@ -77,7 +77,7 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
         #if __FreeBSD__ || __OpenBSD__ // DRM is not available on NetBSD
 const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus);
         #endif
-    #endif // FF_HAVE_DRM
+    #endif // FF_HAVE_DRM || __has_include(<drm/drm.h>)
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
 #endif // defined(XXX)
