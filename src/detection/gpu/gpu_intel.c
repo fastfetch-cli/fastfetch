@@ -16,6 +16,7 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
     FF_LIBRARY_SYMBOL(ctlEnumFrequencyDomains)
     FF_LIBRARY_SYMBOL(ctlFrequencyGetProperties)
+    FF_LIBRARY_SYMBOL(ctlPciGetProperties)
 
     bool inited;
     ctl_api_handle_t apiHandle;
@@ -43,6 +44,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumFrequencyDomains)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetProperties)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlPciGetProperties)
 
         if (ffctlInit(&(ctl_init_args_t) {
                           .AppVersion = CTL_IMPL_VERSION,
@@ -225,6 +227,18 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
 
     if (result.name) {
         ffStrbufSetS(result.name, properties.name);
+    }
+
+    if (result.pcieGen || result.pcieLanes) {
+        ctl_pci_properties_t pciProps = { .Size = sizeof(pciProps), .Version = 0 };
+        if (igclData.ffctlPciGetProperties(device, &pciProps) == CTL_RESULT_SUCCESS) {
+            if (result.pcieGen && pciProps.maxSpeed.gen > 0) {
+                *result.pcieGen = (uint16_t) pciProps.maxSpeed.gen;
+            }
+            if (result.pcieLanes && pciProps.maxSpeed.width > 0) {
+                *result.pcieLanes = (uint16_t) pciProps.maxSpeed.width;
+            }
+        }
     }
 
     return NULL;

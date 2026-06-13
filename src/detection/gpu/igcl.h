@@ -5,6 +5,7 @@
 // DOCUMENTATION REFERENCED BELOW, IN ORDER TO MAKE FASTFETCH MIT COMPLIANT.
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv412ctl_result_t
 typedef enum ctl_result_t {
@@ -73,7 +74,7 @@ typedef struct ctl_adapter_bdf_t {
 } ctl_adapter_bdf_t;
 
 #define IGCL_CTL_MAX_DEVICE_NAME_LEN 100
-#define IGCL_CTL_MAX_RESERVED_SIZE 112
+#define IGCL_CTL_MAX_RESERVED_SIZE 108
 
 typedef enum ctl_adapter_properties_flag_t {
     CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED = 1,
@@ -101,6 +102,7 @@ typedef struct ctl_device_adapter_properties_t {
     uint16_t pci_subsys_id;
     uint16_t pci_subsys_vendor_id;
     ctl_adapter_bdf_t adapter_bdf;
+    uint32_t num_xe_cores;
     char reserved[IGCL_CTL_MAX_RESERVED_SIZE];
 } ctl_device_adapter_properties_t;
 
@@ -214,3 +216,35 @@ typedef struct ctl_freq_properties_t {
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv425ctlFrequencyGetProperties17ctl_freq_handle_tP21ctl_freq_properties_t
 extern ctl_result_t ctlFrequencyGetProperties(ctl_freq_handle_t hFrequency, ctl_freq_properties_t* pProperties);
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv415ctl_pci_speed_t
+typedef struct ctl_pci_speed_t {
+    uint32_t Size;
+    uint8_t Version;
+    int32_t gen;
+    int32_t width;
+    int64_t maxBandwidth;
+} ctl_pci_speed_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctl_pci_address_t
+typedef struct ctl_pci_address_t {
+    uint32_t Size;
+    uint8_t Version;
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t function;
+} ctl_pci_address_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctl_pci_properties_t
+typedef struct ctl_pci_properties_t {
+    uint32_t Size;
+    uint8_t Version;
+    ctl_pci_address_t address;
+    ctl_pci_speed_t maxSpeed;
+    bool resizable_bar_supported;
+    bool resizable_bar_enabled;
+} ctl_pci_properties_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlpcigetproperties
+extern ctl_result_t ctlPciGetProperties(ctl_device_adapter_handle_t hDAhandle, ctl_pci_properties_t* pProperties);

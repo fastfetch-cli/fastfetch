@@ -14,6 +14,8 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxClockInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetUtilizationRates)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkGeneration)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkWidth)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetIndex)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetName)
@@ -159,6 +161,8 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxClockInfo)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkGeneration)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkWidth)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetUtilizationRates)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetIndex)
@@ -285,6 +289,20 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         char name[NVML_DEVICE_NAME_V2_BUFFER_SIZE];
         if (nvmlData.ffnvmlDeviceGetName(device, name, ARRAY_SIZE(name)) == NVML_SUCCESS) {
             ffStrbufSetS(result.name, name);
+        }
+    }
+
+    if (result.pcieGen) {
+        unsigned int value;
+        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkGeneration(device, &value) == NVML_SUCCESS) {
+            *result.pcieGen = (uint16_t) value;
+        }
+    }
+
+    if (result.pcieLanes) {
+        unsigned int value;
+        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkWidth(device, &value) == NVML_SUCCESS) {
+            *result.pcieLanes = (uint16_t) value;
         }
     }
 

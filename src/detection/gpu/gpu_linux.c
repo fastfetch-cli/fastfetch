@@ -368,6 +368,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
     gpu->deviceId = ffGPUPciAddr2Id(pciDomain, pciBus, pciDevice, pciFunc);
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+    gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
 
     char drmKeyBuffer[8];
     if (!drmKey) {
@@ -392,6 +393,36 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);
     ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+
+    ffStrbufAppendS(deviceDir, "/max_link_speed");
+    if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+        int32_t maxLinkSpeed = (int32_t) ffStrbufToSInt(buffer, FF_GPU_PCI_INFO_UNSET);
+        if (maxLinkSpeed >= 64) {
+            gpu->pcieGen = 6;
+        } else if (maxLinkSpeed >= 32) {
+            gpu->pcieGen = 5;
+        } else if (maxLinkSpeed >= 16) {
+            gpu->pcieGen = 4;
+        } else if (maxLinkSpeed >= 8) {
+            gpu->pcieGen = 3;
+        } else if (maxLinkSpeed >= 5) {
+            gpu->pcieGen = 2;
+        } else if (maxLinkSpeed >= 2) { // 2.5
+            gpu->pcieGen = 1;
+        }
+    }
+    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+
+    if (gpu->pcieGen != FF_GPU_PCI_INFO_UNSET) {
+        ffStrbufAppendS(deviceDir, "/max_link_width");
+        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+            int32_t maxLinkWidth = (int32_t) ffStrbufToSInt(buffer, FF_GPU_PCI_INFO_UNSET);
+            if (maxLinkWidth > 0 && maxLinkWidth < 255) { // kernel returns 255 if the value is unknown
+                gpu->pcieLanes = (uint16_t) maxLinkWidth;
+            }
+        }
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+    }
 
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
         bool ok = false;

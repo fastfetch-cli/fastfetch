@@ -130,6 +130,7 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
                 gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
                 gpu->deviceId = ffGPUPciAddr2Id(0, pciBus, pciDev, pciFunc);
                 gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+                gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
 
                 if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
                     ffGPUQueryAmdGpuName(deviceId, revision, gpu);

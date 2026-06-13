@@ -52,6 +52,7 @@ struct FFAdlData {
     FF_LIBRARY_SYMBOL(ADL2_Adapter_MemoryInfo2_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_DedicatedVRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_ASICFamilyType_Get)
+    FF_LIBRARY_SYMBOL(ADL2_Adapter_ChipSetInfo_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive_Caps)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_CapabilitiesX2_Get)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_SystemClocksX2_Get)
@@ -89,6 +90,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_MemoryInfo2_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_DedicatedVRAMUsage_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ASICFamilyType_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ChipSetInfo_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive_Caps)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_CapabilitiesX2_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_SystemClocksX2_Get)
@@ -231,6 +233,26 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     if (result.name) {
         ffStrbufSetS(result.name, device->strAdapterName);
         FF_DEBUG("Setting adapter name: %s; UDID: %s, Present: %d, Exist: %d", device->strAdapterName, device->strUDID, device->iPresent, device->iExist);
+    }
+
+    if (result.pcieGen || result.pcieLanes) {
+        ADLChipSetInfo chipSetInfo;
+        int status = adlData.ffADL2_Adapter_ChipSetInfo_Get(adlData.apiHandle, device->iAdapterIndex, &chipSetInfo);
+        FF_DEBUG("ADL2_Adapter_ChipSetInfo_Get returned %s (%d)", ffAdlStatusToString(status), status);
+
+        if (status == ADL_OK) {
+            FF_DEBUG("Chipset info - Bus Type: %d, PCIe Lane Width: %d", chipSetInfo.iBusType, chipSetInfo.iMaxPCIELaneWidth);
+            if (result.pcieGen && chipSetInfo.iBusType >= 2) {
+                *result.pcieGen = (uint16_t) (chipSetInfo.iBusType - 2);
+                FF_DEBUG("Got PCIe Gen: %u", *result.pcieGen);
+            }
+            if (result.pcieLanes && chipSetInfo.iMaxPCIELaneWidth > 0) {
+                *result.pcieLanes = (uint16_t) chipSetInfo.iMaxPCIELaneWidth;
+                FF_DEBUG("Got PCIe Lanes: %u", *result.pcieLanes);
+            }
+        } else {
+            FF_DEBUG("Failed to get chipset information");
+        }
     }
 
     int odVersion = 0;

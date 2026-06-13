@@ -7,6 +7,7 @@
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t) -1)
 #define FF_GPU_FREQUENCY_UNSET 0
+#define FF_GPU_PCI_INFO_UNSET 0
 #define FF_GPU_CORE_USAGE_UNSET (-DBL_MAX)
 #define FF_GPU_INDEX_UNSET ((uint32_t) -1)
 
@@ -46,6 +47,8 @@ typedef struct FFGPUResult {
     double coreUsage;
     int32_t coreCount;
     uint32_t frequency; // Maximum time clock frequency in MHz
+    uint16_t pcieGen;
+    uint16_t pcieLanes;
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId;
