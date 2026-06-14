@@ -313,6 +313,32 @@ static const char* pciDetectZxSpecific(const FFGPUOptions* options, FFGPUResult*
     return NULL;
 }
 
+static inline uint16_t pcieLinkSpeedToGen(const FFstrbuf* buffer) {
+    int64_t speed = ffStrbufToSInt(buffer, FF_GPU_PCIE_SPEED_UNSET);
+    if (speed >= 64) {
+        return 6;
+    } else if (speed >= 32) {
+        return 5;
+    } else if (speed >= 16) {
+        return 4;
+    } else if (speed >= 8) {
+        return 3;
+    } else if (speed >= 5) {
+        return 2;
+    } else if (speed >= 2) { // 2.5
+        return 1;
+    }
+    return FF_GPU_PCIE_SPEED_UNSET;
+}
+
+static inline uint16_t pcieWidthToLanes(const FFstrbuf* buffer) {
+    int64_t width = ffStrbufToSInt(buffer, FF_GPU_PCIE_SPEED_UNSET);
+    if (width > 0 && width < 255) { // kernel returns 255 if the value is unknown
+        return (uint16_t) width;
+    }
+    return FF_GPU_PCIE_SPEED_UNSET;
+}
+
 static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* deviceDir, const char* drmKey) {
     const uint32_t drmDirPathLength = deviceDir->length;
     uint32_t vendorId, deviceId, subVendorId, subDeviceId;
@@ -368,7 +394,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
     gpu->deviceId = ffGPUPciAddr2Id(pciDomain, pciBus, pciDevice, pciFunc);
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
-    gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
+    gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
     char drmKeyBuffer[8];
     if (!drmKey) {
@@ -396,30 +422,28 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     ffStrbufAppendS(deviceDir, "/max_link_speed");
     if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-        int32_t maxLinkSpeed = (int32_t) ffStrbufToSInt(buffer, FF_GPU_PCI_INFO_UNSET);
-        if (maxLinkSpeed >= 64) {
-            gpu->pcieGen = 6;
-        } else if (maxLinkSpeed >= 32) {
-            gpu->pcieGen = 5;
-        } else if (maxLinkSpeed >= 16) {
-            gpu->pcieGen = 4;
-        } else if (maxLinkSpeed >= 8) {
-            gpu->pcieGen = 3;
-        } else if (maxLinkSpeed >= 5) {
-            gpu->pcieGen = 2;
-        } else if (maxLinkSpeed >= 2) { // 2.5
-            gpu->pcieGen = 1;
-        }
+        gpu->psMax.gen = pcieLinkSpeedToGen(buffer);
     }
     ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
 
-    if (gpu->pcieGen != FF_GPU_PCI_INFO_UNSET) {
+    if (gpu->psMax.gen != FF_GPU_PCIE_SPEED_UNSET) {
         ffStrbufAppendS(deviceDir, "/max_link_width");
         if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-            int32_t maxLinkWidth = (int32_t) ffStrbufToSInt(buffer, FF_GPU_PCI_INFO_UNSET);
-            if (maxLinkWidth > 0 && maxLinkWidth < 255) { // kernel returns 255 if the value is unknown
-                gpu->pcieLanes = (uint16_t) maxLinkWidth;
-            }
+            gpu->psMax.lanes = pcieWidthToLanes(buffer);
+        }
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+    }
+
+    ffStrbufAppendS(deviceDir, "/current_link_speed");
+    if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+        gpu->psCurr.gen = pcieLinkSpeedToGen(buffer);
+    }
+    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+
+    if (gpu->psCurr.gen != FF_GPU_PCIE_SPEED_UNSET) {
+        ffStrbufAppendS(deviceDir, "/current_link_width");
+        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+            gpu->psCurr.lanes = pcieWidthToLanes(buffer);
         }
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }

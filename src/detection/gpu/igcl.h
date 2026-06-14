@@ -248,3 +248,13 @@ typedef struct ctl_pci_properties_t {
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlpcigetproperties
 extern ctl_result_t ctlPciGetProperties(ctl_device_adapter_handle_t hDAhandle, ctl_pci_properties_t* pProperties);
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctl-pci-state-t
+typedef struct _ctl_pci_state_t {
+    uint32_t Size;
+    uint8_t Version;
+    ctl_pci_speed_t speed;
+} ctl_pci_state_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlpcigetstate
+extern ctl_result_t ctlPciGetState(ctl_device_adapter_handle_t hDAhandle, ctl_pci_state_t* pState);

@@ -113,8 +113,8 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
         gpu->frequency = (uint32_t) (devInfo.max_engine_clock / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = devInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-        gpu->pcieGen = (uint16_t) devInfo.pcie_gen;
-        gpu->pcieLanes = (uint16_t) devInfo.pcie_num_lanes;
+        gpu->psMax.gen = (uint16_t) devInfo.pcie_gen;
+        gpu->psMax.lanes = (uint16_t) devInfo.pcie_num_lanes;
     #define FF_VRAM_CASE(name, value)                           \
         case value /* AMDGPU_VRAM_TYPE_ ## name */:             \
                     ffStrbufSetStatic(&gpu->memoryType, #name); \
@@ -370,13 +370,15 @@ const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* 
                 .index = &gpu->index,
                 .temp = options->temp ? &gpu->temperature : NULL,
                 .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                .sharedMemory = options->driverSpecific ? &gpu->shared : NULL,
+                .memoryType = options->driverSpecific ? &gpu->memoryType : NULL,
                 .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                 .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                 .type = &gpu->type,
                 .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 .name = &gpu->name,
-                .pcieGen = options->driverSpecific ? &gpu->pcieGen : NULL,
-                .pcieLanes = options->driverSpecific ? &gpu->pcieLanes : NULL,
+                .psCurr = options->driverSpecific ? &gpu->psCurr : NULL,
+                .psMax = options->driverSpecific ? &gpu->psMax : NULL,
             },
             soName);
     }

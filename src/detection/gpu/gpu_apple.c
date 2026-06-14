@@ -118,7 +118,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
-        gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
         IORegistryEntryGetRegistryEntryID(registryEntry, &gpu->deviceId);
         ffStrbufInitStatic(&gpu->platformApi, "IOKit");
 

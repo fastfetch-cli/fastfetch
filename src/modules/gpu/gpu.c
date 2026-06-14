@@ -139,9 +139,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             }
         }
 
-        char pcieSpeed[32] = "";
-        if (gpu->pcieGen != FF_GPU_PCI_INFO_UNSET && gpu->pcieLanes != FF_GPU_PCI_INFO_UNSET) {
-            snprintf(pcieSpeed, sizeof(pcieSpeed), "PCI Gen %d x%d", gpu->pcieGen, gpu->pcieLanes);
+        char maxSpeed[32] = "", currSpeed[32] = "";
+        if (gpu->pcieSpeed != FF_GPU_PCIE_SPEED_UNSET) {
+            snprintf(maxSpeed, sizeof(maxSpeed), "%d x%d", gpu->psMax.gen, gpu->psMax.lanes);
+            snprintf(currSpeed, sizeof(currSpeed), "%d x%d", gpu->psCurr.gen, gpu->psCurr.lanes);
         }
 
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
@@ -165,7 +166,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
                                                                                                             FF_ARG(coreUsageNum, "core-usage-num"),
                                                                                                             FF_ARG(coreUsageBar, "core-usage-bar"),
                                                                                                             FF_ARG(gpu->memoryType, "memory-type"),
-                                                                                                            FF_ARG(pcieSpeed, "pcie-speed"),
+                                                                                                            FF_ARG(maxSpeed, "pcie-max-speed"),
+                                                                                                            FF_ARG(currSpeed, "pcie-curr-speed"),
                                                                                                         }));
     }
 }
@@ -427,18 +429,14 @@ bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
         yyjson_mut_obj_add_uint(doc, obj, "deviceId", gpu->deviceId);
 
-        if (gpu->pcieGen != FF_GPU_PCI_INFO_UNSET || gpu->pcieLanes != FF_GPU_PCI_INFO_UNSET) {
+        if (gpu->pcieSpeed != FF_GPU_PCIE_SPEED_UNSET) {
             yyjson_mut_val* pcieSpeed = yyjson_mut_obj_add_obj(doc, obj, "pcieSpeed");
-            if (gpu->pcieGen != FF_GPU_PCI_INFO_UNSET) {
-                yyjson_mut_obj_add_uint(doc, pcieSpeed, "gen", gpu->pcieGen);
-            } else {
-                yyjson_mut_obj_add_null(doc, pcieSpeed, "gen");
-            }
-            if (gpu->pcieLanes != FF_GPU_PCI_INFO_UNSET) {
-                yyjson_mut_obj_add_uint(doc, pcieSpeed, "lanes", gpu->pcieLanes);
-            } else {
-                yyjson_mut_obj_add_null(doc, pcieSpeed, "lanes");
-            }
+            yyjson_mut_val* maxSpeed = yyjson_mut_obj_add_obj(doc, pcieSpeed, "max");
+            yyjson_mut_obj_add_uint(doc, maxSpeed, "gen", gpu->psMax.gen);
+            yyjson_mut_obj_add_uint(doc, maxSpeed, "lanes", gpu->psMax.lanes);
+            yyjson_mut_val* currSpeed = yyjson_mut_obj_add_obj(doc, pcieSpeed, "current");
+            yyjson_mut_obj_add_uint(doc, currSpeed, "gen", gpu->psCurr.gen);
+            yyjson_mut_obj_add_uint(doc, currSpeed, "lanes", gpu->psCurr.lanes);
         } else {
             yyjson_mut_obj_add_null(doc, obj, "pcieSpeed");
         }
@@ -506,6 +504,7 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         { "Core usage percentage num", "core-usage-num" },
         { "Core usage percentage bar", "core-usage-bar" },
         { "Memory type (Windows only)", "memory-type" },
-        { "Maximum PCIe speed in gen and lanes", "pcie-speed" },
+        { "PCIe maximum speed in gen and lanes", "pcie-max-speed" },
+        { "PCIe current speed in gen and lanes", "pcie-curr-speed" },
     })),
 };

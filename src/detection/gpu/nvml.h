@@ -145,7 +145,11 @@ extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType
 // Retrieves the maximum PCIe link generation possible with this device and system
 extern nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGen);
 // Retrieves the maximum PCIe link width possible with this device and system
-extern nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth (nvmlDevice_t device, unsigned int* maxLinkWidth);
+extern nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int* maxLinkWidth);
+// Retrieves the current PCIe link generation
+extern nvmlReturn_t nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int* currLinkGen);
+// Retrieves the current PCIe link width
+extern nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int* currLinkWidth);
 // Retrieves the brand of this device
 extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
 // Retrieves the current utilization rates for the device

@@ -16,6 +16,8 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetUtilizationRates)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkGeneration)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkWidth)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetCurrPcieLinkGeneration)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetCurrPcieLinkWidth)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetIndex)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetName)
@@ -163,6 +165,8 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxClockInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkGeneration)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkWidth)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCurrPcieLinkGeneration)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCurrPcieLinkWidth)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetUtilizationRates)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetIndex)
@@ -292,17 +296,23 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         }
     }
 
-    if (result.pcieGen) {
+    if (result.psMax) {
         unsigned int value;
         if (nvmlData.ffnvmlDeviceGetMaxPcieLinkGeneration(device, &value) == NVML_SUCCESS) {
-            *result.pcieGen = (uint16_t) value;
+            result.psMax->gen = (uint16_t) value;
+        }
+        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkWidth(device, &value) == NVML_SUCCESS) {
+            result.psMax->lanes = (uint16_t) value;
         }
     }
 
-    if (result.pcieLanes) {
+    if (result.psCurr) {
         unsigned int value;
-        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkWidth(device, &value) == NVML_SUCCESS) {
-            *result.pcieLanes = (uint16_t) value;
+        if (nvmlData.ffnvmlDeviceGetCurrPcieLinkGeneration(device, &value) == NVML_SUCCESS) {
+            result.psCurr->gen = (uint16_t) value;
+        }
+        if (nvmlData.ffnvmlDeviceGetCurrPcieLinkWidth(device, &value) == NVML_SUCCESS) {
+            result.psCurr->lanes = (uint16_t) value;
         }
     }
 

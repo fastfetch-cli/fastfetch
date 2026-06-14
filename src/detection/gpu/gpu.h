@@ -7,7 +7,7 @@
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t) -1)
 #define FF_GPU_FREQUENCY_UNSET 0
-#define FF_GPU_PCI_INFO_UNSET 0
+#define FF_GPU_PCIE_SPEED_UNSET 0
 #define FF_GPU_CORE_USAGE_UNSET (-DBL_MAX)
 #define FF_GPU_INDEX_UNSET ((uint32_t) -1)
 
@@ -35,6 +35,11 @@ typedef struct FFGPUMemory {
     uint64_t used;
 } FFGPUMemory;
 
+typedef struct FFGPUPcieSpeed {
+    uint16_t gen;
+    uint16_t lanes;
+} FFGPUPcieSpeed;
+
 typedef struct FFGPUResult {
     uint32_t index;
     FFGPUType type;
@@ -47,8 +52,13 @@ typedef struct FFGPUResult {
     double coreUsage;
     int32_t coreCount;
     uint32_t frequency; // Maximum time clock frequency in MHz
-    uint16_t pcieGen;
-    uint16_t pcieLanes;
+    union {
+        struct {
+            FFGPUPcieSpeed psMax;
+            FFGPUPcieSpeed psCurr;
+        };
+        uint64_t pcieSpeed;
+    };
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId;

@@ -27,6 +27,8 @@ static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds
     static FFlist deviceIdsCache;
     static bool initialized;
     typedef struct {
+        uint32_t currentLinkSpeed;
+        uint32_t currentLinkWidth;
         uint32_t maxLinkSpeed;
         uint32_t maxLinkWidth;
         D3DKMT_DEVICE_IDS deviceIds;
@@ -105,23 +107,42 @@ static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds
                 FF_DEBUG("Failed to get PCI bus number");
             }
 
-            pciBufLen = sizeof(entry->maxLinkSpeed);
             DEVPROPTYPE propType;
+
+            pciBufLen = sizeof(entry->maxLinkSpeed);
             // Reports PCEe gen despite the PKEY name
             CONFIGRET ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_MaxLinkSpeed, &propType, (PBYTE) &entry->maxLinkSpeed, &pciBufLen, 0);
             if (ret == CR_SUCCESS) {
-                FF_DEBUG("PCIe GEN: %u", entry->maxLinkSpeed);
+                FF_DEBUG("PCIe max GEN: %u", entry->maxLinkSpeed);
             } else {
-                FF_DEBUG("Failed to get PCIe GEN: %s", ffDebugConfigRet(ret));
+                FF_DEBUG("Failed to get PCIe max GEN: %s", ffDebugConfigRet(ret));
             }
 
-            if (entry->maxLinkSpeed != FF_GPU_PCI_INFO_UNSET) {
+            if (entry->maxLinkSpeed != FF_GPU_PCIE_SPEED_UNSET) {
                 pciBufLen = sizeof(entry->maxLinkWidth);
                 ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_MaxLinkWidth, &propType, (PBYTE) &entry->maxLinkWidth, &pciBufLen, 0);
                 if (ret == CR_SUCCESS) {
                     FF_DEBUG("PCIe max link width: %u", entry->maxLinkWidth);
                 } else {
                     FF_DEBUG("Failed to get PCIe max link width: %s", ffDebugConfigRet(ret));
+                }
+            }
+
+            pciBufLen = sizeof(entry->currentLinkSpeed);
+            ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_CurrentLinkSpeed, &propType, (PBYTE) &entry->currentLinkSpeed, &pciBufLen, 0);
+            if (ret == CR_SUCCESS) {
+                FF_DEBUG("PCIe GEN: %u", entry->currentLinkSpeed);
+            } else {
+                FF_DEBUG("Failed to get PCIe GEN: %s", ffDebugConfigRet(ret));
+            }
+
+            if (entry->currentLinkSpeed != FF_GPU_PCIE_SPEED_UNSET) {
+                pciBufLen = sizeof(entry->currentLinkWidth);
+                ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_CurrentLinkWidth, &propType, (PBYTE) &entry->currentLinkWidth, &pciBufLen, 0);
+                if (ret == CR_SUCCESS) {
+                    FF_DEBUG("PCIe current link width: %u", entry->currentLinkWidth);
+                } else {
+                    FF_DEBUG("Failed to get PCIe current link width: %s", ffDebugConfigRet(ret));
                 }
             }
         }
@@ -133,8 +154,10 @@ static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds
             if (outDeviceIds->VendorID != -1u) {
                 *outDeviceIds = entry->deviceIds;
             }
-            gpu->pcieGen = (uint16_t) entry->maxLinkSpeed;
-            gpu->pcieLanes = (uint16_t) entry->maxLinkWidth;
+            gpu->psMax.gen = (uint16_t) entry->maxLinkSpeed;
+            gpu->psMax.lanes = (uint16_t) entry->maxLinkWidth;
+            gpu->psCurr.gen = (uint16_t) entry->currentLinkSpeed;
+            gpu->psCurr.lanes = (uint16_t) entry->currentLinkWidth;
             return true;
         }
     }
@@ -291,7 +314,7 @@ ffGPUDetectWsl2
             : adapterType.HybridDiscrete
             ? FF_GPU_TYPE_DISCRETE
             : FF_GPU_TYPE_UNKNOWN;
-        gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
         D3DKMT_DRIVERVERSION wddmVersion = KMT_DRIVERVERSION_WDDM_2_0;
         status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
@@ -407,8 +430,10 @@ ffGPUDetectWsl2
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
-                    .name = &gpu->name,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                    .name = &gpu->name,
+                    .psCurr = options->driverSpecific ? &gpu->psCurr : NULL,
+                    .psMax = options->driverSpecific ? &gpu->psMax : NULL,
                 },
                 dllName);
             FF_DEBUG("Driver-specific detection completed: %s", error ?: "Success");

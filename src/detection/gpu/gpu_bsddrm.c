@@ -148,7 +148,7 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = ffGPUPciAddr2Id(pciInfo.domain, pciInfo.bus, pciInfo.dev, pciInfo.func);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
-        gpu->pcieGen = gpu->pcieLanes = FF_GPU_PCI_INFO_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
         char driverName[64];
         driverName[0] = '\0';
