@@ -8,7 +8,7 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByIndex_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByPciBusId_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetPciInfo_v3)
-    FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperatureV)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
@@ -158,7 +158,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByIndex_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByPciBusId_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetPciInfo_v3)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperatureV)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
@@ -254,9 +254,12 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     }
 
     if (result.temp) {
-        uint32_t value;
-        if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) == NVML_SUCCESS) {
-            *result.temp = value;
+        nvmlTemperature_v1_t temp = {
+            .version = nvmlTemperature_v1,
+            .sensorType = NVML_TEMPERATURE_GPU,
+        };
+        if (nvmlData.ffnvmlDeviceGetTemperatureV(device, &temp) == NVML_SUCCESS) {
+            *result.temp = temp.temperature;
         }
     }
 
