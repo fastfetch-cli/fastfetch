@@ -113,8 +113,14 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
         gpu->frequency = (uint32_t) (devInfo.max_engine_clock / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = devInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+        // Was `_pad`. Introduced in commit https://github.com/sailfishos-mirror/drm/commit/22b698a5990292bce0eeb2782754d1eba3fe7a2e
+        #ifdef AMDGPU_FAMILY_GC_11_0_0
         gpu->psMax.gen = (uint16_t) devInfo.pcie_gen;
         gpu->psMax.lanes = (uint16_t) devInfo.pcie_num_lanes;
+        #else
+        gpu->psMax.gen = (uint16_t) devInfo._pad;
+        gpu->psMax.lanes = (uint16_t) devInfo._pad1;
+        #endif
     #define FF_VRAM_CASE(name, value)                           \
         case value /* AMDGPU_VRAM_TYPE_ ## name */:             \
                     ffStrbufSetStatic(&gpu->memoryType, #name); \
