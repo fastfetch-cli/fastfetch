@@ -546,6 +546,7 @@ static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, co
     gpu->type = FF_GPU_TYPE_INTEGRATED;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+    gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
     pciDetectDriver(&gpu->driver, drmDir, buffer, drmKey);
 
