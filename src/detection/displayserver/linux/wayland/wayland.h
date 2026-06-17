@@ -29,6 +29,7 @@ typedef struct WaylandData {
     WaylandProtocolType protocolType;
     uint64_t primaryDisplayId;
     struct wl_proxy* zxdgOutputManager;
+    struct wl_proxy* wpColorManager;
 } WaylandData;
 
 typedef struct WaylandDisplay {
@@ -82,5 +83,6 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 const char* ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
+const char* ffWaylandHandleWpColor(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 
 #endif

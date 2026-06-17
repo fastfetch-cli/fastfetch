@@ -16,6 +16,7 @@
     #include "kde-output-device-v2-client-protocol.h"
     #include "kde-output-order-v1-client-protocol.h"
     #include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wp-color-management-v1-client-protocol.h"
 
     #if __FreeBSD__
         #include <sys/un.h>
@@ -94,6 +95,8 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
         ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name)) {
         ffWaylandHandleZxdgOutput(wldata, registry, name, version);
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, wp_color_manager_v1_interface.name)) {
+        ffWaylandHandleWpColor(wldata, registry, name, version);
     }
 }
 
@@ -122,9 +125,9 @@ static FF_A_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* 
 
             uint8_t edidData[512];
             ssize_t edidLength = ffReadFileData(path.chars, ARRAY_SIZE(edidData), edidData);
-            if (edidLength > 0 && edidLength % 128 == 0) {
+            if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
                 ffEdidGetName(edidData, &wldata->edidName);
-                ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
+                wldata->hdrSupported = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
                 ffEdidGetSerialAndManufactureDate(edidData, &wldata->serial, &wldata->myear, &wldata->mweek);
                 wldata->hdrInfoAvailable = true;
                 return true;
