@@ -7,7 +7,7 @@ static const FFlogo Z[] = {
     // Zerene
     {
         .names = { "Zerene, Zerene OS, zerene" },
-        .lines = FASTFETCH_DATATEXT_LOGO_ZORIN,
+        .lines = FASTFETCH_DATATEXT_LOGO_ZERENE,
         .colors = {
             FF_COLOR_FG_BLUE,
         },
