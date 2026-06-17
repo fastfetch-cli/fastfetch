@@ -13,7 +13,6 @@
     #include "common/properties.h"
 
     #include "wayland.h"
-    #include "wlr-output-management-unstable-v1-client-protocol.h"
     #include "kde-output-device-v2-client-protocol.h"
     #include "kde-output-order-v1-client-protocol.h"
     #include "xdg-output-unstable-v1-client-protocol.h"
@@ -84,11 +83,6 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wldata->ffwl_output_interface->name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_GLOBAL;
         if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL) {
-            wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
-        }
-    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_ZWLR) && ffStrEquals(interface, zwlr_output_manager_v1_interface.name)) {
-        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_ZWLR;
-        if (ffWaylandHandleZwlrOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {

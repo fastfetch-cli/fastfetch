@@ -598,9 +598,7 @@ if(LINUX)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
@@ -759,9 +757,7 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
@@ -855,9 +851,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
@@ -940,9 +934,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
@@ -1185,9 +1177,7 @@ elseif(SunOS)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
@@ -1339,8 +1329,6 @@ elseif(GNU)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
