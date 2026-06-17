@@ -80,7 +80,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version) {
     WaylandData* wldata = data;
 
-    if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wldata->ffwl_output_interface->name)) {
+    if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wl_output_interface.name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_GLOBAL;
         if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
@@ -214,7 +214,6 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_get_fd)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_proxy_marshal_constructor)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_disconnect)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_registry_interface)
 
     WaylandData data = {};
 
@@ -222,7 +221,6 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_add_listener)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_destroy)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_display_roundtrip)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_output_interface)
 
     data.display = ffwl_display_connect(NULL);
     if (data.display == NULL) {
@@ -231,7 +229,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
-    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
+    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, NULL);
     if (registry == NULL) {
         ffwl_display_disconnect(data.display);
         return "wl_display_get_registry returned NULL";

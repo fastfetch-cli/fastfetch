@@ -73,7 +73,7 @@ static struct zxdg_output_v1_listener zxdgOutputListener = {
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
     const char* api = "wayland-global";
     uint32_t bindVersion = min(version, WL_OUTPUT_DESCRIPTION_SINCE_VERSION);
-    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, bindVersion, name, wldata->ffwl_output_interface->name, bindVersion, NULL);
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wl_output_interface, bindVersion, name, wl_output_interface.name, bindVersion, NULL);
     if (output == NULL) {
         return "Failed to create wl_output";
     }

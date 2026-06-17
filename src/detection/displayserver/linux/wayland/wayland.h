@@ -26,7 +26,6 @@ typedef struct WaylandData {
     FF_LIBRARY_SYMBOL(wl_proxy_destroy)
     FF_LIBRARY_SYMBOL(wl_display_roundtrip)
     struct wl_display* display;
-    const struct wl_interface* ffwl_output_interface;
     WaylandProtocolType protocolType;
     uint64_t primaryDisplayId;
     struct wl_proxy* zxdgOutputManager;

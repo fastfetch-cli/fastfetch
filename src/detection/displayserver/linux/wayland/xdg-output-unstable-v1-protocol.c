@@ -35,7 +35,7 @@ static const struct wl_interface* xdg_output_unstable_v1_types[] = {
     NULL,
     NULL,
     &zxdg_output_v1_interface,
-    NULL, // &wl_output_interface,
+    &wl_output_interface,
 };
 
 static const struct wl_message zxdg_output_manager_v1_requests[] = {
