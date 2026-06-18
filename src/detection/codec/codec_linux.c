@@ -242,6 +242,7 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
 
         int major = 0, minor = 0;
         if (ffvaInitialize(display, &major, &minor) != VA_STATUS_SUCCESS) {
+            ffvaTerminate(display);
             continue;
         }
         error = NULL;
