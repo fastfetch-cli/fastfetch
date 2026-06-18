@@ -59,6 +59,7 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = ffGPUPciAddr2Id(pc->pc_sel.pc_domain, pc->pc_sel.pc_bus, pc->pc_sel.pc_dev, pc->pc_sel.pc_func);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
         ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {
                                                     .domain = (uint32_t) pc->pc_sel.pc_domain,
