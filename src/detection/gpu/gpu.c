@@ -77,6 +77,25 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
     }
 }
 
+static bool normalizeVendorName(FFGPUResult* gpu) {
+    if (ffStrbufContainS(&gpu->name, "Apple")) {
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
+        gpu->type = FF_GPU_TYPE_INTEGRATED;
+    } else if (ffStrbufContainS(&gpu->name, "Intel")) {
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+    } else if (ffStrbufContainS(&gpu->name, "AMD") || ffStrbufContainS(&gpu->name, "ATI")) {
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+    } else if (ffStrbufContainS(&gpu->name, "NVIDIA")) {
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+    } else if (ffStrbufContainS(&gpu->name, "MTT")) {
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_MTHREADS);
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
 const char* detectByOpenGL(FFlist* gpus) {
     FF_DEBUG("Starting OpenGL GPU detection fallback");
 
@@ -114,18 +133,7 @@ const char* detectByOpenGL(FFlist* gpus) {
             gpu->vendor.chars,
             result.version.chars);
 
-        if (ffStrbufContainS(&gpu->name, "Apple")) {
-            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
-            gpu->type = FF_GPU_TYPE_INTEGRATED;
-        } else if (ffStrbufContainS(&gpu->name, "Intel")) {
-            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-        } else if (ffStrbufContainS(&gpu->name, "AMD") || ffStrbufContainS(&gpu->name, "ATI")) {
-            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-        } else if (ffStrbufContainS(&gpu->name, "NVIDIA")) {
-            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-        } else if (ffStrbufContainS(&gpu->name, "MTT")) {
-            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_MTHREADS);
-        }
+        normalizeVendorName(gpu);
 
         FF_DEBUG("OpenGL fallback produced GPU: name='%s', vendor='%s', type=%u",
             gpu->name.chars,
@@ -140,6 +148,98 @@ const char* detectByOpenGL(FFlist* gpus) {
     ffStrbufDestroy(&result.library);
     return error;
 }
+
+#if defined(FF_HAVE_EGL) || __has_include(<EGL/egl.h>)
+    #include <EGL/egl.h>
+    #include <EGL/eglext.h>
+
+    #if EGL_EXT_device_base && EGL_EXT_device_persistent_id && EGL_EXT_device_query_name
+
+        #define FF_HAVE_EGL_EXT 1
+        #include <inttypes.h>
+
+        #include "common/library.h"
+        #include "common/strutil.h"
+        #include "common/io.h"
+
+const char* detectByEglext(FFlist* result) {
+    FF_LIBRARY_LOAD_MESSAGE(egl, "libEGL" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(egl, eglGetProcAddress);
+
+    PFNEGLQUERYDEVICESEXTPROC ffeglQueryDevicesEXT = (PFNEGLQUERYDEVICESEXTPROC) ffeglGetProcAddress("eglQueryDevicesEXT");
+    if (!ffeglQueryDevicesEXT) {
+        return "eglQueryDevicesEXT is unavailable";
+    }
+    PFNEGLQUERYDEVICESTRINGEXTPROC ffeglQueryDeviceStringEXT = (PFNEGLQUERYDEVICESTRINGEXTPROC) ffeglGetProcAddress("eglQueryDeviceStringEXT");
+    if (!ffeglQueryDeviceStringEXT) {
+        return "eglQueryDeviceStringEXT is unavailable";
+    }
+    PFNEGLQUERYDEVICEBINARYEXTPROC ffeglQueryDeviceBinaryEXT = (PFNEGLQUERYDEVICEBINARYEXTPROC) ffeglGetProcAddress("eglQueryDeviceBinaryEXT");
+    if (!ffeglQueryDeviceBinaryEXT) {
+        return "eglQueryDeviceBinaryEXT is unavailable";
+    }
+
+    FF_DEBUG("Loaded EGL library and required symbols");
+
+    FF_SUPPRESS_IO();
+
+    EGLDeviceEXT devices[16];
+    EGLint numDevices;
+    if (ffeglQueryDevicesEXT(ARRAY_SIZE(devices), devices, &numDevices) == EGL_TRUE) {
+        FF_DEBUG("eglQueryDevicesEXT() returned %d device(s)", numDevices);
+        for (EGLint i = 0; i < numDevices; i++) {
+            const EGLDeviceEXT device = &devices[i];
+            if (device == (EGLDeviceEXT) EGL_NO_DEVICE_EXT || device == (EGLDeviceEXT) EGL_BAD_DEVICE_EXT) {
+                FF_DEBUG("eglQueryDevicesEXT() returned invalid device at index %d", i);
+                continue;
+            }
+            const char* exts = (const char*) ffeglQueryDeviceStringEXT(devices[i], EGL_EXTENSIONS);
+            FF_DEBUG("eglQueryDeviceStringEXT() returned extensions for device %d: %s", i, exts);
+            if (exts && ffStrContains(exts, "EGL_MESA_device_software")) {
+                FF_DEBUG("eglQueryDeviceStringEXT() returned software device at index %d, skipping", i);
+                continue;
+            }
+
+            const char* name = ffeglQueryDeviceStringEXT(devices[i], EGL_RENDERER_EXT);
+            if (!name) {
+                FF_DEBUG("eglQueryDeviceStringEXT() returned NULL name for device %d, skipping", i);
+                continue;
+            }
+
+            FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *result);
+            ffStrbufInitS(&gpu->name, name);
+            ffStrbufInit(&gpu->vendor);
+            ffStrbufInitS(&gpu->driver, ffeglQueryDeviceStringEXT(devices[i], EGL_DRIVER_NAME_EXT));
+            ffStrbufInitF(&gpu->platformApi, "egl-ext");
+            ffStrbufInit(&gpu->memoryType);
+            gpu->index = FF_GPU_INDEX_UNSET;
+            gpu->temperature = FF_GPU_TEMP_UNSET;
+            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+            gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+            gpu->type = FF_GPU_TYPE_UNKNOWN;
+            gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+            gpu->deviceId = 0;
+            gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+            gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
+
+            ffeglQueryDeviceBinaryEXT(devices[i], EGL_DEVICE_UUID_EXT, sizeof(gpu->deviceId), &gpu->deviceId, NULL);
+
+            if (!normalizeVendorName(gpu)) {
+                ffStrbufSetS(&gpu->vendor, ffeglQueryDeviceStringEXT(devices[i], EGL_VENDOR));
+            }
+
+            FF_DEBUG("Detected GPU %d: vendor='%s', name='%s', driver='%s', id='%16" PRIX64 "'", i, gpu->vendor.chars, gpu->name.chars, gpu->driver.chars, gpu->deviceId);
+        }
+    } else {
+        FF_DEBUG("eglQueryDevicesEXT() returned EGL_FALSE");
+    }
+
+    return NULL;
+}
+    #endif
+
+#endif
+
 
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
     FF_DEBUG("Starting GPU detection with method=%d", (int) options->detectionMethod);
@@ -192,6 +292,22 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         FF_DEBUG("OpenCL detection did not produce results (error=%s, gpuCount=%u)",
             opencl->error ?: "none",
             opencl->gpus.length);
+    }
+    if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_EGL_EXT) {
+        #if FF_HAVE_EGL_EXT
+        FF_DEBUG("Trying EGL_EXT GPU detection fallback");
+        const char* error = detectByEglext(result);
+        if (!error && result->length > 0) {
+            FF_DEBUG("EGL_EXT GPU detection succeeded with %u GPU(s)", result->length);
+            return NULL;
+        }
+
+        FF_DEBUG("EGL_EXT GPU detection did not produce results (error=%s, gpuCount=%u)",
+            error ?: "none",
+            result->length);
+        #else
+        FF_DEBUG("EGL_EXT GPU detection is unavailable");
+        #endif
     }
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENGL) {
         FF_DEBUG("Trying OpenGL GPU detection fallback");

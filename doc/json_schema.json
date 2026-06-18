@@ -2851,6 +2851,10 @@
                                                 "description": "Use OpenCL API.\nSlow and requires proper OpenCL drivers to be installed"
                                             },
                                             {
+                                                "const": "egl-ext",
+                                                "description": "Use EGL_EXT_device_enumeration and EGL_EXT_device_query APIs.\nSlow and only detects GPUs that support these extensions"
+                                            },
+                                            {
                                                 "const": "opengl",
                                                 "description": "Use OpenGL API.\nSlow and only detects one GPU.\nUsed for OpenBSD"
                                             }
