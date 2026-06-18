@@ -252,6 +252,10 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
         data.ffwl_proxy_destroy(data.zxdgOutputManager);
     }
 
+    if (data.wpColorManager) {
+        data.ffwl_proxy_destroy(data.wpColorManager);
+    }
+
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
