@@ -1,6 +1,6 @@
 #include "codec.h"
 
-#if (FF_HAVE_DRM && FF_HAVE_VA) || FF_HAVE_VDPAU
+#if FF_HAVE_VA || FF_HAVE_VDPAU
 
     #include "common/library.h"
     #include "common/mallocHelper.h"
@@ -388,7 +388,7 @@ static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result)
 const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list of FFCodecResult */) {
     FF_SUPPRESS_IO();
 
-    #if FF_HAVE_DRM && FF_HAVE_VA
+    #if FF_HAVE_VA
     if (ffDetectCodecByVa(options, result) == NULL) {
         return NULL;
     }

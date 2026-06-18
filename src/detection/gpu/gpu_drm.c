@@ -13,6 +13,7 @@
         #include <nouveau_drm.h>
         #include <amdgpu_drm.h>
     #else
+        #define FF_HAVE_DRM 1
         #include <drm/drm.h>
         #include <drm/radeon_drm.h>
         #include <drm/nouveau_drm.h>
