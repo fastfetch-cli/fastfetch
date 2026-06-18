@@ -104,15 +104,11 @@ static const char* drmGetPciinfo(int drmfd, const char* drmId, struct drm_pciinf
 }
 
 const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
-    const char* drmDirPath = "/dev/dri/";
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
     if (dirp == NULL) {
         return "opendir(/dev/dri/) failed";
     }
-
-    FF_STRBUF_AUTO_DESTROY pathBuf = ffStrbufCreateA(64);
-    ffStrbufAppendS(&pathBuf, drmDirPath);
-    uint32_t pathLen = pathBuf.length;
+    int drifd = dirfd(dirp);
 
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL) {
@@ -120,10 +116,7 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
             continue;
         }
 
-        ffStrbufAppendS(&pathBuf, entry->d_name);
-
-        FF_AUTO_CLOSE_FD int fd = open(pathBuf.chars, O_RDWR | O_CLOEXEC);
-        ffStrbufSubstrBefore(&pathBuf, pathLen);
+        FF_AUTO_CLOSE_FD int fd = openat(drifd, entry->d_name, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
             continue;
         }
