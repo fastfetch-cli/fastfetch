@@ -546,7 +546,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         return "sysctl(KERN_PROC_PID) failed";
     }
 
-    ffStrbufSetS(name, proc.kp_proc.p_comm); // trancated to 16 chars
+    ffStrbufSetS(name, proc.kp_proc.p_comm); // truncated to 16 chars
     if (ppid) {
         *ppid = (pid_t) proc.kp_eproc.e_ppid;
     }
