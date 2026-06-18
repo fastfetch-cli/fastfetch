@@ -246,7 +246,7 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
 
         if (decoderTypes != FF_CODEC_TYPE_NONE || encoderTypes != FF_CODEC_TYPE_NONE) {
             FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
-            ffStrbufSetS(&item->gpu, ffvaQueryVendorString(display));
+            ffStrbufInitS(&item->gpu, ffvaQueryVendorString(display));
             item->decoders = decoderTypes;
             item->encoders = encoderTypes;
             item->platformApi = "VA-API";
