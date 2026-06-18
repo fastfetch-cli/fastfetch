@@ -4,15 +4,13 @@
 
     #include "common/library.h"
     #include "common/mallocHelper.h"
+    #include "common/strutil.h"
     #include "common/io.h"
 
-    #if FF_HAVE_DRM && FF_HAVE_VA
-        #include "detection/gpu/gpu.h"
-
+    #if FF_HAVE_VA
         #include <fcntl.h>
         #include <va/va.h>
         #include <va/va_drm.h>
-        #include <xf86drm.h>
     #endif
 
     #include <string.h>
@@ -27,7 +25,7 @@ int XCloseDisplay(void* display);
 int XDefaultScreen(void* display);
     #endif
 
-    #if FF_HAVE_DRM && FF_HAVE_VA
+    #if FF_HAVE_VA
 
 static FFCodecType ffCodecProfileToType(VAProfile profile) {
     switch (profile) {
@@ -146,52 +144,7 @@ static bool ffCodecProfileHasOutput(
     return false;
 }
 
-static void ffCodecFillGpuName(const drmDevice* dev, const char* path, FFstrbuf* name) {
-    ffStrbufInit(name);
-
-    switch (dev->bustype) {
-        case DRM_BUS_PCI: {
-            FFGPUResult gpu = {
-                .vendor = ffStrbufCreateStatic(ffGPUGetVendorString(dev->deviceinfo.pci->vendor_id)),
-                .name = ffStrbufCreate(),
-            };
-
-            ffGPUFillVendorAndName(0, dev->deviceinfo.pci->vendor_id, dev->deviceinfo.pci->device_id, &gpu);
-            ffStrbufSetF(name, "%s %s", gpu.vendor.chars, gpu.name.chars);
-
-            ffStrbufDestroy(&gpu.vendor);
-            ffStrbufDestroy(&gpu.name);
-            break;
-        }
-        case DRM_BUS_PLATFORM:
-            ffStrbufSetS(name, dev->deviceinfo.platform->compatible[0]);
-            return;
-        case DRM_BUS_HOST1X:
-            ffStrbufSetS(name, dev->deviceinfo.host1x->compatible[0]);
-            return;
-        case DRM_BUS_USB:
-            ffStrbufSetF(name, "0x%04X 0x%04X", dev->deviceinfo.usb->vendor, dev->deviceinfo.usb->product);
-            return;
-        default:
-            ffStrbufSetStatic(name, "Unknown GPU");
-            return;
-    }
-
-    if (!name->length && path && *path) {
-        const char* base = strrchr(path, '/');
-        ffStrbufSetS(name, base ? base + 1 : path);
-    }
-
-    if (!name->length) {
-        ffStrbufSetStatic(name, "Unknown GPU");
-    }
-}
-
 static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
-    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
-
     FF_LIBRARY_LOAD_MESSAGE(libva, "libva" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaInitialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaTerminate)
@@ -199,38 +152,27 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaMaxNumEntrypoints)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaQueryConfigProfiles)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaQueryConfigEntrypoints)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaQueryVendorString)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libva, vaGetConfigAttributes)
 
     FF_LIBRARY_LOAD_MESSAGE(libvaDrm, "libva-drm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvaDrm, vaGetDisplayDRM)
 
-    drmDevicePtr devices[64];
-    int numDevices = ffdrmGetDevices(devices, ARRAY_SIZE(devices));
-    if (numDevices < 0) {
-        return "drmGetDevices() failed";
-    }
-    if (numDevices == 0) {
-        return "No DRM devices found";
-    }
-
     const char* error = "No DRM device could initialize VA-API";
 
-    for (int i = 0; i < numDevices; ++i) {
-        drmDevice* dev = devices[i];
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
+    if (dirp == NULL) {
+        return "opendir(/dev/dri/) failed";
+    }
+    int drifd = dirfd(dirp);
 
-        const char* path = NULL;
-        if (dev->available_nodes & (1 << DRM_NODE_RENDER)) {
-            path = dev->nodes[DRM_NODE_RENDER];
-        } else if (dev->available_nodes & (1 << DRM_NODE_PRIMARY)) {
-            path = dev->nodes[DRM_NODE_PRIMARY];
-        } else {
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL) {
+        if (entry->d_name[0] == '.' || !ffStrStartsWith(entry->d_name, "renderD")) {
             continue;
         }
 
-        FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
-        if (fd < 0) {
-            fd = open(path, O_RDONLY | O_CLOEXEC);
-        }
+        FF_AUTO_CLOSE_FD int fd = openat(drifd, entry->d_name, O_RDONLY | O_CLOEXEC);
         if (fd < 0) {
             continue;
         }
@@ -304,7 +246,7 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
 
         if (decoderTypes != FF_CODEC_TYPE_NONE || encoderTypes != FF_CODEC_TYPE_NONE) {
             FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
-            ffCodecFillGpuName(dev, path, &item->gpu);
+            ffStrbufSetS(&item->gpu, ffvaQueryVendorString(display));
             item->decoders = decoderTypes;
             item->encoders = encoderTypes;
             item->platformApi = "VA-API";
@@ -313,7 +255,6 @@ static const char* ffDetectCodecByVa(FFCodecOptions* options, FFlist* result) {
         ffvaTerminate(display);
     }
 
-    ffdrmFreeDevices(devices, numDevices);
     return error;
 }
     #endif
