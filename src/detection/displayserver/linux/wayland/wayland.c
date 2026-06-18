@@ -14,7 +14,6 @@
 
     #include "wayland.h"
     #include "kde-output-device-v2-client-protocol.h"
-    #include "kde-output-order-v1-client-protocol.h"
     #include "xdg-output-unstable-v1-client-protocol.h"
     #include "wp-color-management-v1-client-protocol.h"
 
@@ -86,13 +85,16 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
         if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
-    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {
-        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE;
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, kde_output_device_registry_v2_interface.name)) {
+        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_REGISTRY;
+        if (ffWaylandHandleKdeOutputRegistry(wldata, registry, name, version) != NULL) {
+            wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
+        }
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {
+        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED;
         if (ffWaylandHandleKdeOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
-    } else if (ffStrEquals(interface, kde_output_order_v1_interface.name)) {
-        ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name)) {
         ffWaylandHandleZxdgOutput(wldata, registry, name, version);
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, wp_color_manager_v1_interface.name)) {
@@ -259,7 +261,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
-    if (data.primaryDisplayId == 0 && result->wmProcessName.length > 0) {
+    {
         const char* fileName = ffStrbufEqualS(&result->wmProcessName, "gnome-shell")
             ? "monitors.xml"
             : ffStrbufEqualS(&result->wmProcessName, "cinnamon")
@@ -306,19 +308,17 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
                         if (end < monitorsXml.length) {
                             ffStrbufSubstrBefore(&monitorsXml, end);
                             const char* name = monitorsXml.chars + start + strlen("<connector>");
-                            data.primaryDisplayId = ffWaylandGenerateIdFromName(name);
+                            uint64_t primaryDisplayId = ffWaylandGenerateIdFromName(name);
+
+                            FF_LIST_FOR_EACH (FFDisplayResult, d, data.result->displays) {
+                                if (d->id == primaryDisplayId) {
+                                    d->primary = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if (data.primaryDisplayId) {
-        FF_LIST_FOR_EACH (FFDisplayResult, d, data.result->displays) {
-            if (d->id == data.primaryDisplayId) {
-                d->primary = true;
-                break;
             }
         }
     }
