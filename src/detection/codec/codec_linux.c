@@ -306,7 +306,7 @@ static const struct FFCodecVdpauCodec {
 };
 
 static const char* ffDetectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
-    if (options->showType == FF_CODEC_SHOW_TYPE_DECODER) {
+    if (options->showType != FF_CODEC_SHOW_TYPE_DECODER) {
         return "VDPAU only supports decoding";
     }
 
