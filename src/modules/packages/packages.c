@@ -119,6 +119,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(pkg)
         FF_PRINT_PACKAGE(pkgsrc)
         FF_PRINT_PACKAGE(pkgtool)
+        FF_PRINT_PACKAGE(porg)
         FF_PRINT_PACKAGE(rpm)
         if (options->combined) {
             FF_PRINT_PACKAGE_ALL(scoop);
@@ -181,6 +182,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.pkg, "pkg"),
                 FF_ARG(counts.pkgsrc, "pkgsrc"),
                 FF_ARG(counts.pkgtool, "pkgtool"),
+                FF_ARG(counts.porg, "porg"),
                 FF_ARG(counts.rpm, "rpm"),
                 FF_ARG(counts.scoopGlobal, "scoop-global"),
                 FF_ARG(counts.scoopUser, "scoop-user"),
@@ -319,6 +321,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             FF_TEST_PACKAGE_NAME(PKG)
                             FF_TEST_PACKAGE_NAME(PKGSRC)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
+                            FF_TEST_PACKAGE_NAME(PORG)
                             break;
                         case 'R':
                             if (false)
@@ -402,6 +405,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(PKG)
     FF_TEST_PACKAGE_NAME(PKGSRC)
     FF_TEST_PACKAGE_NAME(PKGTOOL)
+    FF_TEST_PACKAGE_NAME(PORG)
     FF_TEST_PACKAGE_NAME(RPM)
     FF_TEST_PACKAGE_NAME(SCOOP)
     FF_TEST_PACKAGE_NAME(SNAP)
@@ -468,6 +472,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(pkg)
     FF_APPEND_PACKAGE_COUNT(pkgsrc)
     FF_APPEND_PACKAGE_COUNT(pkgtool)
+    FF_APPEND_PACKAGE_COUNT(porg)
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
@@ -543,6 +548,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of pkg packages", "pkg" },
         { "Number of pkgsrc packages", "pkgsrc" },
         { "Number of pkgtool packages", "pkgtool" },
+        { "Number of porg packages", "porg" },
         { "Number of rpm packages", "rpm" },
         { "Number of scoop-global packages", "scoop-global" },
         { "Number of scoop-user packages", "scoop-user" },
