@@ -1,3 +1,32 @@
+# 2.65.0
+
+Changes:
+* Reorders package manager variables in custom format strings, moving aggregate variables (e.g., `all`, `brew-all`, `flatpak-all`) to the end. (Packages)
+    * This is a breaking change for users relying on numeric placeholders (e.g., `{1}`). Numeric placeholders are a long-deprecated feature; named placeholders (e.g., `{pacman}`) are always preferred and future-proof.
+* Enables `showPeCoreCount` by default to better display hybrid-architecture core distributions. (CPU)
+* No longer accepts `chafa` options in config files if `chafa` support was disabled at compile time. (Logo)
+    * This may affect users who generated config files using `fastfetch --gen-full-config`. To resolve this, simply remove the `chafa` section from the config file.
+
+Features:
+* Adds CPU code name (e.g., "Alder Lake", "Zen 4") and manufacturing technology (e.g., "Intel 7", "TSMC N4") detection for x86 processors. (#1501, CPU, X86)
+    * Can be used in custom formats via `{code-name}` and `{technology}`.
+* Adds PCIe link speed (current and max generation & lanes) detection support for GPUs on Linux and Windows.
+    * Can be used in custom formats via `{pcie-max-speed}` and `{pcie-curr-speed}`.
+* Adds HDR display detection support via the `wp-color-management-v1` Wayland protocol. (#2356, Display, Linux)
+    * Previously, HDR detection was only supported on KDE Plasma.
+* Adds the `egl-ext` detection method using `EGL_EXT_device_enumeration` for GPU enumeration. (GPU)
+* Adds `kmscon` terminal version and font detection support. (#2393, Terminal / TerminalFont, Linux)
+* Adds the currently-in-beta code name "Golden Gate" for macOS 27. (OS, macOS)
+* Improves the core type (P-Core/E-Core) fetching mechanism on Windows by using `EfficiencyClass` instead of legacy frequency inference. (CPU, Windows)
+* Improves display detection compatibility with KDE 6.7. (Display, Linux)
+* Improves display serial number detection and now prefers string-serial if available. (Display)
+* Improves error messages for config file parsing errors.
+
+Bugfixes:
+* Fixes physical core detection on non-x86 architectures and simplifies the frequency detection code. (CPU, Linux)
+* Fixes console mode and output code page initialization issues when running `fastfetch` in `Conhost`. (#2383, Windows)
+* Fixes several memory leaks.
+
 # 2.64.2
 
 Bugfixes:
