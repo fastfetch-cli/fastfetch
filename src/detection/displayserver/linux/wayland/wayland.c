@@ -132,6 +132,14 @@ static FF_A_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* 
                 wldata->hdrSupported = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
                 ffEdidGetManufactureDate((const uint8_t*) edidData, &wldata->myear, &wldata->mweek);
                 ffEdidGetSerial((const uint8_t*) edidData, &wldata->serial);
+                if (wldata->preferredWidth == 0) {
+                    uint32_t preferredWidth = 0, preferredHeight = 0;
+                    double preferredRefreshRate = 0;
+                    ffEdidGetPreferredResolutionAndRefreshRate(edidData, &preferredWidth, &preferredHeight, &preferredRefreshRate);
+                    wldata->preferredWidth = (int32_t) preferredWidth;
+                    wldata->preferredHeight = (int32_t) preferredHeight;
+                    wldata->preferredRefreshRate = (int32_t) (preferredRefreshRate * 1000.);
+                }
                 wldata->hdrInfoAvailable = true;
                 return true;
             }

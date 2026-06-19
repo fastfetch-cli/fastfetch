@@ -44,8 +44,8 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
             }
         }
 
-        unsigned width = 0, height = 0, physicalWidth = 0, physicalHeight = 0;
-        double refreshRate = 0;
+        uint32_t width = 0, height = 0, physicalWidth = 0, physicalHeight = 0, preferredWidth = 0, preferredHeight = 0;
+        double preferredRefreshRate = 0;
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
         ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
@@ -59,33 +59,35 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
             }
         }
 
-        uint8_t edidData[512];
-        ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
-        if (edidLength <= 0 || edidLength % 128 != 0) {
-            edidLength = 0;
-            ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
-            ffStrbufAppendS(&drmDir, "/modes");
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+        ffStrbufAppendS(&drmDir, "/modes");
 
-            char modes[32];
-            if (ffReadFileData(drmDir.chars, ARRAY_SIZE(modes), modes) >= 3) {
-                sscanf(modes, "%ux%u", &width, &height);
-                ffStrbufAppendS(&name, plainName);
-            }
-        } else {
+        char modes[32];
+        if (ffReadFileData(drmDir.chars, ARRAY_SIZE(modes), modes) >= 3) {
+            // This is actually preferred resolution
+            sscanf(modes, "%ux%u", &width, &height);
+            ffStrbufAppendS(&name, plainName);
+        }
+
+        uint8_t edidData[1024];
+        ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
+        if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
             ffEdidGetName(edidData, &name);
-            ffEdidGetPreferredResolutionAndRefreshRate(edidData, &width, &height, &refreshRate);
+            ffEdidGetPreferredResolutionAndRefreshRate(edidData, &preferredWidth, &preferredHeight, &preferredRefreshRate);
             ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+        } else {
+            edidLength = 0;
         }
 
         FFDisplayResult* item = ffdsAppendDisplay(
             result,
             width,
             height,
-            refreshRate,
             0,
             0,
-            0,
-            0,
+            preferredWidth,
+            preferredHeight,
+            preferredRefreshRate,
             0,
             &name,
             ffdsGetDisplayType(plainName),
@@ -379,7 +381,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
                 uint8_t edidData[512];
                 ssize_t edidLength = 0;
                 drmGetEdidByConnId(conn.connector_id, edidData, &edidLength);
-                if (edidLength > 0 && edidLength % 128 == 0) {
+                if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
                     ffEdidGetName(edidData, &name);
                     hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                     ffEdidGetManufactureDate(edidData, &myear, &mweak);
