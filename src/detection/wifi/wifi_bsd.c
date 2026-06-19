@@ -133,14 +133,23 @@ const char* ffDetectWifi(FFlist* result) {
                     ffStrbufSetStatic(&item->conn.security, "Shared");
                     break;
                 case IEEE80211_AUTH_8021X:
-                    ffStrbufSetStatic(&item->conn.security, "8021X");
+                    ffStrbufSetStatic(&item->conn.security, "802.1x");
                     break;
                 case IEEE80211_AUTH_AUTO:
                     ffStrbufSetStatic(&item->conn.security, "Auto");
                     break;
-                case IEEE80211_AUTH_WPA:
-                    ffStrbufSetStatic(&item->conn.security, "WPA");
+                case IEEE80211_AUTH_WPA: {
+                    ireq.i_type = IEEE80211_IOC_WPA;
+                    if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
+                        switch (ireq.i_val) {
+                            case 2: ffStrbufSetStatic(&item->conn.security, "WPA2"); break;
+                            case 3: ffStrbufSetStatic(&item->conn.security, "WPA1+2"); break;
+                            default: ffStrbufSetStatic(&item->conn.security, "WPA"); break;
+                        }
+                    }
                     break;
+
+                }
                 default:
                     ffStrbufSetF(&item->conn.security, "Unknown (%d)", ireq.i_val);
                     break;
