@@ -51,14 +51,6 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
             }
             putchar('\n');
         } else {
-            char buf[32];
-            if (display->serial) {
-                const uint8_t* nums = (uint8_t*) &display->serial;
-                snprintf(buf, sizeof(buf), "%2X-%2X-%2X-%2X", nums[0], nums[1], nums[2], nums[3]);
-            } else {
-                buf[0] = '\0';
-            }
-
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                          FF_ARG(display->name, "name"),
                                                                                                          FF_ARG(display->width, "width"),
@@ -69,7 +61,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
                                                                                                          FF_ARG(ppi, "ppi"),
                                                                                                          FF_ARG(display->manufactureYear, "manufacture-year"),
                                                                                                          FF_ARG(display->manufactureWeek, "manufacture-week"),
-                                                                                                         FF_ARG(buf, "serial"),
+                                                                                                         FF_ARG(display->serial, "serial"),
                                                                                                          FF_ARG(display->refreshRate, "refresh-rate"),
                                                                                                          FF_ARG(hdrCompatible, "hdr-compatible"),
                                                                                                      }));

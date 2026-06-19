@@ -66,7 +66,7 @@ void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* h
     }
 }
 
-void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial, uint16_t* year, uint16_t* week) {
+void ffEdidGetManufactureDate(const uint8_t edid[128], uint16_t* year, uint16_t* week) {
     if (edid[17] > 0 && edid[17] < 0xFF) {
         *year = (uint16_t) (edid[17] + 1990);
         *week = (uint16_t) edid[16];
@@ -76,8 +76,49 @@ void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial
     } else {
         *year = *week = 0;
     }
+}
 
-    *serial = *(uint32_t*) &edid[12];
+bool ffEdidGetSerial(const uint8_t edid[128], FFstrbuf* result) {
+    int descriptor_offsets[4] = {54, 72, 90, 108};
+
+    for (int i = 0; i < 4; i++) {
+        int offset = descriptor_offsets[i];
+        const uint8_t* desc = edid + offset;
+
+        if (desc[0] == 0x00 && desc[1] == 0x00) { // Monitor Descriptor
+            uint8_t tag = desc[3]; // Descriptor Type Tag
+
+            if (tag == 0xFF) { // Display Product Serial Number
+                ffStrbufClear(result);
+                for (int j = 0; j < 13; j++) {
+                    uint8_t ch = desc[5 + j];
+
+                    if (ch == 0x0A || ch == 0x00) {
+                        break;
+                    }
+
+                    ffStrbufAppendC(result, (char) ch);
+                }
+
+                ffStrbufTrim(result, ' ');
+                if (result->length > 0) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    uint32_t int_serial = 0;
+    int_serial |= (uint32_t)edid[12];
+    int_serial |= (uint32_t)edid[13] << 8;
+    int_serial |= (uint32_t)edid[14] << 16;
+    int_serial |= (uint32_t)edid[15] << 24;
+
+    if (int_serial != 0 && int_serial != 0xFFFFFFFF) {
+        ffStrbufSetF(result, "0x%08X", int_serial);
+        return 0;
+    }
+    return false;
 }
 
 bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length) {

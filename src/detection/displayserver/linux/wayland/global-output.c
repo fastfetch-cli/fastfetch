@@ -198,7 +198,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
 
         item->manufactureYear = display.myear;
         item->manufactureWeek = display.mweek;
-        item->serial = display.serial;
+        ffStrbufInitMove(&item->serial, &display.serial);
     }
 
     ffStrbufDestroy(&display.description);

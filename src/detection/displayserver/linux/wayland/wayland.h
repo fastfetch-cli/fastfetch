@@ -55,7 +55,7 @@ typedef struct WaylandDisplay {
     bool hdrEnabled;
     uint16_t myear;
     uint16_t mweek;
-    uint32_t serial;
+    FFstrbuf serial;
     uint8_t bitDepth;
     bool primary;
 } WaylandDisplay;

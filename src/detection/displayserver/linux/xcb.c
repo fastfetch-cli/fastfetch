@@ -227,7 +227,8 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
     if (item) {
         if (edidData && edidLength >= 128) {
             item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-            ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+            ffEdidGetManufactureDate(edidData, &item->manufactureYear, &item->manufactureWeek);
+            ffEdidGetSerial(edidData, &item->serial);
         }
         item->bitDepth = bitDepth;
         if ((rotation == 90 || rotation == 180) && !randrEmulation) {

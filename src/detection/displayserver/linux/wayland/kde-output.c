@@ -95,7 +95,8 @@ static void waylandKdeEdidListener(void* data, FF_A_UNUSED struct kde_output_dev
     }
     ffEdidGetName((const uint8_t*) edid.chars, &wldata->edidName);
     wldata->hdrSupported = ffEdidGetHdrCompatible((const uint8_t*) edid.chars, edid.length);
-    ffEdidGetSerialAndManufactureDate((const uint8_t*) edid.chars, &wldata->serial, &wldata->myear, &wldata->mweek);
+    ffEdidGetManufactureDate((const uint8_t*) edid.chars, &wldata->myear, &wldata->mweek);
+    ffEdidGetSerial((const uint8_t*) edid.chars, &wldata->serial);
     wldata->hdrInfoAvailable = true;
 }
 
@@ -259,7 +260,7 @@ static const char* waylandKdeHandleOutput(WaylandData* wldata, struct wl_proxy* 
 
         item->manufactureYear = display.myear;
         item->manufactureWeek = display.mweek;
-        item->serial = display.serial;
+        ffStrbufInitMove(&item->serial, &display.serial);
         item->bitDepth = display.bitDepth;
     }
 
