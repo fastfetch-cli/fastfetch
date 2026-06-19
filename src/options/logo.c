@@ -159,10 +159,10 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_RAW;
     } else if ((subKey = ffOptionTestPrefix(key, "chafa"))) {
+#if FF_HAVE_CHAFA
         if (subKey[0] == '\0') {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_IMAGE_CHAFA;
-#if FF_HAVE_CHAFA
         } else if (ffStrEqualsIgnCase(subKey, "fg-only")) {
             options->chafaFgOnly = ffOptionParseBoolean(value);
         } else if (ffStrEqualsIgnCase(subKey, "symbols")) {
@@ -192,10 +192,13 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                                     { "DIFFUSION", 2 },
                                                                                     {},
                                                                                 });
-#endif
         } else {
             return false;
         }
+#else
+        fputs("Error: Chafa options are not supported because Fastfetch was built without Chafa support\n", stderr);
+        exit(477);
+#endif
     } else {
         return false;
     }
@@ -348,8 +351,8 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             options->position = (FFLogoPosition) value;
             continue;
-#if FF_HAVE_CHAFA
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
+#if FF_HAVE_CHAFA
             if (!yyjson_is_obj(val)) {
                 return "Chafa config must be an object";
             }
@@ -416,6 +419,8 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 options->chafaDitherMode = (uint32_t) value;
             }
             continue;
+#else
+            return "Chafa options are not supported because Fastfetch was built without Chafa support";
 #endif
         } else {
             return "Unknown logo key";
