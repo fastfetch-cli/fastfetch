@@ -216,7 +216,7 @@ void ffOptionsDestroyLogo(FFOptionsLogo* options) {
     }
 }
 
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root) {
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) {
         return NULL;
@@ -242,6 +242,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     yyjson_val *key, *val;
     size_t idx, max;
     yyjson_obj_foreach (object, idx, max, key, val) {
+        *pkey = key;
         if (unsafe_yyjson_equals_str(key, "type")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {

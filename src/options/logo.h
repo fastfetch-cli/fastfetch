@@ -57,5 +57,5 @@ typedef struct FFOptionsLogo {
 void ffOptionsInitLogo(FFOptionsLogo* options);
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
 void ffOptionsDestroyLogo(FFOptionsLogo* options);
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root);
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey);
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options);

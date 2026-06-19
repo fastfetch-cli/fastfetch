@@ -7,7 +7,7 @@
 
 #include <unistd.h>
 
-const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root) {
+const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "display");
     if (!object) {
         return NULL;
@@ -19,6 +19,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
     yyjson_val *key, *val;
     size_t idx, max;
     yyjson_obj_foreach (object, idx, max, key, val) {
+        *pkey = key;
         if (unsafe_yyjson_equals_str(key, "stat")) {
             if (yyjson_is_bool(val)) {
                 if (yyjson_get_bool(val)) {

@@ -20,7 +20,7 @@ typedef struct FFOptionsGeneral {
 #endif
 } FFOptionsGeneral;
 
-const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_val* root);
+const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_val* root, yyjson_val** pkey);
 bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key, const char* value);
 void ffOptionsInitGeneral(FFOptionsGeneral* options);
 void ffOptionsDestroyGeneral(FFOptionsGeneral* options);

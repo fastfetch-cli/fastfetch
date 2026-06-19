@@ -404,20 +404,26 @@ static bool parseJsoncFile(FFdata* data, const char* path, yyjson_read_flag flg)
     }
 
     {
-        const char* error = NULL;
-
         yyjson_val* const root = yyjson_doc_get_root(data->configDoc);
         if (!yyjson_is_obj(root)) {
-            error = "Invalid JSON config format. Root value must be an object";
+            fputs("JsonConfig Error: Invalid JSON config format. Root value must be an object", stderr);
+            exit(477);
         }
 
+        yyjson_val* problematicKey = NULL;
+        const char* error = NULL;
+        const char* problematicModule = NULL;
         if (
             error ||
-            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
-            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
-            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
+            ((error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root, &problematicKey)) && (problematicModule = "logo")) ||
+            ((error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root, &problematicKey)) && (problematicModule = "general")) ||
+            ((error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root, &problematicKey)) && (problematicModule = "display")) ||
             false) {
-            fprintf(stderr, "JsonConfig Error: %s\n", error);
+            if (problematicKey) {
+                fprintf(stderr, "JsonConfig Error (%s.%s): %s\n", problematicModule, unsafe_yyjson_get_str(problematicKey), error);
+            } else {
+                fprintf(stderr, "JsonConfig Error (%s): %s\n", problematicModule, error);
+            }
             exit(477);
         }
     }
