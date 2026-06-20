@@ -128,6 +128,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         } else {
             FF_PRINT_PACKAGE_NAME(scoopUser, "scoop")
         }
+        FF_PRINT_PACKAGE_NAME(sdkman, "sdk")
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(soar)
         FF_PRINT_PACKAGE(sorcery)
@@ -184,6 +185,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.rpm, "rpm"),
                 FF_ARG(counts.scoopGlobal, "scoop-global"),
                 FF_ARG(counts.scoopUser, "scoop-user"),
+                FF_ARG(counts.sdkman, "sdk"),
                 FF_ARG(counts.snap, "snap"),
                 FF_ARG(counts.soar, "soar"),
                 FF_ARG(counts.sorcery, "sorcery"),
@@ -329,6 +331,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(SCOOP)
+                            FF_TEST_PACKAGE_NAME(SDKMAN)
                             FF_TEST_PACKAGE_NAME(SNAP)
                             FF_TEST_PACKAGE_NAME(SOAR)
                             FF_TEST_PACKAGE_NAME(SORCERY)
@@ -404,6 +407,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(PKGTOOL)
     FF_TEST_PACKAGE_NAME(RPM)
     FF_TEST_PACKAGE_NAME(SCOOP)
+    FF_TEST_PACKAGE_NAME(SDKMAN)
     FF_TEST_PACKAGE_NAME(SNAP)
     FF_TEST_PACKAGE_NAME(SOAR)
     FF_TEST_PACKAGE_NAME(SORCERY)
@@ -471,6 +475,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
+    FF_APPEND_PACKAGE_COUNT(sdkman)
     FF_APPEND_PACKAGE_COUNT(snap)
     FF_APPEND_PACKAGE_COUNT(soar)
     FF_APPEND_PACKAGE_COUNT(sorcery)
@@ -546,6 +551,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of rpm packages", "rpm" },
         { "Number of scoop-global packages", "scoop-global" },
         { "Number of scoop-user packages", "scoop-user" },
+        {"Number of SDKMAN! packages", "sdk"},
         { "Number of snap packages", "snap" },
         { "Number of soar packages", "soar" },
         { "Number of sorcery packages", "sorcery" },

@@ -287,6 +287,34 @@ static uint32_t getAMUser(void) {
     return packagesPath.length > 0 ? getAMPackages(&packagesPath) : 0;
 }
 
+static uint32_t getSDKMAN(void) {
+    const char* candidatesDir = getenv("SDKMAN_CANDIDATES_DIR");
+    if (!ffStrSet(candidatesDir))
+        return 0;
+
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(candidatesDir);
+    if (!dir)
+        return 0;
+
+    uint32_t count = 0;
+    char path[PATH_MAX];
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_name[0] == '.')
+            continue;
+
+        if (entry->d_type == DT_DIR || entry->d_type == DT_UNKNOWN)
+        {
+            snprintf(path, sizeof(path), "%s/%s/current", candidatesDir, entry->d_name);
+            if (ffPathExists(path, FF_PATHTYPE_DIRECTORY))
+                ++count;
+        }
+    }
+
+    return count;
+}
+
 static int compareHash(const void* a, const void* b) {
     return memcmp(a, b, 32);
 }
@@ -638,6 +666,10 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
 
     if (FF_PACKAGES_IS_ENABLED(options, AM)) {
         result->amUser = getAMUser();
+    }
+
+    if (FF_PACKAGES_IS_ENABLED(options, SDKMAN)) {
+        result->sdkman = getSDKMAN();
     }
 
     if (FF_PACKAGES_IS_ENABLED(options, SOAR)) {
