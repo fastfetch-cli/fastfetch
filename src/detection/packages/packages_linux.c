@@ -458,8 +458,7 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
-static uint32_t getEmergePackagesImpl(FFstrbuf* baseDir)
-{
+static uint32_t getEmergePackagesImpl(FFstrbuf* baseDir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
     if (dirp == NULL)
         return 0;
@@ -477,8 +476,7 @@ static uint32_t getEmergePackagesImpl(FFstrbuf* baseDir)
     return result;
 }
 
-static uint32_t getEmergePackages(FFstrbuf* baseDir, const char* dirname)
-{
+static uint32_t getEmergePackages(FFstrbuf* baseDir, const char* dirname) {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dirname);
     ffStrbufAppendC(baseDir, '/');
