@@ -458,6 +458,35 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
+static uint32_t getEmergePackagesImpl(FFstrbuf* baseDir)
+{
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    if (dirp == NULL)
+        return 0;
+
+    uint32_t result = 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (entry->d_type != DT_DIR || entry->d_name[0] == '.')
+            continue;
+
+        result += getNumElements(baseDir, entry->d_name, true);
+    }
+    return result;
+}
+
+static uint32_t getEmergePackages(FFstrbuf* baseDir, const char* dirname)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    ffStrbufAppendC(baseDir, '/');
+    uint32_t result = getEmergePackagesImpl(baseDir);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return result;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options) {
     if (FF_PACKAGES_IS_ENABLED(options, APK)) {
         packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
@@ -469,7 +498,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
     }
     if (FF_PACKAGES_IS_ENABLED(options, EMERGE)) {
-        packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+        packageCounts->emerge += getEmergePackages(baseDir, "/var/db/pkg");
     }
     if (FF_PACKAGES_IS_ENABLED(options, EOPKG)) {
         packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
