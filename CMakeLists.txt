@@ -140,25 +140,10 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS
-    AM APK APPIMAGE
-    BREW
-    CARDS CHOCO
-    DPKG
-    EMERGE EOPKG
-    FLATPAK
-    GUIX
-    HPKG
-    KISS
-    LINGLONG LPKG LPKGBUILD
-    MACPORTS MOSS MPORT
-    NIX
-    OPKG
-    PACMAN PACSTALL PALUDIS PISI PKG PKGSRC PKGTOOL
-    RPM
-    SCOOP SNAP SOAR SORCERY
-    WINGET
-    XBPS)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/packages/option.h" PACKAGE_MANAGERS)
+string(REGEX MATCHALL "FF_PACKAGES_FLAG_[A-Z]+_BIT" PACKAGE_MANAGERS "${PACKAGE_MANAGERS}")
+string(REGEX REPLACE "FF_PACKAGES_FLAG_([A-Z]+)_BIT" "\\1" PACKAGE_MANAGERS "${PACKAGE_MANAGERS}")
+list(SORT PACKAGE_MANAGERS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -333,7 +318,7 @@ if(Python_FOUND)
     endif()
 else()
     message(WARNING "Python3 is not found, 'help.json' will not be minified")
-    file(READ "doc/help.json" DATATEXT_JSON_HELP)
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/doc/help.json" DATATEXT_JSON_HELP)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
