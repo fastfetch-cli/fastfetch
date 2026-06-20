@@ -98,7 +98,7 @@ static const struct wp_image_description_info_v1_listener wpImageDescInfoListene
 };
 
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
-    const char* api = "wayland-global";
+    const char* api = "wayland-base";
     uint32_t bindVersion = min(version, WL_OUTPUT_DESCRIPTION_SINCE_VERSION);
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wl_output_interface, bindVersion, name, wl_output_interface.name, bindVersion, NULL);
     if (output == NULL) {
@@ -131,7 +131,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
             wldata->ffwl_proxy_add_listener(zxdgOutput, (void (**)(void)) &zxdgOutputListener, &display);
             wldata->ffwl_display_roundtrip(wldata->display);
             wldata->ffwl_proxy_destroy(zxdgOutput);
-            api = "wayland-global-zxdg";
+            api = "wayland-zxdg";
         }
     }
 
@@ -152,7 +152,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
             }
             wldata->ffwl_proxy_destroy(wpColorOutput);
             wldata->ffwl_display_roundtrip(wldata->display);
-            api = "wayland-global-wpcolor";
+            api = api[strlen("wayland-")] == 'z' ? "wayland-zxdg+wpcolor" : "wayland-wpcolor";
         }
     }
 
