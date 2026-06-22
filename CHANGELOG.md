@@ -17,14 +17,20 @@ Features:
 * Adds the `egl-ext` detection method using `EGL_EXT_device_enumeration` for GPU enumeration. (GPU)
 * Adds `kmscon` terminal version and font detection support. (#2393, Terminal / TerminalFont, Linux)
 * Adds the currently-in-beta code name "Golden Gate" for macOS 27. (OS, macOS)
+* Adds WPA version detection support on FreeBSD. (Wifi, FreeBSD)
+* Adds `porg` (#2405) and `install-release` (#2342) package manager support (Packages, Linux)
 * Improves the core type (P-Core/E-Core) fetching mechanism on Windows by using `EfficiencyClass` instead of legacy frequency inference. (CPU, Windows)
 * Improves display detection compatibility with KDE 6.7. (Display, Linux)
-* Improves display serial number detection and now prefers string-serial if available. (Display)
+* Improves display serial number detection and now prefers alphanumeric serial number if available. (Display)
+    * Can be used in custom formats via `{serial}`.
+* Improves performance of `emerge` package manager detection (#2406, Packages, Linux)
 * Improves error messages for config file parsing errors.
 
 Bugfixes:
 * Fixes physical core detection on non-x86 architectures and simplifies the frequency detection code. (CPU, Linux)
 * Fixes console mode and output code page initialization issues when running `fastfetch` in `Conhost`. (#2383, Windows)
+* Fixes an issue where Codec module incorrectly reports no results when `codec.showType` option is set on Linux. (Codec, Linux)
+* Fixes public IP detection randomly failing on Linux. (#2401, PublicIP, Linux)
 * Fixes several memory leaks.
 
 # 2.64.2
