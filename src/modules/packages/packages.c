@@ -530,7 +530,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Number of hpkg-system packages", "hpkg-system" },
         { "Number of hpkg-user packages", "hpkg-user" },
-        { "Number of install-release packages", "install-release"},
+        { "Number of install-release packages", "install-release" },
         { "Number of kiss packages", "kiss" },
         { "Number of linglong packages", "linglong" },
         { "Number of lpkg packages", "lpkg" },
