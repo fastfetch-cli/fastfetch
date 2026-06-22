@@ -10,7 +10,7 @@ static const char* detectWithBacklight(FFlist* result) {
     // https://www.kernel.org/doc/Documentation/ABI/stable/sysfs-class-backlight
     const char* backlightDirPath = "/sys/class/backlight/";
 
-    DIR* dirp = opendir(backlightDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(backlightDirPath);
     if (dirp == NULL) {
         return "Failed to open `/sys/class/backlight/`";
     }
@@ -71,8 +71,6 @@ static const char* detectWithBacklight(FFlist* result) {
         }
         ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
     }
-
-    closedir(dirp);
 
     return NULL;
 }

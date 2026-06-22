@@ -84,7 +84,7 @@ static uint32_t countFilesRecursiveImpl(FFstrbuf* baseDirPath, const char* filen
         return 1;
     }
 
-    DIR* dirp = opendir(baseDirPath->chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDirPath->chars);
     if (dirp == NULL) {
         return 0;
     }
@@ -106,7 +106,6 @@ static uint32_t countFilesRecursiveImpl(FFstrbuf* baseDirPath, const char* filen
         ffStrbufSubstrBefore(baseDirPath, baseDirPathLength);
     }
 
-    closedir(dirp);
     return sum;
 }
 
@@ -138,7 +137,7 @@ static uint32_t getNumElementsBySuffix(FFstrbuf* baseDir, const char* dirname, c
 }
 
 static uint32_t getXBPSImpl(FFstrbuf* baseDir) {
-    DIR* dir = opendir(baseDir->chars);
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(baseDir->chars);
     if (dir == NULL) {
         return 0;
     }
@@ -157,7 +156,6 @@ static uint32_t getXBPSImpl(FFstrbuf* baseDir) {
         break;
     }
 
-    closedir(dir);
     return result;
 }
 
