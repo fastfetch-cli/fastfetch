@@ -614,6 +614,25 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
+static uint32_t getInstallReleasePackages(FFstrbuf* baseDir) {
+    uint32_t result = 0;
+
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, ".config/install_release/state.json");
+    if (ffPathExists(baseDir->chars, FF_PATHTYPE_ANY)) {
+        yyjson_doc* doc = yyjson_read_file(baseDir->chars, YYJSON_READ_NOFLAG, NULL, NULL);
+        if (doc != NULL) {
+            yyjson_val* root = yyjson_doc_get_root(doc);
+            if (yyjson_is_obj(root)) {
+                result = (uint32_t) yyjson_obj_size(root);
+            }
+            yyjson_doc_free(doc);
+        }
+    }
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return result;
+}
+
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
@@ -677,18 +696,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         result->appimage += getNumElementsBySuffix(&baseDir, "/Applications", ".appimage");
     }
 
-    if (!(options->disabled & FF_PACKAGES_FLAG_INSTALLRELEASE_BIT)) {
-        FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(&baseDir);
-        ffStrbufAppendS(&path, ".config/install_release/state.json");
-        if (ffPathExists(path.chars, FF_PATHTYPE_FILE)) {
-            yyjson_doc* doc = yyjson_read_file(path.chars, YYJSON_READ_NOFLAG, NULL, NULL);
-            if (doc != NULL) {
-                yyjson_val* root = yyjson_doc_get_root(doc);
-                if (yyjson_is_obj(root)) {
-                    result->installrelease = (uint32_t) yyjson_obj_size(root);
-                }
-                yyjson_doc_free(doc);
-            }
-        }
+    if (FF_PACKAGES_IS_ENABLED(options, INSTALLRELEASE)) {
+        result->installrelease = getInstallReleasePackages(&baseDir);
     }
 }
