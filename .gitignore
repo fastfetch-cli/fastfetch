@@ -1,8 +1,10 @@
-build/
-.vs/
-.vscode/
-.cache/
-.kdev4/
+/build/
+/build_*/
+/build-*/
+/.vs/
+/.vscode/
+/.cache/
+/.kdev4/
 .DS_Store
 cscope.*
 tags

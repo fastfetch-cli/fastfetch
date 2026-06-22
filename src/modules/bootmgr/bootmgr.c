@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/bootmgr/bootmgr.h"
 #include "modules/bootmgr/bootmgr.h"
 

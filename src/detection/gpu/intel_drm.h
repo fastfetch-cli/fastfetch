@@ -1,7 +1,11 @@
 #pragma once
 
 /* SPDX-License-Identifier: MIT */
-#include <drm.h>
+#if __has_include(<drm.h>)
+    #include <drm.h>
+#else
+    #include <drm/drm.h>
+#endif
 
 // xe_drm.h
 

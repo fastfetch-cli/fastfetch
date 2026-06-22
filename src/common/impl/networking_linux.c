@@ -2,7 +2,7 @@
 #include "common/networking.h"
 #include "common/time.h"
 #include "common/library.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "common/debug.h"
 
@@ -56,7 +56,14 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state) {
     }
 
     #ifndef __APPLE__
-    FF_DEBUG("Using sendto() + MSG_DONTWAIT to send %u bytes of data", state->command.length);
+    FF_DEBUG("Using sendto() "
+        #ifdef MSG_FASTOPEN
+            "+ MSG_FASTOPEN "
+        #endif
+        #ifdef MSG_NOSIGNAL
+            "+ MSG_NOSIGNAL "
+        #endif
+        "to send %u bytes of data", state->command.length);
     ssize_t sent = sendto(state->sockfd,
         state->command.chars,
         state->command.length,
@@ -66,7 +73,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state) {
         #ifdef MSG_NOSIGNAL
             MSG_NOSIGNAL |
         #endif
-            MSG_DONTWAIT,
+            0,
         state->addr->ai_addr,
         state->addr->ai_addrlen);
     #else

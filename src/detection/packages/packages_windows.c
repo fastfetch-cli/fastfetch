@@ -1,6 +1,6 @@
 #include "packages.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/path.h"
 #include "common/windows/unicode.h"
 #include "common/mallocHelper.h"
@@ -188,16 +188,16 @@ static void detectWinget(FFPackagesResult* result) {
 }
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
-    if (!(options->disabled & FF_PACKAGES_FLAG_SCOOP_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, SCOOP)) {
         detectScoop(result);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_CHOCO_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, CHOCO)) {
         detectChoco(result);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PACMAN)) {
         detectPacman(result);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_WINGET_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, WINGET)) {
         detectWinget(result);
     }
 }

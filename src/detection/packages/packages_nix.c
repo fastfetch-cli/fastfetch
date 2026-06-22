@@ -1,7 +1,7 @@
 #include "packages.h"
 #include "common/io.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static bool isValidNixPkg(FFstrbuf* pkg) {
     if (!ffPathExists(pkg->chars, FF_PATHTYPE_DIRECTORY)) {

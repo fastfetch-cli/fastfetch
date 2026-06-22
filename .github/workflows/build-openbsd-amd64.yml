@@ -20,12 +20,12 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.8'
+          version: '7.9'
           environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
             sudo pkg_add -u
-            sudo pkg_add -r llvm-21.1.2p0 cmake git wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa lua-5.4.7 # pkg-config is preinstalled
+            sudo pkg_add -r llvm-21.1.8p4 cmake git wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa lua-5.4.8p0 # pkg-config is preinstalled
             CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features

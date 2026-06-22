@@ -7,7 +7,11 @@
 #ifndef _ASAHI_DRM_H_
 #define _ASAHI_DRM_H_
 
-#include <drm.h>
+#if __has_include(<drm.h>)
+    #include <drm.h>
+#else
+    #include <drm/drm.h>
+#endif
 
 #if defined(__cplusplus)
 extern "C" {

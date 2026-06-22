@@ -27,7 +27,7 @@ static inline int pciReadConf(int fd, uint8_t bus, uint8_t device, uint8_t func,
     return 0;
 }
 
-const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
+const char* detectByPci(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
     char pciDevPath[] = "/dev/pci0";
     FF_AUTO_CLOSE_FD int pcifd = open(pciDevPath, O_RDONLY | O_CLOEXEC);
     if (pcifd < 0) {
@@ -86,6 +86,7 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
                 gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
                 gpu->deviceId = ffGPUPciAddr2Id(0, bus, dev, func);
                 gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+                gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
                 if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
                     ffGPUQueryAmdGpuName(PCI_PRODUCT(pciid), PCI_REVISION(pciid), gpu);
@@ -98,4 +99,17 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
     }
 
     return NULL;
+}
+
+const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
+#if FF_HAVE_DRM
+    if (options->detectionMethod == FF_GPU_DETECTION_METHOD_AUTO) {
+        ffGPUDetectByDrmBSD(options, gpus);
+        if (gpus->length > 0) {
+            return NULL;
+        }
+    }
+#endif
+
+    return detectByPci(options, gpus);
 }

@@ -41,6 +41,7 @@
 #define FF_WM_PRETTY_DTWM "dtwm"
 #define FF_WM_PRETTY_FVWM "fvwm"
 #define FF_WM_PRETTY_CTWM "ctwm"
+#define FF_WM_PRETTY_COSMIC_COMP "cosmic-comp"
 #define FF_WM_PRETTY_RATPOISON "ratpoison"
 #define FF_WM_PRETTY_ENLIGHTENMENT "Enlightenment"
 
@@ -88,7 +89,7 @@ typedef struct FFDisplayResult {
     FFDisplayHdrStatus hdrStatus;
     uint16_t manufactureYear;
     uint16_t manufactureWeek;
-    uint32_t serial;
+    FFstrbuf serial;
     FFDisplayVrrStatus drrStatus;
 } FFDisplayResult;
 

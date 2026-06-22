@@ -1,5 +1,5 @@
 #include "FFPlatform_private.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/io.h"
 #include "detection/version/version.h"
 

@@ -8,12 +8,16 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByIndex_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetHandleByPciBusId_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetPciInfo_v3)
-    FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperatureV)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxClockInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetUtilizationRates)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkGeneration)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxPcieLinkWidth)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetCurrPcieLinkGeneration)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetCurrPcieLinkWidth)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetIndex)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetName)
@@ -154,11 +158,15 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByIndex_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetHandleByPciBusId_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetPciInfo_v3)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperatureV)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxClockInfo)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkGeneration)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxPcieLinkWidth)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCurrPcieLinkGeneration)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCurrPcieLinkWidth)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetUtilizationRates)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetIndex)
@@ -246,9 +254,12 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     }
 
     if (result.temp) {
-        uint32_t value;
-        if (nvmlData.ffnvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, &value) == NVML_SUCCESS) {
-            *result.temp = value;
+        nvmlTemperature_v1_t temp = {
+            .version = nvmlTemperature_v1,
+            .sensorType = NVML_TEMPERATURE_GPU,
+        };
+        if (nvmlData.ffnvmlDeviceGetTemperatureV(device, &temp) == NVML_SUCCESS) {
+            *result.temp = temp.temperature;
         }
     }
 
@@ -285,6 +296,26 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         char name[NVML_DEVICE_NAME_V2_BUFFER_SIZE];
         if (nvmlData.ffnvmlDeviceGetName(device, name, ARRAY_SIZE(name)) == NVML_SUCCESS) {
             ffStrbufSetS(result.name, name);
+        }
+    }
+
+    if (result.psMax) {
+        unsigned int value;
+        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkGeneration(device, &value) == NVML_SUCCESS) {
+            result.psMax->gen = (uint16_t) value;
+        }
+        if (nvmlData.ffnvmlDeviceGetMaxPcieLinkWidth(device, &value) == NVML_SUCCESS) {
+            result.psMax->lanes = (uint16_t) value;
+        }
+    }
+
+    if (result.psCurr) {
+        unsigned int value;
+        if (nvmlData.ffnvmlDeviceGetCurrPcieLinkGeneration(device, &value) == NVML_SUCCESS) {
+            result.psCurr->gen = (uint16_t) value;
+        }
+        if (nvmlData.ffnvmlDeviceGetCurrPcieLinkWidth(device, &value) == NVML_SUCCESS) {
+            result.psCurr->lanes = (uint16_t) value;
         }
     }
 

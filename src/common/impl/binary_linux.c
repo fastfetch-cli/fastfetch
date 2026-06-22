@@ -4,7 +4,7 @@
 
     #include "common/io.h"
     #include "common/library.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
 
     #include <libelf.h> // #1254
     #include <fcntl.h>

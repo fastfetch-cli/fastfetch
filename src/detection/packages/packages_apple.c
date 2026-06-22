@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static void countBrewPackages(FFstrbuf* baseDir, FFPackagesResult* result) {
     uint32_t baseDirLength = baseDir->length;
@@ -23,7 +23,7 @@ static uint32_t getMacPortsPackages(FFstrbuf* baseDir) {
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreate();
-    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, BREW)) {
         const char* prefix = getenv("HOMEBREW_PREFIX");
         if (ffStrSet(prefix)) {
             ffStrbufSetS(&baseDir, prefix);
@@ -36,7 +36,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         }
         countBrewPackages(&baseDir, result);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_MACPORTS_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, MACPORTS)) {
         const char* prefix = getenv("MACPORTS_PREFIX");
         if (ffStrSet(prefix)) {
             ffStrbufSetS(&baseDir, prefix);
@@ -46,7 +46,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
 
         result->macports = getMacPortsPackages(&baseDir);
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
         result->nixDefault += ffPackagesGetNix(&baseDir, "/nix/var/nix/profiles/default");
         result->nixSystem += ffPackagesGetNix(&baseDir, "/run/current-system");

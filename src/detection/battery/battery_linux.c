@@ -1,6 +1,6 @@
 #include "battery.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/debug.h"
 
 #include <dirent.h>

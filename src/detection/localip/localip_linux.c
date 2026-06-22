@@ -1,7 +1,7 @@
 #include "localip.h"
 #include "common/io.h"
 #include "common/netif.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/debug.h"
 
 #include <string.h>

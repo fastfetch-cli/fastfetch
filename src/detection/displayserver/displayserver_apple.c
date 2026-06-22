@@ -1,6 +1,6 @@
 #include "displayserver.h"
 #include "common/apple/cf_helpers.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/edidHelper.h"
 #include "detection/os/os.h"
 
@@ -63,6 +63,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             uint32_t physicalWidth = 0, physicalHeight = 0;
             uint32_t preferredWidth = 0, preferredHeight = 0;
             double preferredRefreshRate = 0;
+            FF_STRBUF_AUTO_DESTROY serial = ffStrbufCreate();
 
             if (displayInfo) {
                 CFDictionaryRef productNames;
@@ -75,8 +76,9 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 if (edidRef && CFGetTypeID(edidRef) == CFDataGetTypeID()) {
                     const uint8_t* edidData = CFDataGetBytePtr(edidRef);
                     uint32_t edidLength = (uint32_t) CFDataGetLength(edidRef);
-                    if (edidLength >= 128) {
+                    if (ffEdidIsValid(edidData, edidLength)) {
                         ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                        ffEdidGetSerial(edidData, &serial);
                     }
                 }
 
@@ -166,7 +168,14 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 }
 #endif
 
-                display->serial = CGDisplaySerialNumber(screen);
+                if (serial.length) {
+                    ffStrbufInitMove(&display->serial, &serial);
+                } else {
+                    uint32_t int_serial = CGDisplaySerialNumber(screen);
+                    if (int_serial != 0 && int_serial != 0xFFFFFFFF) {
+                        ffStrbufSetF(&display->serial, "0x%08X", int_serial);
+                    }
+                }
 
                 if (displayInfo) {
                     int value;

@@ -1,5 +1,5 @@
 #include "diskio.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include <kstat.h>
 
 static inline void kstatFreeWrap(kstat_ctl_t** pkc) {

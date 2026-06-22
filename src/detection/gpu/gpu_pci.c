@@ -2,6 +2,7 @@
 #include "common/io.h"
 #include "common/properties.h"
 #include "common/memrchr.h"
+#include "common/strutil.h"
 
 #include <stdlib.h>
 #ifdef __FreeBSD__
@@ -21,9 +22,6 @@
 #if FF_HAVE_EMBEDDED_AMDGPUIDS
     #include "fastfetch_amdgpuids.c.inc"
 #endif
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
 
 static const FFstrbuf* loadPciIds() {
     static FFstrbuf pciids;

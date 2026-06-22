@@ -1,7 +1,7 @@
 #include "common/time.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "modules/datetime/datetime.h"
 
 #include <time.h>

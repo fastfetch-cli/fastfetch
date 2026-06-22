@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/option.h"
 #include "common/color.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <limits.h>
 

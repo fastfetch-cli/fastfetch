@@ -1,6 +1,6 @@
 #include "displayserver_linux.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #ifdef __FreeBSD__
     #include "common/settings.h"

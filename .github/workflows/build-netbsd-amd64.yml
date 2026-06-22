@@ -24,7 +24,7 @@ jobs:
           environment_variables: 'CMAKE_BUILD_TYPE'
           run: |
             uname -a
-            sudo pkgin -y install clang cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick
+            sudo pkgin -y install clang cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick libva libvdpau
             CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features

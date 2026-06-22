@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/terminaltheme/terminaltheme.h"
 #include "modules/terminaltheme/terminaltheme.h"
 

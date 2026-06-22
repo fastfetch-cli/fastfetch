@@ -7,6 +7,7 @@
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t) -1)
 #define FF_GPU_FREQUENCY_UNSET 0
+#define FF_GPU_PCIE_SPEED_UNSET 0
 #define FF_GPU_CORE_USAGE_UNSET (-DBL_MAX)
 #define FF_GPU_INDEX_UNSET ((uint32_t) -1)
 
@@ -34,6 +35,11 @@ typedef struct FFGPUMemory {
     uint64_t used;
 } FFGPUMemory;
 
+typedef struct FFGPUPcieSpeed {
+    uint16_t gen;
+    uint16_t lanes;
+} FFGPUPcieSpeed;
+
 typedef struct FFGPUResult {
     uint32_t index;
     FFGPUType type;
@@ -46,6 +52,13 @@ typedef struct FFGPUResult {
     double coreUsage;
     int32_t coreCount;
     uint32_t frequency; // Maximum time clock frequency in MHz
+    union {
+        struct {
+            FFGPUPcieSpeed psMax;
+            FFGPUPcieSpeed psCurr;
+        };
+        uint64_t pcieSpeed;
+    };
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId;
@@ -67,14 +80,17 @@ typedef struct FFGpuDriverPciBusId {
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu);
 
-    #if FF_HAVE_DRM
+    #if FF_HAVE_DRM || __has_include(<drm/drm.h>)
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath);
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath);
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectXe(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
-    #endif // FF_HAVE_DRM
+        #if __FreeBSD__ || __OpenBSD__ // DRM is not available on NetBSD
+const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus);
+        #endif
+    #endif // FF_HAVE_DRM || __has_include(<drm/drm.h>)
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
 #endif // defined(XXX)
@@ -87,3 +103,5 @@ static inline uint64_t ffGPUGeneral2Id(uint64_t originalId) {
     // Note: originalId may already have the MSB set
     return (1ULL << 63) | originalId;
 }
+
+bool ffGPUFillVendorByDeviceName(FFGPUResult* gpu);

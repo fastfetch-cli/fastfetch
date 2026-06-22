@@ -1,4 +1,5 @@
 #include "version.h"
+#include "common/strutil.h"
 
 #if defined(__x86_64__)
     #define FF_ARCHITECTURE "x86_64"
@@ -61,9 +62,6 @@
 #else
     #define FF_SYSNAME "Unknown"
 #endif
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
 
 FFVersionResult ffVersionResult = {
     .projectName = FASTFETCH_PROJECT_NAME,

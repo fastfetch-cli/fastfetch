@@ -110,7 +110,9 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
     return error;
 }
 
-__attribute__((visibility("default"), used)) int ffPrintMediaByMediaRemote(bool saveCover) {
+#if !FF_MODULE_DISABLE_MEDIA
+__attribute__((visibility("default"), used))
+int ffPrintMediaByMediaRemote(bool saveCover) {
     FFMediaResult media = {
         .status = ffStrbufCreate(),
         .song = ffStrbufCreate(),
@@ -151,6 +153,7 @@ __attribute__((visibility("default"), used)) int ffPrintMediaByMediaRemote(bool 
     ffStrbufDestroy(&media.cover);
     return 0;
 }
+#endif
 
 static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveCover) {
     // #1737

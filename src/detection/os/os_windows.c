@@ -1,5 +1,5 @@
 #include "os.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/windows/registry.h"
 #include "common/windows/unicode.h"
 

@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
 #include "modules/vulkan/vulkan.h"

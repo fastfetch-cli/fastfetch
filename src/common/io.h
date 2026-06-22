@@ -40,6 +40,7 @@ HANDLE openat(HANDLE dfd, const char* fileName, int oflag);
 HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif
 
+FF_A_ALWAYS_INLINE
 static inline bool ffIsValidNativeFD(FFNativeFD fd) {
 #ifndef _WIN32
     return fd >= 0;
@@ -49,20 +50,17 @@ static inline bool ffIsValidNativeFD(FFNativeFD fd) {
 #endif
 }
 
-FF_A_NONNULL(1) static inline bool wrapClose(FFNativeFD* pfd) {
+FF_A_ALWAYS_INLINE FF_A_NONNULL(1)
+static inline void wrapClose(FFNativeFD* pfd) {
     assert(pfd);
 
-    if (!ffIsValidNativeFD(*pfd)) {
-        return false;
-    }
-
+    if (ffIsValidNativeFD(*pfd)) {
 #ifndef _WIN32
-    close(*pfd);
+        close(*pfd);
 #else
-    NtClose(*pfd);
+        NtClose(*pfd);
 #endif
-
-    return true;
+    }
 }
 #define FF_AUTO_CLOSE_FD FF_A_CLEANUP(wrapClose)
 
@@ -250,34 +248,28 @@ static inline void ffUnsuppressIO(bool* suppressed) {
 
 void ffListFilesRecursively(const char* path, bool pretty);
 
-FF_A_NONNULL(1) static inline bool wrapFclose(FILE** pfile) {
+FF_A_NONNULL(1) FF_A_ALWAYS_INLINE static inline void wrapFclose(FILE** pfile) {
     assert(pfile);
-    if (!*pfile) {
-        return false;
+    if (*pfile) {
+        fclose(*pfile);
     }
-    fclose(*pfile);
-    return true;
 }
 #define FF_AUTO_CLOSE_FILE FF_A_CLEANUP(wrapFclose)
 
-FF_A_NONNULL(1)
+FF_A_NONNULL(1) FF_A_ALWAYS_INLINE
 #ifndef _WIN32
-static inline bool wrapClosedir(DIR** pdir) {
+static inline void wrapClosedir(DIR** pdir) {
     assert(pdir);
-    if (!*pdir) {
-        return false;
+    if (*pdir) {
+        closedir(*pdir);
     }
-    closedir(*pdir);
-    return true;
 }
 #else
-static inline bool wrapClosedir(HANDLE* pdir) {
+static inline void wrapClosedir(HANDLE* pdir) {
     assert(pdir);
-    if (!*pdir) {
-        return false;
+    if (*pdir) {
+        FindClose(*pdir);
     }
-    FindClose(*pdir);
-    return true;
 }
 #endif
 #define FF_AUTO_CLOSE_DIR FF_A_CLEANUP(wrapClosedir)

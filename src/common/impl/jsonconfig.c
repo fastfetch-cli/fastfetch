@@ -4,7 +4,7 @@
 #include "common/printing.h"
 #include "common/io.h"
 #include "common/time.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/version/version.h"
 #include "modules/modules.h"
 
@@ -133,6 +133,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
+        #if !FF_MODULE_DISABLE_CPUUSAGE
         case 'c':
         case 'C': {
             if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
@@ -147,6 +148,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if !FF_MODULE_DISABLE_DISKIO
         case 'd':
         case 'D': {
             if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME)) {
@@ -159,6 +163,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if !FF_MODULE_DISABLE_NETIO
         case 'n':
         case 'N': {
             if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME)) {
@@ -171,6 +178,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if !FF_MODULE_DISABLE_PUBLICIP
         case 'p':
         case 'P': {
             if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME)) {
@@ -183,6 +193,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
+
+        #if !FF_MODULE_DISABLE_WEATHER
         case 'w':
         case 'W': {
             if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME)) {
@@ -195,6 +208,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
             }
             break;
         }
+        #endif
     }
 }
 
@@ -322,7 +336,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                                                                                                                      : FF_COLOR_FG_RED),
                         ms);
                 }
-                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len - 1, str); // Save; Up 1; Right 9999999; Left <len - 1>; Print <str>; Load
             }
         }
 

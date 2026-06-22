@@ -1,7 +1,7 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/brightness/brightness.h"
 #include "modules/brightness/brightness.h"
 
@@ -113,7 +113,11 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
         }
 
         if (unsafe_yyjson_equals_str(key, "ddcciSleep")) {
-            options->ddcciSleep = (uint32_t) yyjson_get_uint(val);
+            if (yyjson_is_null(val)) {
+                options->ddcciSleep = FF_BRIGHTNESS_DDCCI_SLEEP_SKIP;
+            } else {
+                options->ddcciSleep = (uint32_t) yyjson_get_uint(val);
+            }
             continue;
         }
 
@@ -133,7 +137,11 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
 void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+    if (options->ddcciSleep == FF_BRIGHTNESS_DDCCI_SLEEP_SKIP) {
+        yyjson_mut_obj_add_null(doc, module, "ddcciSleep");
+    } else {
+        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+    }
 
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 

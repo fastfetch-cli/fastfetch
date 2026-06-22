@@ -1,7 +1,7 @@
 #include "initsystem.h"
 #include "common/processing.h"
 #include "common/binary.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <libgen.h>
 #include <unistd.h>

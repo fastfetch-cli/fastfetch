@@ -41,6 +41,7 @@ typedef struct FFPackagesResult {
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;
+    uint32_t porg;
     uint32_t rpm;
     uint32_t scoopGlobal;
     uint32_t scoopUser;
@@ -54,6 +55,12 @@ typedef struct FFPackagesResult {
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;
+
+#if FF_PACKAGES_REMOVE_DISABLED
+    #define FF_PACKAGES_IS_ENABLED(options, pkgName) ({ (void) options; !((FF_PACKAGES_DISABLE_LIST) & (FF_PACKAGES_FLAG_ ## pkgName ## _BIT)); })
+#else
+    #define FF_PACKAGES_IS_ENABLED(options, pkgName) (!((options)->disabled & (FF_PACKAGES_FLAG_ ## pkgName ## _BIT)))
+#endif
 
 const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options);
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result);

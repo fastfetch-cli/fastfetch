@@ -1,6 +1,6 @@
 #include "cpucache.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, FFstrbuf* buffer, FFstrbuf* added) {
     uint32_t baseLen = path->length;

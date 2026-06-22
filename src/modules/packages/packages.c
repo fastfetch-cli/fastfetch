@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/packages/packages.h"
 #include "modules/packages/packages.h"
 
@@ -120,6 +120,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(pkg)
         FF_PRINT_PACKAGE(pkgsrc)
         FF_PRINT_PACKAGE(pkgtool)
+        FF_PRINT_PACKAGE(porg)
         FF_PRINT_PACKAGE(rpm)
         if (options->combined) {
             FF_PRINT_PACKAGE_ALL(scoop);
@@ -145,27 +146,22 @@ bool ffPrintPackages(FFPackagesOptions* options) {
             &options->moduleArgs,
             FF_PRINT_TYPE_DEFAULT,
             ((FFformatarg[]) {
-                FF_ARG(counts.all, "all"),
                 FF_ARG(counts.amSystem, "am-system"),
                 FF_ARG(counts.amUser, "am-user"),
                 FF_ARG(counts.appimage, "appimage"),
                 FF_ARG(counts.apk, "apk"),
                 FF_ARG(counts.brew, "brew"),
-                FF_ARG(brewAll, "brew-all"),
                 FF_ARG(counts.brewCask, "brew-cask"),
                 FF_ARG(counts.cards, "cards"),
                 FF_ARG(counts.choco, "choco"),
                 FF_ARG(counts.dpkg, "dpkg"),
                 FF_ARG(counts.emerge, "emerge"),
                 FF_ARG(counts.eopkg, "eopkg"),
-                FF_ARG(flatpakAll, "flatpak-all"),
                 FF_ARG(counts.flatpakSystem, "flatpak-system"),
                 FF_ARG(counts.flatpakUser, "flatpak-user"),
-                FF_ARG(guixAll, "guix-all"),
                 FF_ARG(counts.guixHome, "guix-home"),
                 FF_ARG(counts.guixSystem, "guix-system"),
                 FF_ARG(counts.guixUser, "guix-user"),
-                FF_ARG(hpkgAll, "hpkg-all"),
                 FF_ARG(counts.hpkgSystem, "hpkg-system"),
                 FF_ARG(counts.hpkgUser, "hpkg-user"),
                 FF_ARG(counts.installrelease, "install-release"),
@@ -176,7 +172,6 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.macports, "macports"),
                 FF_ARG(counts.mport, "mport"),
                 FF_ARG(counts.moss, "moss"),
-                FF_ARG(nixAll, "nix-all"),
                 FF_ARG(counts.nixDefault, "nix-default"),
                 FF_ARG(counts.nixSystem, "nix-system"),
                 FF_ARG(counts.nixUser, "nix-user"),
@@ -189,6 +184,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.pkg, "pkg"),
                 FF_ARG(counts.pkgsrc, "pkgsrc"),
                 FF_ARG(counts.pkgtool, "pkgtool"),
+                FF_ARG(counts.porg, "porg"),
                 FF_ARG(counts.rpm, "rpm"),
                 FF_ARG(counts.scoopGlobal, "scoop-global"),
                 FF_ARG(counts.scoopUser, "scoop-user"),
@@ -197,6 +193,13 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.sorcery, "sorcery"),
                 FF_ARG(counts.winget, "winget"),
                 FF_ARG(counts.xbps, "xbps"),
+
+                FF_ARG(brewAll, "brew-all"),
+                FF_ARG(flatpakAll, "flatpak-all"),
+                FF_ARG(guixAll, "guix-all"),
+                FF_ARG(hpkgAll, "hpkg-all"),
+                FF_ARG(nixAll, "nix-all"),
+                FF_ARG(counts.all, "all"),
             }));
     }
 
@@ -213,6 +216,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
             continue;
         }
 
+#if !FF_PACKAGES_REMOVE_DISABLED
         if (unsafe_yyjson_equals_str(key, "disabled")) {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val)) {
                 ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
@@ -231,10 +235,10 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                     }
                     const char* flag = unsafe_yyjson_get_str(flagObj);
 
-#define FF_TEST_PACKAGE_NAME(name)                          \
-    else if (ffStrEqualsIgnCase(flag, #name)) {             \
-        options->disabled |= FF_PACKAGES_FLAG_##name##_BIT; \
-    }
+    #define FF_TEST_PACKAGE_NAME(name)                          \
+        else if (ffStrEqualsIgnCase(flag, #name)) {             \
+            options->disabled |= FF_PACKAGES_FLAG_##name##_BIT; \
+        }
                     switch (toupper(flag[0])) {
                         case 'A':
                             if (false)
@@ -324,6 +328,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             FF_TEST_PACKAGE_NAME(PKG)
                             FF_TEST_PACKAGE_NAME(PKGSRC)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
+                            FF_TEST_PACKAGE_NAME(PORG)
                             break;
                         case 'R':
                             if (false)
@@ -349,11 +354,12 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             FF_TEST_PACKAGE_NAME(XBPS)
                             break;
                     }
-#undef FF_TEST_PACKAGE_NAME
+    #undef FF_TEST_PACKAGE_NAME
                 }
                 continue;
             }
         }
+#endif
 
         if (unsafe_yyjson_equals_str(key, "combined")) {
             options->combined = yyjson_get_bool(val);
@@ -367,14 +373,15 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
 void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
+#if !FF_PACKAGES_REMOVE_DISABLED
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
-#define FF_TEST_PACKAGE_NAME(name)                                  \
-    else if ((options->disabled & FF_PACKAGES_FLAG_##name##_BIT)) { \
-        ffStrbufSetS(&buf, #name);                                  \
-        ffStrbufLowerCase(&buf);                                    \
-        yyjson_mut_arr_add_strbuf(doc, arr, &buf);                  \
-    }
+    #define FF_TEST_PACKAGE_NAME(name)                                  \
+        else if ((options->disabled & FF_PACKAGES_FLAG_##name##_BIT)) { \
+            ffStrbufSetS(&buf, #name);                                  \
+            ffStrbufLowerCase(&buf);                                    \
+            yyjson_mut_arr_add_strbuf(doc, arr, &buf);                  \
+        }
     if (false)
         ;
     FF_TEST_PACKAGE_NAME(AM)
@@ -405,6 +412,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(PKG)
     FF_TEST_PACKAGE_NAME(PKGSRC)
     FF_TEST_PACKAGE_NAME(PKGTOOL)
+    FF_TEST_PACKAGE_NAME(PORG)
     FF_TEST_PACKAGE_NAME(RPM)
     FF_TEST_PACKAGE_NAME(SCOOP)
     FF_TEST_PACKAGE_NAME(SNAP)
@@ -412,12 +420,13 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(SORCERY)
     FF_TEST_PACKAGE_NAME(WINGET)
     FF_TEST_PACKAGE_NAME(XBPS)
-#undef FF_TEST_PACKAGE_NAME
+    #undef FF_TEST_PACKAGE_NAME
+#endif
 
     yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
-bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
@@ -471,6 +480,7 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
     FF_APPEND_PACKAGE_COUNT(pkg)
     FF_APPEND_PACKAGE_COUNT(pkgsrc)
     FF_APPEND_PACKAGE_COUNT(pkgtool)
+    FF_APPEND_PACKAGE_COUNT(porg)
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
@@ -489,7 +499,9 @@ bool ffGeneratePackagesJsonResult(FF_A_UNUSED FFPackagesOptions* options, yyjson
 void ffInitPackagesOptions(FFPackagesOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
+    #if !FF_PACKAGES_REMOVE_DISABLED
     options->disabled = FF_PACKAGES_DISABLE_LIST;
+    #endif
     options->combined = false;
 }
 
@@ -507,27 +519,22 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
     .generateJsonResult = (void*) ffGeneratePackagesJsonResult,
     .generateJsonConfig = (void*) ffGeneratePackagesJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Number of all packages", "all" },
         { "Number of am-system packages", "am-system" },
         { "Number of am-user (aka appman) packages", "am-user" },
         { "Number of appimage packages", "appimage" },
         { "Number of apk packages", "apk" },
         { "Number of brew packages", "brew" },
-        { "Total number of all brew packages", "brew-all" },
         { "Number of brew-cask packages", "brew-cask" },
         { "Number of cards packages", "cards" },
         { "Number of choco packages", "choco" },
         { "Number of dpkg packages", "dpkg" },
         { "Number of emerge packages", "emerge" },
         { "Number of eopkg packages", "eopkg" },
-        { "Total number of all flatpak app packages", "flatpak-all" },
         { "Number of flatpak-system app packages", "flatpak-system" },
         { "Number of flatpak-user app packages", "flatpak-user" },
-        { "Total number of all guix packages", "guix-all" },
         { "Number of guix-home packages", "guix-home" },
         { "Number of guix-system packages", "guix-system" },
         { "Number of guix-user packages", "guix-user" },
-        { "Total number of all hpkg packages", "hpkg-all" },
         { "Number of hpkg-system packages", "hpkg-system" },
         { "Number of hpkg-user packages", "hpkg-user" },
         { "Number of install-release packages", "install-release" },
@@ -538,7 +545,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of macports packages", "macports" },
         { "Number of mport packages", "mport" },
         { "Number of moss packages", "moss" },
-        { "Total number of all nix packages", "nix-all" },
         { "Number of nix-default packages", "nix-default" },
         { "Number of nix-system packages", "nix-system" },
         { "Number of nix-user packages", "nix-user" },
@@ -551,6 +557,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of pkg packages", "pkg" },
         { "Number of pkgsrc packages", "pkgsrc" },
         { "Number of pkgtool packages", "pkgtool" },
+        { "Number of porg packages", "porg" },
         { "Number of rpm packages", "rpm" },
         { "Number of scoop-global packages", "scoop-global" },
         { "Number of scoop-user packages", "scoop-user" },
@@ -559,5 +566,12 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of sorcery packages", "sorcery" },
         { "Number of winget packages", "winget" },
         { "Number of xbps packages", "xbps" },
+
+        { "Total number of all brew packages", "brew-all" },
+        { "Total number of all flatpak app packages", "flatpak-all" },
+        { "Total number of all guix packages", "guix-all" },
+        { "Total number of all hpkg packages", "hpkg-all" },
+        { "Total number of all nix packages", "nix-all" },
+        { "Number of all packages", "all" },
     }))
 };

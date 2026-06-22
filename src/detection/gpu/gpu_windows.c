@@ -11,31 +11,28 @@
 #if _WIN32
     #include "common/windows/unicode.h"
     #include "common/windows/registry.h"
+    #include "common/mallocHelper.h"
 
-    #if FF_WIN81_COMPAT
-        #include "common/mallocHelper.h"
-        #include <windows.h>
-        #include <cfgmgr32.h>
-        #include <devguid.h>
+    #define INITGUID
+    #include <windows.h>
+    #include <cfgmgr32.h>
+    #include <devguid.h>
+    #include <pciprop.h>
 
-        #define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
+    #define GUID_DEVCLASS_DISPLAY_STRING L"{4d36e968-e325-11ce-bfc1-08002be10318}" // Found in <devguid.h>
 
-static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_DEVICE_IDS* outDeviceIds) {
-    FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS failed. Attempting queryDeviceIdsFallback: bus=%u device=%u function=%u",
-        adapterAddress.BusNumber,
-        adapterAddress.DeviceNumber,
-        adapterAddress.FunctionNumber);
-
-    if (adapterAddress.BusNumber == -1u) {
-        FF_DEBUG("Invalid adapter address, cannot query device IDs");
-        return false;
-    }
+static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds) {
+    FF_DEBUG("Query PCI device info: %08llX", gpu->deviceId);
 
     static FFlist deviceIdsCache;
     static bool initialized;
     typedef struct {
+        uint32_t currentLinkSpeed;
+        uint32_t currentLinkWidth;
+        uint32_t maxLinkSpeed;
+        uint32_t maxLinkWidth;
         D3DKMT_DEVICE_IDS deviceIds;
-        D3DKMT_ADAPTERADDRESS adapterAddress;
+        uint64_t adapterAddress;
     } CacheEntry;
 
     if (!initialized) {
@@ -79,34 +76,29 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
                 continue;
             }
 
-            uint32_t pciBus = 0;
+            CacheEntry* entry = FF_LIST_ADD(CacheEntry, deviceIdsCache);
+            *entry = (CacheEntry) {};
 
+            // L"PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1\\4&3674a6b9&0&0008"
+            if (swscanf(devId + 4, L"VEN_%x&DEV_%x&SUBSYS_%4x%4x&REV_%x", &entry->deviceIds.VendorID, &entry->deviceIds.DeviceID, &entry->deviceIds.SubSystemID, &entry->deviceIds.SubVendorID, &entry->deviceIds.RevisionID) >= 2) {
+                FF_DEBUG("Parsed PCI IDs - Vendor: 0x%04x, Device: 0x%04x, SubVendor: 0x%04x, SubSystem: 0x%04x, Rev: 0x%04x", entry->deviceIds.VendorID, entry->deviceIds.DeviceID, entry->deviceIds.SubVendorID, entry->deviceIds.SubSystemID, entry->deviceIds.RevisionID);
+                // I thought it was DXGKMDT_OPM_BUS_TYPE_PCI, but it turns out to be false
+                // Who TF knows what 1 actually means. It's just reported by most graphic cards
+                // And yeah, DXGKMDT_OPM_BUS_TYPE_PCIEXPRESS (3) exists
+                entry->deviceIds.BusType = 1;
+            } else {
+                FF_DEBUG("Failed to parse PCI IDs from device ID string");
+                deviceIdsCache.length--; // remove the cache entry since it's not valid
+                continue;
+            }
+
+            uint32_t pciBus = 0;
             ULONG pciBufLen = sizeof(pciBus);
             if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_BUSNUMBER, NULL, &pciBus, &pciBufLen, 0) == CR_SUCCESS) {
                 uint32_t pciAddr = 0;
                 pciBufLen = sizeof(pciAddr);
                 if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_ADDRESS, NULL, &pciAddr, &pciBufLen, 0) == CR_SUCCESS) {
-                    CacheEntry* entry = FF_LIST_ADD(CacheEntry, deviceIdsCache);
-
-                    entry->deviceIds = (D3DKMT_DEVICE_IDS) {};
-                    // L"PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1\\4&3674a6b9&0&0008"
-                    if (swscanf(devId + 4, L"VEN_%x&DEV_%x&SUBSYS_%4x%4x&REV_%x", &entry->deviceIds.VendorID, &entry->deviceIds.DeviceID, &entry->deviceIds.SubSystemID, &entry->deviceIds.SubVendorID, &entry->deviceIds.RevisionID) >= 2) {
-                        FF_DEBUG("Parsed PCI IDs - Vendor: 0x%04x, Device: 0x%04x, SubVendor: 0x%04x, SubSystem: 0x%04x, Rev: 0x%04x", entry->deviceIds.VendorID, entry->deviceIds.DeviceID, entry->deviceIds.SubVendorID, entry->deviceIds.SubSystemID, entry->deviceIds.RevisionID);
-                        // I thought it was DXGKMDT_OPM_BUS_TYPE_PCI, but it turns out to be false
-                        // Who TF knows what 1 actually means. It's just reported by most graphic cards
-                        // And yeah, DXGKMDT_OPM_BUS_TYPE_PCIEXPRESS (3) exists
-                        entry->deviceIds.BusType = 1;
-                    } else {
-                        FF_DEBUG("Failed to parse PCI IDs from device ID string");
-                        deviceIdsCache.length--; // remove the cache entry since it's not valid
-                        continue;
-                    }
-
-                    entry->adapterAddress = (D3DKMT_ADAPTERADDRESS) {
-                        .BusNumber = pciBus,
-                        .DeviceNumber = (pciAddr >> 16) & 0xFFFF,
-                        .FunctionNumber = pciAddr & 0xFFFF,
-                    };
+                    entry->adapterAddress = ffGPUPciAddr2Id(0, pciBus, (pciAddr >> 16) & 0xFFFF, pciAddr & 0xFFFF);
                     FF_DEBUG("Cached device IDs for PCI bus %u: vendor=0x%04x device=0x%04x", pciBus, entry->deviceIds.VendorID, entry->deviceIds.DeviceID);
                 } else {
                     FF_DEBUG("Failed to get PCI address");
@@ -114,21 +106,65 @@ static bool queryDeviceIdsFallback(D3DKMT_ADAPTERADDRESS adapterAddress, D3DKMT_
             } else {
                 FF_DEBUG("Failed to get PCI bus number");
             }
+
+            DEVPROPTYPE propType;
+
+            pciBufLen = sizeof(entry->maxLinkSpeed);
+            // Reports PCEe gen despite the PKEY name
+            CONFIGRET ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_MaxLinkSpeed, &propType, (PBYTE) &entry->maxLinkSpeed, &pciBufLen, 0);
+            if (ret == CR_SUCCESS) {
+                FF_DEBUG("PCIe max GEN: %u", entry->maxLinkSpeed);
+            } else {
+                FF_DEBUG("Failed to get PCIe max GEN: %s", ffDebugConfigRet(ret));
+            }
+
+            if (entry->maxLinkSpeed != FF_GPU_PCIE_SPEED_UNSET) {
+                pciBufLen = sizeof(entry->maxLinkWidth);
+                ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_MaxLinkWidth, &propType, (PBYTE) &entry->maxLinkWidth, &pciBufLen, 0);
+                if (ret == CR_SUCCESS) {
+                    FF_DEBUG("PCIe max link width: %u", entry->maxLinkWidth);
+                } else {
+                    FF_DEBUG("Failed to get PCIe max link width: %s", ffDebugConfigRet(ret));
+                }
+            }
+
+            pciBufLen = sizeof(entry->currentLinkSpeed);
+            ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_CurrentLinkSpeed, &propType, (PBYTE) &entry->currentLinkSpeed, &pciBufLen, 0);
+            if (ret == CR_SUCCESS) {
+                FF_DEBUG("PCIe GEN: %u", entry->currentLinkSpeed);
+            } else {
+                FF_DEBUG("Failed to get PCIe GEN: %s", ffDebugConfigRet(ret));
+            }
+
+            if (entry->currentLinkSpeed != FF_GPU_PCIE_SPEED_UNSET) {
+                pciBufLen = sizeof(entry->currentLinkWidth);
+                ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_CurrentLinkWidth, &propType, (PBYTE) &entry->currentLinkWidth, &pciBufLen, 0);
+                if (ret == CR_SUCCESS) {
+                    FF_DEBUG("PCIe current link width: %u", entry->currentLinkWidth);
+                } else {
+                    FF_DEBUG("Failed to get PCIe current link width: %s", ffDebugConfigRet(ret));
+                }
+            }
         }
     }
 
     FF_LIST_FOR_EACH (CacheEntry, entry, deviceIdsCache) {
-        if (memcmp(&entry->adapterAddress, &adapterAddress, sizeof(adapterAddress)) == 0) {
-            FF_DEBUG("Cache hit for adapter address: bus=%u device=%u function=%u", adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
-            *outDeviceIds = entry->deviceIds;
+        if (gpu->deviceId == entry->adapterAddress) {
+            FF_DEBUG("Cache hit for adapter address: %08llX", gpu->deviceId);
+            if (outDeviceIds->VendorID != -1u) {
+                *outDeviceIds = entry->deviceIds;
+            }
+            gpu->psMax.gen = (uint16_t) entry->maxLinkSpeed;
+            gpu->psMax.lanes = (uint16_t) entry->maxLinkWidth;
+            gpu->psCurr.gen = (uint16_t) entry->currentLinkSpeed;
+            gpu->psCurr.lanes = (uint16_t) entry->currentLinkWidth;
             return true;
         }
     }
 
-    FF_DEBUG("Cache miss for adapter address: bus=%u device=%u function=%u", adapterAddress.BusNumber, adapterAddress.DeviceNumber, adapterAddress.FunctionNumber);
+    FF_DEBUG("Cache miss for adapter address: %08llX", gpu->deviceId);
     return false;
 }
-    #endif // FF_WIN81_COMPAT
 
 static bool queryVendorNameViaRegistry(FFstrbuf* vendor, D3DKMT_HANDLE hAdapter) {
     // `KMTQAITYPE_QUERY_ADAPTER_UNIQUE_GUID` reports the GUID value used by the adapter's registry key (DirectX and Video)
@@ -278,6 +314,7 @@ ffGPUDetectWsl2
             : adapterType.HybridDiscrete
             ? FF_GPU_TYPE_DISCRETE
             : FF_GPU_TYPE_UNKNOWN;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
         D3DKMT_DRIVERVERSION wddmVersion = KMT_DRIVERVERSION_WDDM_2_0;
         status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
@@ -323,11 +360,7 @@ ffGPUDetectWsl2
             .pPrivateDriverData = &deviceIds,
             .PrivateDriverDataSize = sizeof(deviceIds),
         });
-        if (NT_SUCCESS(status)
-#if FF_WIN81_COMPAT
-            || queryDeviceIdsFallback(adapterAddress, &deviceIds.DeviceIds)
-#endif
-        ) {
+        if (NT_SUCCESS(status)) {
             ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(deviceIds.DeviceIds.VendorID));
             FF_DEBUG("Adapter #%u vendor/device IDs: vendor=0x%04x device=0x%04x",
                 i,
@@ -337,6 +370,14 @@ ffGPUDetectWsl2
             deviceIds.DeviceIds.VendorID = -1u;
             FF_DEBUG("KMTQAITYPE_PHYSICALADAPTERDEVICEIDS query failed for adapter #%u: %s", i, ffDebugNtStatus(status));
         }
+
+        #if _WIN32
+        if (adapterAddress.BusNumber != -1u) {
+            if (queryPciDeviceInfo(gpu, &deviceIds.DeviceIds) && gpu->vendor.length == 0) {
+                ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(deviceIds.DeviceIds.VendorID));
+            }
+        }
+        #endif
 
         D3DKMT_UMD_DRIVER_VERSION umdDriverVersion;
         status = D3DKMTQueryAdapterInfo(&(D3DKMT_QUERYADAPTERINFO) {
@@ -389,8 +430,10 @@ ffGPUDetectWsl2
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
-                    .name = &gpu->name,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                    .name = &gpu->name,
+                    .psCurr = options->driverSpecific ? &gpu->psCurr : NULL,
+                    .psMax = options->driverSpecific ? &gpu->psMax : NULL,
                 },
                 dllName);
             FF_DEBUG("Driver-specific detection completed: %s", error ?: "Success");
@@ -553,25 +596,8 @@ ffGPUDetectWsl2
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN) {
-            FF_DEBUG("Using fallback GPU type detection");
-            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA) {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla")) {
-                    gpu->type = FF_GPU_TYPE_DISCRETE;
-                }
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS) {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT ")) { gpu->type = FF_GPU_TYPE_DISCRETE; }
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
-                // 0000:00:02.0 is reserved for Intel integrated graphics
-                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-            } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_VMWARE || gpu->vendor.chars == FF_GPU_VENDOR_NAME_PARALLELS) {
-                // Virtualized GPUs
-                gpu->type = FF_GPU_TYPE_INTEGRATED;
-            }
-
-            if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
-                FF_DEBUG("Determined GPU type based on vendor (%s) and name: %u", gpu->vendor.chars, gpu->type);
+            if (ffGPUFillVendorByDeviceName(gpu)) {
+                // OK
             }
 #if _WIN32
             else if (ffIsWindows10OrGreater()) {

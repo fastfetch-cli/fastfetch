@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/cpucache/cpucache.h"
 #include "modules/cpucache/cpucache.h"
 

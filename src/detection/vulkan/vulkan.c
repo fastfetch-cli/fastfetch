@@ -7,7 +7,7 @@
     #include "common/library.h"
     #include "common/io.h"
     #include "common/parsing.h"
-    #include "common/stringUtils.h"
+    #include "common/strutil.h"
 
     #include <stdlib.h>
     #include <vulkan/vulkan.h>
@@ -280,6 +280,7 @@ static const char* detectVulkan(FFVulkanResult* result) {
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
     next:
         continue;

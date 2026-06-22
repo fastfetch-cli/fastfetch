@@ -33,5 +33,6 @@ static inline const char* ffFindFileName(const char* file) {
 #if _WIN32
 const char* ffDebugWin32Error(DWORD errorCode);
 const char* ffDebugNtStatus(NTSTATUS status);
+const char* ffDebugConfigRet(unsigned long /*CONFIGRET*/ ret);
 const char* ffDebugHResult(HRESULT hr);
 #endif

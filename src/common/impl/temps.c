@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/temps.h"
 #include "common/textModifier.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config, const FFModuleArgs* module) {
     if (celsius == -DBL_MAX) { // ignores invalid value

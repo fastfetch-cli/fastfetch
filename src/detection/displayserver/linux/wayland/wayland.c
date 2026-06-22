@@ -1,7 +1,7 @@
 #include "../displayserver_linux.h"
 #include "common/io.h"
 #include "common/edidHelper.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,10 +13,9 @@
     #include "common/properties.h"
 
     #include "wayland.h"
-    #include "wlr-output-management-unstable-v1-client-protocol.h"
     #include "kde-output-device-v2-client-protocol.h"
-    #include "kde-output-order-v1-client-protocol.h"
     #include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wp-color-management-v1-client-protocol.h"
 
     #if __FreeBSD__
         #include <sys/un.h>
@@ -81,25 +80,25 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version) {
     WaylandData* wldata = data;
 
-    if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wldata->ffwl_output_interface->name)) {
+    if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wl_output_interface.name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_GLOBAL;
         if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
-    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_ZWLR) && ffStrEquals(interface, zwlr_output_manager_v1_interface.name)) {
-        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_ZWLR;
-        if (ffWaylandHandleZwlrOutput(wldata, registry, name, version) != NULL) {
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, kde_output_device_registry_v2_interface.name)) {
+        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_REGISTRY;
+        if (ffWaylandHandleKdeOutputRegistry(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
-    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {
-        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE;
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {
+        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED;
         if (ffWaylandHandleKdeOutput(wldata, registry, name, version) != NULL) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
-    } else if (ffStrEquals(interface, kde_output_order_v1_interface.name)) {
-        ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name)) {
         ffWaylandHandleZxdgOutput(wldata, registry, name, version);
+    } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, wp_color_manager_v1_interface.name)) {
+        ffWaylandHandleWpColor(wldata, registry, name, version);
     }
 }
 
@@ -128,10 +127,19 @@ static FF_A_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* 
 
             uint8_t edidData[512];
             ssize_t edidLength = ffReadFileData(path.chars, ARRAY_SIZE(edidData), edidData);
-            if (edidLength > 0 && edidLength % 128 == 0) {
+            if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
                 ffEdidGetName(edidData, &wldata->edidName);
-                ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
-                ffEdidGetSerialAndManufactureDate(edidData, &wldata->serial, &wldata->myear, &wldata->mweek);
+                wldata->hdrSupported = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
+                ffEdidGetManufactureDate((const uint8_t*) edidData, &wldata->myear, &wldata->mweek);
+                ffEdidGetSerial((const uint8_t*) edidData, &wldata->serial);
+                if (wldata->preferredWidth == 0) {
+                    uint32_t preferredWidth = 0, preferredHeight = 0;
+                    double preferredRefreshRate = 0;
+                    ffEdidGetPreferredResolutionAndRefreshRate(edidData, &preferredWidth, &preferredHeight, &preferredRefreshRate);
+                    wldata->preferredWidth = (int32_t) preferredWidth;
+                    wldata->preferredHeight = (int32_t) preferredHeight;
+                    wldata->preferredRefreshRate = (int32_t) (preferredRefreshRate * 1000.);
+                }
                 wldata->hdrInfoAvailable = true;
                 return true;
             }
@@ -220,7 +228,6 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_get_fd)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_proxy_marshal_constructor)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_disconnect)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_registry_interface)
 
     WaylandData data = {};
 
@@ -228,7 +235,6 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_add_listener)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_destroy)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_display_roundtrip)
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_output_interface)
 
     data.display = ffwl_display_connect(NULL);
     if (data.display == NULL) {
@@ -237,7 +243,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
-    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, ffwl_registry_interface, NULL);
+    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, NULL);
     if (registry == NULL) {
         ffwl_display_disconnect(data.display);
         return "wl_display_get_registry returned NULL";
@@ -257,10 +263,14 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
         data.ffwl_proxy_destroy(data.zxdgOutputManager);
     }
 
+    if (data.wpColorManager) {
+        data.ffwl_proxy_destroy(data.wpColorManager);
+    }
+
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
-    if (data.primaryDisplayId == 0 && result->wmProcessName.length > 0) {
+    {
         const char* fileName = ffStrbufEqualS(&result->wmProcessName, "gnome-shell")
             ? "monitors.xml"
             : ffStrbufEqualS(&result->wmProcessName, "cinnamon")
@@ -307,19 +317,17 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
                         if (end < monitorsXml.length) {
                             ffStrbufSubstrBefore(&monitorsXml, end);
                             const char* name = monitorsXml.chars + start + strlen("<connector>");
-                            data.primaryDisplayId = ffWaylandGenerateIdFromName(name);
+                            uint64_t primaryDisplayId = ffWaylandGenerateIdFromName(name);
+
+                            FF_LIST_FOR_EACH (FFDisplayResult, d, data.result->displays) {
+                                if (d->id == primaryDisplayId) {
+                                    d->primary = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    if (data.primaryDisplayId) {
-        FF_LIST_FOR_EACH (FFDisplayResult, d, data.result->displays) {
-            if (d->id == data.primaryDisplayId) {
-                d->primary = true;
-                break;
             }
         }
     }

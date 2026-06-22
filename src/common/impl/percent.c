@@ -4,7 +4,7 @@
 #include "common/option.h"
 #include "common/jsonconfig.h"
 #include "common/textModifier.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 static void appendOutputColor(FFstrbuf* buffer, const FFModuleArgs* module) {
     if (module->outputColor.length) {

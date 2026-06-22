@@ -14,12 +14,14 @@ jobs:
 
       - name: setup alpine linux
         uses: jirutka/setup-alpine@master
+        with:
+          branch: edge
 
       - name: install dependencies
         run: |
           cat /etc/alpine-release
           uname -a
-          apk add cmake samurai vulkan-loader-dev libxcb-dev libxrandr-dev rpm-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev lua5.4-dev gcc g++
+          apk add cmake samurai vulkan-loader-dev libxcb-dev libxrandr-dev rpm-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev lua5.4-dev quickjs-ng-dev libvdpau-dev libva-dev gcc g++
         shell: alpine.sh --root {0}
 
       - name: build

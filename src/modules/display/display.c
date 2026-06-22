@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 
@@ -166,14 +166,6 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
                 preferredRefreshRate[0] = 0;
             }
 
-            char buf[32];
-            if (result->serial) {
-                const uint8_t* nums = (uint8_t*) &result->serial;
-                snprintf(buf, ARRAY_SIZE(buf), "%2X-%2X-%2X-%2X", nums[0], nums[1], nums[2], nums[3]);
-            } else {
-                buf[0] = '\0';
-            }
-
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                          FF_ARG(result->width, "width"),
                                                                                                          FF_ARG(result->height, "height"),
@@ -192,7 +184,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
                                                                                                          FF_ARG(hdrEnabled, "hdr-enabled"),
                                                                                                          FF_ARG(result->manufactureYear, "manufacture-year"),
                                                                                                          FF_ARG(result->manufactureWeek, "manufacture-week"),
-                                                                                                         FF_ARG(buf, "serial"),
+                                                                                                         FF_ARG(result->serial, "serial"),
                                                                                                          FF_ARG(result->platformApi, "platform-api"),
                                                                                                          FF_ARG(hdrCompatible, "hdr-compatible"),
                                                                                                          FF_ARG(scaleFactor, "scale-factor"),
@@ -395,8 +387,8 @@ bool ffGenerateDisplayJsonResult(FF_A_UNUSED FFDisplayOptions* options, yyjson_m
             yyjson_mut_obj_add_null(doc, obj, "manufactureDate");
         }
 
-        if (item->serial) {
-            yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
+        if (item->serial.length) {
+            yyjson_mut_obj_add_strbuf(doc, obj, "serial", &item->serial);
         } else {
             yyjson_mut_obj_add_null(doc, obj, "serial");
         }

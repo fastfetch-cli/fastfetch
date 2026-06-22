@@ -3,13 +3,10 @@
 #include "common/parsing.h"
 #include "common/io.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 #include <string.h>
 #include <stdlib.h>
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
 
 static bool parseLsbRelease(const char* fileName, FFOSResult* result) {
     return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {

@@ -1,5 +1,5 @@
 #include "diskio.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 
 #include <sys/disk.h>

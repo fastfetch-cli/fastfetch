@@ -26,6 +26,9 @@ extern int ADL2_Adapter_DedicatedVRAMUsage_Get(ADL_CONTEXT_HANDLE context, int i
 // Function to get the ASICFamilyType from the adapter.
 extern int ADL2_Adapter_ASICFamilyType_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* lpAsicTypes, int* lpValids);
 
+// This function retrieves the chipset information for a specified adapter.
+extern int ADL2_Adapter_ChipSetInfo_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLChipSetInfo* lpChipSetInfo);
+
 // Function to retrieve current power management capabilities.
 extern int ADL2_Overdrive_Caps(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* iSupported, int* iEnabled, int* iVersion);
 

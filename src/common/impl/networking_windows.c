@@ -4,7 +4,7 @@
 // Must be included after <mswsock.h>
 #include "fastfetch.h"
 #include "common/networking.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/debug.h"
 
 static LPFN_CONNECTEX ConnectEx;

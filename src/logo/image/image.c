@@ -2,7 +2,7 @@
 #include "common/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/base64.h"
 #include "detection/terminalsize/terminalsize.h"
 
@@ -727,7 +727,7 @@ FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFI
 
     bool printSuccessful = false;
     if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
-    #ifdef FF_HAVE_CHAFA
+    #if FF_HAVE_CHAFA
         printSuccessful = printImageChafa(requestData, &imageData);
     #endif
     } else if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY) {
@@ -782,12 +782,9 @@ static uint32_t readCachedUint32(FFLogoRequestData* requestData, const char* cac
     return result;
 }
 
-static bool printCachedChars(FFLogoRequestData* requestData) {
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreateA(32768);
-
-    if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
-        readCachedStrbuf(requestData, &content, FF_CACHE_FILE_CHAFA);
-    }
+static bool printCachedChars(FFLogoRequestData* requestData, const char* cacheFileName) {
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    readCachedStrbuf(requestData, &content, cacheFileName);
 
     if (content.length == 0) {
         return false;
@@ -876,14 +873,6 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
     return true;
 }
 
-static bool printCached(FFLogoRequestData* requestData) {
-    if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
-        return printCachedChars(requestData);
-    } else {
-        return printCachedPixel(requestData);
-    }
-}
-
 static bool getCharacterPixelDimensions(FFLogoRequestData* requestData) {
     #ifdef _WIN32
 
@@ -947,9 +936,14 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
     ffStrbufAppendF(&requestData.cacheDir, "%u*%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);
 
-    if (!instance.config.logo.recache && printCached(&requestData)) {
-        ffStrbufDestroy(&requestData.cacheDir);
-        return true;
+    if (!instance.config.logo.recache) {
+        bool cacheValid = requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA
+            ? printCachedChars(&requestData, FF_CACHE_FILE_CHAFA)
+            : printCachedPixel(&requestData);
+        if (cacheValid) {
+            ffStrbufDestroy(&requestData.cacheDir);
+            return true;
+        }
     }
 
     FFLogoImageResult result = FF_LOGO_IMAGE_RESULT_INIT_ERROR;
@@ -1018,7 +1012,7 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
         return printImageKittyIcat(printError);
     }
 
-#if !defined(FF_HAVE_CHAFA)
+#if !FF_HAVE_CHAFA
     if (type == FF_LOGO_TYPE_IMAGE_CHAFA) {
         if (printError) {
             fputs("Logo: Chafa support is not compiled in\n", stderr);

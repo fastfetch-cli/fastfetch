@@ -2,7 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/size.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
 

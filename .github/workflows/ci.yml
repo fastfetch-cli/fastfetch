@@ -9,6 +9,7 @@ jobs:
     uses: ./.github/workflows/build-spellcheck.yml
 
   no-features-test:
+    needs: spellcheck
     name: No-features-test
     permissions:
       security-events: write
@@ -17,6 +18,7 @@ jobs:
     secrets: inherit
 
   linux-hosts:
+    needs: no-features-test
     name: Linux-${{ matrix.arch }}
     permissions:
       security-events: write
@@ -35,6 +37,7 @@ jobs:
     secrets: inherit
 
   linux-i686:
+    needs: no-features-test
     name: Linux-i686
     permissions:
       security-events: write
@@ -43,6 +46,7 @@ jobs:
     secrets: inherit
 
   linux-armv7l:
+    needs: no-features-test
     name: Linux-armv7l
     permissions:
       security-events: write
@@ -51,6 +55,7 @@ jobs:
     secrets: inherit
 
   linux-armv6l:
+    needs: no-features-test
     name: Linux-armv6l
     permissions:
       security-events: write
@@ -59,6 +64,7 @@ jobs:
     secrets: inherit
 
   linux-vms:
+    needs: no-features-test
     name: Linux-${{ matrix.arch }}
     permissions:
       security-events: write
@@ -75,11 +81,13 @@ jobs:
     secrets: inherit
 
   musl-amd64:
+    needs: no-features-test
     name: Musl-amd64
     uses: ./.github/workflows/build-musl-amd64.yml
     secrets: inherit
 
   macos-hosts:
+    needs: no-features-test
     name: macOS-${{ matrix.arch }}
     permissions:
       security-events: write
@@ -98,16 +106,19 @@ jobs:
     secrets: inherit
 
   omnios-amd64:
+    needs: no-features-test
     name: OmniOS-amd64
     uses: ./.github/workflows/build-omnios-amd64.yml
     secrets: inherit
 
   solaris-amd64:
+    needs: no-features-test
     name: Solaris-amd64
     uses: ./.github/workflows/build-solaris-amd64.yml
     secrets: inherit
 
   freebsd-amd64:
+    needs: no-features-test
     name: FreeBSD-amd64
     permissions:
       security-events: write
@@ -116,6 +127,7 @@ jobs:
     secrets: inherit
 
   openbsd-amd64:
+    needs: no-features-test
     name: OpenBSD-amd64
     permissions:
       security-events: write
@@ -124,6 +136,7 @@ jobs:
     secrets: inherit
 
   netbsd-amd64:
+    needs: no-features-test
     name: NetBSD-amd64
     permissions:
       security-events: write
@@ -132,6 +145,7 @@ jobs:
     secrets: inherit
 
   dragonfly-amd64:
+    needs: no-features-test
     name: DragonFly-amd64
     permissions:
       security-events: write
@@ -140,6 +154,7 @@ jobs:
     secrets: inherit
 
   haiku-amd64:
+    needs: no-features-test
     name: Haiku-amd64
     permissions:
       security-events: write
@@ -148,6 +163,7 @@ jobs:
     secrets: inherit
 
   windows-hosts:
+    needs: no-features-test
     name: Windows-${{ matrix.arch }}
     permissions:
       security-events: write

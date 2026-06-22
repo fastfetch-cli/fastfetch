@@ -1,7 +1,7 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "detection/bluetoothradio/bluetoothradio.h"
 #include "modules/bluetoothradio/bluetoothradio.h"
 
@@ -113,6 +113,7 @@ bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options) {
         } else {
             ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         }
+        return false;
     }
 
     FF_LIST_FOR_EACH (FFBluetoothRadioResult, radio, radios) {

@@ -3,7 +3,7 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
@@ -180,6 +180,112 @@ name_not_found:
     return false;
 }
 
+static bool detectCosmicComp(FFstrbuf* themeOrError) {
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(FF_LIST_FIRST(FFstrbuf, instance.state.platform.configDirs));
+    ffStrbufAppendS(&path, "cosmic/");
+    uint32_t basePathLength = path.length;
+
+    const char* variant;
+    {
+        char isDarkC;
+        ffStrbufAppendS(&path, "com.system76.CosmicTheme.Mode/v1/is_dark");
+        if (ffReadFileData(path.chars, 1, &isDarkC) == 1) {
+            variant = isDarkC == 't' || isDarkC == '1' ? "Dark" : "Light";
+        } else {
+            ffStrbufAppendF(themeOrError, "Couldn't read cosmic theme mode from %s", path.chars);
+            return false;
+        }
+        ffStrbufSubstrBefore(&path, basePathLength);
+    }
+
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+    ffStrbufAppendF(&path, "com.system76.CosmicTheme.%s/v1/name", variant);
+    if (ffReadFileBuffer(path.chars, &name)) {
+        ffStrbufTrimSpace(&name);
+        ffStrbufTrim(&name, '"');
+    }
+    ffStrbufSubstrBefore(&path, basePathLength);
+
+    if (name.length > 0) {
+        ffStrbufAppend(themeOrError, &name);
+    } else {
+        ffStrbufAppendS(themeOrError, variant);
+    }
+
+    FF_STRBUF_AUTO_DESTROY accent = ffStrbufCreate();
+    ffStrbufAppendF(&path, "com.system76.CosmicTheme.%s/v1/accent", variant);
+    if (ffReadFileBuffer(path.chars, &accent)) {
+        const char* baseStart = strstr(accent.chars, "base:");
+        if (baseStart != NULL) {
+            const char* contentStart = strchr(baseStart, '(');
+            if (contentStart != NULL) {
+                int depth = 1;
+                const char* contentEnd = contentStart + 1;
+                while (*contentEnd != '\0' && depth > 0) {
+                    if (*contentEnd == '(') {
+                        ++depth;
+                    } else if (*contentEnd == ')') {
+                        --depth;
+                    }
+                    ++contentEnd;
+                }
+
+                if (depth == 0) {
+                    double red = 0.0, green = 0.0, blue = 0.0, alpha = 1.0;
+                    bool ok = true;
+                    for (uint32_t i = 0; i < 4; ++i) {
+                        const char* key =
+                            i == 0 ? "red:" : (i == 1 ? "green:" : (i == 2 ? "blue:" : "alpha:"));
+                        const char* componentStart = strstr(contentStart, key);
+                        if (componentStart == NULL || componentStart >= contentEnd) {
+                            ok = false;
+                            break;
+                        }
+
+                        componentStart += strlen(key);
+                        char* componentEnd = NULL;
+                        double value = strtod(componentStart, &componentEnd);
+                        if (componentEnd == componentStart) {
+                            ok = false;
+                            break;
+                        }
+
+                        if (i == 0) {
+                            red = value;
+                        } else if (i == 1) {
+                            green = value;
+                        } else if (i == 2) {
+                            blue = value;
+                        } else {
+                            alpha = value;
+                        }
+                    }
+
+                    if (ok) {
+                        uint32_t r = red <= 0.0 ? 0 : (red >= 1.0 ? 255 : (uint32_t) (red * 255.0 + 0.5));
+                        uint32_t g = green <= 0.0 ? 0 : (green >= 1.0 ? 255 : (uint32_t) (green * 255.0 + 0.5));
+                        uint32_t b = blue <= 0.0 ? 0 : (blue >= 1.0 ? 255 : (uint32_t) (blue * 255.0 + 0.5));
+                        uint32_t a = alpha <= 0.0 ? 0 : (alpha >= 1.0 ? 255 : (uint32_t) (alpha * 255.0 + 0.5));
+                        uint32_t rgb = (r << 16) | (g << 8) | b;
+                        if (a == 255) {
+                            ffStrbufAppendF(themeOrError, " - #%06X", rgb);
+                        } else {
+                            ffStrbufAppendF(themeOrError, " - #%06X%02X", rgb, a);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ffStrbufSubstrBefore(&path, basePathLength);
+
+    if (name.length > 0) {
+        ffStrbufAppendF(themeOrError, " (%s)", variant);
+    }
+
+    return true;
+}
+
 bool ffDetectWmTheme(FFstrbuf* themeOrError) {
     const FFDisplayServerResult* wm = ffConnectDisplayServer();
 
@@ -190,6 +296,10 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
 
     if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN)) {
         return detectWMThemeFromConfigFile("kwinrc", "theme =", "Breeze", themeOrError);
+    }
+
+    if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_COSMIC_COMP)) {
+        return detectCosmicComp(themeOrError);
     }
 
     if (

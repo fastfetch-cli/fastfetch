@@ -4,6 +4,8 @@
 // THIS FILE IS CREATED FROM SCRATCH, BY READING THE OFFICIAL NVML API
 // DOCUMENTATION REFERENCED BELOW, IN ORDER TO MAKE FASTFETCH MIT COMPLIANT.
 
+// https://docs.nvidia.com/deploy/pdf/NVML_API_Reference_Guide.pdf
+
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceStructs.html
 #define NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE 32
 #define NVML_DEVICE_PCI_BUS_ID_BUFFER_V2_SIZE 16
@@ -11,6 +13,7 @@
 
 typedef enum { NVML_SUCCESS = 0 } nvmlReturn_t;
 typedef struct nvmlDevice_t* nvmlDevice_t;
+#define NVML_STRUCT_VERSION(data, ver) (unsigned int)(sizeof(nvml##data##_v##ver##_t) | (ver << 24U))
 
 // https://docs.nvidia.com/deploy/nvml-api/structnvmlPciInfo__t.html
 // PCI information about a GPU device
@@ -54,7 +57,6 @@ typedef struct {
     unsigned long long used;
 } nvmlMemory_v2_t;
 // https://github.com/NVIDIA/nvidia-settings/issues/78#issuecomment-1012837988
-enum { nvmlMemory_v2 = (unsigned int) (sizeof(nvmlMemory_v2_t) | (2 << 24U)) };
 
 // https://docs.nvidia.com/deploy/nvml-api/structnvmlMemory__t.html#structnvmlMemory__t
 // Memory allocation information for a device (v1)
@@ -117,36 +119,73 @@ typedef struct
     unsigned int memory;
 } nvmlUtilization_t;
 
+typedef struct {
+    // v1
+    unsigned int version;
+    // input
+    nvmlTemperatureSensors_t sensorType;
+    // output
+    int temperature;
+} nvmlTemperature_v1_t;
+
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlInitializationAndCleanup.html#group__nvmlInitializationAndCleanup
 // Initialize NVML, but don't initialize any GPUs yet
-nvmlReturn_t nvmlInit_v2(void);
+extern nvmlReturn_t nvmlInit_v2(void);
 // Shut down NVML by releasing all GPU resources previously allocated with nvmlInit_v2()
-nvmlReturn_t nvmlShutdown(void);
+extern nvmlReturn_t nvmlShutdown(void);
 
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceQueries.html
+
+// v545
+// Retrieves the PCI attributes of this device
+extern nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci);
+
+// v510
+// Gets the device's core count
+extern nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores);
+// Retrieves the amount of used, free, reserved and total memory available on the device, in bytes. The reserved amount is supported on version 2 only
+extern nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory);
+
+// v361
+// Retrieves the maximum clock speeds for the device
+extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock);
+
+// v340
+// Retrieves the brand of this device
+extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
+
+// v5.319 RC
 // Retrieves the number of compute devices in the system. A compute device is a single GPU
 extern nvmlReturn_t nvmlDeviceGetCount_v2(unsigned int* deviceCount);
 // Acquire the handle for a particular device, based on its index
 extern nvmlReturn_t nvmlDeviceGetHandleByIndex_v2(unsigned int index, nvmlDevice_t* device);
-// Acquire the handle for a particular device, based on its PCI bus id
-extern nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t* device);
-// Retrieves the PCI attributes of this device
-extern nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* pci);
-// Retrieves the current temperature readings for the device, in degrees C
-extern nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, unsigned int* temp);
-// Retrieves the amount of used, free, reserved and total memory available on the device, in bytes. The reserved amount is supported on version 2 only
-extern nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory);
-// Retrieves the amount of used, free, total memory available on the device, in bytes.
-extern nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory);
-// Gets the device's core count
-extern nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores);
-// Retrieves the maximum clock speeds for the device
-extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock);
-// Retrieves the brand of this device
-extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
-// Retrieves the current utilization rates for the device
-extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization);
 // Retrieves the globally unique immutable UUID associated with this device, as a 5 part hexadecimal string, that augments the immutable, board serial identifier.
 extern nvmlReturn_t nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int* index);
+
+// v3.295
+// Retrieves the maximum PCIe link generation possible with this device and system
+extern nvmlReturn_t nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int* maxLinkGen);
+// Retrieves the maximum PCIe link width possible with this device and system
+extern nvmlReturn_t nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int* maxLinkWidth);
+// Retrieves the current PCIe link generation
+extern nvmlReturn_t nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int* currLinkGen);
+// Retrieves the current PCIe link width
+extern nvmlReturn_t nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigned int* currLinkWidth);
+
+// v0
+// Acquire the handle for a particular device, based on its PCI bus id
+extern nvmlReturn_t nvmlDeviceGetHandleByPciBusId_v2(const char* pciBusId, nvmlDevice_t* device);
+// Retrieves the amount of used, free, total memory available on the device, in bytes.
+extern nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t* memory);
+// Retrieves the current utilization rates for the device
+extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t* utilization);
 // Retrieves the name of this device.
 extern nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char* name, unsigned int length);
+// Retrieves the current temperature readings (in degrees C) for the given device
+extern nvmlReturn_t nvmlDeviceGetTemperatureV(nvmlDevice_t device, nvmlTemperature_v1_t* temperature);
+
+
+enum {
+    nvmlMemory_v2 = NVML_STRUCT_VERSION(Memory, 2),
+    nvmlTemperature_v1 = NVML_STRUCT_VERSION(Temperature, 1),
+};

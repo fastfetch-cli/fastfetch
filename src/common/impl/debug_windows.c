@@ -2,6 +2,7 @@
 #include "common/windows/nt.h"
 
 #include <windows.h>
+#include <cfgmgr32.h>
 
 const char* ffDebugWin32Error(DWORD errorCode) {
     static char buffer[512];
@@ -32,6 +33,10 @@ const char* ffDebugWin32Error(DWORD errorCode) {
     }
 
     return buffer;
+}
+
+const char* ffDebugConfigRet(CONFIGRET ret) {
+    return ffDebugWin32Error(CM_MapCrToWin32Err(ret, ERROR_INTERNAL_ERROR));
 }
 
 const char* ffDebugNtStatus(NTSTATUS status) {

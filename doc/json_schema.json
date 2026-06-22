@@ -313,12 +313,16 @@
             "description": "Output format for the `Chassis` module. See Wiki for formatting syntax\n    1. {type}: Chassis type\n    2. {vendor}: Chassis vendor\n    3. {version}: Chassis version\n    4. {serial}: Chassis serial number",
             "type": "string"
         },
+        "codecFormat": {
+            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name\n    2. {direction}: Decoder / Encoder\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
+            "type": "string"
+        },
         "commandFormat": {
             "description": "Output format for the `Command` module. See Wiki for formatting syntax\n    1. {result}: Command result",
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name\n    14. {technology}: CPU technology",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -370,7 +374,7 @@
             "type": "string"
         },
         "gpuFormat": {
-            "description": "Output format for the `GPU` module. See Wiki for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num\n    19. {core-usage-bar}: Core usage percentage bar\n    20. {memory-type}: Memory type (Windows only)",
+            "description": "Output format for the `GPU` module. See Wiki for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num\n    19. {core-usage-bar}: Core usage percentage bar\n    20. {memory-type}: Memory type (Windows only)\n    21. {pcie-speed}: Maximum PCIe speed in gen and lanes",
             "type": "string"
         },
         "hostFormat": {
@@ -442,7 +446,7 @@
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format for the `Packages` module. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {am-system}: Number of am-system packages\n    3. {am-user}: Number of am-user (aka appman) packages\n    4. {appimage}: Number of appimage packages\n    5. {apk}: Number of apk packages\n    6. {brew}: Number of brew packages\n    7. {brew-all}: Total number of all brew packages\n    8. {brew-cask}: Number of brew-cask packages\n    9. {cards}: Number of cards packages\n    10. {choco}: Number of choco packages\n    11. {dpkg}: Number of dpkg packages\n    12. {emerge}: Number of emerge packages\n    13. {eopkg}: Number of eopkg packages\n    14. {flatpak-all}: Total number of all flatpak app packages\n    15. {flatpak-system}: Number of flatpak-system app packages\n    16. {flatpak-user}: Number of flatpak-user app packages\n    17. {guix-all}: Total number of all guix packages\n    18. {guix-home}: Number of guix-home packages\n    19. {guix-system}: Number of guix-system packages\n    20. {guix-user}: Number of guix-user packages\n    21. {hpkg-all}: Total number of all hpkg packages\n    22. {hpkg-system}: Number of hpkg-system packages\n    23. {hpkg-user}: Number of hpkg-user packages\n    24. {kiss}: Number of kiss packages\n    25. {linglong}: Number of linglong packages\n    26. {lpkg}: Number of lpkg packages\n    27. {lpkgbuild}: Number of lpkgbuild packages\n    28. {macports}: Number of macports packages\n    29. {mport}: Number of mport packages\n    30. {moss}: Number of moss packages\n    31. {nix-all}: Total number of all nix packages\n    32. {nix-default}: Number of nix-default packages\n    33. {nix-system}: Number of nix-system packages\n    34. {nix-user}: Number of nix-user packages\n    35. {opkg}: Number of opkg packages\n    36. {pacman}: Number of pacman packages\n    37. {pacman-branch}: Pacman branch on manjaro\n    38. {pacstall}: Number of pacstall packages\n    39. {paludis}: Number of paludis packages\n    40. {pisi}: Number of pisi packages\n    41. {pkg}: Number of pkg packages\n    42. {pkgsrc}: Number of pkgsrc packages\n    43. {pkgtool}: Number of pkgtool packages\n    44. {rpm}: Number of rpm packages\n    45. {scoop-global}: Number of scoop-global packages\n    46. {scoop-user}: Number of scoop-user packages\n    47. {snap}: Number of snap packages\n    48. {soar}: Number of soar packages\n    49. {sorcery}: Number of sorcery packages\n    50. {winget}: Number of winget packages\n    51. {xbps}: Number of xbps packages",
+            "description": "Output format for the `Packages` module. See Wiki for formatting syntax\n    1. {am-system}: Number of am-system packages\n    2. {am-user}: Number of am-user (aka appman) packages\n    3. {appimage}: Number of appimage packages\n    4. {apk}: Number of apk packages\n    5. {brew}: Number of brew packages\n    6. {brew-cask}: Number of brew-cask packages\n    7. {cards}: Number of cards packages\n    8. {choco}: Number of choco packages\n    9. {dpkg}: Number of dpkg packages\n    10. {emerge}: Number of emerge packages\n    11. {eopkg}: Number of eopkg packages\n    12. {flatpak-system}: Number of flatpak-system app packages\n    13. {flatpak-user}: Number of flatpak-user app packages\n    14. {guix-home}: Number of guix-home packages\n    15. {guix-system}: Number of guix-system packages\n    16. {guix-user}: Number of guix-user packages\n    17. {hpkg-system}: Number of hpkg-system packages\n    18. {hpkg-user}: Number of hpkg-user packages\n    19. {kiss}: Number of kiss packages\n    20. {linglong}: Number of linglong packages\n    21. {lpkg}: Number of lpkg packages\n    22. {lpkgbuild}: Number of lpkgbuild packages\n    23. {macports}: Number of macports packages\n    24. {mport}: Number of mport packages\n    25. {moss}: Number of moss packages\n    26. {nix-default}: Number of nix-default packages\n    27. {nix-system}: Number of nix-system packages\n    28. {nix-user}: Number of nix-user packages\n    29. {opkg}: Number of opkg packages\n    30. {pacman}: Number of pacman packages\n    31. {pacman-branch}: Pacman branch on manjaro\n    32. {pacstall}: Number of pacstall packages\n    33. {paludis}: Number of paludis packages\n    34. {pisi}: Number of pisi packages\n    35. {pkg}: Number of pkg packages\n    36. {pkgsrc}: Number of pkgsrc packages\n    37. {pkgtool}: Number of pkgtool packages\n    38. {rpm}: Number of rpm packages\n    39. {scoop-global}: Number of scoop-global packages\n    40. {scoop-user}: Number of scoop-user packages\n    41. {snap}: Number of snap packages\n    42. {soar}: Number of soar packages\n    43. {sorcery}: Number of sorcery packages\n    44. {winget}: Number of winget packages\n    45. {xbps}: Number of xbps packages\n    46. {brew-all}: Total number of all brew packages\n    47. {flatpak-all}: Total number of all flatpak app packages\n    48. {guix-all}: Total number of all guix packages\n    49. {hpkg-all}: Total number of all hpkg packages\n    50. {nix-all}: Total number of all nix packages\n    51. {all}: Number of all packages",
             "type": "string"
         },
         "physicaldiskFormat": {
@@ -729,6 +733,11 @@
                                 "top": {
                                     "type": "integer",
                                     "description": "Top padding of the logo",
+                                    "minimum": 0
+                                },
+                                "bottom": {
+                                    "type": "integer",
+                                    "description": "Bottom padding of the logo; only supported when position is `top`",
                                     "minimum": 0
                                 },
                                 "left": {
@@ -1440,6 +1449,7 @@
                             "cpu",
                             "cpucache",
                             "cpuusage",
+                            "codec",
                             "command",
                             "colors",
                             "cursor",
@@ -1745,10 +1755,18 @@
                                         "$ref": "#/$defs/percent"
                                     },
                                     "ddcciSleep": {
-                                        "type": "integer",
-                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
-                                        "minimum": 0,
-                                        "maximum": 400,
+                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSet to null to skip DDC/CI detection\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
+                                        "oneOf": [
+                                            {
+                                                "type": "null",
+                                                "description": "Skip DDC/CI detection"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "minimum": 0,
+                                                "maximum": 400
+                                            }
+                                        ],
                                         "default": 10
                                     },
                                     "compact": {
@@ -1872,6 +1890,67 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/chassisFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Codec",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "codec",
+                                        "description": "Print hardware video acceleration codec types (decode / encode)"
+                                    },
+                                    "splitGPU": {
+                                        "description": "Whether to print each GPU separately. If false, merge codecs from all GPUs",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "useVulkan": {
+                                        "description": "Whether to use Vulkan for codec detection instead of other platform-specific APIs",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showType": {
+                                        "description": "Which types of codecs to detect and show",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "both",
+                                                "description": "Show both decoders and encoders"
+                                            },
+                                            {
+                                                "const": "decoder",
+                                                "description": "Show only decoders"
+                                            },
+                                            {
+                                                "const": "encoder",
+                                                "description": "Show only encoders"
+                                            }
+                                        ],
+                                        "default": "both"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/codecFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -2770,6 +2849,10 @@
                                             {
                                                 "const": "opencl",
                                                 "description": "Use OpenCL API.\nSlow and requires proper OpenCL drivers to be installed"
+                                            },
+                                            {
+                                                "const": "egl-ext",
+                                                "description": "Use EGL_EXT_device_enumeration and EGL_EXT_device_query APIs.\nSlow and only detects GPUs that support these extensions"
                                             },
                                             {
                                                 "const": "opengl",

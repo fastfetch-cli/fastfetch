@@ -1,7 +1,7 @@
 #include "FFPlatform_private.h"
 #include "common/FFstrbuf.h"
-#include "common/arrayUtils.h"
-#include "common/stringUtils.h"
+#include "common/arrutil.h"
+#include "common/strutil.h"
 #include "common/io.h"
 #include "fastfetch_config.h"
 
@@ -30,7 +30,7 @@ static void getExePath(FFPlatform* platform) {
     char exePath[PATH_MAX];
 #if defined(__linux__) || defined(__GNU__)
     ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-    if (exePathLen >= 0) {
+    if (exePathLen > 0) {
         exePath[exePathLen] = '\0';
     }
 #elif defined(__APPLE__)
@@ -128,7 +128,7 @@ static void getExePath(FFPlatform* platform) {
     }
 #elif defined(__sun)
     ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
-    if (exePathLen >= 0) {
+    if (exePathLen > 0) {
         exePath[exePathLen] = '\0';
     }
 #elif defined(__HAIKU__)

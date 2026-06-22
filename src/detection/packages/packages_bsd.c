@@ -19,10 +19,10 @@ static uint32_t getSQLite3Int(const char* dbPath, const char* query, const char*
 }
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKG_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, PKG)) {
         result->pkg = getSQLite3Int(FASTFETCH_TARGET_DIR_ROOT "/var/db/pkg/local.sqlite", "SELECT count(*) FROM packages", "pkg");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_MPORT_BIT)) {
+    if (FF_PACKAGES_IS_ENABLED(options, MPORT)) {
         result->mport = getSQLite3Int(FASTFETCH_TARGET_DIR_ROOT "/var/db/mport/master.db", "SELECT count(*) FROM packages", "mport");
     }
 }

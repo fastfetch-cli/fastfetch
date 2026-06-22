@@ -1,6 +1,6 @@
 #include "common/binary.h"
 #include "common/io.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 #include "common/windows/nt.h"
 
 #include <windows.h>

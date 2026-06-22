@@ -1,5 +1,5 @@
 #include "host.h"
-#include "common/stringUtils.h"
+#include "common/strutil.h"
 
 const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel) {
     // Macbook Pro: https://support.apple.com/en-us/HT201300

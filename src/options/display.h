@@ -90,7 +90,7 @@ typedef struct FFOptionsDisplay {
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;
 
-const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root);
+const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey);
 bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key, const char* value);
 void ffOptionsInitDisplay(FFOptionsDisplay* options);
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options);
