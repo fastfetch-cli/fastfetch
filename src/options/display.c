@@ -834,11 +834,9 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
 
     options->showErrors = false;
     options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
-
-#ifdef NDEBUG
-    options->disableLinewrap = !options->pipe;
-#else
     options->disableLinewrap = false;
+
+#ifndef NDEBUG
     options->debugMode = !!getenv("FF_DEBUG");
 #endif
 
