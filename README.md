@@ -54,6 +54,7 @@ Some distributions package outdated versions of fastfetch. Older versions receiv
 * Slackware: `sbopkg -i fastfetch`
 * Void Linux: `xbps-install fastfetch`
 * Venom Linux: `scratch install fastfetch`
+* Zerene OS : `iota -Provide fastfetch`
 
 You may need `sudo`, `doas`, or `sup` to run these commands.
 
