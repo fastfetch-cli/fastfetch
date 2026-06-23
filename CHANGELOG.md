@@ -22,17 +22,20 @@ Features:
 * Adds the currently-in-beta code name "Golden Gate" for macOS 27. (OS, macOS)
 * Adds WPA version detection on FreeBSD. (Wifi, FreeBSD)
 * Adds package manager support for `porg` (#2405) and `install-release` (#2342). (Packages, Linux)
+* Adds Weston version detection. (WM, Linux)
 * Improves the core type (P-Core/E-Core) fetching mechanism on Windows by using `EfficiencyClass` instead of legacy frequency inference. (CPU, Windows)
 * Improves display detection compatibility with KDE 6.7. (Display, Linux)
 * Improves display serial number detection, now preferring alphanumeric serial numbers when available. (Display)
     * This can be used in custom formats via `{serial}`.
 * Improves the performance of `emerge` package manager detection. (#2406, Packages, Linux)
 * Improves error messages for config file parsing errors.
+* Improves reliability of the `Codec` module on Linux (Codec, Linux)
+    * Adds `va-x11` backend for VA-API and VDPAU, which is used if `va-drm` backend fails to initialize.
+    * Fixes an issue where the Codec module incorrectly reports no results when the `codec.showType` option is set.
 
 Bugfixes:
 * Fixes physical core detection on non-x86 architectures and simplifies the frequency detection code. (CPU, Linux)
 * Fixes console mode and output code page initialization issues when running `fastfetch` in `Conhost`. (#2383, Windows)
-* Fixes an issue where the Codec module incorrectly reports no results when the `codec.showType` option is set on Linux. (Codec, Linux)
 * Fixes public IP detection randomly failing on Linux. (#2401, PublicIP, Linux)
 * Fixes several memory leaks.
 
