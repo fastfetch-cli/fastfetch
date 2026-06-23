@@ -1,6 +1,7 @@
 #include "packages.h"
 #include "common/io.h"
 #include "common/parsing.h"
+#include "common/processing.h"
 #include "common/properties.h"
 #include "common/settings.h"
 #include "common/strutil.h"
@@ -567,6 +568,12 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (FF_PACKAGES_IS_ENABLED(options, CARDS)) {
         packageCounts->cards += getNumElements(baseDir, "/var/lib/pkg/DB", true);
+    }
+    if (FF_PACKAGES_IS_ENABLED(options, ROR)) {
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
+        if (ffProcessAppendStdOut(&output, (char* const[]) { "ror", "count", NULL }) == NULL) {
+            packageCounts->ror += (uint32_t) ffStrbufToUInt(&output, 0);
+        }
     }
 }
 

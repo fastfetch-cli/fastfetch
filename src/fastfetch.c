@@ -669,7 +669,7 @@ static void parseCommand(FFdata* data, char* key, char* value) {
             enableJsonOutput(data);
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
-        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+        instance.state.dynamicInterval = ffOptionParseUInt32(key, value);
     } else {
         return;
     }

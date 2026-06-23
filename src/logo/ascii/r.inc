@@ -292,6 +292,22 @@ static const FFlogo R[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RORKOS
+    // RorkOS
+    {
+        .names = { "rorkos", "RorkOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_RORKOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    #endif
     // LAST
     {},
 };
