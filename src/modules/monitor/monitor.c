@@ -67,7 +67,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
                                                                                                      }));
         }
 
-        ffStrbufDestroy(&display->name);
+        // result is a singleton, so we don't destroy the members
         ++index;
     }
 

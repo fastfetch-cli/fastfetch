@@ -147,7 +147,7 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
         driverName[0] = '\0';
         struct drm_version ver = {
             .name = driverName,
-            .name_len = ARRAY_SIZE(driverName),
+            .name_len = ARRAY_SIZE(driverName) - 1,
         };
         if (ioctl(fd, DRM_IOCTL_VERSION, &ver) == 0) {
             driverName[ver.name_len] = '\0';

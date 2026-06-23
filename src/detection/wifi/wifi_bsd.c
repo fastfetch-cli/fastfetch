@@ -146,9 +146,10 @@ const char* ffDetectWifi(FFlist* result) {
                             case 3: ffStrbufSetStatic(&item->conn.security, "WPA1+2"); break;
                             default: ffStrbufSetStatic(&item->conn.security, "WPA"); break;
                         }
+                    } else {
+                        ffStrbufSetStatic(&item->conn.security, "WPA");
                     }
                     break;
-
                 }
                 default:
                     ffStrbufSetF(&item->conn.security, "Unknown (%d)", ireq.i_val);

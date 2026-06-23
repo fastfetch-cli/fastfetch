@@ -116,7 +116,7 @@ bool ffEdidGetSerial(const uint8_t edid[128], FFstrbuf* result) {
 
     if (int_serial != 0 && int_serial != 0xFFFFFFFF) {
         ffStrbufSetF(result, "0x%08X", int_serial);
-        return 0;
+        return true;
     }
     return false;
 }

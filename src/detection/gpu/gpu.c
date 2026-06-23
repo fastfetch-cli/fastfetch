@@ -188,19 +188,19 @@ const char* detectByEglext(FFlist* result) {
     if (ffeglQueryDevicesEXT(ARRAY_SIZE(devices), devices, &numDevices) == EGL_TRUE) {
         FF_DEBUG("eglQueryDevicesEXT() returned %d device(s)", numDevices);
         for (EGLint i = 0; i < numDevices; i++) {
-            const EGLDeviceEXT device = &devices[i];
+            const EGLDeviceEXT device = devices[i];
             if (device == (EGLDeviceEXT) EGL_NO_DEVICE_EXT || device == (EGLDeviceEXT) EGL_BAD_DEVICE_EXT) {
                 FF_DEBUG("eglQueryDevicesEXT() returned invalid device at index %d", i);
                 continue;
             }
-            const char* exts = (const char*) ffeglQueryDeviceStringEXT(devices[i], EGL_EXTENSIONS);
+            const char* exts = (const char*) ffeglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
             FF_DEBUG("eglQueryDeviceStringEXT() returned extensions for device %d: %s", i, exts);
             if (exts && ffStrContains(exts, "EGL_MESA_device_software")) {
                 FF_DEBUG("eglQueryDeviceStringEXT() returned software device at index %d, skipping", i);
                 continue;
             }
 
-            const char* name = ffeglQueryDeviceStringEXT(devices[i], EGL_RENDERER_EXT);
+            const char* name = ffeglQueryDeviceStringEXT(device, EGL_RENDERER_EXT);
             if (!name) {
                 FF_DEBUG("eglQueryDeviceStringEXT() returned NULL name for device %d, skipping", i);
                 continue;
@@ -209,7 +209,7 @@ const char* detectByEglext(FFlist* result) {
             FFGPUResult* gpu = FF_LIST_ADD(FFGPUResult, *result);
             ffStrbufInitS(&gpu->name, name);
             ffStrbufInit(&gpu->vendor);
-            ffStrbufInitS(&gpu->driver, ffeglQueryDeviceStringEXT(devices[i], EGL_DRIVER_NAME_EXT));
+            ffStrbufInitS(&gpu->driver, ffeglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT));
             ffStrbufInitF(&gpu->platformApi, "egl-ext");
             ffStrbufInit(&gpu->memoryType);
             gpu->index = FF_GPU_INDEX_UNSET;
@@ -222,10 +222,10 @@ const char* detectByEglext(FFlist* result) {
             gpu->frequency = FF_GPU_FREQUENCY_UNSET;
             gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
-            ffeglQueryDeviceBinaryEXT(devices[i], EGL_DEVICE_UUID_EXT, sizeof(gpu->deviceId), &gpu->deviceId, NULL);
+            ffeglQueryDeviceBinaryEXT(device, EGL_DEVICE_UUID_EXT, sizeof(gpu->deviceId), &gpu->deviceId, NULL);
 
             if (!normalizeVendorName(gpu)) {
-                ffStrbufSetS(&gpu->vendor, ffeglQueryDeviceStringEXT(devices[i], EGL_VENDOR));
+                ffStrbufSetS(&gpu->vendor, ffeglQueryDeviceStringEXT(device, EGL_VENDOR));
             }
 
             FF_DEBUG("Detected GPU %d: vendor='%s', name='%s', driver='%s', id='%16" PRIX64 "'", i, gpu->vendor.chars, gpu->name.chars, gpu->driver.chars, gpu->deviceId);
@@ -325,7 +325,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
 }
 
 bool ffGPUFillVendorByDeviceName(FFGPUResult* gpu) {
-    if (gpu->type == FF_GPU_TYPE_UNKNOWN) {
+    if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
         return true;
     }
 

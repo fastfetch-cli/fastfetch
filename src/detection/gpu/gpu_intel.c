@@ -246,10 +246,10 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         ctl_pci_state_t pciState = { .Size = sizeof(pciState), .Version = 0 };
         if (igclData.ffctlPciGetState(device, &pciState) == CTL_RESULT_SUCCESS) {
             if (pciState.speed.gen > 0) {
-                result.psMax->gen = (uint16_t) pciState.speed.gen;
+                result.psCurr->gen = (uint16_t) pciState.speed.gen;
             }
             if (pciState.speed.width > 0) {
-                result.psMax->lanes = (uint16_t) pciState.speed.width;
+                result.psCurr->lanes = (uint16_t) pciState.speed.width;
             }
         }
     }

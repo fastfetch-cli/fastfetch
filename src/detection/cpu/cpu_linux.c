@@ -778,11 +778,14 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         ssize_t len = ffReadFileDataRelative(cpuxfd, "topology/physical_package_id", sizeof(buf) - 1, buf);
         if (len > 0) {
             buf[len] = '\0';
-            unsigned long long id = strtoul(buf, NULL, 10);
-            if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
-                pkgHigh |= 1ULL << (id - 64);
-            } else if (__builtin_expect(id <= 64, true)) {
-                pkgLow |= 1ULL << id;
+            unsigned long long id = strtoull(buf, NULL, 10);
+            if (__builtin_expect(id < 128, true)) {
+                // Do 129-socket boards exist?
+                if (__builtin_expect(id >= 64, false)) {
+                    pkgHigh |= 1ULL << (id - 64);
+                } else {
+                    pkgLow |= 1ULL << id;
+                }
             }
         }
 
