@@ -268,8 +268,11 @@ void ffListFeatures(void) {
 #if FF_HAVE_LIBZFS
         "libzfs\n"
 #endif
-#if FF_HAVE_VA
-        "va\n"
+#if FF_HAVE_VADRM
+        "va-drm\n"
+#endif
+#if FF_HAVE_VAX11
+        "va-x11\n"
 #endif
 #if FF_HAVE_VDPAU
         "vdpau\n"
