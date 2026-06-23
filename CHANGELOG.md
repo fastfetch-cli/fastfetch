@@ -1,37 +1,43 @@
 # 2.65.0
 
 Changes:
+* `display.disableLinewrap` now defaults to `false`.
+    * This allows long lines to wrap instead of being truncated, preventing confusion for new users.
+    * Wrapped lines may overlap with the image logo. Users who prefer the old behavior can set `display.disableLinewrap: true` in their config file or use `--disable-linewrap true` on the command line.
 * Reorders package manager variables in custom format strings, moving aggregate variables (e.g., `all`, `brew-all`, `flatpak-all`) to the end. (Packages)
     * This is a breaking change for users relying on numeric placeholders (e.g., `{1}`). Numeric placeholders are a long-deprecated feature; named placeholders (e.g., `{pacman}`) are always preferred and future-proof.
-* Enables `showPeCoreCount` by default to better display hybrid-architecture core distributions. (CPU)
+* Enables `showPeCoreCount` by default to better display hybrid-architecture core counts. (CPU)
 * No longer accepts `chafa` options in config files if `chafa` support was disabled at compile time. (Logo)
-    * This may affect users who generated config files using `fastfetch --gen-full-config`. To resolve this, simply remove the `chafa` section from the config file.
+    * This may affect users who generated their config files using `fastfetch --gen-full-config`. To resolve this, simply remove the `chafa` section from the config file.
 
 Features:
-* Adds CPU code name (e.g., "Alder Lake", "Zen 4") and manufacturing technology (e.g., "Intel 7", "TSMC N4") detection for x86 processors. (#1501, CPU, X86)
-    * Can be used in custom formats via `{code-name}` and `{technology}`.
-* Adds PCIe link speed (current and max generation & lanes) detection support for GPUs on Linux and Windows.
-    * Can be used in custom formats via `{pcie-max-speed}` and `{pcie-curr-speed}`.
-* Adds HDR display detection support via the `wp-color-management-v1` Wayland protocol. (#2356, Display, Linux)
+* Adds detection for CPU code names (e.g., "Alder Lake", "Zen 4") and manufacturing technologies (e.g., "Intel 7", "TSMC N4") on x86 processors. (#1501, CPU, X86)
+    * These can be used in custom formats via `{code-name}` and `{technology}`.
+* Adds PCIe link speed detection (current and max generation & lanes) for GPUs on Linux and Windows.
+    * These can be used in custom formats via `{pcie-max-speed}` and `{pcie-curr-speed}`.
+* Adds HDR display detection via the `wp-color-management-v1` Wayland protocol. (#2356, Display, Linux)
     * Previously, HDR detection was only supported on KDE Plasma.
-* Adds the `egl-ext` detection method using `EGL_EXT_device_enumeration` for GPU enumeration. (GPU)
-* Adds `kmscon` terminal version and font detection support. (#2393, Terminal / TerminalFont, Linux)
+* Adds the `egl-ext` detection method, which uses `EGL_EXT_device_enumeration` for GPU enumeration. (GPU)
+* Adds terminal version and font detection for `kmscon`. (#2393, Terminal / TerminalFont, Linux)
 * Adds the currently-in-beta code name "Golden Gate" for macOS 27. (OS, macOS)
-* Adds WPA version detection support on FreeBSD. (Wifi, FreeBSD)
-* Adds `porg` (#2405) and `install-release` (#2342) package manager support (Packages, Linux)
+* Adds WPA version detection on FreeBSD. (Wifi, FreeBSD)
+* Adds package manager support for `porg` (#2405) and `install-release` (#2342). (Packages, Linux)
 * Improves the core type (P-Core/E-Core) fetching mechanism on Windows by using `EfficiencyClass` instead of legacy frequency inference. (CPU, Windows)
 * Improves display detection compatibility with KDE 6.7. (Display, Linux)
-* Improves display serial number detection and now prefers alphanumeric serial number if available. (Display)
-    * Can be used in custom formats via `{serial}`.
-* Improves performance of `emerge` package manager detection (#2406, Packages, Linux)
+* Improves display serial number detection, now preferring alphanumeric serial numbers when available. (Display)
+    * This can be used in custom formats via `{serial}`.
+* Improves the performance of `emerge` package manager detection. (#2406, Packages, Linux)
 * Improves error messages for config file parsing errors.
 
 Bugfixes:
 * Fixes physical core detection on non-x86 architectures and simplifies the frequency detection code. (CPU, Linux)
 * Fixes console mode and output code page initialization issues when running `fastfetch` in `Conhost`. (#2383, Windows)
-* Fixes an issue where Codec module incorrectly reports no results when `codec.showType` option is set on Linux. (Codec, Linux)
+* Fixes an issue where the Codec module incorrectly reports no results when the `codec.showType` option is set on Linux. (Codec, Linux)
 * Fixes public IP detection randomly failing on Linux. (#2401, PublicIP, Linux)
 * Fixes several memory leaks.
+
+Logos:
+* Adds Zerene OS. (#2404)
 
 # 2.64.2
 
