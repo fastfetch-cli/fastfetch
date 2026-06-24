@@ -3,9 +3,6 @@ name: Reusable Spellcheck
 on:
   workflow_call:
 
-env:
-  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
-
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
@@ -17,8 +14,8 @@ jobs:
       - name: Install codespell
         shell: bash
         run: |
-          sudo apt-get update || true
-          sudo apt-get install -y codespell
+          pip3 install codespell
+          codespell --version
 
       - name: Run Spellchecker
         run: codespell

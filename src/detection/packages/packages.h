@@ -22,6 +22,7 @@ typedef struct FFPackagesResult {
     uint32_t guixUser;
     uint32_t hpkgSystem;
     uint32_t hpkgUser;
+    uint32_t installrelease;
     uint32_t kiss;
     uint32_t linglong;
     uint32_t lpkg;
@@ -40,6 +41,7 @@ typedef struct FFPackagesResult {
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;
+    uint32_t porg;
     uint32_t rpm;
     uint32_t scoopGlobal;
     uint32_t scoopUser;

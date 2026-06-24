@@ -89,7 +89,7 @@ typedef struct FFDisplayResult {
     FFDisplayHdrStatus hdrStatus;
     uint16_t manufactureYear;
     uint16_t manufactureWeek;
-    uint32_t serial;
+    FFstrbuf serial;
     FFDisplayVrrStatus drrStatus;
 } FFDisplayResult;
 

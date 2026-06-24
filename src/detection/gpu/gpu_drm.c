@@ -1,19 +1,26 @@
 #include "gpu.h"
 
-#if FF_HAVE_DRM
-    #include <drm.h>
+#if FF_HAVE_DRM || __has_include(<drm/drm.h>)
     #include <fcntl.h>
     #include <sys/ioctl.h>
 
     #include "common/io.h"
-    #include "common/library.h"
     #include "common/mallocHelper.h"
-    #include "common/strutil.h"
 
+    #if FF_HAVE_DRM
+        #include <drm.h>
+        #include <radeon_drm.h>
+        #include <nouveau_drm.h>
+        #include <amdgpu_drm.h>
+    #else
+        #define FF_HAVE_DRM 1
+        #include <drm/drm.h>
+        #include <drm/radeon_drm.h>
+        #include <drm/nouveau_drm.h>
+        #include <drm/amdgpu_drm.h>
+    #endif
     #include "intel_drm.h"
     #include "asahi_drm.h"
-    #include <radeon_drm.h>
-    #include <nouveau_drm.h>
 
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
     FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY | O_CLOEXEC);
@@ -76,52 +83,50 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     return NULL;
 }
 
-    #ifdef FF_HAVE_DRM_AMDGPU
-        #include <amdgpu.h>
-        #include <amdgpu_drm.h>
-
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
-        #if FF_HAVE_DRM_AMDGPU
-    FF_LIBRARY_LOAD_MESSAGE(libdrm, "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_gpu_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_sensor_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_heap_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_deinitialize)
-
     FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
         return "Failed to open DRM render device";
     }
 
-    amdgpu_device_handle handle;
-    uint32_t majorVersion, minorVersion;
-    if (ffamdgpu_device_initialize(fd, &majorVersion, &minorVersion, &handle) < 0) {
-        return "Failed to initialize AMDGPU device";
-    }
-
     uint32_t value;
 
     if (options->temp) {
-        if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_TEMP, sizeof(value), &value) >= 0) {
+        if (ioctl(fd, DRM_IOCTL_AMDGPU_INFO,
+            &(struct drm_amdgpu_info) {
+                .return_pointer = (uintptr_t) &value,
+                .return_size = sizeof(value),
+                .query = AMDGPU_INFO_SENSOR,
+                .query_hw_ip.type = AMDGPU_INFO_SENSOR_GPU_TEMP,
+            }) >= 0 && value != 0) {
             gpu->temperature = value / 1000.;
         }
     }
 
-    ffStrbufSetS(&gpu->name, ffamdgpu_get_marketing_name(handle));
-
-    struct amdgpu_gpu_info gpuInfo;
-    if (ffamdgpu_query_gpu_info(handle, &gpuInfo) >= 0) {
-        gpu->coreCount = (int32_t) gpuInfo.cu_active_number;
-        gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
+    struct drm_amdgpu_info_device devInfo;
+    if (ioctl(fd, DRM_IOCTL_AMDGPU_INFO,
+        &(struct drm_amdgpu_info) {
+            .return_pointer = (uintptr_t) &devInfo,
+            .return_size = sizeof(devInfo),
+            .query = AMDGPU_INFO_DEV_INFO,
+        }) >= 0) {
+        gpu->coreCount = (int32_t) devInfo.cu_active_number;
+        gpu->frequency = (uint32_t) (devInfo.max_engine_clock / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
-        gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-            #define FF_VRAM_CASE(name, value)                   \
-                case value /* AMDGPU_VRAM_TYPE_ ## name */:     \
+        gpu->type = devInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+        // Was `_pad`. Introduced in commit https://github.com/sailfishos-mirror/drm/commit/22b698a5990292bce0eeb2782754d1eba3fe7a2e
+        #ifdef AMDGPU_FAMILY_GC_11_0_0
+        gpu->psMax.gen = (uint16_t) devInfo.pcie_gen;
+        gpu->psMax.lanes = (uint16_t) devInfo.pcie_num_lanes;
+        #else
+        gpu->psMax.gen = (uint16_t) devInfo._pad;
+        gpu->psMax.lanes = (uint16_t) devInfo._pad1;
+        #endif
+    #define FF_VRAM_CASE(name, value)                           \
+        case value /* AMDGPU_VRAM_TYPE_ ## name */:             \
                     ffStrbufSetStatic(&gpu->memoryType, #name); \
                     break
-        switch (gpuInfo.vram_type) {
+        switch (devInfo.vram_type) {
             FF_VRAM_CASE(UNKNOWN, 0);
             FF_VRAM_CASE(GDDR1, 1);
             FF_VRAM_CASE(DDR2, 2);
@@ -135,35 +140,39 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
             FF_VRAM_CASE(DDR5, 10);
             FF_VRAM_CASE(LPDDR4, 11);
             FF_VRAM_CASE(LPDDR5, 12);
+            FF_VRAM_CASE(HBM3E, 13);
+            FF_VRAM_CASE(HBM4, 14);
             default:
-                ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", gpuInfo.vram_type);
+                ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", devInfo.vram_type);
                 break;
-        }
-
-        struct amdgpu_heap_info heapInfo;
-        if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0) {
-            gpu->dedicated.total = heapInfo.heap_size;
-            gpu->dedicated.used = heapInfo.heap_usage;
-        }
-        if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_GTT, 0, &heapInfo) >= 0) {
-            gpu->shared.total = heapInfo.heap_size;
-            gpu->shared.used = heapInfo.heap_usage;
         }
     }
 
-    if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_LOAD, sizeof(value), &value) >= 0) {
+    struct drm_amdgpu_memory_info memInfo;
+    if (ioctl(fd, DRM_IOCTL_AMDGPU_INFO,
+        &(struct drm_amdgpu_info) {
+            .return_pointer = (uintptr_t) &memInfo,
+            .return_size = sizeof(memInfo),
+            .query = AMDGPU_INFO_MEMORY,
+        }) >= 0) {
+        gpu->dedicated.total = memInfo.vram.total_heap_size;
+        gpu->dedicated.used = memInfo.vram.heap_usage;
+        gpu->shared.total = memInfo.gtt.total_heap_size;
+        gpu->shared.used = memInfo.gtt.heap_usage;
+    }
+
+    if (ioctl(fd, DRM_IOCTL_AMDGPU_INFO,
+        &(struct drm_amdgpu_info) {
+            .return_pointer = (uintptr_t) &value,
+            .return_size = sizeof(value),
+            .query = AMDGPU_INFO_SENSOR,
+            .query_hw_ip.type = AMDGPU_INFO_SENSOR_GPU_LOAD,
+        }) >= 0) {
         gpu->coreUsage = value;
     }
 
-    ffamdgpu_device_deinitialize(handle);
-
     return NULL;
-        #else
-    FF_UNUSED(options, gpu, renderPath);
-    return "Fastfetch is compiled without libdrm support";
-        #endif
 }
-    #endif
 
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
     {
@@ -356,6 +365,7 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
 #include "gpu_driver_specific.h"
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId) {
+#if !__OpenBSD__
     __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
     const char* soName;
     if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &soName) && (options->temp || options->driverSpecific)) {
@@ -367,14 +377,19 @@ const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* 
                 .index = &gpu->index,
                 .temp = options->temp ? &gpu->temperature : NULL,
                 .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                .sharedMemory = options->driverSpecific ? &gpu->shared : NULL,
+                .memoryType = options->driverSpecific ? &gpu->memoryType : NULL,
                 .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                 .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                 .type = &gpu->type,
                 .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 .name = &gpu->name,
+                .psCurr = options->driverSpecific ? &gpu->psCurr : NULL,
+                .psMax = options->driverSpecific ? &gpu->psMax : NULL,
             },
             soName);
     }
+#endif
 
     return "No driver-specific detection function found for the GPU vendor";
 }

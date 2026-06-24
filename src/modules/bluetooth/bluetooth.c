@@ -66,6 +66,7 @@ bool ffPrintBluetooth(FFBluetoothOptions* options) {
 
     if (devices.length == 0) {
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
+        return false;
     }
 
     uint8_t i = 1;

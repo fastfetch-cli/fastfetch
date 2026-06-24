@@ -16,6 +16,8 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
     FF_LIBRARY_SYMBOL(ctlEnumFrequencyDomains)
     FF_LIBRARY_SYMBOL(ctlFrequencyGetProperties)
+    FF_LIBRARY_SYMBOL(ctlPciGetProperties)
+    FF_LIBRARY_SYMBOL(ctlPciGetState)
 
     bool inited;
     ctl_api_handle_t apiHandle;
@@ -43,6 +45,8 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumFrequencyDomains)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetProperties)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlPciGetProperties)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlPciGetState)
 
         if (ffctlInit(&(ctl_init_args_t) {
                           .AppVersion = CTL_IMPL_VERSION,
@@ -225,6 +229,29 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
 
     if (result.name) {
         ffStrbufSetS(result.name, properties.name);
+    }
+
+    if (result.psMax) {
+        ctl_pci_properties_t pciProps = { .Size = sizeof(pciProps), .Version = 0 };
+        if (igclData.ffctlPciGetProperties(device, &pciProps) == CTL_RESULT_SUCCESS) {
+            if (pciProps.maxSpeed.gen > 0) {
+                result.psMax->gen = (uint16_t) pciProps.maxSpeed.gen;
+            }
+            if (pciProps.maxSpeed.width > 0) {
+                result.psMax->lanes = (uint16_t) pciProps.maxSpeed.width;
+            }
+        }
+    }
+    if (result.psCurr) {
+        ctl_pci_state_t pciState = { .Size = sizeof(pciState), .Version = 0 };
+        if (igclData.ffctlPciGetState(device, &pciState) == CTL_RESULT_SUCCESS) {
+            if (pciState.speed.gen > 0) {
+                result.psCurr->gen = (uint16_t) pciState.speed.gen;
+            }
+            if (pciState.speed.width > 0) {
+                result.psCurr->lanes = (uint16_t) pciState.speed.width;
+            }
+        }
     }
 
     return NULL;

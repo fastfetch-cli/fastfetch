@@ -196,7 +196,8 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                     }
                 }
                 if (edid.length > 0) {
-                    ffEdidGetSerialAndManufactureDate(edid.data, &display->serial, &display->manufactureYear, &display->manufactureWeek);
+                    ffEdidGetManufactureDate(edid.data, &display->manufactureYear, &display->manufactureWeek);
+                    ffEdidGetSerial(edid.data, &display->serial);
                 }
                 display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }

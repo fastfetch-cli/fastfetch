@@ -401,6 +401,24 @@ static void detectWestonTerminal(FFTerminalFontResult* terminalFont) {
     ffFontInitValues(&terminalFont->font, font.chars, size.chars);
 }
 
+static void detectKmscon(FFTerminalFontResult* terminalFont) {
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    ffParsePropFileConfigValues("kmscon/kmscon.conf", 2, (FFpropquery[]){
+                                                             { "font-size=", &fontSize },
+                                                             { "font-name=", &fontName },
+                                                         });
+
+    if (fontName.length == 0) {
+        ffStrbufSetStatic(&fontName, "Hack Nerd Font");
+    }
+    if (fontSize.length == 0) {
+        ffStrbufSetStatic(&fontSize, "18");
+    }
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 static void detectUrxvt(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
@@ -522,6 +540,8 @@ ffDetectTerminalFontPlatform
         detectWarp(terminalFont);
     } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "weston-terminal")) {
         detectWestonTerminal(terminalFont);
+    } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "kmscon")) {
+        detectKmscon(terminalFont);
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator")) {
         detectTerminator(terminalFont);
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "sakura")) {

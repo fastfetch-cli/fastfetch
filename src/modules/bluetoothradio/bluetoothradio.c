@@ -113,6 +113,7 @@ bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options) {
         } else {
             ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         }
+        return false;
     }
 
     FF_LIST_FOR_EACH (FFBluetoothRadioResult, radio, radios) {

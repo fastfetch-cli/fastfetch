@@ -20,11 +20,13 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->recache = false;
     options->position = FF_LOGO_POSITION_LEFT;
 
+#if FF_HAVE_CHAFA
     options->chafaFgOnly = false;
     ffStrbufInitStatic(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
     options->chafaCanvasMode = UINT32_MAX;
     options->chafaColorSpace = UINT32_MAX;
     options->chafaDitherMode = UINT32_MAX;
+#endif
 }
 
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value) {
@@ -157,6 +159,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_RAW;
     } else if ((subKey = ffOptionTestPrefix(key, "chafa"))) {
+#if FF_HAVE_CHAFA
         if (subKey[0] == '\0') {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_IMAGE_CHAFA;
@@ -192,6 +195,10 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
         } else {
             return false;
         }
+#else
+        fputs("Error: Chafa options are not supported because Fastfetch was built without Chafa support\n", stderr);
+        exit(477);
+#endif
     } else {
         return false;
     }
@@ -201,13 +208,15 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
 
 void ffOptionsDestroyLogo(FFOptionsLogo* options) {
     ffStrbufDestroy(&options->source);
+#if FF_HAVE_CHAFA
     ffStrbufDestroy(&options->chafaSymbols);
+#endif
     for (uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i) {
         ffStrbufDestroy(&options->colors[i]);
     }
 }
 
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root) {
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) {
         return NULL;
@@ -233,6 +242,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     yyjson_val *key, *val;
     size_t idx, max;
     yyjson_obj_foreach (object, idx, max, key, val) {
+        *pkey = key;
         if (unsafe_yyjson_equals_str(key, "type")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -343,6 +353,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->position = (FFLogoPosition) value;
             continue;
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
+#if FF_HAVE_CHAFA
             if (!yyjson_is_obj(val)) {
                 return "Chafa config must be an object";
             }
@@ -409,6 +420,9 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 options->chafaDitherMode = (uint32_t) value;
             }
             continue;
+#else
+            return "Chafa options are not supported because Fastfetch was built without Chafa support";
+#endif
         } else {
             return "Unknown logo key";
         }
@@ -515,6 +529,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
                                                      "right",
                                                  })[options->position]);
 
+#if FF_HAVE_CHAFA
     {
         yyjson_mut_val* chafa = yyjson_mut_obj(doc);
         yyjson_mut_obj_add_bool(doc, chafa, "fgOnly", options->chafaFgOnly);
@@ -547,6 +562,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
 
         yyjson_mut_obj_add_val(doc, obj, "chafa", chafa);
     }
+#endif
 
     yyjson_mut_obj_add_val(doc, doc->root, "logo", obj);
 }

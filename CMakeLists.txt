@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.64.2
+    VERSION 2.65.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -63,6 +63,13 @@ endif()
 
 include(CheckIncludeFile)
 
+if(LINUX)
+    CHECK_INCLUDE_FILE("linux/version.h" HAVE_LINUX_VERSION_H)
+    if(NOT HAVE_LINUX_VERSION_H)
+        message(FATAL_ERROR "Linux headers (linux/version.h) not found! Please install linux-headers package.")
+    endif()
+endif()
+
 #####################
 # Configure options #
 #####################
@@ -70,13 +77,13 @@ include(CheckIncludeFile)
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR GNU" OFF)
+cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_VA "Enable libva" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_VADRM "Enable libva-drm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_VAX11 "Enable libva-x11" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_VDPAU "Enable vdpau" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD OR GNU" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_EET "Enable eet" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
@@ -134,25 +141,10 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS
-    AM APK APPIMAGE
-    BREW
-    CARDS CHOCO
-    DPKG
-    EMERGE EOPKG
-    FLATPAK
-    GUIX
-    HPKG
-    KISS
-    LINGLONG LPKG LPKGBUILD
-    MACPORTS MOSS MPORT
-    NIX
-    OPKG
-    PACMAN PACSTALL PALUDIS PISI PKG PKGSRC PKGTOOL
-    RPM
-    SCOOP SNAP SOAR SORCERY
-    WINGET
-    XBPS)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/packages/option.h" PACKAGE_MANAGERS)
+string(REGEX MATCHALL "FF_PACKAGES_FLAG_[A-Z]+_BIT" PACKAGE_MANAGERS "${PACKAGE_MANAGERS}")
+string(REGEX REPLACE "FF_PACKAGES_FLAG_([A-Z]+)_BIT" "\\1" PACKAGE_MANAGERS "${PACKAGE_MANAGERS}")
+list(SORT PACKAGE_MANAGERS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -327,7 +319,7 @@ if(Python_FOUND)
     endif()
 else()
     message(WARNING "Python3 is not found, 'help.json' will not be minified")
-    file(READ "doc/help.json" DATATEXT_JSON_HELP)
+    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/doc/help.json" DATATEXT_JSON_HELP)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
@@ -447,6 +439,7 @@ set(LIBFASTFETCH_SRC
     src/detection/codec/codec.c
     src/detection/codec/codec_vulkan.c
     src/detection/cpu/cpu.c
+    src/detection/cpu/cpu_x86.c
     src/detection/cpuusage/cpuusage.c
     src/detection/command/command.c
     src/detection/disk/disk.c
@@ -591,11 +584,10 @@ if(LINUX)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
-        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -752,11 +744,10 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
-        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -765,6 +756,7 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_bsd.c
         src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
+        src/detection/gpu/gpu_bsddrm.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
@@ -847,11 +839,10 @@ elseif(NetBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
-        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -932,11 +923,10 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
-        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -944,6 +934,8 @@ elseif(OpenBSD)
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
         src/detection/gpu/gpu_obsd.c
+        src/detection/gpu/gpu_drm.c
+        src/detection/gpu/gpu_bsddrm.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
@@ -1175,11 +1167,10 @@ elseif(SunOS)
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
         src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
-        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
         src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -1325,12 +1316,9 @@ elseif(GNU)
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
-        src/detection/displayserver/linux/wayland/wayland.c
-        src/detection/displayserver/linux/wayland/global-output.c
-        src/detection/displayserver/linux/wayland/zwlr-output.c
-        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
@@ -1576,24 +1564,24 @@ endif()
 
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
     message(STATUS "Custom file path of pci.ids: ${CUSTOM_PCI_IDS_PATH}")
-    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_PCI_IDS_PATH=${CUSTOM_PCI_IDS_PATH})
+    target_compile_definitions(libfastfetch PUBLIC FF_CUSTOM_PCI_IDS_PATH=${CUSTOM_PCI_IDS_PATH})
 endif()
 if(NOT "${CUSTOM_AMDGPU_IDS_PATH}" STREQUAL "")
     message(STATUS "Custom file path of amdgpu.ids: ${CUSTOM_AMDGPU_IDS_PATH}")
-    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_AMDGPU_IDS_PATH=${CUSTOM_AMDGPU_IDS_PATH})
+    target_compile_definitions(libfastfetch PUBLIC FF_CUSTOM_AMDGPU_IDS_PATH=${CUSTOM_AMDGPU_IDS_PATH})
 endif()
 if(NOT "${CUSTOM_OS_RELEASE_PATH}" STREQUAL "")
     message(STATUS "Custom file path of os_release: ${CUSTOM_OS_RELEASE_PATH}")
-    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
+    target_compile_definitions(libfastfetch PUBLIC FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
 endif()
 if(NOT "${CUSTOM_LSB_RELEASE_PATH}" STREQUAL "")
     message(STATUS "Custom file path of lsb_release: ${CUSTOM_LSB_RELEASE_PATH}")
-    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_LSB_RELEASE_PATH=${CUSTOM_LSB_RELEASE_PATH})
+    target_compile_definitions(libfastfetch PUBLIC FF_CUSTOM_LSB_RELEASE_PATH=${CUSTOM_LSB_RELEASE_PATH})
 endif()
 
 if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
     message(STATUS "Enabling custom link type: ${BINARY_LINK_TYPE}")
-    target_compile_definitions(libfastfetch PRIVATE FF_DISABLE_DLOPEN=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_DISABLE_DLOPEN=1)
     if(NOT WIN32)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")
     endif()
@@ -1659,18 +1647,18 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
 
     message(STATUS "Library: found ${VARNAME} by ${${VARNAME}_FOUND}")
 
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
 
     if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
-        target_link_directories(libfastfetch PUBLIC ${${VARNAME}_LIBRARY_DIRS})
+        target_link_directories(libfastfetch PRIVATE ${${VARNAME}_LIBRARY_DIRS})
         target_link_libraries(libfastfetch PRIVATE ${${VARNAME}_LIBRARIES})
     endif()
 
     foreach(FLAG ${${VARNAME}_CFLAGS_OTHER})
         if(FLAG MATCHES "-D.*")
             string(SUBSTRING ${FLAG} 2 -1 FLAG)
-            target_compile_definitions(libfastfetch PRIVATE ${FLAG})
+            target_compile_definitions(libfastfetch PUBLIC ${FLAG})
         endif()
     endforeach()
 endfunction()
@@ -1695,17 +1683,17 @@ ff_lib_enable(DRM
     "libdrm"
     "Libdrm"
 )
-ff_lib_enable(VA
+ff_lib_enable(VADRM
     "libva-drm"
     "Libva-drm"
+)
+ff_lib_enable(VAX11
+    "libva-x11"
+    "Libva-x11"
 )
 ff_lib_enable(VDPAU
     "vdpau"
     "vdpau"
-)
-ff_lib_enable(DRM_AMDGPU
-    "libdrm_amdgpu"
-    "Libdrm_Amdgpu"
 )
 ff_lib_enable(GIO
     "gio-2.0"
@@ -1800,8 +1788,8 @@ if(ENABLE_LUA)
             message(STATUS "Library: Lua version ${Lua_VERSION} is not supported, requires 5.3-5.5")
             unset(Lua_FOUND)
         else()
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LUA=1)
-            target_include_directories(libfastfetch PRIVATE ${LUA_INCLUDE_DIR})
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_LUA=1)
+            target_include_directories(libfastfetch PUBLIC ${LUA_INCLUDE_DIR})
 
             if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
                 target_link_libraries(libfastfetch PRIVATE ${LUA_LIBRARIES})
@@ -1814,20 +1802,20 @@ if(ENABLE_LUA)
 endif()
 
 if(ENABLE_THREADS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_PCIIDS=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_EMBEDDED_PCIIDS=1)
 endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_EMBEDDED_AMDGPUIDS=1)
 endif()
 if(ENABLE_LIBZFS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_LIBZFS=1)
 
     if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
         target_link_libraries(libfastfetch
@@ -1984,7 +1972,7 @@ target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
 
-target_compile_options(libfastfetch PRIVATE
+target_compile_options(libfastfetch PUBLIC
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>)
 
 if(FreeBSD)
@@ -1993,18 +1981,18 @@ endif()
 if(LINUX OR FreeBSD OR OpenBSD OR NetBSD)
     CHECK_INCLUDE_FILE("linux/videodev2.h" HAVE_LINUX_VIDEODEV2)
     if(HAVE_LINUX_VIDEODEV2)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LINUX_VIDEODEV2=1)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_LINUX_VIDEODEV2=1)
     endif()
 endif()
 if(NOT WIN32)
     CHECK_INCLUDE_FILE("utmpx.h" HAVE_UTMPX)
     if(HAVE_UTMPX)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX=1)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_UTMPX=1)
     endif()
     if(ENABLE_WORDEXP)
         CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
         if(HAVE_WORDEXP)
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WORDEXP=1)
             message(STATUS "wordexp.h found, wordexp support enabled")
         else()
             set(ENABLE_WORDEXP OFF)
@@ -2016,19 +2004,19 @@ if(NOT WIN32)
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
         if(HAVE_PTHREAD_NP)
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_PTHREAD_NP=1)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PTHREAD_NP=1)
             set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} pthread_np.h)
         endif()
         set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} Threads::Threads)
         check_function_exists("pthread_timedjoin_np" HAVE_TIMEDJOIN_NP)
         if(HAVE_TIMEDJOIN_NP)
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_TIMEDJOIN_NP=1)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_TIMEDJOIN_NP=1)
         else()
             message(WARNING "pthread_timedjoin_np was not found; networking timeout will not work")
         endif()
     endif()
 elseif(HAVE_WINRT)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WINRT=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WINRT=1)
 endif()
 
 set(PACKAGES_DISABLE_LIST "")
@@ -2045,9 +2033,9 @@ else()
     list(TRANSFORM PACKAGES_DISABLE_LIST APPEND "_BIT")
     list(JOIN PACKAGES_DISABLE_LIST " | " PACKAGES_DISABLE_LIST)
 endif()
-target_compile_definitions(libfastfetch PRIVATE "FF_PACKAGES_DISABLE_LIST=${PACKAGES_DISABLE_LIST}")
+target_compile_definitions(libfastfetch PUBLIC "FF_PACKAGES_DISABLE_LIST=${PACKAGES_DISABLE_LIST}")
 if(PACKAGES_REMOVE_DISABLED)
-    target_compile_definitions(libfastfetch PRIVATE FF_PACKAGES_REMOVE_DISABLED=1)
+    target_compile_definitions(libfastfetch PUBLIC FF_PACKAGES_REMOVE_DISABLED=1)
 endif()
 
 ######################

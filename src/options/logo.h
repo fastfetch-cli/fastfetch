@@ -45,15 +45,17 @@ typedef struct FFOptionsLogo {
     bool preserveAspectRatio;
     bool recache;
 
+#if FF_HAVE_CHAFA
     bool chafaFgOnly;
     FFstrbuf chafaSymbols;
     uint32_t chafaCanvasMode;
     uint32_t chafaColorSpace;
     uint32_t chafaDitherMode;
+#endif
 } FFOptionsLogo;
 
 void ffOptionsInitLogo(FFOptionsLogo* options);
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
 void ffOptionsDestroyLogo(FFOptionsLogo* options);
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root);
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey);
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options);

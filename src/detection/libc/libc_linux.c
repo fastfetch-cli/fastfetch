@@ -1,7 +1,5 @@
 #include "libc.h"
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
+#include "common/strutil.h"
 
 #include <features.h>
 

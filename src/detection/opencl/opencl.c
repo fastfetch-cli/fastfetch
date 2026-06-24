@@ -101,6 +101,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result) {
             gpu->deviceId = (size_t) deviceID;
             gpu->frequency = FF_GPU_FREQUENCY_UNSET;
             gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+            gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
             if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS) {
                 ffStrbufSetS(&gpu->platformApi, buffer);

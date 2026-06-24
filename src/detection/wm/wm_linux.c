@@ -169,6 +169,22 @@ static const char* getNiri(FFstrbuf* result) {
     return "Failed to run command `niri --version`";
 }
 
+static const char* getWeston(FFstrbuf* result) {
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("weston", &path);
+    if (error) {
+        return "Failed to find weston executable path";
+    }
+
+    if (ffProcessAppendStdOut(result, (char* const[]) { path.chars, "--version", NULL }) == NULL) { // weston 8.0.0\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `weston --version`";
+}
+
     #ifdef __linux__
 static const char* getWslg(FFstrbuf* result) {
     if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result)) {
@@ -305,6 +321,10 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNU
 
     if (ffStrbufEqualS(wmName, "niri")) {
         return getNiri(result);
+    }
+
+    if (ffStrbufEqualS(wmName, "weston")) {
+        return getWeston(result);
     }
 
     #if __linux__

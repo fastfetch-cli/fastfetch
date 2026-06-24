@@ -3,6 +3,7 @@
     #include "wayland.h"
     #include "common/strutil.h"
     #include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wp-color-management-v1-client-protocol.h"
 
 static void waylandOutputModeListener(void* data, FF_A_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate) {
     WaylandDisplay* display = data;
@@ -70,10 +71,36 @@ static struct zxdg_output_v1_listener zxdgOutputListener = {
     .description = (void*) ffWaylandOutputDescriptionListener,
 };
 
+static void handleWpTfNamed(void *data, FF_A_UNUSED struct wp_image_description_info_v1* wp_image_description_info_v1, uint32_t tf) {
+    // KDE reports `gamma 2.2` even in HDR mode, but it should be handled in KDE specific path
+    WaylandDisplay* display = data;
+    switch (tf) {
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ:
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_HLG:
+            display->hdrInfoAvailable = true;
+            display->hdrEnabled = true;
+            break;
+    }
+}
+
+static const struct wp_image_description_info_v1_listener wpImageDescInfoListener = {
+    .done = (void*) stubListener,
+    .icc_file = (void*) stubListener,
+    .primaries = (void*) stubListener,
+    .primaries_named = (void*) stubListener,
+    .tf_power = (void*) stubListener,
+    .tf_named = (void*) handleWpTfNamed,
+    .luminances = (void*) stubListener,
+    .target_primaries = (void*) stubListener,
+    .target_luminance = (void*) stubListener,
+    .target_max_cll = (void*) stubListener,
+    .target_max_fall = (void*) stubListener,
+};
+
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
-    const char* api = "wayland-global";
+    const char* api = "wayland-base";
     uint32_t bindVersion = min(version, WL_OUTPUT_DESCRIPTION_SINCE_VERSION);
-    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, bindVersion, name, wldata->ffwl_output_interface->name, bindVersion, NULL);
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wl_output_interface, bindVersion, name, wl_output_interface.name, bindVersion, NULL);
     if (output == NULL) {
         return "Failed to create wl_output";
     }
@@ -104,7 +131,28 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
             wldata->ffwl_proxy_add_listener(zxdgOutput, (void (**)(void)) &zxdgOutputListener, &display);
             wldata->ffwl_display_roundtrip(wldata->display);
             wldata->ffwl_proxy_destroy(zxdgOutput);
-            api = "wayland-global-zxdg";
+            api = "wayland-zxdg";
+        }
+    }
+
+    if (wldata->wpColorManager) {
+        uint32_t bindVersion = min(version, WP_COLOR_MANAGER_V1_GET_OUTPUT_SINCE_VERSION);
+        struct wl_proxy* wpColorOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->wpColorManager, WP_COLOR_MANAGER_V1_GET_OUTPUT, &wp_color_management_output_v1_interface, bindVersion, NULL, output);
+
+        if (wpColorOutput) {
+            struct wl_proxy* wpImageDesc = wldata->ffwl_proxy_marshal_constructor_versioned(wpColorOutput, WP_COLOR_MANAGEMENT_OUTPUT_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, bindVersion, NULL);
+            if (wpImageDesc) {
+                struct wl_proxy* wpImageDescInfo = wldata->ffwl_proxy_marshal_constructor_versioned(wpImageDesc, WP_IMAGE_DESCRIPTION_V1_GET_INFORMATION, &wp_image_description_info_v1_interface, bindVersion, NULL);
+                if (wpImageDescInfo) {
+                    wldata->ffwl_proxy_add_listener(wpImageDescInfo, (void (**)(void)) &wpImageDescInfoListener, &display);
+                    wldata->ffwl_display_roundtrip(wldata->display);
+                    wldata->ffwl_proxy_destroy(wpImageDescInfo);
+                }
+                wldata->ffwl_proxy_destroy(wpImageDesc);
+            }
+            wldata->ffwl_proxy_destroy(wpColorOutput);
+            wldata->ffwl_display_roundtrip(wldata->display);
+            api = api[strlen("wayland-")] == 'z' ? "wayland-zxdg+wpcolor" : "wayland-wpcolor";
         }
     }
 
@@ -138,7 +186,9 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
         (uint32_t) display.physicalHeight,
         api);
     if (item) {
-        if (display.hdrSupported) {
+        if (display.hdrEnabled) {
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+        } else if (display.hdrSupported) {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
         } else if (display.hdrInfoAvailable) {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
@@ -148,7 +198,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
 
         item->manufactureYear = display.myear;
         item->manufactureWeek = display.mweek;
-        item->serial = display.serial;
+        ffStrbufInitMove(&item->serial, &display.serial);
     }
 
     ffStrbufDestroy(&display.description);
@@ -166,6 +216,18 @@ const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* r
     }
 
     wldata->zxdgOutputManager = manager;
+
+    return NULL;
+}
+
+const char* ffWaylandHandleWpColor(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
+    uint32_t bindVersion = min(version, WP_COLOR_MANAGER_V1_GET_OUTPUT_SINCE_VERSION);
+    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wp_color_manager_v1_interface, bindVersion, name, wp_color_manager_v1_interface.name, bindVersion, NULL);
+    if (manager == NULL) {
+        return "Failed to create wp_color_manager_v1";
+    }
+
+    wldata->wpColorManager = manager;
 
     return NULL;
 }

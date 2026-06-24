@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <CoreVideo/CVDisplayLink.h>
+#include <IOKit/IOKitLib.h>
 
 #ifdef MAC_OS_X_VERSION_10_15
 extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
@@ -28,6 +29,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     for (uint32_t i = 0; i < screenCount; i++) {
         CGDirectDisplayID screen = screens[i];
+        boolean_t builtin = CGDisplayIsBuiltin(screen);
         CGDisplayModeRef mode = CGDisplayCopyDisplayMode(screen);
         if (mode) {
             // https://github.com/glfw/glfw/commit/aab08712dd8142b642e2042e7b7ba563acd07a45
@@ -63,20 +65,37 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             uint32_t physicalWidth = 0, physicalHeight = 0;
             uint32_t preferredWidth = 0, preferredHeight = 0;
             double preferredRefreshRate = 0;
+            FF_STRBUF_AUTO_DESTROY serial = ffStrbufCreate();
 
             if (displayInfo) {
-                CFDictionaryRef productNames;
-                if (ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames) == NULL) {
-                    ffCfDictGetString(productNames, CFSTR("en_US"), &buffer);
-                }
-
                 // CGDisplayScreenSize reports invalid result for external displays on old Intel MacBook Pro
                 CFDataRef edidRef = (CFDataRef) CFDictionaryGetValue(displayInfo, CFSTR(kIODisplayEDIDKey));
                 if (edidRef && CFGetTypeID(edidRef) == CFDataGetTypeID()) {
                     const uint8_t* edidData = CFDataGetBytePtr(edidRef);
                     uint32_t edidLength = (uint32_t) CFDataGetLength(edidRef);
-                    if (edidLength >= 128) {
+                    if (ffEdidIsValid(edidData, edidLength)) {
                         ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                        ffEdidGetSerial(edidData, &serial);
+                    }
+                } else if (!builtin && ffCfDictGetString(displayInfo, CFSTR(kIODisplayLocationKey), &buffer) == NULL) {
+                    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t ioDisplay = IORegistryEntryFromPath(MACH_PORT_NULL, buffer.chars);
+                    ffStrbufClear(&buffer);
+                    if (ioDisplay) {
+                        FF_CFTYPE_AUTO_RELEASE CFDictionaryRef displayAttrRef = IORegistryEntryCreateCFProperty(ioDisplay, CFSTR("DisplayAttributes"), kCFAllocatorDefault, kNilOptions);
+                        if (displayAttrRef && CFGetTypeID(displayAttrRef) == CFDictionaryGetTypeID()) {
+                            CFDictionaryRef productAttrs;
+                            if (ffCfDictGetDict(displayAttrRef, CFSTR("ProductAttributes"), &productAttrs) == NULL) {
+                                ffCfDictGetString(productAttrs, CFSTR("AlphanumericSerialNumber"), &serial);
+                                ffCfDictGetString(productAttrs, CFSTR("ProductName"), &buffer);
+                            }
+                        }
+                    }
+                }
+
+                if (!buffer.length) {
+                    CFDictionaryRef productNames;
+                    if (ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames) == NULL) {
+                        ffCfDictGetString(productNames, CFSTR("en_US"), &buffer);
                     }
                 }
 
@@ -125,7 +144,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 preferredRefreshRate,
                 (uint32_t) CGDisplayRotation(screen),
                 &buffer,
-                CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
+                builtin ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 CGDisplayIsMain(screen),
                 (uint64_t) screen,
                 physicalWidth,
@@ -166,7 +185,14 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 }
 #endif
 
-                display->serial = CGDisplaySerialNumber(screen);
+                if (serial.length) {
+                    ffStrbufInitMove(&display->serial, &serial);
+                } else {
+                    uint32_t int_serial = CGDisplaySerialNumber(screen);
+                    if (int_serial != 0 && int_serial != 0xFFFFFFFF) {
+                        ffStrbufSetF(&display->serial, "0x%08X", int_serial);
+                    }
+                }
 
                 if (displayInfo) {
                     int value;

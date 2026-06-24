@@ -3,6 +3,7 @@
 #include "common/parsing.h"
 #include "common/thread.h"
 #include "common/textModifier.h"
+#include "common/strutil.h"
 #include "detection/displayserver/displayserver.h"
 #include "detection/terminaltheme/terminaltheme.h"
 #include "logo/logo.h"
@@ -15,6 +16,9 @@
     #include "common/windows/unicode.h"
 #else
     #include <signal.h>
+#endif
+#if __linux__
+    #include <linux/version.h>
 #endif
 
 FFinstance instance; // Global singleton
@@ -46,10 +50,30 @@ static void defaultConfig(void) {
     ffOptionsInitDisplay(&instance.config.display);
 }
 
+#ifdef _WIN32
+static volatile UINT oldCp = CP_UTF8;
+void resetConsoleCP(void) {
+    if (oldCp != CP_UTF8) {
+        SetConsoleOutputCP(oldCp);
+    }
+}
+#endif
+
 void ffInitInstance(void) {
 #ifdef _WIN32
     // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
     setlocale(LC_ALL, ".UTF8");
+
+    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    if (GetConsoleMode(hStdout, &mode)) {
+        SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        oldCp = GetConsoleOutputCP();
+        if (oldCp != CP_UTF8) {
+            SetConsoleOutputCP(CP_UTF8);
+            atexit(resetConsoleCP);
+        }
+    }
 #else
     // Never use `setlocale(LC_ALL, "")`
     setlocale(LC_TIME, "");
@@ -61,9 +85,6 @@ void ffInitInstance(void) {
 
 static volatile bool ffDisableLinewrap = false;
 static volatile bool ffHideCursor = false;
-#ifdef _WIN32
-static volatile UINT oldCp = CP_UTF8;
-#endif
 
 static void resetConsole(void) {
     if (ffDisableLinewrap) {
@@ -80,10 +101,6 @@ static void resetConsole(void) {
 
 #if defined(_WIN32)
     fflush(stdout);
-
-    if (oldCp != CP_UTF8) {
-        SetConsoleOutputCP(oldCp);
-    }
 #endif
 }
 
@@ -111,15 +128,6 @@ void ffStart(void) {
         setvbuf(stdout, NULL, _IOFBF, 4096);
     }
     SetConsoleCtrlHandler(consoleHandler, TRUE);
-    HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD mode = 0;
-    if (GetConsoleMode(hStdout, &mode)) {
-        SetConsoleMode(hStdout, mode | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        oldCp = GetConsoleOutputCP();
-        if (oldCp != CP_UTF8) {
-            SetConsoleOutputCP(CP_UTF8);
-        }
-    }
 #else
     if (instance.config.display.noBuffer) {
         setvbuf(stdout, NULL, _IONBF, 0);
@@ -180,13 +188,14 @@ void ffDestroyInstance(void) {
 #endif
 #if FF_HAVE_QUICKJS
     #include <quickjs.h>
-    #define FF_STR_INDIR(x) #x
-    #define FF_STR(x) FF_STR_INDIR(x)
 #endif
 
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures(void) {
     fputs(
+#if __linux__
+        "linux-headers " FF_STR(LINUX_VERSION_MAJOR) "." FF_STR(LINUX_VERSION_PATCHLEVEL) "." FF_STR(LINUX_VERSION_SUBLEVEL) "\n"
+#endif
 #if FF_HAVE_THREADS
         "threads\n"
 #endif
@@ -204,9 +213,6 @@ void ffListFeatures(void) {
 #endif
 #if FF_HAVE_DRM
         "drm\n"
-#endif
-#if FF_HAVE_DRM_AMDGPU
-        "drm_amdgpu\n"
 #endif
 #if FF_HAVE_GIO
         "gio\n"
@@ -262,8 +268,11 @@ void ffListFeatures(void) {
 #if FF_HAVE_LIBZFS
         "libzfs\n"
 #endif
-#if FF_HAVE_VA
-        "va\n"
+#if FF_HAVE_VADRM
+        "va-drm\n"
+#endif
+#if FF_HAVE_VAX11
+        "va-x11\n"
 #endif
 #if FF_HAVE_VDPAU
         "vdpau\n"

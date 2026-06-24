@@ -21,6 +21,7 @@ static int walkDevTree(di_node_t node, FF_A_UNUSED di_minor_t minor, FFlist* gpu
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = strtoul(di_bus_addr(node), NULL, 16);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
             int* revId;

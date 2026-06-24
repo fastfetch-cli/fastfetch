@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <string.h>
 
+FF_A_COLD
 static void printCommandFormatHelpJson(void) {
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val* root = yyjson_mut_obj(doc);
@@ -49,6 +50,7 @@ static void printCommandFormatHelpJson(void) {
     yyjson_mut_doc_free(doc);
 }
 
+FF_A_COLD
 static void printCommandFormatHelp(const char* command) {
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateNS((uint32_t) (strlen(command) - strlen("-format")), command);
     ffStrbufLowerCase(&type);
@@ -85,6 +87,7 @@ static void printCommandFormatHelp(const char* command) {
     fprintf(stderr, "Error: Module '%s' is not supported\n", type.chars);
 }
 
+FF_A_COLD
 static void printFullHelp() {
     fputs("Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way\n\n", stdout);
     if (!instance.config.display.pipe) {
@@ -191,6 +194,7 @@ For detailed information on logo options, module configuration, and formatting, 
       https://github.com/fastfetch-cli/fastfetch/wiki/Configuration");
 }
 
+FF_A_COLD
 static bool printSpecificCommandHelp(const char* command) {
     yyjson_doc* doc = yyjson_read(FASTFETCH_DATATEXT_JSON_HELP, strlen(FASTFETCH_DATATEXT_JSON_HELP), YYJSON_READ_NOFLAG);
     assert(doc);
@@ -301,6 +305,7 @@ static bool printSpecificCommandHelp(const char* command) {
     return false;
 }
 
+FF_A_COLD
 static void printCommandHelp(const char* command) {
     if (command == NULL) {
         printFullHelp();
@@ -313,6 +318,7 @@ static void printCommandHelp(const char* command) {
     }
 }
 
+FF_A_COLD
 static void listAvailablePresets(bool pretty) {
     FF_LIST_FOR_EACH (FFstrbuf, path, instance.state.platform.dataDirs) {
         ffStrbufAppendS(path, "fastfetch/presets/");
@@ -327,6 +333,7 @@ static void listAvailablePresets(bool pretty) {
     }
 }
 
+FF_A_COLD
 static void listAvailableLogos(void) {
     FF_LIST_FOR_EACH (FFstrbuf, path, instance.state.platform.dataDirs) {
         ffStrbufAppendS(path, "fastfetch/logos/");
@@ -334,6 +341,7 @@ static void listAvailableLogos(void) {
     }
 }
 
+FF_A_COLD
 static void listConfigPaths(void) {
     FF_LIST_FOR_EACH (FFstrbuf, folder, instance.state.platform.configDirs) {
         bool exists = false;
@@ -345,6 +353,7 @@ static void listConfigPaths(void) {
     }
 }
 
+FF_A_COLD
 static void listDataPaths(void) {
     FF_LIST_FOR_EACH (FFstrbuf, folder, instance.state.platform.dataDirs) {
         ffStrbufAppendS(folder, "fastfetch/");
@@ -352,6 +361,7 @@ static void listDataPaths(void) {
     }
 }
 
+FF_A_COLD
 static void listModules(bool pretty) {
     unsigned count = 0;
     for (int i = 0; i <= 'Z' - 'A'; ++i) {
@@ -394,20 +404,26 @@ static bool parseJsoncFile(FFdata* data, const char* path, yyjson_read_flag flg)
     }
 
     {
-        const char* error = NULL;
-
         yyjson_val* const root = yyjson_doc_get_root(data->configDoc);
         if (!yyjson_is_obj(root)) {
-            error = "Invalid JSON config format. Root value must be an object";
+            fputs("JsonConfig Error: Invalid JSON config format. Root value must be an object", stderr);
+            exit(477);
         }
 
+        yyjson_val* problematicKey = NULL;
+        const char* error = NULL;
+        const char* problematicModule = NULL;
         if (
             error ||
-            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
-            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
-            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
+            ((error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root, &problematicKey)) && (problematicModule = "logo")) ||
+            ((error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root, &problematicKey)) && (problematicModule = "general")) ||
+            ((error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root, &problematicKey)) && (problematicModule = "display")) ||
             false) {
-            fprintf(stderr, "JsonConfig Error: %s\n", error);
+            if (problematicKey) {
+                fprintf(stderr, "JsonConfig Error (%s.%s): %s\n", problematicModule, unsafe_yyjson_get_str(problematicKey), error);
+            } else {
+                fprintf(stderr, "JsonConfig Error (%s): %s\n", problematicModule, error);
+            }
             exit(477);
         }
     }
@@ -415,6 +431,7 @@ static bool parseJsoncFile(FFdata* data, const char* path, yyjson_read_flag flg)
     return true;
 }
 
+FF_A_COLD
 static void generateConfigFile(FFdata* data, bool force, const char* filePath, bool fullConfig) {
     if (data->resultDoc) {
         fprintf(stderr, "Error: duplicated `--gen-config` or `--format json` flags found\n");
@@ -552,6 +569,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     exit(414);
 }
 
+FF_A_COLD
 static void printVersion() {
     FFVersionResult* result = &ffVersionResult;
     printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
@@ -572,8 +590,7 @@ static void parseCommand(FFdata* data, char* key, char* value) {
     if (ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help")) {
         printCommandHelp(value);
         exit(0);
-    }
-    if (ffStrEqualsIgnCase(key, "--help-raw")) {
+    } else if (ffStrEqualsIgnCase(key, "--help-raw")) {
         puts(FASTFETCH_DATATEXT_JSON_HELP);
         exit(0);
     } else if (ffStrEqualsIgnCase(key, "-v") || ffStrEqualsIgnCase(key, "--version")) {
@@ -792,6 +809,7 @@ static void run(FFdata* data) {
     }
 }
 
+FF_A_COLD
 static void writeConfigFile(FFdata* data) {
     const FFstrbuf* filename = &data->genConfigPath;
 

@@ -52,6 +52,7 @@ struct FFAdlData {
     FF_LIBRARY_SYMBOL(ADL2_Adapter_MemoryInfo2_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_DedicatedVRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_ASICFamilyType_Get)
+    FF_LIBRARY_SYMBOL(ADL2_Adapter_ChipSetInfo_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive_Caps)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_CapabilitiesX2_Get)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_SystemClocksX2_Get)
@@ -89,6 +90,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_MemoryInfo2_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_DedicatedVRAMUsage_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ASICFamilyType_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ChipSetInfo_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive_Caps)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_CapabilitiesX2_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_SystemClocksX2_Get)
@@ -231,6 +233,40 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     if (result.name) {
         ffStrbufSetS(result.name, device->strAdapterName);
         FF_DEBUG("Setting adapter name: %s; UDID: %s, Present: %d, Exist: %d", device->strAdapterName, device->strUDID, device->iPresent, device->iExist);
+    }
+
+    if (result.psMax || result.psCurr) {
+        ADLChipSetInfo chipSetInfo;
+        int status = adlData.ffADL2_Adapter_ChipSetInfo_Get(adlData.apiHandle, device->iAdapterIndex, &chipSetInfo);
+        FF_DEBUG("ADL2_Adapter_ChipSetInfo_Get returned %s (%d)", ffAdlStatusToString(status), status);
+
+        if (status == ADL_OK) {
+            FF_DEBUG("Chipset info - iBusSpeedType: %d, iMaxPCIELaneWidth: %d", chipSetInfo.iBusSpeedType, chipSetInfo.iMaxPCIELaneWidth);
+            if (result.psMax) {
+                if (chipSetInfo.iBusSpeedType >= 2) {
+                    result.psMax->gen = (uint16_t) (chipSetInfo.iBusSpeedType - 2);
+                    FF_DEBUG("Got PCIe Max Gen: %u", result.psMax->gen);
+                }
+                if (chipSetInfo.iMaxPCIELaneWidth > 0) {
+                    result.psMax->lanes = (uint16_t) chipSetInfo.iMaxPCIELaneWidth;
+                    FF_DEBUG("Got PCIe Max Lanes: %u", result.psMax->lanes);
+                }
+            }
+
+            FF_DEBUG("Chipset info - iBusType: %d, iCurrentPCIELaneWidth: %d", chipSetInfo.iBusType, chipSetInfo.iCurrentPCIELaneWidth);
+            if (result.psCurr) {
+                if (chipSetInfo.iBusType >= 2) {
+                    result.psCurr->gen = (uint16_t) (chipSetInfo.iBusType - 2);
+                    FF_DEBUG("Got PCIe Current Gen: %u", result.psCurr->gen);
+                }
+                if (chipSetInfo.iCurrentPCIELaneWidth > 0) {
+                    result.psCurr->lanes = (uint16_t) chipSetInfo.iCurrentPCIELaneWidth;
+                    FF_DEBUG("Got PCIe Current Lanes: %u", result.psCurr->lanes);
+                }
+            }
+        } else {
+            FF_DEBUG("Failed to get chipset information");
+        }
     }
 
     int odVersion = 0;

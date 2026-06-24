@@ -27,9 +27,20 @@ typedef struct FFCPUResult {
     FFCPUCore coreTypes[16]; // number of P cores, E cores, etc.
 
     double temperature;
+
+    #if __i386__ || __x86_64__
+    const char* codeName;
+    const char* technology;
+    #endif
 } FFCPUResult;
 
 const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);
 const char* ffCPUAppleCodeToName(uint32_t code);
 const char* ffCPUQualcommCodeToName(uint32_t code);
 void ffCPUDetectByCpuid(FFCPUResult* cpu);
+
+#if __i386__ || __x86_64__
+
+bool ffCPUDetectX86Specific(FFCPUResult* cpu);
+
+#endif
