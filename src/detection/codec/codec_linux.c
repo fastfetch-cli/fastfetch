@@ -263,22 +263,25 @@ static const char* detectCodecByVaX11(FFVAData* vaData, FFCodecOptions* options,
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XOpenDisplay)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XCloseDisplay)
 
+    FF_LIBRARY_LOAD_MESSAGE(libvaX11, "libva-x11" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvaX11, vaGetDisplay)
+
     Display* x11Display = ffXOpenDisplay(NULL);
     if (!x11Display) {
         return "XOpenDisplay() failed";
     }
 
-    FF_LIBRARY_LOAD_MESSAGE(libvaX11, "libva-x11" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvaX11, vaGetDisplay)
-
     VADisplay display = ffvaGetDisplay(x11Display);
     if (!display) {
+        ffXCloseDisplay(x11Display);
         return "vaGetDisplay() failed";
     }
 
     if (!vaDetectDisplay(display, vaData, options, result, "VA-API (X11)")) {
+        ffXCloseDisplay(x11Display);
         return "VA-API could not detect any supported codec via X11";
     }
+    ffXCloseDisplay(x11Display);
 
     return NULL;
 }
@@ -372,13 +375,13 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XCloseDisplay)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libX11, XDefaultScreen)
 
+    FF_LIBRARY_LOAD_MESSAGE(libvdpau, "libvdpau" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvdpau, vdp_device_create_x11)
+
     Display* x11Display = ffXOpenDisplay(NULL);
     if (!x11Display) {
         return "XOpenDisplay() failed";
     }
-
-    FF_LIBRARY_LOAD_MESSAGE(libvdpau, "libvdpau" FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvdpau, vdp_device_create_x11)
 
     VdpDevice device = VDP_INVALID_HANDLE;
     VdpGetProcAddress* ffvdp_get_proc_address = NULL;
