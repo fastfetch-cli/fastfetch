@@ -8,9 +8,10 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     }
 
     // vm.stats.vm.* are int values
-    int32_t pagesFree = ffSysctlGetInt("vm.stats.vm.v_free_count", 0) + ffSysctlGetInt("vm.stats.vm.v_inactive_count", 0) + ffSysctlGetInt("vm.stats.vm.v_cache_count", 0);
+    int32_t pagesFree = ffSysctlGetInt("vm.stats.vm.v_free_count", 0) + ffSysctlGetInt("vm.stats.vm.v_inactive_count", 0);
+    int64_t bytesCache = ffSysctlGetInt64("vfs.bufspace", 0) + (ffSysctlGetInt64("kstat.zfs.misc.arcstats.size", 0) - ffSysctlGetInt64("kstat.zfs.misc.arcstats.c_min", 0));
 
-    ram->bytesUsed = ram->bytesTotal - (uint64_t) pagesFree * instance.state.platform.sysinfo.pageSize;
+    ram->bytesUsed = ram->bytesTotal - (uint64_t) pagesFree * instance.state.platform.sysinfo.pageSize - (uint64_t) bytesCache;
 
     return NULL;
 }
