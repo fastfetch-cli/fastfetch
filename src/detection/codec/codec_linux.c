@@ -237,7 +237,7 @@ static const char* detectCodecByVaDrm(FFVAData* vaData, FFCodecOptions* options,
             continue;
         }
 
-        FF_AUTO_CLOSE_FD int fd = openat(drifd, entry->d_name, O_RDONLY | O_CLOEXEC);
+        FF_AUTO_CLOSE_FD int fd = openat(drifd, entry->d_name, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
             continue;
         }
