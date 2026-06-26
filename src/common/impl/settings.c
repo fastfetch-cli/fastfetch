@@ -391,7 +391,7 @@ int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
     }
 
     sqlite3* db;
-    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
+    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, NULL) != SQLITE_OK) {
         return 0;
     }
 
