@@ -65,17 +65,14 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         return "loading igcl library failed";
     }
 
-    uint32_t deviceCount = 0;
-    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, NULL)) {
-        return "ctlEnumerateDevices(NULL) failed";
-    }
-    if (deviceCount == 0) {
-        return "No Intel graphics adapter found";
-    }
-
-    FF_AUTO_FREE ctl_device_adapter_handle_t* devices = malloc(deviceCount * sizeof(*devices));
+    ctl_device_adapter_handle_t devices[64];
+    uint32_t deviceCount = ARRAY_SIZE(devices);
     if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices)) {
         return "ctlEnumerateDevices(devices) failed";
+    }
+
+    if (deviceCount == 0) {
+        return "No Intel graphics adapter found";
     }
 
     ctl_device_adapter_handle_t device = NULL;
