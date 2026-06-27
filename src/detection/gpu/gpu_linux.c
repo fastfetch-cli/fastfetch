@@ -410,34 +410,6 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);
     ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
 
-    ffStrbufAppendS(deviceDir, "/max_link_speed");
-    if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-        gpu->psMax.gen = pcieLinkSpeedToGen(buffer);
-    }
-    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
-
-    if (gpu->psMax.gen != FF_GPU_PCIE_SPEED_UNSET) {
-        ffStrbufAppendS(deviceDir, "/max_link_width");
-        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-            gpu->psMax.lanes = pcieWidthToLanes(buffer);
-        }
-        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
-    }
-
-    ffStrbufAppendS(deviceDir, "/current_link_speed");
-    if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-        gpu->psCurr.gen = pcieLinkSpeedToGen(buffer);
-    }
-    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
-
-    if (gpu->psCurr.gen != FF_GPU_PCIE_SPEED_UNSET) {
-        ffStrbufAppendS(deviceDir, "/current_link_width");
-        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
-            gpu->psCurr.lanes = pcieWidthToLanes(buffer);
-        }
-        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
-    }
-
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD) {
         bool ok = false;
         if (drmKey && options->driverSpecific) {
@@ -473,7 +445,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         pciDetectTempGeneral(options, gpu, deviceDir, buffer);
         pciDetectZxSpecific(options, gpu, deviceDir, buffer);
     } else {
-        ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {
+        ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId){
                                                     .domain = pciDomain,
                                                     .bus = pciBus,
                                                     .device = pciDevice,
@@ -487,11 +459,41 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     ffGPUFillVendorByDeviceName(gpu);
 
+    if (options->driverSpecific && gpu->pcieSpeed == FF_GPU_PCIE_SPEED_UNSET) {
+        ffStrbufAppendS(deviceDir, "/max_link_speed");
+        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+            gpu->psMax.gen = pcieLinkSpeedToGen(buffer);
+        }
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+
+        if (gpu->psMax.gen != FF_GPU_PCIE_SPEED_UNSET) {
+            ffStrbufAppendS(deviceDir, "/max_link_width");
+            if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+                gpu->psMax.lanes = pcieWidthToLanes(buffer);
+            }
+            ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+        }
+
+        ffStrbufAppendS(deviceDir, "/current_link_speed");
+        if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+            gpu->psCurr.gen = pcieLinkSpeedToGen(buffer);
+        }
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+
+        if (gpu->psCurr.gen != FF_GPU_PCIE_SPEED_UNSET) {
+            ffStrbufAppendS(deviceDir, "/current_link_width");
+            if (ffReadFileBuffer(deviceDir->chars, buffer)) {
+                gpu->psCurr.lanes = pcieWidthToLanes(buffer);
+            }
+            ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
+        }
+    }
+
     return NULL;
 }
 
 #if __aarch64__
-#include "detection/cpu/cpu.h"
+    #include "detection/cpu/cpu.h"
 
 FF_A_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FF_A_UNUSED FFstrbuf* buffer, FF_A_UNUSED const char* drmKey) {
     if (sscanf(name, "agx-t%lu", &gpu->deviceId) == 1) {
