@@ -190,6 +190,20 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
         }
     }
 
+    if (result.psCurr || result.psMax) {
+        MtmlPciInfo pciInfo;
+        if (mtmlData.ffmtmlDeviceGetPciInfo(device, &pciInfo) == MTML_SUCCESS) {
+            if (result.psCurr) {
+                result.psCurr->lanes = (uint16_t) pciInfo.pciCurWidth;
+                result.psCurr->gen = (uint16_t) pciInfo.pciCurGen;
+            }
+            if (result.psMax) {
+                result.psMax->lanes = (uint16_t) pciInfo.pciMaxWidth;
+                result.psMax->gen = (uint16_t) pciInfo.pciMaxGen;
+            }
+        }
+    }
+
     return NULL;
 
 #else
