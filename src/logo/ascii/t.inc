@@ -122,6 +122,15 @@ static const FFlogo T[] = {
         .colorTitle = FF_COLOR_FG_256 "32",
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TURKMEN
+    // Turkmen Linux
+    {
+        .names = { "Turkmen Linux", },
+        .lines = FASTFETCH_DATATEXT_LOGO_TURKMEN,
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_TUXEDO_OS
     // TuxedoOS
     {
