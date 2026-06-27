@@ -531,6 +531,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (FF_PACKAGES_IS_ENABLED(options, XBPS)) {
         packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, YMP)) {
+        packageCounts->ymp += getNumElements(baseDir, "/var/lib/ymp/metadata", false);
+    }
     if (FF_PACKAGES_IS_ENABLED(options, BREW)) {
         packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", true);
         packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", true);

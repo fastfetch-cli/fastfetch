@@ -135,6 +135,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(xbps)
+        FF_PRINT_PACKAGE(ymp)
 
         assert(output.length >= 2); // counts.all > 0 guarantees that at least one package count was printed, which guarantees that ", " was appended at least once
         ffStrbufSubstrBefore(&output, output.length - 1);
@@ -193,6 +194,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.sorcery, "sorcery"),
                 FF_ARG(counts.winget, "winget"),
                 FF_ARG(counts.xbps, "xbps"),
+                FF_ARG(counts.ymp, "ymp"),
 
                 FF_ARG(brewAll, "brew-all"),
                 FF_ARG(flatpakAll, "flatpak-all"),
@@ -353,6 +355,11 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                                 ;
                             FF_TEST_PACKAGE_NAME(XBPS)
                             break;
+                        case 'Y':
+                            if (false)
+                                ;
+                            FF_TEST_PACKAGE_NAME(YMP)
+                            break;
                     }
     #undef FF_TEST_PACKAGE_NAME
                 }
@@ -420,6 +427,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(SORCERY)
     FF_TEST_PACKAGE_NAME(WINGET)
     FF_TEST_PACKAGE_NAME(XBPS)
+    FF_TEST_PACKAGE_NAME(YMP)
     #undef FF_TEST_PACKAGE_NAME
 #endif
 
@@ -489,6 +497,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
+    FF_APPEND_PACKAGE_COUNT(ymp)
     if (counts.pacmanBranch.length > 0) {
         yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
     }
@@ -566,6 +575,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of sorcery packages", "sorcery" },
         { "Number of winget packages", "winget" },
         { "Number of xbps packages", "xbps" },
+        { "Number of ymp packages", "ymp" },
 
         { "Total number of all brew packages", "brew-all" },
         { "Total number of all flatpak app packages", "flatpak-all" },

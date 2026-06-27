@@ -50,6 +50,7 @@ typedef struct FFPackagesResult {
     uint32_t sorcery;
     uint32_t winget;
     uint32_t xbps;
+    uint32_t ymp;
 
     uint32_t all; // Make sure this goes last
 
