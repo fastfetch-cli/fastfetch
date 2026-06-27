@@ -66,7 +66,10 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     }
 
     uint32_t deviceCount = 0;
-    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, NULL)) {
+    // ctlEnumerateDevices MUST be called with deviceCount = 0 and devices = NULL first,
+    // otherwise it will be silently ignored and return CTL_RESULT_SUCCESS with deviceCount and devices unmodified.
+    // VERY STRANGE BEHAVIOR
+    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, NULL) != CTL_RESULT_SUCCESS) {
         return "ctlEnumerateDevices(NULL) failed";
     }
     if (deviceCount == 0) {
@@ -74,7 +77,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     }
 
     FF_AUTO_FREE ctl_device_adapter_handle_t* devices = malloc(deviceCount * sizeof(*devices));
-    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices)) {
+    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices) != CTL_RESULT_SUCCESS) {
         return "ctlEnumerateDevices(devices) failed";
     }
 
