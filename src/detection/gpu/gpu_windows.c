@@ -111,7 +111,7 @@ static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds
                 DEVPROPTYPE propType;
 
                 pciBufLen = sizeof(entry->maxLinkSpeed);
-                // Reports PCEe gen despite the PKEY name
+                // Reports PCIe gen despite the PKEY name
                 CONFIGRET ret = CM_Get_DevNode_PropertyW(devInst, &DEVPKEY_PciDevice_MaxLinkSpeed, &propType, (PBYTE) &entry->maxLinkSpeed, &pciBufLen, 0);
                 if (ret == CR_SUCCESS) {
                     FF_DEBUG("PCIe max GEN: %u", entry->maxLinkSpeed);
