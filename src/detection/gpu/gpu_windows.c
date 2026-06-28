@@ -153,7 +153,7 @@ static bool queryPciDeviceInfo(FFGPUResult* gpu, D3DKMT_DEVICE_IDS* outDeviceIds
     FF_LIST_FOR_EACH (CacheEntry, entry, deviceIdsCache) {
         if (gpu->deviceId == entry->adapterAddress) {
             FF_DEBUG("Cache hit for adapter address: %08llX", gpu->deviceId);
-            if (outDeviceIds->VendorID != -1u) {
+            if (outDeviceIds->VendorID == -1u) {
                 *outDeviceIds = entry->deviceIds;
             }
 
