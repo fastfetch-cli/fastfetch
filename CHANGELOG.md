@@ -1,3 +1,22 @@
+# 2.65.2
+
+Changes:
+* Memory usage calculations now exclude the ZFS ARC cache on Linux, FreeBSD, NetBSD, and SunOS. (#1995 / #2418, Memory)
+    * This prevents the Memory module from reporting artificially high memory usage on systems with the ZFS kmod enabled.
+
+Bugfixes:
+* The GPU module no longer pings sleeping dedicated GPUs on dual-GPU laptops. (#2419, GPU)
+    * As a result, PCIe link speed detection (introduced in v2.65.0) is now only enabled in `driverSpecific` mode.
+* Fixed a crash when detecting hardware codec support with the `amdgpu` driver on Linux. (#2419, Codec, Linux)
+
+Logos:
+* Updated CachyOS_small
+* Added Turkish
+
+# 2.65.1
+
+No changes
+
 # 2.65.0
 
 Changes:
