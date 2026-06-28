@@ -111,7 +111,7 @@ static const char* smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
     SmcKeyData_t outputStructure = { 0 };
 
     inputStructure.key = smcStrtoul(key, 4, 16);
-    strcpy(val->key, key);
+    memcpy(val->key, key, sizeof(UInt32Char_t));
 
     const char* error = smcGetKeyInfo(conn, inputStructure.key, &outputStructure.keyInfo);
     if (error) {
