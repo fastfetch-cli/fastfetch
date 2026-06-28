@@ -19,34 +19,34 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
 
     char* token = NULL;
     if ((token = memmem(buf, (size_t) nRead, "MemTotal:", strlen("MemTotal:"))) != NULL) {
-        memTotal = strtoul(token + strlen("MemTotal:"), NULL, 10);
+        memTotal = (uint64_t) strtoull(token + strlen("MemTotal:"), NULL, 10);
     } else {
         return "MemTotal not found in /proc/meminfo";
     }
 
     if ((token = memmem(buf, (size_t) nRead, "MemAvailable:", strlen("MemAvailable:"))) != NULL) {
-        memAvailable = strtoul(token + strlen("MemAvailable:"), NULL, 10);
+        memAvailable = (uint64_t) strtoull(token + strlen("MemAvailable:"), NULL, 10);
     }
 
     if (memAvailable == 0 || memAvailable >= memTotal) { // MemAvailable can be unreasonable. #1988
         if ((token = memmem(buf, (size_t) nRead, "MemFree:", strlen("MemFree:"))) != NULL) {
-            memFree = strtoul(token + strlen("MemFree:"), NULL, 10);
+            memFree = (uint64_t) strtoull(token + strlen("MemFree:"), NULL, 10);
         }
 
         if ((token = memmem(buf, (size_t) nRead, "Buffers:", strlen("Buffers:"))) != NULL) {
-            buffers = strtoul(token + strlen("Buffers:"), NULL, 10);
+            buffers = (uint64_t) strtoull(token + strlen("Buffers:"), NULL, 10);
         }
 
         if ((token = memmem(buf, (size_t) nRead, "Cached:", strlen("Cached:"))) != NULL) {
-            cached = strtoul(token + strlen("Cached:"), NULL, 10);
+            cached = (uint64_t) strtoull(token + strlen("Cached:"), NULL, 10);
         }
 
         if ((token = memmem(buf, (size_t) nRead, "Shmem:", strlen("Shmem:"))) != NULL) {
-            shmem = strtoul(token + strlen("Shmem:"), NULL, 10);
+            shmem = (uint64_t) strtoull(token + strlen("Shmem:"), NULL, 10);
         }
 
         if ((token = memmem(buf, (size_t) nRead, "SReclaimable:", strlen("SReclaimable:"))) != NULL) {
-            sReclaimable = strtoul(token + strlen("SReclaimable:"), NULL, 10);
+            sReclaimable = (uint64_t) strtoull(token + strlen("SReclaimable:"), NULL, 10);
         }
 
         memAvailable = memFree + buffers + cached + sReclaimable - shmem;
@@ -79,11 +79,11 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
                 assert(nRead > 0);
 
                 if ((token = memmem(p, (size_t) nRead, "\nsize ", strlen("\nsize "))) != NULL) {
-                    arcSize = strtoul(token + 1 + dataOffset, NULL, 10);
+                    arcSize = (uint64_t) strtoull(token + 1 + dataOffset, NULL, 10);
                     if (arcSize > 0) {
                         uint64_t arcMin = 0;
                         if ((token = memmem(p, (size_t) nRead, "\nc_min ", strlen("\nc_min "))) != NULL) {
-                            arcMin = strtoul(token + 1 + dataOffset, NULL, 10);
+                            arcMin = (uint64_t) strtoull(token + 1 + dataOffset, NULL, 10);
                             if (arcSize > arcMin) {
                                 arcSize -= arcMin;
                                 if (ram->bytesUsed > arcSize) {
