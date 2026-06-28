@@ -10,7 +10,7 @@ SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 ROOT_DIR="$(cd -- "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 OUT_DIR="$(dirname "$ROOT_DIR")"
 PPA="ppa:zhangsongcui3371/fastfetch"
-CODENAMES=( jammy noble plucky questing resolute )
+CODENAMES=( jammy noble plucky questing resolute stonking )
 DRY_RUN=0
 
 if [[ -d "$OUT_DIR/build" ]]; then

@@ -9,12 +9,12 @@ static const FFlogo C[] = {
         .names = { "CachyOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS,
         .colors = {
-            FF_COLOR_FG_CYAN,
             FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_CYAN,
             FF_COLOR_FG_BLACK,
         },
         .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CACHYOS_SMALL
@@ -24,10 +24,24 @@ static const FFlogo C[] = {
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS_SMALL,
         .colors = {
+            FF_COLOR_FG_GREEN,
             FF_COLOR_FG_CYAN,
         },
         .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CACHYOS_OLD_SMALL
+    // CachyOSOldSmall
+    {
+        .names = { "CachyOS_old_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_CACHYOS_OLD_SMALL,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CALCULATE
