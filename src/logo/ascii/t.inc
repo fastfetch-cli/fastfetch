@@ -122,6 +122,18 @@ static const FFlogo T[] = {
         .colorTitle = FF_COLOR_FG_256 "32",
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TURKISH
+    // Turkish
+    {
+        .names = { "Turkish", },
+        .lines = FASTFETCH_DATATEXT_LOGO_TURKISH,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_TUXEDO_OS
     // TuxedoOS
     {
