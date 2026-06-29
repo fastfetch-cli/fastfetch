@@ -1,3 +1,9 @@
+fastfetch (2.65.2~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.65.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 29 Jun 2026 10:05:47 +0800
+
 fastfetch (2.65.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
 
   * Update to 2.65.1
