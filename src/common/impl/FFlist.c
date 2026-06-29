@@ -3,15 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void* ffListAdd(FFlist* list, uint32_t elementSize) {
-    if (list->length == list->capacity) {
-        ffListReserve(list, elementSize, list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2);
-    }
-
-    ++list->length;
-    return ffListGet(list, elementSize, list->length - 1);
-}
-
 bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result) {
     if (list->length == 0) {
         return false;

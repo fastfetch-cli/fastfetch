@@ -15,8 +15,6 @@ typedef struct FFlist {
     uint32_t capacity;
 } FFlist;
 
-void* ffListAdd(FFlist* list, uint32_t elementSize);
-
 // Removes the first element, and copy its value to `*result`
 bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result);
 // Removes the last element, and copy its value to `*result`
@@ -103,6 +101,15 @@ static inline void ffListReserve(FFlist* list, uint32_t elementSize, uint32_t ne
 
     list->data = (uint8_t*) realloc(list->data, (size_t) newCapacity * elementSize);
     list->capacity = newCapacity;
+}
+
+static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
+    if (__builtin_expect(list->length == list->capacity, false)) {
+        ffListReserve(list, elementSize, list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2);
+    }
+
+    ++list->length;
+    return ffListGet(list, elementSize, list->length - 1);
 }
 
 #define FF_LIST_FOR_EACH(itemType, itemVarName, listVar)                        \

@@ -177,7 +177,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
 }
 
 static inline void readWithLength(HANDLE handle, FFstrbuf* buffer, uint32_t length) {
-    ffStrbufEnsureFree(buffer, length);
+    ffStrbufEnsureFixedLengthFree(buffer, length);
     DWORD bytesRead = 0;
     while (
         length > 0 &&

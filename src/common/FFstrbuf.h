@@ -38,15 +38,10 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr);
 
-void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free);
-
-void ffStrbufClear(FFstrbuf* strbuf);
+void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free);
 
 static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value);
-void ffStrbufAppendC(FFstrbuf* strbuf, char c);
-void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c);
-void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transformFunc)(int));
 FF_A_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
@@ -87,13 +82,6 @@ FF_A_NODISCARD uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 
 bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
-
-void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
-void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
-
-FF_A_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue);
-FF_A_NODISCARD int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue);
-FF_A_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue);
 
 void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
@@ -229,6 +217,76 @@ FF_A_NODISCARD static inline uint32_t ffStrbufGetFree(const FFstrbuf* strbuf) {
     return strbuf->allocated - strbuf->length - 1; // - 1 for the null byte
 }
 
+static inline void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free) {
+    if (__builtin_expect(free == 0, false)) {
+        if (__builtin_expect(!(strbuf->allocated == 0 && strbuf->length > 0), true)) {
+            return;
+        }
+    } else {
+        if (__builtin_expect(ffStrbufGetFree(strbuf) >= free, true)) {
+            return;
+        }
+    }
+
+    ffStrbufEnsureFreeNoCheck(strbuf, free);
+}
+
+
+static inline void ffStrbufClear(FFstrbuf* strbuf) {
+    assert(strbuf != NULL);
+    extern char* CHAR_NULL_PTR;
+
+    if (strbuf->allocated == 0) {
+        strbuf->chars = CHAR_NULL_PTR;
+    } else {
+        strbuf->chars[0] = '\0';
+    }
+
+    strbuf->length = 0;
+}
+
+static inline void ffStrbufAppendC(FFstrbuf* strbuf, char c) {
+    if (__builtin_expect(ffStrbufGetFree(strbuf) == 0, false)) {
+        ffStrbufEnsureFreeNoCheck(strbuf, 1);
+    }
+    strbuf->chars[strbuf->length++] = c;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+static inline void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c) {
+    if (__builtin_expect(num == 0, false)) {
+        return;
+    }
+    if (__builtin_expect(ffStrbufGetFree(strbuf) < num, false)) {
+        ffStrbufEnsureFreeNoCheck(strbuf, num);
+    }
+
+    memset(&strbuf->chars[strbuf->length], c, num);
+    strbuf->length += num;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+static inline void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
+    if (__builtin_expect(value == NULL || length == 0, false)) {
+        return;
+    }
+    if (__builtin_expect(ffStrbufGetFree(strbuf) < length, false)) {
+        ffStrbufEnsureFreeNoCheck(strbuf, length);
+    }
+
+    memcpy(&strbuf->chars[strbuf->length], value, length);
+    strbuf->length += length;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value) {
+    assert(value != strbuf);
+    if (value == NULL) {
+        return;
+    }
+    ffStrbufAppendNS(strbuf, value->length, value->chars);
+}
+
 static inline void ffStrbufRecalculateLength(FFstrbuf* strbuf) {
     strbuf->length = (uint32_t) strlen(strbuf->chars);
 }
@@ -336,14 +394,6 @@ FF_A_NODISCARD static inline FFstrbuf ffStrbufCreateS(const char* str) {
     FFstrbuf strbuf;
     ffStrbufInitS(&strbuf, str);
     return strbuf;
-}
-
-static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value) {
-    assert(value != strbuf);
-    if (value == NULL) {
-        return;
-    }
-    ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
 static inline void ffStrbufPrepend(FFstrbuf* strbuf, FFstrbuf* value) {
@@ -576,6 +626,33 @@ static inline bool ffStrbufSeparatedContainIgnCaseS(const FFstrbuf* strbuf, cons
 
 static inline bool ffStrbufSeparatedContainIgnCase(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator) {
     return ffStrbufSeparatedContainIgnCaseNS(strbuf, comp->length, comp->chars, separator);
+}
+
+static inline void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file) {
+    fwrite(strbuf->chars, sizeof(*strbuf->chars), strbuf->length, file);
+}
+
+static inline void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file) {
+    ffStrbufWriteTo(strbuf, file);
+    fputc('\n', file);
+}
+
+FF_A_NODISCARD static inline double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue) {
+    char* str_end;
+    double result = strtod(strbuf->chars, &str_end);
+    return str_end == strbuf->chars ? defaultValue : result;
+}
+
+FF_A_NODISCARD static inline uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue) {
+    char* str_end;
+    unsigned long long result = strtoull(strbuf->chars, &str_end, 10);
+    return str_end == strbuf->chars ? defaultValue : (uint64_t) result;
+}
+
+FF_A_NODISCARD static inline int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue) {
+    char* str_end;
+    long long result = strtoll(strbuf->chars, &str_end, 10);
+    return str_end == strbuf->chars ? defaultValue : (int64_t) result;
 }
 
 // Returns true if the strbuf is modified
