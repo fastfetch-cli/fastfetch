@@ -4,7 +4,7 @@
 
 #ifdef FF_HAVE_THREADS
     #if defined(_WIN32)
-        #include <winternl.h>
+        #include "common/windows/nt.h"
         #include <synchapi.h>
         #include <process.h>
         #include <processthreadsapi.h>
@@ -41,6 +41,9 @@ static inline bool ffThreadJoin(FFThreadType thread, uint32_t timeout) {
     }
     NtClose(thread);
     return true;
+}
+static inline uintptr_t ffThreadGetCurrentId() {
+    return (uintptr_t) ffGetTeb()->ClientId.UniqueThread;
 }
     #else
         #include <pthread.h>
@@ -104,6 +107,9 @@ static inline bool ffThreadJoin(FFThreadType thread, FF_A_UNUSED uint32_t timeou
         #endif
     pthread_join(thread, NULL);
     return true;
+}
+static inline uintptr_t ffThreadGetCurrentId() {
+    return (uintptr_t) pthread_self();
 }
     #endif
 #else // FF_HAVE_THREADS
