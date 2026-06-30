@@ -307,7 +307,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
         return getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
     }
     if (ffStrEqualsIgnCase(exeName, "tidalshell")) {
-        return getShellVersionTidalshell(exe, version); // brush 0.2.23 (git:2835487)
+        return getShellVersionTidalshell(exe, version);
     }
 #ifdef _WIN32
     if (ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise")) {
