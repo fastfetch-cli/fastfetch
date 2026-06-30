@@ -37,6 +37,8 @@ static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr);
+FF_A_PRINTF(2, 3) void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...);
+FF_A_PRINTF(1, 2) FF_A_NODISCARD FFstrbuf ffStrbufCreateF(const char* format, ...);
 
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free);
 void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free);
@@ -167,31 +169,6 @@ static inline void ffStrbufInitMove(FFstrbuf* strbuf, FFstrbuf* src) {
 FF_A_NODISCARD static inline FFstrbuf ffStrbufCreateMove(FFstrbuf* src) {
     FFstrbuf strbuf;
     ffStrbufInitMove(&strbuf, src);
-    return strbuf;
-}
-
-FF_A_NODISCARD static inline FFstrbuf ffStrbufCreateVF(const char* format, va_list arguments) {
-    FFstrbuf strbuf;
-    ffStrbufInitVF(&strbuf, format, arguments);
-    return strbuf;
-}
-
-FF_A_PRINTF(2, 3) static inline void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...) {
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufInitVF(strbuf, format, arguments);
-    va_end(arguments);
-}
-
-FF_A_PRINTF(1, 2) FF_A_NODISCARD static inline FFstrbuf
-ffStrbufCreateF(const char* format, ...) {
-    FFstrbuf strbuf;
-
-    va_list arguments;
-    va_start(arguments, format);
-    ffStrbufInitVF(&strbuf, format, arguments);
-    va_end(arguments);
-
     return strbuf;
 }
 

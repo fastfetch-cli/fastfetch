@@ -45,6 +45,24 @@ void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr) {
     strbuf->chars = heapStr;
 }
 
+void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...) {
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(strbuf, format, arguments);
+    va_end(arguments);
+}
+
+FFstrbuf ffStrbufCreateF(const char* format, ...) {
+    FFstrbuf strbuf;
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(&strbuf, format, arguments);
+    va_end(arguments);
+
+    return strbuf;
+}
+
 void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free) {
     uint32_t allocate = strbuf->allocated;
     if (allocate < FASTFETCH_STRBUF_DEFAULT_ALLOC) {
