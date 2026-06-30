@@ -289,6 +289,8 @@ static void setShellInfoDetails(FFShellResult* result) {
         ffStrbufInitStatic(&result->prettyName, "Oils");
     } else if (ffStrbufEqualS(&result->processName, "busybox")) {
         ffStrbufInitStatic(&result->prettyName, "ash");
+    } else if (ffStrbufEqualS(&result->processName, "tidalshell")) {
+        ffStrbufInitStatic(&result->prettyName, "TidalShell");
     } else {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
         ffStrbufInitS(&result->prettyName, result->exeName);
