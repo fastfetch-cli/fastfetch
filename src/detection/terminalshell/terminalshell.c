@@ -242,15 +242,13 @@ static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version) {
 
 static bool getShellVersionTidalshell(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (!ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "-v",
-        NULL
-    })) return false;
+    if (ffProcessAppendStdOut(version, (char* const[]){ exe->chars, "-v", NULL }) != NULL)
+        return false;
     ffStrbufTrimRightSpace(version);
     ffStrbufSubstrBeforeFirstC(version, '-');
     return true;
 }
+
 
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version) {
