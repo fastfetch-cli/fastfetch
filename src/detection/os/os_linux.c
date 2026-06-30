@@ -330,6 +330,15 @@ FF_A_UNUSED static void detectDeepinEnhancement(FFOSResult* result) {
     }
 }
 
+FF_A_UNUSED static void detectAstra(FFOSResult* result) {
+    // `PRETTY_NAME` is just `Astra Linux`; the version is in `VERSION_ID`, e.g. `2.12_x86-64`
+    if (ffStrbufEqual(&result->codename, &result->versionID))
+        ffStrbufClear(&result->codename); // `VERSION_CODENAME` mirrors the raw `VERSION_ID`
+    ffStrbufSubstrBeforeFirstC(&result->versionID, '_'); // strip arch suffix: `2.12_x86-64` -> `2.12`
+    if (result->versionID.length > 0)
+        ffStrbufSetF(&result->prettyName, "%s %s", result->name.chars, result->versionID.chars);
+}
+
 static void detectOS(FFOSResult* os) {
 #ifdef FF_CUSTOM_OS_RELEASE_PATH
     parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
@@ -389,6 +398,8 @@ void ffDetectOSImpl(FFOSResult* os) {
         }
     } else if (ffStrbufEqualS(&os->id, "deepin")) {
         detectDeepinEnhancement(os);
+    } else if (ffStrbufEqualS(&os->id, "astra")) {
+        detectAstra(os);
     }
 #endif
 }
