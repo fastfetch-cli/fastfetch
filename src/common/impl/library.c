@@ -27,7 +27,7 @@
         #endif
     #endif
 
-static void* libraryLoad(const char* path, int maxVersion) {
+void* ffLibraryLoadSingle(const char* path, int maxVersion) {
     void* result = dlopen(path, FF_DLOPEN_FLAGS);
 
     #if _WIN32
@@ -81,8 +81,8 @@ static void* libraryLoad(const char* path, int maxVersion) {
     return result;
 }
 
-void* ffLibraryLoad(const char* path, int maxVersion, ...) {
-    void* result = libraryLoad(path, maxVersion);
+void* ffLibraryLoadMulti(const char* path, int maxVersion, ...) {
+    void* result = ffLibraryLoadSingle(path, maxVersion);
 
     if (!result) {
         va_list defaultNames;
@@ -95,7 +95,7 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...) {
             }
 
             int maxVersionRest = va_arg(defaultNames, int);
-            result = libraryLoad(pathRest, maxVersionRest);
+            result = ffLibraryLoadSingle(pathRest, maxVersionRest);
         } while (!result);
 
         va_end(defaultNames);

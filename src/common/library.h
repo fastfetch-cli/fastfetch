@@ -35,9 +35,10 @@ static inline void ffLibraryUnload(void** handle) {
     #define FF_LIBRARY_SYMBOL(symbolName) \
         __typeof__(&symbolName) ff##symbolName;
 
-    #define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...)                                  \
-        void* FF_A_CLEANUP(ffLibraryUnload) libraryObjectName = ffLibraryLoad(__VA_ARGS__, NULL); \
-        if (libraryObjectName == NULL)                                                            \
+    #define FF_LIBRARY_LOAD(libraryObjectName, returnValue, libraryFileName, maxVersion, ...)                                          \
+        void* FF_A_CLEANUP(ffLibraryUnload) libraryObjectName = ffLibraryLoadSingle(libraryFileName, maxVersion);                      \
+        __VA_OPT__(if (__builtin_expect(libraryObjectName == NULL, false)) libraryObjectName = ffLibraryLoadMulti(__VA_ARGS__, NULL);) \
+        if (__builtin_expect(libraryObjectName == NULL, false))                                                                        \
             return returnValue;
 
     #define FF_LIBRARY_LOAD_MESSAGE(libraryObjectName, libraryFileName, maxVersion, ...) \
@@ -45,7 +46,7 @@ static inline void ffLibraryUnload(void** handle) {
 
     #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
         symbolMapping = (__typeof__(&symbolName)) dlsym(library, #symbolName);              \
-        if (symbolMapping == NULL)                                                          \
+        if (__builtin_expect(symbolMapping == NULL, false))                                 \
             return returnValue;
 
     #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
@@ -66,7 +67,8 @@ static inline void ffLibraryUnload(void** handle) {
     #define FF_LIBRARY_LOAD_SYMBOL_PTR(library, varName, symbolName, returnValue) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName)->ff##symbolName, symbolName, returnValue);
 
-void* ffLibraryLoad(const char* path, int maxVersion, ...);
+void* ffLibraryLoadSingle(const char* path, int maxVersion);
+void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
 
 #else
 
