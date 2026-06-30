@@ -553,8 +553,11 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
     #ifdef FF_HAVE_CHAFA
         #include <chafa.h>
 static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* imageData) {
-    FF_LIBRARY_LOAD(chafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1, "libchafa-0" FF_LIBRARY_EXTENSION, -1 // Required for Windows
-    )
+    #if _WIN32
+    FF_LIBRARY_LOAD(chafa, false, "libchafa-0" FF_LIBRARY_EXTENSION, 0)
+    #else
+    FF_LIBRARY_LOAD(chafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
+    #endif
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_apply_selectors, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)

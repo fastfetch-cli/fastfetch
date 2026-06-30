@@ -12,7 +12,12 @@ static FF_LIBRARY_SYMBOL(ResizeImage)
 }
 
 FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData) {
-    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-6.Q16HDRI" FF_LIBRARY_EXTENSION, 8, "libMagickCore-6.Q16" FF_LIBRARY_EXTENSION, 8)
+    // clang-format off
+    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
+        "libMagickCore-6.Q16HDRI" FF_LIBRARY_EXTENSION, 8,
+        "libMagickCore-6.Q16" FF_LIBRARY_EXTENSION, 8
+    )
+    // clang-format on
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
     FFLogoImageResult result = ffLogoPrintImageImpl(requestData, &(FFIMData) {
