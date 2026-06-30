@@ -111,8 +111,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
 }
 
 #if !FF_MODULE_DISABLE_MEDIA
-__attribute__((visibility("default"), used))
-int ffPrintMediaByMediaRemote(bool saveCover) {
+__attribute__((visibility("default"), used)) int ffPrintMediaByMediaRemote(int saveCover) {
     FFMediaResult media = {
         .status = ffStrbufCreate(),
         .song = ffStrbufCreate(),
@@ -122,7 +121,7 @@ int ffPrintMediaByMediaRemote(bool saveCover) {
         .player = ffStrbufCreate(),
         .cover = ffStrbufCreate(),
     };
-    if (getMediaByMediaRemote(&media, saveCover) != NULL) {
+    if (getMediaByMediaRemote(&media, !!saveCover) != NULL) {
         return 1;
     }
     ffStrbufAppendC(&media.status, '\n');
@@ -157,13 +156,19 @@ int ffPrintMediaByMediaRemote(bool saveCover) {
 
 static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveCover) {
     // #1737
-    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("import ctypes;ctypes.CDLL('%s').ffPrintMediaByMediaRemote(%s)", instance.state.platform.exePath.chars, saveCover ? "True" : "False");
+    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("require DynaLoader;\
+my $so = DynaLoader::dl_load_file('%s', 0);\
+my $sym = DynaLoader::dl_find_symbol($so, 'ffPrintMediaByMediaRemote');\
+DynaLoader::dl_install_xsub('fn', $sym, __FILE__);\
+exit(fn(%c))",
+                                                    instance.state.platform.exePath.chars,
+                                                    saveCover ? '1' : '0');
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     const char* error = ffProcessAppendStdOut(
         &buffer,
-        (char* const[]) { "/usr/bin/python3", // Must be signed by Apple. Homebrew python doesn't work
-                          "-c",
+        (char* const[]) { "/usr/bin/perl", // Must be signed by Apple. Homebrew version doesn't work
+                          "-e",
                           script.chars,
                           nil });
     if (error) {
