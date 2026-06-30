@@ -51,6 +51,19 @@ static const FFlogo P[] = {
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA2_SMALL
+    // Parabola2Small
+    {
+        .names = { "parabola2_small", "parabola-gnulinux2_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_PARABOLA2_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_PARCH
     // Parch
     {
@@ -265,6 +278,17 @@ static const FFlogo P[] = {
     {
         .names = { "PostMarketOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_POSTMARKETOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_POSTMARKETOS2
+    // PostMarketOS2
+    {
+        .names = { "PostMarketOS2" },
+        .lines = FASTFETCH_DATATEXT_LOGO_POSTMARKETOS2,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_WHITE,
