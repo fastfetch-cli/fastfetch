@@ -240,6 +240,18 @@ static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version) {
     return getExeVersionGeneral(exe, version); // zsh 5.9 (arm-apple-darwin21.3.0)
 }
 
+static bool getShellVersionTidalshell(FFstrbuf* exe, FFstrbuf* version)
+{
+    if (!ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "-v",
+        NULL
+    })) return false;
+    ffStrbufTrimRightSpace(version);
+    ffStrbufSubstrBeforeFirstC(version, '-');
+    return true;
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version) {
     const char* env = getenv("POWERSHELL_VERSION");
@@ -296,7 +308,9 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
     if (ffStrEqualsIgnCase(exeName, "brush")) {
         return getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
     }
-
+    if (ffStrEqualsIgnCase(exeName, "tidalshell")) {
+        return getShellVersionTidalshell(exe, version); // brush 0.2.23 (git:2835487)
+    }
 #ifdef _WIN32
     if (ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise")) {
         return getShellVersionWinPowerShell(exe, version);
