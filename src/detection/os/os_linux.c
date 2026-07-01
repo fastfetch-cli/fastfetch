@@ -294,12 +294,25 @@ FF_A_UNUSED static bool detectFedoraVariant(FFOSResult* result) {
     return false;
 }
 
-FF_A_UNUSED static bool detectBedrock(FFOSResult* os) {
+static bool detectBedrock(FFOSResult* os)
+{
     const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
-    if (bedrockRestrict && bedrockRestrict[0] == '1') {
+    if (bedrockRestrict && bedrockRestrict[0] == '1')
         return false;
+
+    if (ffPathExists(
+            FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/enux",
+            FF_PATHTYPE_DIRECTORY) &&
+        parseOsRelease(
+            FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/enux/etc/os-release",
+            os))
+    {
+        return true;
     }
-    return parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release", os);
+
+    return parseOsRelease(
+        FASTFETCH_TARGET_DIR_ROOT "/bedrock/strata/bedrock/etc/os-release",
+        os);
 }
 
 FF_A_UNUSED static void detectDeepinEnhancement(FFOSResult* result) {
