@@ -232,6 +232,21 @@ static const FFlogo C[] = {
         .colorTitle = FF_COLOR_FG_RED,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX2
+    // Chimera2
+    {
+        .names = { "Chimera2" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX2,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX_SMALL
     // Chimera_small
     {
