@@ -60,7 +60,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_CALINIXOS
     // CalinixOS
     {
-        .names = { "Calinix", "calinixos" },
+        .names = { "CalinixOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -72,7 +72,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL
     // CalinixOSSmall
     {
-        .names = { "Calinix_small", "calinixos_small" },
+        .names = { "CalinixOS_small" },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL,
         .colors = {
@@ -109,7 +109,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_CELOS
     // CelOS
     {
-        .names = { "Cel", "celos", "cel-linux", "celos-linux" },
+        .names = { "CelOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_CELOS,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -166,7 +166,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_CEREUS
     // Cereus
     {
-        .names = { "Cereus", "Cereus Linux" },
+        .names = { "Cereus" },
         .lines = FASTFETCH_DATATEXT_LOGO_CEREUS,
         .colors = {
             FF_COLOR_FG_256 "173",
@@ -397,7 +397,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS
     // ContainerLinux
     {
-        .names = { "ContainerLinux", "Container Linux", "Container Linux by CoreOS" },
+        .names = { "CoreOS", "Container Linux by CoreOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS,
         .colors = {
             FF_COLOR_FG_BLUE,
