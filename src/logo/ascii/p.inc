@@ -29,7 +29,7 @@ static const FFlogo P[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA
     // Parabola
     {
-        .names = { "parabola" },
+        .names = { "Parabola" },
         .lines = FASTFETCH_DATATEXT_LOGO_PARABOLA,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -41,7 +41,7 @@ static const FFlogo P[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA_SMALL
     // ParabolaSmall
     {
-        .names = { "parabola_small", },
+        .names = { "Parabola_small", },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PARABOLA_SMALL,
         .colors = {
@@ -54,7 +54,7 @@ static const FFlogo P[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_PARABOLA2_SMALL
     // Parabola2Small
     {
-        .names = { "parabola2_small", },
+        .names = { "Parabola2_small", },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PARABOLA2_SMALL,
         .colors = {
