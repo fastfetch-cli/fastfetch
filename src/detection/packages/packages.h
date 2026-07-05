@@ -72,3 +72,6 @@ uint32_t ffPackagesGetNix(FFstrbuf* baseDir, const char* dirname);
 #ifndef _WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir);
 #endif
+#if defined(__linux__) || defined(__NetBSD__) || defined(__sun) || defined(__APPLE__)
+uint32_t ffPackagesGetPkgsrc(FFstrbuf* baseDir);
+#endif
