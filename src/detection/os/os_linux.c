@@ -223,6 +223,22 @@ FF_A_UNUSED static bool detectDebianDerived(FFOSResult* result) {
         }
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
+    } else if (access("/usr/sbin/proxmox-backup-manager", X_OK) == 0) {
+        ffStrbufSetStatic(&result->id, "pbs");
+        ffStrbufSetStatic(&result->idLike, "debian");
+        ffStrbufSetStatic(&result->name, "Proxmox Backup Server");
+        ffStrbufClear(&result->versionID);
+        if (ffProcessAppendStdOut(&result->versionID, (char* const[]) {
+                                                          "/usr/bin/dpkg-query",
+                                                          "--showformat=${version}",
+                                                          "--show",
+                                                          "proxmox-backup-server",
+                                                          NULL,
+                                                      }) == NULL) {
+            ffStrbufTrimRightSpace(&result->versionID);
+        }
+        ffStrbufSetF(&result->prettyName, "Proxmox Backup Server %s", result->versionID.chars);
+        return true;
     } else if (ffPathExists("/etc/rpi-issue", FF_PATHTYPE_FILE)) {
         // Raspberry Pi OS
         ffStrbufSetStatic(&result->id, "raspbian");
