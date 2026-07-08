@@ -311,7 +311,7 @@ static const FFlogo P[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_PROXMOX
     // Proxmox
     {
-        .names = { "Proxmox", "pve", "pbs", "Proxmox Backup Server" },
+        .names = { "Proxmox" },
         .lines = FASTFETCH_DATATEXT_LOGO_PROXMOX,
         .colors = {
             FF_COLOR_FG_WHITE,
