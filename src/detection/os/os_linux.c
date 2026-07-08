@@ -208,7 +208,7 @@ FF_A_UNUSED static bool detectDebianDerived(FFOSResult* result) {
         ffStrbufSetStatic(&result->idLike, "debian");
         return true;
     } else if (access("/usr/bin/pveversion", X_OK) == 0) {
-        ffStrbufSetStatic(&result->id, "pve");
+        ffStrbufSetStatic(&result->id, "proxmox");
         ffStrbufSetStatic(&result->idLike, "debian");
         ffStrbufSetStatic(&result->name, "Proxmox VE");
         ffStrbufClear(&result->versionID);
@@ -220,11 +220,14 @@ FF_A_UNUSED static bool detectDebianDerived(FFOSResult* result) {
                                                           NULL,
                                                       }) == NULL) { // 8.2.2
             ffStrbufTrimRightSpace(&result->versionID);
+            ffStrbufSetStatic(&result->prettyName, "Proxmox VE ");
+            ffStrbufAppend(&result->prettyName, &result->versionID);
+        } else {
+            ffStrbufSetStatic(&result->prettyName, "Proxmox VE");
         }
-        ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
     } else if (access("/usr/sbin/proxmox-backup-manager", X_OK) == 0) {
-        ffStrbufSetStatic(&result->id, "pbs");
+        ffStrbufSetStatic(&result->id, "proxmox");
         ffStrbufSetStatic(&result->idLike, "debian");
         ffStrbufSetStatic(&result->name, "Proxmox Backup Server");
         ffStrbufClear(&result->versionID);
@@ -236,8 +239,11 @@ FF_A_UNUSED static bool detectDebianDerived(FFOSResult* result) {
                                                           NULL,
                                                       }) == NULL) {
             ffStrbufTrimRightSpace(&result->versionID);
+            ffStrbufSetStatic(&result->prettyName, "Proxmox Backup Server ");
+            ffStrbufAppend(&result->prettyName, &result->versionID);
+        } else {
+            ffStrbufSetStatic(&result->prettyName, "Proxmox Backup Server");
         }
-        ffStrbufSetF(&result->prettyName, "Proxmox Backup Server %s", result->versionID.chars);
         return true;
     } else if (ffPathExists("/etc/rpi-issue", FF_PATHTYPE_FILE)) {
         // Raspberry Pi OS
