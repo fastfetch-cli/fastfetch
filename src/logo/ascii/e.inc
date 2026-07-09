@@ -152,6 +152,19 @@ static const FFlogo E[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENUX
+    // ENux
+    {
+        .names = { "enux" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ENUX,
+        // ENux renders entirely black: logo, keys, and title.
+        .colors = {
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_BLACK,
+        .colorTitle = FF_COLOR_FG_BLACK,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ESHANIZEDOS
     // EshanizedOS
     {
