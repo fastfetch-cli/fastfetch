@@ -147,11 +147,16 @@ static void waylandKdePriorityListener(void* data, [[maybe_unused]] struct kde_o
     display->primary = priority == 1;
 }
 
+static void waylandKdeDoneListener(void* data, [[maybe_unused]] struct kde_output_device_v2* kde_output_device_v2) {
+    WaylandDisplay* display = data;
+    display->done = true;
+}
+
 static struct kde_output_device_v2_listener outputListener = {
     .geometry = waylandKdeGeometryListener,
     .current_mode = waylandKdeCurrentModeListener,
     .mode = waylandKdeModeListener,
-    .done = (void*) stubListener,
+    .done = waylandKdeDoneListener,
     .scale = waylandKdeScaleListener,
     .edid = waylandKdeEdidListener,
     .enabled = waylandKdeEnabledListener,
@@ -210,6 +215,13 @@ static const char* waylandKdeHandleOutput(WaylandData* wldata, struct wl_proxy* 
     if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip kde_output_device_v2";
+    }
+    if (!display.done) {
+        const char* error = ffWaylandWaitForDone(&display);
+        if (error) {
+            wldata->ffwl_proxy_destroy(output);
+            return error;
+        }
     }
     // Destroy any mode proxies that were created during the listeners.
     // wl proxies created for modes are not automatically freed by destroying

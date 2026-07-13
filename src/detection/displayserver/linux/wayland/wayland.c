@@ -11,6 +11,7 @@
     #include <sys/socket.h>
 
     #include "common/properties.h"
+    #include "common/time.h"
 
     #include "wayland.h"
     #include "kde-output-device-v2-client-protocol.h"
@@ -215,6 +216,26 @@ uint32_t ffWaylandHandleRotation(WaylandDisplay* display) {
             break;
     }
     return rotation;
+}
+
+const char* ffWaylandWaitForDone(WaylandDisplay* display) {
+    WaylandData* wldata = display->parent;
+    double deadline = ffTimeGetTick() + instance.config.general.processingTimeout;
+
+    // Some compositors emit the final output state asynchronously after the roundtrip callback (#2074)
+    while (!display->done) {
+        if (ffTimeGetTick() >= deadline) {
+            return "Timeout waiting for Wayland output information";
+        }
+        if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
+            return "Failed to roundtrip Wayland output information";
+        }
+        if (!display->done) {
+            ffTimeSleep(1);
+        }
+    }
+
+    return nullptr;
 }
 
 const char* ffdsConnectWayland(FFDisplayServerResult* result) {

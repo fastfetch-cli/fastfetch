@@ -25,6 +25,11 @@ static void waylandOutputScaleListener(void* data, [[maybe_unused]] struct wl_ou
     display->dpi = 96 * (uint32_t) scale;
 }
 
+static void waylandOutputDoneListener(void* data, [[maybe_unused]] struct wl_output* output) {
+    WaylandDisplay* display = data;
+    display->done = true;
+}
+
 static void waylandOutputGeometryListener(void* data,
     [[maybe_unused]] struct wl_output* output,
     [[maybe_unused]] int32_t x,
@@ -54,7 +59,7 @@ static void handleXdgLogicalSize(void* data, [[maybe_unused]] struct zxdg_output
 static void* outputListener[] = {
     waylandOutputGeometryListener,      // geometry
     waylandOutputModeListener,          // mode
-    stubListener,                       // done
+    waylandOutputDoneListener,          // done
     waylandOutputScaleListener,         // scale
     ffWaylandOutputNameListener,        // name
     ffWaylandOutputDescriptionListener, // description
@@ -121,6 +126,13 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
     if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip wl_output";
+    }
+    if (bindVersion >= WL_OUTPUT_DONE_SINCE_VERSION && !display.done) {
+        const char* error = ffWaylandWaitForDone(&display);
+        if (error) {
+            wldata->ffwl_proxy_destroy(output);
+            return error;
+        }
     }
 
     if (wldata->zxdgOutputManager) {

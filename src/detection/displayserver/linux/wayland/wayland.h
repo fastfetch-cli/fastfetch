@@ -58,6 +58,7 @@ typedef struct WaylandDisplay {
     FFstrbuf serial;
     uint8_t bitDepth;
     bool primary;
+    bool done;
 } WaylandDisplay;
 
 inline static void stubListener(void* data, ...) {
@@ -79,6 +80,7 @@ void ffWaylandOutputNameListener(void* data, [[maybe_unused]] void* output, cons
 void ffWaylandOutputDescriptionListener(void* data, [[maybe_unused]] void* output, const char* description);
 // Modifies content of display. Don't call this function when calling ffdsAppendDisplay
 uint32_t ffWaylandHandleRotation(WaylandDisplay* display);
+const char* ffWaylandWaitForDone(WaylandDisplay* display);
 
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 const char* ffWaylandHandleKdeOutputRegistry(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
