@@ -60,9 +60,7 @@ typedef struct WaylandDisplay {
     bool primary;
 } WaylandDisplay;
 
-inline static void stubListener(void* data, ...) {
-    (void) data;
-}
+void ffWaylandStubListener(void* data, ...);
 
 inline static uint64_t ffWaylandGenerateIdFromName(const char* name) {
     uint64_t id = 0;

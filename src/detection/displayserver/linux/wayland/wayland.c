@@ -253,7 +253,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
-        .global_remove = (void*) stubListener
+        .global_remove = (void*) ffWaylandStubListener
     };
 
     data.ffwl_proxy_add_listener(registry, (void (**)(void)) &registry_listener, &data);
@@ -337,6 +337,10 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     // This is used as an indicator that we are running wayland by the x11 backends.
     ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
     return NULL;
+}
+
+void ffWaylandStubListener(void* data, ...) {
+    FF_UNUSED(data);
 }
 
 #else

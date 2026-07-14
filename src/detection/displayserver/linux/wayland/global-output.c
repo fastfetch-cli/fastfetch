@@ -54,7 +54,7 @@ static void handleXdgLogicalSize(void* data, FF_A_UNUSED struct zxdg_output_v1* 
 static void* outputListener[] = {
     waylandOutputGeometryListener,      // geometry
     waylandOutputModeListener,          // mode
-    stubListener,                       // done
+    ffWaylandStubListener,              // done
     waylandOutputScaleListener,         // scale
     ffWaylandOutputNameListener,        // name
     ffWaylandOutputDescriptionListener, // description
@@ -64,9 +64,9 @@ static_assert(
     "sizeof(outputListener) is too small. Please report it to fastfetch github issue");
 
 static struct zxdg_output_v1_listener zxdgOutputListener = {
-    .logical_position = (void*) stubListener,
+    .logical_position = (void*) ffWaylandStubListener,
     .logical_size = handleXdgLogicalSize,
-    .done = (void*) stubListener,
+    .done = (void*) ffWaylandStubListener,
     .name = (void*) ffWaylandOutputNameListener,
     .description = (void*) ffWaylandOutputDescriptionListener,
 };
@@ -84,17 +84,17 @@ static void handleWpTfNamed(void *data, FF_A_UNUSED struct wp_image_description_
 }
 
 static const struct wp_image_description_info_v1_listener wpImageDescInfoListener = {
-    .done = (void*) stubListener,
-    .icc_file = (void*) stubListener,
-    .primaries = (void*) stubListener,
-    .primaries_named = (void*) stubListener,
-    .tf_power = (void*) stubListener,
+    .done = (void*) ffWaylandStubListener,
+    .icc_file = (void*) ffWaylandStubListener,
+    .primaries = (void*) ffWaylandStubListener,
+    .primaries_named = (void*) ffWaylandStubListener,
+    .tf_power = (void*) ffWaylandStubListener,
     .tf_named = (void*) handleWpTfNamed,
-    .luminances = (void*) stubListener,
-    .target_primaries = (void*) stubListener,
-    .target_luminance = (void*) stubListener,
-    .target_max_cll = (void*) stubListener,
-    .target_max_fall = (void*) stubListener,
+    .luminances = (void*) ffWaylandStubListener,
+    .target_primaries = (void*) ffWaylandStubListener,
+    .target_luminance = (void*) ffWaylandStubListener,
+    .target_max_cll = (void*) ffWaylandStubListener,
+    .target_max_fall = (void*) ffWaylandStubListener,
 };
 
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
