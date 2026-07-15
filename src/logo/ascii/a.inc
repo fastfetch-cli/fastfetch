@@ -801,6 +801,19 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTRA_SMALL
+    // AstraSmall
+    {
+        .names = { "astra_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ASTRA_SMALL,
+        .colors = {
+            FF_COLOR_FG_LIGHT_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_JANUSLINUX
     // Ataraxia
     {
