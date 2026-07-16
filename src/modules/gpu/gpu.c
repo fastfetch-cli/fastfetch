@@ -183,6 +183,10 @@ bool ffPrintGPU(FFGPUOptions* options) {
     FF_LIST_AUTO_DESTROY selectedGPUs = ffListCreateA(sizeof(const FFGPUResult*), gpus.length);
 
     FF_LIST_FOR_EACH (FFGPUResult, gpu, gpus) {
+        if (gpu->name.len == 0) {
+            continue;
+        }
+
         if (gpu->type == FF_GPU_TYPE_UNKNOWN && options->hideType == FF_GPU_TYPE_UNKNOWN) {
             continue;
         }
