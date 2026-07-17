@@ -41,7 +41,7 @@ static FFCodecType ffCodecCodecToType(CMVideoCodecType codec) {
 }
 
 static FFCodecType ffCodecDetectEncoders(void) {
-    CFArrayRef encoderList = NULL;
+    FF_CFTYPE_AUTO_RELEASE CFArrayRef encoderList = NULL;
     if (VTCopyVideoEncoderList(NULL, &encoderList) != noErr || !encoderList) {
         return FF_CODEC_TYPE_NONE;
     }
