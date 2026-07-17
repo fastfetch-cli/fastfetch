@@ -53,6 +53,7 @@ bool ffPrintCamera(FFCameraOptions* options) {
 
     FF_LIST_FOR_EACH (FFCameraResult, dev, result) {
         ffStrbufDestroy(&dev->name);
+        ffStrbufDestroy(&dev->vendor);
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
@@ -99,6 +100,7 @@ bool ffGenerateCameraJsonResult(FF_A_UNUSED FFCameraOptions* options, yyjson_mut
 
     FF_LIST_FOR_EACH (FFCameraResult, dev, result) {
         ffStrbufDestroy(&dev->name);
+        ffStrbufDestroy(&dev->vendor);
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
