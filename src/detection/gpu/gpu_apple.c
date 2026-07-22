@@ -28,6 +28,9 @@ static double detectGpuTemp(const FFstrbuf* gpuName) {
             case 4:
                 error = ffDetectSmcTemps(FF_TEMP_GPU_M4X, &result);
                 break;
+            case 5:
+                error = ffDetectSmcTemps(FF_TEMP_GPU_M5X, &result);
+                break;
             default:
                 error = "Unsupported Apple Silicon GPU";
                 break;

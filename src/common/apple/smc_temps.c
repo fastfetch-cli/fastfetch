@@ -392,6 +392,27 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tp0e", result); // CPU performance core 8
             break;
 
+        case FF_TEMP_CPU_M5X:
+            count += detectTemp(conn, "Tp00", result); // CPU super core 1
+            count += detectTemp(conn, "Tp04", result); // CPU super core 2
+            count += detectTemp(conn, "Tp08", result); // CPU super core 3
+            count += detectTemp(conn, "Tp0C", result); // CPU super core 4
+            count += detectTemp(conn, "Tp0G", result); // CPU super core 5
+            count += detectTemp(conn, "Tp0K", result); // CPU super core 6
+            count += detectTemp(conn, "Tp0O", result); // CPU performance core 1
+            count += detectTemp(conn, "Tp0R", result); // CPU performance core 2
+            count += detectTemp(conn, "Tp0U", result); // CPU performance core 3
+            count += detectTemp(conn, "Tp0X", result); // CPU performance core 4
+            count += detectTemp(conn, "Tp0a", result); // CPU performance core 5
+            count += detectTemp(conn, "Tp0d", result); // CPU performance core 6
+            count += detectTemp(conn, "Tp0g", result); // CPU performance core 7
+            count += detectTemp(conn, "Tp0j", result); // CPU performance core 8
+            count += detectTemp(conn, "Tp0m", result); // CPU performance core 9
+            count += detectTemp(conn, "Tp0p", result); // CPU performance core 10
+            count += detectTemp(conn, "Tp0u", result); // CPU performance core 11
+            count += detectTemp(conn, "Tp0y", result); // CPU performance core 12
+            break;
+
         case FF_TEMP_GPU_INTEL:
             count += detectTemp(conn, "TCGC", result); // GPU Intel Graphics
             goto gpu_unknown;
@@ -442,6 +463,17 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tg0k", result); // GPU 8
             break;
 
+        case FF_TEMP_GPU_M5X:
+            count += detectTemp(conn, "Tg0U", result); // GPU 1
+            count += detectTemp(conn, "Tg0X", result); // GPU 2
+            count += detectTemp(conn, "Tg0d", result); // GPU 3
+            count += detectTemp(conn, "Tg0g", result); // GPU 4
+            count += detectTemp(conn, "Tg0j", result); // GPU 5
+            count += detectTemp(conn, "Tg1Y", result); // GPU 6
+            count += detectTemp(conn, "Tg1c", result); // GPU 7
+            count += detectTemp(conn, "Tg1g", result); // GPU 8
+            break;
+
         case FF_TEMP_BATTERY:
             count += detectTemp(conn, "TB1T", result); // Battery
             count += detectTemp(conn, "TB2T", result); // Battery
@@ -452,6 +484,9 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tm06", result); // Memory 2
             count += detectTemp(conn, "Tm08", result); // Memory 3
             count += detectTemp(conn, "Tm09", result); // Memory 4
+            count += detectTemp(conn, "Tm0p", result); // Memory Proximity 1 (M4)
+            count += detectTemp(conn, "Tm1p", result); // Memory Proximity 2 (M4)
+            count += detectTemp(conn, "Tm2p", result); // Memory Proximity 3 (M4)
             break;
     }
 
