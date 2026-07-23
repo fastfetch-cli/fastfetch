@@ -117,6 +117,7 @@ void ffInitSeparatorOptions(FFSeparatorOptions* options) {
 
 void ffDestroySeparatorOptions(FFSeparatorOptions* options) {
     ffStrbufDestroy(&options->string);
+    ffStrbufDestroy(&options->outputColor);
 }
 
 FFModuleBaseInfo ffSeparatorModuleInfo = {
