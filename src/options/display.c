@@ -897,6 +897,19 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options) {
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);
+    ffStrbufDestroy(&options->barBorderLeft);
+    ffStrbufDestroy(&options->barBorderRight);
+    ffStrbufDestroy(&options->barBorderLeftElapsed);
+    ffStrbufDestroy(&options->barBorderRightElapsed);
+    ffStrbufDestroy(&options->barColorElapsed);
+    ffStrbufDestroy(&options->barColorTotal);
+    ffStrbufDestroy(&options->barColorBorder);
+    ffStrbufDestroy(&options->tempColorGreen);
+    ffStrbufDestroy(&options->tempColorYellow);
+    ffStrbufDestroy(&options->tempColorRed);
+    ffStrbufDestroy(&options->percentColorGreen);
+    ffStrbufDestroy(&options->percentColorYellow);
+    ffStrbufDestroy(&options->percentColorRed);
     FF_LIST_FOR_EACH (FFstrbuf, item, options->constants) {
         ffStrbufDestroy(item);
     }
