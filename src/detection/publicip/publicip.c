@@ -9,8 +9,8 @@ void ffPreparePublicIp(FFPublicIPOptions* options) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
     if (*status != FF_UNINITIALIZED) {
-        fputs("Error: PublicIp module can only be used once due to internal limitations\n", stderr);
-        exit(1);
+        *status = "PublicIp module can only be used once due to internal limitations";
+        return;
     }
 
     state->timeout = options->timeout;
@@ -25,8 +25,8 @@ void ffPreparePublicIp(FFPublicIPOptions* options) {
         uint32_t hostStartIndex = ffStrbufFirstIndexS(&host, "://");
         if (hostStartIndex < host.length) {
             if (hostStartIndex != 4 || !ffStrbufStartsWithIgnCaseS(&host, "http")) {
-                fputs("Error: only http: protocol is supported. Use `Command` module with `curl` if needed\n", stderr);
-                exit(1);
+                *status = "Only http: protocol is supported. Use `Command` module with `curl` if needed";
+                return;
             }
             ffStrbufSubstrAfter(&host, hostStartIndex + (uint32_t) (strlen("://") - 1));
         }
