@@ -15,6 +15,30 @@
 #include <ctype.h>
 #include <string.h>
 
+static void printWatchHeader(uint32_t iteration) {
+    const char* timeStr = ffTimeToShortStr(ffTimeGetNow());
+    uint32_t intervalSec = instance.state.dynamicInterval / 1000;
+    uint32_t intervalMs = instance.state.dynamicInterval % 1000;
+
+    // Print a reverse-video header bar
+    if (!instance.config.display.pipe) {
+        fputs("\e[7m", stdout); // Reverse video
+    }
+
+    if (intervalMs == 0) {
+        printf(" fastfetch --watch  %s  #%u (%us)  Ctrl+C to exit ",
+            timeStr, iteration, intervalSec);
+    } else {
+        printf(" fastfetch --watch  %s  #%u (%.1fs)  Ctrl+C to exit ",
+            timeStr, iteration, (double)instance.state.dynamicInterval / 1000.0);
+    }
+
+    if (!instance.config.display.pipe) {
+        fputs("\e[0m", stdout); // Reset
+    }
+    putchar('\n');
+}
+
 [[gnu::cold]]
 static void printCommandFormatHelpJson(void) {
     yyjson_mut_doc* doc = yyjson_mut_doc_new(nullptr);
@@ -670,6 +694,14 @@ static void parseCommand(FFdata* data, char* key, char* value) {
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
         instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+    } else if (ffStrEqualsIgnCase(key, "--watch") || ffStrEqualsIgnCase(key, "-w")) {
+        if (value == nullptr) {
+            instance.state.dynamicInterval = 2000; // Default 2 seconds
+        } else if (ffOptionParseBoolean(value)) {
+            instance.state.dynamicInterval = 2000;
+        } else {
+            instance.state.dynamicInterval = ffOptionParseUInt32(key, value);
+        }
     } else {
         return;
     }
@@ -751,6 +783,7 @@ static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(F
 
 static void run(FFdata* data) {
     const bool useJsonConfig = data->structure.length == 0 && data->configDoc;
+    uint32_t watchIteration = 0;
 
     if (useJsonConfig) {
         ffPrintJsonConfig(data, true /* prepare */);
@@ -787,6 +820,8 @@ static void run(FFdata* data) {
             fflush(stdout);
             ffTimeSleep(instance.state.dynamicInterval);
             fputs("\e[H", stdout); // Move cursor to the top left corner to overwrite the previous output
+            ++watchIteration;
+            printWatchHeader(watchIteration);
             instance.state.keysHeight = 0; // Reset keysHeight so `ffLogoPrintRemaining` will recalculate it
         } else {
             break;
