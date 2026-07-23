@@ -87,6 +87,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options) {
 void ffDestroyWeatherOptions(FFWeatherOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 
+    ffStrbufDestroy(&options->location);
     ffStrbufDestroy(&options->outputFormat);
 }
 
