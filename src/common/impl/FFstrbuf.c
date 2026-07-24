@@ -410,9 +410,7 @@ bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index) {
 
     if (strbuf->allocated == 0) {
         // static string
-        if (index < strbuf->length) {
-            ffStrbufInitNS(strbuf, index, strbuf->chars);
-        }
+        ffStrbufInitNS(strbuf, index, strbuf->chars);
         return true;
     }
 
