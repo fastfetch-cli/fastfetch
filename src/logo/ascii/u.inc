@@ -208,6 +208,17 @@ static const FFlogo U[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UINXED
+    // Uinxed
+    {
+        .names = { "uinxed" },
+        .lines = FASTFETCH_DATATEXT_LOGO_UINXED,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ULTRAMARINE
     // Ultramarine
     {
