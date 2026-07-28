@@ -457,6 +457,13 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 if (clHeader) {
                     contentLength = (uint32_t) strtoul(clHeader + 15, NULL, 10);
                     if (contentLength > 0) {
+                        if (contentLength > 1024 * 1024) { // 1MB limit to prevent excessive memory allocation and potential attacks
+                            FF_DEBUG("Content-Length is too large: %u bytes, aborting", contentLength);
+                            close(state->sockfd);
+                            state->sockfd = -1;
+                            return "Content-Length too large";
+                        }
+
                         FF_DEBUG("Detected Content-Length: %u, pre-allocating buffer", contentLength);
                         // Ensure buffer is large enough, adding header size and some margin
                         ffStrbufEnsureFree(buffer, contentLength + 16);
