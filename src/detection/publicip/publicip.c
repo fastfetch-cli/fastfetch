@@ -34,9 +34,8 @@ void ffPreparePublicIp(FFPublicIPOptions* options) {
 
         FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
         if (pathStartIndex != host.length) {
-            ffStrbufAppendNS(&path, pathStartIndex, host.chars + (host.length - pathStartIndex));
-            host.length = pathStartIndex;
-            host.chars[pathStartIndex] = '\0';
+            ffStrbufAppendNS(&path, host.length - pathStartIndex, host.chars + pathStartIndex);
+            ffStrbufSubstrBefore(&host, pathStartIndex);
         }
 
         *status = ffNetworkingSendHttpRequest(state, host.chars, path.length == 0 ? "/" : path.chars, NULL);
