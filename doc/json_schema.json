@@ -912,11 +912,6 @@
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
                     "default": 5000
                 },
-                "preRun": {
-                    "type": "string",
-                    "description": "Command to run before printing logos",
-                    "default": ""
-                },
                 "detectVersion": {
                     "type": "boolean",
                     "description": "Whether to detect and display component versions. Mainly for benchmarking",
