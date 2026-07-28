@@ -1,6 +1,7 @@
 #include "common/FFstrbuf.h"
 #include "common/mallocHelper.h"
 #include "common/strutil.h"
+#include "common/debug.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -64,13 +65,24 @@ FFstrbuf ffStrbufCreateF(const char* format, ...) {
 }
 
 void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free) {
-    uint32_t allocate = strbuf->length + free;
+    uint32_t allocate;
+    if (__builtin_expect(__builtin_uadd_overflow(strbuf->length, free, &allocate), false)) {
+        FF_DEBUG("Error: Integer overflow when calculating allocation size. Aborting");
+        abort();
+    }
+
     if (allocate < FASTFETCH_STRBUF_DEFAULT_ALLOC) { // `<` for null terminator
         allocate = FASTFETCH_STRBUF_DEFAULT_ALLOC;
     } else {
+        if (__builtin_expect(allocate > (UINT32_MAX >> 1), false)) {
+            // User tried to allocate more than 2GB of memory, which exceeds the maximum size supported by FFstrbuf.
+            // This is likely an error or an attempt to exploit the program. Abort to prevent potential issues.
+            FF_DEBUG("Error: Attempted to allocate %" PRIu32 " bytes more than 2GB of memory in FFstrbuf. Aborting", allocate);
+            abort();
+        }
+
         // Round up to the next power of 2.
         // If the value is already a power of 2, it will be rounded up to the next power of 2.
-        assert(allocate < (UINT32_MAX >> 1));
         allocate = 1U << (32 - __builtin_clz(allocate));
     }
 
@@ -91,16 +103,17 @@ void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free) {
 
 // Ensure that at least `free` bytes are available in the buffer besides the current length
 // for an empty buffer, free + 1 length memory will be allocated(+1 for the NUL)
+// This function ensures a dynamic buffer is allocated even if free == 0
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free) {
-    uint32_t oldFree = ffStrbufGetFree(strbuf);
-    if (oldFree >= free && !(strbuf->allocated == 0 && strbuf->length > 0)) {
-        return;
-    }
-
-    uint32_t newCap = strbuf->allocated + (free - oldFree);
+    uint32_t newCap;
 
     if (strbuf->allocated == 0) {
-        newCap += strbuf->length + 1;
+        assert(strbuf->length < UINT32_MAX - 1); // We don't use static strings with length >= UINT32_MAX - 1, so this should never happen
+        if (__builtin_expect(__builtin_uadd_overflow(strbuf->length + 1, free, &newCap), false)) {
+            FF_DEBUG("Error: Integer overflow when calculating new capacity. Aborting");
+            abort();
+        }
+
         char* newbuf = malloc(sizeof(*strbuf->chars) * newCap);
         if (strbuf->length == 0) {
             *newbuf = '\0';
@@ -109,6 +122,15 @@ void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free) {
         }
         strbuf->chars = newbuf;
     } else {
+        uint32_t oldFree = ffStrbufGetFree(strbuf);
+        if (oldFree >= free) {
+            return;
+        }
+
+        if (__builtin_expect(__builtin_uadd_overflow(strbuf->allocated, free - oldFree, &newCap), false)) {
+            FF_DEBUG("Error: Integer overflow when calculating new capacity. Aborting");
+            abort();
+        }
         strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * newCap);
     }
 
