@@ -346,7 +346,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "No HTTP header end found";
     }
 
-    if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
+    if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n") && !ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);
         return "Invalid response";
     }
