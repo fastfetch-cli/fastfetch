@@ -223,9 +223,7 @@ static inline void ffStrbufClear(FFstrbuf* strbuf) {
 }
 
 static inline void ffStrbufAppendC(FFstrbuf* strbuf, char c) {
-    if (__builtin_expect(ffStrbufGetFree(strbuf) == 0, false)) {
-        ffStrbufEnsureFreeNoCheck(strbuf, 1);
-    }
+    ffStrbufEnsureFree(strbuf, 1);
     strbuf->chars[strbuf->length++] = c;
     strbuf->chars[strbuf->length] = '\0';
 }
@@ -234,9 +232,7 @@ static inline void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c) {
     if (__builtin_expect(num == 0, false)) {
         return;
     }
-    if (__builtin_expect(ffStrbufGetFree(strbuf) < num, false)) {
-        ffStrbufEnsureFreeNoCheck(strbuf, num);
-    }
+    ffStrbufEnsureFree(strbuf, num);
 
     memset(&strbuf->chars[strbuf->length], c, num);
     strbuf->length += num;
@@ -247,9 +243,7 @@ static inline void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const cha
     if (__builtin_expect(value == NULL || length == 0, false)) {
         return;
     }
-    if (__builtin_expect(ffStrbufGetFree(strbuf) < length, false)) {
-        ffStrbufEnsureFreeNoCheck(strbuf, length);
-    }
+    ffStrbufEnsureFree(strbuf, length);
 
     memcpy(&strbuf->chars[strbuf->length], value, length);
     strbuf->length += length;
