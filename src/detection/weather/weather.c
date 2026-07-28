@@ -7,8 +7,8 @@ static const char* status = FF_UNITIALIZED;
 
 void ffPrepareWeather(FFWeatherOptions* options) {
     if (status != FF_UNITIALIZED) {
-        status = "Weather module can only be used once due to internal limitations";
-        return;
+        fputs("Error: Weather module can only be used once due to internal limitations\n", stderr);
+        exit(1);
     }
 
     state.timeout = options->timeout;
