@@ -154,6 +154,7 @@ jobs:
     secrets: inherit
 
   haiku-amd64:
+    if: false # Disabled because the Haiku build is currently broken
     needs: no-features-test
     name: Haiku-amd64
     permissions:
@@ -207,7 +208,7 @@ jobs:
       - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
-      - haiku-amd64
+      # - haiku-amd64
       - windows-hosts
     permissions:
       contents: write
