@@ -572,6 +572,7 @@ set(LIBFASTFETCH_SRC
     src/options/display.c
     src/options/logo.c
     src/options/general.c
+    src/configtool/configtool.c
 )
 
 if(LINUX)

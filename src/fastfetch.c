@@ -10,6 +10,7 @@
 #include "common/strutil.h"
 #include "common/mallocHelper.h"
 #include "fastfetch_datatext.h"
+#include "configtool/configtool.h"
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -654,6 +655,11 @@ static void parseCommand(FFdata* data, char* key, char* value) {
         generateConfigFile(data, false, value, true);
     } else if (ffStrEqualsIgnCase(key, "--gen-config-full-force")) {
         generateConfigFile(data, true, value, true);
+    } else if (ffStrEqualsIgnCase(key, "--gen-config-tool")) {
+        generateConfigFile(data, false, value, false);
+        if (runConfigTool(data) != 0) {
+            exit(416);
+        }
     } else if (ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config")) {
         optionParseConfigFile(data, key, value);
     } else if (ffStrEqualsIgnCase(key, "-j") || ffStrEqualsIgnCase(key, "--json")) {
