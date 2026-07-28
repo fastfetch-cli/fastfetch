@@ -83,6 +83,16 @@
                 "type": "num",
                 "default": 0
             }
+        },
+        {
+            "long": "watch",
+            "short": "w",
+            "desc": "Alias of dynamic-interval, but the value is in seconds instead of milliseconds. If no value is provided, it defaults to 1 second",
+            "arg": {
+                "type": "num",
+                "optional": true,
+                "default": 1
+            }
         }
     ],
     "Config": [

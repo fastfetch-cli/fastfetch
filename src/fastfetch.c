@@ -670,6 +670,12 @@ static void parseCommand(FFdata* data, char* key, char* value) {
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
         instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+    } else if (ffStrEqualsIgnCase(key, "-w") || ffStrEqualsIgnCase(key, "--watch")) {
+        if (value == nullptr) {
+            instance.state.dynamicInterval = 1000; // default to 1 second if no value is provided
+        } else {
+            instance.state.dynamicInterval = ffOptionParseUInt32(key, value) * 1000; // seconds to milliseconds
+        }
     } else {
         return;
     }
