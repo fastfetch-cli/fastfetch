@@ -57,23 +57,22 @@ static void waylandKdeCurrentModeListener(void* data, [[maybe_unused]] struct kd
         return;
     }
 
-    int set = 0;
+    bool foundCurrent = false, foundPreferred = false;
     FF_LIST_FOR_EACH (WaylandKdeMode, m, *(FFlist*) wldata->internal) {
-        if (m->pMode == mode) {
+        if (!foundCurrent && m->pMode == mode) {
             wldata->width = m->width;
             wldata->height = m->height;
             wldata->refreshRate = m->refreshRate;
-            if (++set == 2) {
-                break;
-            }
+            foundCurrent = true;
         }
-        if (m->preferred) {
+        if (!foundPreferred && m->preferred) {
             wldata->preferredWidth = m->width;
             wldata->preferredHeight = m->height;
             wldata->preferredRefreshRate = m->refreshRate;
-            if (++set == 2) {
-                break;
-            }
+            foundPreferred = true;
+        }
+        if (foundCurrent && foundPreferred) {
+            break;
         }
     }
 }
