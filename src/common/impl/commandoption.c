@@ -9,6 +9,7 @@
 
 #include <ctype.h>
 #include <inttypes.h>
+#include <stdalign.h>
 
 bool ffParseModuleOptions(const char* key, const char* value) {
     if (!ffStrStartsWith(key, "--") || !ffCharIsEnglishAlphabet(key[2])) {
@@ -175,7 +176,7 @@ static bool parseStructureCommand(
         for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(line[0]) - 'A']; *modules; ++modules) {
             FFModuleBaseInfo* baseInfo = *modules;
             if (ffStrEqualsIgnCase(line, baseInfo->name)) {
-                uint8_t optionBuf[FF_OPTION_MAX_SIZE];
+                alignas(uint64_t) uint8_t optionBuf[FF_OPTION_MAX_SIZE];
                 baseInfo->initOptions(optionBuf);
                 if (data->resultDoc != NULL) {
                     fn(data, baseInfo, optionBuf);
