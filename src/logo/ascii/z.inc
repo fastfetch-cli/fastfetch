@@ -49,6 +49,19 @@ static const FFlogo Z[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZAKOFOXOS
+    // ZakoFoxOS
+    {
+        .names = { "ZakoFoxOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZAKOFOXOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_RED,
+        .colorTitle = FF_COLOR_FG_LIGHT_RED,
+    },
+    #endif
+
     // LAST
     {},
 };
