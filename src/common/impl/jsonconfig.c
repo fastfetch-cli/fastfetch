@@ -95,7 +95,7 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules) {
         FFModuleBaseInfo* baseInfo = *modules;
         if (ffStrEqualsIgnCase(type, baseInfo->name)) {
-            uint8_t optionBuf[FF_OPTION_MAX_SIZE];
+            alignas(uint64_t) uint8_t optionBuf[FF_OPTION_MAX_SIZE];
             baseInfo->initOptions(optionBuf);
             if (jsonVal) {
                 baseInfo->parseJsonObject(optionBuf, jsonVal);
