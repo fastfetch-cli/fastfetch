@@ -132,5 +132,6 @@ FFModuleBaseInfo ffOpenCLModuleInfo = {
         { "Platform version", "version" },
         { "Platform name", "name" },
         { "Platform vendor", "vendor" },
-    }))
+    })),
+    .defaultOrder = 56,
 };

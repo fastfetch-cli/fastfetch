@@ -573,5 +573,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Total number of all nix packages", "nix-all" },
         { "Number of all packages", "all" },
-    }))
+    })),
+    .defaultOrder = 14,
 };

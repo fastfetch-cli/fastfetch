@@ -439,5 +439,6 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         { "MTU size in bytes", "mtu" },
         { "Link speed (formatted)", "speed" },
         { "Interface flags", "flags" },
-    }))
+    })),
+    .defaultOrder = 49,
 };

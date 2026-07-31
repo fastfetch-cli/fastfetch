@@ -125,5 +125,6 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         { "Power adapter model", "model" },
         { "Power adapter description", "description" },
         { "Power adapter serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 45,
 };

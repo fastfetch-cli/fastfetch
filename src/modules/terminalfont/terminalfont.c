@@ -119,4 +119,5 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
         { "Terminal font size", "size" },
         { "Terminal font styles", "styles" },
     })),
+    .defaultOrder = 30,
 };

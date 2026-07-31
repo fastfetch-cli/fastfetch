@@ -128,4 +128,5 @@ FFModuleBaseInfo ffSeparatorModuleInfo = {
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
+    .defaultOrder = 2,
 };

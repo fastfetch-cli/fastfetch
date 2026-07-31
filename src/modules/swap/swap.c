@@ -196,5 +196,6 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         { "Percentage used (num)", "percentage" },
         { "Percentage used (bar)", "percentage-bar" },
         { "Name", "name" },
-    }))
+    })),
+    .defaultOrder = 40,
 };

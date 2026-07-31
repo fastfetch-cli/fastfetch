@@ -72,5 +72,7 @@ FFModuleBaseInfo ffProcessesModuleInfo = {
     .generateJsonResult = (void*) ffGenerateProcessesJsonResult,
     .generateJsonConfig = (void*) ffGenerateProcessesJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Process count", "result" } }))
+        { "Process count", "result" },
+    })),
+    .defaultOrder = 13,
 };

@@ -152,5 +152,6 @@ FFModuleBaseInfo ffHostModuleInfo = {
         { "Product vendor", "vendor" },
         { "Product serial number", "serial" },
         { "Product uuid", "uuid" },
-    }))
+    })),
+    .defaultOrder = 4,
 };

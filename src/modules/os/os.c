@@ -193,5 +193,6 @@ FFModuleBaseInfo ffOSModuleInfo = {
         { "Version codename of the OS", "codename" },
         { "Build ID of the OS", "build-id" },
         { "Architecture of the OS", "arch" },
-    }))
+    })),
+    .defaultOrder = 3,
 };

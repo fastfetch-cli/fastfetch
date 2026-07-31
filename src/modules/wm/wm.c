@@ -134,5 +134,6 @@ FFModuleBaseInfo ffWMModuleInfo = {
         { "WM protocol name", "protocol-name" },
         { "WM plugin name", "plugin-name" },
         { "WM version", "version" },
-    }))
+    })),
+    .defaultOrder = 22,
 };

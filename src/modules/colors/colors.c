@@ -302,4 +302,5 @@ FFModuleBaseInfo ffColorsModuleInfo = {
     .parseJsonObject = (void*) ffParseColorsJsonObject,
     .printModule = (void*) ffPrintColors,
     .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
+    .defaultOrder = 72,
 };

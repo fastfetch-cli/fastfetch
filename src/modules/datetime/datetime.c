@@ -185,5 +185,6 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         { "Locale-dependent timezone name or abbreviation", "timezone-name" },
         { "Day in month with leading zero", "day-pretty" },
         { "AM or PM", "am-pm" },
-    }))
+    })),
+    .defaultOrder = 52,
 };

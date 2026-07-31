@@ -160,5 +160,6 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Name", "name" },
         { "Serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 64,
 };

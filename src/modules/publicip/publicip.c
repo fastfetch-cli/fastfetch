@@ -121,5 +121,6 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Public IP address", "ip" },
         { "Location", "location" },
-    }))
+    })),
+    .defaultOrder = 48,
 };

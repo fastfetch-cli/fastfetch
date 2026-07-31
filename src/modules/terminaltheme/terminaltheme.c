@@ -106,5 +106,6 @@ FFModuleBaseInfo ffTerminalThemeModuleInfo = {
         { "Terminal foreground type (Dark / Light)", "fg-type" },
         { "Terminal background color", "bg-color" },
         { "Terminal background type (Dark / Light)", "bg-type" },
-    }))
+    })),
+    .defaultOrder = 32,
 };

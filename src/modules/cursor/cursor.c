@@ -112,4 +112,5 @@ FFModuleBaseInfo ffCursorModuleInfo = {
         { "Cursor theme", "theme" },
         { "Cursor size", "size" },
     })),
+    .defaultOrder = 27,
 };
