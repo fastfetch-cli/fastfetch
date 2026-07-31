@@ -92,7 +92,8 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result) {
     }
 
     // xdgConfigDirs contains plasma only
-    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop.list", FF_PATHTYPE_FILE)) {
+    // `ubuntustudio-desktop-core` is installed on both the full and core installations
+    if (ffPathExists("/var/lib/dpkg/info/ubuntustudio-desktop-core.list", FF_PATHTYPE_FILE)) {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
