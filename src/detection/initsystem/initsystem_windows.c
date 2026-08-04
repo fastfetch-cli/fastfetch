@@ -17,7 +17,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
     }
 
     for (SYSTEM_PROCESS_INFORMATION* ptr = buffer; ; ptr = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) ptr + ptr->NextEntryOffset)) {
-        assert(ptr >= buffer && (uint8_t*) ptr < (uint8_t*) buffer + size);
+        assert(ptr >= buffer && (uint8_t*) ptr < (uint8_t*) buffer + sizeof(buffer));
         uint16_t len = ptr->ImageName.Length / sizeof(*ptr->ImageName.Buffer);
         if (ptr->InheritedFromUniqueProcessId == (HANDLE)(uintptr_t) 4 /* System */ &&
             len > 4 && _wcsnicmp(ptr->ImageName.Buffer + len - 4, L".exe", 4) == 0) { // smss.exe
