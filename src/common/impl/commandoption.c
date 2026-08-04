@@ -244,11 +244,6 @@ void ffPrintCommandOption(FFdata* data) {
 }
 
 void ffMigrateCommandOptionToJsonc(FFdata* data) {
-    // If we don't have a custom structure, use the default one
-    if (data->structure.length == 0) {
-        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
-    }
-
     char* moduleType = nullptr;
     size_t moduleLen = 0;
     while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure)) {

@@ -905,6 +905,10 @@ int main(int argc, char** argv) {
     if (__builtin_expect(data.genConfigPath.length == 0, true)) {
         run(&data);
     } else {
+        // If we don't have a custom structure, use the default one
+        if (data.structure.length == 0) {
+            ffStrbufSetS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
+        }
         if (data.genConfigInteractive && !ffGenConfigInteractive(&data)) {
             // User cancelled the interactive config generation
             ffStrbufDestroy(&data.structure);

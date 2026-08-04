@@ -5,7 +5,6 @@
 #include "common/io.h"
 #include "common/strutil.h"
 #include "detection/terminalsize/terminalsize.h"
-#include "fastfetch_datatext.h"
 #include "modules/modules.h"
 
 #include <stdio.h>
@@ -195,28 +194,16 @@ static void collectModuleInfos(FFlist* modules) {
     ffListSort(modules, sizeof(FFModuleBaseInfo*), compareModuleInfo);
 }
 
-static bool isInDefaultStructure(const char* moduleName) {
-    char* moduleType = nullptr;
-    size_t moduleLen = 0;
-    FF_STRBUF_AUTO_DESTROY structure = ffStrbufCreateS(FASTFETCH_DATATEXT_STRUCTURE);
-    while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &structure)) {
-        if (moduleLen == strlen(moduleName) && ffStrEqualsIgnCase(moduleType, moduleName)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-static void initItems(FFlist* items, const FFlist* modules) {
+static void initItems(FFlist* items, const FFlist* modules, FFdata* data) {
     ffListInitA(items, sizeof(FFGenConfigItem), modules->length + 8);
     FF_LIST_FOR_EACH (FFModuleBaseInfo*, info, *modules) {
         FFGenConfigItem* item = FF_LIST_ADD(FFGenConfigItem, *items);
         item->baseInfo = *info;
-        if (ffStrEqualsIgnCase((*info)->name, FF_BREAK_MODULE_NAME) ||
-            ffStrEqualsIgnCase((*info)->name, FF_SEPARATOR_MODULE_NAME)) {
+        if (*info == &ffBreakModuleInfo || *info == &ffSeparatorModuleInfo) {
             item->status = FF_GEN_CONFIG_ITEM_STATUS_SPECIAL;
         } else {
-            item->status = isInDefaultStructure((*info)->name)
+            item->status = ffStrbufSeparatedContainIgnCaseS(&data->structure, (*info)->name, ':') &&
+                    !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, (*info)->name, ':')
                 ? FF_GEN_CONFIG_ITEM_STATUS_SELECTED
                 : FF_GEN_CONFIG_ITEM_STATUS_UNSELECTED;
         }
@@ -721,7 +708,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 
     rowInit(&row, cols);
     rowAppendRaw(&row, "\e[90m");
-    rowAppendVisual(&row, "  l logo  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
+    rowAppendVisual(&row, "  l/L logo  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
     rowAppendRaw(&row, "\e[m");
     finishRow(&row, out, ++rowCount == ui->rows);
 
@@ -973,6 +960,8 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
                 ui->cursor = ui->items.length > 0 ? ui->items.length - 1 : 0;
             } else if (ch == 'l') {
                 cycleLogoType(ui, 1);
+            } else if (ch == 'L') {
+                cycleLogoType(ui, -1);
             } else if (ch == '\x03' || ch == '\x04' || ch == '\x1a' || ch == '\x1c') {
                 return 0;
             }
@@ -1032,6 +1021,7 @@ static bool applyConfig(FFdata* data, const FFlist* items, bool fullConfig) {
     return true;
 }
 
+[[gnu::cold]]
 bool ffGenConfigInteractive(FFdata* data) {
     FF_LIST_AUTO_DESTROY modules;
     collectModuleInfos(&modules);
@@ -1046,7 +1036,7 @@ bool ffGenConfigInteractive(FFdata* data) {
         .rows = 24,
         .cols = 80,
     };
-    initItems(&ui.items, &modules);
+    initItems(&ui.items, &modules, data);
 
     getTerminalSize(&ui.rows, &ui.cols);
     enterRawMode();
