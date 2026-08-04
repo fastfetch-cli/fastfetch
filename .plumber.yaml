@@ -1,0 +1,20 @@
+# Plumber overlay: inherits every control from the CLI's built-in
+# baseline, only the differences for this repo are written here.
+# Run 'plumber config resolve' to see the full effective config.
+extends: plumber:default
+version: "2.0"
+
+github:
+  controls:
+    githubActionMustComeFromAuthorizedSources:
+      # Keep the curated default list and trust the niche platform
+      # actions this repo already relies on for its BSD, Solaris and
+      # arch-emulation builds, plus the release helpers.
+      includePlumberDefaults: true
+      trustedGithubActions:
+        - cross-platform-actions/action
+        - jirutka/setup-alpine
+        - ncipollo/release-action
+        - pozetroninc/github-action-get-latest-release
+        - uraimo/run-on-arch-action
+        - vmactions/solaris-vm
