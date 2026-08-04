@@ -18,6 +18,12 @@ on:
       msys-arch:
         required: true
         type: string
+    secrets:
+      SIGNPATH_API_TOKEN:
+        description: SignPath REST API token used to submit the signing request
+        # Optional so that runs without the secret (pull requests, forks)
+        # still work; the signing step is skipped there anyway.
+        required: false
 
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}

@@ -15,7 +15,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-no-features-test.yml
-    secrets: inherit
 
   linux-hosts:
     needs: no-features-test
@@ -34,7 +33,6 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
       runs-on: ${{ matrix.runs-on }}
-    secrets: inherit
 
   linux-i686:
     needs: no-features-test
@@ -43,7 +41,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-linux-i686.yml
-    secrets: inherit
 
   linux-armv7l:
     needs: no-features-test
@@ -52,7 +49,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-linux-armv7l.yml
-    secrets: inherit
 
   linux-loong64:
     needs: no-features-test
@@ -61,7 +57,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-linux-loong64.yml
-    secrets: inherit
 
   linux-vms:
     needs: no-features-test
@@ -78,13 +73,11 @@ jobs:
     uses: ./.github/workflows/build-linux-vms.yml
     with:
       arch: ${{ matrix.arch }}
-    secrets: inherit
 
   musl-amd64:
     needs: no-features-test
     name: Musl-amd64
     uses: ./.github/workflows/build-musl-amd64.yml
-    secrets: inherit
 
   macos-hosts:
     needs: no-features-test
@@ -103,19 +96,16 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
       runs-on: ${{ matrix.runs-on }}
-    secrets: inherit
 
   omnios-amd64:
     needs: no-features-test
     name: OmniOS-amd64
     uses: ./.github/workflows/build-omnios-amd64.yml
-    secrets: inherit
 
   solaris-amd64:
     needs: no-features-test
     name: Solaris-amd64
     uses: ./.github/workflows/build-solaris-amd64.yml
-    secrets: inherit
 
   freebsd-amd64:
     needs: no-features-test
@@ -124,7 +114,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-freebsd-amd64.yml
-    secrets: inherit
 
   openbsd-amd64:
     needs: no-features-test
@@ -133,7 +122,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-openbsd-amd64.yml
-    secrets: inherit
 
   netbsd-amd64:
     needs: no-features-test
@@ -142,7 +130,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-netbsd-amd64.yml
-    secrets: inherit
 
   dragonfly-amd64:
     needs: no-features-test
@@ -151,7 +138,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-dragonfly-amd64.yml
-    secrets: inherit
 
   haiku-amd64:
     if: false # Disabled because the Haiku build is currently broken
@@ -161,7 +147,6 @@ jobs:
       security-events: write
       contents: read
     uses: ./.github/workflows/build-haiku-amd64.yml
-    secrets: inherit
 
   windows-hosts:
     needs: no-features-test
@@ -189,7 +174,8 @@ jobs:
       msystem: ${{ matrix.msystem }}
       msystem-lower: ${{ matrix.msystem-lower }}
       msys-arch: ${{ matrix.msys-arch }}
-    secrets: inherit
+    secrets:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
@@ -215,4 +201,3 @@ jobs:
     uses: ./.github/workflows/build-release.yml
     with:
       ffversion: ${{ needs.linux-hosts.outputs.ffversion }}
-    secrets: inherit
