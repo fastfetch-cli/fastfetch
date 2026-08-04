@@ -3,6 +3,9 @@ name: Reusable No Features Test
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
 
