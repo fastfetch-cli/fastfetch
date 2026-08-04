@@ -56,7 +56,7 @@ typedef struct FFGenConfigLayout {
 
 typedef struct FFGenConfigUI {
     FFlist items; // FFGenConfigItem
-    int32_t cursor;
+    uint32_t cursor;
     uint32_t viewOffset;
     FFLogoType logoType;
     bool fullConfig;
@@ -71,10 +71,6 @@ typedef enum : uint8_t {
     FF_GEN_KEY_DOWN,
     FF_GEN_KEY_LEFT,
     FF_GEN_KEY_RIGHT,
-    FF_GEN_KEY_PAGE_UP,
-    FF_GEN_KEY_PAGE_DOWN,
-    FF_GEN_KEY_HOME,
-    FF_GEN_KEY_END,
     FF_GEN_KEY_ENTER,
     FF_GEN_KEY_ESCAPE,
     FF_GEN_KEY_CHAR,
@@ -133,7 +129,7 @@ static void enterRawMode(void) {
 
     if (GetConsoleMode(hInput, &gOriginalInputMode)) {
         DWORD newMode = gOriginalInputMode;
-        newMode &= ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+        newMode &= ~(DWORD) (ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
         newMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
         SetConsoleMode(hInput, newMode);
     }
@@ -218,7 +214,7 @@ static void moveItemDown(FFGenConfigUI* ui, uint32_t idx) {
     FFGenConfigItem tmp = items[idx];
     items[idx] = items[idx + 1];
     items[idx + 1] = tmp;
-    ui->cursor = (int32_t) (idx + 1);
+    ui->cursor = idx + 1;
 }
 
 static void moveItemUp(FFGenConfigUI* ui, uint32_t idx) {
@@ -229,7 +225,7 @@ static void moveItemUp(FFGenConfigUI* ui, uint32_t idx) {
     FFGenConfigItem tmp = items[idx];
     items[idx] = items[idx - 1];
     items[idx - 1] = tmp;
-    ui->cursor = (int32_t) (idx - 1);
+    ui->cursor = idx - 1;
 }
 
 static void removeAllBreaksSeparators(FFGenConfigUI* ui) {
@@ -239,8 +235,8 @@ static void removeAllBreaksSeparators(FFGenConfigUI* ui) {
             FF_LIST_REMOVE_AT(FFGenConfigItem, ui->items, i);
         }
     }
-    if ((uint32_t) ui->cursor >= ui->items.length && ui->items.length > 0) {
-        ui->cursor = (int32_t) ui->items.length - 1;
+    if (ui->cursor >= ui->items.length && ui->items.length > 0) {
+        ui->cursor = ui->items.length - 1;
     }
 }
 
@@ -293,11 +289,8 @@ static void recomputeView(FFGenConfigUI* ui) {
         ui->viewOffset = 0;
         return;
     }
-    if (ui->cursor < 0) {
-        ui->cursor = 0;
-    }
-    if ((uint32_t) ui->cursor >= length) {
-        ui->cursor = (int32_t) length - 1;
+    if (ui->cursor >= length) {
+        ui->cursor = length - 1;
     }
 
     uint32_t rowsPerColumn = layout->itemsPerColumn;
@@ -306,7 +299,7 @@ static void recomputeView(FFGenConfigUI* ui) {
         return;
     }
 
-    uint32_t cursorRow = (uint32_t) ui->cursor % rowsPerColumn;
+    uint32_t cursorRow = ui->cursor % rowsPerColumn;
     uint32_t pageTop = ui->viewOffset;
     if (cursorRow < pageTop) {
         pageTop = cursorRow;
@@ -676,7 +669,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
             uint32_t index = (ui->viewOffset + screenRow) + c * rowsPerColumn;
             if (screenRow < rowsPerColumn && index < length) {
                 const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, index);
-                drawItemCell(&row, startCol, layout->colWidth, item, (uint32_t) ui->cursor == index);
+                drawItemCell(&row, startCol, layout->colWidth, item, ui->cursor == index);
             } else {
                 rowPadVisual(&row, startCol + layout->colWidth);
             }
@@ -686,8 +679,8 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 
     // Row after grid: description
     rowInit(&row, cols);
-    if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-        const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, (uint32_t) ui->cursor);
+    if (ui->cursor < ui->items.length) {
+        const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, ui->cursor);
         if (item->baseInfo && item->baseInfo->description) {
             rowAppendVisual(&row, "  ");
             rowAppendRaw(&row, "\e[90m");
@@ -803,35 +796,12 @@ static FFGenConfigKey readKey(char* outChar) {
                     return FF_GEN_KEY_RIGHT;
                 case 'D':
                     return FF_GEN_KEY_LEFT;
-                case 'H':
-                    return FF_GEN_KEY_HOME;
-                case 'F':
-                    return FF_GEN_KEY_END;
-                case '~':
-                    switch (param) {
-                        case 5:
-                            return FF_GEN_KEY_PAGE_UP;
-                        case 6:
-                            return FF_GEN_KEY_PAGE_DOWN;
-                        case 7:
-                            return FF_GEN_KEY_HOME;
-                        case 8:
-                            return FF_GEN_KEY_END;
-                    }
             }
         }
         return FF_GEN_KEY_UNKNOWN;
     }
 
     if (buf[1] == 'O') {
-        if (n >= 3) {
-            switch (buf[2]) {
-                case 'H':
-                    return FF_GEN_KEY_HOME;
-                case 'F':
-                    return FF_GEN_KEY_END;
-            }
-        }
         return FF_GEN_KEY_UNKNOWN;
     }
 
@@ -843,7 +813,7 @@ static void moveCursorLeft(FFGenConfigUI* ui) {
     if (rowsPerColumn == 0) {
         return;
     }
-    if ((uint32_t) ui->cursor >= rowsPerColumn) {
+    if (ui->cursor >= rowsPerColumn) {
         ui->cursor -= rowsPerColumn;
     }
 }
@@ -853,15 +823,17 @@ static void moveCursorRight(FFGenConfigUI* ui) {
     if (rowsPerColumn == 0) {
         return;
     }
-    uint32_t newCursor = (uint32_t) ui->cursor + rowsPerColumn;
+    uint32_t newCursor = ui->cursor + rowsPerColumn;
     if (newCursor < ui->items.length) {
-        ui->cursor = (int32_t) newCursor;
+        ui->cursor = newCursor;
     }
 }
 
 static void moveCursorUp(FFGenConfigUI* ui) {
     if (ui->cursor > 0) {
         --ui->cursor;
+    } else {
+        ui->cursor = ui->items.length > 0 ? ui->items.length - 1 : 0;
     }
 }
 
@@ -869,7 +841,7 @@ static void moveCursorDown(FFGenConfigUI* ui) {
     if (ui->items.length == 0) {
         return;
     }
-    if ((uint32_t) ui->cursor + 1 < ui->items.length) {
+    if (ui->cursor + 1 < ui->items.length) {
         ++ui->cursor;
     } else {
         ui->cursor = 0;
@@ -905,27 +877,6 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
         case FF_GEN_KEY_RIGHT:
             moveCursorRight(ui);
             break;
-        case FF_GEN_KEY_PAGE_UP:
-            ui->cursor -= (int32_t) ui->layout.listRows;
-            if (ui->cursor < 0) {
-                ui->cursor = 0;
-            }
-            break;
-        case FF_GEN_KEY_PAGE_DOWN:
-            if (ui->items.length == 0) {
-                break;
-            }
-            ui->cursor += (int32_t) ui->layout.listRows;
-            if ((uint32_t) ui->cursor >= ui->items.length) {
-                ui->cursor = (int32_t) ui->items.length - 1;
-            }
-            break;
-        case FF_GEN_KEY_HOME:
-            ui->cursor = 0;
-            break;
-        case FF_GEN_KEY_END:
-            ui->cursor = ui->items.length > 0 ? (int32_t) ui->items.length - 1 : 0;
-            break;
         case FF_GEN_KEY_ENTER:
             if (fileExists) {
                 ui->confirmingOverwrite = true;
@@ -945,8 +896,8 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
                     return 1;
                 }
             } else if (ch == ' ') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    toggleItem(ui, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    toggleItem(ui, ui->cursor);
                 }
             } else if (ch == 'f') {
                 selectAllModules(ui);
@@ -959,28 +910,28 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
             } else if (ch == 'k') {
                 moveCursorUp(ui);
             } else if (ch == 'J') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    moveItemDown(ui, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    moveItemDown(ui, ui->cursor);
                 }
             } else if (ch == 'K') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    moveItemUp(ui, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    moveItemUp(ui, ui->cursor);
                 }
             } else if (ch == 'b') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    addBreakBelow(ui, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    addBreakBelow(ui, ui->cursor);
                 }
             } else if (ch == 'B') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    addSeparatorBelow(ui, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    addSeparatorBelow(ui, ui->cursor);
                 }
             } else if (ch == 'd') {
-                if (ui->cursor >= 0 && (uint32_t) ui->cursor < ui->items.length) {
-                    FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, (uint32_t) ui->cursor);
+                if (ui->cursor < ui->items.length) {
+                    FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, ui->cursor);
                     if (item->status == FF_GEN_CONFIG_ITEM_STATUS_SPECIAL) {
-                        FF_LIST_REMOVE_AT(FFGenConfigItem, ui->items, (uint32_t) ui->cursor);
-                        if ((uint32_t) ui->cursor >= ui->items.length && ui->items.length > 0) {
-                            ui->cursor = (int32_t) ui->items.length - 1;
+                        FF_LIST_REMOVE_AT(FFGenConfigItem, ui->items, ui->cursor);
+                        if (ui->cursor >= ui->items.length && ui->items.length > 0) {
+                            ui->cursor = ui->items.length - 1;
                         }
                     }
                 }
@@ -989,7 +940,7 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
             } else if (ch == 'g') {
                 ui->cursor = 0;
             } else if (ch == 'G') {
-                ui->cursor = ui->items.length > 0 ? (int32_t) ui->items.length - 1 : 0;
+                ui->cursor = ui->items.length > 0 ? ui->items.length - 1 : 0;
             } else if (ch == 'l') {
                 cycleLogoType(ui, 1);
             } else if (ch == '\x03' || ch == '\x04' || ch == '\x1a' || ch == '\x1c') {
