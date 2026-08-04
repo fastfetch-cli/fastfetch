@@ -7,6 +7,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest

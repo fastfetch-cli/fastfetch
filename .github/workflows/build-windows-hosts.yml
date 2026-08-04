@@ -25,6 +25,12 @@ on:
         # still work; the signing step is skipped there anyway.
         required: false
 
+permissions:
+  contents: read
+  # The SignPath action reads job details and downloads the unsigned
+  # artifact with the workflow token.
+  actions: read
+
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
 
