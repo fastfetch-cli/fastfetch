@@ -761,7 +761,7 @@ static FFGenConfigKey readKey(char* outChar) {
         return FF_GEN_KEY_ESCAPE;
     }
 
-    if (buf[1] == '[') {
+    if (buf[1] == '[' || buf[1] == 'O') {
         size_t i = 2;
         if (i < (size_t) n && buf[i] >= 'A' && buf[i] <= 'D') {
             switch (buf[i]) {
@@ -798,10 +798,6 @@ static FFGenConfigKey readKey(char* outChar) {
                     return FF_GEN_KEY_LEFT;
             }
         }
-        return FF_GEN_KEY_UNKNOWN;
-    }
-
-    if (buf[1] == 'O') {
         return FF_GEN_KEY_UNKNOWN;
     }
 
