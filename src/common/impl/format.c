@@ -109,7 +109,21 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 }
 
 static inline bool formatArgSet(const FFformatarg* arg) {
-    return arg->value != nullptr && ((arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) || (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) || (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) || (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0));
+    // clang-format off
+    return arg->value != nullptr && (
+        (arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) ||
+        (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) ||
+        (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) ||
+        (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0)
+    );
+    // clang-format on
 }
 
 [[maybe_unused]] static inline void normalizeArgName(FFstrbuf* dst, const char* src) {
