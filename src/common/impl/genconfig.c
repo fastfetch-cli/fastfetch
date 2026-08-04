@@ -15,6 +15,7 @@
 #ifndef _WIN32
     #include <termios.h>
     #include <poll.h>
+    #include <signal.h>
     #include <unistd.h>
 #else
     #include <windows.h>
@@ -34,6 +35,11 @@
 //  9+listRows: help line 2
 #define FF_GEN_CONFIG_LIST_TOP 7
 #define FF_GEN_CONFIG_BOTTOM_CHROME 3
+
+// Poll wait timeout (ms) while idle. A longer wait avoids frequent full-screen
+// redraws (flicker); terminal size changes redraw immediately via SIGWINCH /
+// console window-size events.
+#define FF_GEN_CONFIG_POLL_TIMEOUT 1000
 
 typedef enum : uint8_t {
     FF_GEN_CONFIG_ITEM_STATUS_UNSELECTED = false,
@@ -74,12 +80,19 @@ typedef enum : uint8_t {
     FF_GEN_KEY_ENTER,
     FF_GEN_KEY_ESCAPE,
     FF_GEN_KEY_CHAR,
+    FF_GEN_KEY_RESIZE,
     FF_GEN_KEY_UNKNOWN,
 } FFGenConfigKey;
 
 #ifndef _WIN32
 static struct termios gOriginalTermios;
 static bool gRawModeActive = false;
+static volatile sig_atomic_t gWindowResized = 0;
+
+static void onWindowResize(int sig) {
+    (void) sig;
+    gWindowResized = 1;
+}
 
 static void restoreRawMode(void) {
     if (gRawModeActive) {
@@ -106,6 +119,10 @@ static void enterRawMode(void) {
         return;
     }
     gRawModeActive = true;
+
+    struct sigaction sa = { .sa_handler = onWindowResize };
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGWINCH, &sa, nullptr);
 }
 #else
 static DWORD gOriginalInputMode;
@@ -130,7 +147,7 @@ static void enterRawMode(void) {
     if (GetConsoleMode(hInput, &gOriginalInputMode)) {
         DWORD newMode = gOriginalInputMode;
         newMode &= ~(DWORD) (ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
-        newMode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
+        newMode |= ENABLE_VIRTUAL_TERMINAL_INPUT | ENABLE_WINDOW_INPUT;
         SetConsoleMode(hInput, newMode);
     }
 
@@ -715,33 +732,47 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 
 static FFGenConfigKey readKey(char* outChar) {
 #ifndef _WIN32
+    if (gWindowResized) {
+        gWindowResized = 0;
+        return FF_GEN_KEY_RESIZE;
+    }
     struct pollfd pfd = {
         .fd = STDIN_FILENO,
         .events = POLLIN,
     };
-    if (poll(&pfd, 1, 100) <= 0) {
+    if (poll(&pfd, 1, FF_GEN_CONFIG_POLL_TIMEOUT) <= 0) {
+        if (gWindowResized) {
+            gWindowResized = 0;
+            return FF_GEN_KEY_RESIZE;
+        }
         return FF_GEN_KEY_UNKNOWN;
     }
 #else
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD waitResult = WaitForSingleObject(hInput, 100);
-    if (waitResult != WAIT_OBJECT_0) {
+    if (WaitForSingleObject(hInput, FF_GEN_CONFIG_POLL_TIMEOUT) != WAIT_OBJECT_0) {
         return FF_GEN_KEY_UNKNOWN;
     }
-    DWORD numEvents;
-    while (GetNumberOfConsoleInputEvents(hInput, &numEvents) && numEvents > 0) {
+    DWORD numEvents = 0;
+    if (GetNumberOfConsoleInputEvents(hInput, &numEvents) && numEvents > 0) {
+        bool consumed = false;
         INPUT_RECORD record;
-        DWORD read;
-        if (!PeekConsoleInput(hInput, &record, 1, &read) || read == 0) {
-            break;
+        while (numEvents > 0) {
+            DWORD n = 0;
+            if (!PeekConsoleInputW(hInput, &record, 1, &n) || n == 0) {
+                break;
+            }
+            if (record.EventType == KEY_EVENT) {
+                break; // keep key events for ffReadFDData
+            }
+            if (!ReadConsoleInputW(hInput, &record, 1, &n) || n == 0) {
+                break;
+            }
+            consumed = true;
+            --numEvents;
         }
-        if (record.EventType == KEY_EVENT && record.Event.KeyEvent.bKeyDown) {
-            break;
+        if (consumed) {
+            return FF_GEN_KEY_RESIZE;
         }
-        ReadConsoleInput(hInput, &record, 1, &read);
-    }
-    if (!GetNumberOfConsoleInputEvents(hInput, &numEvents) || numEvents == 0) {
-        return FF_GEN_KEY_UNKNOWN;
     }
 #endif
 
@@ -849,6 +880,9 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
     if (key == FF_GEN_KEY_UNKNOWN) {
         return -1;
     }
+    if (key == FF_GEN_KEY_RESIZE) {
+        return -1; // Terminal resized: redraw with new size
+    }
 
     if (ui->confirmingOverwrite) {
         if (key == FF_GEN_KEY_CHAR && (ch == 'y' || ch == 'Y')) {
@@ -943,7 +977,7 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
                 return 0;
             }
             break;
-        case FF_GEN_KEY_UNKNOWN:
+        default:
             break;
     }
     return -1;

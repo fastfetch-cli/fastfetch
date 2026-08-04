@@ -20,6 +20,7 @@
     #include <unistd.h>
 #else
     #include <windows.h>
+    #include "common/windows/nt.h"
 #endif
 
 [[gnu::cold]]
@@ -599,7 +600,11 @@ static void enableJsonOutput(FFdata* data) {
 }
 
 static void genConfigCommon(FFdata* data, const char* value) {
-    if (!getenv("NO_COLOR") && isatty(STDOUT_FILENO) && isatty(STDIN_FILENO)) {
+    if (!getenv("NO_COLOR") && isatty(STDOUT_FILENO) && isatty(STDIN_FILENO)
+        #ifdef _WIN32
+            && ffIsWindows10OrGreater()
+        #endif
+    ) {
         data->genConfigInteractive = true;
         setupGenConfigPath(data, value);
     } else {
