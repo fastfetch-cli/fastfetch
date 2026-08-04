@@ -1,3 +1,46 @@
+# 2.67.0
+
+Changes:
+* The minimum supported compiler version has been raised to GCC 13 (released on 2023-04-26) and Clang 16 (released on 2023-03-17) to accommodate the new C23 syntax used throughout the codebase. (General)
+    * As a result, building from source in Debian 12 (which only ships GCC 12 by default) is no longer supported. Users must upgrade their compiler or use the prebuilt binaries from the GitHub releases page.
+* The `general.preRun` option has been removed due to security concerns. (General)
+    * Users who relied on this option to run a command before printing output will need to move that logic to an external wrapper.
+* The `{status}` placeholder in Battery custom format is now an array type instead of a single comma-separated string. (Battery)
+    * This is a breaking change for users who print `{status}` in Lua scripts. They can use `table.concat(...)` to join the array into a single string if needed.
+* The `--gen-config-*` flags (`--gen-config-full`, `--gen-config-force`, `--gen-config-full-force`) have been removed and their functions have been merged into `--gen-config`. (Global)
+    * See features below.
+
+Features:
+* `--gen-config` now opens an interactive configuration TUI to make generating config files easier.
+    * It falls back to non-interactive generation when `$NO_COLOR` is set or when stdin/stdout is not a TTY. This behavior can also be used to disable the interactive mode.
+* Added an experimental [WebUI](https://fastfetch-cli.github.io/fastfetch-config/) ([separate project](https://github.com/fastfetch-cli/fastfetch-config)) for generating and editing configs.
+* Added `-w`/`--watch` as a seconds-based alias for `--dynamic-interval`, defaulting to 1 second when no value is provided. (#2478, Watch)
+* Added InitSystem detection on Windows, reporting the first userland process (`smss.exe`). (InitSystem, Windows)
+* Added CPU and GPU temperature detection support for Apple M5 series chips. (CPU / GPU, macOS)
+* Reported `Basic` as the Windows theme when DWM is disabled. (Theme, Windows)
+* Improved Ghostty terminal font detection performance. (#2122, TerminalFont)
+    * It now parses Ghostty directly instead of running `ghostty +show-config`.
+* Added support for a wider range of TOML config syntaxes used by Alacritty. (#2456, TerminalFont)
+
+Bugfixes:
+* Fixed a potential fish version detection error. (Shell, Linux)
+* Fixed incorrect resolution reporting when a monitor advertises multiple preferred modes. (#2481, Display, Linux)
+* Fixed connected monitors being missed when Wayland output events arrive late. (#2451, Display, Linux)
+* Fixed VP9 codec detection on macOS. (Codec, macOS)
+* Corrected Base64 encoding on big-endian hosts. (#2470)
+* Fixed invalid URL parsing in the PublicIP module. (PublicIP)
+* Correctly reported virtual GPUs on Windows. (#2461, GPU, Windows)
+* Added a size limit for network responses to prevent excessive memory usage and mitigate potential attacks. (PublicIP / Weather)
+* Fixed Ubuntu Studio Core detection (OS, Linux)
+* Relaxed the HTTP response check so that both `HTTP/1.0` and `HTTP/1.1` responses are accepted when fetching data over the network. (PublicIP / Weather)
+* Various internal cleanups and optimizations:
+    * Fixed multiple memory leaks (Separator, Camera, Codec, Display)
+    * Added integer overflow checks to the string buffer implementation
+    * Various code cleanups and compiler warning fixes
+
+Logos:
+* Removed Hypros, MagpieOS, Furreto, EmperorOS and Magix
+
 # 2.66.0
 
 Changes:
