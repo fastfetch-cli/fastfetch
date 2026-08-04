@@ -13,17 +13,17 @@ jobs:
     steps:
       - name: get latest release version
         id: get_version_release
-        uses: pozetroninc/github-action-get-latest-release@master
+        uses: pozetroninc/github-action-get-latest-release@2a61c339ea7ef0a336d1daa35ef0cb1418e7676c # v0.8.0
         with:
           repository: ${{ github.repository }}
 
       - name: download artifacts
         if: inputs.ffversion != steps.get_version_release.outputs.release
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
 
       - name: create release
         if: inputs.ffversion != steps.get_version_release.outputs.release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           tag: ${{ inputs.ffversion }}
           commit: ${{ github.sha }}
@@ -50,7 +50,7 @@ jobs:
 
       - name: update release body
         if: inputs.ffversion != steps.get_version_release.outputs.release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           tag: ${{ inputs.ffversion }}
           commit: ${{ github.sha }}
