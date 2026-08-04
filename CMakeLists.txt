@@ -434,6 +434,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/font.c
     src/common/impl/format.c
     src/common/impl/frequency.c
+    src/common/impl/genconfig.c
     src/common/impl/init.c
     src/common/impl/jsonconfig.c
     src/common/impl/library.c
