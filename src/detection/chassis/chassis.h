@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/chassis/option.h"
 
-typedef struct FFChassisResult
-{
+typedef struct FFChassisResult {
     FFstrbuf type;
     FFstrbuf serial;
     FFstrbuf vendor;

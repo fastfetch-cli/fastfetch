@@ -52,6 +52,10 @@
             "driverSpecific": true,
             "temp": true
         },
+        {
+            "type": "codec",
+            "splitGPU": true
+        },
         "memory",
         "physicalmemory",
         {

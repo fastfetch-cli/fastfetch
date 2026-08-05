@@ -4,12 +4,10 @@
 
 #include <stdlib.h>
 
-static void verify(uint64_t totalSeconds, const char* expected, int lineNo)
-{
+static void verify(uint64_t totalSeconds, const char* expected, int lineNo) {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     ffDurationAppendNum(totalSeconds, &result);
-    if (!ffStrbufEqualS(&result, expected))
-    {
+    if (!ffStrbufEqualS(&result, expected)) {
         fprintf(stderr, FASTFETCH_TEXT_MODIFIER_ERROR "[%d] %llu: expected \"%s\", got \"%s\"\n" FASTFETCH_TEXT_MODIFIER_RESET, lineNo, (unsigned long long) totalSeconds, expected, result.chars);
         exit(1);
     }
@@ -17,8 +15,7 @@ static void verify(uint64_t totalSeconds, const char* expected, int lineNo)
 
 #define VERIFY(color, expected) verify((color), (expected), __LINE__)
 
-int main(void)
-{
+int main(void) {
     // Test seconds less than 60
     VERIFY(0, "0 seconds");
     VERIFY(1, "1 second");
@@ -115,6 +112,6 @@ int main(void)
     VERIFY(60 * 60 * 24 * 100, "100d");
     VERIFY(60 * 60 * 24 * 200, "200d");
 
-    //Success
+    // Success
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

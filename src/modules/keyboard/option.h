@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/FFlist.h"
 
-typedef struct FFKeyboardOptions
-{
+typedef struct FFKeyboardOptions {
     FFModuleArgs moduleArgs;
 
     FFlist ignores; // List of FFstrbuf

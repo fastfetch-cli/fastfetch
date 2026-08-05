@@ -1,0 +1,21 @@
+name: Reusable Spellcheck
+
+on:
+  workflow_call:
+
+jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install codespell
+        shell: bash
+        run: |
+          pip3 install codespell
+          codespell --version
+
+      - name: Run Spellchecker
+        run: codespell

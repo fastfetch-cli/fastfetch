@@ -1,7 +1,7 @@
 #include "physicalmemory.h"
 #include "common/processing.h"
-#include "common/smbiosHelper.h"
-#include "common/stringUtils.h"
+#include "common/smbios.h"
+#include "common/strutil.h"
 #include "common/apple/cf_helpers.h"
 
 #import <Foundation/Foundation.h>
@@ -19,7 +19,7 @@ static void appendDevice(
     NSString* speed,
     bool ecc)
 {
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInitS(&device->type, type.UTF8String);
     ffStrbufInit(&device->formFactor);
     ffStrbufInitS(&device->locator, locator.UTF8String);
@@ -32,11 +32,12 @@ static void appendDevice(
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;
+    device->installed = true;
     device->ecc = ecc;
 
     if (size)
     {
-        char* unit = NULL;
+        char* unit = nullptr;
         device->size = strtoul(size.UTF8String, &unit, 10);
         if (*unit == ' ') ++unit;
 
@@ -51,7 +52,7 @@ static void appendDevice(
 
     if (speed)
     {
-        char* unit = NULL;
+        char* unit = nullptr;
         device->maxSpeed = (uint32_t) strtoul(speed.UTF8String, &unit, 10);
         if (*unit == ' ') ++unit;
 
@@ -61,7 +62,6 @@ static void appendDevice(
             case 'G': device->maxSpeed *= 1000; break;
             case 'K': device->maxSpeed /= 1000; break;
         }
-        device->runningSpeed = device->maxSpeed;
     }
 }
 
@@ -74,8 +74,8 @@ static const char* detectFromSystemProfiler(FFlist* result)
         "-xml",
         "-detailLevel",
         "full",
-        NULL
-    }) != NULL)
+        nullptr
+    }) != nullptr)
         return "Starting `system_profiler SPMemoryDataType -xml -detailLevel full` failed";
 
     NSArray* arr = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytes:buffer.chars length:buffer.length]
@@ -118,10 +118,10 @@ static const char* detectFromSystemProfiler(FFlist* result)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
+[[maybe_unused]] static const char* detectFromIokit(FFlist* result)
 {
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/chosen");
     if (!entryDevice)
@@ -133,7 +133,7 @@ FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
     if (!dramType || !dramSize || !dramVendor)
         return "IORegistryEntryCreateCFProperty() failed";
 
-    FFPhysicalMemoryResult* device = ffListAdd(result);
+    FFPhysicalMemoryResult* device = FF_LIST_ADD(FFPhysicalMemoryResult, *result);
     ffStrbufInit(&device->type);
     ffStrbufInit(&device->formFactor);
     ffStrbufInit(&device->locator);
@@ -143,19 +143,20 @@ FF_MAYBE_UNUSED static const char* detectFromIokit(FFlist* result)
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;
+    device->installed = true;
     device->ecc = false;
 
     ffCfStrGetString(dramType, &device->type);
     ffCfStrGetString(dramVendor, &device->vendor);
     ffCfNumGetInt64(dramSize, (int64_t*) &device->size);
-    return NULL;
+    return nullptr;
 }
 
-const char* ffDetectPhysicalMemory(FFlist* result)
+const char* ffDetectPhysicalMemory([[maybe_unused]] FFPhysicalMemoryOptions* options, FFlist* result)
 {
     #if __aarch64__
-    if (detectFromIokit(result) == NULL)
-        return NULL;
+    if (detectFromIokit(result) == nullptr)
+        return nullptr;
     #endif
 
     return detectFromSystemProfiler(result);

@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFWMOptions
-{
+typedef struct FFWMOptions {
     FFModuleArgs moduleArgs;
 
     bool detectPlugin;

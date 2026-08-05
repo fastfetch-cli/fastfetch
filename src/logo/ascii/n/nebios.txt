@@ -1,0 +1,19 @@
+     $2:ddl.                $3:O0x' 
+   $2.dddddd:              $3x00000c
+   $2:dddddddl           $3.O000000k
+    $2cdddddddo         $3.00000000c
+     $2,dddddddd.      $3:000000000.
+  $1.:  $2.dddddddd'    $3l0000000000 
+  $1:oo.  $2dddddddd;  $3.00000000000 
+  $1oooo.  $2ddddddddc  $3.000000000k 
+  $1ooooo,  $2ldddddddl   $300000000c 
+ $1.oooooo;  $2:dddddddo   $3k000000. 
+ $1'oooooooc  $2'dddddddd.  $3c00000  
+ $1:ooooooool  $2.dddddddd'  $3'0000  
+ $1ooooooooooo   $2dddddddd;  $3.00k  
+ $1oooooooooo.    $2ddddddddc  $3.0:  
+ $1ooooooooo.      $2cdddddddl      
+$1.oooooooo.        $2,dddddddo     
+$1:ooooooo.          $2.dddddddd.   
+$1loooooo.            $2.ddddddd:   
+ $1coooo                $2ldddd,    

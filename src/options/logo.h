@@ -5,8 +5,7 @@
 #define FASTFETCH_LOGO_MAX_NAMES 9
 #define FASTFETCH_LOGO_MAX_COLORS 9 // two digits would make parsing much more complicated (index 1 - 9)
 
-typedef enum __attribute__((__packed__)) FFLogoType
-{
+typedef enum FFLogoType: uint8_t {
     FF_LOGO_TYPE_AUTO,               // if something is given, first try builtin, then file. Otherwise detect logo
     FF_LOGO_TYPE_BUILTIN,            // builtin ascii art
     FF_LOGO_TYPE_SMALL,              // builtin ascii art, small version
@@ -25,15 +24,13 @@ typedef enum __attribute__((__packed__)) FFLogoType
     FF_LOGO_TYPE_NONE,               // `--logo none`, but still applies colors to the system information output (unless `--pipe` is set)
 } FFLogoType;
 
-typedef enum __attribute__((__packed__)) FFLogoPosition
-{
+typedef enum FFLogoPosition: uint8_t {
     FF_LOGO_POSITION_LEFT,
     FF_LOGO_POSITION_TOP,
     FF_LOGO_POSITION_RIGHT,
 } FFLogoPosition;
 
-typedef struct FFOptionsLogo
-{
+typedef struct FFOptionsLogo {
     FFstrbuf source;
     FFLogoType type;
     FFLogoPosition position;
@@ -43,19 +40,22 @@ typedef struct FFOptionsLogo
     uint32_t paddingTop;
     uint32_t paddingLeft;
     uint32_t paddingRight;
+    uint32_t paddingBottom;
     bool printRemaining;
     bool preserveAspectRatio;
     bool recache;
 
+#if FF_HAVE_CHAFA
     bool chafaFgOnly;
     FFstrbuf chafaSymbols;
     uint32_t chafaCanvasMode;
     uint32_t chafaColorSpace;
     uint32_t chafaDitherMode;
+#endif
 } FFOptionsLogo;
 
 void ffOptionsInitLogo(FFOptionsLogo* options);
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
 void ffOptionsDestroyLogo(FFOptionsLogo* options);
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root);
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey);
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options);

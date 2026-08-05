@@ -5,8 +5,7 @@ FFDisplayResult* ffdsAppendDisplay(
     uint32_t width,
     uint32_t height,
     double refreshRate,
-    uint32_t scaledWidth,
-    uint32_t scaledHeight,
+    uint32_t dpi,
     uint32_t preferredWidth,
     uint32_t preferredHeight,
     double preferredRefreshRate,
@@ -17,17 +16,16 @@ FFDisplayResult* ffdsAppendDisplay(
     uint64_t id,
     uint32_t physicalWidth,
     uint32_t physicalHeight,
-    const char* platformApi)
-{
-    if(width == 0 || height == 0)
-        return NULL;
+    const char* platformApi) {
+    if (width == 0 || height == 0) {
+        return nullptr;
+    }
 
-    FFDisplayResult* display = (FFDisplayResult*) ffListAdd(&result->displays);
+    FFDisplayResult* display = FF_LIST_ADD(FFDisplayResult, result->displays);
     display->width = width;
     display->height = height;
     display->refreshRate = refreshRate;
-    display->scaledWidth = scaledWidth;
-    display->scaledHeight = scaledHeight;
+    display->dpi = dpi ?: 96; // 0 means unknown
     display->preferredWidth = preferredWidth;
     display->preferredHeight = preferredHeight;
     display->preferredRefreshRate = preferredRefreshRate;
@@ -44,7 +42,7 @@ FFDisplayResult* ffdsAppendDisplay(
     display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
     display->manufactureYear = 0;
     display->manufactureWeek = 0;
-    display->serial = 0;
+    ffStrbufInit(&display->serial);
     display->drrStatus = FF_DISPLAY_DRR_STATUS_UNKNOWN;
 
     return display;
@@ -52,17 +50,17 @@ FFDisplayResult* ffdsAppendDisplay(
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer()
-{
+const FFDisplayServerResult* ffConnectDisplayServer() {
     static FFDisplayServerResult result;
-    if (result.displays.elementSize == 0)
-    {
+    static bool initialized = false;
+    if (!initialized) {
+        initialized = true;
         ffStrbufInit(&result.wmProcessName);
         ffStrbufInit(&result.wmPrettyName);
         ffStrbufInit(&result.wmProtocolName);
         ffStrbufInit(&result.deProcessName);
         ffStrbufInit(&result.dePrettyName);
-        ffListInit(&result.displays, sizeof(FFDisplayResult));
+        ffListInit(&result.displays);
         ffConnectDisplayServerImpl(&result);
     }
     return &result;

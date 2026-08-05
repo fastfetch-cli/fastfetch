@@ -3,8 +3,7 @@
 #include "common/library.h"
 #include "mtml.h"
 
-struct FFMtmlData
-{
+struct FFMtmlData {
     FF_LIBRARY_SYMBOL(mtmlDeviceCountGpuCores)
     FF_LIBRARY_SYMBOL(mtmlDeviceGetBrand)
     FF_LIBRARY_SYMBOL(mtmlDeviceGetIndex)
@@ -26,21 +25,18 @@ struct FFMtmlData
     FF_LIBRARY_SYMBOL(mtmlLibraryShutDown)
 
     bool inited;
-    MtmlLibrary *lib;
-    MtmlSystem *sys;
+    MtmlLibrary* lib;
+    MtmlSystem* sys;
 } mtmlData;
 
-FF_MAYBE_UNUSED static void shutdownMtml(void)
-{
+[[maybe_unused]] static void shutdownMtml(void) {
     mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
 }
 
-const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDriverResult result, const char *soName)
-{
+const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName) {
 #ifndef FF_DISABLE_DLOPEN
 
-    if (!mtmlData.inited)
-    {
+    if (!mtmlData.inited) {
         mtmlData.inited = true;
         FF_LIBRARY_LOAD(libmtml, "dlopen mtml failed", soName, 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libmtml, mtmlLibraryInit)
@@ -64,142 +60,151 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlMemoryGetUtilization)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlLibraryShutDown)
 
-        if (ffmtmlLibraryInit(&mtmlData.lib) != MTML_SUCCESS)
-        {
-            mtmlData.ffmtmlLibraryInitSystem = NULL;
+        if (ffmtmlLibraryInit(&mtmlData.lib) != MTML_SUCCESS) {
+            mtmlData.ffmtmlLibraryInitSystem = nullptr;
             return "mtmlLibraryInit failed";
         }
-        if (mtmlData.ffmtmlLibraryInitSystem(mtmlData.lib, &mtmlData.sys) != MTML_SUCCESS)
-        {
+        if (mtmlData.ffmtmlLibraryInitSystem(mtmlData.lib, &mtmlData.sys) != MTML_SUCCESS) {
             mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
-            mtmlData.ffmtmlLibraryInitSystem = NULL;
+            mtmlData.ffmtmlLibraryInitSystem = nullptr;
             return "mtmlLibraryInitSystem failed";
         }
         atexit(shutdownMtml);
-        libmtml = NULL; // don't close mtml
+        libmtml = nullptr; // don't close mtml
     }
 
-    if (mtmlData.ffmtmlLibraryInitSystem == NULL)
+    if (mtmlData.ffmtmlLibraryInitSystem == nullptr) {
         return "loading mtml library failed";
+    }
 
-    MtmlDevice *device = NULL;
-    if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
-    {
+    MtmlDevice* device = nullptr;
+    if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID) {
         char pciBusIdStr[32];
         snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
 
         MtmlReturn ret = mtmlData.ffmtmlLibraryInitDeviceByPciSbdf(mtmlData.lib, pciBusIdStr, &device);
-        if (ret != MTML_SUCCESS)
+        if (ret != MTML_SUCCESS) {
             return "mtmlLibraryInitDeviceByPciSbdf() failed";
-    }
-    else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID)
-    {
+        }
+    } else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID) {
         uint32_t count;
-        if (mtmlData.ffmtmlLibraryCountDevice(mtmlData.lib, &count) != MTML_SUCCESS)
+        if (mtmlData.ffmtmlLibraryCountDevice(mtmlData.lib, &count) != MTML_SUCCESS) {
             return "mtmlLibraryCountDevice() failed";
+        }
 
-        for (uint32_t i = 0; i < count; i++, device = NULL)
-        {
-            if (mtmlData.ffmtmlLibraryInitDeviceByIndex(mtmlData.lib, i, &device) != MTML_SUCCESS)
+        for (uint32_t i = 0; i < count; i++, device = nullptr) {
+            if (mtmlData.ffmtmlLibraryInitDeviceByIndex(mtmlData.lib, i, &device) != MTML_SUCCESS) {
                 continue;
+            }
 
             MtmlPciInfo pciInfo;
-            if (mtmlData.ffmtmlDeviceGetPciInfo(device, &pciInfo) != MTML_SUCCESS)
+            if (mtmlData.ffmtmlDeviceGetPciInfo(device, &pciInfo) != MTML_SUCCESS) {
                 continue;
+            }
 
             if (pciInfo.pciDeviceId != ((cond->pciDeviceId.deviceId << 16u) | cond->pciDeviceId.vendorId) ||
-                pciInfo.pciSubsystemId != cond->pciDeviceId.subSystemId)
+                pciInfo.pciSubsystemId != cond->pciDeviceId.subSystemId) {
                 continue;
+            }
 
             break;
         }
-        if (!device)
+        if (!device) {
             return "Device not found";
-    }
-    else
-    {
+        }
+    } else {
         return "Unknown condition type";
     }
 
     MtmlBrandType brand;
-    if (mtmlData.ffmtmlDeviceGetBrand(device, &brand) == MTML_SUCCESS)
-    {
-        switch (brand)
-        {
-        case MTML_BRAND_MTT:
-            *result.type = FF_GPU_TYPE_DISCRETE;
-            break;
-        default:
-            break;
+    if (mtmlData.ffmtmlDeviceGetBrand(device, &brand) == MTML_SUCCESS) {
+        switch (brand) {
+            case MTML_BRAND_MTT:
+                *result.type = FF_GPU_TYPE_DISCRETE;
+                break;
+            default:
+                break;
         }
     }
 
-    if (result.index)
-    {
+    if (result.index) {
         unsigned int value;
-        if (mtmlData.ffmtmlDeviceGetIndex(device, &value) == MTML_SUCCESS)
+        if (mtmlData.ffmtmlDeviceGetIndex(device, &value) == MTML_SUCCESS) {
             *result.index = value;
-    }
-
-    if (result.temp)
-    {
-        MtmlGpu *gpu = NULL;
-        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS)
-        {
-            uint32_t value;
-            if (mtmlData.ffmtmlGpuGetTemperature(gpu, &value) == MTML_SUCCESS)
-                *result.temp = value;
         }
     }
 
-    if (result.memory)
-    {
-        MtmlMemory *mem = NULL;
-        if (mtmlData.ffmtmlDeviceInitMemory(device, &mem) == MTML_SUCCESS)
-        {
+    if (result.temp) {
+        MtmlGpu* gpu = nullptr;
+        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
+            uint32_t value;
+            if (mtmlData.ffmtmlGpuGetTemperature(gpu, &value) == MTML_SUCCESS) {
+                *result.temp = value;
+            }
+        }
+    }
+
+    if (result.memory) {
+        MtmlMemory* mem = nullptr;
+        if (mtmlData.ffmtmlDeviceInitMemory(device, &mem) == MTML_SUCCESS) {
             unsigned long long total;
-            if (mtmlData.ffmtmlMemoryGetTotal(mem, &total) == MTML_SUCCESS)
+            if (mtmlData.ffmtmlMemoryGetTotal(mem, &total) == MTML_SUCCESS) {
                 result.memory->total = total;
+            }
 
             unsigned long long used;
-            if (mtmlData.ffmtmlMemoryGetUsed(mem, &used) == MTML_SUCCESS)
+            if (mtmlData.ffmtmlMemoryGetUsed(mem, &used) == MTML_SUCCESS) {
                 result.memory->used = used;
+            }
         }
     }
 
-    if (result.coreCount)
+    if (result.coreCount) {
         mtmlData.ffmtmlDeviceCountGpuCores(device, result.coreCount);
+    }
 
-    if (result.frequency)
-    {
-        MtmlGpu *gpu = NULL;
-        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS)
-        {
+    if (result.frequency) {
+        MtmlGpu* gpu = nullptr;
+        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
             uint32_t clockMHz;
-            if (mtmlData.ffmtmlGpuGetMaxClock(gpu, &clockMHz) == MTML_SUCCESS)
+            if (mtmlData.ffmtmlGpuGetMaxClock(gpu, &clockMHz) == MTML_SUCCESS) {
                 *result.frequency = clockMHz;
+            }
         }
     }
 
-    if (result.coreUsage)
-    {
-        MtmlGpu *gpu = NULL;
-        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS)
-        {
+    if (result.coreUsage) {
+        MtmlGpu* gpu = nullptr;
+        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
             unsigned int utilization;
-            if (mtmlData.ffmtmlGpuGetUtilization(gpu, &utilization) == MTML_SUCCESS)
+            if (mtmlData.ffmtmlGpuGetUtilization(gpu, &utilization) == MTML_SUCCESS) {
                 *result.coreUsage = utilization;
+            }
         }
     }
 
-    if (result.name)
-    {
+    if (result.name) {
         char name[MTML_DEVICE_NAME_BUFFER_SIZE];
-        if (mtmlData.ffmtmlDeviceGetName(device, name, ARRAY_SIZE(name)) == MTML_SUCCESS)
+        if (mtmlData.ffmtmlDeviceGetName(device, name, ARRAY_SIZE(name)) == MTML_SUCCESS) {
             ffStrbufSetS(result.name, name);
+        }
     }
 
-    return NULL;
+    if (result.psCurr || result.psMax) {
+        MtmlPciInfo pciInfo;
+        if (mtmlData.ffmtmlDeviceGetPciInfo(device, &pciInfo) == MTML_SUCCESS) {
+            if (result.psCurr) {
+                result.psCurr->lanes = (uint16_t) pciInfo.pciCurWidth;
+                result.psCurr->gen = (uint16_t) pciInfo.pciCurGen;
+            }
+            if (result.psMax) {
+                result.psMax->lanes = (uint16_t) pciInfo.pciMaxWidth;
+                result.psMax->gen = (uint16_t) pciInfo.pciMaxGen;
+            }
+        }
+    }
+
+    return nullptr;
 
 #else
 

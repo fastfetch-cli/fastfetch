@@ -1,0 +1,67 @@
+name: Reusable OmniOS amd64
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: cpa.sh {0}
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v7
+
+      - name: Start VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: omnios
+          version: 'r151058'
+          shell: bash
+          cpu_count: 4
+
+      - name: Show system info
+        run: |
+          uname -a
+
+      - name: Update and install dependencies
+        run: |
+          sudo pkg update --accept || true
+          sudo pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja
+
+      - name: CMake configuration
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} .
+
+      - name: CMake build
+        run: cmake --build . --verbose -j4
+
+      - name: List features
+        run: ./fastfetch --list-features
+
+      - name: Run normal
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: Run json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: Run flashfetch
+        run: time ./flashfetch
+
+      - name: Run ldd
+        run: ldd fastfetch
+
+      - name: Run tests
+        run: ctest --output-on-failure
+
+      - name: Package
+        run: |
+          echo 'set(CPACK_PACKAGE_FILE_NAME "fastfetch-omnios-amd64")' >> CPackConfig.cmake
+          cpack -V
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fastfetch-omnios-amd64
+          path: ./fastfetch-*.*

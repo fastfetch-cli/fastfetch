@@ -1,9 +1,8 @@
 #include "board.h"
 #include "common/settings.h"
-#include "common/smbiosHelper.h"
+#include "common/smbios.h"
 
-const char* ffDetectBoard(FFBoardResult* result)
-{
+const char* ffDetectBoard(FFBoardResult* result) {
     ffSettingsGetFreeBSDKenv("smbios.planar.product", &result->name);
     ffCleanUpSmbiosValue(&result->name);
     ffSettingsGetFreeBSDKenv("smbios.planar.serial", &result->serial);
@@ -12,5 +11,5 @@ const char* ffDetectBoard(FFBoardResult* result)
     ffCleanUpSmbiosValue(&result->vendor);
     ffSettingsGetFreeBSDKenv("smbios.planar.version", &result->version);
     ffCleanUpSmbiosValue(&result->version);
-    return NULL;
+    return nullptr;
 }

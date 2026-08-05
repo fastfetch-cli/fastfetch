@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFTerminalFontOptions
-{
+typedef struct FFTerminalFontOptions {
     FFModuleArgs moduleArgs;
 } FFTerminalFontOptions;
 

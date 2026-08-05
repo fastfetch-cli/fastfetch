@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/theme/option.h"
 
-typedef struct FFThemeResult
-{
+typedef struct FFThemeResult {
     FFstrbuf theme1;
     FFstrbuf theme2;
 } FFThemeResult;

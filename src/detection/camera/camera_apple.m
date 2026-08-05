@@ -8,7 +8,7 @@
 
 #ifdef MAC_OS_VERSION_14_0
 // To make fastfetch compiled on newer macOS versions runs on older ones
-AVF_EXPORT __attribute__((weak_import)) AVCaptureDeviceType const AVCaptureDeviceTypeExternal;
+[[clang::weak_import]] AVF_EXPORT AVCaptureDeviceType const AVCaptureDeviceTypeExternal;
 #endif
 
 const char* ffDetectCamera(FFlist* result)
@@ -16,7 +16,7 @@ const char* ffDetectCamera(FFlist* result)
     #ifdef MAC_OS_X_VERSION_10_15
     FF_SUPPRESS_IO(); // #822
 
-    AVCaptureDeviceType deviceType = NULL;
+    AVCaptureDeviceType deviceType = nullptr;
 
     #ifdef MAC_OS_VERSION_14_0
     // Strangely `@available(macOS 14.0, *)` doesn't work here (#1594)
@@ -26,7 +26,7 @@ const char* ffDetectCamera(FFlist* result)
             deviceType = AVCaptureDeviceTypeExternal;
     }
     #endif
-    if (deviceType == NULL)
+    if (deviceType == nullptr)
         deviceType = AVCaptureDeviceTypeExternalUnknown;
 
     AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
@@ -37,7 +37,7 @@ const char* ffDetectCamera(FFlist* result)
 
     for (AVCaptureDevice* device in session.devices)
     {
-        FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
+        FFCameraResult* camera = FF_LIST_ADD(FFCameraResult, *result);
         ffStrbufInitS(&camera->name, device.localizedName.UTF8String);
         ffStrbufInitS(&camera->vendor, device.manufacturer.UTF8String);
         ffStrbufInitS(&camera->id, device.uniqueID.UTF8String);
@@ -47,13 +47,14 @@ const char* ffDetectCamera(FFlist* result)
             case AVCaptureColorSpace_P3_D65: ffStrbufInitStatic(&camera->colorspace, "P3-D65"); break;
             case 2 /*AVCaptureColorSpace_HLG_BT2020*/: ffStrbufInitStatic(&camera->colorspace, "BT2020-HLG"); break;
             case 3 /*AVCaptureColorSpace_AppleLog*/: ffStrbufInitStatic(&camera->colorspace, "AppleLog"); break;
+            case 4 /*AVCaptureColorSpace_AppleLog2*/: ffStrbufInitStatic(&camera->colorspace, "AppleLog2"); break;
         }
 
         CMVideoDimensions size = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription);
         camera->width = size.width < 0 ? 0 : (uint32_t) size.width;
         camera->height = size.height < 0 ? 0 : (uint32_t) size.height;
     }
-    return NULL;
+    return nullptr;
     #else
     return "No support for old MacOS version";
     #endif

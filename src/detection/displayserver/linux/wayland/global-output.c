@@ -1,92 +1,112 @@
 #ifdef FF_HAVE_WAYLAND
 
-#include "wayland.h"
-#include "common/stringUtils.h"
-#include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wayland.h"
+    #include "common/strutil.h"
+    #include "xdg-output-unstable-v1-client-protocol.h"
+    #include "wp-color-management-v1-client-protocol.h"
 
-static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
-{
+static void waylandOutputModeListener(void* data, [[maybe_unused]] struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate) {
     WaylandDisplay* display = data;
 
-    if (flags & WL_OUTPUT_MODE_CURRENT)
-    {
+    if (flags & WL_OUTPUT_MODE_CURRENT) {
         display->width = width;
         display->height = height;
         display->refreshRate = refreshRate;
     }
-    if (flags & WL_OUTPUT_MODE_PREFERRED)
-    {
+    if (flags & WL_OUTPUT_MODE_PREFERRED) {
         display->preferredWidth = width;
         display->preferredHeight = height;
         display->preferredRefreshRate = refreshRate;
     }
 }
 
-static void waylandOutputScaleListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, int32_t scale)
-{
+static void waylandOutputScaleListener(void* data, [[maybe_unused]] struct wl_output* output, int32_t scale) {
     WaylandDisplay* display = data;
-    display->scale = scale;
+    display->dpi = 96 * (uint32_t) scale;
 }
 
-static void waylandOutputGeometryListener(void *data,
-    FF_MAYBE_UNUSED struct wl_output *output,
-    FF_MAYBE_UNUSED int32_t x,
-    FF_MAYBE_UNUSED int32_t y,
+static void waylandOutputDoneListener(void* data, [[maybe_unused]] struct wl_output* output) {
+    WaylandDisplay* display = data;
+    display->done = true;
+}
+
+static void waylandOutputGeometryListener(void* data,
+    [[maybe_unused]] struct wl_output* output,
+    [[maybe_unused]] int32_t x,
+    [[maybe_unused]] int32_t y,
     int32_t physical_width,
     int32_t physical_height,
-    FF_MAYBE_UNUSED int32_t subpixel,
-    FF_MAYBE_UNUSED const char *make,
-    FF_MAYBE_UNUSED const char *model,
-    int32_t transform)
-{
+    [[maybe_unused]] int32_t subpixel,
+    [[maybe_unused]] const char* make,
+    [[maybe_unused]] const char* model,
+    int32_t transform) {
     WaylandDisplay* display = data;
     display->physicalWidth = physical_width;
     display->physicalHeight = physical_height;
     display->transform = (enum wl_output_transform) transform;
 }
 
-static void handleXdgLogicalSize(void *data, FF_MAYBE_UNUSED struct zxdg_output_v1 *_, int32_t width, FF_MAYBE_UNUSED int32_t height)
-{
+static void handleXdgLogicalSize(void* data, [[maybe_unused]] struct zxdg_output_v1* _, int32_t width, [[maybe_unused]] int32_t height) {
     WaylandDisplay* display = data;
     // Seems the values are only useful when ractional scale is enabled
-    if (width < display->width)
-    {
-        display->scale = (double) display->width / width;
+    if (width < display->width) {
+        display->dpi = (uint32_t) (display->width * 96 / width);
     }
 }
 
-// Dirty hack for #477
-// The order of these callbacks MUST follow `struct wl_output_listener`
-static void* outputListener[] = {
-    waylandOutputGeometryListener, // geometry
-    waylandOutputModeListener, // mode
-    stubListener, // done
-    waylandOutputScaleListener, // scale
-    ffWaylandOutputNameListener, // name
-    ffWaylandOutputDescriptionListener, // description
-};
-static_assert(
-    sizeof(outputListener) >= sizeof(struct wl_output_listener),
-    "sizeof(outputListener) is too small. Please report it to fastfetch github issue"
-);
-
-static struct zxdg_output_v1_listener zxdgOutputListener = {
-    .logical_position = (void*) stubListener,
-    .logical_size = handleXdgLogicalSize,
-    .done = (void*) stubListener,
+static struct wl_output_listener outputListener = {
+    .geometry = waylandOutputGeometryListener,
+    .mode = waylandOutputModeListener,
+    .done = waylandOutputDoneListener,
+    .scale = waylandOutputScaleListener,
     .name = (void*) ffWaylandOutputNameListener,
     .description = (void*) ffWaylandOutputDescriptionListener,
 };
 
-const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
-{
-    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
-    if(output == NULL)
+static struct zxdg_output_v1_listener zxdgOutputListener = {
+    .logical_position = (void*) ffUnused,
+    .logical_size = handleXdgLogicalSize,
+    .done = (void*) ffUnused,
+    .name = (void*) ffWaylandOutputNameListener,
+    .description = (void*) ffWaylandOutputDescriptionListener,
+};
+
+static void handleWpTfNamed(void *data, [[maybe_unused]] struct wp_image_description_info_v1* wp_image_description_info_v1, uint32_t tf) {
+    // KDE reports `gamma 2.2` even in HDR mode, but it should be handled in KDE specific path
+    WaylandDisplay* display = data;
+    switch (tf) {
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ:
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_HLG:
+            display->hdrInfoAvailable = true;
+            display->hdrEnabled = true;
+            break;
+    }
+}
+
+static const struct wp_image_description_info_v1_listener wpImageDescInfoListener = {
+    .done = (void*) ffUnused,
+    .icc_file = (void*) ffUnused,
+    .primaries = (void*) ffUnused,
+    .primaries_named = (void*) ffUnused,
+    .tf_power = (void*) ffUnused,
+    .tf_named = (void*) handleWpTfNamed,
+    .luminances = (void*) ffUnused,
+    .target_primaries = (void*) ffUnused,
+    .target_luminance = (void*) ffUnused,
+    .target_max_cll = (void*) ffUnused,
+    .target_max_fall = (void*) ffUnused,
+};
+
+const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
+    const char* api = "wayland-base";
+    uint32_t bindVersion = min(version, WL_OUTPUT_DESCRIPTION_SINCE_VERSION);
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wl_output_interface, bindVersion, name, wl_output_interface.name, bindVersion, nullptr);
+    if (output == nullptr) {
         return "Failed to create wl_output";
+    }
 
     WaylandDisplay display = {
         .parent = wldata,
-        .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
         .name = ffStrbufCreate(),
@@ -94,33 +114,60 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
         .edidName = ffStrbufCreate(),
     };
 
-    if (wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display) < 0)
-    {
+    if (wldata->ffwl_proxy_add_listener(output, (void (**)(void)) &outputListener, &display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to add listener to wl_output";
     }
-    if (wldata->ffwl_display_roundtrip(wldata->display) < 0)
-    {
+    if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip wl_output";
     }
+    if (bindVersion >= WL_OUTPUT_DONE_SINCE_VERSION && !display.done) {
+        const char* error = ffWaylandWaitForDone(&display);
+        if (error) {
+            wldata->ffwl_proxy_destroy(output);
+            return error;
+        }
+    }
 
-    if (wldata->zxdgOutputManager)
-    {
-        struct wl_proxy* zxdgOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->zxdgOutputManager, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, version, NULL, output);
+    if (wldata->zxdgOutputManager) {
+        uint32_t bindVersion = min(version, ZXDG_OUTPUT_V1_DESCRIPTION_SINCE_VERSION);
+        struct wl_proxy* zxdgOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->zxdgOutputManager, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, bindVersion, nullptr, output);
 
-        if (zxdgOutput)
-        {
-            wldata->ffwl_proxy_add_listener(zxdgOutput, (void(**)(void)) &zxdgOutputListener, &display);
+        if (zxdgOutput) {
+            wldata->ffwl_proxy_add_listener(zxdgOutput, (void (**)(void)) &zxdgOutputListener, &display);
             wldata->ffwl_display_roundtrip(wldata->display);
             wldata->ffwl_proxy_destroy(zxdgOutput);
+            api = "wayland-zxdg";
+        }
+    }
+
+    if (wldata->wpColorManager) {
+        uint32_t bindVersion = min(version, WP_COLOR_MANAGER_V1_GET_OUTPUT_SINCE_VERSION);
+        struct wl_proxy* wpColorOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->wpColorManager, WP_COLOR_MANAGER_V1_GET_OUTPUT, &wp_color_management_output_v1_interface, bindVersion, nullptr, output);
+
+        if (wpColorOutput) {
+            struct wl_proxy* wpImageDesc = wldata->ffwl_proxy_marshal_constructor_versioned(wpColorOutput, WP_COLOR_MANAGEMENT_OUTPUT_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, bindVersion, nullptr);
+            if (wpImageDesc) {
+                struct wl_proxy* wpImageDescInfo = wldata->ffwl_proxy_marshal_constructor_versioned(wpImageDesc, WP_IMAGE_DESCRIPTION_V1_GET_INFORMATION, &wp_image_description_info_v1_interface, bindVersion, nullptr);
+                if (wpImageDescInfo) {
+                    wldata->ffwl_proxy_add_listener(wpImageDescInfo, (void (**)(void)) &wpImageDescInfoListener, &display);
+                    wldata->ffwl_display_roundtrip(wldata->display);
+                    wldata->ffwl_proxy_destroy(wpImageDescInfo);
+                }
+                wldata->ffwl_proxy_destroy(wpImageDesc);
+            }
+            wldata->ffwl_proxy_destroy(wpColorOutput);
+            wldata->ffwl_display_roundtrip(wldata->display);
+            api = api[strlen("wayland-")] == 'z' ? "wayland-zxdg+wpcolor" : "wayland-wpcolor";
         }
     }
 
     wldata->ffwl_proxy_destroy(output);
 
-    if(display.width <= 0 || display.height <= 0)
+    if (display.width <= 0 || display.height <= 0) {
         return "Failed to get display information from wl_output";
+    }
 
     uint32_t rotation = ffWaylandHandleRotation(&display);
 
@@ -128,8 +175,7 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
-        (uint32_t) (display.width / display.scale + .5),
-        (uint32_t) (display.height / display.scale + .5),
+        display.dpi,
         (uint32_t) display.preferredWidth,
         (uint32_t) display.preferredHeight,
         display.preferredRefreshRate / 1000.0,
@@ -138,45 +184,59 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
             ? &display.edidName
             // Try ignoring `eDP-1-unknown`, where `unknown` is localized
             : display.description.length && !ffStrbufContain(&display.description, &display.name)
-                ? &display.description
-                : &display.name,
+            ? &display.description
+            : &display.name,
         display.type,
         false,
         display.id,
         (uint32_t) display.physicalWidth,
         (uint32_t) display.physicalHeight,
-        "wayland-global"
-    );
-    if (item)
-    {
-        if (display.hdrSupported)
+        api);
+    if (item) {
+        if (display.hdrEnabled) {
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+        } else if (display.hdrSupported) {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
-        else if (display.hdrInfoAvailable)
+        } else if (display.hdrInfoAvailable) {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-        else
+        } else {
             item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+        }
 
         item->manufactureYear = display.myear;
         item->manufactureWeek = display.mweek;
-        item->serial = display.serial;
+        ffStrbufInitMove(&item->serial, &display.serial);
     }
 
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
 
-    return NULL;
+    return nullptr;
 }
 
-const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
-{
-    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, version, name, zxdg_output_manager_v1_interface.name, version, NULL);
-    if(manager == NULL)
+const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
+    uint32_t bindVersion = min(version, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT_SINCE_VERSION);
+    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, bindVersion, name, zxdg_output_manager_v1_interface.name, bindVersion, nullptr);
+    if (manager == nullptr) {
         return "Failed to create zxdg_output_manager_v1";
+    }
 
     wldata->zxdgOutputManager = manager;
 
-    return NULL;
+    return nullptr;
+}
+
+const char* ffWaylandHandleWpColor(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
+    uint32_t bindVersion = min(version, WP_COLOR_MANAGER_V1_GET_OUTPUT_SINCE_VERSION);
+    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &wp_color_manager_v1_interface, bindVersion, name, wp_color_manager_v1_interface.name, bindVersion, nullptr);
+    if (manager == nullptr) {
+        return "Failed to create wp_color_manager_v1";
+    }
+
+    wldata->wpColorManager = manager;
+
+    return nullptr;
 }
 
 #endif

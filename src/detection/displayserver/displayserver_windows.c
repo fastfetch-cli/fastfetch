@@ -1,42 +1,39 @@
 #include "displayserver.h"
-#include "common/windows/unicode.h"
 #include "common/edidHelper.h"
+#include "common/windows/registry.h"
+#include "common/windows/unicode.h"
 
 #include <windows.h>
 #include <shellscalingapi.h>
+
+static inline void freeArgBuffer(FFArgBuffer* buffer) {
+    if (buffer->data) {
+        free(buffer->data);
+    }
+    buffer->data = nullptr;
+    buffer->length = 0;
+}\
 
 // http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
 BOOL WINAPI IsThreadDesktopComposited();
 BOOL WINAPI GetDpiForMonitorInternal(HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY);
 
-static void detectDisplays(FFDisplayServerResult* ds)
-{
+static void detectDisplays(FFDisplayServerResult* ds) {
     DISPLAYCONFIG_PATH_INFO paths[128];
     uint32_t pathCount = ARRAY_SIZE(paths);
     DISPLAYCONFIG_MODE_INFO modes[256];
     uint32_t modeCount = ARRAY_SIZE(modes);
 
     if (QueryDisplayConfig(
-        QDC_ONLY_ACTIVE_PATHS,
-        &pathCount,
-        paths,
-        &modeCount,
-        modes,
-        NULL) == ERROR_SUCCESS)
-    {
-        for (uint32_t i = 0; i < pathCount; ++i)
-        {
+            QDC_ONLY_ACTIVE_PATHS,
+            &pathCount,
+            paths,
+            &modeCount,
+            modes,
+            nullptr) == ERROR_SUCCESS) {
+        for (uint32_t i = 0; i < pathCount; ++i) {
             const DISPLAYCONFIG_PATH_INFO* path = &paths[i];
             const DISPLAYCONFIG_SOURCE_MODE* sourceMode = &modes[path->sourceInfo.modeInfoIdx].sourceMode;
-
-            DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName = {
-                .header = {
-                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
-                    .size = sizeof(sourceName),
-                    .adapterId = path->sourceInfo.adapterId,
-                    .id = path->sourceInfo.id,
-                },
-            };
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
             uint32_t physicalWidth = 0, physicalHeight = 0;
@@ -49,40 +46,34 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     .id = path->targetInfo.id,
                 },
             };
-            uint8_t edidData[1024];
-            DWORD edidLength = 0;
-
-            if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
-            {
+            [[gnu::cleanup(freeArgBuffer)]] FFArgBuffer edid = {};
+            if (DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS) {
                 wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
                 wchar_t* pRegPath = regPath + strlen("SYSTEM\\CurrentControlSet\\Enum");
                 wchar_t* pDevPath = targetName.monitorDevicePath + strlen("\\\\?");
-                while (*pDevPath && *pDevPath != L'{')
-                {
-                    if (*pDevPath == L'#')
+                while (*pDevPath && *pDevPath != L'{') {
+                    if (*pDevPath == L'#') {
                         *pRegPath = L'\\';
-                    else
+                    } else {
                         *pRegPath = *pDevPath;
+                    }
                     ++pRegPath;
                     ++pDevPath;
                     assert(pRegPath < regPath + ARRAY_SIZE(regPath) + strlen("Device Parameters"));
                 }
                 wcscpy(pRegPath, L"Device Parameters");
 
-                edidLength = ARRAY_SIZE(edidData);
-                if (RegGetValueW(HKEY_LOCAL_MACHINE, regPath, L"EDID", RRF_RT_REG_BINARY, NULL, edidData, &edidLength) == ERROR_SUCCESS &&
-                    edidLength > 0 && edidLength % 128 == 0)
-                {
-                    ffEdidGetName(edidData, &name);
-                    ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
-                }
-                else
-                {
-                    edidLength = 0;
-                    if (targetName.flags.friendlyNameFromEdid)
+                FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, nullptr) &&
+                    ffRegReadData(hKey, L"EDID", &edid, nullptr) &&
+                    ffEdidIsValid(edid.data, edid.length)) {
+                    ffEdidGetName(edid.data, &name);
+                    ffEdidGetPhysicalSize(edid.data, &physicalWidth, &physicalHeight);
+                } else {
+                    edid.length = 0;
+                    if (targetName.flags.friendlyNameFromEdid) {
                         ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
-                    else
-                    {
+                    } else {
                         ffStrbufSetWS(&name, targetName.monitorDevicePath);
                         ffStrbufSubstrAfterFirstC(&name, '#');
                         ffStrbufSubstrBeforeFirstC(&name, '#');
@@ -92,24 +83,20 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             uint32_t width = sourceMode->width;
             uint32_t height = sourceMode->height;
-            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
-                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270)
-            {
-                uint32_t temp = width;
-                width = height;
-                height = temp;
-                temp = physicalWidth;
-                physicalWidth = physicalHeight;
-                physicalHeight = temp;
-            }
-
             uint32_t rotation;
-            switch (path->targetInfo.rotation)
-            {
-                case DISPLAYCONFIG_ROTATION_ROTATE90: rotation = 90; break;
-                case DISPLAYCONFIG_ROTATION_ROTATE180: rotation = 180; break;
-                case DISPLAYCONFIG_ROTATION_ROTATE270: rotation = 270; break;
-                default: rotation = 0; break;
+            switch (path->targetInfo.rotation) {
+                case DISPLAYCONFIG_ROTATION_ROTATE90:
+                    rotation = 90;
+                    break;
+                case DISPLAYCONFIG_ROTATION_ROTATE180:
+                    rotation = 180;
+                    break;
+                case DISPLAYCONFIG_ROTATION_ROTATE270:
+                    rotation = 270;
+                    break;
+                default:
+                    rotation = 0;
+                    break;
             }
 
             DISPLAYCONFIG_TARGET_PREFERRED_MODE preferredMode = {
@@ -121,53 +108,53 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             };
             double preferredRefreshRate = 0;
-            if (DisplayConfigGetDeviceInfo(&preferredMode.header) == ERROR_SUCCESS)
-            {
+            if (DisplayConfigGetDeviceInfo(&preferredMode.header) == ERROR_SUCCESS) {
                 DISPLAYCONFIG_RATIONAL freq = preferredMode.targetMode.targetVideoSignalInfo.vSyncFreq;
                 preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
             }
 
             uint32_t systemDpi = 0;
-            HMONITOR hMonitor = MonitorFromPoint(*(POINT*)&sourceMode->position, MONITOR_DEFAULTTONULL);
-            if (hMonitor)
-            {
+            HMONITOR hMonitor = MonitorFromPoint(*(POINT*) &sourceMode->position, MONITOR_DEFAULTTONULL);
+            if (hMonitor) {
                 UINT ignored;
                 GetDpiForMonitorInternal(hMonitor, MDT_EFFECTIVE_DPI, &systemDpi, &ignored);
             }
 
-            if (systemDpi == 0)
-            {
-                HDC hdc = GetDC(NULL);
+            if (systemDpi == 0) {
+                HDC hdc = GetDC(nullptr);
                 systemDpi = (uint32_t) GetDeviceCaps(hdc, LOGPIXELSX);
-                if (systemDpi == 0) systemDpi = 96;
-                ReleaseDC(NULL, hdc);
+                if (systemDpi == 0) {
+                    systemDpi = 96;
+                }
+                ReleaseDC(nullptr, hdc);
+            }
+
+            if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||
+                path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE270) {
+                uint32_t temp = width;
+                width = height;
+                height = temp;
             }
 
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
-                width * 96 / systemDpi,
-                height * 96 / systemDpi,
+                systemDpi,
                 preferredMode.width,
                 preferredMode.height,
                 preferredRefreshRate,
                 rotation,
                 &name,
-                path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER ? FF_DISPLAY_TYPE_UNKNOWN :
-                    path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL ||
-                    path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED ||
-                    path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
-                    ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
+                path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER ? FF_DISPLAY_TYPE_UNKNOWN : path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL || path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_EMBEDDED || path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED ? FF_DISPLAY_TYPE_BUILTIN
+                                                                                                                                                                                                                                                                                                                                                                                       : FF_DISPLAY_TYPE_EXTERNAL,
                 sourceMode->position.x == 0 && sourceMode->position.y == 0,
-                path->sourceInfo.id,
+                (uintptr_t) hMonitor,
                 physicalWidth,
                 physicalHeight,
-                "GDI"
-            );
+                "GDI");
 
-            if (display)
-            {
+            if (display) {
                 DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO_2 advColorInfo2 = {
                     .header = {
                         .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO_2,
@@ -176,18 +163,16 @@ static void detectDisplays(FFDisplayServerResult* ds)
                         .id = path->targetInfo.id,
                     }
                 };
-                if (DisplayConfigGetDeviceInfo(&advColorInfo2.header) == ERROR_SUCCESS)
-                {
-                    if (advColorInfo2.highDynamicRangeUserEnabled)
+                if (DisplayConfigGetDeviceInfo(&advColorInfo2.header) == ERROR_SUCCESS) {
+                    if (advColorInfo2.highDynamicRangeUserEnabled) {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
-                    else if (advColorInfo2.highDynamicRangeSupported)
+                    } else if (advColorInfo2.highDynamicRangeSupported) {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
-                    else
+                    } else {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+                    }
                     display->bitDepth = (uint8_t) advColorInfo2.bitsPerColorChannel;
-                }
-                else
-                {
+                } else {
                     DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO advColorInfo = {
                         .header = {
                             .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
@@ -196,36 +181,34 @@ static void detectDisplays(FFDisplayServerResult* ds)
                             .id = path->targetInfo.id,
                         }
                     };
-                    if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
-                    {
-                        if (advColorInfo.advancedColorEnabled)
+                    if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS) {
+                        if (advColorInfo.advancedColorEnabled) {
                             display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
-                        else if (advColorInfo.advancedColorSupported)
+                        } else if (advColorInfo.advancedColorSupported) {
                             display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
-                        else
+                        } else {
                             display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+                        }
                         display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
-                    }
-                    else
+                    } else {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+                    }
                 }
-                if (edidLength > 0)
-                    ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
+                if (edid.length > 0) {
+                    ffEdidGetManufactureDate(edid.data, &display->manufactureYear, &display->manufactureWeek);
+                    ffEdidGetSerial(edid.data, &display->serial);
+                }
                 display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }
         }
     }
 }
 
-void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
-{
-    if (IsThreadDesktopComposited())
-    {
+void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
+    if (IsThreadDesktopComposited()) {
         ffStrbufSetStatic(&ds->wmProcessName, "dwm.exe");
         ffStrbufSetStatic(&ds->wmPrettyName, "Desktop Window Manager");
-    }
-    else
-    {
+    } else {
         // `explorer.exe` only provides a subset of WM functions, as well as the taskbar and desktop icons.
         // While a window itself is drawn by kernel (GDI). Killing `explorer.exe` won't affect how windows are displayed generally.
         ffStrbufSetStatic(&ds->wmProcessName, "explorer.exe");

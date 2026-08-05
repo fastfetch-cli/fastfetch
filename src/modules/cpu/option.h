@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCPUOptions
-{
+typedef struct FFCPUOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf tempSensor;

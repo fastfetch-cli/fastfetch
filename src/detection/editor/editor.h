@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/editor/option.h"
 
-typedef struct FFEditorResult
-{
+typedef struct FFEditorResult {
     const char* type;
     FFstrbuf name;
     FFstrbuf exe;

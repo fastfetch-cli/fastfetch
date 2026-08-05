@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFLoadavgOptions
-{
+typedef struct FFLoadavgOptions {
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;

@@ -1,9 +1,8 @@
 #include "libc.h"
 
-const char* ffDetectLibc(FFLibcResult* result)
-{
+const char* ffDetectLibc(FFLibcResult* result) {
     result->name = "Unknown";
-    result->version = NULL;
+    result->version = nullptr;
 
 #ifdef __DragonFly__ // We define `__FreeBSD__` on DragonFly BSD for simplification
     result->name = "DF";
@@ -17,5 +16,5 @@ const char* ffDetectLibc(FFLibcResult* result)
     #endif
 #endif
 
-    return NULL;
+    return nullptr;
 }

@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFBluetoothOptions
-{
+typedef struct FFBluetoothOptions {
     FFModuleArgs moduleArgs;
 
     bool showDisconnected;

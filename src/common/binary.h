@@ -11,7 +11,7 @@
  * @param userdata User-provided data passed to the callback function
  * @param minLength Minimum length of strings to extract
  *
- * @return NULL on success, error message on failure.
+ * @return nullptr on success, error message on failure.
  * @note This function won't return an error if no strings are found.
  *       Always check if strings are correctly extracted after this function all.
  */

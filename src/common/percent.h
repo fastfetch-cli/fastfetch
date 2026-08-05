@@ -4,20 +4,17 @@
 #include "common/parsing.h"
 #include "common/option.h"
 
-typedef enum __attribute__((__packed__)) FFPercentageTypeFlags
-{
+typedef enum FFPercentageTypeFlags: uint8_t {
     FF_PERCENTAGE_TYPE_NONE = 0,
     FF_PERCENTAGE_TYPE_NUM_BIT = 1 << 0,
     FF_PERCENTAGE_TYPE_BAR_BIT = 1 << 1,
     FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT = 1 << 2,
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
     FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT = 1 << 4,
-    FF_PERCENTAGE_TYPE_FORCE_UNSIGNED_ = UINT8_MAX,
 } FFPercentageTypeFlags;
 static_assert(sizeof(FFPercentageTypeFlags) == 1, "");
 
-typedef struct FFPercentageModuleConfig
-{
+typedef struct FFPercentageModuleConfig {
     uint8_t green;
     uint8_t yellow;
     FFPercentageTypeFlags type;

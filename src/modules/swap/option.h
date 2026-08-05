@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFSwapOptions
-{
+typedef struct FFSwapOptions {
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;

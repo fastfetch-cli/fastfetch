@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFNetIOOptions
-{
+typedef struct FFNetIOOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;

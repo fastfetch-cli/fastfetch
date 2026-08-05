@@ -3,36 +3,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-void* ffListAdd(FFlist* list)
-{
-    if(list->length == list->capacity)
-    {
-        list->capacity = list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2;
-        // realloc(NULL, newSize) is same as malloc(newSize)
-        list->data = realloc(list->data, (size_t)list->capacity * list->elementSize);
+bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result) {
+    if (list->length == 0) {
+        return false;
     }
 
-    ++list->length;
-    return ffListGet(list, list->length - 1);
-}
-
-bool ffListShift(FFlist* list, void* result)
-{
-    if(list->length == 0)
-        return false;
-
-    memcpy(result, list->data, list->elementSize);
-    memmove(list->data, list->data + list->elementSize, (size_t) list->elementSize * (list->length - 1));
+    memcpy(result, list->data, elementSize);
+    memmove(list->data, list->data + elementSize, (size_t) elementSize * (list->length - 1));
     --list->length;
     return true;
 }
 
-bool ffListPop(FFlist* list, void* result)
-{
-    if(list->length == 0)
+bool ffListPop(FFlist* list, uint32_t elementSize, void* __restrict result) {
+    if (list->length == 0) {
         return false;
+    }
 
-    memcpy(result, ffListGet(list, list->length - 1), list->elementSize);
+    memcpy(result, ffListGet(list, elementSize, list->length - 1), elementSize);
     --list->length;
     return true;
 }

@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/uptime/option.h"
 
-typedef struct FFUptimeResult
-{
+typedef struct FFUptimeResult {
     uint64_t bootTime;
     uint64_t uptime;
 } FFUptimeResult;

@@ -2,8 +2,7 @@
 // https://github.com/NVIDIA/nvapi (MIT License)
 // https://github.com/deathcamp/NVOC/blob/master/nvoc.c (Public Domain)
 
-typedef enum NvApiGPUMemoryType
-{
+typedef enum NvApiGPUMemoryType {
     NVAPI_GPU_MEMORY_TYPE_UNKNOWN = 0,
     NVAPI_GPU_MEMORY_TYPE_SDRAM,
     NVAPI_GPU_MEMORY_TYPE_DDR1,
@@ -23,18 +22,16 @@ typedef enum NvApiGPUMemoryType
     NVAPI_GPU_MEMORY_TYPE_GDDR7,
 } NvApiGPUMemoryType;
 
-typedef enum
-{
-    NV_SYSTEM_TYPE_GPU_UNKNOWN     = 0,
-    NV_SYSTEM_TYPE_IGPU            = 1, // Integrated
-    NV_SYSTEM_TYPE_DGPU            = 2, // Discrete
+typedef enum {
+    NV_SYSTEM_TYPE_GPU_UNKNOWN = 0,
+    NV_SYSTEM_TYPE_IGPU = 1, // Integrated
+    NV_SYSTEM_TYPE_DGPU = 2, // Discrete
 } NvApiGPUType;
 
 typedef int NvAPI_Status; // 0 = success; < 0 = error
 typedef struct NvPhysicalGpuHandle* NvPhysicalGpuHandle;
 
-typedef enum
-{
+typedef enum {
     NVAPI_INTERFACE_OFFSET_INITIALIZE = 0x0150E828,
     NVAPI_INTERFACE_OFFSET_UNLOAD = 0xD22BDD7E,
     NVAPI_INTERFACE_OFFSET_ENUM_PHYSICAL_GPUS = 0xE5AC921F,

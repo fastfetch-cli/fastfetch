@@ -5,15 +5,14 @@
     #include <IOKit/IOKitLib.h>
 #endif
 
-const char* ffDetectTPM(FFTPMResult* result)
-{
-    #ifdef __aarch64__
+const char* ffDetectTPM(FFTPMResult* result) {
+#ifdef __aarch64__
 
     ffStrbufSetStatic(&result->version, "2.0");
     ffStrbufSetStatic(&result->description, "Apple Silicon Security");
-    return NULL;
+    return nullptr;
 
-    #else
+#else
 
     FF_IOOBJECT_AUTO_RELEASE io_service_t t2Service = IOServiceGetMatchingService(
         MACH_PORT_NULL,
@@ -22,10 +21,10 @@ const char* ffDetectTPM(FFTPMResult* result)
     if (t2Service) {
         ffStrbufSetStatic(&result->version, "2.0");
         ffStrbufSetStatic(&result->description, "Apple T2 Security Chip");
-        return NULL;
+        return nullptr;
     }
 
-    #endif
+#endif
 
     return "No Apple Security hardware detected";
 }

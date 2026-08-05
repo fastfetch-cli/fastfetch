@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCommandOptions
-{
+typedef struct FFCommandOptions {
     FFModuleArgs moduleArgs;
 
     FFstrbuf shell;

@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/cursor/option.h"
 
-typedef struct FFCursorResult
-{
+typedef struct FFCursorResult {
     FFstrbuf theme;
     FFstrbuf size;
     FFstrbuf error;

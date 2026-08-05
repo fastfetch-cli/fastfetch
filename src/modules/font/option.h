@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFFontOptions
-{
+typedef struct FFFontOptions {
     FFModuleArgs moduleArgs;
 } FFFontOptions;
 

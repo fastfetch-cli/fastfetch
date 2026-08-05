@@ -6,16 +6,31 @@ body:
   - type: markdown
     attributes:
       value: |
-        Tip: You can display a logo in fastfetch without adding it to fastfetch's official repo.
+        > [!WARNING]
+        > **NB:** If your logo request does not meet the basic requirements outlined in this template, the issue may be closed at any time without any further explanation.
+
+        **Tip:** You can display a logo in fastfetch without adding it to fastfetch's official repo.
         For highly customized, personal logos, we recommend keeping them locally.
-        Please refer to https://github.com/fastfetch-cli/fastfetch/wiki/Migrate-Neofetch-Logo-To-Fastfetch
+        You can test your logo locally using:
+        `fastfetch -l /path/to/logo.txt --logo-color-1 white --logo-color-2 red`
+        Please refer to the [Migration Guide](https://github.com/fastfetch-cli/fastfetch/wiki/Migrate-Neofetch-Logo-To-Fastfetch) for details on color placeholders (`$1`, `$2`, etc.).
+
   - type: textarea
     attributes:
       label: OS
-      description: Paste the contents of `/etc/os-release` and `/etc/lsb-release` here. If neither file exists, describe how to identify the distro.
+      description: Paste the contents of `/etc/os-release` (specifically the `ID` and `PRETTY_NAME` fields). If neither file exists, describe how to identify the distro.
       placeholder: cat /etc/os-release
     validations:
       required: true
+
+  - type: input
+    attributes:
+      label: Public repository URL
+      description: A public repository is required to verify the request. Please provide a link to the repository where the distro is developed.
+      placeholder: https://github.com/example/distro
+    validations:
+      required: true
+
   - type: input
     attributes:
       label: Distro Website
@@ -23,25 +38,35 @@ body:
       placeholder: https://example.com
     validations:
       required: true
+
   - type: textarea
     attributes:
       label: ASCII Art
-      description: The ASCII logo should not take up too much space (smaller than 50x20 characters, W x H). Please also include the color codes if they are not available in `os-release`.
-      placeholder: Paste ASCII art here
+      description: |
+        The ASCII logo should not take up too much space (smaller than 50x20 characters, W x H).
+        **Important:** Fastfetch uses `$1`, `$2`, `$3` etc. for color placeholders. Do NOT use hardcoded ANSI escape codes (like `\033[38;2...m`) or Neofetch's `${c1}` syntax.
+        Take <https://github.com/fastfetch-cli/fastfetch/tree/dev/src/logo/ascii> as examples.
+      placeholder: Paste ASCII art with $1, $2 placeholders here
     validations:
       required: true
+
   - type: input
     attributes:
       label: Original Image URL
       description: If the ASCII art is based on an image, please provide a link to the original image file.
       placeholder: Image URL from the distro website mentioned above
+
   - type: checkboxes
     attributes:
       label: Checklist
       options:
+        - label: My distro has reached a stable state (out of beta, alpha, RC).
+          required: true
         - label: The ASCII art is smaller than 50x20 characters (W x H).
           required: true
-        - label: The ASCII art includes color codes, or the color codes are available in `os-release`.
+        - label: The ASCII art uses `$N` color placeholders (or colors are natively available in `os-release`).
           required: true
-        - label: The ASCII art has no internal padding (spaces at the start and/or end of lines).
+        - label: The ASCII art has no unnecessary trailing spaces at the end of lines.
+          required: true
+        - label: I promise that I will send a removal request if the distro is discontinued.
           required: true

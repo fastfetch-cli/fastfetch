@@ -10,7 +10,7 @@
 static void detectIterm2(FFTerminalFontResult* terminalFont)
 {
     const char* profile = getenv("ITERM_PROFILE");
-    if (profile == NULL)
+    if (profile == nullptr)
     {
         ffStrbufAppendS(&terminalFont->error, "environment variable ITERM_PROFILE not set");
         return;

@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFCustomOptions
-{
+typedef struct FFCustomOptions {
     FFModuleArgs moduleArgs;
 } FFCustomOptions;
 

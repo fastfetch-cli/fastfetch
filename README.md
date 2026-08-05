@@ -15,6 +15,8 @@
 
 Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it in a visually appealing way. It is written mainly in C, with a focus on performance and customizability. Currently, it supports Linux, macOS, Windows 8.1+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku and SunOS (illumos, Solaris).
 
+> Note: Fastfetch is only actively tested on x86-64 and aarch64 platforms. It may work on other platforms but is not guaranteed to do so.
+
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
 <img src="screenshots/example4.png" width="49%" align="left" />
@@ -197,7 +199,8 @@ See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
 ### Q: Fastfetch shows fewer dpkg packages than neofetch. Is it a bug?
 
-Neofetch incorrectly counts `rc` packages (packages that have been removed but still have configuration files remaining). See bug: https://github.com/dylanaraps/neofetch/issues/2278
+1. Neofetch incorrectly counts `rc` packages for apt (packages that have been removed but still have configuration files remaining). See bug: https://github.com/dylanaraps/neofetch/issues/2278
+2. Neofetch incorrectly counts `gpg-pubkey` as packages for rpm. You may check the results of `dnf list --installed | wc -l` and `rpm -qa | wc -l` to see the difference.
 
 ### Q: I use Debian / Ubuntu / Debian-derived distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is this a bug?
 

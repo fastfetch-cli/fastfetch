@@ -2,8 +2,7 @@
 
 #include "common/option.h"
 
-typedef struct FFWifiOptions
-{
+typedef struct FFWifiOptions {
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;

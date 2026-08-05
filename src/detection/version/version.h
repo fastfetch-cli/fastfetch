@@ -3,8 +3,7 @@
 #include "fastfetch.h"
 #include "modules/version/option.h"
 
-typedef struct FFVersionResult
-{
+typedef struct FFVersionResult {
     const char* projectName;
     const char* sysName;
     const char* architecture;

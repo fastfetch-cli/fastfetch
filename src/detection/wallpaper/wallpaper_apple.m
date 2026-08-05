@@ -40,7 +40,7 @@ const char* ffDetectWallpaper(FFstrbuf* result)
                 }
             }
             if (result->length > 0)
-                return NULL;
+                return nullptr;
         }
     }
 
@@ -60,13 +60,13 @@ const char* ffDetectWallpaper(FFstrbuf* result)
             "JOIN spaces ON pictures.space_id=spaces.ROWID\n"
             "WHERE display_id=1 AND space_id=1 AND key=1", result)
         )
-            return NULL;
+            return nullptr;
     }
 
     #endif
 
     if (ffOsascript("tell application \"Finder\" to get POSIX path of (get desktop picture as alias)", result))
-        return NULL;
+        return nullptr;
 
     return "All detection methods failed";
 }

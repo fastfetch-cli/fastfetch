@@ -1,8 +1,7 @@
 #include "bootmgr.h"
 
 // https://uefi.org/specs/UEFI/2.10/10_Protocols_Device_Path_Protocol.html#generic-device-path-structures
-typedef struct ffEfiDevicePathProtocol
-{
+typedef struct ffEfiDevicePathProtocol {
     uint8_t Type;
     uint8_t SubType;
     uint16_t Length;
@@ -10,8 +9,7 @@ typedef struct ffEfiDevicePathProtocol
 } ffEfiDevicePathProtocol;
 
 // https://uefi.org/specs/UEFI/2.10/03_Boot_Manager.html#load-options
-typedef struct FFEfiLoadOption
-{
+typedef struct FFEfiLoadOption {
     uint32_t Attributes;
     uint16_t FilePathListLength;
     uint16_t Description[];

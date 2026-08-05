@@ -1,12 +1,9 @@
 #include "libc.h"
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
+#include "common/strutil.h"
 
 #include <features.h>
 
-const char* ffDetectLibc(FFLibcResult* result)
-{
+const char* ffDetectLibc(FFLibcResult* result) {
 #ifdef __UCLIBC__
     result->name = "uClibc";
     result->version = FF_STR(__UCLIBC_MAJOR__) "." FF_STR(__UCLIBC_MINOR__) "." FF_STR(__UCLIBC_SUBLEVEL__);
@@ -16,11 +13,11 @@ const char* ffDetectLibc(FFLibcResult* result)
 #else
     result->name = "musl";
     #ifdef FF_MUSL_VERSION
-        result->version = FF_MUSL_VERSION;
+    result->version = FF_MUSL_VERSION;
     #else
-        result->version = NULL;
+    result->version = nullptr;
     #endif
 #endif
 
-    return NULL;
+    return nullptr;
 }

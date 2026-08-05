@@ -9,8 +9,7 @@
     #define FF_DISK_FOLDER_SEPARATOR ':'
 #endif
 
-typedef struct FFDisk
-{
+typedef struct FFDisk {
     FFstrbuf mountFrom;
     FFstrbuf mountpoint;
     FFstrbuf filesystem;

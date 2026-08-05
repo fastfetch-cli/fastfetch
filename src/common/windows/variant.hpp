@@ -7,8 +7,7 @@
 #include <cstdint>
 
 template <typename TVariant>
-struct FFBaseVariant: TVariant
-{
+struct FFBaseVariant : TVariant {
     bool hasValue() {
         return this->vt != VT_EMPTY;
     }
@@ -17,8 +16,8 @@ struct FFBaseVariant: TVariant
         return this->hasValue();
     }
 
-    template <typename T> T get()
-    {
+    template <typename T>
+    T get() {
         // boolean
         if constexpr (std::is_same_v<T, bool>) {
             assert(this->vt == VT_BOOL);
@@ -29,16 +28,13 @@ struct FFBaseVariant: TVariant
         else if constexpr (std::is_same_v<T, int8_t>) {
             assert(this->vt == VT_I1);
             return this->cVal;
-        }
-        else if constexpr (std::is_same_v<T, int16_t>) {
+        } else if constexpr (std::is_same_v<T, int16_t>) {
             assert(this->vt == VT_I2);
             return this->iVal;
-        }
-        else if constexpr (std::is_same_v<T, int32_t>) {
+        } else if constexpr (std::is_same_v<T, int32_t>) {
             assert(this->vt == VT_I4 || this->vt == VT_INT);
             return this->intVal;
-        }
-        else if constexpr (std::is_same_v<T, int64_t>) {
+        } else if constexpr (std::is_same_v<T, int64_t>) {
             assert(this->vt == VT_I8);
             return this->llVal;
         }
@@ -47,16 +43,13 @@ struct FFBaseVariant: TVariant
         else if constexpr (std::is_same_v<T, uint8_t>) {
             assert(this->vt == VT_UI1);
             return this->bVal;
-        }
-        else if constexpr (std::is_same_v<T, uint16_t>) {
+        } else if constexpr (std::is_same_v<T, uint16_t>) {
             assert(this->vt == VT_UI2);
             return this->uiVal;
-        }
-        else if constexpr (std::is_same_v<T, uint32_t>) {
+        } else if constexpr (std::is_same_v<T, uint32_t>) {
             assert(this->vt == VT_UI4 || this->vt == VT_UINT);
             return this->uintVal;
-        }
-        else if constexpr (std::is_same_v<T, uint64_t>) {
+        } else if constexpr (std::is_same_v<T, uint64_t>) {
             assert(this->vt == VT_UI8);
             return this->ullVal;
         }
@@ -65,8 +58,7 @@ struct FFBaseVariant: TVariant
         else if constexpr (std::is_same_v<T, float>) {
             assert(this->vt == VT_R4);
             return this->fltVal;
-        }
-        else if constexpr (std::is_same_v<T, double>) {
+        } else if constexpr (std::is_same_v<T, double>) {
             assert(this->vt == VT_R8);
             return this->dblVal;
         }
@@ -75,95 +67,98 @@ struct FFBaseVariant: TVariant
         else if constexpr (std::is_same_v<T, std::string_view>) {
             assert(this->vt == VT_LPSTR);
             return this->pcVal;
-        }
-        else if constexpr (std::is_same_v<T, std::wstring_view>) {
+        } else if constexpr (std::is_same_v<T, std::wstring_view>) {
             assert(this->vt == VT_BSTR || this->vt == VT_LPWSTR);
-            if (this->vt == VT_LPWSTR)
+            if (this->vt == VT_LPWSTR) {
                 return this->bstrVal;
-            else
+            } else {
                 return { this->bstrVal, SysStringLen(this->bstrVal) };
+            }
         }
 
         // array signed
         else if constexpr (std::is_same_v<T, std::pair<const int8_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_I1);
-            return std::make_pair((int8_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const int16_t*, uint32_t>>) {
+            return std::make_pair((int8_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const int16_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_I2);
-            return std::make_pair((int16_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const int32_t*, uint32_t>>) {
+            return std::make_pair((int16_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const int32_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_I4);
-            return std::make_pair((int32_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const int64_t*, uint32_t>>) {
+            return std::make_pair((int32_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const int64_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_I8);
-            return std::make_pair((int64_t*)this->parray->pvData, this->parray->cDims);
+            return std::make_pair((int64_t*) this->parray->pvData, this->parray->cDims);
         }
 
         // array unsigned
         else if constexpr (std::is_same_v<T, std::pair<const uint8_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_UI1);
-            return std::make_pair((uint8_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const uint16_t*, uint32_t>>) {
+            return std::make_pair((uint8_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const uint16_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_UI2);
-            return std::make_pair((uint16_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const uint32_t*, uint32_t>>) {
+            return std::make_pair((uint16_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const uint32_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_UI4);
-            return std::make_pair((uint32_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else if constexpr (std::is_same_v<T, std::pair<const uint64_t*, uint32_t>>) {
+            return std::make_pair((uint32_t*) this->parray->pvData, this->parray->cDims);
+        } else if constexpr (std::is_same_v<T, std::pair<const uint64_t*, uint32_t>>) {
             assert(this->vt & VT_ARRAY);
             assert((this->vt & ~VT_ARRAY) == VT_UI8);
-            return std::make_pair((uint64_t*)this->parray->pvData, this->parray->cDims);
-        }
-        else {
+            return std::make_pair((uint64_t*) this->parray->pvData, this->parray->cDims);
+        } else {
             assert(false && "unsupported type");
             __builtin_unreachable();
         }
     }
 };
 
-struct FFWmiVariant: FFBaseVariant<VARIANT>
-{
+struct FFWmiVariant : FFBaseVariant<VARIANT> {
     FFWmiVariant(const FFWmiVariant&) = delete;
     FFWmiVariant(FFWmiVariant&&); // don't define it to enforce NRVO optimization
-    explicit FFWmiVariant() { VariantInit(this); }
+    explicit FFWmiVariant() {
+        VariantInit(this);
+    }
     explicit FFWmiVariant(std::initializer_list<PCWSTR> strings);
-    ~FFWmiVariant() { VariantClear(this); }
+    ~FFWmiVariant() {
+        VariantClear(this);
+    }
 };
 static_assert(sizeof(FFWmiVariant) == sizeof(VARIANT), "");
 
-struct FFPropVariant: FFBaseVariant<PROPVARIANT>
-{
+struct FFPropVariant : FFBaseVariant<PROPVARIANT> {
     FFPropVariant(const FFPropVariant&) = delete;
     FFPropVariant(FFPropVariant&&); // don't define it to enforce NRVO optimization
-    explicit FFPropVariant() { PropVariantInit(this); }
-    ~FFPropVariant() { PropVariantClear(this); }
+    explicit FFPropVariant() {
+        PropVariantInit(this);
+    }
+    ~FFPropVariant() {
+        PropVariantClear(this);
+    }
 };
 static_assert(sizeof(FFPropVariant) == sizeof(PROPVARIANT), "");
 
-namespace
-{
-    // Provide our bstr_t to avoid libstdc++ dependency
-    struct bstr_t
-    {
-        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
-        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
-        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
-        operator BSTR(void) const noexcept { return _bstr; }
+namespace {
+// Provide our bstr_t to avoid libstdc++ dependency
+struct bstr_t {
+    explicit bstr_t(const wchar_t* str) noexcept : _bstr(SysAllocString(str)) {}
+    ~bstr_t(void) noexcept {
+        SysFreeString(_bstr);
+    }
+    explicit operator const wchar_t*(void) const noexcept {
+        return _bstr;
+    }
+    operator BSTR(void) const noexcept {
+        return _bstr;
+    }
 
-        private:
-            BSTR _bstr;
-    };
-}
+  private:
+    BSTR _bstr;
+};
+} // namespace

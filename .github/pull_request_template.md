@@ -21,6 +21,10 @@ Closes #
 
 - 
 
+## Screenshots
+
+<!-- Required if this PR introduces visual changes. -->
+
 ## Checklist
 
 - [ ] I have tested my changes locally.

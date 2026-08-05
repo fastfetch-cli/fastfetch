@@ -3,8 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef struct FFZpoolOptions
-{
+typedef struct FFZpoolOptions {
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;

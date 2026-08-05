@@ -32,7 +32,7 @@ const char* ffGpuDetectDriverVersion(FFlist* gpus)
                 ffStrbufAppendS(&x->driver, version.UTF8String);
             }
         }
-        return NULL;
+        return nullptr;
     }
     return "Unsupported macOS version";
 }
@@ -43,7 +43,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
     {
         for (id<MTLDevice> device in MTLCopyAllDevices())
         {
-            FFGPUResult* gpu = NULL;
+            FFGPUResult* gpu = nullptr;
             FF_LIST_FOR_EACH(FFGPUResult, x, *gpus)
             {
                 if (x->deviceId == device.registryID)
@@ -81,7 +81,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
                 gpu->shared.total = device.recommendedMaxWorkingSetSize;
             #endif
         }
-        return NULL;
+        return nullptr;
     }
     return "Metal API is not supported by this macOS version";
 }

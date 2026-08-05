@@ -5,27 +5,25 @@
 // DOCUMENTATION REFERENCED BELOW, IN ORDER TO MAKE FASTFETCH MIT COMPLIANT.
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv412ctl_result_t
-typedef enum ctl_result_t
-{
+typedef enum ctl_result_t {
     CTL_RESULT_SUCCESS = 0,
 } ctl_result_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctl_application_id_t
-typedef struct ctl_application_id_t
-{
+typedef struct ctl_application_id_t {
     uint32_t Data1;
     uint16_t Data2;
     uint16_t Data3;
     uint8_t Data4[8];
 } ctl_application_id_t;
 
-#define CTL_IMPL_VERSION (( 1 /*major*/ << 16 )|( 1 /*minor*/ & 0x0000ffff))
+#define CTL_IMPL_VERSION ((1 /*major*/ << 16) | (1 /*minor*/ & 0x0000ffff))
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv415ctl_init_flag_t
-typedef enum ctl_init_flag_t
-{
+typedef enum ctl_init_flag_t {
     CTL_INIT_FLAG_USE_LEVEL_ZERO = 1,
     CTL_INIT_FLAG_MAX
 } ctl_init_flag_t;
@@ -33,8 +31,7 @@ typedef enum ctl_init_flag_t
 typedef uint32_t ctl_version_info_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv415ctl_init_args_t
-typedef struct ctl_init_args_t
-{
+typedef struct ctl_init_args_t {
     uint32_t Size;
     uint8_t Version;
     ctl_version_info_t AppVersion;
@@ -46,50 +43,45 @@ typedef struct ctl_init_args_t
 typedef struct ctl_api_handle_t* ctl_api_handle_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv47ctlInitP15ctl_init_args_tP16ctl_api_handle_t
-extern ctl_result_t ctlInit(ctl_init_args_t *pInitDesc, ctl_api_handle_t *phAPIHandle);
+extern ctl_result_t ctlInit(ctl_init_args_t* pInitDesc, ctl_api_handle_t* phAPIHandle);
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlclose
 extern ctl_result_t ctlClose(ctl_api_handle_t hAPIHandle);
 
 typedef struct ctl_device_adapter_handle_t* ctl_device_adapter_handle_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv419ctlEnumerateDevices16ctl_api_handle_tP8uint32_tP27ctl_device_adapter_handle_t
-extern ctl_result_t ctlEnumerateDevices(ctl_api_handle_t hAPIHandle, uint32_t *pCount, ctl_device_adapter_handle_t* phDevices);
+extern ctl_result_t ctlEnumerateDevices(ctl_api_handle_t hAPIHandle, uint32_t* pCount, ctl_device_adapter_handle_t* phDevices);
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctl_device_type_t
-typedef enum ctl_device_type_t
-{
+typedef enum ctl_device_type_t {
     CTL_DEVICE_TYPE_GRAPHICS = 1,
     CTL_DEVICE_TYPE_SYSTEM = 2,
     CTL_DEVICE_TYPE_MAX
 } ctl_device_type_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv422ctl_firmware_version_t
-typedef struct ctl_firmware_version_t
-{
+typedef struct ctl_firmware_version_t {
     uint64_t major_version;
     uint64_t minor_version;
     uint64_t build_number;
 } ctl_firmware_version_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctl_adapter_bdf_t
-typedef struct ctl_adapter_bdf_t
-{
+typedef struct ctl_adapter_bdf_t {
     uint8_t bus;
     uint8_t device;
     uint8_t function;
 } ctl_adapter_bdf_t;
 
 #define IGCL_CTL_MAX_DEVICE_NAME_LEN 100
-#define IGCL_CTL_MAX_RESERVED_SIZE 112
+#define IGCL_CTL_MAX_RESERVED_SIZE 108
 
-typedef enum ctl_adapter_properties_flag_t
-{
+typedef enum ctl_adapter_properties_flag_t {
     CTL_ADAPTER_PROPERTIES_FLAG_INTEGRATED = 1,
 } ctl_adapter_properties_flag_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv431ctl_device_adapter_properties_t
-typedef struct ctl_device_adapter_properties_t
-{
+typedef struct ctl_device_adapter_properties_t {
     uint32_t Size;
     uint8_t Version;
     void* pDeviceID;
@@ -110,6 +102,7 @@ typedef struct ctl_device_adapter_properties_t
     uint16_t pci_subsys_id;
     uint16_t pci_subsys_vendor_id;
     ctl_adapter_bdf_t adapter_bdf;
+    uint32_t num_xe_cores;
     char reserved[IGCL_CTL_MAX_RESERVED_SIZE];
 } ctl_device_adapter_properties_t;
 
@@ -122,8 +115,7 @@ typedef struct ctl_temp_handle_t* ctl_temp_handle_t;
 extern ctl_result_t ctlEnumTemperatureSensors(ctl_device_adapter_handle_t hDAhandle, uint32_t* pCount, ctl_temp_handle_t* phTemperature);
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv427ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t
 
-typedef enum ctl_temp_sensors_t
-{
+typedef enum ctl_temp_sensors_t {
     CTL_TEMP_SENSORS_GLOBAL = 0,
     CTL_TEMP_SENSORS_GPU = 1,
     CTL_TEMP_SENSORS_MEMORY = 2,
@@ -133,8 +125,7 @@ typedef enum ctl_temp_sensors_t
     CTL_TEMP_SENSORS_MAX
 } ctl_temp_sensors_t;
 
-typedef struct _ctl_temp_properties_t
-{
+typedef struct _ctl_temp_properties_t {
     uint32_t Size;
     uint8_t Version;
     ctl_temp_sensors_t type;
@@ -147,11 +138,10 @@ extern ctl_result_t ctlTemperatureGetProperties(ctl_temp_handle_t hTemperature, 
 typedef struct ctl_mem_handle_t* ctl_mem_handle_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t
-extern ctl_result_t ctlEnumMemoryModules(ctl_device_adapter_handle_t hDAhandle, uint32_t *pCount, ctl_mem_handle_t* phMemory);
+extern ctl_result_t ctlEnumMemoryModules(ctl_device_adapter_handle_t hDAhandle, uint32_t* pCount, ctl_mem_handle_t* phMemory);
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv415ctl_mem_state_t
-typedef struct ctl_mem_state_t
-{
+typedef struct ctl_mem_state_t {
     uint32_t Size;
     uint8_t Version;
     uint64_t free;
@@ -159,11 +149,10 @@ typedef struct ctl_mem_state_t
 } ctl_mem_state_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t
-extern ctl_result_t ctlMemoryGetState(ctl_mem_handle_t hMemory, ctl_mem_state_t *pState);
+extern ctl_result_t ctlMemoryGetState(ctl_mem_handle_t hMemory, ctl_mem_state_t* pState);
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv414ctl_mem_type_t
-typedef enum ctl_mem_type_t
-{
+typedef enum ctl_mem_type_t {
     CTL_MEM_TYPE_HBM = 0,
     CTL_MEM_TYPE_DDR = 1,
     CTL_MEM_TYPE_DDR3 = 2,
@@ -183,16 +172,14 @@ typedef enum ctl_mem_type_t
 } ctl_mem_type_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv413ctl_mem_loc_t
-typedef enum ctl_mem_loc_t
-{
+typedef enum ctl_mem_loc_t {
     CTL_MEM_LOC_SYSTEM = 0,
     CTL_MEM_LOC_DEVICE = 1,
     CTL_MEM_LOC_MAX
 } ctl_mem_loc_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctl_mem_properties_t
-typedef struct ctl_mem_properties_t
-{
+typedef struct ctl_mem_properties_t {
     uint32_t Size;
     uint8_t Version;
     ctl_mem_type_t type;
@@ -203,7 +190,7 @@ typedef struct ctl_mem_properties_t
 } ctl_mem_properties_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv422ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t
-extern ctl_result_t ctlMemoryGetProperties(ctl_mem_handle_t hMemory, ctl_mem_properties_t *pProperties);
+extern ctl_result_t ctlMemoryGetProperties(ctl_mem_handle_t hMemory, ctl_mem_properties_t* pProperties);
 
 typedef struct ctl_freq_handle_t* ctl_freq_handle_t;
 
@@ -211,16 +198,14 @@ typedef struct ctl_freq_handle_t* ctl_freq_handle_t;
 extern ctl_result_t ctlEnumFrequencyDomains(ctl_device_adapter_handle_t hDAhandle, uint32_t* pCount, ctl_freq_handle_t* phFrequency);
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctl_freq_domain_t
-typedef enum ctl_freq_domain_t
-{
+typedef enum ctl_freq_domain_t {
     CTL_FREQ_DOMAIN_GPU = 0,
     CTL_FREQ_DOMAIN_MEMORY = 1,
     CTL_FREQ_DOMAIN_MAX
 } ctl_freq_domain_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv421ctl_freq_properties_t
-typedef struct ctl_freq_properties_t
-{
+typedef struct ctl_freq_properties_t {
     uint32_t Size;
     uint8_t Version;
     ctl_freq_domain_t type;
@@ -231,3 +216,45 @@ typedef struct ctl_freq_properties_t
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv425ctlFrequencyGetProperties17ctl_freq_handle_tP21ctl_freq_properties_t
 extern ctl_result_t ctlFrequencyGetProperties(ctl_freq_handle_t hFrequency, ctl_freq_properties_t* pProperties);
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv415ctl_pci_speed_t
+typedef struct ctl_pci_speed_t {
+    uint32_t Size;
+    uint8_t Version;
+    int32_t gen;
+    int32_t width;
+    int64_t maxBandwidth;
+} ctl_pci_speed_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctl_pci_address_t
+typedef struct ctl_pci_address_t {
+    uint32_t Size;
+    uint8_t Version;
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t function;
+} ctl_pci_address_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctl_pci_properties_t
+typedef struct ctl_pci_properties_t {
+    uint32_t Size;
+    uint8_t Version;
+    ctl_pci_address_t address;
+    ctl_pci_speed_t maxSpeed;
+    bool resizable_bar_supported;
+    bool resizable_bar_enabled;
+} ctl_pci_properties_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlpcigetproperties
+extern ctl_result_t ctlPciGetProperties(ctl_device_adapter_handle_t hDAhandle, ctl_pci_properties_t* pProperties);
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctl-pci-state-t
+typedef struct _ctl_pci_state_t {
+    uint32_t Size;
+    uint8_t Version;
+    ctl_pci_speed_t speed;
+} ctl_pci_state_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlpcigetstate
+extern ctl_result_t ctlPciGetState(ctl_device_adapter_handle_t hDAhandle, ctl_pci_state_t* pState);
