@@ -506,39 +506,41 @@ static void drawModuleItem(FFRow* row, const FFGenConfigItem* item, uint32_t cel
     const uint32_t nameMax = cellWidth > 4 ? cellWidth - 4 : 0;
 
     if (item->baseInfo == &ffBreakModuleInfo) {
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_MAGENTA "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_MAGENTA "m");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_MAGENTA "m" : "\e[" FF_COLOR_FG_MAGENTA "m");
         ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_MAGENTA "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_MAGENTA "m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_MAGENTA "m");
         rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         return;
     }
     if (item->baseInfo == &ffSeparatorModuleInfo) {
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_CYAN "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_CYAN "m");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_CYAN "m" : "\e[" FF_COLOR_FG_CYAN "m");
         ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_CYAN "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_CYAN "m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_CYAN "m");
         rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         return;
     }
 
     if (item->status == FF_GEN_CONFIG_ITEM_STATUS_SELECTED) {
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_GREEN "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_GREEN "m");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_GREEN "m" : "\e[" FF_COLOR_FG_GREEN "m");
         ffStrbufAppendS(&row->buf, "[x]");
         row->visualCol += 3;
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_WHITE "m" : "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_WHITE "m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
         rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     } else {
-        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_LIGHT_BLACK "m" : "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
+        if (highlight) {
+            rowAppendRaw(row, "\e[" FF_COLOR_MODE_INVERSE_ "m");
+        }
         ffStrbufAppendS(&row->buf, "[ ]");
         row->visualCol += 3;
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
@@ -556,17 +558,15 @@ static void drawItemCell(FFRow* row, uint32_t startCol, uint32_t cellWidth, cons
 
 static void drawLogoOption(FFRow* row, const char* name, bool active) {
     if (active) {
-        rowAppendRaw(row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_GREEN "m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
         rowAppendVisual(row, "● ");
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
-        rowAppendRaw(row, "\e[" FF_COLOR_MODE_BOLD "m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
         rowAppendVisual(row, name);
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     } else {
-        rowAppendRaw(row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
         rowAppendVisual(row, "○ ");
         rowAppendVisual(row, name);
-        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
 }
 
@@ -588,16 +588,13 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 0: title
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_CYAN "m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
     rowAppendVisual(&row, "fastfetch");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD "m");
     rowAppendVisual(&row, " configuration");
-    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     if (cols >= 48) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
-        rowAppendVisual(&row, "interactive config generator");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        rowAppendVisual(&row, "    interactive config generator");
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
@@ -609,8 +606,11 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 2: logo type
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_WHITE "m");
-    rowAppendVisual(&row, "Logo type:");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendVisual(&row, "L");
+    rowAppendRaw(&row, "\e[24m"); // Reset underline
+    rowAppendVisual(&row, "ogo type:");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "default", ui->logoType == FF_LOGO_TYPE_AUTO);
@@ -619,9 +619,18 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "none", ui->logoType == FF_LOGO_TYPE_NONE);
     if (cols >= 72) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
-        rowAppendVisual(&row, "(l)");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        switch (ui->logoType) {
+            case FF_LOGO_TYPE_AUTO:
+                rowAppendVisual(&row, " - Built-in ASCII art");
+                break;
+            case FF_LOGO_TYPE_SMALL:
+                rowAppendVisual(&row, " - Built-in ASCII art, small version");
+                break;
+            default:
+                rowAppendVisual(&row, " - Disable logo printing");
+                break;
+        }
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
@@ -629,17 +638,23 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 3: output mode
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_WHITE "m");
-    rowAppendVisual(&row, "Output:");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendVisual(&row, "O");
+    rowAppendRaw(&row, "\e[24m"); // Reset underline
+    rowAppendVisual(&row, "utput:");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "minimal", !ui->fullConfig);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "full", ui->fullConfig);
     if (cols >= 64) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
-        rowAppendVisual(&row, "(o)");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        if (ui->fullConfig) {
+            rowAppendVisual(&row, " - Full JSON config with all module options");
+        } else {
+            rowAppendVisual(&row, " - Minimal JSON config");
+        }
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
@@ -651,12 +666,11 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 5: modules title
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_WHITE "m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
     rowAppendVisual(&row, "Modules:");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
-    rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_GREEN "m");
-    FF_STRBUF_AUTO_DESTROY counter = ffStrbufCreateA(32);
-    ffStrbufAppendF(&counter, "  [%u/%u selected]", selectedCount, moduleCount);
+    rowAppendRaw(&row, "\e[" FF_COLOR_FG_GREEN "m");
+    FF_STRBUF_AUTO_DESTROY counter = ffStrbufCreateF("  [%u/%u selected]", selectedCount, moduleCount);
     rowAppendVisual(&row, counter.chars);
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
@@ -689,7 +703,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
         const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, ui->cursor);
         if (item->baseInfo && item->baseInfo->description) {
             rowAppendVisual(&row, "  ");
-            rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
+            rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
             rowAppendVisualTruncated(&row, item->baseInfo->description, cols > 4 ? cols - 4 : 1);
             rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
         }
@@ -698,7 +712,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 
     // Help lines
     rowInit(&row, cols);
-    rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
     rowAppendVisual(&row, "  "
 #if _WIN32 || __APPLE__ || __linux__ || (__FreeBSD__ && !__DragonFly__)
                           "↑/↓ k/j move  ←/→ col"
@@ -708,14 +722,14 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
                           "  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
     if (ui->confirmingOverwrite) {
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
-        rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_LIGHT_YELLOW "m");
+        rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW "m");
         rowAppendVisual(&row, "  File exists. Overwrite? (y/N)");
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
     rowInit(&row, cols);
-    rowAppendRaw(&row, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
     rowAppendVisual(&row, "  l/L logo  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
