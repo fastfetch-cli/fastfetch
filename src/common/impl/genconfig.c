@@ -505,7 +505,7 @@ static void drawModuleItem(FFRow* row, const FFGenConfigItem* item, uint32_t cel
 
     if (item->baseInfo == &ffBreakModuleInfo) {
         rowAppendRaw(row, highlight ? "\e[1;95;7m" : "\e[1;95m");
-        ffStrbufAppendS(&row->buf, "[─]");
+        ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
         rowAppendRaw(row, "\e[m");
         rowAppendVisual(row, " ");
@@ -516,7 +516,7 @@ static void drawModuleItem(FFRow* row, const FFGenConfigItem* item, uint32_t cel
     }
     if (item->baseInfo == &ffSeparatorModuleInfo) {
         rowAppendRaw(row, highlight ? "\e[1;96;7m" : "\e[1;96m");
-        ffStrbufAppendS(&row->buf, "[═]");
+        ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
         rowAppendRaw(row, "\e[m");
         rowAppendVisual(row, " ");
@@ -697,7 +697,13 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Help lines
     rowInit(&row, cols);
     rowAppendRaw(&row, "\e[90m");
-    rowAppendVisual(&row, "  ↑/↓ k/j move  ←/→ col  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
+    rowAppendVisual(&row, "  "
+#if _WIN32 || __APPLE__ || __linux__ || (__FreeBSD__ && !__DragonFly__)
+                          "↑/↓ k/j move  ←/→ col"
+#else
+                          "^/v k/j move  </> col"
+#endif
+                          "  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
     if (ui->confirmingOverwrite) {
         rowAppendRaw(&row, "\e[m");
         rowAppendRaw(&row, "\e[1;93m");
