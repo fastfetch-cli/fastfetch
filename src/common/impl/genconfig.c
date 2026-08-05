@@ -559,13 +559,11 @@ static void drawItemCell(FFRow* row, uint32_t startCol, uint32_t cellWidth, cons
 static void drawLogoOption(FFRow* row, const char* name, bool active) {
     if (active) {
         rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
-        rowAppendVisual(row, "● ");
-        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
-        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
+        rowAppendVisual(row, "[x] ");
         rowAppendVisual(row, name);
         rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     } else {
-        rowAppendVisual(row, "○ ");
+        rowAppendVisual(row, "[ ] ");
         rowAppendVisual(row, name);
     }
 }
