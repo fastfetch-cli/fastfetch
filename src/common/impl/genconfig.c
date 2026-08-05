@@ -604,8 +604,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 2: logo type
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE_ "m");
     rowAppendVisual(&row, "L");
     rowAppendRaw(&row, "\e[24m"); // Reset underline
     rowAppendVisual(&row, "ogo type:");
@@ -636,8 +635,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 3: output mode
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
-    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE_ "m");
     rowAppendVisual(&row, "O");
     rowAppendRaw(&row, "\e[24m"); // Reset underline
     rowAppendVisual(&row, "utput:");
@@ -666,8 +664,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     rowAppendVisual(&row, "  ");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
     rowAppendVisual(&row, "Modules:");
-    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
-    rowAppendRaw(&row, "\e[" FF_COLOR_FG_GREEN "m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET "\e[" FF_COLOR_FG_GREEN "m");
     FF_STRBUF_AUTO_DESTROY counter = ffStrbufCreateF("  [%u/%u selected]", selectedCount, moduleCount);
     rowAppendVisual(&row, counter.chars);
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
@@ -719,8 +716,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 #endif
                           "  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
     if (ui->confirmingOverwrite) {
-        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
-        rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW "m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW "m");
         rowAppendVisual(&row, "  File exists. Overwrite? (y/N)");
         rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
