@@ -997,7 +997,6 @@ static int runCui(FFGenConfigUI* ui, bool fileExists) {
         FF_STRBUF_AUTO_DESTROY frame = ffStrbufCreateA((uint32_t) ui->cols * ((uint32_t) ui->rows + 4));
         renderFrame(ui, &frame);
         ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), frame.length, frame.chars);
-        fflush(stdout);
 
         char ch = 0;
         FFGenConfigKey key = readKey(&ch);
