@@ -125,5 +125,6 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
         { "Serial number", "serial" },
         { "Maximum refresh rate in Hz", "refresh-rate" },
         { "True if the display is HDR compatible", "hdr-compatible" },
-    }))
+    })),
+    .defaultOrder = 19,
 };

@@ -41,7 +41,7 @@ static FFCodecType ffCodecCodecToType(CMVideoCodecType codec) {
 }
 
 static FFCodecType ffCodecDetectEncoders(void) {
-    CFArrayRef encoderList = nullptr;
+    FF_CFTYPE_AUTO_RELEASE CFArrayRef encoderList = nullptr;
     if (VTCopyVideoEncoderList(nullptr, &encoderList) != noErr || !encoderList) {
         return FF_CODEC_TYPE_NONE;
     }
@@ -65,16 +65,20 @@ static FFCodecType ffCodecDetectEncoders(void) {
 static FFCodecType ffCodecDetectDecoders() {
     FFCodecType types = FF_CODEC_TYPE_NONE;
     for (uint32_t i = 0; i < ARRAY_SIZE(FF_CODEC_CODECS); ++i) {
-        if (types & FF_CODEC_CODECS[i].type) {
+        auto codec = FF_CODEC_CODECS[i];
+        if (types & codec.type) {
             continue;
         }
 
-        bool supported = VTIsHardwareDecodeSupported(FF_CODEC_CODECS[i].codec);
+        if (__builtin_available(macOS 11.0, *)) {
+            VTRegisterSupplementalVideoDecoderIfAvailable(codec.codec);
+        }
+        bool supported = VTIsHardwareDecodeSupported(codec.codec);
         if (!supported) {
             continue;
         }
 
-        types |= FF_CODEC_CODECS[i].type;
+        types |= codec.type;
     }
 
     return types;

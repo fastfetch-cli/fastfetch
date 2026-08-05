@@ -90,4 +90,5 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
         { "Terminal width (in pixels)", "width" },
         { "Terminal height (in pixels)", "height" },
     })),
+    .defaultOrder = 31,
 };

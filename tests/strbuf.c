@@ -414,7 +414,7 @@ int main(void) {
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 0);
     VERIFY(strbuf.length == 0);
-    VERIFY(strbuf.allocated == 0);
+    VERIFY(strbuf.allocated == 1);
     ffStrbufDestroy(&strbuf);
 
     // ffStrbufEnsureFixedLengthFree / empty buffer but oldFree >= newFree

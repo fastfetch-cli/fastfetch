@@ -87,6 +87,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options) {
 void ffDestroyWeatherOptions(FFWeatherOptions* options) {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 
+    ffStrbufDestroy(&options->location);
     ffStrbufDestroy(&options->outputFormat);
 }
 
@@ -101,5 +102,6 @@ FFModuleBaseInfo ffWeatherModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateWeatherJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Weather result", "result" },
-    }))
+    })),
+    .defaultOrder = 65,
 };

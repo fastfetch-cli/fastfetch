@@ -94,5 +94,6 @@ FFModuleBaseInfo ffTPMModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "TPM device version", "version" },
         { "TPM general description", "description" },
-    }))
+    })),
+    .defaultOrder = 69,
 };

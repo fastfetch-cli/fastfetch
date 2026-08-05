@@ -163,5 +163,6 @@ FFModuleBaseInfo ffMouseModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Mouse name", "name" },
         { "Mouse serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 63,
 };

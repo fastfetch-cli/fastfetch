@@ -234,5 +234,6 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Separate result", "result" },
         { "Sum result", "sum" },
-    }))
+    })),
+    .defaultOrder = 34,
 };

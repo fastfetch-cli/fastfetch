@@ -16,7 +16,7 @@ bool ffGetAppNameAndVersion(const char* exePath, FFstrbuf* retName, FFstrbuf* re
 
     lastSlash -= strlen("MacOS");
     char infoPlistPath[PATH_MAX];
-    memcpy(infoPlistPath, exePath, lastSlash - exePath);
+    memcpy(infoPlistPath, exePath, (size_t) (lastSlash - exePath));
     memcpy(infoPlistPath + (lastSlash - exePath), "Info.plist", sizeof("Info.plist")); // X.app/Contents/Info.plist
     NSError* error;
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL fileURLWithPath:@(infoPlistPath)]

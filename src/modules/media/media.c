@@ -273,5 +273,6 @@ FFModuleBaseInfo ffMediaModuleInfo = {
         { "Player name", "player-name" },
         { "Player ID", "player-id" },
         { "URL", "url" },
-    }))
+    })),
+    .defaultOrder = 47,
 };

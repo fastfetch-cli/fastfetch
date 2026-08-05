@@ -151,34 +151,6 @@ static const FFlogo M[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_MAGIX
-    // Magix
-    {
-        .names = { "Magix", "MagixOS" },
-        .lines = FASTFETCH_DATATEXT_LOGO_MAGIX,
-        .colors = {
-            FF_COLOR_FG_LIGHT_MAGENTA,
-            FF_COLOR_FG_CYAN,
-        },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_LIGHT_MAGENTA,
-    },
-    #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_MAGPIEOS
-    // MagpieOS
-    {
-        .names = { "MagpieOS", "Magpie" },
-        .lines = FASTFETCH_DATATEXT_LOGO_MAGPIEOS,
-        .colors = {
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_MAGENTA,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_RED,
-    },
-    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_MANDRIVA
     // Mandriva
     {

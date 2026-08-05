@@ -57,6 +57,9 @@ static inline void ffLibraryUnload(void** handle) {
     #define FF_LIBRARY_LOAD_SYMBOL_VAR(library, varName, symbolName, returnValue) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName).ff##symbolName, symbolName, returnValue);
 
+    #define FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(library, varName, symbolName) \
+        (varName).ff##symbolName = (typeof(&symbolName)) dlsym(library, #symbolName);
+
     #define FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(library, varName, symbolName) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName).ff##symbolName, symbolName, "dlsym " #symbolName " failed");
 
@@ -93,6 +96,9 @@ void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
 
     #define FF_LIBRARY_LOAD_SYMBOL_VAR(library, varName, symbolName, returnValue) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName).ff##symbolName, symbolName, returnValue);
+
+    #define FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(library, varName, symbolName) \
+        (varName).ff##symbolName = (typeof(&symbolName)) &symbolName;
 
     #define FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(library, varName, symbolName) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName).ff##symbolName, symbolName, "dlsym " #symbolName " failed");

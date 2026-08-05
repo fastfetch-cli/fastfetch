@@ -117,6 +117,7 @@ void ffInitSeparatorOptions(FFSeparatorOptions* options) {
 
 void ffDestroySeparatorOptions(FFSeparatorOptions* options) {
     ffStrbufDestroy(&options->string);
+    ffStrbufDestroy(&options->outputColor);
 }
 
 FFModuleBaseInfo ffSeparatorModuleInfo = {
@@ -127,4 +128,5 @@ FFModuleBaseInfo ffSeparatorModuleInfo = {
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
+    .defaultOrder = 2,
 };

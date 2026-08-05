@@ -77,5 +77,6 @@ FFModuleBaseInfo ffKernelModuleInfo = {
         { "Architecture", "arch" },
         { "Display version", "display-version" },
         { "Page size", "page-size" },
-    }))
+    })),
+    .defaultOrder = 9,
 };

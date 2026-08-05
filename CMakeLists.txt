@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.66.0
+    VERSION 2.67.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -182,6 +182,29 @@ endif()
 
 set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type -Werror=vla")
 
+if(LINUX)
+    if(NOT IS_MUSL) # `NOT DEFINED IS_MUSL` doesn't work
+        execute_process(
+            COMMAND ${CMAKE_C_COMPILER} -print-file-name=libc.so
+            OUTPUT_VARIABLE LIBC_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        if(LIBC_PATH MATCHES "-musl")
+            set(IS_MUSL ON CACHE BOOL "Build with musl libc" FORCE)
+        endif()
+    endif()
+
+    if(IS_MUSL)
+        message(STATUS "MUSL libc detected")
+        # Silence ioctl related warnings
+        set(WARNING_FLAGS "${WARNING_FLAGS} -Wno-sign-conversion")
+    endif()
+endif()
+
+# Minimal compiler version supported: GCC 13 (2023-04-26), Clang 16 (2023-03-17)
+# Most C23 features are allowed with noticeable exceptions of `constexpr` and `#embed`
+# See https://cppreference.com/c/compiler_support/23 for detail
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
@@ -411,6 +434,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/font.c
     src/common/impl/format.c
     src/common/impl/frequency.c
+    src/common/impl/genconfig.c
     src/common/impl/init.c
     src/common/impl/jsonconfig.c
     src/common/impl/library.c
@@ -1100,7 +1124,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.cpp
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
-        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/initsystem/initsystem_windows.c
         src/detection/keyboard/keyboard_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c

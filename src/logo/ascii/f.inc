@@ -283,19 +283,6 @@ static const FFlogo F[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_FURRETO
-    // Furreto
-    {
-        .names = { "Furreto" },
-        .lines = FASTFETCH_DATATEXT_LOGO_FURRETO,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_LIGHT_MAGENTA,
-        },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
-    },
-    #endif
     // LAST
     {},
 };

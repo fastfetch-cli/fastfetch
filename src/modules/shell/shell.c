@@ -106,5 +106,6 @@ FFModuleBaseInfo ffShellModuleInfo = {
         { "Shell pretty name", "pretty-name" },
         { "Shell full exe path", "exe-path" },
         { "Shell tty used", "tty" },
-    }))
+    })),
+    .defaultOrder = 15,
 };

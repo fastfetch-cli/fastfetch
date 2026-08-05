@@ -184,7 +184,7 @@ const char* ffOpenGLDetectByEGL(FFOpenGLResult* result) {
     }
     if (ffeglGetPlatformDisplay) {
         FF_DEBUG("Trying eglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA)");
-        display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, nullptr);
+        display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, nullptr /*EGL_DEFAULT_DISPLAY*/, nullptr);
         FF_DEBUG("eglGetPlatformDisplay() %s", display == EGL_NO_DISPLAY ? "failed" : "succeeded");
     } else {
         FF_DEBUG("eglGetPlatformDisplay is unavailable, falling back to eglGetDisplay");

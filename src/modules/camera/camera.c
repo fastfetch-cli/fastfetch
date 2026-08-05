@@ -1,7 +1,5 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/strutil.h"
-#include "detection/libc/libc.h"
 #include "detection/camera/camera.h"
 #include "modules/camera/camera.h"
 
@@ -53,6 +51,7 @@ bool ffPrintCamera(FFCameraOptions* options) {
 
     FF_LIST_FOR_EACH (FFCameraResult, dev, result) {
         ffStrbufDestroy(&dev->name);
+        ffStrbufDestroy(&dev->vendor);
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
@@ -99,6 +98,7 @@ bool ffGenerateCameraJsonResult([[maybe_unused]] FFCameraOptions* options, yyjso
 
     FF_LIST_FOR_EACH (FFCameraResult, dev, result) {
         ffStrbufDestroy(&dev->name);
+        ffStrbufDestroy(&dev->vendor);
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
@@ -130,5 +130,6 @@ FFModuleBaseInfo ffCameraModuleInfo = {
         { "Identifier", "id" },
         { "Width (in px)", "width" },
         { "Height (in px)", "height" },
-    }))
+    })),
+    .defaultOrder = 61,
 };

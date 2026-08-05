@@ -141,16 +141,14 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
 
     // Initialize overlapped structure with WSA event for asynchronous I/O
-    state->overlapped = (OVERLAPPED) {
-        .hEvent = WSACreateEvent()
-    };
+    state->overlapped = (OVERLAPPED) {};
 
-    if (state->overlapped.hEvent == WSA_INVALID_EVENT) {
-        FF_DEBUG("WSACreateEvent() failed");
+    if (!NT_SUCCESS(NtCreateEvent(&state->overlapped.hEvent, EVENT_ALL_ACCESS, nullptr, NotificationEvent, FALSE))) {
+        FF_DEBUG("NtCreateEvent() failed");
         closesocket(state->sockfd);
         FreeAddrInfoW(addr);
         state->sockfd = INVALID_SOCKET;
-        return "WSACreateEvent() failed";
+        return "NtCreateEvent() failed";
     }
 
     // Build HTTP command
@@ -194,7 +192,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     if (!result) {
         if (WSAGetLastError() != WSA_IO_PENDING) {
             FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-            WSACloseEvent(state->overlapped.hEvent);
+            NtClose(state->overlapped.hEvent);
             closesocket(state->sockfd);
             state->sockfd = INVALID_SOCKET;
             ffStrbufDestroy(&state->command);
@@ -219,37 +217,27 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "ffNetworkingSendHttpRequest() failed";
     }
 
+    DWORD transfer;
     uint32_t timeout = state->timeout;
-    if (timeout > 0) {
-        FF_DEBUG("WSAWaitForMultipleEvents with timeout: %u ms", timeout);
-        DWORD result = WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, timeout, FALSE);
-        if (result != WSA_WAIT_EVENT_0) {
-            if (result == WSA_WAIT_TIMEOUT) {
-                FF_DEBUG("WSAWaitForMultipleEvents timed out");
-            } else {
-                FF_DEBUG("WSAWaitForMultipleEvents failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-            }
-            if (CancelIoEx((HANDLE) state->sockfd, &state->overlapped)) {
-                WSAWaitForMultipleEvents(1, &state->overlapped.hEvent, TRUE, 10, TRUE);
-            }
-            WSACloseEvent(state->overlapped.hEvent);
-            closesocket(state->sockfd);
-            ffStrbufDestroy(&state->command);
-            return "WSAWaitForMultipleEvents() failed or timeout";
+    if (!GetOverlappedResultEx((HANDLE) state->sockfd, &state->overlapped, &transfer, timeout > 0 ? timeout : INFINITE, FALSE)) {
+        DWORD error = GetLastError();
+        if (error == WAIT_TIMEOUT) {
+            FF_DEBUG("GetOverlappedResultEx timed out");
+        } else {
+            FF_DEBUG("GetOverlappedResultEx failed: %s", ffDebugWin32Error(error));
         }
-    }
-
-    DWORD transfer, flags;
-    if (!WSAGetOverlappedResult(state->sockfd, &state->overlapped, &transfer, TRUE, &flags)) {
-        FF_DEBUG("WSAGetOverlappedResult failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        IO_STATUS_BLOCK cancelIosb = {};
+        if (NT_SUCCESS(NtCancelIoFileEx((HANDLE) state->sockfd, (PIO_STATUS_BLOCK) &state->overlapped, &cancelIosb))) {
+            NtWaitForSingleObject(state->overlapped.hEvent, TRUE, &(LARGE_INTEGER) { .QuadPart = (int64_t) 10 * -10000 });
+        }
+        NtClose(state->overlapped.hEvent);
         closesocket(state->sockfd);
-        WSACloseEvent(state->overlapped.hEvent);
         ffStrbufDestroy(&state->command);
-        return "WSAGetOverlappedResult() failed";
+        return "GetOverlappedResultEx() failed or timeout";
     }
-    FF_DEBUG("WSAGetOverlappedResult succeeded, %u bytes sent", (unsigned) transfer);
+    FF_DEBUG("GetOverlappedResultEx succeeded, %u bytes sent", (unsigned) transfer);
     ffStrbufDestroy(&state->command);
-    WSACloseEvent(state->overlapped.hEvent);
+    NtClose(state->overlapped.hEvent);
     state->overlapped.hEvent = nullptr;
 
     if (setsockopt(state->sockfd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, nullptr, 0) != 0) {
@@ -322,6 +310,13 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 if (clHeader) {
                     contentLength = (uint32_t) strtoul(clHeader + 15, nullptr, 10);
                     if (contentLength > 0) {
+                        if (contentLength > 1024 * 1024) { // 1MB limit to prevent excessive memory allocation and potential attacks
+                            FF_DEBUG("Content-Length is too large: %u bytes, aborting", contentLength);
+                            closesocket(state->sockfd);
+                            state->sockfd = INVALID_SOCKET;
+                            return "Content-Length too large";
+                        }
+
                         FF_DEBUG("Detected Content-Length: %u, pre-allocating buffer", contentLength);
                         // Ensure buffer is large enough, adding header size and some margin
                         ffStrbufEnsureFree(buffer, contentLength + 16);
@@ -346,7 +341,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "No HTTP header end found";
     }
 
-    if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
+    if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n") && !ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);
         return "Invalid response";
     }

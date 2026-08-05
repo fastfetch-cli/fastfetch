@@ -116,5 +116,6 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         { "Init system exe path", "exe" },
         { "Init system version path", "version" },
         { "Init system pid", "pid" },
-    }))
+    })),
+    .defaultOrder = 10,
 };

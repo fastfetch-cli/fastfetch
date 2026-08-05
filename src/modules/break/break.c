@@ -33,4 +33,5 @@ FFModuleBaseInfo ffBreakModuleInfo = {
     .destroyOptions = (void*) ffDestroyBreakOptions,
     .parseJsonObject = (void*) ffParseBreakJsonObject,
     .printModule = (void*) ffPrintBreak,
+    .defaultOrder = 71,
 };

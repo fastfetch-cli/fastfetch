@@ -105,5 +105,6 @@ FFModuleBaseInfo ffIconsModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Icons part 1", "icons1" },
         { "Icons part 2", "icons2" },
-    }))
+    })),
+    .defaultOrder = 25,
 };

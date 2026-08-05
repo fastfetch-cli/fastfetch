@@ -175,7 +175,7 @@ static bool parseStructureCommand(
         for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(line[0]) - 'A']; *modules; ++modules) {
             FFModuleBaseInfo* baseInfo = *modules;
             if (ffStrEqualsIgnCase(line, baseInfo->name)) {
-                uint8_t optionBuf[FF_OPTION_MAX_SIZE];
+                alignas(uint64_t) uint8_t optionBuf[FF_OPTION_MAX_SIZE];
                 baseInfo->initOptions(optionBuf);
                 if (data->resultDoc != nullptr) {
                     fn(data, baseInfo, optionBuf);
@@ -244,11 +244,6 @@ void ffPrintCommandOption(FFdata* data) {
 }
 
 void ffMigrateCommandOptionToJsonc(FFdata* data) {
-    // If we don't have a custom structure, use the default one
-    if (data->structure.length == 0) {
-        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
-    }
-
     char* moduleType = nullptr;
     size_t moduleLen = 0;
     while (ffStrbufGetdelim(&moduleType, &moduleLen, ':', &data->structure)) {

@@ -34,6 +34,7 @@ typedef struct FFModuleBaseInfo {
     bool (*generateJsonResult)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module); // true on success
     void (*generateJsonConfig)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* obj);
     FFModuleFormatArgList formatArgs;
+    const uint8_t defaultOrder;
 } FFModuleBaseInfo;
 
 typedef enum FFModuleKeyType: uint8_t {

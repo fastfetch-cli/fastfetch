@@ -199,7 +199,8 @@ See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
 ### Q: Fastfetch shows fewer dpkg packages than neofetch. Is it a bug?
 
-Neofetch incorrectly counts `rc` packages (packages that have been removed but still have configuration files remaining). See bug: https://github.com/dylanaraps/neofetch/issues/2278
+1. Neofetch incorrectly counts `rc` packages for apt (packages that have been removed but still have configuration files remaining). See bug: https://github.com/dylanaraps/neofetch/issues/2278
+2. Neofetch incorrectly counts `gpg-pubkey` as packages for rpm. You may check the results of `dnf list --installed | wc -l` and `rpm -qa | wc -l` to see the difference.
 
 ### Q: I use Debian / Ubuntu / Debian-derived distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is this a bug?
 

@@ -511,4 +511,5 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         { "PCIe maximum speed in gen and lanes", "pcie-max-speed" },
         { "PCIe current speed in gen and lanes", "pcie-curr-speed" },
     })),
+    .defaultOrder = 36,
 };

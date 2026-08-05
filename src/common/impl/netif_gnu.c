@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
-    FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/route", "r");
+    FF_AUTO_CLOSE_FILE FILE* netRoute = fopen("/proc/route", "r");
 
     if (!netRoute) {
         return false;

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define FF_LIST_DEFAULT_ALLOC 16
 
@@ -110,6 +111,19 @@ static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
     return ffListGet(list, elementSize, list->length - 1);
 }
 
+static inline void ffListRemoveAt(FFlist* list, uint32_t elementSize, uint32_t index) {
+    assert(list->length > index);
+    memmove(list->data + (index * elementSize), list->data + ((index + 1) * elementSize), (size_t) (list->length - index - 1) * elementSize);
+    --list->length;
+}
+
+static inline void ffListInsertAt(FFlist* list, uint32_t elementSize, uint32_t index, const void* element) {
+    assert(list->length >= index);
+    ffListAdd(list, elementSize);
+    memmove(list->data + ((index + 1) * elementSize), list->data + (index * elementSize), (size_t) (list->length - index - 1) * elementSize);
+    memcpy(list->data + (index * elementSize), element, elementSize);
+}
+
 #define FF_LIST_FOR_EACH(itemType, itemVarName, listVar)                        \
     for (itemType* itemVarName = (itemType*) (listVar).data;                    \
         itemVarName - (itemType*) (listVar).data < (intptr_t) (listVar).length; \
@@ -125,6 +139,12 @@ static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
 
 #define FF_LIST_ADD(itemType, listVar) (itemType*) ffListAdd(&(listVar), (uint32_t) sizeof(itemType))
 
+#define FF_LIST_REMOVE_AT(itemType, listVar, index) \
+    ffListRemoveAt(&(listVar), (uint32_t) sizeof(itemType), (index))
+
+#define FF_LIST_INSERT_AT(itemType, listVar, index, pElement) \
+    ffListInsertAt(&(listVar), (uint32_t) sizeof(itemType), (index), (pElement))
+
 #define FF_LIST_FIRST(itemType, listVar) FF_LIST_GET(itemType, listVar, 0)
 #define FF_LIST_LAST(itemType, listVar)                         \
     ({                                                          \
@@ -134,9 +154,9 @@ static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
 
 #define FF_LIST_CONTAINS(listVar, pCompElement, compFunc)                                                                              \
     ({                                                                                                                                 \
-        typedef typeof(*(pCompElement)) compElementType;                                                                           \
+        typedef typeof(*(pCompElement)) compElementType;                                                                               \
         typedef bool compFuncType(const compElementType*, const compElementType*);                                                     \
-        static_assert(__builtin_types_compatible_p(typeof(compFunc), compFuncType), "Incompatible callback function");             \
+        static_assert(__builtin_types_compatible_p(typeof(compFunc), compFuncType), "Incompatible callback function");                 \
         ffListContains(&(listVar), (uint32_t) sizeof(*(pCompElement)), (pCompElement), (bool (*)(const void*, const void*)) compFunc); \
     })
 

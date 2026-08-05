@@ -3,6 +3,7 @@
 #include "detection/version/version.h"
 #include "logo/logo.h"
 #include "common/commandoption.h"
+#include "common/genconfig.h"
 #include "common/init.h"
 #include "common/io.h"
 #include "common/jsonconfig.h"
@@ -14,6 +15,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
+#ifndef _WIN32
+    #include <unistd.h>
+#else
+    #include <windows.h>
+    #include "common/windows/nt.h"
+#endif
 
 [[gnu::cold]]
 static void printCommandFormatHelpJson(void) {
@@ -432,12 +440,7 @@ static bool parseJsoncFile(FFdata* data, const char* path, yyjson_read_flag flg)
 }
 
 [[gnu::cold]]
-static void generateConfigFile(FFdata* data, bool force, const char* filePath, bool fullConfig) {
-    if (data->resultDoc) {
-        fprintf(stderr, "Error: duplicated `--gen-config` or `--format json` flags found\n");
-        exit(477);
-    }
-
+static void setupGenConfigPath(FFdata* data, const char* filePath) {
     if (!filePath) {
         if (instance.state.platform.configDirs.length == 0) {
             fprintf(stderr, "Error: No config directory found to generate config file in. Use --gen-config <path> to specify a path\n");
@@ -451,13 +454,23 @@ static void generateConfigFile(FFdata* data, bool force, const char* filePath, b
     } else {
         ffStrbufSetS(&data->genConfigPath, filePath);
     }
+}
 
-    if (!force && ffPathExists(data->genConfigPath.chars, FF_PATHTYPE_ANY)) {
-        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config%s-force` to overwrite\n", data->genConfigPath.chars, fullConfig ? "-full" : "");
+[[gnu::cold]]
+static void generateConfigFile(FFdata* data, const char* filePath) {
+    if (data->resultDoc) {
+        fprintf(stderr, "Error: duplicated `--gen-config` or `--format json` flags found\n");
         exit(477);
     }
 
-    data->docType = fullConfig ? FF_RESULT_DOC_TYPE_CONFIG_FULL : FF_RESULT_DOC_TYPE_CONFIG;
+    setupGenConfigPath(data, filePath);
+
+    if (ffPathExists(data->genConfigPath.chars, FF_PATHTYPE_ANY)) {
+        fprintf(stderr, "Error: file `%s` exists. Please remove it before generating a new one\n", data->genConfigPath.chars);
+        exit(477);
+    }
+
+    data->docType = FF_RESULT_DOC_TYPE_CONFIG;
     data->resultDoc = yyjson_mut_doc_new(nullptr);
 }
 
@@ -586,6 +599,19 @@ static void enableJsonOutput(FFdata* data) {
     yyjson_mut_doc_set_root(data->resultDoc, yyjson_mut_arr(data->resultDoc));
 }
 
+static void genConfigCommon(FFdata* data, const char* value) {
+    if (!getenv("NO_COLOR") && isatty(STDOUT_FILENO) && isatty(STDIN_FILENO)
+        #ifdef _WIN32
+            && ffIsWindows10OrGreater()
+        #endif
+    ) {
+        data->genConfigInteractive = true;
+        setupGenConfigPath(data, value);
+    } else {
+        generateConfigFile(data, value);
+    }
+}
+
 static void parseCommand(FFdata* data, char* key, char* value) {
     if (ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help")) {
         printCommandHelp(value);
@@ -647,13 +673,7 @@ static void parseCommand(FFdata* data, char* key, char* value) {
 
         exit(0);
     } else if (ffStrEqualsIgnCase(key, "--gen-config")) {
-        generateConfigFile(data, false, value, false);
-    } else if (ffStrEqualsIgnCase(key, "--gen-config-force")) {
-        generateConfigFile(data, true, value, false);
-    } else if (ffStrEqualsIgnCase(key, "--gen-config-full")) {
-        generateConfigFile(data, false, value, true);
-    } else if (ffStrEqualsIgnCase(key, "--gen-config-full-force")) {
-        generateConfigFile(data, true, value, true);
+        genConfigCommon(data, value);
     } else if (ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config")) {
         optionParseConfigFile(data, key, value);
     } else if (ffStrEqualsIgnCase(key, "-j") || ffStrEqualsIgnCase(key, "--json")) {
@@ -670,6 +690,12 @@ static void parseCommand(FFdata* data, char* key, char* value) {
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
         instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+    } else if (ffStrEqualsIgnCase(key, "-w") || ffStrEqualsIgnCase(key, "--watch")) {
+        if (value == nullptr) {
+            instance.state.dynamicInterval = 1000; // default to 1 second if no value is provided
+        } else {
+            instance.state.dynamicInterval = ffOptionParseUInt32(key, value) * 1000; // seconds to milliseconds
+        }
     } else {
         return;
     }
@@ -822,6 +848,14 @@ static void writeConfigFile(FFdata* data) {
         ffOptionsGenerateLogoJsonConfig(data, &instance.config.logo);
         ffOptionsGenerateDisplayJsonConfig(data, &instance.config.display);
         ffOptionsGenerateGeneralJsonConfig(data, &instance.config.general);
+    } else if (data->genConfigInteractive) {
+        if (instance.config.logo.type == FF_LOGO_TYPE_NONE) {
+            yyjson_mut_obj_add_null(doc, root, "logo");
+        } else if (instance.config.logo.type == FF_LOGO_TYPE_SMALL) {
+            yyjson_mut_val* logo = yyjson_mut_obj(doc);
+            yyjson_mut_obj_add_str(doc, logo, "type", "small");
+            yyjson_mut_obj_add_val(doc, root, "logo", logo);
+        }
     }
     ffMigrateCommandOptionToJsonc(data);
 
@@ -871,6 +905,18 @@ int main(int argc, char** argv) {
     if (__builtin_expect(data.genConfigPath.length == 0, true)) {
         run(&data);
     } else {
+        // If we don't have a custom structure, use the default one
+        if (data.structure.length == 0) {
+            ffStrbufSetS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
+        }
+        if (data.genConfigInteractive && !ffGenConfigInteractive(&data)) {
+            // User cancelled the interactive config generation
+            ffStrbufDestroy(&data.structure);
+            ffStrbufDestroy(&data.structureDisabled);
+            yyjson_doc_free(data.configDoc);
+            ffStrbufDestroy(&data.genConfigPath);
+            return 0;
+        }
         writeConfigFile(&data);
     }
 

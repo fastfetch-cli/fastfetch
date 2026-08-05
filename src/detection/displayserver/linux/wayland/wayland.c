@@ -217,6 +217,39 @@ uint32_t ffWaylandHandleRotation(WaylandDisplay* display) {
     return rotation;
 }
 
+const char* ffWaylandWaitForDone(WaylandDisplay* display) {
+    int32_t timeout = instance.config.general.processingTimeout;
+    struct timespec ts;
+    if (timeout == 0) {
+        return "timeout is disabled";
+    } else if (timeout > 0) {
+        if (!display->parent->ffwl_display_dispatch_timeout) {
+            return "timeout is enabled, but the libwayland-client version is too old to support it";
+        }
+        ts.tv_sec = timeout / 1000;
+        ts.tv_nsec = (timeout % 1000) * 1000000;
+    }
+
+    WaylandData* wldata = display->parent;
+
+    // Some compositors emit the final output state asynchronously after the roundtrip callback (#2074)
+    while (!display->done) {
+        if (timeout > 0) {
+            if (wldata->ffwl_display_dispatch_timeout(wldata->display, &ts) < 0) {
+                return "wl_display_dispatch_timeout() failed";
+            }
+        } else if (timeout < 0) {
+            if (wldata->ffwl_display_dispatch(wldata->display) < 0) {
+                return "wl_display_dispatch() failed";
+            }
+        } else {
+            return "Timeout exceeded, but the compositor did not send a done event";
+        }
+    }
+
+    return nullptr;
+}
+
 const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     if (getenv("XDG_RUNTIME_DIR") == nullptr) {
         return "Wayland requires $XDG_RUNTIME_DIR being set";
@@ -236,6 +269,12 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_destroy)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_display_roundtrip)
 
+    if (instance.config.general.processingTimeout < 0) {
+        FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(wayland, data, wl_display_dispatch)
+    } else if (instance.config.general.processingTimeout > 0) {
+        FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(wayland, data, wl_display_dispatch_timeout)
+    }
+
     data.display = ffwl_display_connect(nullptr);
     if (data.display == nullptr) {
         return "wl_display_connect returned nullptr";
@@ -253,7 +292,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
-        .global_remove = (void*) stubListener
+        .global_remove = (void*) ffUnused
     };
 
     data.ffwl_proxy_add_listener(registry, (void (**)(void)) &registry_listener, &data);

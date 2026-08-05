@@ -121,36 +121,35 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffDurationAppendNum((uint32_t) result->timeRemaining, &timeStr);
         }
 
-        FF_STRBUF_AUTO_DESTROY statusStr = ffStrbufCreate();
+        FF_LIST_AUTO_DESTROY status = ffListCreate();
         if (result->status & FF_BATTERY_STATUS_AC_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "AC Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "AC Connected");
         }
         if (result->status & FF_BATTERY_STATUS_USB_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "USB Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "USB Connected");
         }
         if (result->status & FF_BATTERY_STATUS_WIRELESS_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "Wireless Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Wireless Connected");
         }
         if (result->status & FF_BATTERY_STATUS_CHARGING) {
-            ffStrbufAppendS(&statusStr, "Charging, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Charging");
         }
         if (result->status & FF_BATTERY_STATUS_DISCHARGING) {
-            ffStrbufAppendS(&statusStr, "Discharging, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Discharging");
         }
         if (result->status & FF_BATTERY_STATUS_CRITICAL) {
-            ffStrbufAppendS(&statusStr, "Critical, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Critical");
         }
         if (result->status & FF_BATTERY_STATUS_UNKNOWN) {
-            ffStrbufAppendS(&statusStr, "Unknown, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Unknown");
         }
-        ffStrbufSubstrBefore(&statusStr, statusStr.length - 2); // Remove last ", "
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                      FF_ARG(result->manufacturer, "manufacturer"),
                                                                                                      FF_ARG(result->modelName, "model-name"),
                                                                                                      FF_ARG(result->technology, "technology"),
                                                                                                      FF_ARG(capacityNum, "capacity"),
-                                                                                                     FF_ARG(statusStr, "status"),
+                                                                                                     FF_ARG(status, "status"),
                                                                                                      FF_ARG(tempStr, "temperature"),
                                                                                                      FF_ARG(result->cycleCount, "cycle-count"),
                                                                                                      FF_ARG(result->serial, "serial"),
@@ -322,5 +321,6 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         { "Battery time remaining minutes", "time-minutes" },
         { "Battery time remaining seconds", "time-seconds" },
         { "Battery time remaining (formatted)", "time-formatted" },
-    }))
+    })),
+    .defaultOrder = 44,
 };

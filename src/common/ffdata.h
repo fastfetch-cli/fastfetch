@@ -19,4 +19,5 @@ typedef struct FFdata {
     FFstrbuf genConfigPath;      // Path to generate configuration file
     FFDataResultDocType docType; // Type of result document
     bool configLoaded;
+    bool genConfigInteractive; // `--gen-config` entered the interactive CUI
 } FFdata;

@@ -121,5 +121,6 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         { "Board vendor", "vendor" },
         { "Board version", "version" },
         { "Board serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 7,
 };

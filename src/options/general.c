@@ -24,12 +24,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         } else if (unsafe_yyjson_equals_str(key, "processingTimeout")) {
             options->processingTimeout = (int32_t) yyjson_get_int(val);
         } else if (unsafe_yyjson_equals_str(key, "preRun")) {
-            if (!yyjson_is_str(val)) {
-                return "general.preRun must be a string";
-            }
-            if (system(unsafe_yyjson_get_str(val)) < 0) {
-                return "Failed to execute preRun command";
-            }
+            return "general.preRun is removed due to security concerns.";
         } else if (unsafe_yyjson_equals_str(key, "detectVersion")) {
             options->detectVersion = yyjson_get_bool(val);
         } else if (unsafe_yyjson_equals_str(key, "playerName")) {

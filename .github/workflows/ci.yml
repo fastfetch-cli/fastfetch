@@ -54,6 +54,15 @@ jobs:
     uses: ./.github/workflows/build-linux-armv7l.yml
     secrets: inherit
 
+  linux-loong64:
+    needs: no-features-test
+    name: Linux-loong64
+    permissions:
+      security-events: write
+      contents: read
+    uses: ./.github/workflows/build-linux-loong64.yml
+    secrets: inherit
+
   linux-vms:
     needs: no-features-test
     name: Linux-${{ matrix.arch }}
@@ -145,6 +154,7 @@ jobs:
     secrets: inherit
 
   haiku-amd64:
+    if: false # Disabled because the Haiku build is currently broken
     needs: no-features-test
     name: Haiku-amd64
     permissions:
@@ -188,6 +198,7 @@ jobs:
       - linux-hosts
       - linux-i686
       - linux-armv7l
+      - linux-loong64
       - linux-vms
       - musl-amd64
       - macos-hosts
@@ -197,7 +208,7 @@ jobs:
       - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
-      - haiku-amd64
+      # - haiku-amd64
       - windows-hosts
     permissions:
       contents: write

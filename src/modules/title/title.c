@@ -197,5 +197,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         { "UID (*nix) / SID (Windows)", "user-id" },
         { "PID of current process", "pid" },
         { "CWD with home dir replaced by `~`", "cwd" },
-    }))
+    })),
+    .defaultOrder = 1,
 };

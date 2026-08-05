@@ -100,6 +100,79 @@ int main(void) {
     VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 2);
     VERIFY(*FF_LIST_GET(uint32_t, list, list.length - 1) == FF_LIST_DEFAULT_ALLOC);
 
+    // insertAt
+    ffListClear(&list);
+    for (uint32_t i = 1; i <= 5; ++i) {
+        *FF_LIST_ADD(uint32_t, list) = i;
+    }
+    // list = [1,2,3,4,5]
+
+    {
+        uint32_t v = 0;
+        FF_LIST_INSERT_AT(uint32_t, list, 0, &v); // insert at head
+    }
+    VERIFY(list.length == 6);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 0);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 1) == 1);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 5) == 5);
+    // list = [0,1,2,3,4,5]
+
+    {
+        uint32_t v = 99;
+        FF_LIST_INSERT_AT(uint32_t, list, 3, &v); // insert in the middle
+    }
+    VERIFY(list.length == 7);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 2) == 2);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 3) == 99);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 4) == 3);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 6) == 5);
+    // list = [0,1,2,99,3,4,5]
+
+    {
+        uint32_t v = 6;
+        FF_LIST_INSERT_AT(uint32_t, list, list.length, &v); // insert at tail
+    }
+    VERIFY(list.length == 8);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 3) == 99);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 7) == 6);
+    // list = [0,1,2,99,3,4,5,6]
+
+    ffListClear(&list);
+    {
+        uint32_t v = 42;
+        FF_LIST_INSERT_AT(uint32_t, list, 0, &v); // insert into empty list
+    }
+    VERIFY(list.length == 1);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 42);
+
+    // removeAt
+    FF_LIST_REMOVE_AT(uint32_t, list, 0); // remove the only element
+    VERIFY(list.length == 0);
+
+    for (uint32_t i = 1; i <= 5; ++i) {
+        *FF_LIST_ADD(uint32_t, list) = i;
+    }
+    // list = [1,2,3,4,5]
+
+    FF_LIST_REMOVE_AT(uint32_t, list, 0); // remove head
+    VERIFY(list.length == 4);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 2);
+    VERIFY(*FF_LIST_GET(uint32_t, list, list.length - 1) == 5);
+    // list = [2,3,4,5]
+
+    FF_LIST_REMOVE_AT(uint32_t, list, 1); // remove in the middle
+    VERIFY(list.length == 3);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 2);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 1) == 4);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 2) == 5);
+    // list = [2,4,5]
+
+    FF_LIST_REMOVE_AT(uint32_t, list, list.length - 1); // remove tail
+    VERIFY(list.length == 2);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 0) == 2);
+    VERIFY(*FF_LIST_GET(uint32_t, list, 1) == 4);
+    // list = [2,4]
+
     // Destroy
     ffListDestroy(&list);
 

@@ -207,5 +207,6 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         { "Vendor", "vendor" },
         { "Discoverable", "discoverable" },
         { "Connectable / Pairable", "connectable" },
-    }))
+    })),
+    .defaultOrder = 59,
 };

@@ -25,6 +25,11 @@ static void waylandOutputScaleListener(void* data, [[maybe_unused]] struct wl_ou
     display->dpi = 96 * (uint32_t) scale;
 }
 
+static void waylandOutputDoneListener(void* data, [[maybe_unused]] struct wl_output* output) {
+    WaylandDisplay* display = data;
+    display->done = true;
+}
+
 static void waylandOutputGeometryListener(void* data,
     [[maybe_unused]] struct wl_output* output,
     [[maybe_unused]] int32_t x,
@@ -49,24 +54,19 @@ static void handleXdgLogicalSize(void* data, [[maybe_unused]] struct zxdg_output
     }
 }
 
-// Dirty hack for #477
-// The order of these callbacks MUST follow `struct wl_output_listener`
-static void* outputListener[] = {
-    waylandOutputGeometryListener,      // geometry
-    waylandOutputModeListener,          // mode
-    stubListener,                       // done
-    waylandOutputScaleListener,         // scale
-    ffWaylandOutputNameListener,        // name
-    ffWaylandOutputDescriptionListener, // description
+static struct wl_output_listener outputListener = {
+    .geometry = waylandOutputGeometryListener,
+    .mode = waylandOutputModeListener,
+    .done = waylandOutputDoneListener,
+    .scale = waylandOutputScaleListener,
+    .name = (void*) ffWaylandOutputNameListener,
+    .description = (void*) ffWaylandOutputDescriptionListener,
 };
-static_assert(
-    sizeof(outputListener) >= sizeof(struct wl_output_listener),
-    "sizeof(outputListener) is too small. Please report it to fastfetch github issue");
 
 static struct zxdg_output_v1_listener zxdgOutputListener = {
-    .logical_position = (void*) stubListener,
+    .logical_position = (void*) ffUnused,
     .logical_size = handleXdgLogicalSize,
-    .done = (void*) stubListener,
+    .done = (void*) ffUnused,
     .name = (void*) ffWaylandOutputNameListener,
     .description = (void*) ffWaylandOutputDescriptionListener,
 };
@@ -84,17 +84,17 @@ static void handleWpTfNamed(void *data, [[maybe_unused]] struct wp_image_descrip
 }
 
 static const struct wp_image_description_info_v1_listener wpImageDescInfoListener = {
-    .done = (void*) stubListener,
-    .icc_file = (void*) stubListener,
-    .primaries = (void*) stubListener,
-    .primaries_named = (void*) stubListener,
-    .tf_power = (void*) stubListener,
+    .done = (void*) ffUnused,
+    .icc_file = (void*) ffUnused,
+    .primaries = (void*) ffUnused,
+    .primaries_named = (void*) ffUnused,
+    .tf_power = (void*) ffUnused,
     .tf_named = (void*) handleWpTfNamed,
-    .luminances = (void*) stubListener,
-    .target_primaries = (void*) stubListener,
-    .target_luminance = (void*) stubListener,
-    .target_max_cll = (void*) stubListener,
-    .target_max_fall = (void*) stubListener,
+    .luminances = (void*) ffUnused,
+    .target_primaries = (void*) ffUnused,
+    .target_luminance = (void*) ffUnused,
+    .target_max_cll = (void*) ffUnused,
+    .target_max_fall = (void*) ffUnused,
 };
 
 const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {
@@ -121,6 +121,13 @@ const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry*
     if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip wl_output";
+    }
+    if (bindVersion >= WL_OUTPUT_DONE_SINCE_VERSION && !display.done) {
+        const char* error = ffWaylandWaitForDone(&display);
+        if (error) {
+            wldata->ffwl_proxy_destroy(output);
+            return error;
+        }
     }
 
     if (wldata->zxdgOutputManager) {

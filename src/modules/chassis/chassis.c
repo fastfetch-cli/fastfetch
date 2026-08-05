@@ -124,4 +124,5 @@ FFModuleBaseInfo ffChassisModuleInfo = {
         { "Chassis version", "version" },
         { "Chassis serial number", "serial" },
     })),
+    .defaultOrder = 8,
 };

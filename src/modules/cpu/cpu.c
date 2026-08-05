@@ -276,5 +276,6 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         { "CPU code name", "code-name" },
         { "CPU technology", "technology" },
         #endif
-    }))
+    })),
+    .defaultOrder = 33,
 };

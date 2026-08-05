@@ -31,7 +31,7 @@ jobs:
       - name: Update and install dependencies
         run: |
           sudo pkg update
-          sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa lua54 libva libvdpau
+          sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3 egl opencl ocl-icd v4l_compat chafa lua54 libva libvdpau
 
       - name: CMake configuration
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} .

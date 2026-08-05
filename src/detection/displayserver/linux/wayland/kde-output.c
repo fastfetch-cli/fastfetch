@@ -33,8 +33,8 @@ static const struct kde_output_device_mode_v2_listener modeListener = {
     .size = waylandKdeModeSizeListener,
     .refresh = waylandKdeModeRefreshListener,
     .preferred = waylandKdeModePreferredListener,
-    .removed = (void*) stubListener,
-    .flags = (void*) stubListener,
+    .removed = (void*) ffUnused,
+    .flags = (void*) ffUnused,
 };
 
 static void waylandKdeModeListener(void* data, [[maybe_unused]] struct kde_output_device_v2* _, struct kde_output_device_mode_v2* mode) {
@@ -57,23 +57,22 @@ static void waylandKdeCurrentModeListener(void* data, [[maybe_unused]] struct kd
         return;
     }
 
-    int set = 0;
+    bool foundCurrent = false, foundPreferred = false;
     FF_LIST_FOR_EACH (WaylandKdeMode, m, *(FFlist*) wldata->internal) {
-        if (m->pMode == mode) {
+        if (!foundCurrent && m->pMode == mode) {
             wldata->width = m->width;
             wldata->height = m->height;
             wldata->refreshRate = m->refreshRate;
-            if (++set == 2) {
-                break;
-            }
+            foundCurrent = true;
         }
-        if (m->preferred) {
+        if (!foundPreferred && m->preferred) {
             wldata->preferredWidth = m->width;
             wldata->preferredHeight = m->height;
             wldata->preferredRefreshRate = m->refreshRate;
-            if (++set == 2) {
-                break;
-            }
+            foundPreferred = true;
+        }
+        if (foundCurrent && foundPreferred) {
+            break;
         }
     }
 }
@@ -147,47 +146,52 @@ static void waylandKdePriorityListener(void* data, [[maybe_unused]] struct kde_o
     display->primary = priority == 1;
 }
 
+static void waylandKdeDoneListener(void* data, [[maybe_unused]] struct kde_output_device_v2* kde_output_device_v2) {
+    WaylandDisplay* display = data;
+    display->done = true;
+}
+
 static struct kde_output_device_v2_listener outputListener = {
     .geometry = waylandKdeGeometryListener,
     .current_mode = waylandKdeCurrentModeListener,
     .mode = waylandKdeModeListener,
-    .done = (void*) stubListener,
+    .done = waylandKdeDoneListener,
     .scale = waylandKdeScaleListener,
     .edid = waylandKdeEdidListener,
     .enabled = waylandKdeEnabledListener,
-    .uuid = (void*) stubListener,
-    .serial_number = (void*) stubListener,
-    .eisa_id = (void*) stubListener,
-    .capabilities = (void*) stubListener,
-    .overscan = (void*) stubListener,
-    .vrr_policy = (void*) stubListener,
-    .rgb_range = (void*) stubListener,
+    .uuid = (void*) ffUnused,
+    .serial_number = (void*) ffUnused,
+    .eisa_id = (void*) ffUnused,
+    .capabilities = (void*) ffUnused,
+    .overscan = (void*) ffUnused,
+    .vrr_policy = (void*) ffUnused,
+    .rgb_range = (void*) ffUnused,
     .name = waylandKdeNameListener,
     .high_dynamic_range = waylandKdeHdrListener,
-    .sdr_brightness = (void*) stubListener,
-    .wide_color_gamut = (void*) stubListener,
-    .auto_rotate_policy = (void*) stubListener,
-    .icc_profile_path = (void*) stubListener,
-    .brightness_metadata = (void*) stubListener,
-    .brightness_overrides = (void*) stubListener,
-    .sdr_gamut_wideness = (void*) stubListener,
-    .color_profile_source = (void*) stubListener,
-    .brightness = (void*) stubListener,
-    .color_power_tradeoff = (void*) stubListener,
-    .dimming = (void*) stubListener,
-    .replication_source = (void*) stubListener,
-    .ddc_ci_allowed = (void*) stubListener,
+    .sdr_brightness = (void*) ffUnused,
+    .wide_color_gamut = (void*) ffUnused,
+    .auto_rotate_policy = (void*) ffUnused,
+    .icc_profile_path = (void*) ffUnused,
+    .brightness_metadata = (void*) ffUnused,
+    .brightness_overrides = (void*) ffUnused,
+    .sdr_gamut_wideness = (void*) ffUnused,
+    .color_profile_source = (void*) ffUnused,
+    .brightness = (void*) ffUnused,
+    .color_power_tradeoff = (void*) ffUnused,
+    .dimming = (void*) ffUnused,
+    .replication_source = (void*) ffUnused,
+    .ddc_ci_allowed = (void*) ffUnused,
     .max_bits_per_color = (void*) waylandKdeMaxBitsPerColorListener,
-    .max_bits_per_color_range = (void*) stubListener,
-    .automatic_max_bits_per_color_limit = (void*) stubListener,
-    .edr_policy = (void*) stubListener,
-    .sharpness = (void*) stubListener,
+    .max_bits_per_color_range = (void*) ffUnused,
+    .automatic_max_bits_per_color_limit = (void*) ffUnused,
+    .edr_policy = (void*) ffUnused,
+    .sharpness = (void*) ffUnused,
     .priority = waylandKdePriorityListener,
-    .auto_brightness = (void*) stubListener,
-    .removed = (void*) stubListener,
-    .hdr_icc_profile_path = (void*) stubListener,
-    .hdr_color_profile_source = (void*) stubListener,
-    .abm_level = (void*) stubListener,
+    .auto_brightness = (void*) ffUnused,
+    .removed = (void*) ffUnused,
+    .hdr_icc_profile_path = (void*) ffUnused,
+    .hdr_color_profile_source = (void*) ffUnused,
+    .abm_level = (void*) ffUnused,
 };
 
 static const char* waylandKdeHandleOutput(WaylandData* wldata, struct wl_proxy* output) {
@@ -210,6 +214,13 @@ static const char* waylandKdeHandleOutput(WaylandData* wldata, struct wl_proxy* 
     if (wldata->ffwl_display_roundtrip(wldata->display) < 0) {
         wldata->ffwl_proxy_destroy(output);
         return "Failed to roundtrip kde_output_device_v2";
+    }
+    if (!display.done) {
+        const char* error = ffWaylandWaitForDone(&display);
+        if (error) {
+            wldata->ffwl_proxy_destroy(output);
+            return error;
+        }
     }
     // Destroy any mode proxies that were created during the listeners.
     // wl proxies created for modes are not automatically freed by destroying
@@ -288,7 +299,7 @@ static void waylandKdeOutputListener(void* data, [[maybe_unused]] struct kde_out
 
 static struct kde_output_device_registry_v2_listener registryListener = {
     .output = waylandKdeOutputListener,
-    .finished = (void*) stubListener,
+    .finished = (void*) ffUnused,
 };
 
 const char* ffWaylandHandleKdeOutputRegistry(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version) {

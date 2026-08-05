@@ -144,5 +144,6 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         { "BIOS vendor", "vendor" },
         { "BIOS version", "version" },
         { "Firmware type", "type" },
-    }))
+    })),
+    .defaultOrder = 5,
 };

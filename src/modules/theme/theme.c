@@ -98,5 +98,6 @@ FFModuleBaseInfo ffThemeModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Theme part 1", "theme1" },
         { "Theme part 2", "theme2" },
-    }))
+    })),
+    .defaultOrder = 24,
 };
