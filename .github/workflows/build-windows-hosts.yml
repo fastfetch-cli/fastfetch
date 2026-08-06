@@ -94,7 +94,7 @@ jobs:
 
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         name: submit signing request
-        uses: signpath/github-action-submit-signing-request@ced31329c0317e779dad2eec2a7c3bb46ea1343e # v1.3
+        uses: signpath/github-action-submit-signing-request@b9d91eadd323de506c0c81cf0c7fe7438f3360fd # v2.2
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
