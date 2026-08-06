@@ -14,6 +14,10 @@ on:
         description: fastfetch version from linux host build
         value: ${{ jobs.build.outputs.ffversion }}
 
+permissions:
+  security-events: write
+  contents: read
+
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
 
@@ -24,7 +28,7 @@ jobs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: uname -a
         run: uname -a
@@ -48,7 +52,7 @@ jobs:
 
       - name: Initialize CodeQL
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           languages: c
 
@@ -60,7 +64,7 @@ jobs:
 
       - name: perform CodeQL analysis
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
 
       - name: list features
         run: ./fastfetch --list-features
@@ -97,7 +101,7 @@ jobs:
           cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-linux-${{ inputs.arch }}
           path: ./fastfetch-*.*

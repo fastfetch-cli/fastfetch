@@ -18,6 +18,18 @@ on:
       msys-arch:
         required: true
         type: string
+    secrets:
+      SIGNPATH_API_TOKEN:
+        description: SignPath REST API token used to submit the signing request
+        # Optional so that runs without the secret (pull requests, forks)
+        # still work; the signing step is skipped there anyway.
+        required: false
+
+permissions:
+  contents: read
+  # The SignPath action reads job details and downloads the unsigned
+  # artifact with the workflow token.
+  actions: read
 
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
@@ -30,10 +42,10 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: setup-msys2
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
           msystem: ${{ inputs.msystem }}
           update: true
@@ -72,7 +84,7 @@ jobs:
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         id: upload-unsigned-artifact
         name: upload artifacts for signing
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: |
@@ -82,7 +94,7 @@ jobs:
 
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         name: submit signing request
-        uses: signpath/github-action-submit-signing-request@v1
+        uses: signpath/github-action-submit-signing-request@b9d91eadd323de506c0c81cf0c7fe7438f3360fd # v2.2
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
@@ -99,7 +111,7 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ inputs.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: ./fastfetch-windows-${{ inputs.arch }}.*

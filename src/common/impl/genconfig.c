@@ -2,8 +2,10 @@
 
 #include "fastfetch.h"
 
+#include "common/color.h"
 #include "common/io.h"
 #include "common/strutil.h"
+#include "common/textModifier.h"
 #include "detection/terminalsize/terminalsize.h"
 #include "modules/modules.h"
 
@@ -409,86 +411,14 @@ static void rowAppendVisual(FFRow* row, const char* s) {
     row->visualCol += ffUtf8StrWidth(s, len);
 }
 
-static void rowAppendVisualTruncated(FFRow* row, const char* s, uint32_t maxWidth) {
-    uint32_t total = (uint32_t) strlen(s);
-    uint32_t bytes = total;
-    if (ffUtf8StrWidth(s, total) > maxWidth) {
-        bytes = 0;
-        uint32_t used = 0;
-        const char* p = s;
-        uint32_t remaining = total;
-        while (remaining > 0 && used < maxWidth) {
-            uint8_t w = 0;
-            uint8_t cbytes = ffUtf8CharLenWidth(p, remaining, &w);
-            if (cbytes == 0 || used + w > maxWidth) {
-                break;
-            }
-            used += w;
-            bytes += cbytes;
-            p += cbytes;
-            remaining -= cbytes;
-        }
-    }
-    ffStrbufAppendNS(&row->buf, bytes, s);
-    row->visualCol += ffUtf8StrWidth(s, bytes);
-}
-
 static void rowPadVisual(FFRow* row, uint32_t col) {
-    while (row->visualCol < col) {
-        ffStrbufAppendC(&row->buf, ' ');
-        ++row->visualCol;
+    if (row->visualCol < col) {
+        ffStrbufAppendNC(&row->buf, col - row->visualCol, ' ');
+        row->visualCol = col;
     }
-}
-
-static uint32_t rowAnsiSeqLength(const char* s, uint32_t length) {
-    uint32_t i = 1;
-    while (i < length) {
-        uint8_t c = (uint8_t) s[i];
-        if (c >= 0x40 && c <= 0x7e) {
-            return i + 1;
-        }
-        ++i;
-    }
-    return length;
-}
-
-static void truncateRow(FFRow* row) {
-    FFstrbuf src = row->buf;
-    ffStrbufInitA(&row->buf, row->cols + 32);
-    uint32_t used = 0;
-    uint32_t remaining = src.length;
-    const char* p = src.chars;
-    while (remaining > 0 && used < row->cols) {
-        if (*p == '\x1b') {
-            uint32_t len = rowAnsiSeqLength(p, remaining);
-            ffStrbufAppendNS(&row->buf, len, p);
-            p += len;
-            remaining -= len;
-        } else {
-            uint8_t w = 0;
-            uint8_t cbytes = ffUtf8CharLenWidth(p, remaining, &w);
-            if (cbytes == 0) {
-                cbytes = 1;
-                w = 1;
-            }
-            if (used + w > row->cols) {
-                break;
-            }
-            ffStrbufAppendNS(&row->buf, cbytes, p);
-            used += w;
-            p += cbytes;
-            remaining -= cbytes;
-        }
-    }
-    ffStrbufDestroy(&src);
-    row->visualCol = used;
 }
 
 static void finishRow(FFRow* row, FFstrbuf* out, bool isLastRow) {
-    if (row->visualCol > row->cols) {
-        truncateRow(row);
-        ffStrbufAppendS(&row->buf, "\e[m");
-    }
     if (row->visualCol < row->cols) {
         rowPadVisual(row, row->cols);
     }
@@ -500,71 +430,67 @@ static void finishRow(FFRow* row, FFstrbuf* out, bool isLastRow) {
     ffStrbufDestroy(&row->buf);
 }
 
-static void drawModuleItem(FFRow* row, const FFGenConfigItem* item, uint32_t cellWidth, bool highlight) {
-    const uint32_t nameMax = cellWidth > 4 ? cellWidth - 4 : 0;
-
+static void drawModuleItem(FFRow* row, const FFGenConfigItem* item, bool highlight) {
     if (item->baseInfo == &ffBreakModuleInfo) {
-        rowAppendRaw(row, highlight ? "\e[1;95;7m" : "\e[1;95m");
-        ffStrbufAppendS(&row->buf, "[─]");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_MAGENTA "m" : "\e[" FF_COLOR_FG_MAGENTA "m");
+        ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[1;95;7m" : "\e[1;95m");
-        rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_MAGENTA "m");
+        rowAppendVisual(row, item->baseInfo->name);
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         return;
     }
     if (item->baseInfo == &ffSeparatorModuleInfo) {
-        rowAppendRaw(row, highlight ? "\e[1;96;7m" : "\e[1;96m");
-        ffStrbufAppendS(&row->buf, "[═]");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_CYAN "m" : "\e[" FF_COLOR_FG_CYAN "m");
+        ffStrbufAppendS(&row->buf, "[-]");
         row->visualCol += 3;
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[1;96;7m" : "\e[1;96m");
-        rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_CYAN "m");
+        rowAppendVisual(row, item->baseInfo->name);
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         return;
     }
 
     if (item->status == FF_GEN_CONFIG_ITEM_STATUS_SELECTED) {
-        rowAppendRaw(row, highlight ? "\e[1;92;7m" : "\e[1;92m");
+        rowAppendRaw(row, highlight ? "\e[" FF_COLOR_MODE_INVERSE FF_COLOR_FG_GREEN "m" : "\e[" FF_COLOR_FG_GREEN "m");
         ffStrbufAppendS(&row->buf, "[x]");
         row->visualCol += 3;
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendRaw(row, highlight ? "\e[1;97;7m" : "\e[1;97m");
-        rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
+        rowAppendVisual(row, item->baseInfo->name);
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     } else {
-        rowAppendRaw(row, highlight ? "\e[90;7m" : "\e[90m");
+        if (highlight) {
+            rowAppendRaw(row, "\e[" FF_COLOR_MODE_INVERSE_ "m");
+        }
         ffStrbufAppendS(&row->buf, "[ ]");
         row->visualCol += 3;
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
         rowAppendVisual(row, " ");
-        rowAppendVisualTruncated(row, item->baseInfo->name, nameMax);
-        rowAppendRaw(row, "\e[m");
+        rowAppendVisual(row, item->baseInfo->name);
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
 }
 
 static void drawItemCell(FFRow* row, uint32_t startCol, uint32_t cellWidth, const FFGenConfigItem* item, bool highlight) {
     rowPadVisual(row, startCol);
-    drawModuleItem(row, item, cellWidth, highlight);
+    drawModuleItem(row, item, highlight);
     rowPadVisual(row, startCol + cellWidth);
 }
 
 static void drawLogoOption(FFRow* row, const char* name, bool active) {
     if (active) {
-        rowAppendRaw(row, "\e[1;92m");
-        rowAppendVisual(row, "● ");
-        rowAppendRaw(row, "\e[m");
-        rowAppendRaw(row, "\e[1m");
+        rowAppendRaw(row, "\e[" FF_COLOR_FG_GREEN "m");
+        rowAppendVisual(row, "[x] ");
         rowAppendVisual(row, name);
-        rowAppendRaw(row, "\e[m");
+        rowAppendRaw(row, FASTFETCH_TEXT_MODIFIER_RESET);
     } else {
-        rowAppendRaw(row, "\e[90m");
-        rowAppendVisual(row, "○ ");
+        rowAppendVisual(row, "[ ] ");
         rowAppendVisual(row, name);
-        rowAppendRaw(row, "\e[m");
     }
 }
 
@@ -586,17 +512,14 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 0: title
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[1;36m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
     rowAppendVisual(&row, "fastfetch");
-    rowAppendRaw(&row, "\e[m");
-    rowAppendRaw(&row, "\e[1m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     rowAppendVisual(&row, " configuration");
-    rowAppendRaw(&row, "\e[m");
     if (cols >= 48) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[90m");
-        rowAppendVisual(&row, "interactive config generator");
-        rowAppendRaw(&row, "\e[m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        rowAppendVisual(&row, "    interactive config generator");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
@@ -607,9 +530,11 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 2: logo type
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[1;97m");
-    rowAppendVisual(&row, "Logo type:");
-    rowAppendRaw(&row, "\e[m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendVisual(&row, "L");
+    rowAppendRaw(&row, "\e[24m"); // Reset underline
+    rowAppendVisual(&row, "ogo type:");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "default", ui->logoType == FF_LOGO_TYPE_AUTO);
     rowAppendVisual(&row, "  ");
@@ -617,28 +542,42 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "none", ui->logoType == FF_LOGO_TYPE_NONE);
     if (cols >= 72) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[90m");
-        rowAppendVisual(&row, "(l)");
-        rowAppendRaw(&row, "\e[m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        switch (ui->logoType) {
+            case FF_LOGO_TYPE_AUTO:
+                rowAppendVisual(&row, " - Built-in ASCII art");
+                break;
+            case FF_LOGO_TYPE_SMALL:
+                rowAppendVisual(&row, " - Built-in ASCII art, small version");
+                break;
+            default:
+                rowAppendVisual(&row, " - Disable logo printing");
+                break;
+        }
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
     // Row 3: output mode
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[1;97m");
-    rowAppendVisual(&row, "Output:");
-    rowAppendRaw(&row, "\e[m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendVisual(&row, "O");
+    rowAppendRaw(&row, "\e[24m"); // Reset underline
+    rowAppendVisual(&row, "utput:");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "minimal", !ui->fullConfig);
     rowAppendVisual(&row, "  ");
     drawLogoOption(&row, "full", ui->fullConfig);
     if (cols >= 64) {
-        rowAppendVisual(&row, "    ");
-        rowAppendRaw(&row, "\e[90m");
-        rowAppendVisual(&row, "(o)");
-        rowAppendRaw(&row, "\e[m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        if (ui->fullConfig) {
+            rowAppendVisual(&row, " - Full JSON config with all module options");
+        } else {
+            rowAppendVisual(&row, " - Minimal JSON config");
+        }
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
@@ -649,14 +588,12 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     // Row 5: modules title
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
-    rowAppendRaw(&row, "\e[1;97m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
     rowAppendVisual(&row, "Modules:");
-    rowAppendRaw(&row, "\e[m");
-    rowAppendRaw(&row, "\e[92m");
-    FF_STRBUF_AUTO_DESTROY counter = ffStrbufCreateA(32);
-    ffStrbufAppendF(&counter, "  [%u/%u selected]", selectedCount, moduleCount);
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET "\e[" FF_COLOR_FG_GREEN "m");
+    FF_STRBUF_AUTO_DESTROY counter = ffStrbufCreateF("  [%u/%u selected]", selectedCount, moduleCount);
     rowAppendVisual(&row, counter.chars);
-    rowAppendRaw(&row, "\e[m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
 
     // Row 6: blank
@@ -687,29 +624,34 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
         const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, ui->cursor);
         if (item->baseInfo && item->baseInfo->description) {
             rowAppendVisual(&row, "  ");
-            rowAppendRaw(&row, "\e[90m");
-            rowAppendVisualTruncated(&row, item->baseInfo->description, cols > 4 ? cols - 4 : 1);
-            rowAppendRaw(&row, "\e[m");
+            rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
+            rowAppendVisual(&row, item->baseInfo->description);
+            rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
         }
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
     // Help lines
     rowInit(&row, cols);
-    rowAppendRaw(&row, "\e[90m");
-    rowAppendVisual(&row, "  ↑/↓ k/j move  ←/→ col  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
+    rowAppendVisual(&row, "  "
+#if _WIN32 || __APPLE__ || __linux__ || (__FreeBSD__ && !__DragonFly__)
+                          "↑/↓ k/j move  ←/→ col"
+#else
+                          "^/v k/j move  </> col"
+#endif
+                          "  Space toggle  f/F all/invert  K/J reorder  b/B break/sep  d/D del");
     if (ui->confirmingOverwrite) {
-        rowAppendRaw(&row, "\e[m");
-        rowAppendRaw(&row, "\e[1;93m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET "\e[" FF_COLOR_MODE_BOLD FF_COLOR_FG_YELLOW "m");
         rowAppendVisual(&row, "  File exists. Overwrite? (y/N)");
-        rowAppendRaw(&row, "\e[m");
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
     rowInit(&row, cols);
-    rowAppendRaw(&row, "\e[90m");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
     rowAppendVisual(&row, "  l/L logo  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
-    rowAppendRaw(&row, "\e[m");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
 
     ffStrbufAppendS(out, "\e[J");
@@ -977,7 +919,6 @@ static int runCui(FFGenConfigUI* ui, bool fileExists) {
         FF_STRBUF_AUTO_DESTROY frame = ffStrbufCreateA((uint32_t) ui->cols * ((uint32_t) ui->rows + 4));
         renderFrame(ui, &frame);
         ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), frame.length, frame.chars);
-        fflush(stdout);
 
         char ch = 0;
         FFGenConfigKey key = readKey(&ch);
@@ -1040,13 +981,13 @@ bool ffGenConfigInteractive(FFdata* data) {
 
     getTerminalSize(&ui.rows, &ui.cols);
     enterRawMode();
-    ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), strlen("\e[?1049h\e[?25l"), "\e[?1049h\e[?25l");
+    ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), strlen("\e[?1049h\e[?25l\e[?7l"), "\e[?1049h\e[?25l\e[?7l");
 
     const bool fileExists = ffPathExists(data->genConfigPath.chars, FF_PATHTYPE_ANY);
     int result = runCui(&ui, fileExists);
 
     restoreRawMode();
-    ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), strlen("\e[?1049l\e[?25h\e[m"), "\e[?1049l\e[?25h\e[m");
+    ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), strlen("\e[?1049l\e[?25h\e[?7h" FASTFETCH_TEXT_MODIFIER_RESET), "\e[?1049l\e[?25h\e[?7h" FASTFETCH_TEXT_MODIFIER_RESET);
 
     bool success = false;
     if (result == 1) {
