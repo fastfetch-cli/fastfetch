@@ -1555,7 +1555,7 @@ elseif(Haiku)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 elseif(GNU)
     # On Hurd PATH_MAX is not defined. Set an arbitrary limit as workaround.
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE PATH_MAX=4096 O_PATH=0)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE PATH_MAX=4096 O_PATH=O_NORW)
 endif()
 
 if(APPLE)
