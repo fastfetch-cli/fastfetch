@@ -182,7 +182,7 @@ static const FFlogo C[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_CGOS
     // CGOS
     {
-        .names = { "cgos", "CGOS" },
+        .names = { "CGOS" },
         .lines = FASTFETCH_DATATEXT_LOGO_CGOS,
         .colors = {
             FF_COLOR_FG_BLUE,
