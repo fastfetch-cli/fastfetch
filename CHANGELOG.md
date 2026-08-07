@@ -1,3 +1,10 @@
+# 2.67.1
+
+Bugfixes:
+* Fixed `Symbol not found` error when running on macOS 10.15 (macOS)
+* Fixed building on Apple clang 16 (the default compiler of macOS 14)
+* Added a C23 compiler check so the build process exits during CMake configuration
+
 # 2.67.0
 
 Changes:
@@ -31,12 +38,12 @@ Bugfixes:
 * Fixed invalid URL parsing in the PublicIP module. (PublicIP)
 * Correctly reported virtual GPUs on Windows. (#2461, GPU, Windows)
 * Added a size limit for network responses to prevent excessive memory usage and mitigate potential attacks. (PublicIP / Weather)
-* Fixed Ubuntu Studio Core detection (OS, Linux)
+* Fixed Ubuntu Studio Core detection. (OS, Linux)
 * Relaxed the HTTP response check so that both `HTTP/1.0` and `HTTP/1.1` responses are accepted when fetching data over the network. (PublicIP / Weather)
 * Various internal cleanups and optimizations:
-    * Fixed multiple memory leaks (Separator, Camera, Codec, Display)
-    * Added integer overflow checks to the string buffer implementation
-    * Various code cleanups and compiler warning fixes
+    * Fixed multiple memory leaks (Separator, Camera, Codec, Display).
+    * Added integer overflow checks to the string buffer implementation.
+    * Various code cleanups and compiler warning fixes.
 
 Logos:
 * Removed Hypros, MagpieOS, Furreto, EmperorOS and Magix
@@ -49,9 +56,9 @@ Changes:
 
 Bugfixes:
 * Fixed compatibility with WSL 2.9.3 (#2433, WM, Linux)
-* Fixed accurate AMD GPU names are not queried in `driverSpecific` mode (GPU, Linux)
+* Fixed AMD GPU names not being queried accurately in `driverSpecific` mode (GPU, Linux)
 * Fixed GPU core counting for Apple Silicon GPU on Asahi Linux (GPU, Linux)
-* Some internal cleanups and optimizations
+* Some internal cleanups and optimizations.
 
 Features:
 * Added Astra Linux version detection (OS, Linux)
@@ -784,7 +791,7 @@ Features:
 * Added support for interface speed detection on SunOS (LocalIP, SunOS)
 * Added detection support for Xlibre (#1888, WM, Linux)
 * Improved the accuracy of color detection (Cursor, macOS)
-* Improved the proformance of `Nix` package manager detection on macOS by porting optimizations form Linux port (#1893, Packages, macOS)
+* Improved the performance of `Nix` package manager detection on macOS by porting optimizations from the Linux port (#1893, Packages, macOS)
 
 Bugfixes:
 * Fixed custom object inheriting a key from the previous custom object if the key is blank (#1477)
@@ -1295,7 +1302,7 @@ Features:
 * Change package manager name of NetBSD from `pkg` to `pkgsrc` (#1515, Packages, NetBSD)
 * Detect SOC name on RISCV (#1519, CPU, Linux)
 * Report marketing name of new QS8Es (CPU, Android)
-* Acquire acquire more os info from lsb-release if missing from os-release (#1521)
+* Acquire more OS info from lsb-release if missing from os-release (#1521)
 * CMake: add option `-DCUSTOM_LSB_RELEASE_PATH` to specify the path of `lsb-release` file
     * `-DCUSTOM_OS_RELEASE_PATH` has been supported since `v2.11.4`
 * Report more SOC names on Android (CPU, Android)
@@ -1763,7 +1770,7 @@ Logos:
 
 Bugfixes:
 * Fix bad Intel Arc GPU name detection, which was supposed to be fixed in the last version but the change was reverted accidentally (#1177, GPU, Linux)
-* Fix arm32 CPU name detection no longer work. Regression of 2.21.2 (CPU, Linux)
+* Fix arm32 CPU name detection no longer working. Regression of 2.21.2 (CPU, Linux)
 
 # 2.21.2
 
