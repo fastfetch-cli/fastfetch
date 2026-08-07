@@ -3,6 +3,10 @@
 #include <VideoToolbox/VideoToolbox.h>
 #include "common/apple/cf_helpers.h"
 
+#ifdef MAC_OS_VERSION_11_0
+[[clang::weak_import]] VT_EXPORT void VTRegisterSupplementalVideoDecoderIfAvailable(CMVideoCodecType codecType);
+#endif
+
 static const struct {
     CMVideoCodecType codec;
     FFCodecType type;
@@ -70,9 +74,11 @@ static FFCodecType ffCodecDetectDecoders() {
             continue;
         }
 
-        if (__builtin_available(macOS 11.0, *)) {
+#ifdef MAC_OS_VERSION_11_0
+        if (VTRegisterSupplementalVideoDecoderIfAvailable) {
             VTRegisterSupplementalVideoDecoderIfAvailable(codec.codec);
         }
+#endif
         bool supported = VTIsHardwareDecodeSupported(codec.codec);
         if (!supported) {
             continue;
