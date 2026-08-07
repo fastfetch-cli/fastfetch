@@ -1469,10 +1469,24 @@ endforeach()
 include(CheckCSourceCompiles)
 check_c_source_compiles("int main(void){int arr[1];return _Countof(arr);}" COMPILER_SUPPORTS_COUNT_OF)
 if(COMPILER_SUPPORTS_COUNT_OF)
-    message(STATUS "_Countof is supported by the compiler")
+    message(STATUS "C2Y _Countof is supported by the compiler")
     target_compile_definitions(libfastfetch PUBLIC FF_SUPPORTS_COUNT_OF=1)
 else()
-    message(STATUS "_Countof is NOT supported by the compiler")
+    message(STATUS "C2Y _Countof is NOT supported by the compiler")
+endif()
+
+# Test C23 compiler support
+check_c_source_compiles("enum my_enum: long{MY_ENUM_ZERO}; void test(void*p){} int main(int,const char**){[[gnu::cleanup(test)]] void* x=nullptr; return (int)MY_ENUM_ZERO;}" COMPILER_SUPPORTS_C23)
+if(NOT COMPILER_SUPPORTS_C23)
+    message(FATAL_ERROR "Compiler does not support C23. Please use a newer compiler.")
+endif()
+
+# A hack for AppleClang 17, which supports most C23 features we use except for the `auto` keyword.
+# See https://github.com/Homebrew/homebrew-core/pull/297403
+check_c_source_compiles("int main(void){auto v = 12.34; return (int)v;}" COMPILER_SUPPORTS_AUTO)
+if(NOT COMPILER_SUPPORTS_AUTO)
+    message(WARNING "Compiler does not support C23 'auto' keyword. A workaround will be applied.")
+    target_compile_definitions(libfastfetch PUBLIC $<$<COMPILE_LANGUAGE:C>:auto=__auto_type>)
 endif()
 
 if(yyjson_FOUND)
