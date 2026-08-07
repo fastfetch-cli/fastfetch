@@ -19,12 +19,8 @@ const char* ffDetectCamera(FFlist* result)
     AVCaptureDeviceType deviceType = nullptr;
 
     #ifdef MAC_OS_VERSION_14_0
-    // Strangely `@available(macOS 14.0, *)` doesn't work here (#1594)
-    if (@available(macOS 14.0, *))
-    {
-        if (&AVCaptureDeviceTypeExternal)
-            deviceType = AVCaptureDeviceTypeExternal;
-    }
+    if (&AVCaptureDeviceTypeExternal)
+        deviceType = AVCaptureDeviceTypeExternal;
     #endif
     if (deviceType == nullptr)
         deviceType = AVCaptureDeviceTypeExternalUnknown;
