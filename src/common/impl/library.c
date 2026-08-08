@@ -178,3 +178,78 @@ void* ffLibraryGetModule(const wchar_t* libraryFileName) {
     return module;
 }
 #endif
+
+struct LibraryIterateDynamicLibsBundle {
+    FFLibraryIterateCallback callback;
+    void* userData;
+};
+
+#if _WIN32
+
+static void ffLibraryIterateDynamicLibsCallback(PLDR_DATA_TABLE_ENTRY DataTableEntry, PVOID Context, BOOLEAN* StopEnumeration) {
+    if (DataTableEntry->FullDllName.Buffer == nullptr || DataTableEntry->FullDllName.Buffer[0] == L'\0') {
+        return;
+    }
+
+    char path[PATH_MAX * 3];
+    ULONG outBytes;
+    if (NT_SUCCESS(RtlUnicodeToUTF8N(path, sizeof(path), &outBytes, DataTableEntry->FullDllName.Buffer, (uint32_t) (DataTableEntry->FullDllName.Length + sizeof(wchar_t))))) {
+        struct LibraryIterateDynamicLibsBundle* bundle = (struct LibraryIterateDynamicLibsBundle*) Context;
+        *StopEnumeration = !bundle->callback(path, bundle->userData);
+    }
+}
+
+void ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData) {
+    struct LibraryIterateDynamicLibsBundle bundle = {
+        .callback = callback,
+        .userData = userData,
+    };
+    LdrEnumerateLoadedModules(FALSE, ffLibraryIterateDynamicLibsCallback, &bundle);
+}
+
+#elif defined(__APPLE__)
+
+#include <mach-o/dyld.h>
+
+void ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData) {
+    uint32_t imageCount = _dyld_image_count();
+    for (uint32_t i = 0; i < imageCount; ++i) {
+        const char* name = _dyld_get_image_name(i);
+        if (name == nullptr || name[0] == '\0') {
+            continue;
+        }
+
+        if (!callback(name, userData)) {
+            break;
+        }
+    }
+}
+
+#elif __has_include(<link.h>)
+    #include <link.h>
+
+static int ffLibraryIterateDynamicLibsCallback(struct dl_phdr_info* info, size_t, void* data) {
+    if (info->dlpi_name == nullptr || info->dlpi_name[0] == '\0') {
+        return 0;
+    }
+
+    struct LibraryIterateDynamicLibsBundle* bundle = (struct LibraryIterateDynamicLibsBundle*) data;
+    return !bundle->callback(info->dlpi_name, bundle->userData);
+}
+
+void ffLibraryIterateDynamicLibs(bool (*callback)(const char* name, void* userData), void* userData) {
+    dl_iterate_phdr(
+        ffLibraryIterateDynamicLibsCallback,
+        &(struct LibraryIterateDynamicLibsBundle) {
+            .callback = callback,
+            .userData = userData,
+        });
+}
+
+#else
+
+void ffLibraryIterateDynamicLibs(FFLibraryIterateCallback, void*) {
+    // Not implemented for this platform
+}
+
+#endif

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "fastfetch.h" // IWYU pragma: keep
 
 #ifndef FF_DISABLE_DLOPEN
 
@@ -111,3 +111,7 @@ void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
 #if _WIN32
 void* ffLibraryGetModule(const wchar_t* libraryFileName);
 #endif
+
+// Return false to stop iterating, true to continue
+typedef bool (*FFLibraryIterateCallback)(const char* name, void* userData);
+void ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData);
