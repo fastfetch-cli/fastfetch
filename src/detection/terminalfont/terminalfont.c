@@ -23,13 +23,13 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont) {
         };
 
         // alacritty parses config files in this order
-        if (ffParsePropFileConfigValues("alacritty/alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues("alacritty/alacritty.toml", 3, fontQueryToml)) {
             break;
         }
-        if (ffParsePropFileConfigValues("alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues("alacritty.toml", 3, fontQueryToml)) {
             break;
         }
-        if (ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues(".alacritty.toml", 3, fontQueryToml)) {
             break;
         }
     } while (false);
