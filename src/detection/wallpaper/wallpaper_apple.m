@@ -3,9 +3,20 @@
 #include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {
+    {
+        // Reliable for user-picked static images.
+        NSURL* url = [NSWorkspace.sharedWorkspace desktopImageURLForScreen:NSScreen.mainScreen];
+        if (url.fileURL && ![url.path isEqualToString:@"/System/Library/CoreServices/DefaultDesktop.heic"] /* dynamic wallpapers */)
+        {
+            ffStrbufSetS(result, url.path.UTF8String);
+            return nullptr;
+        }
+    }
+
     {
         // For Sonoma
         // https://github.com/JohnCoates/Aerial/issues/1332

@@ -12,3 +12,4 @@ fastfetch.kdev4
 *.user
 *.user.*
 *.swp
+*.log
