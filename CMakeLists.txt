@@ -1064,7 +1064,7 @@ elseif(APPLE)
         src/detection/wifi/wifi_apple.m
         src/detection/wm/wm_apple.m
         src/detection/de/de_nosupport.c
-        src/detection/wmtheme/wmtheme_apple.m
+        src/detection/wmtheme/wmtheme_apple.c
         src/detection/camera/camera_apple.m
     )
     # CMAKE_SYSTEM_PROCESSOR has been normalized before
