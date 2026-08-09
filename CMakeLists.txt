@@ -1023,7 +1023,7 @@ elseif(APPLE)
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
-        src/detection/cursor/cursor_apple.m
+        src/detection/cursor/cursor_apple.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
