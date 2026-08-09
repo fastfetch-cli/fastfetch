@@ -114,4 +114,5 @@ void* ffLibraryGetModule(const wchar_t* libraryFileName);
 
 // Return false to stop iterating, true to continue
 typedef bool (*FFLibraryIterateCallback)(const char* name, void* userData);
-void ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData);
+// Iterate over all loaded dynamic libraries. Returns true on success, false on failure.
+bool ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData);
