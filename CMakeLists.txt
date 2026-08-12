@@ -1038,7 +1038,7 @@ elseif(APPLE)
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
-        src/detection/locale/locale_apple.c
+        src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
