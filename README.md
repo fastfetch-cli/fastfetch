@@ -330,15 +330,3 @@ If you find Fastfetch useful, please consider donating.
 
 * Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
 * This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it
-
-## Star History
-
-Give us a star to show your support!
-
-<a href="https://star-history.com/#fastfetch-cli/fastfetch&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date" />
-  </picture>
-</a>
