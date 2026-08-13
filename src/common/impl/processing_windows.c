@@ -49,37 +49,37 @@ static void argvToCmdline(char* const argv[], FFstrbuf* result) {
 }
 
 static wchar_t* createChildEnvironment(void) {
-    wchar_t* source = GetEnvironmentStringsW();
-    if (!source) {
+    auto pparams = ffGetPeb()->ProcessParameters;
+    const wchar_t* readStart = pparams->Environment;
+
+    if (!readStart) {
         return nullptr;
     }
 
-    size_t sourceLength = 0;
-    for (const wchar_t* entry = source; *entry; entry += wcslen(entry) + 1) {
-        sourceLength += wcslen(entry) + 1;
-    }
+    RtlAcquirePebLock();
+    wchar_t* result = malloc(pparams->EnvironmentSize + sizeof(L"LANG=C.UTF-8"));
 
-    wchar_t* result = malloc((sourceLength + 7) * sizeof(wchar_t));
-    wchar_t* write = result;
-    bool foundLang = false;
-    for (const wchar_t* entry = source; *entry; entry += wcslen(entry) + 1) {
-        if (_wcsnicmp(entry, L"LANG=", 5) == 0) {
-            wcscpy(write, L"LANG=C");
-            write += 6;
-            foundLang = true;
-        } else {
-            size_t entryLength = wcslen(entry) + 1;
-            memcpy(write, entry, entryLength * sizeof(wchar_t));
-            write += entryLength;
+    const wchar_t* entry = readStart;
+    wchar_t* writeStart = result;
+
+    // Copy all environment variables except LANG
+    while (*entry) {
+        assert((const uint8_t*) entry <= (const uint8_t*) pparams->Environment + pparams->EnvironmentSize);
+        size_t entryLength = wcslen(entry);
+        if (entryLength >= strlen("LANG=") && memcmp(entry, L"LANG=", strlen("LANG=") * sizeof(wchar_t)) == 0) {
+            memcpy(writeStart, readStart, (size_t) (entry - readStart) * sizeof(wchar_t));
+            writeStart += (size_t) (entry - readStart);
+            readStart = entry + entryLength + 1;
         }
+        entry += entryLength + 1;
     }
-    if (!foundLang) {
-        wcscpy(write, L"LANG=C");
-        write += 6;
-    }
-    *write = L'\0';
+    // Copy the remaining environment variables
+    memcpy(writeStart, readStart, (size_t) (entry - readStart) * sizeof(wchar_t));
+    writeStart += (size_t) (entry - readStart);
+    // Add LANG=C.UTF-8 and double null terminator
+    memcpy(writeStart, L"LANG=C.UTF-8\0", sizeof(L"LANG=C.UTF-8\0"));
 
-    FreeEnvironmentStringsW(source);
+    RtlReleasePebLock();
     return result;
 }
 

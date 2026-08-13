@@ -1339,3 +1339,6 @@ NTSYSAPI NTSTATUS NTAPI NtCancelIoFileEx(
 NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
     _In_opt_ HANDLE ProcessHandle,
     _In_ NTSTATUS ExitStatus);
+
+NTSYSAPI NTSTATUS NTAPI RtlAcquirePebLock(VOID);
+NTSYSAPI NTSTATUS NTAPI RtlReleasePebLock(VOID);
