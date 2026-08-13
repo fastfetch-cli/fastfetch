@@ -21,6 +21,11 @@ static uint32_t getMacPortsPackages(FFstrbuf* baseDir) {
     return ffPackagesGetNumElements(baseDir->chars, true);
 }
 
+static uint32_t getDramPackages(FFstrbuf* baseDir) {
+    ffStrbufAppendS(baseDir, "/Cellar");
+    return ffPackagesGetNumElements(baseDir->chars, true);
+}
+
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreate();
     if (FF_PACKAGES_IS_ENABLED(options, BREW)) {
@@ -45,6 +50,17 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         }
 
         result->macports = getMacPortsPackages(&baseDir);
+    }
+    if (FF_PACKAGES_IS_ENABLED(options, DRAM)) {
+        const char* prefix = getenv("DRAM_PREFIX");
+        if (ffStrSet(prefix)) {
+            ffStrbufSetS(&baseDir, prefix);
+        } else {
+            ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
+            ffStrbufAppendS(&baseDir, ".dram");
+        }
+
+        result->dram = getDramPackages(&baseDir);
     }
     if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);

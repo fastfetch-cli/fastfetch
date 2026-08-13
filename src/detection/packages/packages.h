@@ -13,6 +13,7 @@ typedef struct FFPackagesResult {
     uint32_t cards;
     uint32_t choco;
     uint32_t dpkg;
+    uint32_t dram;
     uint32_t emerge;
     uint32_t eopkg;
     uint32_t flatpakSystem;
