@@ -5,6 +5,10 @@
 #include "common/strutil.h"
 #include "options/display.h"
 
+#if !FF_MODULE_DISABLE_TERMINALTHEME
+    #include "detection/terminaltheme/terminaltheme.h"
+#endif
+
 #include <unistd.h>
 
 const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey) {
@@ -825,11 +829,22 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
 }
 
 void ffOptionsInitDisplay(FFOptionsDisplay* options) {
+    bool terminalLightTheme = false;
+    #if !FF_MODULE_DISABLE_TERMINALTHEME
+    {
+        // don't enable bright color if the terminal is in light mode
+        FFTerminalThemeResult result;
+        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark) {
+            terminalLightTheme = true;
+        }
+    }
+    #endif
+
     ffStrbufInit(&options->colorKeys);
     ffStrbufInit(&options->colorTitle);
     ffStrbufInit(&options->colorOutput);
     ffStrbufInit(&options->colorSeparator);
-    options->brightColor = !instance.state.terminalLightTheme;
+    options->brightColor = !terminalLightTheme;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
@@ -856,8 +871,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->tempUnit = FF_TEMPERATURE_UNIT_DEFAULT;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->tempColorYellow, terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->tempColorRed, terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->tempSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
@@ -867,8 +882,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     ffStrbufInit(&options->barBorderLeftElapsed);
     ffStrbufInit(&options->barBorderRightElapsed);
     ffStrbufInitStatic(&options->barColorElapsed, "auto");
-    ffStrbufInitStatic(&options->barColorTotal, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
-    ffStrbufInitStatic(&options->barColorBorder, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorTotal, terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorBorder, terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     options->barWidth = 10;
 
     options->durationAbbreviation = false;
@@ -876,8 +891,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->percentType = FF_PERCENTAGE_TYPE_NUM_BIT | FF_PERCENTAGE_TYPE_NUM_COLOR_BIT;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->percentColorYellow, terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->percentColorRed, terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentWidth = 0;
 
