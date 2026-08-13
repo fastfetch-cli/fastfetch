@@ -98,13 +98,17 @@ static void parseGhosttyConfig(FFstrbuf* path, FFstrbuf* fontName, FFstrbuf* fon
     while (ffStrbufGetline(&line, &len, &buffer)) {
         if (ffParsePropLine(line, "font-family =", &temp)) {
             FF_DEBUG("found font-family='%s' in %s", temp.chars, path->chars);
-            // Latter overrides former; former becomes the fallback font
-            if (fontName->length > 0) {
-                ffStrbufDestroy(fontNameFallback);
-                ffStrbufInitMove(fontNameFallback, fontName);
+            // Ghostty appends to a fallback list; the first entry is the primary font.
+            // An empty value resets the list.
+            if (temp.length == 0) {
+                ffStrbufClear(fontName);
+                ffStrbufClear(fontNameFallback);
+            } else if (fontName->length == 0) {
+                ffStrbufSet(fontName, &temp);
+            } else if (fontNameFallback->length == 0) {
+                ffStrbufSet(fontNameFallback, &temp);
             }
-            ffStrbufDestroy(fontName);
-            ffStrbufInitMove(fontName, &temp);
+            ffStrbufClear(&temp);
         } else if (ffParsePropLine(line, "font-size =", &temp)) {
             FF_DEBUG("found font-size='%s' in %s", temp.chars, path->chars);
             // Latter overrides former
