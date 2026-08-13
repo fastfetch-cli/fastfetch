@@ -193,7 +193,8 @@ static void ffLibraryIterateDynamicLibsCallback(PLDR_DATA_TABLE_ENTRY DataTableE
 
     char path[PATH_MAX * 3];
     ULONG outBytes;
-    if (NT_SUCCESS(RtlUnicodeToUTF8N(path, sizeof(path), &outBytes, DataTableEntry->FullDllName.Buffer, (uint32_t) (DataTableEntry->FullDllName.Length + sizeof(wchar_t))))) {
+    if (NT_SUCCESS(RtlUnicodeToUTF8N(path, sizeof(path), &outBytes, DataTableEntry->FullDllName.Buffer, DataTableEntry->FullDllName.Length))) {
+        path[outBytes] = '\0';
         struct LibraryIterateDynamicLibsBundle* bundle = (struct LibraryIterateDynamicLibsBundle*) Context;
         *StopEnumeration = !bundle->callback(path, bundle->userData);
     }
