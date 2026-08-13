@@ -1,9 +1,20 @@
 # 2.67.1
 
 Bugfixes:
-* Fixed `Symbol not found` error when running on macOS 10.15 (macOS)
-* Fixed building on Apple clang 16 (the default compiler of macOS 14)
-* Added a C23 compiler check so the build process exits during CMake configuration
+* Fixed a `Symbol not found` error when running on macOS 10.15. (Codec, macOS)
+* Fixed Alacritty font size never being parsed from the TOML config. (TerminalFont)
+* Fixed Ghostty `font-family` fallback order. (#2510, TerminalFont)
+* Fixed bright colors incorrectly being active when the terminal uses a light theme. (#2509, Display)
+* Fixed Ghostty terminal font detection by trying to load the config with the `.ghostty` extension. (#2500, TerminalFont)
+* Added compatibility workarounds for Apple Clang 14 to fix building on macOS 14. (CMake, macOS)
+* Some internal cleanups and optimizations.
+
+Features:
+* Added a C23 compiler check so the build process gracefully exits during CMake configuration if the compiler is unsupported. (CMake)
+* Reported real Android version codenames (e.g., "Baklava", "Vanilla Ice Cream") instead of "REL". (OS, Android)
+* Added Loadavg detection support on Haiku R1B6. (Loadavg, Haiku)
+* Enabled image logo support in the Zellij terminal multiplexer. (Logo)
+* Improved Locale detection on Windows to use `$LC_ALL` or `$LANG` environment variables if available (e.g., in MSYS2 or Cygwin). (Locale, Windows)
 
 # 2.67.0
 
