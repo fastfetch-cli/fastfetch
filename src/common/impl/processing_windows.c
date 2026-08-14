@@ -48,6 +48,41 @@ static void argvToCmdline(char* const argv[], FFstrbuf* result) {
     }
 }
 
+static wchar_t* createChildEnvironment(void) {
+    auto pparams = ffGetPeb()->ProcessParameters;
+    const wchar_t* readStart = pparams->Environment;
+
+    if (!readStart) {
+        return nullptr;
+    }
+
+    RtlAcquirePebLock();
+    wchar_t* result = malloc(pparams->EnvironmentSize + sizeof(L"LANG=C.UTF-8"));
+
+    const wchar_t* entry = readStart;
+    wchar_t* writeStart = result;
+
+    // Copy all environment variables except LANG
+    while (*entry) {
+        assert((const uint8_t*) entry <= (const uint8_t*) pparams->Environment + pparams->EnvironmentSize);
+        size_t entryLength = wcslen(entry);
+        if (entryLength >= strlen("LANG=") && memcmp(entry, L"LANG=", strlen("LANG=") * sizeof(wchar_t)) == 0) {
+            memcpy(writeStart, readStart, (size_t) (entry - readStart) * sizeof(wchar_t));
+            writeStart += (size_t) (entry - readStart);
+            readStart = entry + entryLength + 1;
+        }
+        entry += entryLength + 1;
+    }
+    // Copy the remaining environment variables
+    memcpy(writeStart, readStart, (size_t) (entry - readStart) * sizeof(wchar_t));
+    writeStart += (size_t) (entry - readStart);
+    // Add LANG=C.UTF-8 and double null terminator
+    memcpy(writeStart, L"LANG=C.UTF-8\0", sizeof(L"LANG=C.UTF-8\0"));
+
+    RtlReleasePebLock();
+    return result;
+}
+
 const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle) {
     const int32_t timeout = instance.config.general.processingTimeout;
 
@@ -108,17 +143,18 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         }
     }
 
+    FF_AUTO_FREE wchar_t* environment = createChildEnvironment();
     BOOL success = CreateProcessW(
-        nullptr,         // application name
-        cmdline,      // command line
-        nullptr,         // process security attributes
-        nullptr,         // primary thread security attributes
-        TRUE,         // handles are inherited
-        0,            // creation flags
-        nullptr,         // use parent's environment
-        nullptr,         // use parent's current directory
-        &siStartInfo, // STARTUPINFO pointer
-        &piProcInfo   // receives PROCESS_INFORMATION
+        nullptr,                    // application name
+        cmdline,                    // command line
+        nullptr,                    // process security attributes
+        nullptr,                    // primary thread security attributes
+        TRUE,                       // handles are inherited
+        CREATE_UNICODE_ENVIRONMENT, // creation flags
+        environment,                // child environment
+        nullptr,                    // use parent's current directory
+        &siStartInfo,               // STARTUPINFO pointer
+        &piProcInfo                 // receives PROCESS_INFORMATION
     );
 
     NtClose(hChildPipeWrite);

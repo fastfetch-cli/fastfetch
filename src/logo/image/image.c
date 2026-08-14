@@ -996,7 +996,7 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
     }
 
     const char* term = getenv("TERM");
-    if ((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ")) {
+    if (term && ffStrEquals(term, "screen")) {
         if (printError) {
             fputs("Logo: Image logo is not supported in terminal multiplexers\n", stderr);
         }

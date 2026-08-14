@@ -1279,6 +1279,22 @@ NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
     _In_opt_ ULONG ProcedureNumber,
     _Out_ PVOID* ProcedureAddress);
 
+typedef _Function_class_(LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION)
+VOID NTAPI LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION(
+    _In_ PLDR_DATA_TABLE_ENTRY DataTableEntry,
+    _In_opt_ PVOID Context,
+    _Inout_ BOOLEAN* StopEnumeration
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrEnumerateLoadedModules(
+    _In_ BOOLEAN ReservedFlag,
+    _In_ LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION* EnumProc,
+    _In_opt_ PVOID Context
+);
+
 typedef enum _SECTION_INHERIT {
     ViewShare = 1,
     ViewUnmap = 2
@@ -1323,3 +1339,6 @@ NTSYSAPI NTSTATUS NTAPI NtCancelIoFileEx(
 NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
     _In_opt_ HANDLE ProcessHandle,
     _In_ NTSTATUS ExitStatus);
+
+NTSYSAPI NTSTATUS NTAPI RtlAcquirePebLock(VOID);
+NTSYSAPI NTSTATUS NTAPI RtlReleasePebLock(VOID);

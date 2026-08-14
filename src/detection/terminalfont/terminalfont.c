@@ -23,13 +23,13 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont) {
         };
 
         // alacritty parses config files in this order
-        if (ffParsePropFileConfigValues("alacritty/alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues("alacritty/alacritty.toml", 3, fontQueryToml)) {
             break;
         }
-        if (ffParsePropFileConfigValues("alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues("alacritty.toml", 3, fontQueryToml)) {
             break;
         }
-        if (ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml)) {
+        if (ffParsePropFileConfigValues(".alacritty.toml", 3, fontQueryToml)) {
             break;
         }
     } while (false);
@@ -69,7 +69,7 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont) {
     ffFontInitMoveValues(&terminalFont->font, &fontFamily, &fontSize, &fontStyle);
 }
 
-static void parseGhosttyConfig(const FFstrbuf* path, FFstrbuf* fontName, FFstrbuf* fontNameFallback, FFstrbuf* fontSize, FFlist* configFiles /* list of FFstrbuf */) {
+static void parseGhosttyConfig(FFstrbuf* path, FFstrbuf* fontName, FFstrbuf* fontNameFallback, FFstrbuf* fontSize, FFlist* configFiles /* list of FFstrbuf */) {
     // Maximum number of `config-file` directives to follow, guarding against runaway includes
     enum { FF_GHOSTTY_MAX_CONFIG_FILES = 16 };
 
@@ -79,7 +79,18 @@ static void parseGhosttyConfig(const FFstrbuf* path, FFstrbuf* fontName, FFstrbu
     FF_STRBUF_AUTO_DESTROY temp = ffStrbufCreate();
     if (!ffAppendFileBuffer(path->chars, &buffer)) {
         FF_DEBUG("cannot read config: %s", path->chars);
-        return;
+        if (ffStrbufEndsWithS(path, ".ghostty")) {
+            FF_DEBUG("Trying to load config without .ghostty extension");
+            path->chars[path->length - strlen(".ghostty")] = '\0';
+            bool ok = ffAppendFileBuffer(path->chars, &buffer);
+            path->chars[path->length - strlen(".ghostty")] = '.';
+            if (!ok) {
+                FF_DEBUG("cannot read config: %s", path->chars);
+                return;
+            }
+        } else {
+            return;
+        }
     }
 
     char* line = nullptr;
@@ -87,13 +98,17 @@ static void parseGhosttyConfig(const FFstrbuf* path, FFstrbuf* fontName, FFstrbu
     while (ffStrbufGetline(&line, &len, &buffer)) {
         if (ffParsePropLine(line, "font-family =", &temp)) {
             FF_DEBUG("found font-family='%s' in %s", temp.chars, path->chars);
-            // Latter overrides former; former becomes the fallback font
-            if (fontName->length > 0) {
-                ffStrbufDestroy(fontNameFallback);
-                ffStrbufInitMove(fontNameFallback, fontName);
+            // Ghostty appends to a fallback list; the first entry is the primary font.
+            // An empty value resets the list.
+            if (temp.length == 0) {
+                ffStrbufClear(fontName);
+                ffStrbufClear(fontNameFallback);
+            } else if (fontName->length == 0) {
+                ffStrbufSet(fontName, &temp);
+            } else if (fontNameFallback->length == 0) {
+                ffStrbufSet(fontNameFallback, &temp);
             }
-            ffStrbufDestroy(fontName);
-            ffStrbufInitMove(fontName, &temp);
+            ffStrbufClear(&temp);
         } else if (ffParsePropLine(line, "font-size =", &temp)) {
             FF_DEBUG("found font-size='%s' in %s", temp.chars, path->chars);
             // Latter overrides former
@@ -394,7 +409,7 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour")) {
         detectContour(&terminal->exe, terminalFont);
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty")) {
-        detectGhostty(terminalFont, "com.mitchellh.ghostty/config", "ghostty/config");
+        detectGhostty(terminalFont, "com.mitchellh.ghostty/config.ghostty", "ghostty/config.ghostty");
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "Muxy")) {
         detectGhostty(terminalFont, "Muxy/ghostty.conf", "muxy/ghostty.conf");
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio")) {
