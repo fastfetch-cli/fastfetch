@@ -18,6 +18,7 @@ void ffPlatformInit(FFPlatform* platform) {
 
 #ifdef _WIN32
     ffStrbufInit(&platform->sid);
+    platform->initCP = 0;
 #endif
 
     FFPlatformSysinfo* info = &platform->sysinfo;

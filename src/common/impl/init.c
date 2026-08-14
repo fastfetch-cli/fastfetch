@@ -39,7 +39,7 @@ static void defaultConfig(void) {
 }
 
 #ifdef _WIN32
-static volatile UINT oldCp = CP_UTF8;
+static UINT oldCp = CP_UTF8;
 void resetConsoleCP(void) {
     if (oldCp != CP_UTF8) {
         SetConsoleOutputCP(oldCp);
@@ -69,6 +69,10 @@ void ffInitInstance(void) {
 
     defaultConfig();
     initState(&instance.state);
+
+#ifdef _WIN32
+    instance.state.platform.initCP = oldCp;
+#endif
 }
 
 static volatile bool ffDisableLinewrap = false;
