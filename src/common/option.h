@@ -18,10 +18,27 @@ typedef struct FFModuleFormatArgList {
 
 #define FF_FORMAT_ARG_LIST(list) { .args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg) }
 
+typedef struct FFModuleDisplayName {
+    const char* en; // English
+
+    const char* de; // German
+    const char* es; // Spanish
+    const char* fr; // French
+    const char* it; // Italian
+    const char* ja; // Japanese
+    const char* ko; // Korean
+    const char* pl; // Polish
+    const char* pt_BR; // Brazilian Portuguese
+    const char* ru; // Russian
+    const char* zh_CN; // Simplified Chinese
+    const char* zh_TW; // Traditional Chinese
+} FFModuleDisplayName;
+
 // Must be the first field of FFModuleOptions
 typedef struct FFModuleBaseInfo {
     const char* name;
     const char* description;
+    FFModuleDisplayName displayName;
     // A dirty polymorphic implementation in C.
     // This is UB, because `void*` is not compatible with `FF*Options*`.
     // However we can't do it better unless we move to C++, so that `option` becomes a `this` pointer
