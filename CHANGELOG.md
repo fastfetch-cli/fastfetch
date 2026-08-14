@@ -1,8 +1,8 @@
 # 2.67.1
 
 Bugfixes:
-* Fixed a `Symbol not found` error when running on macOS 10.15. (Codec, macOS)
-* Fixed Alacritty font size never being parsed from the TOML config. (TerminalFont)
+* Fixed a `Symbol not found` error when running on macOS 10.15. (#2499, Codec, macOS)
+* Fixed Alacritty font size never being parsed from the TOML config. (#2501, TerminalFont)
 * Fixed bright colors incorrectly being active when the terminal uses a light theme. (#2509, Display)
 * Fixed Ghostty terminal font detection (TerminalFont)
     * Now tries to load the config with the `.ghostty` extension. (#2500)
