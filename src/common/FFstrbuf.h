@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "common/memrchr.h"
+#include "common/arrutil.h"
 
 #ifdef FF_USE_SYSTEM_YYJSON
     #include <yyjson.h>
@@ -628,3 +629,4 @@ static inline void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file) {
 bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf);
 
 #define FF_STRBUF_AUTO_DESTROY [[gnu::cleanup(ffStrbufDestroy)]] FFstrbuf
+#define FF_STRBUF_STATIC(str) { .allocated = 0, .length = (uint32_t) ARRAY_SIZE(str) - 1, .chars = str }
