@@ -16,12 +16,12 @@ bool ffPrintEditor(FFEditorOptions* options) {
     const char* error = ffDetectEditor(&result);
 
     if (error) {
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.exe.length) {
             ffStrbufWriteTo(&result.exe, stdout);
             if (result.version.length) {
@@ -32,7 +32,7 @@ bool ffPrintEditor(FFEditorOptions* options) {
         }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(result.type, "type"),
                                                                                                            FF_ARG(result.name, "name"),
                                                                                                            FF_ARG(result.exe, "exe-name"),
@@ -57,7 +57,7 @@ void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -103,7 +103,7 @@ void ffDestroyEditorOptions(FFEditorOptions* options) {
 }
 
 FFModuleBaseInfo ffEditorModuleInfo = {
-    .name = FF_EDITOR_MODULE_NAME,
+    .name = "Editor",
     .description = "Print information about the default editor ($VISUAL or $EDITOR)",
     .displayName = {
         .en = "Editor",

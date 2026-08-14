@@ -6,18 +6,16 @@
 
 #include <ctype.h>
 
-#define FF_PLAYER_DISPLAY_NAME "Media Player"
-
 bool ffPrintPlayer(FFPlayerOptions* options) {
     const FFMediaResult* media = ffDetectMedia(false);
 
     if (media->error.length > 0) {
-        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return false;
     }
 
     if (media->player.length == 0) {
-        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No media player detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No media player detected");
         return false;
     }
 
@@ -65,10 +63,10 @@ bool ffPrintPlayer(FFPlayerOptions* options) {
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&playerPretty, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(playerPretty, "player"),
                                                                                                             FF_ARG(media->player, "name"),
                                                                                                             FF_ARG(media->playerId, "id"),
@@ -87,7 +85,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -109,7 +107,7 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options) {
 }
 
 FFModuleBaseInfo ffPlayerModuleInfo = {
-    .name = FF_PLAYER_MODULE_NAME,
+    .name = "Player",
     .description = "Print the music player name that is currently active",
     .displayName = {
         .en = "Media Player",

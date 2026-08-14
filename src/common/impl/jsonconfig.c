@@ -136,9 +136,9 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         #if !FF_MODULE_DISABLE_CPUUSAGE
         case 'c':
         case 'C': {
-            if (ffStrEqualsIgnCase(type, FF_CPUUSAGE_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, ffCPUUsageModuleInfo.name)) {
                 ffPrepareCPUUsage();
-            } else if (ffStrEqualsIgnCase(type, FF_COMMAND_MODULE_NAME)) {
+            } else if (ffStrEqualsIgnCase(type, ffCommandModuleInfo.name)) {
                 [[gnu::cleanup(ffDestroyCommandOptions)]] FFCommandOptions options;
                 ffInitCommandOptions(&options);
                 if (module) {
@@ -153,7 +153,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         #if !FF_MODULE_DISABLE_DISKIO
         case 'd':
         case 'D': {
-            if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, ffDiskIOModuleInfo.name)) {
                 [[gnu::cleanup(ffDestroyDiskIOOptions)]] FFDiskIOOptions options;
                 ffInitDiskIOOptions(&options);
                 if (module) {
@@ -168,7 +168,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         #if !FF_MODULE_DISABLE_NETIO
         case 'n':
         case 'N': {
-            if (ffStrEqualsIgnCase(type, FF_NETIO_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, ffNetIOModuleInfo.name)) {
                 [[gnu::cleanup(ffDestroyNetIOOptions)]] FFNetIOOptions options;
                 ffInitNetIOOptions(&options);
                 if (module) {
@@ -183,7 +183,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         #if !FF_MODULE_DISABLE_PUBLICIP
         case 'p':
         case 'P': {
-            if (ffStrEqualsIgnCase(type, FF_PUBLICIP_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, ffPublicIPModuleInfo.name)) {
                 [[gnu::cleanup(ffDestroyPublicIpOptions)]] FFPublicIPOptions options;
                 ffInitPublicIpOptions(&options);
                 if (module) {
@@ -198,7 +198,7 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         #if !FF_MODULE_DISABLE_WEATHER
         case 'w':
         case 'W': {
-            if (ffStrEqualsIgnCase(type, FF_WEATHER_MODULE_NAME)) {
+            if (ffStrEqualsIgnCase(type, ffWeatherModuleInfo.name)) {
                 [[gnu::cleanup(ffDestroyWeatherOptions)]] FFWeatherOptions options;
                 ffInitWeatherOptions(&options);
                 if (module) {

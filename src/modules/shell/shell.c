@@ -8,12 +8,12 @@ bool ffPrintShell(FFShellOptions* options) {
     const FFShellResult* result = ffDetectShell();
 
     if (result->processName.length == 0) {
-        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result->prettyName, stdout);
 
         if (result->version.length > 0) {
@@ -23,7 +23,7 @@ bool ffPrintShell(FFShellOptions* options) {
 
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result->processName, "process-name"),
                                                                                                           FF_ARG(result->exe, "exe"),
                                                                                                           FF_ARG(result->exeName, "exe-name"),
@@ -46,7 +46,7 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -89,7 +89,7 @@ void ffDestroyShellOptions(FFShellOptions* options) {
 }
 
 FFModuleBaseInfo ffShellModuleInfo = {
-    .name = FF_SHELL_MODULE_NAME,
+    .name = "Shell",
     .description = "Print the current shell name and version",
     .displayName = {
         .en = "Shell",

@@ -56,7 +56,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
     const FFMediaResult* media = ffDetectMedia(false);
 
     if (media->error.length > 0) {
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Media), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return false;
     }
 
@@ -110,7 +110,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
             ffStrbufClear(&artistPretty);
         }
 
-        ffPrintLogoAndKey(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Media), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (artistPretty.length > 0) {
             ffStrbufWriteTo(&artistPretty, stdout);
@@ -171,7 +171,7 @@ bool ffPrintMedia(FFMediaOptions* options) {
                     &options->moduleArgs);
             }
         }
-        FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Media), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                                                                                                           FF_ARG(songPretty, "combined"),
                                                                                                           FF_ARG(media->song, "title"),
                                                                                                           FF_ARG(media->artist, "artist"),
@@ -201,7 +201,7 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Media), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -253,7 +253,7 @@ void ffDestroyMediaOptions(FFMediaOptions* options) {
 }
 
 FFModuleBaseInfo ffMediaModuleInfo = {
-    .name = FF_MEDIA_MODULE_NAME,
+    .name = "Media",
     .description = "Print the name of the currently playing song",
     .displayName = {
         .en = "Media",

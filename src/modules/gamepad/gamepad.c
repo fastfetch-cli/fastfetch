@@ -8,7 +8,7 @@
 static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device, uint8_t index) {
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Gamepad), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         bool showBatteryLevel = device->battery > 0 && device->battery <= 100;
@@ -39,7 +39,7 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
             ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Gamepad), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                 FF_ARG(device->name, "name"),
                                                                                                                 FF_ARG(device->serial, "serial"),
                                                                                                                 FF_ARG(percentageNum, "battery-percentage"),
@@ -54,12 +54,12 @@ bool ffPrintGamepad(FFGamepadOptions* options) {
     const char* error = ffDetectGamepad(&result);
 
     if (error) {
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Gamepad), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (!result.length) {
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Gamepad), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         return false;
     }
 
@@ -80,7 +80,7 @@ bool ffPrintGamepad(FFGamepadOptions* options) {
 
     bool ret = true;
     if (!filtered.length) {
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Gamepad), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
         ret = false;
     } else {
         uint8_t index = 0;
@@ -122,7 +122,7 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Gamepad), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -189,7 +189,7 @@ void ffDestroyGamepadOptions(FFGamepadOptions* options) {
 }
 
 FFModuleBaseInfo ffGamepadModuleInfo = {
-    .name = FF_GAMEPAD_MODULE_NAME,
+    .name = "Gamepad",
     .description = "List connected gamepads",
     .displayName = {
         .en = "Gamepad",

@@ -8,12 +8,12 @@ bool ffPrintCommand(FFCommandOptions* options) {
     const char* error = ffDetectCommand(options, &result);
 
     if (error) {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (!result.length) {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
         return false;
     }
 
@@ -23,18 +23,18 @@ bool ffPrintCommand(FFCommandOptions* options) {
         size_t len = 0;
         while (ffStrbufGetline(&line, &len, &result)) {
             if (options->moduleArgs.outputFormat.length == 0) {
-                ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
                 puts(line);
             } else {
-                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
+                FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
             }
         }
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufPutTo(&result, stdout);
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
         }
     }
 
@@ -79,7 +79,7 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -153,7 +153,7 @@ void ffDestroyCommandOptions(FFCommandOptions* options) {
 }
 
 FFModuleBaseInfo ffCommandModuleInfo = {
-    .name = FF_COMMAND_MODULE_NAME,
+    .name = "Command",
     .description = "Run custom shell scripts",
     .displayName = {
         .en = "Command",

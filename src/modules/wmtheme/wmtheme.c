@@ -4,20 +4,18 @@
 #include "detection/wmtheme/wmtheme.h"
 #include "modules/wmtheme/wmtheme.h"
 
-#define FF_WMTHEME_DISPLAY_NAME "WM Theme"
-
 bool ffPrintWMTheme(FFWMThemeOptions* options) {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
     if (!ffDetectWmTheme(&themeOrError)) {
-        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", themeOrError.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", themeOrError.chars);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         puts(themeOrError.chars);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                              FF_ARG(themeOrError, "result"),
                                                                                                          }));
     }
@@ -33,7 +31,7 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(WMTheme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -61,7 +59,7 @@ void ffDestroyWMThemeOptions(FFWMThemeOptions* options) {
 }
 
 FFModuleBaseInfo ffWMThemeModuleInfo = {
-    .name = FF_WMTHEME_MODULE_NAME,
+    .name = "WMTheme",
     .description = "Print the current window manager theme",
     .displayName = {
         .en = "WM Theme",

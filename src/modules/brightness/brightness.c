@@ -11,12 +11,12 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
     const char* error = ffDetectBrightness(options, &result);
 
     if (error) {
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
         return false;
     }
 
@@ -34,7 +34,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
             ffPercentAppendNum(&str, percent, options->percent, false, &options->moduleArgs);
         }
 
-        ffPrintLogoAndKey(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&str, stdout);
         return true;
     }
@@ -44,7 +44,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
     uint32_t index = 0;
     FF_LIST_FOR_EACH (FFBrightnessResult, item, result) {
         if (options->moduleArgs.key.length == 0) {
-            ffStrbufAppendF(&key, "%s (%s)", FF_BRIGHTNESS_MODULE_NAME, item->name.chars);
+            ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Brightness), item->name.chars);
         } else {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -130,7 +130,7 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
             continue;
         }
 
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -190,7 +190,7 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options) {
 }
 
 FFModuleBaseInfo ffBrightnessModuleInfo = {
-    .name = FF_BRIGHTNESS_MODULE_NAME,
+    .name = "Brightness",
     .description = "Print the current brightness level of your monitors",
     .displayName = {
         .en = "Brightness",

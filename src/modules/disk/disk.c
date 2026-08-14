@@ -16,7 +16,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufSetF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
+        ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Disk), disk->mountpoint.chars);
     } else {
         FF_STRBUF_AUTO_DESTROY mountpointLink = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY nameLink = ffStrbufCreate();
@@ -187,12 +187,12 @@ bool ffPrintDisk(FFDiskOptions* options) {
     const char* error = ffDetectDisks(options, &disks);
 
     if (error) {
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Disk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (disks.length == 0) {
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disks found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Disk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disks found");
         return false;
     }
 
@@ -327,7 +327,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Disk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -451,7 +451,7 @@ void ffDestroyDiskOptions(FFDiskOptions* options) {
 }
 
 FFModuleBaseInfo ffDiskModuleInfo = {
-    .name = FF_DISK_MODULE_NAME,
+    .name = "Disk",
     .description = "Print partitions, space usage, file system, etc",
     .displayName = {
         .en = "Disk",

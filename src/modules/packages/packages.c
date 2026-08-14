@@ -11,12 +11,12 @@ bool ffPrintPackages(FFPackagesOptions* options) {
     const char* error = ffDetectPackages(&counts, options);
 
     if (error) {
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (counts.all == 0) {
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No packages from known package managers found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No packages from known package managers found");
         return false;
     }
 
@@ -29,7 +29,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
     uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
@@ -141,7 +141,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         output.chars[output.length - 1] = '\n';
         ffStrbufWriteTo(&output, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME,
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Packages),
             0,
             &options->moduleArgs,
             FF_PRINT_TYPE_DEFAULT,
@@ -219,7 +219,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
 #if !FF_PACKAGES_REMOVE_DISABLED
         if (unsafe_yyjson_equals_str(key, "disabled")) {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val)) {
-                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
                 continue;
             }
 
@@ -230,7 +230,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                 size_t flagIdx, flagMax;
                 yyjson_arr_foreach (val, flagIdx, flagMax, flagObj) {
                     if (!yyjson_is_str(flagObj)) {
-                        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
+                        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
                         continue;
                     }
                     const char* flag = unsafe_yyjson_get_str(flagObj);
@@ -366,7 +366,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -510,7 +510,7 @@ void ffDestroyPackagesOptions(FFPackagesOptions* options) {
 }
 
 FFModuleBaseInfo ffPackagesModuleInfo = {
-    .name = FF_PACKAGES_MODULE_NAME,
+    .name = "Packages",
     .description = "List installed package managers and count of installed packages",
     .displayName = {
         .en = "Packages",

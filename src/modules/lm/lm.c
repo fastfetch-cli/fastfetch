@@ -13,17 +13,17 @@ bool ffPrintLM(FFLMOptions* options) {
     const char* error = ffDetectLM(&result);
 
     if (error) {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
     if (result.service.length == 0) {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
         goto exit;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.service, stdout);
         if (result.version.length) {
             printf(" %s", result.version.chars);
@@ -33,7 +33,7 @@ bool ffPrintLM(FFLMOptions* options) {
         }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                        FF_ARG(result.service, "service"),
                                                                                                        FF_ARG(result.type, "type"),
                                                                                                        FF_ARG(result.version, "version"),
@@ -57,7 +57,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -106,7 +106,7 @@ void ffDestroyLMOptions(FFLMOptions* options) {
 }
 
 FFModuleBaseInfo ffLMModuleInfo = {
-    .name = FF_LM_MODULE_NAME,
+    .name = "LM",
     .description = "Print login manager (desktop manager) name and version",
     .displayName = {
         .en = "Login Manager",

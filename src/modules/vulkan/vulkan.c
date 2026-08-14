@@ -9,12 +9,12 @@ bool ffPrintVulkan(FFVulkanOptions* options) {
     const FFVulkanResult* vulkan = ffDetectVulkan();
 
     if (vulkan->error) {
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", vulkan->error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", vulkan->error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (vulkan->apiVersion.length == 0 && vulkan->driver.length == 0) {
             ffStrbufWriteTo(&vulkan->instanceVersion, stdout);
@@ -35,7 +35,7 @@ bool ffPrintVulkan(FFVulkanOptions* options) {
             putchar('\n');
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(vulkan->driver, "driver"),
                                                                                                            FF_ARG(vulkan->apiVersion, "api-version"),
                                                                                                            FF_ARG(vulkan->conformanceVersion, "conformance-version"),
@@ -54,7 +54,7 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Vulkan), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -132,7 +132,7 @@ void ffDestroyVulkanOptions(FFVulkanOptions* options) {
 }
 
 FFModuleBaseInfo ffVulkanModuleInfo = {
-    .name = FF_VULKAN_MODULE_NAME,
+    .name = "Vulkan",
     .description = "Print the highest Vulkan version supported by the GPU",
     .displayName = {
         .en = "Vulkan",

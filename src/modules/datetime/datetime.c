@@ -8,8 +8,6 @@
 
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
-#define FF_DATETIME_DISPLAY_NAME "Date & Time"
-
 typedef struct FFDateTimeResult {
     // Examples for 21.02.2022 - 15:18:37
     uint16_t year;                                       // 2022
@@ -67,7 +65,7 @@ static void printDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs) {
     strftime(result.amPm, sizeof(result.amPm), "%p", tm);
 
     FF_PRINT_FORMAT_CHECKED(
-        FF_DATETIME_DISPLAY_NAME,
+        FF_MODULE_GET_DISPLAY_NAME(DateTime),
         0,
         moduleArgs,
         FF_PRINT_TYPE_DEFAULT,
@@ -112,11 +110,11 @@ bool ffPrintDateTime(FFDateTimeOptions* options) {
     char buffer[32];
     if (strftime(buffer, ARRAY_SIZE(buffer), "%F %T", tm) == 0) // yyyy-MM-dd HH:mm:ss
     {
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DateTime), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
         return false;
     }
 
-    ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+    ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DateTime), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
     puts(buffer);
     return true;
@@ -130,7 +128,7 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DateTime), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -152,7 +150,7 @@ void ffDestroyDateTimeOptions(FFDateTimeOptions* options) {
 }
 
 FFModuleBaseInfo ffDateTimeModuleInfo = {
-    .name = FF_DATETIME_MODULE_NAME,
+    .name = "DateTime",
     .description = "Print the current date and time",
     .displayName = {
         .en = "Date & Time",

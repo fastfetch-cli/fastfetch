@@ -1057,6 +1057,76 @@
                             "description": "Left padding for keys",
                             "minimum": 0,
                             "default": 0
+                        },
+                        "language": {
+                            "description": "Language used for module keys. `null` for auto detection based on system locale",
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detection based on system locale"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "en",
+                                    "description": "English"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "de",
+                                    "description": "German"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "es",
+                                    "description": "Spanish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "fr",
+                                    "description": "French"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "it",
+                                    "description": "Italian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ja",
+                                    "description": "Japanese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ko",
+                                    "description": "Korean"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "pl",
+                                    "description": "Polish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "pt_BR",
+                                    "description": "Brazilian Portuguese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ru",
+                                    "description": "Russian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "zh_CN",
+                                    "description": "Simplified Chinese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "zh_TW",
+                                    "description": "Traditional Chinese"
+                                }
+                            ],
+                            "default": "en"
                         }
                     }
                 },

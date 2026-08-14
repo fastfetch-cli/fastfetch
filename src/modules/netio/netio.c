@@ -5,8 +5,6 @@
 #include "detection/netio/netio.h"
 #include "modules/netio/netio.h"
 
-#define FF_NETIO_DISPLAY_NAME "Network IO"
-
 static int sortInfs(const FFNetIOResult* left, const FFNetIOResult* right) {
     return ffStrbufComp(&left->name, &right->name);
 }
@@ -17,7 +15,7 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
             ffStrbufSetF(&inf->name, "unknown %u", (unsigned) index);
         }
 
-        ffStrbufSetF(key, FF_NETIO_DISPLAY_NAME " (%s)", inf->name.chars);
+        ffStrbufSetF(key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(NetIO), inf->name.chars);
     } else {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -33,7 +31,7 @@ bool ffPrintNetIO(FFNetIOOptions* options) {
     const char* error = ffDetectNetIO(&result, options);
 
     if (error) {
-        ffPrintError(FF_NETIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(NetIO), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -131,7 +129,7 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(NetIO), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -199,7 +197,7 @@ void ffDestroyNetIOOptions(FFNetIOOptions* options) {
 }
 
 FFModuleBaseInfo ffNetIOModuleInfo = {
-    .name = FF_NETIO_MODULE_NAME,
+    .name = "NetIO",
     .description = "Print network I/O throughput",
     .displayName = {
         .en = "Network I/O",

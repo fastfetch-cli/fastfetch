@@ -15,13 +15,13 @@ bool ffPrintFont(FFFontOptions* options) {
     const char* error = ffDetectFont(&font);
 
     if (error) {
-        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufPutTo(&font.display, stdout);
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                              FF_ARG(font.fonts[0], "font1"),
                                                                                                              FF_ARG(font.fonts[1], "font2"),
                                                                                                              FF_ARG(font.fonts[2], "font3"),
@@ -49,7 +49,7 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Font), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -95,7 +95,7 @@ void ffDestroyFontOptions(FFFontOptions* options) {
 }
 
 FFModuleBaseInfo ffFontModuleInfo = {
-    .name = FF_FONT_MODULE_NAME,
+    .name = "Font",
     .description = "Print system font names",
     .displayName = {
         .en = "Font",

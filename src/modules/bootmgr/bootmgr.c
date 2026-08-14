@@ -14,7 +14,7 @@ bool ffPrintBootmgr(FFBootmgrOptions* options) {
     const char* error = ffDetectBootmgr(&bootmgr);
 
     if (error) {
-        ffPrintError(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     } else {
         FF_STRBUF_AUTO_DESTROY firmwareName = ffStrbufCreateCopy(&bootmgr.firmware);
@@ -25,7 +25,7 @@ bool ffPrintBootmgr(FFBootmgrOptions* options) {
 #endif
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&bootmgr.name, stdout);
             if (firmwareName.length > 0) {
                 printf(" - %s\n", firmwareName.chars);
@@ -33,7 +33,7 @@ bool ffPrintBootmgr(FFBootmgrOptions* options) {
                 putchar('\n');
             }
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                 FF_ARG(bootmgr.name, "name"),
                                                                                                                 FF_ARG(bootmgr.firmware, "firmware-path"),
                                                                                                                 FF_ARG(firmwareName, "firmware-name"),
@@ -59,7 +59,7 @@ void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bootmgr), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -103,7 +103,7 @@ void ffDestroyBootmgrOptions(FFBootmgrOptions* options) {
 }
 
 FFModuleBaseInfo ffBootmgrModuleInfo = {
-    .name = FF_BOOTMGR_MODULE_NAME,
+    .name = "Bootmgr",
     .description = "Print second-stage bootloader information (name, firmware, etc.)",
     .displayName = {
         .en = "Boot Manager",

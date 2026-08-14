@@ -8,15 +8,15 @@ bool ffPrintLocale(FFLocaleOptions* options) {
 
     const char* error = ffDetectLocale(&locale);
     if (error) {
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&locale, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
     }
 
     return true;
@@ -30,7 +30,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -67,7 +67,7 @@ void ffDestroyLocaleOptions(FFLocaleOptions* options) {
 }
 
 FFModuleBaseInfo ffLocaleModuleInfo = {
-    .name = FF_LOCALE_MODULE_NAME,
+    .name = "Locale",
     .description = "Print system locale name",
     .displayName = {
         .en = "Locale",

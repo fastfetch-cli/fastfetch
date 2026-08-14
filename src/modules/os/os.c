@@ -50,14 +50,14 @@ bool ffPrintOS(FFOSOptions* options) {
     const FFOSResult* os = ffDetectOS();
 
     if (os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0) {
-        ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Could not detect OS");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Could not detect OS");
         return false;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufSetStatic(&key, FF_OS_MODULE_NAME);
+        ffStrbufSetStatic(&key, FF_MODULE_GET_DISPLAY_NAME(OS));
     } else {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                                                                            FF_ARG(instance.state.platform.sysinfo.name, "sysname"),
@@ -112,7 +112,7 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -172,7 +172,7 @@ void ffDestroyOSOptions(FFOSOptions* options) {
 }
 
 FFModuleBaseInfo ffOSModuleInfo = {
-    .name = FF_OS_MODULE_NAME,
+    .name = "OS",
     .description = "Print the OS or Linux distribution name and version",
     .displayName = {
         .en = "OS",

@@ -9,15 +9,15 @@ bool ffPrintWeather(FFWeatherOptions* options) {
     const char* error = ffDetectWeather(options, &result);
 
     if (error) {
-        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Weather), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Weather), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&result, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Weather), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(result, "result"),
                                                                                                         }));
     }
@@ -48,7 +48,7 @@ void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Weather), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -92,7 +92,7 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options) {
 }
 
 FFModuleBaseInfo ffWeatherModuleInfo = {
-    .name = FF_WEATHER_MODULE_NAME,
+    .name = "Weather",
     .description = "Print weather information",
     .displayName = {
         .en = "Weather",

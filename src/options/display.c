@@ -8,8 +8,67 @@
 #if !FF_MODULE_DISABLE_TERMINALTHEME
     #include "detection/terminaltheme/terminaltheme.h"
 #endif
+#if !FF_MODULE_DISABLE_LOCALE
+    #include "detection/locale/locale.h"
+#endif
 
 #include <unistd.h>
+
+// @returns offsetof(FFModuleDisplayName, <language>)
+// @see src/common/option.h
+static uint32_t optionParseLanguageString(FFstrbuf* language) {
+    if (language->length == 0) {
+#if !FF_MODULE_DISABLE_LOCALE
+        ffDetectLocale(language);
+#else
+        fputs("Error: --key-language requires a value\n", stderr);
+        exit(477);
+#endif
+    }
+
+    // The language code is expected to be in the format of "en", "en_US", "de", "de_DE", etc.
+    // First try to match the full language code, then try to match just the first two characters (the language part).
+    // If no match is found, report a language not supported error.
+    // en_US -> offsetof(FFModuleDisplayName, en)
+    // de_DE -> offsetof(FFModuleDisplayName, de)
+    // zh_CN -> offsetof(FFModuleDisplayName, zh_CN)
+    // ar -> Error: Language 'ar' is not supported
+
+    // Try to match the full language code, e.g. "en", "pt_BR", "zh_CN"
+    static const FFKeyValuePair pairs[] = {
+        { "en", offsetof(FFModuleDisplayName, en) },
+        { "de", offsetof(FFModuleDisplayName, de) },
+        { "es", offsetof(FFModuleDisplayName, es) },
+        { "fr", offsetof(FFModuleDisplayName, fr) },
+        { "it", offsetof(FFModuleDisplayName, it) },
+        { "ja", offsetof(FFModuleDisplayName, ja) },
+        { "ko", offsetof(FFModuleDisplayName, ko) },
+        { "pl", offsetof(FFModuleDisplayName, pl) },
+        { "pt_BR", offsetof(FFModuleDisplayName, pt_BR) },
+        { "ru", offsetof(FFModuleDisplayName, ru) },
+        { "zh_CN", offsetof(FFModuleDisplayName, zh_CN) },
+        { "zh_TW", offsetof(FFModuleDisplayName, zh_TW) },
+        {},
+    };
+
+    for (const FFKeyValuePair* pair = pairs; pair->key; ++pair) {
+        if (ffStrbufIgnCaseEqualS(language, pair->key)) {
+            return (uint32_t) pair->value;
+        }
+    }
+
+    // Try to match just the first two characters (the language part), e.g. "en" from "en_US", "de" from "de_DE"
+    if (language->length >= 2) {
+        for (const FFKeyValuePair* pair = pairs; pair->key; ++pair) {
+            if (ffStrbufStartsWithIgnCaseS(language, pair->key)) {
+                return (uint32_t) pair->value;
+            }
+        }
+    }
+
+    fprintf(stderr, "Error: Language '%s' is not supported\n", language->chars);
+    exit(477);
+}
 
 const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "display");
@@ -483,6 +542,17 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (paddingLeft) {
                     options->keyPaddingLeft = (uint16_t) yyjson_get_uint(paddingLeft);
                 }
+
+                yyjson_val* language = yyjson_obj_get(val, "language");
+                if (language) {
+                    FF_STRBUF_AUTO_DESTROY languageBuffer = ffStrbufCreate();
+                    if (yyjson_is_str(language)) {
+                        ffStrbufSetJsonVal(&languageBuffer, language);
+                    } else if (!yyjson_is_null(language)) {
+                        return "display.key.language must be a string or null";
+                    }
+                    options->keyLanguage = optionParseLanguageString(&languageBuffer);
+                }
             } else {
                 return "display.key must be an object";
             }
@@ -651,6 +721,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "none", FF_MODULE_KEY_TYPE_NONE }, { "string", FF_MODULE_KEY_TYPE_STRING }, { "icon", FF_MODULE_KEY_TYPE_ICON }, { "both", FF_MODULE_KEY_TYPE_BOTH }, { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 }, { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 }, { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 }, { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 }, { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "padding-left")) {
             options->keyPaddingLeft = (uint16_t) ffOptionParseUInt32(key, value);
+        } else if (ffStrEqualsIgnCase(subkey, "language")) {
+            FF_STRBUF_AUTO_DESTROY language = ffStrbufCreateStatic(value);
+            options->keyLanguage = optionParseLanguageString(&language);
         } else {
             return false;
         }
@@ -867,6 +940,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->keyWidth = 0;
     options->keyPaddingLeft = 0;
     options->keyType = FF_MODULE_KEY_TYPE_STRING;
+    options->keyLanguage = offsetof(FFModuleDisplayName, en);
 
     options->tempUnit = FF_TEMPERATURE_UNIT_DEFAULT;
     options->tempNdigits = 1;
@@ -1168,6 +1242,45 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
         }
 
         yyjson_mut_obj_add_uint(doc, key, "paddingLeft", options->keyPaddingLeft);
+
+        switch (options->keyLanguage) {
+            case offsetof(FFModuleDisplayName, en):
+                yyjson_mut_obj_add_str(doc, key, "language", "en");
+                break;
+            case offsetof(FFModuleDisplayName, de):
+                yyjson_mut_obj_add_str(doc, key, "language", "de");
+                break;
+            case offsetof(FFModuleDisplayName, es):
+                yyjson_mut_obj_add_str(doc, key, "language", "es");
+                break;
+            case offsetof(FFModuleDisplayName, fr):
+                yyjson_mut_obj_add_str(doc, key, "language", "fr");
+                break;
+            case offsetof(FFModuleDisplayName, it):
+                yyjson_mut_obj_add_str(doc, key, "language", "it");
+                break;
+            case offsetof(FFModuleDisplayName, ja):
+                yyjson_mut_obj_add_str(doc, key, "language", "ja");
+                break;
+            case offsetof(FFModuleDisplayName, ko):
+                yyjson_mut_obj_add_str(doc, key, "language", "ko");
+                break;
+            case offsetof(FFModuleDisplayName, pl):
+                yyjson_mut_obj_add_str(doc, key, "language", "pl");
+                break;
+            case offsetof(FFModuleDisplayName, pt_BR):
+                yyjson_mut_obj_add_str(doc, key, "language", "pt_BR");
+                break;
+            case offsetof(FFModuleDisplayName, ru):
+                yyjson_mut_obj_add_str(doc, key, "language", "ru");
+                break;
+            case offsetof(FFModuleDisplayName, zh_CN):
+                yyjson_mut_obj_add_str(doc, key, "language", "zh_CN");
+                break;
+            case offsetof(FFModuleDisplayName, zh_TW):
+                yyjson_mut_obj_add_str(doc, key, "language", "zh_TW");
+                break;
+        }
     }
 
     {

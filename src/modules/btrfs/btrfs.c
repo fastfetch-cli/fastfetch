@@ -10,9 +10,9 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (result->name.length > 0) {
-            ffStrbufSetF(&buffer, "%s (%s)", FF_BTRFS_MODULE_NAME, result->name.chars);
+            ffStrbufSetF(&buffer, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Btrfs), result->name.chars);
         } else {
-            ffStrbufSetS(&buffer, FF_BTRFS_MODULE_NAME);
+            ffStrbufSetS(&buffer, FF_MODULE_GET_DISPLAY_NAME(Btrfs));
         }
     } else {
         ffStrbufClear(&buffer);
@@ -100,11 +100,11 @@ bool ffPrintBtrfs(FFBtrfsOptions* options) {
     const char* error = ffDetectBtrfs(&results);
 
     if (error) {
-        ffPrintError(FF_BTRFS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Btrfs), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
     if (results.length == 0) {
-        ffPrintError(FF_BTRFS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No btrfs drive found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Btrfs), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No btrfs drive found");
         return false;
     }
 
@@ -136,7 +136,7 @@ void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BTRFS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Btrfs), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -198,7 +198,7 @@ void ffDestroyBtrfsOptions(FFBtrfsOptions* options) {
 }
 
 FFModuleBaseInfo ffBtrfsModuleInfo = {
-    .name = FF_BTRFS_MODULE_NAME,
+    .name = "Btrfs",
     .description = "Print Linux BTRFS volumes",
     .displayName = {
         .en = "BTRFS",

@@ -4,7 +4,7 @@
 #include "options/logo.h"
 
 bool ffPrintLogo([[maybe_unused]] FFLogoOptions* options) {
-    ffPrintError(FF_LOGO_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_DEFAULT, "Supported in JSON format only");
+    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Logo), 0, nullptr, FF_PRINT_TYPE_DEFAULT, "Supported in JSON format only");
     return false;
 }
 
@@ -16,7 +16,7 @@ void ffParseLogoJsonObject([[maybe_unused]] FFLogoOptions* options, [[maybe_unus
             continue;
         }
 
-        ffPrintError(FF_LOGO_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Logo), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -77,7 +77,7 @@ void ffDestroyLogoOptions([[maybe_unused]] FFLogoOptions* options) {
 }
 
 FFModuleBaseInfo ffLogoModuleInfo = {
-    .name = FF_LOGO_MODULE_NAME,
+    .name = "Logo",
     .description = "Query built-in logo for JSON output",
     .displayName = {
         .en = "Logo",

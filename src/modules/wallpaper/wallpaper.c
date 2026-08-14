@@ -21,15 +21,15 @@ bool ffPrintWallpaper(FFWallpaperOptions* options) {
         : fullpath.chars + index;
 
     if (error) {
-        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         puts(filename);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(filename, "file-name"),
                                                                                                               FF_ARG(fullpath, "full-path"),
                                                                                                           }));
@@ -46,7 +46,7 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Wallpaper), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -75,7 +75,7 @@ void ffDestroyWallpaperOptions(FFWallpaperOptions* options) {
 }
 
 FFModuleBaseInfo ffWallpaperModuleInfo = {
-    .name = FF_WALLPAPER_MODULE_NAME,
+    .name = "Wallpaper",
     .description = "Print the file path of the current wallpaper",
     .displayName = {
         .en = "Wallpaper",

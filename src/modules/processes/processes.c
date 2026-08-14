@@ -9,16 +9,16 @@ bool ffPrintProcesses(FFProcessesOptions* options) {
     const char* error = ffDetectProcesses(&numProcesses);
 
     if (error) {
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         printf("%u\n", numProcesses);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(numProcesses, "result") }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(numProcesses, "result") }));
     }
 
     return true;
@@ -32,7 +32,7 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -63,7 +63,7 @@ void ffDestroyProcessesOptions(FFProcessesOptions* options) {
 }
 
 FFModuleBaseInfo ffProcessesModuleInfo = {
-    .name = FF_PROCESSES_MODULE_NAME,
+    .name = "Processes",
     .description = "Print number of running processes",
     .displayName = {
         .en = "Processes",

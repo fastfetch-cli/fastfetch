@@ -2,8 +2,6 @@
 
 #include "option.h"
 
-#define FF_PUBLICIP_MODULE_NAME "PublicIp"
-
 void ffPreparePublicIp(FFPublicIPOptions* options);
 
 bool ffPrintPublicIp(FFPublicIPOptions* options);

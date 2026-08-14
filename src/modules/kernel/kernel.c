@@ -7,12 +7,12 @@
 bool ffPrintKernel(FFKernelOptions* options) {
     const FFPlatformSysinfo* info = &instance.state.platform.sysinfo;
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Kernel), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         printf("%s %s\n", info->name.chars, info->release.chars);
     } else {
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         ffSizeAppendNum(info->pageSize, &str);
-        FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Kernel), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(info->name, "sysname"),
                                                                                                            FF_ARG(info->release, "release"),
                                                                                                            FF_ARG(info->version, "version"),
@@ -32,7 +32,7 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Kernel), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -62,7 +62,7 @@ void ffDestroyKernelOptions(FFKernelOptions* options) {
 }
 
 FFModuleBaseInfo ffKernelModuleInfo = {
-    .name = FF_KERNEL_MODULE_NAME,
+    .name = "Kernel",
     .description = "Print system kernel version",
     .displayName = {
         .en = "Kernel",

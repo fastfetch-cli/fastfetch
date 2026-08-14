@@ -12,19 +12,19 @@ bool ffPrintTPM(FFTPMOptions* options) {
     const char* error = ffDetectTPM(&result);
 
     if (error) {
-        ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.description.length > 0) {
             ffStrbufPutTo(&result.description, stdout);
         } else {
             ffStrbufPutTo(&result.version, stdout);
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                         FF_ARG(result.version, "version"),
                                                                                                         FF_ARG(result.description, "description"),
                                                                                                     }));
@@ -44,7 +44,7 @@ void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -83,7 +83,7 @@ void ffDestroyTPMOptions(FFTPMOptions* options) {
 }
 
 FFModuleBaseInfo ffTPMModuleInfo = {
-    .name = FF_TPM_MODULE_NAME,
+    .name = "TPM",
     .description = "Print information about the Trusted Platform Module (TPM) security device",
     .displayName = {
         .en = "TPM",

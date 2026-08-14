@@ -586,6 +586,30 @@
             }
         },
         {
+            "long": "key-language",
+            "desc": "Specify the language used for module keys",
+            "remark": "Leave empty for auto-detection based on the system locale",
+            "arg": {
+                "type": "enum",
+                "default": "en",
+                "optional": true,
+                "enum": {
+                    "en": "English",
+                    "de": "German",
+                    "es": "Spanish",
+                    "fr": "French",
+                    "it": "Italian",
+                    "ja": "Japanese",
+                    "ko": "Korean",
+                    "pl": "Polish",
+                    "pt_BR": "Brazilian Portuguese",
+                    "ru": "Russian",
+                    "zh_CN": "Simplified Chinese",
+                    "zh_TW": "Traditional Chinese"
+                }
+            }
+        },
+        {
             "long": "bright-color",
             "desc": "Specify whether keys, title, and ASCII logo should be printed in bright color",
             "arg": {

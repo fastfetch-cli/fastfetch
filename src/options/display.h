@@ -80,6 +80,7 @@ typedef struct FFOptionsDisplay {
     uint8_t percentWidth;
     bool noBuffer;
     FFModuleKeyType keyType;
+    uint32_t keyLanguage; // Offset of FFModuleDisplayName member
     uint16_t keyWidth;
     uint16_t keyPaddingLeft;
     int8_t freqNdigits;

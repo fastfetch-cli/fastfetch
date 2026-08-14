@@ -51,9 +51,9 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (gpu->length > 0) {
-            ffStrbufSetF(&key, "%s (%s - %s)", FF_CODEC_MODULE_NAME, direction, gpu->chars);
+            ffStrbufSetF(&key, "%s (%s - %s)", FF_MODULE_GET_DISPLAY_NAME(Codec), direction, gpu->chars);
         } else {
-            ffStrbufSetF(&key, "%s (%s)", FF_CODEC_MODULE_NAME, direction);
+            ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Codec), direction);
         }
     } else {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]){
@@ -100,12 +100,12 @@ bool ffPrintCodec(FFCodecOptions* options) {
     const char* error = ffDetectCodec(options, &result);
 
     if (error) {
-        ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Codec), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No hardware video acceleration found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Codec), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No hardware video acceleration found");
         return false;
     }
 
@@ -174,14 +174,14 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_CODEC_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Codec), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->showType = (FFCodecShowType) value;
             }
             continue;
         }
 
-        ffPrintError(FF_CODEC_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Codec), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -251,7 +251,7 @@ void ffDestroyCodecOptions(FFCodecOptions* options) {
 }
 
 FFModuleBaseInfo ffCodecModuleInfo = {
-    .name = FF_CODEC_MODULE_NAME,
+    .name = "Codec",
     .description = "Print hardware video acceleration codec types (decode / encode)",
     .displayName = {
         .en = "Codec",

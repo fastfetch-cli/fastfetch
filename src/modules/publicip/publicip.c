@@ -4,8 +4,6 @@
 #include "modules/publicip/publicip.h"
 #include "detection/publicip/publicip.h"
 
-#define FF_PUBLICIP_DISPLAY_NAME "Public IP"
-
 bool ffPrintPublicIp(FFPublicIPOptions* options) {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -13,19 +11,19 @@ bool ffPrintPublicIp(FFPublicIPOptions* options) {
     const char* error = ffDetectPublicIp(options, &result);
 
     if (error) {
-        ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.location.length) {
             printf("%s (%s)\n", result.ip.chars, result.location.chars);
         } else {
             ffStrbufPutTo(&result.ip, stdout);
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(result.ip, "ip"),
                                                                                                               FF_ARG(result.location, "location"),
                                                                                                           }));
@@ -60,7 +58,7 @@ void ffParsePublicIpJsonObject(FFPublicIPOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_PUBLICIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PublicIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -110,7 +108,7 @@ void ffDestroyPublicIpOptions(FFPublicIPOptions* options) {
 }
 
 FFModuleBaseInfo ffPublicIPModuleInfo = {
-    .name = FF_PUBLICIP_MODULE_NAME,
+    .name = "PublicIp",
     .description = "Print your public IP address and related information",
     .displayName = {
         .en = "Public IP",

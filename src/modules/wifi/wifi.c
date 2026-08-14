@@ -9,11 +9,11 @@ bool ffPrintWifi(FFWifiOptions* options) {
 
     const char* error = ffDetectWifi(&result);
     if (error) {
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Wifi), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
     if (!result.length) {
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No Wifi interfaces found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Wifi), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No Wifi interfaces found");
         return false;
     }
 
@@ -46,7 +46,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
         }
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Wifi), moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
             if (item->conn.ssid.length) {
@@ -95,7 +95,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
                 ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
             }
 
-            FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Wifi), moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                        FF_ARG(item->inf.description, "inf-desc"),
                                                                                                                        FF_ARG(item->inf.status, "inf-status"),
                                                                                                                        FF_ARG(item->conn.status, "status"),
@@ -138,7 +138,7 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Wifi), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -213,7 +213,7 @@ void ffDestroyWifiOptions(FFWifiOptions* options) {
 }
 
 FFModuleBaseInfo ffWifiModuleInfo = {
-    .name = FF_WIFI_MODULE_NAME,
+    .name = "Wifi",
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
     .displayName = {
         .en = "Wi-Fi",

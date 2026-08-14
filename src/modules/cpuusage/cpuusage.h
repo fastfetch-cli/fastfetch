@@ -2,8 +2,6 @@
 
 #include "option.h"
 
-#define FF_CPUUSAGE_MODULE_NAME "CPUUsage"
-
 void ffPrepareCPUUsage();
 
 bool ffPrintCPUUsage(FFCPUUsageOptions* options);

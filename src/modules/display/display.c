@@ -19,7 +19,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if (dsResult->displays.length == 0) {
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
         return false;
     }
 
@@ -28,7 +28,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
     }
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE) {
-        ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         FF_LIST_FOR_EACH (FFDisplayResult, result, dsResult->displays) {
@@ -71,11 +71,11 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
         ffStrbufClear(&key);
         if (options->moduleArgs.key.length == 0) {
             if (result->name.length) {
-                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
+                ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Display), result->name.chars);
             } else if (moduleIndex > 0) {
-                ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
+                ffStrbufAppendF(&key, "%s (%d)", FF_MODULE_GET_DISPLAY_NAME(Display), moduleIndex);
             } else {
-                ffStrbufAppendS(&key, FF_DISPLAY_MODULE_NAME);
+                ffStrbufAppendS(&key, FF_MODULE_GET_DISPLAY_NAME(Display));
             }
         } else {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -221,7 +221,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->compactType = (FFDisplayCompactType) value;
                 }
@@ -246,7 +246,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->order = (FFDisplayOrder) value;
                 }
@@ -254,7 +254,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -411,7 +411,7 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options) {
 }
 
 FFModuleBaseInfo ffDisplayModuleInfo = {
-    .name = FF_DISPLAY_MODULE_NAME,
+    .name = "Display",
     .description = "Print resolutions, refresh rates, etc",
     .displayName = {
         .en = "Display",
