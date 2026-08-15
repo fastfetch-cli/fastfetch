@@ -161,7 +161,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options) {
 
     ffStrbufInit(&options->namePrefix);
     options->detectTotal = false;
-    options->waitTime = 1000;
+    options->waitTime = 500;
 }
 
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options) {
