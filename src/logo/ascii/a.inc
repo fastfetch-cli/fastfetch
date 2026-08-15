@@ -901,6 +901,18 @@ static const FFlogo A[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ANNIRA
+    // Annira Linux
+    {
+        .names = { "Annira", "Annira Linux", "annira" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ANNIRA,
+        .colors = {
+            FF_COLOR_FG_RGB "230;0;0",
+        },
+        .colorKeys = FF_COLOR_FG_RGB "230;0;0",
+        .colorTitle = FF_COLOR_FG_RGB "230;0;0",
+    },
+    #endif
     // LAST
     {},
 };
