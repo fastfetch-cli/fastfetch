@@ -28,7 +28,7 @@ typedef struct FFModuleDisplayName {
     const char* ja; // Japanese
     const char* ko; // Korean
     const char* pl; // Polish
-    const char* pt_BR; // Brazilian Portuguese
+    const char* pt; // (Brazilian) Portuguese
     const char* ru; // Russian
     const char* zh_CN; // Simplified Chinese
     const char* zh_TW; // Traditional Chinese

@@ -1107,8 +1107,8 @@
                                 },
                                 {
                                     "type": "string",
-                                    "const": "pt_BR",
-                                    "description": "Brazilian Portuguese"
+                                    "const": "pt",
+                                    "description": "Portuguese"
                                 },
                                 {
                                     "type": "string",
