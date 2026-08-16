@@ -196,7 +196,7 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         .ko = "스왑",
         .pl = "Swap",
         .pt = "Swap",
-        .ru = "Своп",
+        .ru = "Подкачка",
         .zh_CN = "交换空间",
         .zh_TW = "交換空間",
     },

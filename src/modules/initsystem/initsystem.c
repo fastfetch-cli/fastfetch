@@ -115,7 +115,7 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         .ko = "초기화 시스템",
         .pl = "System init",
         .pt = "Sistema de inicialização",
-        .ru = "Init-система",
+        .ru = "Система инициализации",
         .zh_CN = "Init 系统",
         .zh_TW = "Init 系統",
     },

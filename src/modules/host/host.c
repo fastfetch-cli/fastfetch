@@ -150,7 +150,7 @@ FFModuleBaseInfo ffHostModuleInfo = {
         .ko = "호스트",
         .pl = "Host",
         .pt = "Host",
-        .ru = "Хост",
+        .ru = "Модель",
         .zh_CN = "主机",
         .zh_TW = "主機",
     },

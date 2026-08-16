@@ -265,7 +265,7 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         .ko = "CPU",
         .pl = "CPU",
         .pt = "CPU",
-        .ru = "CPU",
+        .ru = "Процессор",
         .zh_CN = "CPU",
         .zh_TW = "CPU",
     },

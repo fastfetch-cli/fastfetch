@@ -122,7 +122,7 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
         .ko = "공용 IP",
         .pl = "Publiczne IP",
         .pt = "IP público",
-        .ru = "Публичный IP",
+        .ru = "Внешний IP",
         .zh_CN = "公网 IP",
         .zh_TW = "公網 IP",
     },

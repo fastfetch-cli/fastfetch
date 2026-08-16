@@ -124,7 +124,7 @@ FFModuleBaseInfo ffChassisModuleInfo = {
         .ko = "섀시",
         .pl = "Obudowa",
         .pt = "Chassi",
-        .ru = "Шасси",
+        .ru = "Корпус",
         .zh_CN = "机箱",
         .zh_TW = "機箱",
     },

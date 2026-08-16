@@ -122,7 +122,7 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         .ko = "전원 어댑터",
         .pl = "Zasilacz",
         .pt = "Fonte de alimentação",
-        .ru = "Блок питания",
+        .ru = "Адаптер питания",
         .zh_CN = "电源适配器",
         .zh_TW = "電源轉接器",
     },

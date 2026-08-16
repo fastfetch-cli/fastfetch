@@ -193,7 +193,7 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         .ko = "CPU 사용량",
         .pl = "Użycie CPU",
         .pt = "Uso da CPU",
-        .ru = "Использование ЦП",
+        .ru = "Использование процессора",
         .zh_CN = "CPU使用率",
         .zh_TW = "CPU使用率",
     },
