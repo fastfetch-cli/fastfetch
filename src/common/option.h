@@ -21,9 +21,11 @@ typedef struct FFModuleFormatArgList {
 typedef struct FFModuleDisplayName {
     const char* en; // English
 
+    const char* ar; // Arabic
     const char* de; // German
     const char* es; // Spanish
     const char* fr; // French
+    const char* he; // Hebrew
     const char* it; // Italian
     const char* ja; // Japanese
     const char* ko; // Korean

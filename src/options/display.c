@@ -62,9 +62,11 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
 #pragma GCC diagnostic ignored "-Wmultichar"
     switch (language->chars[0] << 8 | language->chars[1]) {
         case 'en': return offsetof(FFModuleDisplayName, en);
+        case 'ar': return offsetof(FFModuleDisplayName, ar);
         case 'de': return offsetof(FFModuleDisplayName, de);
         case 'es': return offsetof(FFModuleDisplayName, es);
         case 'fr': return offsetof(FFModuleDisplayName, fr);
+        case 'he': return offsetof(FFModuleDisplayName, he);
         case 'it': return offsetof(FFModuleDisplayName, it);
         case 'ja': return offsetof(FFModuleDisplayName, ja);
         case 'ko': return offsetof(FFModuleDisplayName, ko);
@@ -1269,6 +1271,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             case offsetof(FFModuleDisplayName, en):
                 yyjson_mut_obj_add_str(doc, key, "language", "en");
                 break;
+            case offsetof(FFModuleDisplayName, ar):
+                yyjson_mut_obj_add_str(doc, key, "language", "ar");
+                break;
             case offsetof(FFModuleDisplayName, de):
                 yyjson_mut_obj_add_str(doc, key, "language", "de");
                 break;
@@ -1277,6 +1282,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 break;
             case offsetof(FFModuleDisplayName, fr):
                 yyjson_mut_obj_add_str(doc, key, "language", "fr");
+                break;
+            case offsetof(FFModuleDisplayName, he):
+                yyjson_mut_obj_add_str(doc, key, "language", "he");
                 break;
             case offsetof(FFModuleDisplayName, it):
                 yyjson_mut_obj_add_str(doc, key, "language", "it");

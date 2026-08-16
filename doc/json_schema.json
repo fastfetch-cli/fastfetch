@@ -1072,6 +1072,11 @@
                                 },
                                 {
                                     "type": "string",
+                                    "const": "ar",
+                                    "description": "Arabic"
+                                },
+                                {
+                                    "type": "string",
                                     "const": "de",
                                     "description": "German"
                                 },
@@ -1084,6 +1089,11 @@
                                     "type": "string",
                                     "const": "fr",
                                     "description": "French"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "he",
+                                    "description": "Hebrew"
                                 },
                                 {
                                     "type": "string",
