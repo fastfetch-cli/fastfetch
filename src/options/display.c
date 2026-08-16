@@ -71,12 +71,7 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
         case 'ja': return offsetof(FFModuleDisplayName, ja);
         case 'ko': return offsetof(FFModuleDisplayName, ko);
         case 'pl': return offsetof(FFModuleDisplayName, pl);
-        case 'pt': {
-            if (ffStrbufEqualS(language, "pt")) {
-                return offsetof(FFModuleDisplayName, pt);
-            }
-            goto error;
-        }
+        case 'pt': return offsetof(FFModuleDisplayName, pt);
         case 'ru': return offsetof(FFModuleDisplayName, ru);
         case 'zh': {
             if (ffStrbufEqualS(language, "zh_cn")) {
