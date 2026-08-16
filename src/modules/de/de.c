@@ -96,7 +96,7 @@ FFModuleBaseInfo ffDEModuleInfo = {
         .ko = "데스크탑 환경",
         .pl = "Środowisko graficzne",
         .pt = "Ambiente de desktop",
-        .ru = "Рабочая среда",
+        .ru = "Рабочее окружение",
         .zh_CN = "桌面环境",
         .zh_TW = "桌面環境",
     },

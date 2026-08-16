@@ -493,7 +493,7 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         .ko = "GPU",
         .pl = "GPU",
         .pt = "GPU",
-        .ru = "GPU",
+        .ru = "Видеокарта",
         .zh_CN = "显卡",
         .zh_TW = "顯卡",
     },

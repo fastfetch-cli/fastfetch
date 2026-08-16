@@ -184,7 +184,7 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         .ko = "디스크 I/O",
         .pl = "Dysk I/O",
         .pt = "Disco I/O",
-        .ru = "Диск I/O",
+        .ru = "Дисковый I/O",
         .zh_CN = "磁盘 I/O",
         .zh_TW = "磁碟 I/O",
     },
