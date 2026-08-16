@@ -165,7 +165,7 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         .ko = "블루투스",
         .pl = "Bluetooth",
         .pt = "Bluetooth",
-        .ru = "Блютуз",
+        .ru = "Bluetooth",
         .zh_CN = "蓝牙",
         .zh_TW = "藍牙",
     },
