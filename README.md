@@ -99,7 +99,7 @@ See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 * View all data that fastfetch detects: `fastfetch -s <module1>[:<module2>][:<module3>] --format json`
 * Display help messages: `fastfetch --help`
 * Generate a minimal config file: `fastfetch [-s <module1>[:<module2>]] --gen-config [</path/to/config.jsonc>]`
-    * Use: `--gen-config-full` to generate a full config file with all optional options
+    * Use [The online configuration generator](https://fastfetch-cli.github.io/fastfetch-config/) to generate a full config file with all optional options
 
 ## Customization
 
