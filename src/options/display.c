@@ -19,53 +19,75 @@
 static uint32_t optionParseLanguageString(FFstrbuf* language) {
     if (language->length == 0) {
 #if !FF_MODULE_DISABLE_LOCALE
-        ffDetectLocale(language);
+        const char* error = ffDetectLocale(language);
+        if (__builtin_expect(error != nullptr, false)) {
+            fprintf(stderr, "ffDetectLocale: %s\n", error);
+            exit(477);
+        }
 #else
         fputs("Error: --key-language requires a value\n", stderr);
         exit(477);
 #endif
     }
 
+    ffStrbufSubstrBeforeFirstC(language, '.'); // Remove the encoding part of the locale
+    #if __linux__
+        ffStrbufSubstrBeforeFirstC(language, '@'); // Remove the modifier part of the locale (Linux only)
+    #endif
+    ffStrbufLowerCase(language);
+
+    if (language->length <= 1) {
+        if (language->chars[0] == 'c') {
+            return offsetof(FFModuleDisplayName, en);
+        } else {
+            goto error;
+        }
+    } else if (language->length > 2) {
+        if (language->chars[2] == '-') {
+            language->chars[2] = '_';
+        } else if (__builtin_expect(language->chars[2] != '_', false)) {
+            goto error;
+        }
+    }
+
     // The language code is expected to be in the format of "en", "en_US", "de", "de_DE", etc.
     // First try to match the full language code, then try to match just the first two characters (the language part).
     // If no match is found, report a language not supported error.
     // en_US -> offsetof(FFModuleDisplayName, en)
-    // de_DE -> offsetof(FFModuleDisplayName, de)
+    // en -> offsetof(FFModuleDisplayName, en)
     // zh_CN -> offsetof(FFModuleDisplayName, zh_CN)
-    // ar -> Error: Language 'ar' is not supported
+    // zh -> Error: Language 'zh' is not supported. This is an intentional design decision, as the language code 'zh' could refer to either Simplified or Traditional Chinese.
 
-    // Try to match the full language code, e.g. "en", "pt_BR", "zh_CN"
-    static const FFKeyValuePair pairs[] = {
-        { "en", offsetof(FFModuleDisplayName, en) },
-        { "de", offsetof(FFModuleDisplayName, de) },
-        { "es", offsetof(FFModuleDisplayName, es) },
-        { "fr", offsetof(FFModuleDisplayName, fr) },
-        { "it", offsetof(FFModuleDisplayName, it) },
-        { "ja", offsetof(FFModuleDisplayName, ja) },
-        { "ko", offsetof(FFModuleDisplayName, ko) },
-        { "pl", offsetof(FFModuleDisplayName, pl) },
-        { "pt_BR", offsetof(FFModuleDisplayName, pt_BR) },
-        { "ru", offsetof(FFModuleDisplayName, ru) },
-        { "zh_CN", offsetof(FFModuleDisplayName, zh_CN) },
-        { "zh_TW", offsetof(FFModuleDisplayName, zh_TW) },
-        {},
-    };
-
-    for (const FFKeyValuePair* pair = pairs; pair->key; ++pair) {
-        if (ffStrbufIgnCaseEqualS(language, pair->key)) {
-            return (uint32_t) pair->value;
-        }
-    }
-
-    // Try to match just the first two characters (the language part), e.g. "en" from "en_US", "de" from "de_DE"
-    if (language->length >= 2) {
-        for (const FFKeyValuePair* pair = pairs; pair->key; ++pair) {
-            if (ffStrbufStartsWithIgnCaseS(language, pair->key)) {
-                return (uint32_t) pair->value;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+    switch (language->chars[0] << 8 | language->chars[1]) {
+        case 'en': return offsetof(FFModuleDisplayName, en);
+        case 'de': return offsetof(FFModuleDisplayName, de);
+        case 'es': return offsetof(FFModuleDisplayName, es);
+        case 'fr': return offsetof(FFModuleDisplayName, fr);
+        case 'it': return offsetof(FFModuleDisplayName, it);
+        case 'ja': return offsetof(FFModuleDisplayName, ja);
+        case 'ko': return offsetof(FFModuleDisplayName, ko);
+        case 'pl': return offsetof(FFModuleDisplayName, pl);
+        case 'pt': {
+            if (ffStrbufEqualS(language, "pt_br")) {
+                return offsetof(FFModuleDisplayName, pt_BR);
             }
+            goto error;
+        }
+        case 'ru': return offsetof(FFModuleDisplayName, ru);
+        case 'zh': {
+            if (ffStrbufEqualS(language, "zh_cn")) {
+                return offsetof(FFModuleDisplayName, zh_CN);
+            } else if (ffStrbufEqualS(language, "zh_tw")) {
+                return offsetof(FFModuleDisplayName, zh_TW);
+            }
+            goto error;
         }
     }
+#pragma GCC diagnostic pop
 
+error:
     fprintf(stderr, "Error: Language '%s' is not supported\n", language->chars);
     exit(477);
 }
