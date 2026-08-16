@@ -200,7 +200,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         .ko = "블루투스 어댑터",
         .pl = "Adapter Bluetooth",
         .pt = "Adaptador Bluetooth",
-        .ru = "Блютус-адаптер",
+        .ru = "Блютуз-адаптер",
         .zh_CN = "蓝牙适配器",
         .zh_TW = "藍牙配接器",
     },
