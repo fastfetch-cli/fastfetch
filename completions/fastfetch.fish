@@ -63,46 +63,78 @@ echo '
 import json, subprocess, sys
 
 
+def escape_fish_dq(s: str) -> str:
+    """Escape special characters for Fish double quotes to prevent unexpected expansions. One slash in output needs four slashes in script"""
+    return str(s).replace("\\\\", "\\\\\\\\").replace("\\"", "\\\\\\"").replace("$", "\\\\$")
+
+
 def main():
     data: dict[str, list[dict]] = json.loads(subprocess.check_output(["fastfetch", "--help-raw"]))
 
+    enum_functions = []
+    complete_commands = []
+
     for key in data:
         for flag in data[key]:
-            if flag["long"] == "logo-color-[1-9]":
+            long_name = flag.get("long", "")
+
+            # Handle pseudo flag logo-color-[1-9]
+            if long_name == "logo-color-[1-9]":
+                safe_desc_global = escape_fish_dq(flag.get("desc", ""))
                 for i in range(1, 10):
-                    print(f"""complete -c fastfetch -d "{flag["desc"]}" -l "logo-color-{i}" -x -a "(__fastfetch_complete_color)" """)
+                    complete_commands.append(f"complete -c fastfetch -d \"{safe_desc_global}\" -l \"logo-color-{i}\" -x -a \"(__fastfetch_complete_color)\"")
                 continue
 
             if flag.get("pseudo", False):
                 continue
 
-            command_prefix = f"""complete -c fastfetch -d "{flag["desc"]}" -l "{flag["long"]}\""""
+            safe_desc_global = escape_fish_dq(flag.get("desc", ""))
+            command_prefix = f"complete -c fastfetch -d \"{safe_desc_global}\" -l \"{long_name}\""
+
             if "short" in flag:
-                command_prefix += f""" -o {flag["short"]}"""
+                short_name = flag["short"]
+                command_prefix += f" -o {short_name}"
 
             if "arg" in flag:
-                type: str = flag["arg"]["type"]
-                if type == "bool":
-                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_bool)\"")
-                elif type == "color":
-                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_color)\"")
-                elif type == "command":
-                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_command)\"")
-                elif type == "config":
-                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_config)\"")
-                elif type == "enum":
-                    temp: str = " ".join(flag["arg"]["enum"])
-                    print(f"{command_prefix} -x -a \"{temp}\"")
-                elif type == "logo":
-                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_logo)\"")
-                elif type == "structure":
-                    print(f"{command_prefix} -x -a \"(__fish_complete_list : __fastfetch_complete_structure)\"")
-                elif type == "path":
-                    print(f"{command_prefix} -r -F")
+                arg_type: str = flag["arg"]["type"]
+                if arg_type == "bool":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_bool)\"")
+                elif arg_type == "color":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_color)\"")
+                elif arg_type == "command":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_command)\"")
+                elif arg_type == "config":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_config)\"")
+                elif arg_type == "enum":
+                    # Sanitize flag name to create a valid Fish function name
+                    func_name = long_name.replace("-", "_").replace("[", "_").replace("]", "_")
+                    func_name = f"__fastfetch_complete_enum_{func_name}"
+
+                    # Generate the enum function
+                    func_lines = [f"function {func_name}"]
+                    for enum_val, enum_desc in flag["arg"]["enum"].items():
+                        safe_val = escape_fish_dq(enum_val)
+                        safe_desc = escape_fish_dq(enum_desc)
+                        func_lines.append(f"    echo -e \"{safe_val}\\t{safe_desc}\"")
+                    func_lines.append("end\n")
+                    enum_functions.append("\n".join(func_lines))
+
+                    # Append complete command pointing to the new function
+                    complete_commands.append(f"{command_prefix} -x -a \"({func_name})\"")
+                elif arg_type == "logo":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fastfetch_complete_logo)\"")
+                elif arg_type == "structure":
+                    complete_commands.append(f"{command_prefix} -x -a \"(__fish_complete_list : __fastfetch_complete_structure)\"")
+                elif arg_type == "path":
+                    complete_commands.append(f"{command_prefix} -r -F")
                 else:
-                    print(f"{command_prefix} -x")
+                    complete_commands.append(f"{command_prefix} -x")
             else:
-                print(f"{command_prefix} -f")
+                complete_commands.append(f"{command_prefix} -f")
+
+    # Print generated enum functions first, then complete rules
+    print("\n".join(enum_functions))
+    print("\n".join(complete_commands))
 
 
 if __name__ == "__main__":
