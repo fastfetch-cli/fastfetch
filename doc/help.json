@@ -588,7 +588,7 @@
         {
             "long": "key-language",
             "desc": "Specify the language used for module keys",
-            "remark": "Leave empty for auto-detection based on the system locale",
+            "remark": "Leave empty for auto-detection based on the system locale. Unsupported locales fall back to English",
             "arg": {
                 "type": "enum",
                 "default": "en",
