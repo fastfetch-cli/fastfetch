@@ -17,7 +17,9 @@
 // @returns offsetof(FFModuleDisplayName, <language>)
 // @see src/common/option.h
 static uint32_t optionParseLanguageString(FFstrbuf* language) {
-    if (language->length == 0) {
+    const bool detected = language->length == 0;
+
+    if (detected) {
 #if !FF_MODULE_DISABLE_LOCALE
         const char* error = ffDetectLocale(language);
         if (__builtin_expect(error != nullptr, false)) {
@@ -52,7 +54,7 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
 
     // The language code is expected to be in the format of "en", "en_US", "de", "de_DE", etc.
     // First try to match the full language code, then try to match just the first two characters (the language part).
-    // If no match is found, report a language not supported error.
+    // If no match is found, report a language not supported error, unless the language was auto-detected.
     // en_US -> offsetof(FFModuleDisplayName, en)
     // en -> offsetof(FFModuleDisplayName, en)
     // zh_CN -> offsetof(FFModuleDisplayName, zh_CN)
@@ -85,6 +87,10 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
 #pragma GCC diagnostic pop
 
 error:
+    // The user asked for the system locale, not for this specific language. Most locales have no
+    // translation, so falling back to English is friendlier than aborting fastfetch entirely.
+    if (detected) return offsetof(FFModuleDisplayName, en);
+
     fprintf(stderr, "Error: Language '%s' is not supported\n", language->chars);
     exit(477);
 }
