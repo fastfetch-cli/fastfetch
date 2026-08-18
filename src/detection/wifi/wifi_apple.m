@@ -44,7 +44,9 @@ const char* ffDetectWifi(FFlist* result) {
 
         FF_IOOBJECT_AUTO_RELEASE io_object_t service = IOServiceGetMatchingService(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, item->inf.description.chars));
         FF_IOOBJECT_AUTO_RELEASE io_object_t parentService = IO_OBJECT_NULL;
-        while (!IOObjectConformsTo(service, "IOUserNetworkWLAN")) {
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef frequency;
+        // Note: IO80211ChannelFrequency is only available when the interface is connected
+        while (!(frequency = IORegistryEntryCreateCFProperty(service, CFSTR("IO80211ChannelFrequency"), nullptr, kNilOptions))) {
             if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) {
                 IOObjectRelease(service);
                 service = parentService;
@@ -58,12 +60,11 @@ const char* ffDetectWifi(FFlist* result) {
 
         if (service != IO_OBJECT_NULL) {
             if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) { // AppleBCMWLANCore
-                FF_CFTYPE_AUTO_RELEASE CFStringRef driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("AppleBCMWLAN.BuildTag"), nullptr, kNilOptions); // Chipsets other than Broadcom?
-                if (driverName) {
+                FF_CFTYPE_AUTO_RELEASE CFStringRef driverName = nullptr; // Chipsets other than Broadcom?
+                if ((driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("AppleBCMWLAN.BuildTag"), nullptr, kNilOptions)) || (driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("IO80211Family.BuildTag"), nullptr, kNilOptions))) {
                     ffCfStrGetString(driverName, &item->inf.driver);
                     ffStrbufReplaceAllC(&item->inf.driver, '-', ' ');
-                } else {
-                    driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("CFBundleIdentifier"), nullptr, kNilOptions);
+                } else if ((driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("CFBundleIdentifier"), nullptr, kNilOptions))) {
                     ffCfStrGetString(driverName, &item->inf.driver);
                 }
             }
@@ -194,13 +195,10 @@ const char* ffDetectWifi(FFlist* result) {
             case kCWChannelWidth160MHz: item->conn.channelWidth = 160; break;
             default: item->conn.channelWidth = 0; break;
         }
-        if (service != IO_OBJECT_NULL) {
-            FF_CFTYPE_AUTO_RELEASE CFNumberRef frequency = IORegistryEntryCreateCFProperty(service, CFSTR("IO80211ChannelFrequency"), nullptr, kNilOptions);
-            if (frequency) {
-                int64_t value;
-                if (ffCfNumGetInt64(frequency, &value) == nil) {
-                    item->conn.frequency = (uint16_t) value;
-                }
+        if (frequency) {
+            int64_t value;
+            if (ffCfNumGetInt64(frequency, &value) == nil) {
+                item->conn.frequency = (uint16_t) value;
             }
         }
     }
