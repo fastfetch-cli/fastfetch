@@ -1,42 +1,115 @@
 #include "wifi.h"
 #include "common/library.h"
 #include "common/windows/unicode.h"
+#include "common/windows/registry.h"
 
 #include <windows.h>
 #include <wlanapi.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch"
-
 static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result) {
     switch (state) {
         case wlan_interface_state_not_ready:
-            ffStrbufAppendS(result, "Not ready");
+            ffStrbufSetStatic(result, "Not ready");
             break;
         case wlan_interface_state_connected:
-            ffStrbufAppendS(result, "Connected");
+            ffStrbufSetStatic(result, "Connected");
             break;
         case wlan_interface_state_ad_hoc_network_formed:
-            ffStrbufAppendS(result, "Ad hoc network formed");
+            ffStrbufSetStatic(result, "Ad hoc network formed");
             break;
         case wlan_interface_state_disconnecting:
-            ffStrbufAppendS(result, "Disconnecting");
+            ffStrbufSetStatic(result, "Disconnecting");
             break;
         case wlan_interface_state_disconnected:
-            ffStrbufAppendS(result, "Disconnected");
+            ffStrbufSetStatic(result, "Disconnected");
             break;
         case wlan_interface_state_associating:
-            ffStrbufAppendS(result, "Associating");
+            ffStrbufSetStatic(result, "Associating");
             break;
         case wlan_interface_state_discovering:
-            ffStrbufAppendS(result, "Discovering");
+            ffStrbufSetStatic(result, "Discovering");
             break;
         case wlan_interface_state_authenticating:
-            ffStrbufAppendS(result, "Authenticating");
+            ffStrbufSetStatic(result, "Authenticating");
             break;
         default:
-            ffStrbufAppendS(result, "Unknown");
+            ffStrbufSetStatic(result, "Unknown");
             break;
+    }
+}
+
+typedef struct _WLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO {
+    UCHAR ucLinkID;
+    ULONG ulChannelCenterFrequencyMhz;
+    ULONG ulBandwidth;
+    LONG lRssi;
+    WLAN_RATE_SET wlanRateSet;
+} WLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO, *PWLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO;
+
+typedef struct _WLAN_REALTIME_CONNECTION_QUALITY {
+    DOT11_PHY_TYPE dot11PhyType;
+    ULONG ulLinkQuality;
+    ULONG ulRxRate;
+    ULONG ulTxRate;
+    BOOL bIsMLOConnection;
+    ULONG ulNumLinks;
+    // Array of size ulNumLinks
+    WLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO linksInfo[];
+} WLAN_REALTIME_CONNECTION_QUALITY, *PWLAN_REALTIME_CONNECTION_QUALITY;
+
+enum { wlan_intf_opcode_realtime_connection_quality = 19 };
+
+#define WIFI_DRIVER_REG_PATH L"SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E972-E325-11CE-BFC1-08002BE10318}"
+
+static bool detectWifiDriver(const GUID* interfaceGuid, FFstrbuf* driver) {
+    char interfaceGuidA[64];
+    snprintf(interfaceGuidA, sizeof(interfaceGuidA),
+        "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+        (unsigned) interfaceGuid->Data1,
+        (unsigned) interfaceGuid->Data2,
+        (unsigned) interfaceGuid->Data3,
+        (unsigned) interfaceGuid->Data4[0], (unsigned) interfaceGuid->Data4[1],
+        (unsigned) interfaceGuid->Data4[2], (unsigned) interfaceGuid->Data4[3],
+        (unsigned) interfaceGuid->Data4[4], (unsigned) interfaceGuid->Data4[5],
+        (unsigned) interfaceGuid->Data4[6], (unsigned) interfaceGuid->Data4[7]);
+
+    FF_AUTO_CLOSE_FD HANDLE hClassKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, WIFI_DRIVER_REG_PATH, &hClassKey, nullptr)) {
+        return false;
+    }
+
+    wchar_t subKeyW[16];
+
+    for (uint32_t i = 0;; ++i) {
+        _snwprintf(subKeyW, ARRAY_SIZE(subKeyW), L"%04u", i);
+
+        FF_AUTO_CLOSE_FD HANDLE hDeviceKey = nullptr;
+        if (!ffRegOpenSubkeyForRead(hClassKey, subKeyW, &hDeviceKey, nullptr)) {
+            return false;
+        }
+
+        FF_STRBUF_AUTO_DESTROY netCfgInstanceId = ffStrbufCreate();
+        if (!ffRegReadStrbuf(hDeviceKey, L"NetCfgInstanceId", &netCfgInstanceId, nullptr)) {
+            continue;
+        }
+
+        if (!ffStrbufEqualS(&netCfgInstanceId, interfaceGuidA)) {
+            continue;
+        }
+
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (ffRegReadStrbuf(hDeviceKey, L"ProviderName", &buffer, nullptr)) {
+            ffStrbufSet(driver, &buffer);
+        }
+
+        if (ffRegReadStrbuf(hDeviceKey, L"DriverVersion", &buffer, nullptr)) {
+            if (driver->length) {
+                ffStrbufAppendC(driver, ' ');
+            }
+            ffStrbufAppend(driver, &buffer);
+        }
+
+        return true;
     }
 }
 
@@ -54,7 +127,7 @@ const char* ffDetectWifi(FFlist* result) {
     WLAN_INTERFACE_INFO_LIST* ifList = nullptr;
     const char* error = nullptr;
 
-    if (ffWlanOpenHandle(2, nullptr, &curVersion, &hClient) != ERROR_SUCCESS) {
+    if (ffWlanOpenHandle(2 /*maxClientVersion*/, nullptr, &curVersion, &hClient) != ERROR_SUCCESS) {
         error = "WlanOpenHandle() failed";
         goto exit;
     }
@@ -70,6 +143,7 @@ const char* ffDetectWifi(FFlist* result) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitWS(&item->inf.description, ifInfo->strInterfaceDescription);
         ffStrbufInit(&item->inf.status);
+        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
         ffStrbufInit(&item->conn.bssid);
@@ -79,8 +153,10 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.rxRate = -DBL_MAX;
         item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
+        item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
+        detectWifiDriver(&ifInfo->InterfaceGuid, &item->inf.driver);
         convertIfStateToString(ifInfo->isState, &item->inf.status);
 
         if (ifInfo->isState != wlan_interface_state_connected) {
@@ -200,17 +276,44 @@ const char* ffDetectWifi(FFlist* result) {
             ffStrbufAppendS(&item->conn.security, "Insecure");
         }
 
-        WLAN_BSS_LIST* bssList = nullptr;
-        if (ffWlanGetNetworkBssList(hClient,
+        WLAN_REALTIME_CONNECTION_QUALITY* connectionQuality = nullptr;
+        bufSize = 0;
+        if (ffWlanQueryInterface(hClient,
                 &ifInfo->InterfaceGuid,
-                &connInfo->wlanAssociationAttributes.dot11Ssid,
-                connInfo->wlanAssociationAttributes.dot11BssType,
-                connInfo->wlanSecurityAttributes.bSecurityEnabled,
+                wlan_intf_opcode_realtime_connection_quality,
                 nullptr,
-                &bssList) == ERROR_SUCCESS &&
-            bssList->dwNumberOfItems > 0) {
-            item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
-            ffWlanFreeMemory(bssList);
+                &bufSize,
+                (PVOID*) &connectionQuality,
+                &opCode) == ERROR_SUCCESS) {
+            const WLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO* bestLink = nullptr;
+            for (ULONG linkIndex = 0; linkIndex < connectionQuality->ulNumLinks; ++linkIndex) {
+                const WLAN_REALTIME_CONNECTION_QUALITY_LINK_INFO* link = &connectionQuality->linksInfo[linkIndex];
+                if (!bestLink || link->lRssi > bestLink->lRssi) {
+                    bestLink = link;
+                }
+            }
+            if (bestLink) {
+                item->conn.channelWidth = (uint16_t) bestLink->ulBandwidth;
+                item->conn.frequency = (uint16_t) bestLink->ulChannelCenterFrequencyMhz;
+            }
+        }
+        if (connectionQuality) {
+            ffWlanFreeMemory(connectionQuality);
+        }
+
+        if (item->conn.frequency == 0) {
+            WLAN_BSS_LIST* bssList = nullptr;
+            if (ffWlanGetNetworkBssList(hClient,
+                    &ifInfo->InterfaceGuid,
+                    &connInfo->wlanAssociationAttributes.dot11Ssid,
+                    connInfo->wlanAssociationAttributes.dot11BssType,
+                    connInfo->wlanSecurityAttributes.bSecurityEnabled,
+                    nullptr,
+                    &bssList) == ERROR_SUCCESS &&
+                bssList->dwNumberOfItems > 0) {
+                item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
+                ffWlanFreeMemory(bssList);
+            }
         }
 
         ffWlanFreeMemory(connInfo);
@@ -238,5 +341,3 @@ exit:
     }
     return error;
 }
-
-#pragma GCC diagnostic pop
