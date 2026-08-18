@@ -741,7 +741,7 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         } else if (ffStrEqualsIgnCase(subkey, "padding-left")) {
             options->keyPaddingLeft = (uint16_t) ffOptionParseUInt32(key, value);
         } else if (ffStrEqualsIgnCase(subkey, "language")) {
-            FF_STRBUF_AUTO_DESTROY language = ffStrbufCreateStatic(value);
+            FF_STRBUF_AUTO_DESTROY language = ffStrbufCreateS(value);
             options->keyLanguage = optionParseLanguageString(&language);
         } else {
             return false;
