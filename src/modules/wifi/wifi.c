@@ -98,6 +98,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
             FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Wifi), moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                        FF_ARG(item->inf.description, "inf-desc"),
                                                                                                                        FF_ARG(item->inf.status, "inf-status"),
+                                                                                                                          FF_ARG(item->inf.driver, "inf-driver"),
                                                                                                                        FF_ARG(item->conn.status, "status"),
                                                                                                                        FF_ARG(item->conn.ssid, "ssid"),
                                                                                                                        FF_ARG(item->conn.bssid, "bssid"),
@@ -108,6 +109,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
                                                                                                                        FF_ARG(item->conn.security, "security"),
                                                                                                                        FF_ARG(percentBar, "signal-quality-bar"),
                                                                                                                        FF_ARG(item->conn.channel, "channel"),
+                                                                                                                       FF_ARG(item->conn.channelWidth, "channel-width"),
                                                                                                                        FF_ARG(bandStr, "band"),
                                                                                                                    }));
         }
@@ -116,6 +118,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
     FF_LIST_FOR_EACH (FFWifiResult, item, result) {
         ffStrbufDestroy(&item->inf.description);
         ffStrbufDestroy(&item->inf.status);
+        ffStrbufDestroy(&item->inf.driver);
         ffStrbufDestroy(&item->conn.status);
         ffStrbufDestroy(&item->conn.ssid);
         ffStrbufDestroy(&item->conn.bssid);
@@ -163,6 +166,7 @@ bool ffGenerateWifiJsonResult([[maybe_unused]] FFWifiOptions* options, yyjson_mu
         yyjson_mut_val* inf = yyjson_mut_obj_add_obj(doc, obj, "inf");
         yyjson_mut_obj_add_strbuf(doc, inf, "description", &wifi->inf.description);
         yyjson_mut_obj_add_strbuf(doc, inf, "status", &wifi->inf.status);
+        yyjson_mut_obj_add_strbuf(doc, inf, "driver", &wifi->inf.driver);
 
         yyjson_mut_val* conn = yyjson_mut_obj_add_obj(doc, obj, "conn");
         yyjson_mut_obj_add_strbuf(doc, conn, "status", &wifi->conn.status);
@@ -186,12 +190,14 @@ bool ffGenerateWifiJsonResult([[maybe_unused]] FFWifiOptions* options, yyjson_mu
             yyjson_mut_obj_add_null(doc, conn, "txRate");
         }
         yyjson_mut_obj_add_uint(doc, conn, "channel", wifi->conn.channel);
+        yyjson_mut_obj_add_uint(doc, conn, "channelWidth", wifi->conn.channelWidth);
         yyjson_mut_obj_add_uint(doc, conn, "frequency", wifi->conn.frequency);
     }
 
     FF_LIST_FOR_EACH (FFWifiResult, item, result) {
         ffStrbufDestroy(&item->inf.description);
         ffStrbufDestroy(&item->inf.status);
+        ffStrbufDestroy(&item->inf.driver);
         ffStrbufDestroy(&item->conn.status);
         ffStrbufDestroy(&item->conn.ssid);
         ffStrbufDestroy(&item->conn.bssid);
@@ -240,6 +246,7 @@ FFModuleBaseInfo ffWifiModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Interface description", "inf-desc" },
         { "Interface status", "inf-status" },
+        { "Interface driver", "inf-driver" },
         { "Connection status", "status" },
         { "Connection SSID", "ssid" },
         { "Connection BSSID", "bssid" },
@@ -250,6 +257,7 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         { "Connection Security algorithm", "security" },
         { "Connection signal quality (percentage bar)", "signal-quality-bar" },
         { "Connection channel number", "channel" },
+        { "Connection channel width in MHz", "channel-width" },
         { "Connection channel band in GHz", "band" },
     })),
     .defaultOrder = 51,
