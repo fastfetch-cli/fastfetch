@@ -1169,7 +1169,7 @@ elseif(SunOS)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/kmod_sunos.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_sunos.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
@@ -1235,7 +1235,7 @@ elseif(SunOS)
         src/detection/uptime/uptime_sunos.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_sunos.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
@@ -1305,7 +1305,7 @@ elseif(Haiku)
         src/detection/uptime/uptime_haiku.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_haiku.cpp
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_haiku.cpp
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_haiku.cpp

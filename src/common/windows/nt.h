@@ -169,7 +169,7 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
 );
 
 NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
-NTSTATUS NTAPI RtlStringFromGUIDEx(IN GUID* Guid, OUT PCUNICODE_STRING GuidString, _In_ BOOLEAN AllocateGuidString);
+NTSTATUS NTAPI RtlStringFromGUIDEx(IN const GUID* Guid, OUT PUNICODE_STRING GuidString, IN BOOLEAN AllocateGuidString);
 
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION {
     BOOLEAN SecureBootEnabled;

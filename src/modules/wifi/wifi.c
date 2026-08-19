@@ -108,6 +108,7 @@ bool ffPrintWifi(FFWifiOptions* options) {
                                                                                                                        FF_ARG(item->conn.security, "security"),
                                                                                                                        FF_ARG(percentBar, "signal-quality-bar"),
                                                                                                                        FF_ARG(item->conn.channel, "channel"),
+                                                                                                                       FF_ARG(item->conn.channelWidth, "channel-width"),
                                                                                                                        FF_ARG(bandStr, "band"),
                                                                                                                    }));
         }
@@ -186,6 +187,7 @@ bool ffGenerateWifiJsonResult([[maybe_unused]] FFWifiOptions* options, yyjson_mu
             yyjson_mut_obj_add_null(doc, conn, "txRate");
         }
         yyjson_mut_obj_add_uint(doc, conn, "channel", wifi->conn.channel);
+        yyjson_mut_obj_add_uint(doc, conn, "channelWidth", wifi->conn.channelWidth);
         yyjson_mut_obj_add_uint(doc, conn, "frequency", wifi->conn.frequency);
     }
 
@@ -250,6 +252,7 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         { "Connection Security algorithm", "security" },
         { "Connection signal quality (percentage bar)", "signal-quality-bar" },
         { "Connection channel number", "channel" },
+        { "Connection channel width in MHz", "channel-width" },
         { "Connection channel band in GHz", "band" },
     })),
     .defaultOrder = 51,

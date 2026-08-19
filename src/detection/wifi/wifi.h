@@ -18,6 +18,7 @@ struct FFWifiConnection {
     double rxRate;
     double txRate;
     uint16_t channel;
+    uint16_t channelWidth; // MHz
     uint16_t frequency; // MHz
 };
 

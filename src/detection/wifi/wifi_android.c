@@ -42,6 +42,7 @@ const char* ffDetectWifi(FFlist* result) {
     item->conn.rxRate = -DBL_MAX;
     item->conn.txRate = -DBL_MAX;
     item->conn.channel = 0;
+    item->conn.channelWidth = 0;
     item->conn.frequency = 0;
 
     ffStrbufAppendJsonVal(&item->inf.status, yyjson_obj_get(root, "supplicant_state"));
