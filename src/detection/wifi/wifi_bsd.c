@@ -27,6 +27,7 @@ const char* ffDetectWifi(FFlist* result) {
 
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitS(&item->inf.description, i->if_name);
+        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
@@ -37,6 +38,7 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.rxRate = -DBL_MAX;
         item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
+        item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
         char ssid[IEEE80211_NWID_LEN + 1] = {};
@@ -79,6 +81,16 @@ const char* ffDetectWifi(FFlist* result) {
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
             item->conn.channel = curchan.ic_ieee;
             item->conn.frequency = curchan.ic_freq;
+
+            // Determine channel width from channel flags
+            if (curchan.ic_flags & IEEE80211_CHAN_VHT160)
+                item->conn.channelWidth = 160;
+            else if (curchan.ic_flags & IEEE80211_CHAN_VHT80)
+                item->conn.channelWidth = 80;
+            else if (curchan.ic_flags & IEEE80211_CHAN_HT40)
+                item->conn.channelWidth = 40;
+            else
+                item->conn.channelWidth = 20;
 
 #ifdef IEEE80211_IS_CHAN_HE // for future use
             if (IEEE80211_IS_CHAN_HE(&curchan)) {
