@@ -28,6 +28,7 @@ const char* ffDetectWifi(FFlist* result) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitS(&item->inf.description, i->if_name);
         ffStrbufInit(&item->inf.status);
+        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
         ffStrbufInit(&item->conn.bssid);
@@ -37,6 +38,7 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.rxRate = -DBL_MAX;
         item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
+        item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
         struct ieee80211_nodereq nr = {};

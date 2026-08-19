@@ -33,6 +33,7 @@ const char* ffDetectWifi(FFlist* result) {
     FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
     ffStrbufInit(&item->inf.description);
     ffStrbufInit(&item->inf.status);
+    ffStrbufInit(&item->inf.driver);
     ffStrbufInit(&item->conn.status);
     ffStrbufInit(&item->conn.ssid);
     ffStrbufInit(&item->conn.bssid);
@@ -42,6 +43,7 @@ const char* ffDetectWifi(FFlist* result) {
     item->conn.rxRate = -DBL_MAX;
     item->conn.txRate = -DBL_MAX;
     item->conn.channel = 0;
+    item->conn.channelWidth = 0;
     item->conn.frequency = 0;
 
     ffStrbufAppendJsonVal(&item->inf.status, yyjson_obj_get(root, "supplicant_state"));
