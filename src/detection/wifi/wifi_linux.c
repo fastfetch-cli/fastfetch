@@ -1067,7 +1067,6 @@ const char* ffDetectWifi(FFlist* result) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitS(&item->inf.description, i->if_name);
         ffStrbufInit(&item->inf.status);
-        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
         ffStrbufInit(&item->conn.bssid);
@@ -1079,20 +1078,6 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.channel = 0;
         item->conn.channelWidth = 0;
         item->conn.frequency = 0;
-
-        {
-            ffStrbufSetF(&buffer, "/sys/class/net/%s/device/driver", i->if_name);
-            char pathBuf[PATH_MAX];
-            ssize_t resultLength = readlink(buffer.chars, pathBuf, ARRAY_SIZE(pathBuf));
-            if (resultLength > 0) {
-                const char* p = memrchr(pathBuf, '/', (size_t) resultLength);
-                if (p) {
-                    ++p;
-                    ffStrbufSetNS(&item->inf.driver, (uint32_t) (resultLength - (p - pathBuf)), p);
-                }
-            }
-        }
-
 
         char operstate;
         ffStrbufSetF(&buffer, "/sys/class/net/%s/operstate", i->if_name);

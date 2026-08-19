@@ -6,7 +6,6 @@
 struct FFWifiInterface {
     FFstrbuf description;
     FFstrbuf status;
-    FFstrbuf driver;
 };
 
 struct FFWifiConnection {

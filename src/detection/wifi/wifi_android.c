@@ -33,7 +33,6 @@ const char* ffDetectWifi(FFlist* result) {
     FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
     ffStrbufInit(&item->inf.description);
     ffStrbufInit(&item->inf.status);
-    ffStrbufInit(&item->inf.driver);
     ffStrbufInit(&item->conn.status);
     ffStrbufInit(&item->conn.ssid);
     ffStrbufInit(&item->conn.bssid);

@@ -9,7 +9,6 @@ extern "C" {
 static void initWifiResult(FFWifiResult* item, const char* name) {
     ffStrbufInitS(&item->inf.description, name);
     ffStrbufInit(&item->inf.status);
-    ffStrbufInit(&item->inf.driver);
     ffStrbufInit(&item->conn.status);
     ffStrbufInit(&item->conn.ssid);
     ffStrbufInit(&item->conn.bssid);
@@ -92,7 +91,7 @@ const char* ffDetectWifi(FFlist* result) {
             continue;
         }
 
-        ffStrbufSetNS(&item->conn.ssid, strnlen(network.name, sizeof(network.name)), network.name);
+        ffStrbufSetNS(&item->conn.ssid, (uint32_t) strnlen(network.name, sizeof(network.name)), network.name);
         setWifiBssid(&item->conn.bssid, network);
         item->conn.signalQuality = network.signal_strength > 100 ? 100 : network.signal_strength;
         setWifiSecurity(&item->conn.security, network);

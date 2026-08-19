@@ -1,7 +1,6 @@
 #include "wifi.h"
 #include "common/library.h"
 #include "common/windows/unicode.h"
-#include "common/windows/registry.h"
 
 #include <windows.h>
 #include <wlanapi.h>
@@ -59,60 +58,6 @@ typedef struct _WLAN_REALTIME_CONNECTION_QUALITY {
 
 enum { wlan_intf_opcode_realtime_connection_quality = 19 };
 
-#define WIFI_DRIVER_REG_PATH L"SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E972-E325-11CE-BFC1-08002BE10318}"
-
-static bool detectWifiDriver(const GUID* interfaceGuid, FFstrbuf* driver) {
-    char interfaceGuidA[64];
-    snprintf(interfaceGuidA, sizeof(interfaceGuidA),
-        "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-        (unsigned) interfaceGuid->Data1,
-        (unsigned) interfaceGuid->Data2,
-        (unsigned) interfaceGuid->Data3,
-        (unsigned) interfaceGuid->Data4[0], (unsigned) interfaceGuid->Data4[1],
-        (unsigned) interfaceGuid->Data4[2], (unsigned) interfaceGuid->Data4[3],
-        (unsigned) interfaceGuid->Data4[4], (unsigned) interfaceGuid->Data4[5],
-        (unsigned) interfaceGuid->Data4[6], (unsigned) interfaceGuid->Data4[7]);
-
-    FF_AUTO_CLOSE_FD HANDLE hClassKey = nullptr;
-    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, WIFI_DRIVER_REG_PATH, &hClassKey, nullptr)) {
-        return false;
-    }
-
-    wchar_t subKeyW[16];
-
-    for (uint32_t i = 0;; ++i) {
-        _snwprintf(subKeyW, ARRAY_SIZE(subKeyW), L"%04u", i);
-
-        FF_AUTO_CLOSE_FD HANDLE hDeviceKey = nullptr;
-        if (!ffRegOpenSubkeyForRead(hClassKey, subKeyW, &hDeviceKey, nullptr)) {
-            return false;
-        }
-
-        FF_STRBUF_AUTO_DESTROY netCfgInstanceId = ffStrbufCreate();
-        if (!ffRegReadStrbuf(hDeviceKey, L"NetCfgInstanceId", &netCfgInstanceId, nullptr)) {
-            continue;
-        }
-
-        if (!ffStrbufEqualS(&netCfgInstanceId, interfaceGuidA)) {
-            continue;
-        }
-
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (ffRegReadStrbuf(hDeviceKey, L"ProviderName", &buffer, nullptr)) {
-            ffStrbufSet(driver, &buffer);
-        }
-
-        if (ffRegReadStrbuf(hDeviceKey, L"DriverVersion", &buffer, nullptr)) {
-            if (driver->length) {
-                ffStrbufAppendC(driver, ' ');
-            }
-            ffStrbufAppend(driver, &buffer);
-        }
-
-        return true;
-    }
-}
-
 const char* ffDetectWifi(FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(wlanapi, "wlanapi" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanOpenHandle)
@@ -143,7 +88,6 @@ const char* ffDetectWifi(FFlist* result) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInitWS(&item->inf.description, ifInfo->strInterfaceDescription);
         ffStrbufInit(&item->inf.status);
-        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
         ffStrbufInit(&item->conn.bssid);
@@ -156,7 +100,6 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
-        detectWifiDriver(&ifInfo->InterfaceGuid, &item->inf.driver);
         convertIfStateToString(ifInfo->isState, &item->inf.status);
 
         if (ifInfo->isState != wlan_interface_state_connected) {

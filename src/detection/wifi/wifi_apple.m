@@ -26,7 +26,6 @@ const char* ffDetectWifi(FFlist* result) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInit(&item->inf.description);
         ffStrbufInit(&item->inf.status);
-        ffStrbufInit(&item->inf.driver);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
         ffStrbufInit(&item->conn.bssid);
@@ -41,34 +40,6 @@ const char* ffDetectWifi(FFlist* result) {
 
         ffStrbufSetS(&item->inf.description, inf.interfaceName.UTF8String);
         ffStrbufSetStatic(&item->inf.status, inf.powerOn ? "Power On" : "Power Off");
-
-        FF_IOOBJECT_AUTO_RELEASE io_object_t service = IOServiceGetMatchingService(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, item->inf.description.chars));
-        FF_IOOBJECT_AUTO_RELEASE io_object_t parentService = IO_OBJECT_NULL;
-        FF_CFTYPE_AUTO_RELEASE CFNumberRef frequency;
-        // Note: IO80211ChannelFrequency is only available when the interface is connected
-        while (!(frequency = IORegistryEntryCreateCFProperty(service, CFSTR("IO80211ChannelFrequency"), nullptr, kNilOptions))) {
-            if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) {
-                IOObjectRelease(service);
-                service = parentService;
-                parentService = IO_OBJECT_NULL;
-            } else {
-                IOObjectRelease(service);
-                service = IO_OBJECT_NULL;
-                break;
-            }
-        }
-
-        if (service != IO_OBJECT_NULL) {
-            if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) { // AppleBCMWLANCore
-                FF_CFTYPE_AUTO_RELEASE CFStringRef driverName = nullptr; // Chipsets other than Broadcom?
-                if ((driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("AppleBCMWLAN.BuildTag"), nullptr, kNilOptions)) || (driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("IO80211Family.BuildTag"), nullptr, kNilOptions))) {
-                    ffCfStrGetString(driverName, &item->inf.driver);
-                    ffStrbufReplaceAllC(&item->inf.driver, '-', ' ');
-                } else if ((driverName = IORegistryEntryCreateCFProperty(parentService, CFSTR("CFBundleIdentifier"), nullptr, kNilOptions))) {
-                    ffCfStrGetString(driverName, &item->inf.driver);
-                }
-            }
-        }
 
         if (!inf.powerOn) {
             continue;
@@ -194,6 +165,21 @@ const char* ffDetectWifi(FFlist* result) {
             case kCWChannelWidth80MHz: item->conn.channelWidth = 80; break;
             case kCWChannelWidth160MHz: item->conn.channelWidth = 160; break;
             default: item->conn.channelWidth = 0; break;
+        }
+
+        FF_IOOBJECT_AUTO_RELEASE io_object_t service = IOServiceGetMatchingService(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, item->inf.description.chars));
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef frequency;
+        // Note: IO80211ChannelFrequency is only available when the interface is connected
+        while (!(frequency = IORegistryEntryCreateCFProperty(service, CFSTR("IO80211ChannelFrequency"), nullptr, kNilOptions))) {
+            io_object_t parentService = IO_OBJECT_NULL;
+            if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) {
+                IOObjectRelease(service);
+                service = parentService;
+            } else {
+                IOObjectRelease(service);
+                service = IO_OBJECT_NULL;
+                break;
+            }
         }
         if (frequency) {
             int64_t value;
