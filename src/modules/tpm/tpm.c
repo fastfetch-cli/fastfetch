@@ -91,6 +91,7 @@ FFModuleBaseInfo ffTPMModuleInfo = {
         .de = "TPM",
         .es = "TPM",
         .fr = "TPM",
+        .gl = "TPM",
         .he = "TPM",
         .it = "TPM",
         .ja = "TPM",

@@ -90,6 +90,7 @@ FFModuleBaseInfo ffDEModuleInfo = {
         .de = "Desktop-Umgebung",
         .es = "Entorno de Escritorio",
         .fr = "Environnement de Bureau",
+        .gl = "Contorno do Escritorio",
         .he = "סביבת שולחן עבודה",
         .it = "Ambiente Desktop",
         .ja = "デスクトップ環境",

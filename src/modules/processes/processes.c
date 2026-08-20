@@ -71,6 +71,7 @@ FFModuleBaseInfo ffProcessesModuleInfo = {
         .de = "Prozesse",
         .es = "Procesos",
         .fr = "Processus",
+        .gl = "Procesos",
         .he = "תהליכים",
         .it = "Processi",
         .ja = "プロセス",

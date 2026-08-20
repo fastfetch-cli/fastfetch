@@ -459,6 +459,7 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         .de = "Festplatte",
         .es = "Disco",
         .fr = "Disque",
+        .gl = "Disco",
         .he = "דיסק",
         .it = "Disco",
         .ja = "ディスク",

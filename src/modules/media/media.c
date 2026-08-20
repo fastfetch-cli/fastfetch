@@ -261,6 +261,7 @@ FFModuleBaseInfo ffMediaModuleInfo = {
         .de = "Medien",
         .es = "Medios",
         .fr = "Médias",
+        .gl = "Multimedia",
         .he = "מדיה",
         .it = "Media",
         .ja = "メディア",

@@ -111,6 +111,7 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
         .de = "Boot-Manager",
         .es = "Administrador de arranque",
         .fr = "Gestionnaire de démarrage",
+        .gl = "Xestor de arranque",
         .he = "מנהל אתחול",
         .it = "Gestore di avvio",
         .ja = "ブートマネージャー",

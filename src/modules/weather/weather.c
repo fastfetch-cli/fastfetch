@@ -100,6 +100,7 @@ FFModuleBaseInfo ffWeatherModuleInfo = {
         .de = "Wetter",
         .es = "Clima",
         .fr = "Météo",
+        .gl = "Tempo",
         .he = "מזג אוויר",
         .it = "Meteo",
         .ja = "天気",

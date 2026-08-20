@@ -70,6 +70,7 @@ FFModuleBaseInfo ffKernelModuleInfo = {
         .de = "Kernel",
         .es = "Kernel",
         .fr = "Kernel",
+        .gl = "Kernel",
         .he = "ליבה",
         .it = "Kernel",
         .ja = "カーネル",

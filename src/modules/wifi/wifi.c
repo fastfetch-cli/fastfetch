@@ -223,6 +223,7 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         .de = "WLAN",
         .es = "Wi-Fi",
         .fr = "Wi-Fi",
+        .gl = "Wi-Fi",
         .he = "Wi-Fi",
         .it = "Wi-Fi",
         .ja = "Wi-Fi",

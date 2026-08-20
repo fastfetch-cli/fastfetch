@@ -128,6 +128,7 @@ FFModuleBaseInfo ffWMModuleInfo = {
         .de = "Fenstermanager",
         .es = "Gestor de ventanas",
         .fr = "Gestionnaire de fenêtres",
+        .gl = "Xestor de xanelas",
         .he = "מנהל חלונות",
         .it = "Gestore finestre",
         .ja = "ウィンドウマネージャー",

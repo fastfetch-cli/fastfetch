@@ -190,6 +190,7 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         .de = "Swap",
         .es = "Swap",
         .fr = "Swap",
+        .gl = "Swap",
         .he = "זיכרון החלפה",
         .it = "Swap",
         .ja = "スワップ",

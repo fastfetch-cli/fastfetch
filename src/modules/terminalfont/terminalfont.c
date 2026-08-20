@@ -111,6 +111,7 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
         .de = "Terminalschriftart",
         .es = "Fuente del terminal",
         .fr = "Police du terminal",
+        .gl = "Fonte do terminal",
         .he = "גופן טרמינל",
         .it = "Carattere del terminale",
         .ja = "ターミナルフォント",

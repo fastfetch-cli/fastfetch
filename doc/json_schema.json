@@ -1092,6 +1092,11 @@
                                 },
                                 {
                                     "type": "string",
+                                    "const": "gl",
+                                    "description": "Galician"
+                                },
+                                {
+                                    "type": "string",
                                     "const": "he",
                                     "description": "Hebrew"
                                 },

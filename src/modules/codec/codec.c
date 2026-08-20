@@ -259,6 +259,7 @@ FFModuleBaseInfo ffCodecModuleInfo = {
         .de = "Codec",
         .es = "Códec",
         .fr = "Codec",
+        .gl = "Códec",
         .he = "קודק",
         .it = "Codec",
         .ja = "コーデック",

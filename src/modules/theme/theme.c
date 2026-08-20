@@ -95,6 +95,7 @@ FFModuleBaseInfo ffThemeModuleInfo = {
         .de = "Thema",
         .es = "Tema",
         .fr = "Thème",
+        .gl = "Tema",
         .he = "ערכת נושא",
         .it = "Tema",
         .ja = "テーマ",

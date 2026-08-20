@@ -157,6 +157,7 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
         .de = "Tastatur",
         .es = "Teclado",
         .fr = "Clavier",
+        .gl = "Teclado",
         .he = "מקלדת",
         .it = "Tastiera",
         .ja = "キーボード",

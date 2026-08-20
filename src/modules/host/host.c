@@ -144,6 +144,7 @@ FFModuleBaseInfo ffHostModuleInfo = {
         .de = "Rechner",
         .es = "Host",
         .fr = "Hôte",
+        .gl = "Host",
         .he = "מארח",
         .it = "Host",
         .ja = "ホスト",

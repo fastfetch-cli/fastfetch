@@ -114,6 +114,7 @@ FFModuleBaseInfo ffLMModuleInfo = {
         .de = "Anmeldemanager",
         .es = "Administrador de inicio de sesión",
         .fr = "Gestionnaire de connexion",
+        .gl = "Xestor de inicio de sesión",
         .he = "מנהל התחברות",
         .it = "Gestore di accesso",
         .ja = "ログインマネージャー",

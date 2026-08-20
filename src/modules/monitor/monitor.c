@@ -112,6 +112,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
         .de = "Monitor",
         .es = "Monitor",
         .fr = "Moniteur",
+        .gl = "Monitor",
         .he = "צג",
         .it = "Monitor",
         .ja = "モニター",

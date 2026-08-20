@@ -102,6 +102,7 @@ FFModuleBaseInfo ffIconsModuleInfo = {
         .de = "Symbole",
         .es = "Iconos",
         .fr = "Icônes",
+        .gl = "Iconas",
         .he = "סמלים",
         .it = "Icone",
         .ja = "アイコン",

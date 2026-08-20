@@ -75,6 +75,7 @@ FFModuleBaseInfo ffLocaleModuleInfo = {
         .de = "Sprachraum",
         .es = "Configuración regional",
         .fr = "Paramètres régionaux",
+        .gl = "Configuración rexional",
         .he = "לוקאל",
         .it = "Impostazioni locali",
         .ja = "ロケール",
