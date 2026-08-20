@@ -159,6 +159,7 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         .de = "Bluetooth",
         .es = "Bluetooth",
         .fr = "Bluetooth",
+        .gl = "bluetooth",
         .he = "בלוטות'",
         .it = "Bluetooth",
         .ja = "ブルートゥース",

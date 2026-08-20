@@ -305,6 +305,7 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         .de = "Akku",
         .es = "Batería",
         .fr = "Batterie",
+        .gl = "Batería",
         .he = "סוללה",
         .it = "Batteria",
         .ja = "バッテリー",

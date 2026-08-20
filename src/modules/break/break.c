@@ -35,6 +35,7 @@ FFModuleBaseInfo ffBreakModuleInfo = {
         .de = "Umbruch",
         .es = "Salto de línea",
         .fr = "Saut de ligne",
+        .gl = "Salto de liña",
         .he = "מעבר שורה",
         .it = "Interruzione",
         .ja = "改行",

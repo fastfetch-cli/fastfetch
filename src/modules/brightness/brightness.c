@@ -198,6 +198,7 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
         .de = "Helligkeit",
         .es = "Brillo",
         .fr = "Luminosité",
+        .gl = "Brillo",
         .he = "בהירות",
         .it = "Luminosità",
         .ja = "明るさ",

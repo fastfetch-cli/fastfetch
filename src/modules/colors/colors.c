@@ -303,6 +303,7 @@ FFModuleBaseInfo ffColorsModuleInfo = {
         .de = "Farben",
         .es = "Colores",
         .fr = "Couleurs",
+        .gl = "Cores",
         .he = "צבעים",
         .it = "Colori",
         .ja = "色",

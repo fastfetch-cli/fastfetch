@@ -229,6 +229,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
         .de = "CPU-Cache",
         .es = "Caché de CPU",
         .fr = "Cache CPU",
+        .gl = "Caché da CPU",
         .he = "מטמון מעבד",
         .it = "Cache CPU",
         .ja = "CPUキャッシュ",

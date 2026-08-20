@@ -67,6 +67,7 @@ FFModuleBaseInfo ffWMThemeModuleInfo = {
         .de = "Fenstermanager-Thema",
         .es = "Tema del gestor de ventanas",
         .fr = "Thème du gestionnaire de fenêtres",
+        .gl = "Tema do xestor de xanelas",
         .he = "ערכת נושא של מנהל חלונות",
         .it = "Tema del gestore finestre",
         .ja = "ウィンドウマネージャのテーマ",

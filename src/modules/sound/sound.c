@@ -207,6 +207,7 @@ FFModuleBaseInfo ffSoundModuleInfo = {
         .de = "Sound",
         .es = "Sonido",
         .fr = "Son",
+        .gl = "Son",
         .he = "קול",
         .it = "Audio",
         .ja = "サウンド",

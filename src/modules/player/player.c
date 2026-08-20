@@ -115,6 +115,7 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         .de = "Medienplayer",
         .es = "Reproductor multimedia",
         .fr = "Lecteur multimédia",
+        .gl = "Reprodutor multimedia",
         .he = "נגן מדיה",
         .it = "Lettore multimediale",
         .ja = "メディアプレイヤー",

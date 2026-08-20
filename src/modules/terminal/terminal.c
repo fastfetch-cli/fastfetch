@@ -91,6 +91,7 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         .de = "Terminal",
         .es = "Terminal",
         .fr = "Terminal",
+        .gl = "Terminal",
         .he = "טרמינל",
         .it = "Terminale",
         .ja = "ターミナル",

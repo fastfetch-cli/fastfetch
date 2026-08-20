@@ -103,6 +103,7 @@ FFModuleBaseInfo ffFontModuleInfo = {
         .de = "Schriftart",
         .es = "Fuente",
         .fr = "Police",
+        .gl = "Fonte",
         .he = "גופן",
         .it = "Carattere",
         .ja = "フォント",

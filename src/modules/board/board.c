@@ -116,6 +116,7 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         .de = "Mainboard",
         .es = "Placa base",
         .fr = "Carte mère",
+        .gl = "Placa base",
         .he = "לוח אם",
         .it = "Scheda madre",
         .ja = "マザーボード",

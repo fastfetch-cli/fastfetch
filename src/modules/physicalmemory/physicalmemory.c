@@ -165,6 +165,7 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         .de = "Physischer Speicher",
         .es = "Memoria física",
         .fr = "Mémoire physique",
+        .gl = "Memoria física",
         .he = "זיכרון פיזי",
         .it = "Memoria fisica",
         .ja = "物理メモリ",

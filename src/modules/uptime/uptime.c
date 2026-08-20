@@ -91,6 +91,7 @@ FFModuleBaseInfo ffUptimeModuleInfo = {
         .de = "Betriebszeit",
         .es = "Tiempo de actividad",
         .fr = "Temps de fonctionnement",
+        .gl = "Tempo de actividade",
         .he = "זמן פעילות",
         .it = "Tempo di attività",
         .ja = "稼働時間",

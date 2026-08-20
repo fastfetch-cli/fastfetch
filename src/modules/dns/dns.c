@@ -142,6 +142,7 @@ FFModuleBaseInfo ffDNSModuleInfo = {
         .de = "DNS",
         .es = "DNS",
         .fr = "DNS",
+        .gl = "DNS",
         .he = "DNS",
         .it = "DNS",
         .ja = "DNS",

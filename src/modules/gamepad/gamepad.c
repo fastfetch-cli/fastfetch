@@ -197,6 +197,7 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         .de = "Gamepad",
         .es = "Gamepad",
         .fr = "Manette",
+        .gl = "Gamepad",
         .he = "משטח משחק",
         .it = "Gamepad",
         .ja = "ゲームパッド",

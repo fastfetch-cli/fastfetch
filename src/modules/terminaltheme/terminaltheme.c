@@ -99,6 +99,7 @@ FFModuleBaseInfo ffTerminalThemeModuleInfo = {
         .de = "Terminalthema",
         .es = "Tema del terminal",
         .fr = "Thème du terminal",
+        .gl = "Tema do terminal",
         .he = "ערכת נושא של טרמינל",
         .it = "Tema del terminale",
         .ja = "ターミナルテーマ",

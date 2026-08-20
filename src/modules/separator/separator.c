@@ -129,6 +129,7 @@ FFModuleBaseInfo ffSeparatorModuleInfo = {
         .de = "Trennlinie",
         .es = "Separador",
         .fr = "Séparateur",
+        .gl = "Separador",
         .he = "מפריד",
         .it = "Separatore",
         .ja = "セパレーター",

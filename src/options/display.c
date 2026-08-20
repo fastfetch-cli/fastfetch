@@ -68,6 +68,7 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
         case 'de': return offsetof(FFModuleDisplayName, de);
         case 'es': return offsetof(FFModuleDisplayName, es);
         case 'fr': return offsetof(FFModuleDisplayName, fr);
+        case 'gl': return offsetof(FFModuleDisplayName, gl);
         case 'he': return offsetof(FFModuleDisplayName, he);
         case 'it': return offsetof(FFModuleDisplayName, it);
         case 'ja': return offsetof(FFModuleDisplayName, ja);
@@ -1283,6 +1284,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 break;
             case offsetof(FFModuleDisplayName, fr):
                 yyjson_mut_obj_add_str(doc, key, "language", "fr");
+                break;
+            case offsetof(FFModuleDisplayName, gl):
+                yyjson_mut_obj_add_str(doc, key, "language", "gl");
                 break;
             case offsetof(FFModuleDisplayName, he):
                 yyjson_mut_obj_add_str(doc, key, "language", "he");

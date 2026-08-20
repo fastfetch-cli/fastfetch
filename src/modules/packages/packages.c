@@ -518,6 +518,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         .de = "Pakete",
         .es = "Paquetes",
         .fr = "Paquets",
+        .gl = "Paquetes",
         .he = "חבילות",
         .it = "Pacchetti",
         .ja = "パッケージ",

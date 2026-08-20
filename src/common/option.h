@@ -25,6 +25,7 @@ typedef struct FFModuleDisplayName {
     const char* de; // German
     const char* es; // Spanish
     const char* fr; // French
+    const char* gl; // Galician
     const char* he; // Hebrew
     const char* it; // Italian
     const char* ja; // Japanese

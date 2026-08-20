@@ -128,6 +128,7 @@ FFModuleBaseInfo ffOpenCLModuleInfo = {
         .de = "OpenCL",
         .es = "OpenCL",
         .fr = "OpenCL",
+        .gl = "OpenCL",
         .he = "OpenCL",
         .it = "OpenCL",
         .ja = "OpenCL",

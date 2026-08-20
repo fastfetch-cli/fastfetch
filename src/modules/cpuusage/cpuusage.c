@@ -187,6 +187,7 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         .de = "CPU-Auslastung",
         .es = "Uso del CPU",
         .fr = "Utilisation du CPU",
+        .gl = "Uso da CPU",
         .he = "שימוש במעבד",
         .it = "Utilizzo della CPU",
         .ja = "CPU使用率",

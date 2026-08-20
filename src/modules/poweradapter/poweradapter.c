@@ -116,6 +116,7 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         .de = "Netzteil",
         .es = "Adaptador de corriente",
         .fr = "Adaptateur secteur",
+        .gl = "Adaptador de corrente",
         .he = "מתאם מתח",
         .it = "Alimentatore",
         .ja = "電源アダプター",

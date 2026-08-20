@@ -429,6 +429,7 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         .de = "Lokale IP",
         .es = "IP local",
         .fr = "IP locale",
+        .gl = "IP local",
         .he = "IP מקומי",
         .it = "IP locale",
         .ja = "ローカル IP",

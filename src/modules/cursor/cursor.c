@@ -108,6 +108,7 @@ FFModuleBaseInfo ffCursorModuleInfo = {
         .de = "Mauszeiger",
         .es = "Cursor",
         .fr = "Curseur",
+        .gl = "Cursor",
         .he = "סמן",
         .it = "Cursore",
         .ja = "カーソル",

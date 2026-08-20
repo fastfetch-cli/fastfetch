@@ -160,6 +160,7 @@ FFModuleBaseInfo ffMouseModuleInfo = {
         .de = "Maus",
         .es = "Ratón",
         .fr = "Souris",
+        .gl = "Rato",
         .he = "עכבר",
         .it = "Mouse",
         .ja = "マウス",

@@ -123,6 +123,7 @@ FFModuleBaseInfo ffCameraModuleInfo = {
         .de = "Kamera",
         .es = "Cámara",
         .fr = "Caméra",
+        .gl = "Cámara",
         .he = "מצלמה",
         .it = "Fotocamera",
         .ja = "カメラ",

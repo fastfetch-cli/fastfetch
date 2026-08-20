@@ -158,6 +158,7 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         .de = "Datum & Uhrzeit",
         .es = "Fecha y hora",
         .fr = "Date et heure",
+        .gl = "Data e hora",
         .he = "תאריך ושעה",
         .it = "Data e ora",
         .ja = "日付と時刻",

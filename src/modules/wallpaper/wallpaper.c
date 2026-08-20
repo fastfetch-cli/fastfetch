@@ -83,6 +83,7 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
         .de = "Hintergrundbild",
         .es = "Fondo de pantalla",
         .fr = "Fond d'écran",
+        .gl = "Fondo de escritorio",
         .he = "טפט",
         .it = "Sfondo",
         .ja = "壁紙",
