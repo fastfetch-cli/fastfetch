@@ -30,22 +30,6 @@ static bool getWifiValue(int fd, uint32_t id, void* value, size_t valueSize, wld
     return true;
 }
 
-static void initWifiResult(FFWifiResult* item, const char* name) {
-    ffStrbufInitS(&item->inf.description, name);
-    ffStrbufInit(&item->inf.status);
-    ffStrbufInit(&item->conn.status);
-    ffStrbufInit(&item->conn.ssid);
-    ffStrbufInit(&item->conn.bssid);
-    ffStrbufInit(&item->conn.protocol);
-    ffStrbufInit(&item->conn.security);
-    item->conn.signalQuality = -DBL_MAX;
-    item->conn.rxRate = -DBL_MAX;
-    item->conn.txRate = -DBL_MAX;
-    item->conn.channel = 0;
-    item->conn.channelWidth = 0;
-    item->conn.frequency = 0;
-}
-
 static void setWifiProtocol(FFstrbuf* protocol, uint32_t subtype, bool htEnabled) {
     switch (subtype) {
         case WL_FHSS:
@@ -89,6 +73,8 @@ static void setWifiSecurity(FFstrbuf* security, uint32_t encryption, bool haveAu
 }
 
 const char* ffDetectWifi(FFlist* result) {
+    // https://github.com/illumos/illumos-gate/blob/master/usr/src/cmd/cmd-inet/usr.sbin/wificonfig/wificonfig.c
+
     FF_AUTO_CLOSE_DIR DIR* directory = opendir("/dev/wifi");
     if (!directory) {
         return nullptr;
@@ -113,13 +99,28 @@ const char* ffDetectWifi(FFlist* result) {
             continue;
         }
 
-        FF_AUTO_CLOSE_FD int fd = open(devicePath, O_RDWR);
+        FF_AUTO_CLOSE_FD int fd = open(devicePath, O_RDWR | O_CLOEXEC);
         if (fd < 0) {
+            continue;
+        }
+        if (!isastream(fd)) {
             continue;
         }
 
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
-        initWifiResult(item, entry->d_name);
+        ffStrbufInitS(&item->inf.description, entry->d_name);
+        ffStrbufInit(&item->inf.status);
+        ffStrbufInit(&item->conn.status);
+        ffStrbufInit(&item->conn.ssid);
+        ffStrbufInit(&item->conn.bssid);
+        ffStrbufInit(&item->conn.protocol);
+        ffStrbufInit(&item->conn.security);
+        item->conn.signalQuality = -DBL_MAX;
+        item->conn.rxRate = -DBL_MAX;
+        item->conn.txRate = -DBL_MAX;
+        item->conn.channel = 0;
+        item->conn.channelWidth = 0;
+        item->conn.frequency = 0;
 
         wl_radio_t radio;
         if (getWifiValue(fd, WL_RADIO, &radio, sizeof(radio), buffer)) {
@@ -140,13 +141,13 @@ const char* ffDetectWifi(FFlist* result) {
         ffStrbufSetStatic(&item->conn.status, "Connected");
 
         wl_essid_t essid;
-        if (getWifiValue(fd, WL_ESSID, &essid, sizeof(essid), buffer) && essid.wl_essid_length < sizeof(essid.wl_essid_essid) && essid.wl_essid_length <= MAX_ESSID_LENGTH - 1) {
+        if (getWifiValue(fd, WL_ESSID, &essid, sizeof(essid), buffer) && essid.wl_essid_length > 0 && essid.wl_essid_length < sizeof(essid.wl_essid_essid) && essid.wl_essid_length <= MAX_ESSID_LENGTH - 1) {
             ffStrbufSetNS(&item->conn.ssid, essid.wl_essid_length, essid.wl_essid_essid);
         }
 
         wl_bssid_t bssid;
         if (getWifiValue(fd, WL_BSSID, bssid, sizeof(bssid), buffer)) {
-            ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X", bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+            ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X", (uint8_t) bssid[0], (uint8_t) bssid[1], (uint8_t) bssid[2], (uint8_t) bssid[3], (uint8_t) bssid[4], (uint8_t) bssid[5]);
         }
 
         wl_rssi_t rssi;
