@@ -335,6 +335,19 @@ static const FFlogo L[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LEONOS4
+    // LeonOS 4
+    {
+        .names = { "LeonOS", "leonos", "LeonOS 4"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LEONOS4,
+        .colors = {
+            FF_COLOR_FG_RGB "0;120;212",
+            FF_COLOR_FG_RGB "0;90;158",
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     // LAST
     {},
 };
