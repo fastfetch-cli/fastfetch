@@ -1,3 +1,25 @@
+# Unreleased
+
+Changes:
+* The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
+
+Features:
+* Added module key localization support. (General)
+    * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
+    * See `fastfetch -h key-language` for all supported languages.
+* Improved Wi-Fi module
+    * Added Wifi channel width detection, exposed via `{channel-width}` in custom format (reports 0 when not supported).
+    * Improved Wifi channel frequency accuracy and fortified detection on Windows, macOS.
+    * Added Wifi detection support on SunOS, Haiku.
+* Added Battery detection support on SunOS. (Battery, SunOS)
+* Added terminal font size detection support on Termux. (TerminalFont, Android)
+* Improved GTK theme/icons/font detection on standalone WMs such as Hyprland, sway, niri and i3. (Theme, Linux)
+* Improved fish completion scripts to print enum descriptions. (Completion)
+
+Bugfixes:
+* Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
+* Some internal cleanups and optimizations.
+
 # 2.67.1
 
 Bugfixes:
