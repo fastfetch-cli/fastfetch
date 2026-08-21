@@ -65,17 +65,22 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
     switch (language->chars[0] << 8 | language->chars[1]) {
         case 'en': return offsetof(FFModuleDisplayName, en);
         case 'ar': return offsetof(FFModuleDisplayName, ar);
+        case 'cs': return offsetof(FFModuleDisplayName, cs);
         case 'de': return offsetof(FFModuleDisplayName, de);
         case 'es': return offsetof(FFModuleDisplayName, es);
         case 'fr': return offsetof(FFModuleDisplayName, fr);
         case 'gl': return offsetof(FFModuleDisplayName, gl);
         case 'he': return offsetof(FFModuleDisplayName, he);
+        case 'id': return offsetof(FFModuleDisplayName, id);
         case 'it': return offsetof(FFModuleDisplayName, it);
         case 'ja': return offsetof(FFModuleDisplayName, ja);
         case 'ko': return offsetof(FFModuleDisplayName, ko);
         case 'pl': return offsetof(FFModuleDisplayName, pl);
         case 'pt': return offsetof(FFModuleDisplayName, pt);
         case 'ru': return offsetof(FFModuleDisplayName, ru);
+        case 'tr': return offsetof(FFModuleDisplayName, tr);
+        case 'uk': return offsetof(FFModuleDisplayName, uk);
+        case 'vi': return offsetof(FFModuleDisplayName, vi);
         case 'zh': {
             if (ffStrbufEqualS(language, "zh_cn")) {
                 return offsetof(FFModuleDisplayName, zh_CN);
@@ -1276,6 +1281,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             case offsetof(FFModuleDisplayName, ar):
                 yyjson_mut_obj_add_str(doc, key, "language", "ar");
                 break;
+            case offsetof(FFModuleDisplayName, cs):
+                yyjson_mut_obj_add_str(doc, key, "language", "cs");
+                break;
             case offsetof(FFModuleDisplayName, de):
                 yyjson_mut_obj_add_str(doc, key, "language", "de");
                 break;
@@ -1290,6 +1298,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 break;
             case offsetof(FFModuleDisplayName, he):
                 yyjson_mut_obj_add_str(doc, key, "language", "he");
+                break;
+            case offsetof(FFModuleDisplayName, id):
+                yyjson_mut_obj_add_str(doc, key, "language", "id");
                 break;
             case offsetof(FFModuleDisplayName, it):
                 yyjson_mut_obj_add_str(doc, key, "language", "it");
@@ -1308,6 +1319,15 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                 break;
             case offsetof(FFModuleDisplayName, ru):
                 yyjson_mut_obj_add_str(doc, key, "language", "ru");
+                break;
+            case offsetof(FFModuleDisplayName, tr):
+                yyjson_mut_obj_add_str(doc, key, "language", "tr");
+                break;
+            case offsetof(FFModuleDisplayName, uk):
+                yyjson_mut_obj_add_str(doc, key, "language", "uk");
+                break;
+            case offsetof(FFModuleDisplayName, vi):
+                yyjson_mut_obj_add_str(doc, key, "language", "vi");
                 break;
             case offsetof(FFModuleDisplayName, zh_CN):
                 yyjson_mut_obj_add_str(doc, key, "language", "zh_CN");

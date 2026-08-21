@@ -1077,6 +1077,11 @@
                                 },
                                 {
                                     "type": "string",
+                                    "const": "cs",
+                                    "description": "Czech"
+                                },
+                                {
+                                    "type": "string",
                                     "const": "de",
                                     "description": "German"
                                 },
@@ -1099,6 +1104,11 @@
                                     "type": "string",
                                     "const": "he",
                                     "description": "Hebrew"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "id",
+                                    "description": "Indonesian"
                                 },
                                 {
                                     "type": "string",
@@ -1129,6 +1139,21 @@
                                     "type": "string",
                                     "const": "ru",
                                     "description": "Russian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "tr",
+                                    "description": "Turkish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "uk",
+                                    "description": "Ukrainian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "vi",
+                                    "description": "Vietnamese"
                                 },
                                 {
                                     "type": "string",
