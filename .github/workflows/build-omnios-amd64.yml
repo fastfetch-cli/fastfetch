@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Start VM
-        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
+        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
         with:
           operating_system: omnios
           version: 'r151058'
