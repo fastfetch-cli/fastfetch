@@ -184,15 +184,21 @@ static const FFlogo A[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_ALT_ATOMIC
     // ALT Atomic
     {
-        .names = { "ALT Atomic" },
+        .names = { "ALT Atomic", "alt-atomic", "altatomic" },
         .lines = FASTFETCH_DATATEXT_LOGO_ALT_ATOMIC,
         .colors = {
-            FF_COLOR_FG_256 "69",
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_256 "208",
+            FF_COLOR_FG_RGB "79;157;207",
+            FF_COLOR_FG_RGB "113;173;210",
+            FF_COLOR_FG_RGB "248;251;252",
+            FF_COLOR_FG_RGB "154;199;227",
+            FF_COLOR_FG_RGB "209;231;243",
+            FF_COLOR_FG_RGB "173;186;187",
+            FF_COLOR_FG_RGB "64;126;166",
+            FF_COLOR_FG_RGB "236;206;172",
+            FF_COLOR_FG_RGB "49;96;126"
         },
-        .colorKeys = FF_COLOR_FG_256 "69",
-        .colorTitle = FF_COLOR_FG_256 "69",
+        .colorKeys = FF_COLOR_FG_RGB "80;157;207",
+        .colorTitle = FF_COLOR_FG_RGB "255;209;164",
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ALTLINUX
