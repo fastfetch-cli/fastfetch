@@ -322,7 +322,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name\n    14. {technology}: CPU technology",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -505,6 +505,10 @@
             "description": "Output format for the `Title` module. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: CWD with home dir replaced by `~`",
             "type": "string"
         },
+        "topFormat": {
+            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {path}: Executable path\n    3. {pid}: Process ID\n    4. {cpu}: CPU usage\n    5. {mem}: Memory usage (RSS) in bytes\n    6. {disk-read}: Disk read bytes per second\n    7. {disk-write}: Disk write bytes per second\n    8. {cpu-percentage}: CPU usage percentage\n    9. {mem-formatted}: Memory usage (RSS) formatted\n    10. {disk-read-formatted}: Disk read formatted\n    11. {disk-write-formatted}: Disk write formatted",
+            "type": "string"
+        },
         "themeFormat": {
             "description": "Output format for the `Theme` module. See Wiki for formatting syntax\n    1. {theme1}: Theme part 1\n    2. {theme2}: Theme part 2",
             "type": "string"
@@ -542,7 +546,7 @@
             "type": "string"
         },
         "wifiFormat": {
-            "description": "Output format for the `Wifi` module. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {band}: Connection channel band in GHz",
+            "description": "Output format for the `Wifi` module. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {channel-width}: Connection channel width in MHz\n    14. {band}: Connection channel band in GHz",
             "type": "string"
         },
         "wmthemeFormat": {
@@ -1592,6 +1596,7 @@
                             "poweradapter",
                             "processes",
                             "publicip",
+                            "top",
                             "separator",
                             "shell",
                             "sound",
@@ -4418,6 +4423,74 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/titleFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Top",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "top",
+                                        "description": "Print processes with the highest CPU or memory usage"
+                                    },
+                                    "sort": {
+                                        "type": "string",
+                                        "description": "Sort processes by CPU, memory or disk IO usage",
+                                        "enum": [
+                                            "cpu",
+                                            "memory",
+                                            "disk-read",
+                                            "disk-write"
+                                        ],
+                                        "default": "cpu"
+                                    },
+                                    "processes": {
+                                        "type": "integer",
+                                        "description": "Number of top processes to print",
+                                        "minimum": 1,
+                                        "default": 5
+                                    },
+                                    "waitTime": {
+                                        "type": "integer",
+                                        "description": "Wait time between process samples, in milliseconds",
+                                        "minimum": 1,
+                                        "default": 500
+                                    },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Print all process on a single line",
+                                        "default": false
+                                    },
+                                    "kernelTask": {
+                                        "type": "boolean",
+                                        "description": "Whether to include kernel tasks (kworker, System, kernel_task) in the process list",
+                                        "default": false
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/topFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"

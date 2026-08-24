@@ -111,6 +111,14 @@ void ffPrepareCommandOption(FFdata* data) {
                 break;
             #endif
 
+            #if !FF_MODULE_DISABLE_TOP
+            case 'T':
+            case 't':
+                FF_IF_MODULE_MATCH(ffTopModuleInfo.name)
+                ffPrepareTopProcesses();
+                break;
+            #endif
+
             #if !FF_MODULE_DISABLE_WEATHER
             case 'W':
             case 'w':

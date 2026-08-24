@@ -484,6 +484,7 @@ set(LIBFASTFETCH_SRC
     src/detection/physicalmemory/physicalmemory.c
     src/detection/publicip/publicip.c
     src/detection/terminaltheme/terminaltheme.c
+    src/detection/top/top.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
@@ -559,6 +560,7 @@ set(LIBFASTFETCH_SRC
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
     src/modules/title/title.c
+    src/modules/top/top.c
     src/modules/tpm/tpm.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
@@ -651,6 +653,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_linux.c
         src/detection/tpm/tpm_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -822,11 +825,13 @@ elseif(FreeBSD)
     if(DragonFly)
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_nosupport.c
+            src/detection/top/top_dbsd.c
             src/detection/wifi/wifi_nosupport.c
         )
     else()
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_bsd.c
+            src/detection/top/top_bsd.c
             src/detection/wifi/wifi_bsd.c
         )
     endif()
@@ -904,6 +909,7 @@ elseif(NetBSD)
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
+        src/detection/top/top_nbsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -990,6 +996,7 @@ elseif(OpenBSD)
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
+        src/detection/top/top_obsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -1057,6 +1064,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_apple.c
+        src/detection/top/top_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -1149,6 +1157,7 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
         src/detection/theme/theme_windows.c
+        src/detection/top/top_windows.c
         src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -1231,6 +1240,7 @@ elseif(SunOS)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_sunos.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_sunos.c
         src/detection/users/users_linux.c
@@ -1301,6 +1311,7 @@ elseif(Haiku)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/top/top_haiku.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_haiku.c
         src/detection/users/users_linux.c
@@ -1385,6 +1396,7 @@ elseif(GNU)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_gnu.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -1995,6 +2007,7 @@ elseif(SunOS)
 elseif(GNU)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE "ps"
     )
 elseif(ANDROID)
     target_link_libraries(libfastfetch

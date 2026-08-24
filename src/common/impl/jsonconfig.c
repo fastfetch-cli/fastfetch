@@ -195,6 +195,16 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         }
         #endif
 
+        #if !FF_MODULE_DISABLE_TOP
+        case 't':
+        case 'T': {
+            if (ffStrEqualsIgnCase(type, ffTopModuleInfo.name)) {
+                ffPrepareTopProcesses();
+            }
+            break;
+        }
+        #endif
+
         #if !FF_MODULE_DISABLE_WEATHER
         case 'w':
         case 'W': {

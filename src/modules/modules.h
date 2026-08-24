@@ -64,6 +64,7 @@
 #include "modules/terminaltheme/terminaltheme.h"
 #include "modules/theme/theme.h"
 #include "modules/title/title.h"
+#include "modules/top/top.h"
 #include "modules/tpm/tpm.h"
 #include "modules/uptime/uptime.h"
 #include "modules/users/users.h"
