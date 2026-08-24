@@ -1388,7 +1388,7 @@ elseif(GNU)
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_linux.c
+        src/detection/processes/processes_gnu.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
