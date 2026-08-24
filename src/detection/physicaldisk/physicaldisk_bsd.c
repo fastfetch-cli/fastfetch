@@ -122,6 +122,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 }
 #else
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
+    FF_UNUSED(result, options);
     return "Fastfetch was compiled without libgeom support";
 }
 #endif
