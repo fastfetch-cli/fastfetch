@@ -3,7 +3,7 @@
 #include <OS.h>
 #include <string.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     int32 cookie = 0;
     team_info team;
     while (get_next_team_info(&cookie, &team) == B_OK) {

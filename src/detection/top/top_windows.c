@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <winternl.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     FF_AUTO_FREE SYSTEM_PROCESS_INFORMATION* pstart = nullptr;
 
     // Multiple attempts in case processes change while

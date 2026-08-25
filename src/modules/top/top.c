@@ -11,19 +11,23 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), total == 1 ? 0 : (uint8_t) (index + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
-        ffStrbufAppendF(&output, "%s (%u) - ", process->name.chars, process->pid);
-        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
-            ffStrbufAppendS(&output, "CPU ");
+        ffStrbufAppendF(&output, "%s (%u)", process->name.chars, process->pid);
+        if ((options->showTypes & FF_TOP_TYPE_CPU) && (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)) {
+            ffStrbufAppendS(&output, " - CPU ");
             ffPercentAppendNum(&output, process->cpuPercent, options->percent, false, &options->moduleArgs);
         }
         if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)) {
-            ffStrbufAppendS(&output, " - MEM ");
-            ffSizeAppendNum(process->memBytes, &output);
-            ffStrbufAppendS(&output, " - DSK ");
-            ffSizeAppendNum(process->bytesRead, &output);
-            ffStrbufAppendS(&output, "/s / ");
-            ffSizeAppendNum(process->bytesWritten, &output);
-            ffStrbufAppendS(&output, "/s");
+            if (options->showTypes & FF_TOP_TYPE_MEMORY) {
+                ffStrbufAppendS(&output, " - MEM ");
+                ffSizeAppendNum(process->memBytes, &output);
+            }
+            if (options->showTypes & FF_TOP_TYPE_DISK) {
+                ffStrbufAppendS(&output, " - DSK ");
+                ffSizeAppendNum(process->bytesRead, &output);
+                ffStrbufAppendS(&output, "/s / ");
+                ffSizeAppendNum(process->bytesWritten, &output);
+                ffStrbufAppendS(&output, "/s");
+            }
         }
         ffStrbufPutTo(&output, stdout);
     } else {
@@ -92,16 +96,54 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
         if (unsafe_yyjson_equals_str(key, "sort")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]){
-                                                                       { "cpu", FF_TOP_SORT_CPU },
-                                                                       { "memory", FF_TOP_SORT_MEMORY },
-                                                                       { "disk-read", FF_TOP_SORT_DISK_READ },
-                                                                       { "disk-write", FF_TOP_SORT_DISK_WRITE },
+                                                                       { "cpu", FF_TOP_TYPE_CPU },
+                                                                       { "memory", FF_TOP_TYPE_MEMORY },
+                                                                       { "disk-read", FF_TOP_TYPE_DISK_READ },
+                                                                       { "disk-write", FF_TOP_TYPE_DISK_WRITE },
                                                                        {},
                                                                    });
             if (error) {
                 ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
-                options->sort = (FFTopSortType) value;
+                options->sort = (FFTopTypes) value;
+            }
+            continue;
+        } else if (unsafe_yyjson_equals_str(key, "showTypes")) {
+            if (yyjson_is_arr(val)) {
+                options->showTypes = 0;
+                yyjson_val* item;
+                size_t aidx, amax;
+                yyjson_arr_foreach (val, aidx, amax, item) {
+                    int value;
+                    const char* error = ffJsonConfigParseEnum(item, &value, (FFKeyValuePair[]){
+                                                                                { "cpu", FF_TOP_TYPE_CPU },
+                                                                                { "memory", FF_TOP_TYPE_MEMORY },
+                                                                                { "disk", FF_TOP_TYPE_DISK },
+                                                                                {},
+                                                                            });
+                    if (error == nullptr) {
+                        options->showTypes |= (FFTopTypes) value;
+                    }
+                    if (error) {
+                        options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
+                        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                        break;
+                    }
+                }
+            } else {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]){
+                                                                           { "cpu", FF_TOP_TYPE_CPU },
+                                                                           { "memory", FF_TOP_TYPE_MEMORY },
+                                                                           { "disk", FF_TOP_TYPE_DISK },
+                                                                           {},
+                                                                       });
+                if (error == nullptr) {
+                    options->showTypes = (FFTopTypes) value;
+                }
+                if (error) {
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                }
             }
             continue;
         } else if (unsafe_yyjson_equals_str(key, "processes")) {
@@ -121,19 +163,25 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
 void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_str(doc, module, "type", "top");
-    switch (options->sort) {
-        case FF_TOP_SORT_CPU:
-            yyjson_mut_obj_add_str(doc, module, "sort", "cpu");
-            break;
-        case FF_TOP_SORT_MEMORY:
-            yyjson_mut_obj_add_str(doc, module, "sort", "memory");
-            break;
-        case FF_TOP_SORT_DISK_READ:
-            yyjson_mut_obj_add_str(doc, module, "sort", "disk-read");
-            break;
-        case FF_TOP_SORT_DISK_WRITE:
-            yyjson_mut_obj_add_str(doc, module, "sort", "disk-write");
-            break;
+    yyjson_mut_val* showTypes = yyjson_mut_arr(doc);
+    if (options->showTypes & FF_TOP_TYPE_CPU) {
+        yyjson_mut_arr_add_str(doc, showTypes, "cpu");
+    }
+    if (options->showTypes & FF_TOP_TYPE_MEMORY) {
+        yyjson_mut_arr_add_str(doc, showTypes, "memory");
+    }
+    if (options->showTypes & FF_TOP_TYPE_DISK) {
+        yyjson_mut_arr_add_str(doc, showTypes, "disk");
+    }
+    yyjson_mut_obj_add_val(doc, module, "showTypes", showTypes);
+    if (options->sort == FF_TOP_TYPE_CPU) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "cpu");
+    } else if (options->sort == FF_TOP_TYPE_MEMORY) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "memory");
+    } else if (options->sort == FF_TOP_TYPE_DISK_READ) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "disk-read");
+    } else if (options->sort == FF_TOP_TYPE_DISK_WRITE) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "disk-write");
     }
     yyjson_mut_obj_add_uint(doc, module, "processes", options->nProcesses);
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
@@ -153,10 +201,16 @@ bool ffGenerateTopJsonResult(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, array);
         yyjson_mut_obj_add_strbuf(doc, item, "name", &process->name);
         yyjson_mut_obj_add_uint(doc, item, "pid", process->pid);
-        yyjson_mut_obj_add_real(doc, item, "cpuPercent", process->cpuPercent);
-        yyjson_mut_obj_add_uint(doc, item, "mem", process->memBytes);
-        yyjson_mut_obj_add_uint(doc, item, "bytesRead", process->bytesRead);
-        yyjson_mut_obj_add_uint(doc, item, "bytesWritten", process->bytesWritten);
+        if (options->showTypes & FF_TOP_TYPE_CPU) {
+            yyjson_mut_obj_add_real(doc, item, "cpuPercent", process->cpuPercent);
+        }
+        if (options->showTypes & FF_TOP_TYPE_MEMORY) {
+            yyjson_mut_obj_add_uint(doc, item, "mem", process->memBytes);
+        }
+        if (options->showTypes & FF_TOP_TYPE_DISK) {
+            yyjson_mut_obj_add_uint(doc, item, "bytesRead", process->bytesRead);
+            yyjson_mut_obj_add_uint(doc, item, "bytesWritten", process->bytesWritten);
+        }
         yyjson_mut_obj_add_uint(doc, item, "startTime", process->startTime);
     }
 
@@ -168,7 +222,8 @@ bool ffGenerateTopJsonResult(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
 
 void ffInitTopOptions(FFTopOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰍛");
-    options->sort = FF_TOP_SORT_CPU;
+    options->sort = FF_TOP_TYPE_CPU;
+    options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
     options->nProcesses = 5;
     options->waitTime = 500;
     options->compact = false;

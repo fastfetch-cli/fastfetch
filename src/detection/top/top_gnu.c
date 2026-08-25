@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ps.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     struct ps_context* context = nullptr;
     if (ps_context_create(getproc(), &context) != 0) {
         return "ps_context_create(getproc()) failed";

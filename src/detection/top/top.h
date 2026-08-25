@@ -5,11 +5,11 @@
 
 typedef struct FFTopProcessResult {
     FFstrbuf name;
-    uint64_t startTime;
     double cpuPercent;
     uint64_t memBytes;
     uint64_t bytesRead;
     uint64_t bytesWritten;
+    uint64_t startTime;
     uint32_t pid;
 } FFTopProcessResult;
 
@@ -24,4 +24,4 @@ typedef struct FFTopProcessSnapshot {
 } FFTopProcessSnapshot;
 
 const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result);
-const char* ffTopGetProcessSnapshot(FFlist* snapshots);
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes);

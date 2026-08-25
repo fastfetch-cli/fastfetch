@@ -55,7 +55,7 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
     return true;
 }
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     const long ticks = sysconf(_SC_CLK_TCK);
     const long pageSize = instance.state.platform.sysinfo.pageSize;
     FF_DEBUG("Scanning /proc: clk_tck=%ld, pageSize=%ld", ticks, pageSize);
@@ -98,20 +98,24 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
         }
         statBuffer[statLength] = '\0';
 
-        ssize_t statmLength;
-        if ((statmLength = ffReadFileDataRelative(subfd, "statm", sizeof(statmBuffer) - 1, statmBuffer)) < 0) {
-            FF_DEBUG("Failed to read /proc/%s/statm: %s", entry->d_name, strerror(errno));
-            continue;
+        ssize_t statmLength = 0;
+        if (showTypes & FF_TOP_TYPE_MEMORY) {
+            if ((statmLength = ffReadFileDataRelative(subfd, "statm", sizeof(statmBuffer) - 1, statmBuffer)) < 0) {
+                FF_DEBUG("Failed to read /proc/%s/statm: %s", entry->d_name, strerror(errno));
+                statmLength = 0;
+            }
+            statmBuffer[statmLength] = '\0';
         }
-        statmBuffer[statmLength] = '\0';
 
         char ioBuffer[512];
-        ssize_t ioLength;
-        if ((ioLength = ffReadFileDataRelative(subfd, "io", sizeof(ioBuffer) - 1, ioBuffer)) < 0) {
-            FF_DEBUG("Failed to read /proc/%s/io: %s", entry->d_name, strerror(errno));
-            ioLength = 0;
+        ssize_t ioLength = 0;
+        if (showTypes & FF_TOP_TYPE_DISK) {
+            if ((ioLength = ffReadFileDataRelative(subfd, "io", sizeof(ioBuffer) - 1, ioBuffer)) < 0) {
+                FF_DEBUG("Failed to read /proc/%s/io: %s", entry->d_name, strerror(errno));
+                ioLength = 0;
+            }
+            ioBuffer[ioLength] = '\0';
         }
-        ioBuffer[ioLength] = '\0';
 
         auto snapshot = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
         ffStrbufInit(&snapshot->name);
@@ -121,8 +125,8 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
             continue;
         }
 
-        uint64_t rssPages;
-        if (__builtin_expect(sscanf(statmBuffer, "%*u %" SCNu64, &rssPages) != 1, false)) {
+        uint64_t rssPages = 0;
+        if (__builtin_expect((showTypes & FF_TOP_TYPE_MEMORY) && sscanf(statmBuffer, "%*u %" SCNu64, &rssPages) != 1, false)) {
             FF_DEBUG("Failed to parse statm of /proc/%lu", pid);
             ffStrbufDestroy(&snapshot->name);
             --snapshots->length;

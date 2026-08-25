@@ -114,8 +114,11 @@ void ffPrepareCommandOption(FFdata* data) {
             #if !FF_MODULE_DISABLE_TOP
             case 'T':
             case 't':
-                FF_IF_MODULE_MATCH(ffTopModuleInfo.name)
-                ffPrepareTopProcesses();
+                FF_IF_MODULE_MATCH(ffTopModuleInfo.name) {
+                    [[gnu::cleanup(ffDestroyTopOptions)]] FFTopOptions options;
+                    ffInitTopOptions(&options);
+                    ffPrepareTopProcesses(options.showTypes);
+                }
                 break;
             #endif
 

@@ -199,7 +199,12 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
         case 't':
         case 'T': {
             if (ffStrEqualsIgnCase(type, ffTopModuleInfo.name)) {
-                ffPrepareTopProcesses();
+                [[gnu::cleanup(ffDestroyTopOptions)]] FFTopOptions options;
+                ffInitTopOptions(&options);
+                if (module) {
+                    ffTopModuleInfo.parseJsonObject(&options, module);
+                }
+                ffPrepareTopProcesses(options.showTypes);
             }
             break;
         }

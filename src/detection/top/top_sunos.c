@@ -7,7 +7,7 @@
 #include <procfs.h>
 #include <sys/param.h> // DEV_BSIZE
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/proc");
     if (!dirp) {
         return "opendir(\"/proc\") failed";
@@ -52,13 +52,14 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
         item->startTime = (uint64_t) psinfo.pr_start.tv_sec * 1000 +
             (uint64_t) psinfo.pr_start.tv_nsec / 1000000;
 
-        prusage_t usage;
-        if (ffReadFileDataRelative(subfd, "usage", sizeof(usage), &usage) == (ssize_t) sizeof(usage)) {
-            item->bytesRead = (uint64_t) usage.pr_inblk * DEV_BSIZE;
-            item->bytesWritten = (uint64_t) usage.pr_oublk * DEV_BSIZE;
-        } else {
-            item->bytesRead = 0;
-            item->bytesWritten = 0;
+        item->bytesRead = 0;
+        item->bytesWritten = 0;
+        if (showTypes & FF_TOP_TYPE_DISK) {
+            prusage_t usage;
+            if (ffReadFileDataRelative(subfd, "usage", sizeof(usage), &usage) == (ssize_t) sizeof(usage)) {
+                item->bytesRead = (uint64_t) usage.pr_inblk * DEV_BSIZE;
+                item->bytesWritten = (uint64_t) usage.pr_oublk * DEV_BSIZE;
+            }
         }
     }
 

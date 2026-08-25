@@ -2,7 +2,7 @@
 
 #include "option.h"
 
-void ffPrepareTopProcesses(void);
+void ffPrepareTopProcesses(FFTopTypes showTypes);
 
 bool ffPrintTop(FFTopOptions* options);
 void ffInitTopOptions(FFTopOptions* options);

@@ -5,7 +5,7 @@
 #include <sys/sysctl.h>
 #include <kvm.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     if (!kd) {
         return "kvm_open() failed";

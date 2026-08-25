@@ -4449,6 +4449,36 @@
                                         ],
                                         "default": "cpu"
                                     },
+                                    "showTypes": {
+                                        "description": "Specify which resource usages are detected and displayed.\nIf memory is enabled is enabled alone, only a single process snapshot is taken and `waitTime` sampling wait is skipped",
+                                        "default": [
+                                            "cpu",
+                                            "memory",
+                                            "disk"
+                                        ],
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "cpu",
+                                                    "memory",
+                                                    "disk"
+                                                ]
+                                            },
+                                            {
+                                                "type": "array",
+                                                "minItems": 1,
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "cpu",
+                                                        "memory",
+                                                        "disk"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
                                     "processes": {
                                         "type": "integer",
                                         "description": "Number of top processes to print",
@@ -4457,7 +4487,7 @@
                                     },
                                     "waitTime": {
                                         "type": "integer",
-                                        "description": "Wait time between process samples, in milliseconds",
+                                        "description": "Wait time between process samples, in milliseconds. Ignored when showTypes contains \"memory\" only",
                                         "minimum": 1,
                                         "default": 500
                                     },
