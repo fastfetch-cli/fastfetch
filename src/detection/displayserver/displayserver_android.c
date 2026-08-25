@@ -192,13 +192,23 @@ static bool detectDE(FFDisplayServerResult* ds) {
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
-    const char* error = ffdsConnectXcbRandr(ds);
-    if (error) {
-        error = ffdsConnectXrandr(ds);
-    }
-    if (!error) {
-        ffdsDetectWMDE(ds);
-        return;
+    // Keep the same display-server preference as Linux: Wayland provides the
+    // richest output information, followed by XCB and XRandR.
+    if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE) {
+        ffdsConnectWayland(ds);
+
+        if (ds->displays.length == 0) {
+            ffdsConnectXcbRandr(ds);
+        }
+
+        if (ds->displays.length == 0) {
+            ffdsConnectXrandr(ds);
+        }
+
+        if (ds->displays.length > 0) {
+            ffdsDetectWMDE(ds);
+            return;
+        }
     }
 
     // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager

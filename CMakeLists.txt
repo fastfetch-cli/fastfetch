@@ -78,7 +78,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
+cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "ANDROID OR LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
@@ -694,6 +694,13 @@ elseif(ANDROID)
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/kde-output.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
+        src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
