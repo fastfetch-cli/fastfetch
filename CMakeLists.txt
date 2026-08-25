@@ -736,6 +736,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_linux.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
