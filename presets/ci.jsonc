@@ -21,6 +21,7 @@
         "uptime",
         "loadavg",
         "processes",
+        "top",
         "packages",
         "shell",
         "editor",
