@@ -1,5 +1,6 @@
 #include "top.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/memrchr.h"
 #include "common/strutil.h"
@@ -12,12 +13,14 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
     const char* open = strchr(buffer, '(');
     const char* close = (const char*) memrchr(buffer, ')', length);
     if (!open || !close || close <= open || close + 2 >= buffer + length) {
+        FF_DEBUG("parseStat: malformed stat content");
         return false;
     }
 
     ffStrbufSetNS(&result->name, (uint32_t) (close - open - 1), open + 1);
     const char* cursor = close + 2; // state, then fields 4..
     if (*cursor == '\0') {
+        FF_DEBUG("parseStat(%s): truncated after state field", result->name.chars);
         return false;
     }
     ++cursor;
@@ -28,12 +31,14 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
             ++cursor;
         }
         if (*cursor == '\0') {
+            FF_DEBUG("parseStat(%s): truncated at field %u", result->name.chars, field);
             return false;
         }
         char* end;
         errno = 0;
         unsigned long long value = strtoull(cursor, &end, 10);
         if (end == cursor || errno == ERANGE) {
+            FF_DEBUG("parseStat(%s): invalid number at field %u", result->name.chars, field);
             return false;
         }
         values[field - 4] = (uint64_t) value;
@@ -41,6 +46,7 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
     }
 
     if (values[5] & PF_KTHREAD) { // values[5] is field 9 (flags)
+        FF_DEBUG("Skip kernel thread: %s", result->name.chars);
         return false;
     }
 
@@ -52,12 +58,14 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
 const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
     const long ticks = sysconf(_SC_CLK_TCK);
     const long pageSize = instance.state.platform.sysinfo.pageSize;
+    FF_DEBUG("Scanning /proc: clk_tck=%ld, pageSize=%ld", ticks, pageSize);
     if (ticks <= 0 || pageSize <= 0) {
         return "sysconf(_SC_CLK_TCK or _SC_PAGESIZE) failed";
     }
 
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (!dir) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 
@@ -73,22 +81,26 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
 
         unsigned long pid = strtoul(entry->d_name, nullptr, 10);
         if (pid == 0 || pid > UINT32_MAX) {
+            FF_DEBUG("Skip invalid pid directory: %s", entry->d_name);
             continue;
         }
 
         FF_AUTO_CLOSE_FD int subfd = openat(procfd, entry->d_name, O_RDONLY | O_DIRECTORY);
         if (subfd < 0) {
+            FF_DEBUG("openat(/proc/%s) failed: %s", entry->d_name, strerror(errno));
             continue;
         }
 
         ssize_t statLength;
         if ((statLength = ffReadFileDataRelative(subfd, "stat", sizeof(statBuffer) - 1, statBuffer)) < 0) {
+            FF_DEBUG("Failed to read /proc/%s/stat: %s", entry->d_name, strerror(errno));
             continue;
         }
         statBuffer[statLength] = '\0';
 
         ssize_t statmLength;
         if ((statmLength = ffReadFileDataRelative(subfd, "statm", sizeof(statmBuffer) - 1, statmBuffer)) < 0) {
+            FF_DEBUG("Failed to read /proc/%s/statm: %s", entry->d_name, strerror(errno));
             continue;
         }
         statmBuffer[statmLength] = '\0';
@@ -96,7 +108,8 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
         char ioBuffer[512];
         ssize_t ioLength;
         if ((ioLength = ffReadFileDataRelative(subfd, "io", sizeof(ioBuffer) - 1, ioBuffer)) < 0) {
-            continue;
+            FF_DEBUG("Failed to read /proc/%s/io: %s", entry->d_name, strerror(errno));
+            ioLength = 0;
         }
         ioBuffer[ioLength] = '\0';
 
@@ -108,8 +121,9 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
             continue;
         }
 
-        unsigned long long rssPages;
-        if (__builtin_expect(sscanf(statmBuffer, "%*llu %llu", &rssPages) != 1, false)) {
+        uint64_t rssPages;
+        if (__builtin_expect(sscanf(statmBuffer, "%*u %" SCNu64, &rssPages) != 1, false)) {
+            FF_DEBUG("Failed to parse statm of /proc/%lu", pid);
             ffStrbufDestroy(&snapshot->name);
             --snapshots->length;
             continue;
@@ -119,8 +133,14 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
         snapshot->memBytes = rssPages * (uint64_t) pageSize;
         snapshot->bytesRead = 0;
         snapshot->bytesWritten = 0;
-        sscanf(ioBuffer, "rchar: %*" SCNu64 "\nwchar: %*" SCNu64 "\nsyscr: %*" SCNu64 "\nsyscw: %*" SCNu64 "\nread_bytes: %" SCNu64 "\nwrite_bytes: %" SCNu64, &snapshot->bytesRead, &snapshot->bytesWritten);
+        if (ioLength > 0) {
+            sscanf(ioBuffer, "rchar: %*u\nwchar: %*u\nsyscr: %*u\nsyscw: %*u\nread_bytes: %" SCNu64 "\nwrite_bytes: %" SCNu64, &snapshot->bytesRead, &snapshot->bytesWritten);
+        }
         snapshot->cpuTime = snapshot->cpuTime * 1000u / (uint64_t) ticks;
+        FF_DEBUG(
+            "Captured process %u (%s): cpuTime=%" PRIu64 "ms, mem=%" PRIu64 "B, diskRead=%" PRIu64 "B, diskWrite=%" PRIu64 "B",
+            snapshot->pid, snapshot->name.chars, snapshot->cpuTime, snapshot->memBytes, snapshot->bytesRead, snapshot->bytesWritten);
     }
+    FF_DEBUG("Captured %u process snapshots in total", snapshots->length);
     return nullptr;
 }
