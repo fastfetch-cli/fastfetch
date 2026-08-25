@@ -6,7 +6,7 @@
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     size_t length;
 
