@@ -138,7 +138,6 @@ void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
     yyjson_mut_obj_add_uint(doc, module, "processes", options->nProcesses);
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
     yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
-    yyjson_mut_obj_add_bool(doc, module, "kernelTask", options->kernelTask);
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
@@ -173,7 +172,6 @@ void ffInitTopOptions(FFTopOptions* options) {
     options->nProcesses = 5;
     options->waitTime = 500;
     options->compact = false;
-    options->kernelTask = false;
     options->percent = (FFPercentageModuleConfig){ 50, 80, 0 };
 }
 
@@ -218,8 +216,8 @@ FFModuleBaseInfo ffTopModuleInfo = {
         { "Process ID", "pid" },
         { "CPU usage", "cpu" },
         { "Memory usage (RSS) in bytes", "mem" },
-        { "Disk read bytes per second", "disk-read" },
-        { "Disk write bytes per second", "disk-write" },
+        { "Disk read bytes per second (0 if unsupported)", "disk-read" },
+        { "Disk write bytes per second (0 if unsupported)", "disk-write" },
         { "CPU usage percentage", "cpu-percentage" },
         { "Memory usage (RSS) formatted", "mem-formatted" },
         { "Disk read formatted", "disk-read-formatted" },

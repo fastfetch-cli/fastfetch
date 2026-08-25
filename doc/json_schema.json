@@ -4466,11 +4466,6 @@
                                         "description": "Print all process on a single line",
                                         "default": false
                                     },
-                                    "kernelTask": {
-                                        "type": "boolean",
-                                        "description": "Whether to include kernel tasks (kworker, System, kernel_task) in the process list",
-                                        "default": false
-                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
