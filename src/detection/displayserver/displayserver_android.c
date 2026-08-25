@@ -174,6 +174,11 @@ static bool detectDE(FFDisplayServerResult* ds) {
         ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
         return true;
     }
+    if (ffSettingsGetAndroidProperty("ro.product.brand", &ds->dePrettyName) && ffStrbufEqualS(&ds->dePrettyName, "asus")) {
+        ffStrbufClear(&ds->dePrettyName);
+        ffSettingsGetAndroidProperty("ro.build.version.incremental", &ds->dePrettyName);
+        return true;
+    }
     if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName)) {
         if (ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS")) {
             ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
