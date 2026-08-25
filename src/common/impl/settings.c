@@ -450,12 +450,10 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
     return true;
 }
 #else  // FF_HAVE_SQLITE3
-int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
-    FF_UNUSED(dbPath, query)
+int ffSettingsGetSQLite3Int(const char*, const char*) {
     return 0;
 }
-bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result) {
-    FF_UNUSED(dbPath, query, result)
+bool ffSettingsGetSQLite3String(const char*, const char*, FFstrbuf*) {
     return false;
 }
 #endif // FF_HAVE_SQLITE3
