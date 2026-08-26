@@ -1144,7 +1144,7 @@ elseif(WIN32)
         src/detection/initsystem/initsystem_windows.c
         src/detection/keyboard/keyboard_windows.c
         src/detection/libc/libc_windows.cpp
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_windows.c
         src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
