@@ -43,9 +43,8 @@ static const char* getHyprland(FFstrbuf* result) {
     FF_DEBUG("Detecting Hyprland version");
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    FF_DEBUG("Checking for " FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h"
-             " file");
-    if (ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h", result)) {
+    FF_DEBUG("Checking for " FF_PATH_PKG_BASE "/include/hyprland/src/version.h file");
+    if (ffReadFileBuffer(FF_PATH_PKG_BASE "/include/hyprland/src/version.h", result)) {
         FF_DEBUG("Found version.h file, extracting version");
         if (ffStrbufSubstrAfterFirstS(result, "\n#define GIT_TAG ")) {
             ffStrbufSubstrAfterFirstC(result, '"');

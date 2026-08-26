@@ -54,6 +54,8 @@ static const char* getSshdVersion(FFstrbuf* version) {
 
 #ifdef FF_HAVE_ZLIB
     #include "common/library.h"
+    #include "common/path.h"
+    
     #include <stdlib.h>
     #include <zlib.h>
 
@@ -66,7 +68,7 @@ static const char* getSddmVersion(FFstrbuf* version) {
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzrewind)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzclose)
 
-    gzFile file = ffgzopen(FASTFETCH_TARGET_DIR_USR "/share/man/man1/sddm.1.gz", "rb");
+    gzFile file = ffgzopen(FF_PATH_PKG_BASE "/share/man/man1/sddm.1.gz", "rb");
     if (file == Z_NULL) {
         return "ffgzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed";
     }

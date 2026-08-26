@@ -3,7 +3,7 @@
 #include "common/arrutil.h"
 #include "common/strutil.h"
 #include "common/io.h"
-#include "fastfetch_config.h"
+#include "common/path.h"
 
 #include <unistd.h>
 #include <pwd.h>
@@ -238,9 +238,7 @@ static void getDataDirs(FFPlatform* platform) {
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
-#ifdef _PATH_LOCALBASE
-    ffPlatformPathAddAbsolute(&platform->dataDirs, _PATH_LOCALBASE "/share/");
-#endif
+    ffPlatformPathAddAbsolute(&platform->dataDirs, FF_PATH_PKG_BASE "/share/");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/local/share/");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }
