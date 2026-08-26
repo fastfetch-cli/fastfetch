@@ -978,7 +978,7 @@ elseif(OpenBSD)
         src/detection/gpu/gpu_bsddrm.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
@@ -1227,7 +1227,7 @@ elseif(SunOS)
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_sunos.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c

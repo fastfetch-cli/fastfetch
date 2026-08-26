@@ -5,7 +5,6 @@
 
 typedef struct FFLMResult {
     FFstrbuf service;
-    FFstrbuf type;
     FFstrbuf version;
 } FFLMResult;
 

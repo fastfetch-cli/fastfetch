@@ -1,18 +1,35 @@
 #include "lm.h"
+#include "common/io.h"
+#include "common/mallocHelper.h"
 #include "common/properties.h"
-#include "common/dbus.h"
 #include "common/processing.h"
+#include "common/strutil.h"
 #include "detection/displayserver/displayserver.h"
 
 #include <unistd.h>
+
+#if __FreeBSD__
+    #include <sys/sysctl.h>
+    #include <sys/types.h>
+    #include <sys/user.h>
+#elif __OpenBSD__
+    #include <sys/param.h>
+    #include <sys/sysctl.h>
+    #include <kvm.h>
+#elif __sun
+    #include <procfs.h>
+#elif __NetBSD__
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
+#endif
 
 #define FF_SYSTEMD_SESSIONS_PATH "/run/systemd/sessions/"
 #define FF_SYSTEMD_USERS_PATH "/run/systemd/users/"
 
 static const char* getGdmVersion(FFstrbuf* version) {
-    const char* error = ffProcessAppendStdOut(version, (char* const[]) { "gdm", "--version", nullptr });
+    const char* error = ffProcessAppendStdOut(version, (char* const[]) { "gdm3", "--version", nullptr });
     if (error || version->length == 0) {
-        error = ffProcessAppendStdOut(version, (char* const[]) { "gdm3", "--version", nullptr });
+        error = ffProcessAppendStdOut(version, (char* const[]) { "gdm", "--version", nullptr });
         if (error || version->length == 0) {
             return "Failed to get GDM version";
         }
@@ -112,33 +129,263 @@ static const char* getLightdmVersion(FFstrbuf* version) {
     return nullptr;
 }
 
-const char* ffDetectLM(FFLMResult* result) {
+#if __linux__ && !__ANDROID__
+static const char* detectBySystemd(FFLMResult* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     FF_STRBUF_AUTO_DESTROY sessionId = ffStrbufCreateS(getenv("XDG_SESSION_ID"));
     if (sessionId.length == 0) {
         // On some incorrectly configured systems, $XDG_SESSION_ID is not set. Try finding it ourself
         // WARNING: This is private data. Do not parse
-        ffStrbufSetF(&path, FF_SYSTEMD_USERS_PATH "%d", instance.state.platform.uid);
+        ffStrbufAppendS(&path, FF_SYSTEMD_USERS_PATH);
+        ffStrbufAppendUInt(&path, instance.state.platform.uid);
 
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use
-        if (!ffParsePropFileValues(path.chars, 1, (FFpropquery[]) {
+        if (!ffParsePropFileValues(path.chars, 1, (FFpropquery[]){
                                                       { "DISPLAY=", &sessionId },
                                                   })) {
             return "Failed to get $XDG_SESSION_ID";
         }
     }
 
-    ffStrbufSetS(&path, FF_SYSTEMD_SESSIONS_PATH);
+    ffStrbufClear(&path);
+    ffStrbufAppendS(&path, FF_SYSTEMD_SESSIONS_PATH);
     ffStrbufAppend(&path, &sessionId);
 
     // WARNING: This is private data. Do not parse
-    if (!ffParsePropFileValues(path.chars, 2, (FFpropquery[]) {
-                                                  { "SERVICE=", &result->service },
-                                                  { "TYPE=", &result->type },
-                                              })) {
+    if (!ffParsePropFile(path.chars, "SERVICE=", &result->service)) {
         return "Failed to parse " FF_SYSTEMD_SESSIONS_PATH "$XDG_SESSION_ID";
+    }
+    return nullptr;
+}
+#endif
+
+static const char* testLms(const char* psName) {
+    static const char* A[] = {
+        "atrium",
+    };
+    static const char* C[] = {
+        "cdm",
+    };
+    static const char* E[] = {
+        "entrance",
+    };
+    static const char* G[] = {
+        "gdm",
+        "gdm3",
+        "greetd",
+    };
+    static const char* L[] = {
+        "lemurs",
+        "lightdm",
+        "lxdm",
+        "ly",
+    };
+    static const char* P[] = {
+        "plasmalogin",
+    };
+    static const char* S[] = {
+        "sddm",
+        "slim",
+    };
+    static const char* T[] = {
+        "tbsm",
+    };
+    static const char* X[] = {
+        "xdm",
+    };
+
+    switch (psName[0]) {
+        #define PS_CASE(letter, array) \
+            case letter: \
+                for (uint32_t i = 0; i < ARRAY_SIZE(array); ++i) { \
+                    if (ffStrEqualsIgnCase(psName, array[i])) { \
+                        return array[i]; \
+                    } \
+                } \
+                break;
+        PS_CASE('a', A)
+        PS_CASE('c', C)
+        PS_CASE('e', E)
+        PS_CASE('g', G)
+        PS_CASE('l', L)
+        PS_CASE('p', P)
+        PS_CASE('s', S)
+        PS_CASE('t', T)
+        PS_CASE('x', X)
+    }
+    return nullptr;
+}
+
+const char* detectByProcesses(FFLMResult* result) {
+#if __FreeBSD__
+    #ifdef __DragonFly__
+        #define ki_comm kp_comm
+    #endif
+
+    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, 0 };
+    size_t length = 0;
+
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
+    }
+
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
+    }
+
+    length /= sizeof(*procs);
+
+    for (struct kinfo_proc* proc = procs; proc < procs + length; ++proc) {
+        const char* lm = testLms(proc->ki_comm);
+        if (lm) {
+            ffStrbufSetStatic(&result->service, lm);
+            break;
+        }
+    }
+#elif __OpenBSD__
+    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, 0, sizeof(*proc), &count);
+    if (proc) {
+        for (int i = 0; i < count; ++i) {
+            const char* lm = testLms(proc[i].p_comm);
+            if (lm) {
+                ffStrbufSetStatic(&result->service, lm);
+                break;
+            }
+        }
+    }
+    kvm_close(kd);
+#elif __sun
+    FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
+    if (procdir == nullptr) {
+        return "opendir(\"/proc\") failed";
+    }
+
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
+    ffStrbufAppendS(&procPath, "/proc/");
+
+    uint32_t procPathLength = procPath.length;
+
+    struct dirent* dirent;
+    while ((dirent = readdir(procdir)) != nullptr) {
+        if (!ffCharIsDigit(dirent->d_name[0])) {
+            continue;
+        }
+
+        ffStrbufAppendS(&procPath, dirent->d_name);
+        ffStrbufAppendS(&procPath, "/psinfo");
+        psinfo_t proc;
+        if (ffReadFileData(procPath.chars, sizeof(proc), &proc) == sizeof(proc)) {
+            ffStrbufSubstrBefore(&procPath, procPathLength);
+
+            if (proc.pr_uid != 0) {
+                continue;
+            }
+
+            const char* lm = testLms(proc.pr_fname);
+            if (lm) {
+                ffStrbufSetS(&result->service, lm);
+                break;
+            }
+        }
+    }
+#elif __linux__ || __GNU__
+    FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
+    if (procdir == nullptr) {
+        return "opendir(\"/proc\") failed";
+    }
+
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
+    int procfd = dirfd(procdir);
+
+    struct dirent* dirent;
+    while ((dirent = readdir(procdir)) != nullptr) {
+        // Match only folders starting with a number (the pid folders)
+        if (dirent->d_type != DT_DIR || !ffCharIsDigit(dirent->d_name[0])) {
+            continue;
+        }
+
+        ffStrbufSetS(&procPath, dirent->d_name);
+        uint32_t procFolderPathLength = procPath.length;
+
+        // Don't check for processes not owned by root (login managers run as root).
+        char loginuid[32];
+        ffStrbufAppendS(&procPath, "/loginuid");
+        ssize_t bytesRead = ffReadFileDataRelative(procfd, procPath.chars, sizeof(loginuid) - 1, loginuid);
+        if (bytesRead <= 0) {
+            continue;
+        }
+        loginuid[bytesRead] = '\0';
+
+        if (strtol(loginuid, nullptr, 10) != (long) (uint32_t) -1 /* no loginuid */) {
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&procPath, procFolderPathLength);
+
+        ffStrbufAppendS(&procPath, "/comm");
+        char comm[256];
+        bytesRead = ffReadFileDataRelative(procfd, procPath.chars, sizeof(comm) - 1, comm);
+        if (bytesRead <= 0) {
+            continue;
+        }
+        if (comm[bytesRead - 1] == '\n') {
+            --bytesRead;
+        }
+        comm[bytesRead] = '\0';
+
+        const char* lm = testLms(comm);
+        if (lm) {
+            ffStrbufSetS(&result->service, lm);
+            break;
+        }
+    }
+#elif __NetBSD__
+    int request[] = { CTL_KERN, KERN_PROC2, KERN_PROC_UID, 0, sizeof(struct kinfo_proc2), INT_MAX };
+
+    size_t size = 0;
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &size, nullptr, 0) != 0) {
+        return "sysctl(KERN_PROC_UID, nullptr) failed";
+    }
+
+    FF_AUTO_FREE struct kinfo_proc2* procs = malloc(size);
+
+    if (sysctl(request, ARRAY_SIZE(request), procs, &size, nullptr, 0) != 0) {
+        return "sysctl(KERN_PROC_UID, procs) failed";
+    }
+
+    for (struct kinfo_proc2* proc = procs; proc < procs + (size / sizeof(struct kinfo_proc2)); proc++) {
+        const char* lm = testLms(proc->p_comm);
+        if (lm) {
+            ffStrbufSetStatic(&result->service, lm);
+            break;
+        }
+    }
+#endif
+
+    if (result->service.length == 0) {
+        return "Failed to detect login manager by processes";
+    }
+
+    return nullptr;
+}
+
+const char* ffDetectLM(FFLMResult* result) {
+    const char* error = "";
+#if __linux__ && !__ANDROID__
+    error = detectBySystemd(result);
+#endif
+
+    if (error != nullptr) {
+        error = detectByProcesses(result);
+    }
+
+    if (error != nullptr) {
+        return error;
     }
 
     if (instance.config.general.detectVersion) {
@@ -153,15 +400,6 @@ const char* ffDetectLM(FFLMResult* result) {
         } else if (ffStrbufStartsWithS(&result->service, "sshd")) {
             getSshdVersion(&result->version);
         }
-    }
-
-    // Correct char cases
-    if (ffStrbufIgnCaseEqualS(&result->type, FF_WM_PROTOCOL_WAYLAND)) {
-        ffStrbufSetS(&result->type, FF_WM_PROTOCOL_WAYLAND);
-    } else if (ffStrbufIgnCaseEqualS(&result->type, FF_WM_PROTOCOL_X11)) {
-        ffStrbufSetS(&result->type, FF_WM_PROTOCOL_X11);
-    } else if (ffStrbufIgnCaseEqualS(&result->type, FF_WM_PROTOCOL_TTY)) {
-        ffStrbufSetS(&result->type, FF_WM_PROTOCOL_TTY);
     }
 
     return nullptr;
