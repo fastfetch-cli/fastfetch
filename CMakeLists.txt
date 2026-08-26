@@ -1050,7 +1050,7 @@ elseif(APPLE)
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_apple.m
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
