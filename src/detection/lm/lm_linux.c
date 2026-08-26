@@ -219,6 +219,7 @@ static const char* testLms(const char* psName) {
     };
     static const char* X[] = {
         "xdm",
+        "xenodm",
     };
 
     switch (psName[0]) {
@@ -472,6 +473,8 @@ const char* ffDetectLM(FFLMResult* result) {
         case 'x':
             if (ffStrEqualsIgnCase(result->service.chars, "xdm")) {
                 ffStrbufSetStatic(&result->prettyName, "XDM");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "xenodm")) {
+                ffStrbufSetStatic(&result->prettyName, "Xenodm");
             }
             break;
     }
