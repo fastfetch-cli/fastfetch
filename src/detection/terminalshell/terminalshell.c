@@ -187,6 +187,9 @@ static bool extractBusyboxVersion(const char* line, uint32_t len, void* userdata
 
 static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version) {
     ffBinaryExtractStrings(exe->chars, extractBusyboxVersion, version, (uint32_t) strlen("BusyBox v0.0.0"));
+    if (version->length > 0) {
+        return true;
+    }
 
     const char* error = ffStrbufEndsWithS(exe, "busybox")
         ? ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "ash", "--help", NULL })
