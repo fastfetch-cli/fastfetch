@@ -418,6 +418,68 @@ const char* ffDetectLM(FFLMResult* result) {
         return error;
     }
 
+    switch (result->service.chars[0]) {
+        case 'a':
+            if (ffStrEqualsIgnCase(result->service.chars, "atrium")) {
+                ffStrbufSetStatic(&result->prettyName, "Atrium");
+            }
+            break;
+        case 'c':
+            if (ffStrEqualsIgnCase(result->service.chars, "cdm")) {
+                ffStrbufSetStatic(&result->prettyName, "CDM");
+            }
+            break;
+        case 'e':
+            if (ffStrEqualsIgnCase(result->service.chars, "entrance")) {
+                ffStrbufSetStatic(&result->prettyName, "Entrance");
+            }
+            break;
+        case 'g':
+            if (ffStrbufStartsWithIgnCaseS(&result->service, "gdm")) {
+                ffStrbufSetStatic(&result->prettyName, "GDM");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "greetd")) {
+                ffStrbufSetStatic(&result->prettyName, "greetd");
+            }
+            break;
+        case 'l':
+            if (ffStrEqualsIgnCase(result->service.chars, "lemurs")) {
+                ffStrbufSetStatic(&result->prettyName, "Lemurs");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "lightdm")) {
+                ffStrbufSetStatic(&result->prettyName, "LightDM");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "lxdm")) {
+                ffStrbufSetStatic(&result->prettyName, "LXDM");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "ly")) {
+                ffStrbufSetStatic(&result->prettyName, "Ly");
+            }
+            break;
+        case 'p':
+            if (ffStrEqualsIgnCase(result->service.chars, "plasmalogin")) {
+                ffStrbufSetStatic(&result->prettyName, "Plasma Login");
+            }
+            break;
+        case 's':
+            if (ffStrEqualsIgnCase(result->service.chars, "sddm")) {
+                ffStrbufSetStatic(&result->prettyName, "SDDM");
+            } else if (ffStrEqualsIgnCase(result->service.chars, "slim")) {
+                ffStrbufSetStatic(&result->prettyName, "SLiM");
+            }
+            break;
+        case 't':
+            if (ffStrEqualsIgnCase(result->service.chars, "tbsm")) {
+                ffStrbufSetStatic(&result->prettyName, "TBSM");
+            }
+            break;
+        case 'x':
+            if (ffStrEqualsIgnCase(result->service.chars, "xdm")) {
+                ffStrbufSetStatic(&result->prettyName, "XDM");
+            }
+            break;
+    }
+
+    if (result->prettyName.length == 0) {
+        ffStrbufSet(&result->prettyName, &result->service);
+    }
+
     if (instance.config.general.detectVersion) {
         if (ffStrbufStartsWithS(&result->service, "gdm")) {
             getGdmVersion(&result->version);

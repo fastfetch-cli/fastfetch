@@ -8,6 +8,7 @@ bool ffPrintLM(FFLMOptions* options) {
     bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
+    ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     const char* error = ffDetectLM(&result);
 
@@ -23,7 +24,7 @@ bool ffPrintLM(FFLMOptions* options) {
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result.service, stdout);
+        ffStrbufWriteTo(&result.prettyName, stdout);
         if (result.version.length) {
             printf(" %s", result.version.chars);
         }
@@ -31,6 +32,7 @@ bool ffPrintLM(FFLMOptions* options) {
     } else {
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                        FF_ARG(result.service, "service"),
+                                                                                                       FF_ARG(result.prettyName, "pretty-name"),
                                                                                                        FF_ARG(result.version, "version"),
                                                                                                    }));
     }
@@ -38,6 +40,7 @@ bool ffPrintLM(FFLMOptions* options) {
 
 exit:
     ffStrbufDestroy(&result.service);
+    ffStrbufDestroy(&result.prettyName);
     ffStrbufDestroy(&result.version);
 
     return success;
@@ -63,6 +66,7 @@ bool ffGenerateLMJsonResult([[maybe_unused]] FFLMOptions* options, yyjson_mut_do
     bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
+    ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     const char* error = ffDetectLM(&result);
 
@@ -78,11 +82,13 @@ bool ffGenerateLMJsonResult([[maybe_unused]] FFLMOptions* options, yyjson_mut_do
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "service", &result.service);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result.prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
     success = true;
 
 exit:
     ffStrbufDestroy(&result.service);
+    ffStrbufDestroy(&result.prettyName);
     ffStrbufDestroy(&result.version);
 
     return success;
@@ -128,7 +134,8 @@ FFModuleBaseInfo ffLMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLMJsonResult,
     .generateJsonConfig = (void*) ffGenerateLMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "LM service", "service" },
+        { "LM service / process name", "service" },
+        { "LM pretty name", "pretty-name" },
         { "LM version", "version" },
     })),
     .defaultOrder = 20,
