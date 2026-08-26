@@ -4,7 +4,10 @@
 #include "common/properties.h"
 #include "common/processing.h"
 #include "common/strutil.h"
-#include "detection/displayserver/displayserver.h"
+
+#ifdef FF_HAVE_DBUS
+    #include "common/dbus.h"
+#endif
 
 #include <unistd.h>
 
@@ -22,9 +25,6 @@
     #include <sys/types.h>
     #include <sys/sysctl.h>
 #endif
-
-#define FF_SYSTEMD_SESSIONS_PATH "/run/systemd/sessions/"
-#define FF_SYSTEMD_USERS_PATH "/run/systemd/users/"
 
 static const char* getGdmVersion(FFstrbuf* version) {
     const char* error = ffProcessAppendStdOut(version, (char* const[]) { "gdm3", "--version", nullptr });
@@ -130,7 +130,33 @@ static const char* getLightdmVersion(FFstrbuf* version) {
 }
 
 #if __linux__ && !__ANDROID__
-static const char* detectBySystemd(FFLMResult* result) {
+#ifdef FF_HAVE_DBUS
+static const char* detectBySystemdDbus(FFLMResult* result) {
+    // This is the standard way to query the systemd session service name,
+    // and requires no $XDG_SESSION_ID being available
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
+    if (ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus) != nullptr) {
+        return "Failed to load system DBus";
+    }
+
+    if (!ffDBusGetPropertyString(
+            &dbus,
+            "org.freedesktop.login1",
+            "/org/freedesktop/login1/session/auto",
+            "org.freedesktop.login1.Session",
+            "Service",
+            &result->service)) {
+        return "Failed to get systemd session Service property";
+    }
+
+    return nullptr;
+}
+#endif
+
+#define FF_SYSTEMD_SESSIONS_PATH "/run/systemd/sessions/"
+#define FF_SYSTEMD_USERS_PATH "/run/systemd/users/"
+
+static const char* detectBySystemdPrivate(FFLMResult* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
     FF_STRBUF_AUTO_DESTROY sessionId = ffStrbufCreateS(getenv("XDG_SESSION_ID"));
@@ -142,9 +168,7 @@ static const char* detectBySystemd(FFLMResult* result) {
 
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use
-        if (!ffParsePropFileValues(path.chars, 1, (FFpropquery[]){
-                                                      { "DISPLAY=", &sessionId },
-                                                  })) {
+        if (!ffParsePropFile(path.chars, "DISPLAY=", &sessionId)) {
             return "Failed to get $XDG_SESSION_ID";
         }
     }
@@ -157,6 +181,7 @@ static const char* detectBySystemd(FFLMResult* result) {
     if (!ffParsePropFile(path.chars, "SERVICE=", &result->service)) {
         return "Failed to parse " FF_SYSTEMD_SESSIONS_PATH "$XDG_SESSION_ID";
     }
+
     return nullptr;
 }
 #endif
@@ -376,8 +401,13 @@ const char* detectByProcesses(FFLMResult* result) {
 
 const char* ffDetectLM(FFLMResult* result) {
     const char* error = "";
-#if __linux__ && !__ANDROID__
-    error = detectBySystemd(result);
+#if __linux__
+    #ifdef FF_HAVE_DBUS
+        error = detectBySystemdDbus(result);
+    #endif
+    if (error != nullptr) {
+        error = detectBySystemdPrivate(result);
+    }
 #endif
 
     if (error != nullptr) {
