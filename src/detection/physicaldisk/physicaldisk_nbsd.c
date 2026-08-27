@@ -122,7 +122,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
     FF_DEBUG("Disk names: %s", diskNames.chars);
 
-    char* diskName = NULL;
+    char* diskName = nullptr;
     size_t len = 0;
     while (ffStrbufGetdelim(&diskName, &len, ' ', &diskNames)) {
         FF_DEBUG("Probing disk: %s", diskName);
@@ -158,9 +158,9 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         unsigned long sectorsPerUnit, sectorSize;
 
-        const char* devType = NULL;
+        const char* devType = nullptr;
 
-        prop_dictionary_t dict = NULL;
+        prop_dictionary_t dict = nullptr;
         if (prop_dictionary_recv_ioctl(f, DIOCGDISKINFO, &dict) == 0) {
             FF_DEBUG("DIOCGDISKINFO succeeded for %s", diskName);
             prop_dictionary_get_string(dict, "type", &devType);
@@ -228,7 +228,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         if (dict) {
             prop_object_release(dict);
-            dict = NULL;
+            dict = nullptr;
         }
 
         struct scsipi_inquiry_data inquiry = {};
@@ -320,5 +320,5 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         FF_DEBUG("Detected disk '%s' (%s), type=%u", device->name.chars, diskName, (unsigned) device->type);
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -4,7 +4,6 @@
 #include "detection/localip/localip.h"
 #include "modules/localip/localip.h"
 
-#define FF_LOCALIP_DISPLAY_NAME "Local IP"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right) {
@@ -17,7 +16,7 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
             ffStrbufSetF(&ip->name, "unknown %u", (unsigned) index);
         }
 
-        ffStrbufSetF(key, FF_LOCALIP_DISPLAY_NAME " (%s)", ip->name.chars);
+        ffStrbufSetF(key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(LocalIP), ip->name.chars);
     } else {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -100,12 +99,12 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
     const char* error = ffDetectLocalIps(options, &results);
 
     if (error) {
-        ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (results.length == 0) {
-        ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect any IPs");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect any IPs");
         return false;
     }
 
@@ -114,7 +113,7 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT) {
-        ffPrintLogoAndKey(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_LIST_FOR_EACH (FFLocalIpResult, ip, results) {
             if (buffer.length) {
@@ -201,7 +200,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
                     options->ipv6Type = (FFLocalIpIpv6Type) value;
@@ -296,7 +295,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -308,7 +307,7 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
     if (options->ipv6Type == FF_LOCALIP_IPV6_TYPE_AUTO) {
         yyjson_mut_obj_add_bool(doc, module, "showIpv6", !!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT));
     } else {
-        const char* str = NULL;
+        const char* str = nullptr;
         switch (options->ipv6Type) {
             case FF_LOCALIP_IPV6_TYPE_GUA_BIT:
                 str = "gua";
@@ -350,7 +349,7 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 }
 
-bool ffGenerateLocalIpJsonResult(FF_A_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLocalIpJsonResult([[maybe_unused]] FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectLocalIps(options, &results);
@@ -422,8 +421,30 @@ void ffDestroyLocalIpOptions(FFLocalIpOptions* options) {
 }
 
 FFModuleBaseInfo ffLocalIPModuleInfo = {
-    .name = FF_LOCALIP_MODULE_NAME,
+    .name = "LocalIp",
     .description = "List local IP addresses (IPv4 or IPv6), MAC addresses, etc",
+    .displayName = {
+        .en = "Local IP",
+        .ar = "عنوان IP المحلي",
+        .cs = "Místní IP",
+        .de = "Lokale IP",
+        .es = "IP local",
+        .fr = "IP locale",
+        .gl = "IP local",
+        .he = "IP מקומי",
+        .id = "IP Lokal",
+        .it = "IP locale",
+        .ja = "ローカル IP",
+        .ko = "로컬 IP",
+        .pl = "Lokalny adres IP",
+        .pt = "IP local",
+        .ru = "Локальный IP",
+        .tr = "Yerel IP",
+        .uk = "Локальна IP",
+        .vi = "IP cục bộ",
+        .zh_CN = "本地 IP",
+        .zh_TW = "區域 IP",
+    },
     .initOptions = (void*) ffInitLocalIpOptions,
     .destroyOptions = (void*) ffDestroyLocalIpOptions,
     .parseJsonObject = (void*) ffParseLocalIpJsonObject,
@@ -439,5 +460,6 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         { "MTU size in bytes", "mtu" },
         { "Link speed (formatted)", "speed" },
         { "Interface flags", "flags" },
-    }))
+    })),
+    .defaultOrder = 49,
 };

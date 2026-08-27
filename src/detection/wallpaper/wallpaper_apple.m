@@ -3,9 +3,20 @@
 #include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {
+    {
+        // Reliable for user-picked static images.
+        NSURL* url = [NSWorkspace.sharedWorkspace desktopImageURLForScreen:NSScreen.mainScreen];
+        if (url.fileURL && ![url.path isEqualToString:@"/System/Library/CoreServices/DefaultDesktop.heic"] /* dynamic wallpapers */)
+        {
+            ffStrbufSetS(result, url.path.UTF8String);
+            return nullptr;
+        }
+    }
+
     {
         // For Sonoma
         // https://github.com/JohnCoates/Aerial/issues/1332
@@ -40,7 +51,7 @@ const char* ffDetectWallpaper(FFstrbuf* result)
                 }
             }
             if (result->length > 0)
-                return NULL;
+                return nullptr;
         }
     }
 
@@ -60,13 +71,13 @@ const char* ffDetectWallpaper(FFstrbuf* result)
             "JOIN spaces ON pictures.space_id=spaces.ROWID\n"
             "WHERE display_id=1 AND space_id=1 AND key=1", result)
         )
-            return NULL;
+            return nullptr;
     }
 
     #endif
 
     if (ffOsascript("tell application \"Finder\" to get POSIX path of (get desktop picture as alias)", result))
-        return NULL;
+        return nullptr;
 
     return "All detection methods failed";
 }

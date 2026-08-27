@@ -7,14 +7,14 @@ extern "C" {
 #include <MediaRoster.h>
 #include <ParameterWeb.h>
 
-const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
+const char* ffDetectSound([[maybe_unused]] FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
     BMediaRoster* roster = BMediaRoster::Roster();
     media_node mediaNode;
     live_node_info liveInfo;
     dormant_node_info dormantInfo;
 
     if (roster->GetAudioOutput(&mediaNode) != B_OK) {
-        return NULL;
+        return nullptr;
     }
 
     FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
@@ -36,20 +36,20 @@ const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /
 
     media_node mixer;
     if (roster->GetAudioMixer(&mixer) != B_OK) {
-        return NULL;
+        return nullptr;
     }
 
     BParameterWeb* web;
     status_t status = roster->GetParameterWebFor(mixer, &web);
     roster->ReleaseNode(mixer); // the web is all we need :-)
     if (status != B_OK) {
-        return NULL;
+        return nullptr;
     }
 
-    BContinuousParameter* gain = NULL;
-    BParameter* mute = NULL;
+    BContinuousParameter* gain = nullptr;
+    BParameter* mute = nullptr;
     BParameter* parameter;
-    for (int32 index = 0; (parameter = web->ParameterAt(index)) != NULL; index++) {
+    for (int32 index = 0; (parameter = web->ParameterAt(index)) != nullptr; index++) {
         // assume the mute preceding master gain control
         if (ffStrEquals(parameter->Kind(), B_MUTE)) {
             mute = parameter;
@@ -63,8 +63,8 @@ const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /
         }
     }
 
-    if (gain == NULL) {
-        return NULL;
+    if (gain == nullptr) {
+        return nullptr;
     }
 
     bigtime_t when;
@@ -74,7 +74,7 @@ const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /
         int32 isMute = false;
         size = sizeof(isMute);
         if (mute->GetValue(&isMute, &size, &when) == B_OK && isMute) {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -84,5 +84,5 @@ const char* ffDetectSound(FF_A_UNUSED FFSoundOptions* options, FFlist* devices /
         device->volume = (uint8_t) (100 * (volume - gain->MinValue()) / (gain->MaxValue() - gain->MinValue()));
     }
 
-    return NULL;
+    return nullptr;
 }

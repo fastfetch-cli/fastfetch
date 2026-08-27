@@ -1,5 +1,5 @@
 #include "disk.h"
 
-const char* ffDetectDisksImpl(FF_A_UNUSED FFDiskOptions* options, FF_A_UNUSED FFlist* disks) {
+const char* ffDetectDisksImpl([[maybe_unused]] FFDiskOptions* options, [[maybe_unused]] FFlist* disks) {
     return "Not supported on this platform";
 }

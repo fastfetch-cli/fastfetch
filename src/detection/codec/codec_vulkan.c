@@ -80,8 +80,8 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
     FF_SUPPRESS_IO();
 
     uint32_t apiVersion = VK_API_VERSION_1_0;
-    PFN_vkEnumerateInstanceVersion ffvkEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) ffvkGetInstanceProcAddr(NULL, "vkEnumerateInstanceVersion");
-    if (ffvkEnumerateInstanceVersion != NULL) {
+    PFN_vkEnumerateInstanceVersion ffvkEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) ffvkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion");
+    if (ffvkEnumerateInstanceVersion != nullptr) {
         uint32_t detectedApiVersion = 0;
         if (ffvkEnumerateInstanceVersion(&detectedApiVersion) == VK_SUCCESS) {
             apiVersion = detectedApiVersion;
@@ -105,7 +105,7 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
                                               .apiVersion = apiVersion,
                                           },
                                       },
-        NULL,
+        nullptr,
         &vkInstance);
     if (res != VK_SUCCESS) {
         FF_DEBUG("ffvkCreateInstance() failed with VkResult=%d", res);
@@ -129,25 +129,25 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
 
     PFN_vkGetPhysicalDeviceProperties ffvkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceProperties");
     if (!ffvkGetPhysicalDeviceProperties) {
-        ffvkDestroyInstance(vkInstance, NULL);
+        ffvkDestroyInstance(vkInstance, nullptr);
         return "vkGetPhysicalDeviceProperties is not available";
     }
 
     PFN_vkGetPhysicalDeviceQueueFamilyProperties2 ffvkGetPhysicalDeviceQueueFamilyProperties2 = (PFN_vkGetPhysicalDeviceQueueFamilyProperties2) ffvkGetInstanceProcAddr(vkInstance, "vkGetPhysicalDeviceQueueFamilyProperties2");
     if (!ffvkGetPhysicalDeviceQueueFamilyProperties2) {
-        ffvkDestroyInstance(vkInstance, NULL);
+        ffvkDestroyInstance(vkInstance, nullptr);
         return "vkGetPhysicalDeviceQueueFamilyProperties2 is not available";
     }
 
     uint32_t physicalDeviceCount = 0;
-    res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, NULL);
+    res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, nullptr);
     if (res != VK_SUCCESS) {
         FF_DEBUG("ffvkEnumeratePhysicalDevices(count) failed with VkResult=%d", res);
-        ffvkDestroyInstance(vkInstance, NULL);
+        ffvkDestroyInstance(vkInstance, nullptr);
         return "ffvkEnumeratePhysicalDevices() failed during Vulkan codec detection";
     }
     if (physicalDeviceCount == 0) {
-        ffvkDestroyInstance(vkInstance, NULL);
+        ffvkDestroyInstance(vkInstance, nullptr);
         return "No Vulkan physical devices found";
     }
 
@@ -156,7 +156,7 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
     res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices);
     if (res != VK_SUCCESS) {
         FF_DEBUG("ffvkEnumeratePhysicalDevices(list) failed with VkResult=%d", res);
-        ffvkDestroyInstance(vkInstance, NULL);
+        ffvkDestroyInstance(vkInstance, nullptr);
         return "ffvkEnumeratePhysicalDevices() failed during Vulkan codec detection";
     }
 
@@ -167,7 +167,7 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
         ffvkGetPhysicalDeviceProperties(physicalDevices[i], &properties);
 
         uint32_t extensionCount = 0;
-        res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], NULL, &extensionCount, NULL);
+        res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], nullptr, &extensionCount, nullptr);
         if (res != VK_SUCCESS) {
             FF_DEBUG("vkEnumerateDeviceExtensionProperties(count) failed for '%s' with VkResult=%d", properties.deviceName, res);
             continue;
@@ -180,7 +180,7 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
 
         FF_AUTO_FREE VkExtensionProperties* extensions = (VkExtensionProperties*) malloc(sizeof(VkExtensionProperties) * (size_t) extensionCount);
 
-        res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], NULL, &extensionCount, extensions);
+        res = ffvkEnumerateDeviceExtensionProperties(physicalDevices[i], nullptr, &extensionCount, extensions);
         if (res != VK_SUCCESS) {
             FF_DEBUG("vkEnumerateDeviceExtensionProperties(list) failed for '%s' with VkResult=%d", properties.deviceName, res);
             continue;
@@ -198,7 +198,7 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
         sawVideoQueueExtension = true;
 
         uint32_t queueFamilyCount = 0;
-        ffvkGetPhysicalDeviceQueueFamilyProperties2(physicalDevices[i], &queueFamilyCount, NULL);
+        ffvkGetPhysicalDeviceQueueFamilyProperties2(physicalDevices[i], &queueFamilyCount, nullptr);
         if (queueFamilyCount == 0) {
             FF_DEBUG("Skipping Vulkan device '%s' because it has no queue families", properties.deviceName);
             continue;
@@ -248,10 +248,10 @@ const char* ffDetectCodecVulkan(FFCodecOptions* options, FFlist* result /*list o
         FF_DEBUG("Added Vulkan codec result for '%s': decoders=%u encoders=%u", properties.deviceName, (unsigned) decoders, (unsigned) encoders);
     }
 
-    ffvkDestroyInstance(vkInstance, NULL);
+    ffvkDestroyInstance(vkInstance, nullptr);
 
     if (result->length > 0) {
-        return NULL;
+        return nullptr;
     }
 
     return sawVideoQueueExtension ? "No supported Vulkan video codec operations found"

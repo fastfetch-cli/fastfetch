@@ -316,18 +316,18 @@ typedef struct _DXGK_NODEMETADATA_FLAGS {
     };
 } DXGK_NODEMETADATA_FLAGS;
 
-typedef struct _DXGK_NODEMETADATA {
+typedef struct [[gnu::packed]] _DXGK_NODEMETADATA {
     DXGK_ENGINE_TYPE EngineType;
     WCHAR FriendlyName[DXGK_MAX_METADATA_NAME_LENGTH];
     DXGK_NODEMETADATA_FLAGS Flags; // WDDM 2.2
     BOOLEAN GpuMmuSupported;       // WDDM 2.0 ???
     BOOLEAN IoMmuSupported;
-} FF_A_PACKED DXGK_NODEMETADATA;
+} DXGK_NODEMETADATA;
 
-typedef struct _D3DKMT_NODEMETADATA {
+typedef struct [[gnu::packed]] _D3DKMT_NODEMETADATA {
     UINT NodeOrdinalAndAdapterIndex; // WDDMv2: High word is physical adapter index, low word is node ordinal
     DXGK_NODEMETADATA NodeData;
-} FF_A_PACKED D3DKMT_NODEMETADATA;
+} D3DKMT_NODEMETADATA;
 static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structure size mismatch");
 
 // Functions

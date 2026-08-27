@@ -2,7 +2,7 @@
 #include "common/smbios.h"
 #include "common/strutil.h"
 
-typedef struct FFSmbiosCacheInfo {
+typedef struct [[gnu::packed]] FFSmbiosCacheInfo {
     FFSmbiosHeader Header;
 
     uint8_t SocketDesignation;   // string
@@ -21,7 +21,7 @@ typedef struct FFSmbiosCacheInfo {
     // 3.1+
     uint32_t MaximumCacheSize2;   // bit field
     uint32_t InstalledCacheSize2; // bit field
-} FF_A_PACKED FFSmbiosCacheInfo;
+} FFSmbiosCacheInfo;
 
 static_assert(offsetof(FFSmbiosCacheInfo, InstalledCacheSize2) == 0x17,
     "FFSmbiosCacheInfo: Wrong struct alignment");
@@ -78,5 +78,5 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
         ffCPUCacheAddItem(result, level, size, 0, type);
     }
 
-    return NULL;
+    return nullptr;
 }

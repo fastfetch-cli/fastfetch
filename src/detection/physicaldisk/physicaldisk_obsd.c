@@ -119,7 +119,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
     FF_DEBUG("Disk names: %s", diskNames.chars);
 
-    char* diskName = NULL;
+    char* diskName = nullptr;
     size_t len = 0;
     while (ffStrbufGetdelim(&diskName, &len, ',', &diskNames)) {
         char* colon = strchr(diskName, ':');
@@ -138,7 +138,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             continue;
         }
 
-        char* devPath = NULL;
+        char* devPath = nullptr;
         FF_AUTO_CLOSE_FD int f = opendev(diskName, O_RDONLY, OPENDEV_PART, &devPath);
         if (f < 0) {
             if (errno == EACCES) {
@@ -275,5 +275,5 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         FF_DEBUG("Detected disk '%s' (%s), type=%u", device->name.chars, diskName, (unsigned) device->type);
     }
 
-    return NULL;
+    return nullptr;
 }

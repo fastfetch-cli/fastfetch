@@ -169,7 +169,7 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
 );
 
 NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
-NTSTATUS NTAPI RtlStringFromGUIDEx(IN GUID* Guid, OUT PCUNICODE_STRING GuidString, _In_ BOOLEAN AllocateGuidString);
+NTSTATUS NTAPI RtlStringFromGUIDEx(IN const GUID* Guid, OUT PUNICODE_STRING GuidString, IN BOOLEAN AllocateGuidString);
 
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION {
     BOOLEAN SecureBootEnabled;
@@ -604,7 +604,7 @@ typedef struct _KUSER_SHARED_DATA {
 
 #ifdef __aarch64__
     #define SharedUserData ({                                                                        \
-        __auto_type shared_user_data = (const volatile KUSER_SHARED_DATA*) (uintptr_t) 0x7FFE0000UL; \
+        auto shared_user_data = (const volatile KUSER_SHARED_DATA*) (uintptr_t) 0x7FFE0000UL; \
         __asm__("" : "+r"(shared_user_data)); /* https://github.com/lhmouse/mcfgthread/issues/330 */ \
         shared_user_data;                                                                            \
     })
@@ -1279,6 +1279,22 @@ NTSYSAPI NTSTATUS NTAPI LdrGetProcedureAddress(
     _In_opt_ ULONG ProcedureNumber,
     _Out_ PVOID* ProcedureAddress);
 
+typedef _Function_class_(LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION)
+VOID NTAPI LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION(
+    _In_ PLDR_DATA_TABLE_ENTRY DataTableEntry,
+    _In_opt_ PVOID Context,
+    _Inout_ BOOLEAN* StopEnumeration
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+LdrEnumerateLoadedModules(
+    _In_ BOOLEAN ReservedFlag,
+    _In_ LDR_LOADED_MODULE_ENUMERATION_CALLBACK_FUNCTION* EnumProc,
+    _In_opt_ PVOID Context
+);
+
 typedef enum _SECTION_INHERIT {
     ViewShare = 1,
     ViewUnmap = 2
@@ -1323,3 +1339,6 @@ NTSYSAPI NTSTATUS NTAPI NtCancelIoFileEx(
 NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
     _In_opt_ HANDLE ProcessHandle,
     _In_ NTSTATUS ExitStatus);
+
+NTSYSAPI NTSTATUS NTAPI RtlAcquirePebLock(VOID);
+NTSYSAPI NTSTATUS NTAPI RtlReleasePebLock(VOID);

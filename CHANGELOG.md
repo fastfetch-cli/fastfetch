@@ -1,3 +1,144 @@
+# Unreleased
+
+Changes:
+* The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
+
+Features:
+* Improved Login Manager (LM) module
+    * Added support on macOS, Windows and POSIX systems without systemd (by process list enumeration).
+    * Reports pretty name on Linux.
+* Added Top module to print processes with the highest CPU, memory or disk I/O usage. (Top)
+* Added module key localization support. (General)
+    * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
+    * See `fastfetch -h key-language` for all supported languages.
+* Improved Wi-Fi module
+    * Added Wifi channel width detection, exposed via `{channel-width}` in custom format (reports 0 when not supported).
+    * Improved Wifi channel frequency accuracy and fortified detection on Windows, macOS.
+    * Added Wifi detection support on SunOS, Haiku.
+* Added Battery detection support on SunOS. (Battery, SunOS)
+* Added terminal font size detection support on Termux. (TerminalFont, Android)
+* Improved GTK theme/icons/font detection on standalone WMs such as Hyprland, sway, niri and i3. (Theme, Linux)
+* Improved fish completion scripts to print enum descriptions. (Completion)
+* Enabled Wayland support on Android. (DisplayServer, Android)
+* Added DE detection support for ASUS Zenfone. (DE, Android)
+
+Bugfixes:
+* Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
+* Fixed the fast path of ash version detection. (Shell)
+* Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
+    * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
+* Some internal cleanups and optimizations.
+
+Logos:
+* Added macOS_old
+
+# 2.67.1
+
+Bugfixes:
+* Fixed a `Symbol not found` error when running on macOS 10.15. (#2499, Codec, macOS)
+* Fixed Alacritty font size never being parsed from the TOML config. (#2501, TerminalFont)
+* Fixed bright colors incorrectly being active when the terminal uses a light theme. (#2509, Display)
+* Fixed Ghostty terminal font detection (TerminalFont)
+    * Now tries to load the config with the `.ghostty` extension. (#2500)
+    * Fixed `font-family` fallback order. (#2510)
+* Some internal cleanups and optimizations.
+
+Features:
+* Added a C23 compiler check so the build process gracefully exits during CMake configuration if the compiler is unsupported. (CMake)
+* Added compatibility workarounds for Apple Clang 16 to fix building on macOS 14. (CMake, macOS)
+* Reported real Android version codenames (e.g., "Baklava", "Vanilla Ice Cream") instead of "REL". (OS, Android)
+* Added Loadavg detection support on Haiku R1B6. (Loadavg, Haiku)
+* Enabled image logo support in the Zellij terminal multiplexer. (#2507, Logo)
+* Improved Locale detection on Windows (Locale, Windows)
+    * Now respects `LC_ALL` and `LANG` environment variables if set for better compatibility with MSYS2/cygwin.
+    * Appends the active system Code Page (e.g., `.UTF-8` or `.Windows-1252`) to the default system locale fallback.
+
+# 2.67.0
+
+Changes:
+* The minimum supported compiler version has been raised to GCC 13 (released on 2023-04-26) and Clang 16 (released on 2023-03-17) to accommodate the new C23 syntax used throughout the codebase. (General)
+    * As a result, building from source in Debian 12 (which only ships GCC 12 by default) is no longer supported. Users must upgrade their compiler or use the prebuilt binaries from the GitHub releases page.
+* The `general.preRun` option has been removed due to security concerns. (General)
+    * Users who relied on this option to run a command before printing output will need to move that logic to an external wrapper.
+* The `{status}` placeholder in Battery custom format is now an array type instead of a single comma-separated string. (Battery)
+    * This is a breaking change for users who print `{status}` in Lua scripts. They can use `table.concat(...)` to join the array into a single string if needed.
+* The `--gen-config-*` flags (`--gen-config-full`, `--gen-config-force`, `--gen-config-full-force`) have been removed and their functions have been merged into `--gen-config`. (Global)
+    * See features below.
+
+Features:
+* `--gen-config` now opens an interactive configuration TUI to make generating config files easier.
+    * It falls back to non-interactive generation when `$NO_COLOR` is set or when stdin/stdout is not a TTY. This behavior can also be used to disable the interactive mode.
+* Added an experimental [WebUI](https://fastfetch-cli.github.io/fastfetch-config/) ([separate project](https://github.com/fastfetch-cli/fastfetch-config)) for generating and editing configs.
+* Added `-w`/`--watch` as a seconds-based alias for `--dynamic-interval`, defaulting to 1 second when no value is provided. (#2478, Watch)
+* Added InitSystem detection on Windows, reporting the first userland process (`smss.exe`). (InitSystem, Windows)
+* Added CPU and GPU temperature detection support for Apple M5 series chips. (CPU / GPU, macOS)
+* Reported `Basic` as the Windows theme when DWM is disabled. (Theme, Windows)
+* Improved Ghostty terminal font detection performance. (#2122, TerminalFont)
+    * It now parses Ghostty directly instead of running `ghostty +show-config`.
+* Added support for a wider range of TOML config syntaxes used by Alacritty. (#2456, TerminalFont)
+
+Bugfixes:
+* Fixed a potential fish version detection error. (Shell, Linux)
+* Fixed incorrect resolution reporting when a monitor advertises multiple preferred modes. (#2481, Display, Linux)
+* Fixed connected monitors being missed when Wayland output events arrive late. (#2451, Display, Linux)
+* Fixed VP9 codec detection on macOS. (Codec, macOS)
+* Corrected Base64 encoding on big-endian hosts. (#2470)
+* Fixed invalid URL parsing in the PublicIP module. (PublicIP)
+* Correctly reported virtual GPUs on Windows. (#2461, GPU, Windows)
+* Added a size limit for network responses to prevent excessive memory usage and mitigate potential attacks. (PublicIP / Weather)
+* Fixed Ubuntu Studio Core detection. (OS, Linux)
+* Relaxed the HTTP response check so that both `HTTP/1.0` and `HTTP/1.1` responses are accepted when fetching data over the network. (PublicIP / Weather)
+* Various internal cleanups and optimizations:
+    * Fixed multiple memory leaks (Separator, Camera, Codec, Display).
+    * Added integer overflow checks to the string buffer implementation.
+    * Various code cleanups and compiler warning fixes.
+
+Logos:
+* Removed Hypros, MagpieOS, Furreto, EmperorOS and Magix
+
+# 2.66.0
+
+Changes:
+* CPU package count is no longer reported in the default output.
+    * Users can still print it in custom formats via `{packages}`
+
+Bugfixes:
+* Fixed compatibility with WSL 2.9.3 (#2433, WM, Linux)
+* Fixed AMD GPU names not being queried accurately in `driverSpecific` mode (GPU, Linux)
+* Fixed GPU core counting for Apple Silicon GPU on Asahi Linux (GPU, Linux)
+* Some internal cleanups and optimizations.
+
+Features:
+* Added Astra Linux version detection (OS, Linux)
+* Improved performance of Windows PowerShell version detection (Shell, Windows)
+* Improved performance of Media module on macOS (Media, macOS)
+* Added proxmox backup server detection (#2443, OS, Linux)
+
+Logos:
+* Added Flatcar, Azure Linux
+* Added Chimera_small, Chimera2, Parabola2_small, PostmarketOS2, Qubes_small
+* Updated linuxmint_small
+* Cleaned up distro names
+
+# 2.65.2
+
+Changes:
+* Memory usage calculations now exclude the ZFS ARC cache on Linux, FreeBSD, NetBSD, and SunOS. (#1995 / #2418, Memory)
+    * This prevents the Memory module from reporting artificially high memory usage on systems with the ZFS kmod enabled.
+
+Bugfixes:
+* The GPU module no longer pings sleeping dedicated GPUs on dual-GPU laptops. (#2419, GPU)
+    * As a result, PCIe link speed detection (introduced in v2.65.0) is now only enabled in `driverSpecific` mode.
+* Fixed a crash when detecting hardware codec support with the `amdgpu` driver on Linux. (#2419, Codec, Linux)
+
+Logos:
+* Updated CachyOS_small; fixed CachyOS logo colors to match the official logo better
+* Added Turkish
+
+# 2.65.1
+
+No changes
+
 # 2.65.0
 
 Changes:
@@ -698,7 +839,7 @@ Features:
 * Added support for interface speed detection on SunOS (LocalIP, SunOS)
 * Added detection support for Xlibre (#1888, WM, Linux)
 * Improved the accuracy of color detection (Cursor, macOS)
-* Improved the proformance of `Nix` package manager detection on macOS by porting optimizations form Linux port (#1893, Packages, macOS)
+* Improved the performance of `Nix` package manager detection on macOS by porting optimizations from the Linux port (#1893, Packages, macOS)
 
 Bugfixes:
 * Fixed custom object inheriting a key from the previous custom object if the key is blank (#1477)
@@ -1209,7 +1350,7 @@ Features:
 * Change package manager name of NetBSD from `pkg` to `pkgsrc` (#1515, Packages, NetBSD)
 * Detect SOC name on RISCV (#1519, CPU, Linux)
 * Report marketing name of new QS8Es (CPU, Android)
-* Acquire acquire more os info from lsb-release if missing from os-release (#1521)
+* Acquire more OS info from lsb-release if missing from os-release (#1521)
 * CMake: add option `-DCUSTOM_LSB_RELEASE_PATH` to specify the path of `lsb-release` file
     * `-DCUSTOM_OS_RELEASE_PATH` has been supported since `v2.11.4`
 * Report more SOC names on Android (CPU, Android)
@@ -1677,7 +1818,7 @@ Logos:
 
 Bugfixes:
 * Fix bad Intel Arc GPU name detection, which was supposed to be fixed in the last version but the change was reverted accidentally (#1177, GPU, Linux)
-* Fix arm32 CPU name detection no longer work. Regression of 2.21.2 (CPU, Linux)
+* Fix arm32 CPU name detection no longer working. Regression of 2.21.2 (CPU, Linux)
 
 # 2.21.2
 

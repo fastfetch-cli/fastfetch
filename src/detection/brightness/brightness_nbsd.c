@@ -2,7 +2,7 @@
 
 #include "common/sysctl.h"
 
-const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
+const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
     // https://man.netbsd.org/NetBSD-10.1/acpiout.4#DESCRIPTION
     char key[] = "hw.acpi.acpiout0.brightness";
     char* pn = key + strlen("hw.acpi.acpiout");
@@ -22,5 +22,5 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
         brightness->current = value;
         brightness->builtin = true;
     }
-    return NULL;
+    return nullptr;
 }

@@ -11,5 +11,5 @@ const char* ffDetectBoard(FFBoardResult* result) {
     ffCleanUpSmbiosValue(&result->vendor);
     ffSettingsGetFreeBSDKenv("smbios.planar.version", &result->version);
     ffCleanUpSmbiosValue(&result->version);
-    return NULL;
+    return nullptr;
 }

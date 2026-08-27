@@ -1059,7 +1059,7 @@ static inline void
 wp_color_manager_v1_destroy(struct wp_color_manager_v1 *wp_color_manager_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_COLOR_MANAGER_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1076,7 +1076,7 @@ wp_color_manager_v1_get_output(struct wp_color_manager_v1 *wp_color_manager_v1, 
 	struct wl_proxy *id;
 
 	id = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_GET_OUTPUT, &wp_color_management_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL, output);
+			 WP_COLOR_MANAGER_V1_GET_OUTPUT, &wp_color_management_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr, output);
 
 	return (struct wp_color_management_output_v1 *) id;
 }
@@ -1098,7 +1098,7 @@ wp_color_manager_v1_get_surface(struct wp_color_manager_v1 *wp_color_manager_v1,
 	struct wl_proxy *id;
 
 	id = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_GET_SURFACE, &wp_color_management_surface_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL, surface);
+			 WP_COLOR_MANAGER_V1_GET_SURFACE, &wp_color_management_surface_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr, surface);
 
 	return (struct wp_color_management_surface_v1 *) id;
 }
@@ -1118,7 +1118,7 @@ wp_color_manager_v1_get_surface_feedback(struct wp_color_manager_v1 *wp_color_ma
 	struct wl_proxy *id;
 
 	id = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_GET_SURFACE_FEEDBACK, &wp_color_management_surface_feedback_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL, surface);
+			 WP_COLOR_MANAGER_V1_GET_SURFACE_FEEDBACK, &wp_color_management_surface_feedback_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr, surface);
 
 	return (struct wp_color_management_surface_feedback_v1 *) id;
 }
@@ -1141,7 +1141,7 @@ wp_color_manager_v1_create_icc_creator(struct wp_color_manager_v1 *wp_color_mana
 	struct wl_proxy *obj;
 
 	obj = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_CREATE_ICC_CREATOR, &wp_image_description_creator_icc_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL);
+			 WP_COLOR_MANAGER_V1_CREATE_ICC_CREATOR, &wp_image_description_creator_icc_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr);
 
 	return (struct wp_image_description_creator_icc_v1 *) obj;
 }
@@ -1164,7 +1164,7 @@ wp_color_manager_v1_create_parametric_creator(struct wp_color_manager_v1 *wp_col
 	struct wl_proxy *obj;
 
 	obj = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_CREATE_PARAMETRIC_CREATOR, &wp_image_description_creator_params_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL);
+			 WP_COLOR_MANAGER_V1_CREATE_PARAMETRIC_CREATOR, &wp_image_description_creator_params_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr);
 
 	return (struct wp_image_description_creator_params_v1 *) obj;
 }
@@ -1223,7 +1223,7 @@ wp_color_manager_v1_create_windows_scrgb(struct wp_color_manager_v1 *wp_color_ma
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_CREATE_WINDOWS_SCRGB, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL);
+			 WP_COLOR_MANAGER_V1_CREATE_WINDOWS_SCRGB, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1242,7 +1242,7 @@ wp_color_manager_v1_get_image_description(struct wp_color_manager_v1 *wp_color_m
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_manager_v1,
-			 WP_COLOR_MANAGER_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, NULL, reference);
+			 WP_COLOR_MANAGER_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_manager_v1), 0, nullptr, reference);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1325,7 +1325,7 @@ static inline void
 wp_color_management_output_v1_destroy(struct wp_color_management_output_v1 *wp_color_management_output_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_output_v1,
-			 WP_COLOR_MANAGEMENT_OUTPUT_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_management_output_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_COLOR_MANAGEMENT_OUTPUT_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_management_output_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1369,7 +1369,7 @@ wp_color_management_output_v1_get_image_description(struct wp_color_management_o
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_output_v1,
-			 WP_COLOR_MANAGEMENT_OUTPUT_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_output_v1), 0, NULL);
+			 WP_COLOR_MANAGEMENT_OUTPUT_V1_GET_IMAGE_DESCRIPTION, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_output_v1), 0, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1444,7 +1444,7 @@ static inline void
 wp_color_management_surface_v1_destroy(struct wp_color_management_surface_v1 *wp_color_management_surface_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_COLOR_MANAGEMENT_SURFACE_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1494,7 +1494,7 @@ static inline void
 wp_color_management_surface_v1_set_image_description(struct wp_color_management_surface_v1 *wp_color_management_surface_v1, struct wp_image_description_v1 *image_description, uint32_t render_intent)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_V1_SET_IMAGE_DESCRIPTION, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), 0, image_description, render_intent);
+			 WP_COLOR_MANAGEMENT_SURFACE_V1_SET_IMAGE_DESCRIPTION, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), 0, image_description, render_intent);
 }
 
 /**
@@ -1511,7 +1511,7 @@ static inline void
 wp_color_management_surface_v1_unset_image_description(struct wp_color_management_surface_v1 *wp_color_management_surface_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_V1_UNSET_IMAGE_DESCRIPTION, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), 0);
+			 WP_COLOR_MANAGEMENT_SURFACE_V1_UNSET_IMAGE_DESCRIPTION, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_v1), 0);
 }
 
 #ifndef WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_ERROR_ENUM
@@ -1647,7 +1647,7 @@ static inline void
 wp_color_management_surface_feedback_v1_destroy(struct wp_color_management_surface_feedback_v1 *wp_color_management_surface_feedback_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_feedback_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -1693,7 +1693,7 @@ wp_color_management_surface_feedback_v1_get_preferred(struct wp_color_management
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_feedback_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_GET_PREFERRED, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), 0, NULL);
+			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_GET_PREFERRED, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), 0, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1714,7 +1714,7 @@ wp_color_management_surface_feedback_v1_get_preferred_parametric(struct wp_color
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_color_management_surface_feedback_v1,
-			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_GET_PREFERRED_PARAMETRIC, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), 0, NULL);
+			 WP_COLOR_MANAGEMENT_SURFACE_FEEDBACK_V1_GET_PREFERRED_PARAMETRIC, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_color_management_surface_feedback_v1), 0, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1818,7 +1818,7 @@ wp_image_description_creator_icc_v1_create(struct wp_image_description_creator_i
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_icc_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_ICC_V1_CREATE, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_icc_v1), WL_MARSHAL_FLAG_DESTROY, NULL);
+			 WP_IMAGE_DESCRIPTION_CREATOR_ICC_V1_CREATE, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_icc_v1), WL_MARSHAL_FLAG_DESTROY, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -1870,7 +1870,7 @@ static inline void
 wp_image_description_creator_icc_v1_set_icc_file(struct wp_image_description_creator_icc_v1 *wp_image_description_creator_icc_v1, int32_t icc_profile, uint32_t offset, uint32_t length)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_icc_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_ICC_V1_SET_ICC_FILE, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_icc_v1), 0, icc_profile, offset, length);
+			 WP_IMAGE_DESCRIPTION_CREATOR_ICC_V1_SET_ICC_FILE, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_icc_v1), 0, icc_profile, offset, length);
 }
 
 #ifndef WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_ERROR_ENUM
@@ -2027,7 +2027,7 @@ wp_image_description_creator_params_v1_create(struct wp_image_description_creato
 	struct wl_proxy *image_description;
 
 	image_description = wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_CREATE, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), WL_MARSHAL_FLAG_DESTROY, NULL);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_CREATE, &wp_image_description_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), WL_MARSHAL_FLAG_DESTROY, nullptr);
 
 	return (struct wp_image_description_v1 *) image_description;
 }
@@ -2052,7 +2052,7 @@ static inline void
 wp_image_description_creator_params_v1_set_tf_named(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t tf)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_TF_NAMED, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, tf);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_TF_NAMED, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, tf);
 }
 
 /**
@@ -2081,7 +2081,7 @@ static inline void
 wp_image_description_creator_params_v1_set_tf_power(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t eexp)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_TF_POWER, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, eexp);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_TF_POWER, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, eexp);
 }
 
 /**
@@ -2102,7 +2102,7 @@ static inline void
 wp_image_description_creator_params_v1_set_primaries_named(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t primaries)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_PRIMARIES_NAMED, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, primaries);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_PRIMARIES_NAMED, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, primaries);
 }
 
 /**
@@ -2126,7 +2126,7 @@ static inline void
 wp_image_description_creator_params_v1_set_primaries(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x, int32_t b_y, int32_t w_x, int32_t w_y)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_PRIMARIES, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, r_x, r_y, g_x, g_y, b_x, b_y, w_x, w_y);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_PRIMARIES, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, r_x, r_y, g_x, g_y, b_x, b_y, w_x, w_y);
 }
 
 /**
@@ -2186,7 +2186,7 @@ static inline void
 wp_image_description_creator_params_v1_set_luminances(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t min_lum, uint32_t max_lum, uint32_t reference_lum)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_LUMINANCES, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, min_lum, max_lum, reference_lum);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_LUMINANCES, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, min_lum, max_lum, reference_lum);
 }
 
 /**
@@ -2243,7 +2243,7 @@ static inline void
 wp_image_description_creator_params_v1_set_mastering_display_primaries(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x, int32_t b_y, int32_t w_x, int32_t w_y)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MASTERING_DISPLAY_PRIMARIES, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, r_x, r_y, g_x, g_y, b_x, b_y, w_x, w_y);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MASTERING_DISPLAY_PRIMARIES, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, r_x, r_y, g_x, g_y, b_x, b_y, w_x, w_y);
 }
 
 /**
@@ -2287,7 +2287,7 @@ static inline void
 wp_image_description_creator_params_v1_set_mastering_luminance(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t min_lum, uint32_t max_lum)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MASTERING_LUMINANCE, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, min_lum, max_lum);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MASTERING_LUMINANCE, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, min_lum, max_lum);
 }
 
 /**
@@ -2301,7 +2301,7 @@ static inline void
 wp_image_description_creator_params_v1_set_max_cll(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t max_cll)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MAX_CLL, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, max_cll);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MAX_CLL, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, max_cll);
 }
 
 /**
@@ -2316,7 +2316,7 @@ static inline void
 wp_image_description_creator_params_v1_set_max_fall(struct wp_image_description_creator_params_v1 *wp_image_description_creator_params_v1, uint32_t max_fall)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_creator_params_v1,
-			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MAX_FALL, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, max_fall);
+			 WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_SET_MAX_FALL, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_creator_params_v1), 0, max_fall);
 }
 
 #ifndef WP_IMAGE_DESCRIPTION_V1_ERROR_ENUM
@@ -2515,7 +2515,7 @@ static inline void
 wp_image_description_v1_destroy(struct wp_image_description_v1 *wp_image_description_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_v1,
-			 WP_IMAGE_DESCRIPTION_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_IMAGE_DESCRIPTION_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 /**
@@ -2535,7 +2535,7 @@ wp_image_description_v1_get_information(struct wp_image_description_v1 *wp_image
 	struct wl_proxy *information;
 
 	information = wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_v1,
-			 WP_IMAGE_DESCRIPTION_V1_GET_INFORMATION, &wp_image_description_info_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_v1), 0, NULL);
+			 WP_IMAGE_DESCRIPTION_V1_GET_INFORMATION, &wp_image_description_info_v1_interface, wl_proxy_get_version((struct wl_proxy *) wp_image_description_v1), 0, nullptr);
 
 	return (struct wp_image_description_info_v1 *) information;
 }
@@ -2861,7 +2861,7 @@ static inline void
 wp_image_description_reference_v1_destroy(struct wp_image_description_reference_v1 *wp_image_description_reference_v1)
 {
 	wl_proxy_marshal_flags((struct wl_proxy *) wp_image_description_reference_v1,
-			 WP_IMAGE_DESCRIPTION_REFERENCE_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) wp_image_description_reference_v1), WL_MARSHAL_FLAG_DESTROY);
+			 WP_IMAGE_DESCRIPTION_REFERENCE_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) wp_image_description_reference_v1), WL_MARSHAL_FLAG_DESTROY);
 }
 
 #ifdef  __cplusplus

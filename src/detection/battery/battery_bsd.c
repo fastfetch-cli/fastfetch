@@ -8,7 +8,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 
-const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* results) {
+const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* results) {
     // https://www.freebsd.org/cgi/man.cgi?acpi_battery(4)
     // https://gitlab.xfce.org/panel-plugins/xfce4-battery-plugin/-/blob/master/panel-plugin/libacpi.c
 
@@ -18,7 +18,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
     }
 
     if (units == 0) {
-        return NULL;
+        return nullptr;
     }
 
     FF_AUTO_CLOSE_FD int acpifd = open("/dev/acpi", O_RDONLY | O_CLOEXEC);
@@ -86,5 +86,5 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
         }
 #endif
     }
-    return NULL;
+    return nullptr;
 }

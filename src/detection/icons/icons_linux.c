@@ -26,5 +26,5 @@ const char* ffDetectIcons(FFIconsResult* result) {
         ffStrbufAppendS(&result->icons1, " [Qt]");
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -9,10 +9,10 @@ const char* ffGpuDetectDriverVersion(FFlist* gpus);
 
 static double detectGpuTemp(const FFstrbuf* gpuName) {
     double result = 0;
-    const char* error = NULL;
+    const char* error = nullptr;
 
     if (ffStrbufStartsWithS(gpuName, "Apple M")) {
-        switch (strtol(gpuName->chars + strlen("Apple M"), NULL, 10)) {
+        switch (strtol(gpuName->chars + strlen("Apple M"), nullptr, 10)) {
             case 0:
                 error = "Invalid Apple Silicon GPU";
                 break;
@@ -27,6 +27,9 @@ static double detectGpuTemp(const FFstrbuf* gpuName) {
                 break;
             case 4:
                 error = ffDetectSmcTemps(FF_TEMP_GPU_M4X, &result);
+                break;
+            case 5:
+                error = ffDetectSmcTemps(FF_TEMP_GPU_M5X, &result);
                 break;
             default:
                 error = "Unsupported Apple Silicon GPU";
@@ -48,8 +51,6 @@ static double detectGpuTemp(const FFstrbuf* gpuName) {
 }
 
 #ifdef __aarch64__
-    #include "common/apple/cf_helpers.h"
-
     #include <IOKit/IOKitLib.h>
 
 static const char* detectFrequency(FFGPUResult* gpu) {
@@ -71,7 +72,7 @@ static const char* detectFrequency(FFGPUResult* gpu) {
 
     // voltage-states9-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
     CFIndex propLength = CFDataGetLength(freqProperty);
-    if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0) {
+    if (propLength == 0 || propLength % (CFIndex) (sizeof(uint32_t) * 2) != 0) {
         return "Invalid \"voltage-states9-sram\" length";
     }
 
@@ -90,7 +91,7 @@ static const char* detectFrequency(FFGPUResult* gpu) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 
@@ -125,27 +126,27 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
         ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);
 
-        if (ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount) != NULL) { // For Apple
+        if (ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount) != nullptr) { // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         }
 
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-        CFDictionaryRef perfStatistics = NULL;
+        CFDictionaryRef perfStatistics = nullptr;
         uint64_t vramUsed = 0, vramTotal = 0;
-        if (ffCfDictGetDict(properties, CFSTR("PerformanceStatistics"), &perfStatistics) == NULL) {
+        if (ffCfDictGetDict(properties, CFSTR("PerformanceStatistics"), &perfStatistics) == nullptr) {
             int64_t utilization;
-            if (ffCfDictGetInt64(perfStatistics, CFSTR("Device Utilization %"), &utilization) == NULL) {
+            if (ffCfDictGetInt64(perfStatistics, CFSTR("Device Utilization %"), &utilization) == nullptr) {
                 gpu->coreUsage = (double) utilization;
-            } else if (ffCfDictGetInt64(perfStatistics, CFSTR("GPU Core Utilization"), &utilization) == NULL) {
+            } else if (ffCfDictGetInt64(perfStatistics, CFSTR("GPU Core Utilization"), &utilization) == nullptr) {
                 gpu->coreUsage = (double) utilization / 10000000.; // Nvidia?
             }
 
-            if (ffCfDictGetInt64(perfStatistics, CFSTR("Alloc system memory"), (int64_t*) &vramTotal) == NULL) {
-                if (ffCfDictGetInt64(perfStatistics, CFSTR("In use system memory"), (int64_t*) &vramUsed) != NULL) {
+            if (ffCfDictGetInt64(perfStatistics, CFSTR("Alloc system memory"), (int64_t*) &vramTotal) == nullptr) {
+                if (ffCfDictGetInt64(perfStatistics, CFSTR("In use system memory"), (int64_t*) &vramUsed) != nullptr) {
                     vramTotal = 0;
                 }
-            } else if (ffCfDictGetInt64(perfStatistics, CFSTR("vramFreeBytes"), (int64_t*) &vramTotal) == NULL) {
-                if (ffCfDictGetInt64(perfStatistics, CFSTR("vramUsedBytes"), (int64_t*) &vramUsed) == NULL) {
+            } else if (ffCfDictGetInt64(perfStatistics, CFSTR("vramFreeBytes"), (int64_t*) &vramTotal) == nullptr) {
+                if (ffCfDictGetInt64(perfStatistics, CFSTR("vramUsedBytes"), (int64_t*) &vramUsed) == nullptr) {
                     vramTotal += vramUsed;
                 } else {
                     vramTotal = 0;
@@ -156,9 +157,9 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
         ffStrbufInit(&gpu->name);
         // IOAccelerator returns model / vendor-id properties for Apple Silicon, but not for Intel Iris GPUs.
         // Still needs testing for AMD's
-        if (ffCfDictGetString(properties, CFSTR("model"), &gpu->name) != NULL) {
+        if (ffCfDictGetString(properties, CFSTR("model"), &gpu->name) != nullptr) {
             CFRelease(properties);
-            properties = NULL;
+            properties = nullptr;
 
             FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t parentEntry = 0;
             if (IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &parentEntry) != kIOReturnSuccess ||
@@ -171,7 +172,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
 
         ffStrbufInit(&gpu->vendor);
         int vendorId;
-        if (ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId) == NULL) {
+        if (ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId) == nullptr) {
             const char* vendorStr = ffGPUGetVendorString((unsigned) vendorId);
             ffStrbufAppendS(&gpu->vendor, vendorStr);
             if (vendorStr == FF_GPU_VENDOR_NAME_APPLE || vendorStr == FF_GPU_VENDOR_NAME_INTEL) {
@@ -205,5 +206,5 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
     if (instance.config.general.detectVersion) {
         ffGpuDetectDriverVersion(gpus);
     }
-    return NULL;
+    return nullptr;
 }

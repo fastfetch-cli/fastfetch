@@ -1,7 +1,7 @@
 #include "host.h"
 #include "common/smbios.h"
 
-typedef struct FFSmbiosSystemInfo {
+typedef struct [[gnu::packed]] FFSmbiosSystemInfo {
     FFSmbiosHeader Header;
 
     uint8_t Manufacturer; // string
@@ -10,20 +10,20 @@ typedef struct FFSmbiosSystemInfo {
     uint8_t SerialNumber; // string
 
     // 2.1+
-    struct {
+    struct [[gnu::packed]] {
         uint32_t TimeLow;
         uint16_t TimeMid;
         uint16_t TimeHighAndVersion;
         uint8_t ClockSeqHiAndReserved;
         uint8_t ClockSeqLow;
         uint8_t Node[6];
-    } FF_A_PACKED UUID; // varies
+    } UUID; // varies
     uint8_t WakeUpType; // enum
 
     // 2.4+
     uint8_t SKUNumber; // string
     uint8_t Family;    // string
-} FF_A_PACKED FFSmbiosSystemInfo;
+} FFSmbiosSystemInfo;
 
 static_assert(offsetof(FFSmbiosSystemInfo, Family) == 0x1A,
     "FFSmbiosSystemInfo: Wrong struct alignment");
@@ -70,5 +70,5 @@ const char* ffDetectHost(FFHostResult* host) {
     ffHostDetectMac(host);
 #endif
 
-    return NULL;
+    return nullptr;
 }

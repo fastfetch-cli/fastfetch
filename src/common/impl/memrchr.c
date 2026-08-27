@@ -4,7 +4,7 @@
 
 void* memrchr(const void* s, int c, size_t n) {
     if (n == 0) {
-        return NULL;
+        return nullptr;
     }
 
     const uint8_t uc = (uint8_t) c;
@@ -17,5 +17,5 @@ void* memrchr(const void* s, int c, size_t n) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

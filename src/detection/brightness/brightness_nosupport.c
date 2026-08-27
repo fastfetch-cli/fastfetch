@@ -1,5 +1,5 @@
 #include "brightness.h"
 
-const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FF_A_UNUSED FFlist* result) {
+const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, [[maybe_unused]] FFlist* result) {
     return "Not supported on this platform";
 }

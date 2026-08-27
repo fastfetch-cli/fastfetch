@@ -21,8 +21,8 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         "-xml",
         "-detailLevel",
         "basic",
-        NULL
-    }) != NULL)
+        nullptr
+    }) != nullptr)
         return "Starting `system_profiler SPBluetoothDataType -xml -detailLevel basic` failed";
 
     NSArray* arr = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytes:buffer.chars length:buffer.length]
@@ -65,5 +65,5 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         }
     }
 
-    return NULL;
+    return nullptr;
 }

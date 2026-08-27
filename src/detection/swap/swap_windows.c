@@ -15,7 +15,7 @@ const char* ffDetectSwap(FFlist* result) {
     }
 
     if (size == 0) {
-        return NULL;
+        return nullptr;
     }
 
     uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
@@ -31,5 +31,5 @@ const char* ffDetectSwap(FFlist* result) {
             break;
         }
     }
-    return NULL;
+    return nullptr;
 }

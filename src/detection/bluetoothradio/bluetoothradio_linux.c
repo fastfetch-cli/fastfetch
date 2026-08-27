@@ -73,14 +73,14 @@ static const char* detectBluetoothProperty(FFBluetoothRadioResult* device, FFDBu
         ffDBusGetBool(dbus, &dictIter, &device->connectable);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* detectBluetoothRoot(FFBluetoothRadioResult* device, const char* hciName, FFDBusData* dbus) {
     char objPath[300];
     snprintf(objPath, sizeof(objPath), "/org/bluez/%s", hciName);
 
-    DBusMessage* properties = ffDBusGetMethodReply(dbus, "org.bluez", objPath, "org.freedesktop.DBus.Properties", "GetAll", "org.bluez.Adapter1", NULL);
+    DBusMessage* properties = ffDBusGetMethodReply(dbus, "org.bluez", objPath, "org.freedesktop.DBus.Properties", "GetAll", "org.bluez.Adapter1", nullptr);
     if (!properties) {
         return "Failed to call org.freedesktop.DBus.Properties.GetAll";
     }
@@ -104,12 +104,12 @@ static const char* detectBluetoothRoot(FFBluetoothRadioResult* device, const cha
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 
     dbus->lib->ffdbus_message_unref(properties);
-    return NULL;
+    return nullptr;
 }
 
 static const char* detectBluetooth(FFlist* devices) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "Failed to open /sys/class/bluetooth";
     }
 
@@ -120,12 +120,12 @@ static const char* detectBluetooth(FFlist* devices) {
     }
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.') {
             continue;
         }
 
-        if (strchr(entry->d_name, ':') != NULL) { // ignore connected devices
+        if (strchr(entry->d_name, ':') != nullptr) { // ignore connected devices
             continue;
         }
 
@@ -138,7 +138,7 @@ static const char* detectBluetooth(FFlist* devices) {
         device->enabled = false;
         detectBluetoothRoot(device, entry->d_name, &dbus);
     }
-    return NULL;
+    return nullptr;
 }
 
 #endif

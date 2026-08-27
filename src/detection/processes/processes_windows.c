@@ -5,7 +5,7 @@
 #include <winternl.h>
 
 const char* ffDetectProcesses(uint32_t* result) {
-    SYSTEM_PROCESS_INFORMATION* FF_AUTO_FREE pstart = NULL;
+    FF_AUTO_FREE SYSTEM_PROCESS_INFORMATION* pstart = nullptr;
 
     // Multiple attempts in case processes change while
     // we are in the middle of querying them.
@@ -30,5 +30,5 @@ const char* ffDetectProcesses(uint32_t* result) {
         ++*result;
     }
 
-    return NULL;
+    return nullptr;
 }

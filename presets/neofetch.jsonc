@@ -17,6 +17,13 @@
         "os",
         "host",
         {
+            "type": "board",
+            "key": "Host",
+            "condition": {
+                "succeeded": false
+            }
+        },
+        {
             "type": "kernel",
             "format": "{release}"
         },

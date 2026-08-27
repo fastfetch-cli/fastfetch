@@ -10,12 +10,12 @@ const char* ffDebugWin32Error(DWORD errorCode) {
     wchar_t bufferW[256];
     ULONG len = FormatMessageW(
         FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
+        nullptr,
         (DWORD) errorCode,
         0,
         bufferW,
         ARRAY_SIZE(bufferW),
-        NULL);
+        nullptr);
 
     if (len == 0) {
         snprintf(buffer, sizeof(buffer), "Unknown error code (%lu)", errorCode);

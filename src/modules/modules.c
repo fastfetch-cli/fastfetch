@@ -6,7 +6,7 @@
 // We rely `LTO` to remove the unused code (only enabled in Release mode)
 
 static FFModuleBaseInfo* A[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* B[] = {
@@ -37,7 +37,7 @@ static FFModuleBaseInfo* B[] = {
 #if !FF_MODULE_DISABLE_BTRFS
     &ffBtrfsModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* C[] = {
@@ -71,7 +71,7 @@ static FFModuleBaseInfo* C[] = {
 #if !FF_MODULE_DISABLE_CUSTOM
     &ffCustomModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* D[] = {
@@ -93,21 +93,21 @@ static FFModuleBaseInfo* D[] = {
 #if !FF_MODULE_DISABLE_DNS
     &ffDNSModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* E[] = {
 #if !FF_MODULE_DISABLE_EDITOR
     &ffEditorModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* F[] = {
 #if !FF_MODULE_DISABLE_FONT
     &ffFontModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* G[] = {
@@ -117,14 +117,14 @@ static FFModuleBaseInfo* G[] = {
 #if !FF_MODULE_DISABLE_GPU
     &ffGPUModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* H[] = {
 #if !FF_MODULE_DISABLE_HOST
     &ffHostModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* I[] = {
@@ -134,11 +134,11 @@ static FFModuleBaseInfo* I[] = {
 #if !FF_MODULE_DISABLE_INITSYSTEM
     &ffInitSystemModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* J[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* K[] = {
@@ -148,7 +148,7 @@ static FFModuleBaseInfo* K[] = {
 #if !FF_MODULE_DISABLE_KEYBOARD
     &ffKeyboardModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* L[] = {
@@ -167,7 +167,7 @@ static FFModuleBaseInfo* L[] = {
 #if !FF_MODULE_DISABLE_LOGO
     &ffLogoModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* M[] = {
@@ -183,14 +183,14 @@ static FFModuleBaseInfo* M[] = {
 #if !FF_MODULE_DISABLE_MOUSE
     &ffMouseModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* N[] = {
 #if !FF_MODULE_DISABLE_NETIO
     &ffNetIOModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* O[] = {
@@ -203,7 +203,7 @@ static FFModuleBaseInfo* O[] = {
 #if !FF_MODULE_DISABLE_OS
     &ffOSModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* P[] = {
@@ -228,15 +228,15 @@ static FFModuleBaseInfo* P[] = {
 #if !FF_MODULE_DISABLE_PUBLICIP
     &ffPublicIPModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* Q[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* R[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* S[] = {
@@ -252,7 +252,7 @@ static FFModuleBaseInfo* S[] = {
 #if !FF_MODULE_DISABLE_SWAP
     &ffSwapModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* T[] = {
@@ -271,13 +271,16 @@ static FFModuleBaseInfo* T[] = {
 #if !FF_MODULE_DISABLE_TITLE
     &ffTitleModuleInfo,
 #endif
+#if !FF_MODULE_DISABLE_TOP
+    &ffTopModuleInfo,
+#endif
 #if !FF_MODULE_DISABLE_THEME
     &ffThemeModuleInfo,
 #endif
 #if !FF_MODULE_DISABLE_TPM
     &ffTPMModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* U[] = {
@@ -287,7 +290,7 @@ static FFModuleBaseInfo* U[] = {
 #if !FF_MODULE_DISABLE_USERS
     &ffUsersModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* V[] = {
@@ -297,7 +300,7 @@ static FFModuleBaseInfo* V[] = {
 #if !FF_MODULE_DISABLE_VULKAN
     &ffVulkanModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* W[] = {
@@ -316,22 +319,22 @@ static FFModuleBaseInfo* W[] = {
 #if !FF_MODULE_DISABLE_WMTHEME
     &ffWMThemeModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* X[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* Y[] = {
-    NULL,
+    nullptr,
 };
 
 static FFModuleBaseInfo* Z[] = {
 #if !FF_MODULE_DISABLE_ZPOOL
     &ffZpoolModuleInfo,
 #endif
-    NULL,
+    nullptr,
 };
 
 FFModuleBaseInfo** ffModuleInfos[] = {

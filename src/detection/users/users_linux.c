@@ -52,7 +52,7 @@ bool detectUserBySystemd(const FFstrbuf* pathUsers, FFlist* users) {
     FF_STRBUF_AUTO_DESTROY remoteHost = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY service = ffStrbufCreate();
 
-    char* token = NULL;
+    char* token = nullptr;
     size_t n = 0;
     while (ffStrbufGetdelim(&token, &n, ' ', &sessions)) {
         ffStrbufSubstrBefore(&pathSessions, pathSessionsBaseLen);
@@ -116,7 +116,7 @@ const char* detectBySystemd(FFUsersOptions* options, FFlist* users) {
             ffStrbufSubstrBefore(&pathUsers, pathUsersBaseLen);
         }
     }
-    return NULL;
+    return nullptr;
 }
 #endif
 
@@ -132,23 +132,23 @@ static void fillUtmpIpAddr(FFUserResult* user, struct utmpx* n) {
 
     if (isIpv6) {
         char ipv6_str[INET6_ADDRSTRLEN];
-        if (inet_ntop(AF_INET6, n->ut_addr_v6, ipv6_str, INET6_ADDRSTRLEN) != NULL) {
+        if (inet_ntop(AF_INET6, n->ut_addr_v6, ipv6_str, INET6_ADDRSTRLEN) != nullptr) {
             ffStrbufSetS(&user->clientIp, ipv6_str);
         }
     } else if (n->ut_addr_v6[0] != 0) {
         char ipv4_str[INET_ADDRSTRLEN];
-        if (inet_ntop(AF_INET, n->ut_addr_v6, ipv4_str, INET_ADDRSTRLEN) != NULL) {
+        if (inet_ntop(AF_INET, n->ut_addr_v6, ipv4_str, INET_ADDRSTRLEN) != nullptr) {
             ffStrbufSetS(&user->clientIp, ipv4_str);
         }
     }
 }
 #else
-static void fillUtmpIpAddr(FF_A_UNUSED FFUserResult* user, FF_A_UNUSED struct utmpx* n) {
+static void fillUtmpIpAddr([[maybe_unused]] FFUserResult* user, [[maybe_unused]] struct utmpx* n) {
 }
 #endif
 
 const char* detectByUtmp(FFUsersOptions* options, FFlist* users) {
-    struct utmpx* n = NULL;
+    struct utmpx* n = nullptr;
     setutxent();
 
 next:
@@ -185,7 +185,7 @@ next:
 
     endutxent();
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectUsers(FFUsersOptions* options, FFlist* users) {
@@ -200,5 +200,5 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users) {
     }
 #endif
 
-    return NULL;
+    return nullptr;
 }

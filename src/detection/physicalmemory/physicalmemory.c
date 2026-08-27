@@ -35,7 +35,7 @@ static inline const char* getVendorString(unsigned vendorId) {
         case 0x0467:
             return "Ramaxel";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -61,7 +61,7 @@ void FFPhysicalMemoryUpdateVendorString(FFPhysicalMemoryResult* device) {
         memcpy(vendorIdStr, device->vendor.chars, 4);
     }
     vendorIdStr[4] = '\0';
-    char* pEnd = NULL;
+    char* pEnd = nullptr;
     uint32_t vendorId = (uint32_t) strtoul(vendorIdStr, &pEnd, 16);
     if (*pEnd != '\0') {
         return;

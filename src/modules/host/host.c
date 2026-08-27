@@ -17,17 +17,17 @@ bool ffPrintHost(FFHostOptions* options) {
 
     const char* error = ffDetectHost(&host);
     if (error) {
-        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
     if (host.name.length == 0 && host.family.length == 0) {
-        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "neither product_family nor product_name is set by O.E.M.");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "neither product_family nor product_name is set by O.E.M.");
         goto exit;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
@@ -43,7 +43,7 @@ bool ffPrintHost(FFHostOptions* options) {
 
         ffStrbufPutTo(&output, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                          FF_ARG(host.family, "family"),
                                                                                                          FF_ARG(host.name, "name"),
                                                                                                          FF_ARG(host.version, "version"),
@@ -75,7 +75,7 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Host), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -83,7 +83,7 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateHostJsonResult(FF_A_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateHostJsonResult([[maybe_unused]] FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);
@@ -136,8 +136,30 @@ void ffDestroyHostOptions(FFHostOptions* options) {
 }
 
 FFModuleBaseInfo ffHostModuleInfo = {
-    .name = FF_HOST_MODULE_NAME,
+    .name = "Host",
     .description = "Print your computer's product name",
+    .displayName = {
+        .en = "Host",
+        .ar = "المضيف",
+        .cs = "Hostitel",
+        .de = "Rechner",
+        .es = "Host",
+        .fr = "Hôte",
+        .gl = "Host",
+        .he = "מארח",
+        .id = "Host",
+        .it = "Host",
+        .ja = "ホスト",
+        .ko = "호스트",
+        .pl = "Host",
+        .pt = "Host",
+        .ru = "Модель",
+        .tr = "Ana Bilgisayar",
+        .uk = "Хост",
+        .vi = "Máy chủ",
+        .zh_CN = "主机",
+        .zh_TW = "主機",
+    },
     .initOptions = (void*) ffInitHostOptions,
     .destroyOptions = (void*) ffDestroyHostOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
@@ -152,5 +174,6 @@ FFModuleBaseInfo ffHostModuleInfo = {
         { "Product vendor", "vendor" },
         { "Product serial number", "serial" },
         { "Product uuid", "uuid" },
-    }))
+    })),
+    .defaultOrder = 4,
 };

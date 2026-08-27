@@ -81,7 +81,7 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                                 break;
                             }
                             char str[] = { path.chars[i + 1], path.chars[i + 2], 0 };
-                            char* end = NULL;
+                            char* end = nullptr;
                             const char decodedChar = (char) strtoul(str, &end, 16);
                             if (end == &str[2]) {
                                 i += 2;
@@ -111,7 +111,7 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
 static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResult* result) {
     // Get all properties at once to reduce the number of IPCs
     DBusMessage* reply = ffDBusGetAllProperties(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player");
-    if (reply == NULL) {
+    if (reply == nullptr) {
         return false;
     }
 
@@ -166,7 +166,7 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
                         break;
                     }
                     char str[] = { fileName[1], fileName[2], 0 };
-                    ffStrbufAppendC(&result->song, (char) strtoul(str, NULL, 16));
+                    ffStrbufAppendC(&result->song, (char) strtoul(str, nullptr, 16));
                     fileName += 2;
                 }
             }
@@ -221,8 +221,8 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result) {
         return;
     }
 
-    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames", NULL, NULL);
-    if (reply == NULL) {
+    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames", nullptr, nullptr);
+    if (reply == nullptr) {
         return;
     }
 
@@ -260,7 +260,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result) {
 static const char* getMedia(FFMediaResult* result) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData data = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SESSION, &data);
-    if (error != NULL) {
+    if (error != nullptr) {
         return error;
     }
 
@@ -272,7 +272,7 @@ static const char* getMedia(FFMediaResult* result) {
         getBestBus(&data, result);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #endif

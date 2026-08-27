@@ -23,5 +23,5 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
         info->totalAll = uptime;
     }
 
-    return NULL;
+    return nullptr;
 }

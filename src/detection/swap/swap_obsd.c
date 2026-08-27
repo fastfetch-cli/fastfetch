@@ -13,7 +13,7 @@ const char* ffDetectSwap(FFlist* result) {
         return "swapctl(SWAP_NSWAP) failed";
     }
     if (nswap == 0) {
-        return NULL;
+        return nullptr;
     }
 
     FF_AUTO_FREE struct swapent* swdev = malloc((uint32_t) nswap * sizeof(*swdev));
@@ -31,5 +31,5 @@ const char* ffDetectSwap(FFlist* result) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

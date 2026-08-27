@@ -47,14 +47,14 @@ extern const struct wl_interface wp_image_description_reference_v1_interface;
 extern const struct wl_interface wp_image_description_v1_interface;
 
 static const struct wl_interface *color_management_v1_types[] = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wp_color_management_output_v1_interface,
 	&wl_output_interface,
 	&wp_color_management_surface_v1_interface,
@@ -68,7 +68,7 @@ static const struct wl_interface *color_management_v1_types[] = {
 	&wp_image_description_reference_v1_interface,
 	&wp_image_description_v1_interface,
 	&wp_image_description_v1_interface,
-	NULL,
+	nullptr,
 	&wp_image_description_v1_interface,
 	&wp_image_description_v1_interface,
 	&wp_image_description_v1_interface,
@@ -125,7 +125,7 @@ static const struct wl_message wp_color_management_surface_v1_requests[] = {
 WL_EXPORT const struct wl_interface wp_color_management_surface_v1_interface = {
 	"wp_color_management_surface_v1", 2,
 	3, wp_color_management_surface_v1_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wp_color_management_surface_feedback_v1_requests[] = {
@@ -153,7 +153,7 @@ static const struct wl_message wp_image_description_creator_icc_v1_requests[] = 
 WL_EXPORT const struct wl_interface wp_image_description_creator_icc_v1_interface = {
 	"wp_image_description_creator_icc_v1", 2,
 	2, wp_image_description_creator_icc_v1_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wp_image_description_creator_params_v1_requests[] = {
@@ -172,7 +172,7 @@ static const struct wl_message wp_image_description_creator_params_v1_requests[]
 WL_EXPORT const struct wl_interface wp_image_description_creator_params_v1_interface = {
 	"wp_image_description_creator_params_v1", 2,
 	10, wp_image_description_creator_params_v1_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wp_image_description_v1_requests[] = {
@@ -208,7 +208,7 @@ static const struct wl_message wp_image_description_info_v1_events[] = {
 
 WL_EXPORT const struct wl_interface wp_image_description_info_v1_interface = {
 	"wp_image_description_info_v1", 2,
-	0, NULL,
+	0, nullptr,
 	11, wp_image_description_info_v1_events,
 };
 
@@ -219,7 +219,7 @@ static const struct wl_message wp_image_description_reference_v1_requests[] = {
 WL_EXPORT const struct wl_interface wp_image_description_reference_v1_interface = {
 	"wp_image_description_reference_v1", 1,
 	1, wp_image_description_reference_v1_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 #endif

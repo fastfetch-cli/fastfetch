@@ -18,7 +18,7 @@ static double detectNvmeTemp(int devfd) {
         ssize_t size = ffReadFileDataRelative(devfd, pathHwmon, ARRAY_SIZE(buffer), buffer);
         if (size > 0) {
             buffer[size] = '\0';
-            double temp = strtod(buffer, NULL);
+            double temp = strtod(buffer, nullptr);
             return temp > 0 && temp < 10000000 /*VMware*/ ? temp / 1000 : FF_PHYSICALDISK_TEMP_UNSET;
         }
     }
@@ -34,7 +34,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
         if (fileSize > 0) {
             blkSize[fileSize] = 0;
-            size = (uint64_t) strtoul(blkSize, NULL, 10) * 512;
+            size = (uint64_t) strtoul(blkSize, nullptr, 10) * 512;
         }
     }
 
@@ -118,15 +118,15 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
             snprintf(pathSysDeviceLink, ARRAY_SIZE(pathSysDeviceLink), "/sys/block/%s/device", devName);
             char pathSysDeviceReal[PATH_MAX];
             if (realpath(pathSysDeviceLink, pathSysDeviceReal)) {
-                if (strstr(pathSysDeviceReal, "/usb") != NULL) {
+                if (strstr(pathSysDeviceReal, "/usb") != nullptr) {
                     ffStrbufSetStatic(&device->interconnect, "USB");
-                } else if (strstr(pathSysDeviceReal, "/ata") != NULL) {
+                } else if (strstr(pathSysDeviceReal, "/ata") != nullptr) {
                     ffStrbufSetStatic(&device->interconnect, "ATA");
-                } else if (strstr(pathSysDeviceReal, "/scsi") != NULL) {
+                } else if (strstr(pathSysDeviceReal, "/scsi") != nullptr) {
                     ffStrbufSetStatic(&device->interconnect, "SCSI");
-                } else if (strstr(pathSysDeviceReal, "/nvme") != NULL) {
+                } else if (strstr(pathSysDeviceReal, "/nvme") != nullptr) {
                     ffStrbufSetStatic(&device->interconnect, "NVMe");
-                } else if (strstr(pathSysDeviceReal, "/virtio") != NULL) {
+                } else if (strstr(pathSysDeviceReal, "/virtio") != nullptr) {
                     ffStrbufSetStatic(&device->interconnect, "VirtIO");
                     isVirtio = true; // VirtIO devices are virtual, but we still want to report it
                 } else {
@@ -177,12 +177,12 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* sysBlockDirp = opendir("/sys/block/");
-    if (sysBlockDirp == NULL) {
-        return "opendir(\"/sys/block/\") == NULL";
+    if (sysBlockDirp == nullptr) {
+        return "opendir(\"/sys/block/\") == nullptr";
     }
 
     struct dirent* sysBlockEntry;
-    while ((sysBlockEntry = readdir(sysBlockDirp)) != NULL) {
+    while ((sysBlockEntry = readdir(sysBlockDirp)) != nullptr) {
         const char* const devName = sysBlockEntry->d_name;
 
         if (devName[0] == '.') {
@@ -198,5 +198,5 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
     }
 
-    return NULL;
+    return nullptr;
 }

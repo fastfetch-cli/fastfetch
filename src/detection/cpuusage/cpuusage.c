@@ -18,7 +18,7 @@ void ffPrepareCPUUsage(void) {
 }
 
 const char* ffGetCpuUsageResult(FFCPUUsageOptions* options, FFlist* result) {
-    const char* error = NULL;
+    const char* error = nullptr;
     if (startTime == 0) {
         ffListInit(&cpuTimes1);
         error = ffGetCpuUsageInfo(&cpuTimes1);
@@ -70,5 +70,5 @@ retry:
         cpuTime1->totalAll = cpuTime2->totalAll;
     }
     startTime = ffTimeGetNow();
-    return NULL;
+    return nullptr;
 }

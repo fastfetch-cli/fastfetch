@@ -6,7 +6,7 @@
 #include <libgen.h>
 #include <unistd.h>
 
-FF_A_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata) {
+[[maybe_unused]] static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "systemd ")) {
         return true;
     }
@@ -20,13 +20,13 @@ FF_A_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, voi
 }
 
 const char* ffDetectInitSystem(FFInitSystemResult* result) {
-    const char* error = ffProcessGetBasicInfoLinux((int) result->pid, &result->name, NULL, NULL);
+    const char* error = ffProcessGetBasicInfoLinux((int) result->pid, &result->name, nullptr, nullptr);
     if (error) {
 #ifdef __ANDROID__
         if (access("/system/bin/init", F_OK) == 0) {
             ffStrbufSetStatic(&result->exe, "/system/bin/init");
             ffStrbufSetStatic(&result->name, "init");
-            return NULL;
+            return nullptr;
         }
 #endif
         return error;
@@ -34,7 +34,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
 
     const char* _;
     // In linux /proc/1/exe is not readable
-    ffProcessGetInfoLinux((int) result->pid, &result->name, &result->exe, &_, NULL);
+    ffProcessGetInfoLinux((int) result->pid, &result->name, &result->exe, &_, nullptr);
     if (result->exe.chars[0] == '/') {
         // In some old system, /sbin/init is a symlink
         char buf[PATH_MAX];
@@ -52,8 +52,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
                 if (ffProcessAppendStdOut(&result->version, (char* const[]) {
                                                                 ffStrbufEndsWithS(&result->exe, "/systemd") ? result->exe.chars : "systemctl", // use exe path in case users have another systemd installed
                                                                 "--version",
-                                                                NULL,
-                                                            }) == NULL &&
+                                                                nullptr,
+                                                            }) == nullptr &&
                     result->version.length) {
                     uint32_t iStart = ffStrbufFirstIndexC(&result->version, '(');
                     if (iStart < result->version.length) {
@@ -67,8 +67,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
             if (ffProcessAppendStdOut(&result->version, (char* const[]) {
                                                             ffStrbufEndsWithS(&result->exe, "/dinit") ? result->exe.chars : "dinit",
                                                             "--version",
-                                                            NULL,
-                                                        }) == NULL &&
+                                                            nullptr,
+                                                        }) == nullptr &&
                 result->version.length) {
                 // Dinit version 0.18.0.
                 ffStrbufSubstrBeforeFirstC(&result->version, '\n');
@@ -79,8 +79,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
             if (ffProcessAppendStdOut(&result->version, (char* const[]) {
                                                             ffStrbufEndsWithS(&result->exe, "/shepherd") ? result->exe.chars : "shepherd",
                                                             "--version",
-                                                            NULL,
-                                                        }) == NULL &&
+                                                            nullptr,
+                                                        }) == nullptr &&
                 result->version.length) {
                 // shepherd (GNU Shepherd) 1.0.6
                 // The first line in the output might not contain the version
@@ -97,8 +97,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
             if (ffProcessAppendStdOut(&result->version, (char* const[]) {
                                                             "/bin/launchctl",
                                                             "version",
-                                                            NULL,
-                                                        }) == NULL &&
+                                                            nullptr,
+                                                        }) == nullptr &&
                 result->version.length) {
                 uint32_t iStart = ffStrbufFirstIndexS(&result->version, "Version ");
                 if (iStart < result->version.length) {
@@ -112,5 +112,5 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
 #endif
     }
 
-    return NULL;
+    return nullptr;
 }

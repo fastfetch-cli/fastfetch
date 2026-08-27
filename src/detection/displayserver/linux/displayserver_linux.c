@@ -22,12 +22,12 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result) {
         return;
     }
 
-    if (getenv("WAYLAND_DISPLAY") != NULL || getenv("WAYLAND_SOCKET") != NULL) {
+    if (getenv("WAYLAND_DISPLAY") != nullptr || getenv("WAYLAND_SOCKET") != nullptr) {
         ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
         return;
     }
 
-    if (getenv("DISPLAY") != NULL) // XWayland also set this
+    if (getenv("DISPLAY") != nullptr) // XWayland also set this
     {
         ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
         return;
@@ -73,7 +73,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
                 ffStrbufClear(&buf);
                 if (ffSettingsGetFreeBSDKenv("screen.height", &buf)) {
                     uint32_t height = (uint32_t) ffStrbufToUInt(&buf, 0);
-                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
+                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, 0, 0, nullptr, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
                 }
             }
         }

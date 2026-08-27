@@ -48,5 +48,5 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
         };
     }
 
-    return NULL;
+    return nullptr;
 }

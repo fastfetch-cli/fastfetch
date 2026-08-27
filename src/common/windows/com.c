@@ -21,14 +21,14 @@ static const char* doInitCom() {
                 return "RoInitialize() failed: unexpected error";
             case RPC_E_CHANGED_MODE:
                 // COM was already initialized with a different concurrency model
-                return NULL;
+                return nullptr;
             default:
                 return "RoInitialize() failed: unknown error";
         }
     }
 
     atexit(RoUninitializeWrap);
-    return NULL;
+    return nullptr;
 }
 #else
     #include <combaseapi.h>
@@ -38,7 +38,7 @@ static void CoUninitializeWrap(void) {
 }
 
 static const char* doInitCom() {
-    HRESULT res = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    HRESULT res = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(res)) {
         switch (res) {
             case E_INVALIDARG:
@@ -47,14 +47,14 @@ static const char* doInitCom() {
                 return "CoInitializeEx() failed: out of memory";
             case RPC_E_CHANGED_MODE:
                 // COM was already initialized with a different concurrency model
-                return NULL;
+                return nullptr;
             default:
                 return "CoInitializeEx() failed: unknown error";
         }
     }
 
     atexit(CoUninitializeWrap);
-    return NULL;
+    return nullptr;
 }
 #endif
 

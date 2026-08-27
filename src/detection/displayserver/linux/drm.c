@@ -11,7 +11,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
     const char* drmDirPath = "/sys/class/drm/";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "opendir(drmDirPath) failed";
     }
 
@@ -21,7 +21,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
     uint32_t drmDirLength = drmDir.length;
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.') {
             continue;
         }
@@ -105,7 +105,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 
@@ -175,11 +175,11 @@ static inline const char* drmType2Name(uint32_t connector_type) {
     }
 }
 
-FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength) {
+[[maybe_unused]] static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength) {
     const char* drmDirPath = "/sys/class/drm/";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "opendir(drmDirPath) failed";
     }
 
@@ -189,7 +189,7 @@ FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edid
     uint32_t drmDirLength = drmDir.length;
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.') {
             continue;
         }
@@ -201,7 +201,7 @@ FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edid
 
         ffStrbufAppendS(&drmDir, "/connector_id");
         ffReadFileData(drmDir.chars, ARRAY_SIZE(connectorId), connectorId);
-        if (strtoul(connectorId, NULL, 10) != connId) {
+        if (strtoul(connectorId, nullptr, 10) != connId) {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
         }
@@ -209,7 +209,7 @@ FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edid
         ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
         ffStrbufAppendS(&drmDir, "/edid");
         *edidLength = ffReadFileData(drmDir.chars, (uint32_t) *edidLength, edidData);
-        return NULL;
+        return nullptr;
     }
 
     return "Failed to match connector ID";
@@ -217,7 +217,7 @@ FF_A_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edid
 
 static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "opendir(/dev/dri/) failed";
     }
     int drifd = dirfd(dirp);
@@ -225,7 +225,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
     int nSuccess = 0;
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.' || !ffStrStartsWith(entry->d_name, "card")) {
             continue;
         }
@@ -392,7 +392,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
 
             if (name.length == 0) {
                 const char* connectorTypeName = drmType2Name(conn.connector_type);
-                if (connectorTypeName == NULL) {
+                if (connectorTypeName == nullptr) {
                     connectorTypeName = "Unknown";
                 }
                 ffStrbufSetF(&name, "%s-%d", connectorTypeName, iConn + 1);
@@ -429,16 +429,16 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result) {
         }
     }
 
-    return nSuccess > 0 ? NULL : "No connectors found using libdrm";
+    return nSuccess > 0 ? nullptr : "No connectors found using libdrm";
 }
 
 #endif
 
-const char* ffdsConnectDrm(FF_A_UNUSED FFDisplayServerResult* result) {
+const char* ffdsConnectDrm([[maybe_unused]] FFDisplayServerResult* result) {
 #if FF_HAVE_DRM
     if (instance.config.general.dsForceDrm != FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY) {
-        if (drmConnectLibdrm(result) == NULL) {
-            return NULL;
+        if (drmConnectLibdrm(result) == nullptr) {
+            return nullptr;
         }
     }
 #endif

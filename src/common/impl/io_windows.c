@@ -20,10 +20,10 @@ static bool createSubfolders(wchar_t* fileName) {
             fileName,
             FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
+            nullptr,
             OPEN_EXISTING,
             FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
-            NULL);
+            nullptr);
 
         ptr[3] = saved;
         if (hRoot == INVALID_HANDLE_VALUE) {
@@ -36,12 +36,12 @@ static bool createSubfolders(wchar_t* fileName) {
     // UNC path: \\server\share\...
     else if (ptr[0] == L'\\' && ptr[1] == L'\\') {
         wchar_t* serverEnd = wcschr(ptr + 2, L'\\');
-        if (serverEnd == NULL) {
+        if (serverEnd == nullptr) {
             return false;
         }
 
         wchar_t* shareEnd = wcschr(serverEnd + 1, L'\\');
-        if (shareEnd == NULL) {
+        if (shareEnd == nullptr) {
             return true; // no parent subfolder exists before file name
         }
 
@@ -52,10 +52,10 @@ static bool createSubfolders(wchar_t* fileName) {
             fileName,
             FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
+            nullptr,
             OPEN_EXISTING,
             FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
-            NULL);
+            nullptr);
 
         *shareEnd = saved;
         if (hRoot == INVALID_HANDLE_VALUE) {
@@ -73,10 +73,10 @@ static bool createSubfolders(wchar_t* fileName) {
             driveRoot,
             FILE_LIST_DIRECTORY | FILE_TRAVERSE | SYNCHRONIZE,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-            NULL,
+            nullptr,
             OPEN_EXISTING,
             FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_FLAG_BACKUP_SEMANTICS,
-            NULL);
+            nullptr);
         if (hRoot == INVALID_HANDLE_VALUE) {
             return false;
         }
@@ -86,7 +86,7 @@ static bool createSubfolders(wchar_t* fileName) {
 
     while (true) {
         wchar_t* token = wcschr(ptr, L'\\');
-        if (token == NULL) {
+        if (token == nullptr) {
             break;
         }
 
@@ -113,12 +113,12 @@ static bool createSubfolders(wchar_t* fileName) {
                 .Attributes = OBJ_CASE_INSENSITIVE,
             },
             &iosb,
-            NULL,
+            nullptr,
             FILE_ATTRIBUTE_NORMAL,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
             FILE_OPEN_IF,
             FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT,
-            NULL,
+            nullptr,
             0);
 
         if (!NT_SUCCESS(status)) {
@@ -157,13 +157,13 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
         }
     }
 
-    HANDLE FF_AUTO_CLOSE_FD handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
         if (GetLastError() == ERROR_PATH_NOT_FOUND) {
             if (!createSubfolders(fileNameW)) {
                 return false;
             }
-            handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
             if (handle == INVALID_HANDLE_VALUE) {
                 return false;
             }
@@ -173,15 +173,15 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
     }
 
     DWORD written;
-    return !!WriteFile(handle, data, (DWORD) dataSize, &written, NULL);
+    return !!WriteFile(handle, data, (DWORD) dataSize, &written, nullptr);
 }
 
 static inline void readWithLength(HANDLE handle, FFstrbuf* buffer, uint32_t length) {
-    ffStrbufEnsureFree(buffer, length);
+    ffStrbufEnsureFixedLengthFree(buffer, length);
     DWORD bytesRead = 0;
     while (
         length > 0 &&
-        ReadFile(handle, buffer->chars + buffer->length, length, &bytesRead, NULL) != FALSE &&
+        ReadFile(handle, buffer->chars + buffer->length, length, &bytesRead, nullptr) != FALSE &&
         bytesRead > 0) {
         buffer->length += (uint32_t) bytesRead;
         length -= (uint32_t) bytesRead;
@@ -193,7 +193,7 @@ static inline void readUntilEOF(HANDLE handle, FFstrbuf* buffer) {
     uint32_t available = ffStrbufGetFree(buffer);
     DWORD bytesRead = 0;
     while (
-        ReadFile(handle, buffer->chars + buffer->length, available, &bytesRead, NULL) != FALSE &&
+        ReadFile(handle, buffer->chars + buffer->length, available, &bytesRead, nullptr) != FALSE &&
         bytesRead > 0) {
         buffer->length += (uint32_t) bytesRead;
         if ((uint32_t) bytesRead == available) {
@@ -282,7 +282,7 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
     len /= sizeof(wchar_t); // convert from bytes to characters
 
     SIZE_T outLen; // in characters, including null terminator
-    if (!NT_SUCCESS(RtlExpandEnvironmentStrings(NULL, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen))) {
+    if (!NT_SUCCESS(RtlExpandEnvironmentStrings(nullptr, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen))) {
         return false;
     }
 
@@ -336,7 +336,7 @@ bool ffSuppressIO(bool suppress) {
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty) {
     uint32_t folderLength = folder->length;
 
-    if (pretty && folderName != NULL) {
+    if (pretty && folderName != nullptr) {
         for (uint8_t i = 0; i < indentation - 1; i++) {
             fputs("  | ", stdout);
         }
@@ -381,7 +381,7 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 void ffListFilesRecursively(const char* path, bool pretty) {
     FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
-    listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
+    listFilesRecursively(folder.length, &folder, 0, nullptr, pretty);
 }
 
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...) {
@@ -390,7 +390,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     DWORD inputMode = 0;
     bool hasInputMode = !!GetConsoleMode(hInput, &inputMode);
     if (!hasInputMode) {
-        hConin = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
+        hConin = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, nullptr);
         hInput = hConin;
         hasInputMode = !!GetConsoleMode(hInput, &inputMode);
     }
@@ -404,10 +404,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         FF_AUTO_CLOSE_FD HANDLE hConout = INVALID_HANDLE_VALUE;
         DWORD outputMode;
         if (!GetConsoleMode(hOutput, &outputMode)) {
-            hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+            hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, nullptr);
             hOutput = hConout;
         }
-        WriteFile(hOutput, request, (DWORD) strlen(request), &bytes, NULL);
+        WriteFile(hOutput, request, (DWORD) strlen(request), &bytes, nullptr);
     }
 
     while (true) {
@@ -441,7 +441,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true) {
         DWORD bytes = 0;
-        if (!ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, NULL) || bytes == 0) {
+        if (!ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, nullptr) || bytes == 0) {
             va_end(args);
             return "ReadFile() failed";
         }
@@ -473,7 +473,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     va_end(args);
 
-    return NULL;
+    return nullptr;
 }
 
 FFNativeFD ffGetNullFD(void) {
@@ -490,7 +490,7 @@ FFNativeFD ffGetNullFD(void) {
         0,
         &(SECURITY_ATTRIBUTES) {
             .nLength = sizeof(SECURITY_ATTRIBUTES),
-            .lpSecurityDescriptor = NULL,
+            .lpSecurityDescriptor = nullptr,
             .bInheritHandle = TRUE,
         });
     return hNullFile;

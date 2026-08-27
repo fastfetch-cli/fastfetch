@@ -1,20 +1,9 @@
 #include "gpu.h"
 #include "common/io.h"
+#include "common/path.h"
 #include "common/properties.h"
 #include "common/memrchr.h"
 #include "common/strutil.h"
-
-#include <stdlib.h>
-#ifdef __FreeBSD__
-    #include <paths.h>
-    #ifndef _PATH_LOCALBASE
-        #define _PATH_LOCALBASE "/usr/local"
-    #endif
-#elif __OpenBSD__
-    #define _PATH_LOCALBASE "/usr/local"
-#elif __NetBSD__
-    #define _PATH_LOCALBASE "/usr/pkg"
-#endif
 
 #if FF_HAVE_EMBEDDED_PCIIDS
     #include "fastfetch_pciids.c.inc"
@@ -46,9 +35,9 @@ static const FFstrbuf* loadPciIds() {
         }
     }
     #elif __OpenBSD__ || __FreeBSD__ || __NetBSD__
-    ffReadFileBuffer(_PATH_LOCALBASE "/share/hwdata/pci.ids", &pciids);
+    ffReadFileBuffer(FF_PATH_PKG_BASE "/share/hwdata/pci.ids", &pciids);
     if (pciids.length == 0) {
-        ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", &pciids);
+        ffReadFileBuffer(FF_PATH_PKG_BASE "/share/pciids/pci.ids", &pciids);
     }
     #elif __sun
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);

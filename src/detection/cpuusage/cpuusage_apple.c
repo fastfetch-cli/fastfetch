@@ -29,5 +29,5 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     }
 
     vm_deallocate(mach_task_self(), (vm_address_t) cpuInfo, numCpuInfo * sizeof(integer_t));
-    return NULL;
+    return nullptr;
 }

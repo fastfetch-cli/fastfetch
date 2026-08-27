@@ -18,7 +18,7 @@ FFDisplayResult* ffdsAppendDisplay(
     uint32_t physicalHeight,
     const char* platformApi) {
     if (width == 0 || height == 0) {
-        return NULL;
+        return nullptr;
     }
 
     FFDisplayResult* display = FF_LIST_ADD(FFDisplayResult, result->displays);

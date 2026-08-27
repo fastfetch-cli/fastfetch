@@ -4,7 +4,7 @@
 #include <iphlpapi.h>
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
-    PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
+    PMIB_IPFORWARD_TABLE2 pIpForwardTable = nullptr;
 
     if (!NETIO_SUCCESS(GetIpForwardTable2(AF_INET, &pIpForwardTable))) {
         return false;
@@ -48,7 +48,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 }
 
 bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
-    PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
+    PMIB_IPFORWARD_TABLE2 pIpForwardTable = nullptr;
 
     if (!NETIO_SUCCESS(GetIpForwardTable2(AF_INET6, &pIpForwardTable))) {
         return false;

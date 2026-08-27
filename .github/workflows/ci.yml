@@ -6,16 +6,16 @@ on:
 
 jobs:
   spellcheck:
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-spellcheck.yml
 
   no-features-test:
     needs: spellcheck
     name: No-features-test
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-no-features-test.yml
-    secrets: inherit
 
   linux-hosts:
     needs: no-features-test
@@ -34,40 +34,32 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
       runs-on: ${{ matrix.runs-on }}
-    secrets: inherit
 
   linux-i686:
     needs: no-features-test
     name: Linux-i686
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-linux-i686.yml
-    secrets: inherit
 
   linux-armv7l:
     needs: no-features-test
     name: Linux-armv7l
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-linux-armv7l.yml
-    secrets: inherit
 
-  linux-armv6l:
+  linux-loong64:
     needs: no-features-test
-    name: Linux-armv6l
+    name: Linux-loong64
     permissions:
-      security-events: write
       contents: read
-    uses: ./.github/workflows/build-linux-armv6l.yml
-    secrets: inherit
+    uses: ./.github/workflows/build-linux-loong64.yml
 
   linux-vms:
     needs: no-features-test
     name: Linux-${{ matrix.arch }}
     permissions:
-      security-events: write
       contents: read
     strategy:
       matrix:
@@ -78,19 +70,18 @@ jobs:
     uses: ./.github/workflows/build-linux-vms.yml
     with:
       arch: ${{ matrix.arch }}
-    secrets: inherit
 
   musl-amd64:
     needs: no-features-test
     name: Musl-amd64
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-musl-amd64.yml
-    secrets: inherit
 
   macos-hosts:
     needs: no-features-test
     name: macOS-${{ matrix.arch }}
     permissions:
-      security-events: write
       contents: read
     strategy:
       matrix:
@@ -103,71 +94,65 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
       runs-on: ${{ matrix.runs-on }}
-    secrets: inherit
 
   omnios-amd64:
     needs: no-features-test
     name: OmniOS-amd64
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-omnios-amd64.yml
-    secrets: inherit
 
   solaris-amd64:
     needs: no-features-test
     name: Solaris-amd64
+    permissions:
+      contents: read
     uses: ./.github/workflows/build-solaris-amd64.yml
-    secrets: inherit
 
   freebsd-amd64:
     needs: no-features-test
     name: FreeBSD-amd64
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-freebsd-amd64.yml
-    secrets: inherit
 
   openbsd-amd64:
     needs: no-features-test
     name: OpenBSD-amd64
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-openbsd-amd64.yml
-    secrets: inherit
 
   netbsd-amd64:
     needs: no-features-test
     name: NetBSD-amd64
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-netbsd-amd64.yml
-    secrets: inherit
 
   dragonfly-amd64:
     needs: no-features-test
     name: DragonFly-amd64
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-dragonfly-amd64.yml
-    secrets: inherit
 
   haiku-amd64:
+    if: false # Disabled because the Haiku build is currently broken
     needs: no-features-test
     name: Haiku-amd64
     permissions:
-      security-events: write
       contents: read
     uses: ./.github/workflows/build-haiku-amd64.yml
-    secrets: inherit
 
   windows-hosts:
     needs: no-features-test
     name: Windows-${{ matrix.arch }}
     permissions:
-      security-events: write
       contents: read
+      # The SignPath action reads job details and downloads the unsigned
+      # artifact with the workflow token.
+      actions: read
     strategy:
       matrix:
         include:
@@ -188,7 +173,19 @@ jobs:
       msystem: ${{ matrix.msystem }}
       msystem-lower: ${{ matrix.msystem-lower }}
       msys-arch: ${{ matrix.msys-arch }}
-    secrets: inherit
+    secrets:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+
+  benchmark:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && github.repository == 'fastfetch-cli/fastfetch'
+    name: Benchmark
+    needs:
+      - linux-hosts
+      - macos-hosts
+      - windows-hosts
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-benchmark.yml
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
@@ -197,7 +194,7 @@ jobs:
       - linux-hosts
       - linux-i686
       - linux-armv7l
-      - linux-armv6l
+      - linux-loong64
       - linux-vms
       - musl-amd64
       - macos-hosts
@@ -207,11 +204,10 @@ jobs:
       - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
-      - haiku-amd64
+      # - haiku-amd64
       - windows-hosts
     permissions:
       contents: write
     uses: ./.github/workflows/build-release.yml
     with:
       ffversion: ${{ needs.linux-hosts.outputs.ffversion }}
-    secrets: inherit

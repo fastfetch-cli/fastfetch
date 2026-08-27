@@ -425,7 +425,7 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel) {
             return "iMac (24/20-inch, Early 2009)";
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 #ifdef __x86_64__

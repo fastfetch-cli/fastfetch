@@ -42,15 +42,15 @@ static bool verifySignature(const wchar_t* filePath) {
         .dwProvFlags = WTD_SAFER_FLAG,
     };
 
-    LONG status = ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+    LONG status = ffWinVerifyTrustEx(nullptr, &actionID, &trustData);
     trustData.dwStateAction = WTD_STATEACTION_CLOSE;
-    ffWinVerifyTrustEx(NULL, &actionID, &trustData);
+    ffWinVerifyTrustEx(nullptr, &actionID, &trustData);
 
     return status == ERROR_SUCCESS;
 }
 
 static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE_STRING* buffer, size_t bufSize) {
-    FF_AUTO_CLOSE_FD HANDLE hProcess = NULL;
+    FF_AUTO_CLOSE_FD HANDLE hProcess = nullptr;
     if (!NT_SUCCESS(NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION, &(OBJECT_ATTRIBUTES) {
                                                                                     .Length = sizeof(OBJECT_ATTRIBUTES),
                                                                                 },
@@ -63,14 +63,14 @@ static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE
         buffer->Length == 0) {
         return false;
     }
-    assert(buffer->MaximumLength >= buffer->Length + 2); // NULL terminated
+    assert(buffer->MaximumLength >= buffer->Length + 2); // nullptr terminated
 
     if (processType & FF_PROCESS_TYPE_WINDOWS_STORE) {
         static wchar_t windowsAppsPath[MAX_PATH];
         static uint32_t windowsAppsPathLen;
         if (windowsAppsPathLen == 0) {
-            PWSTR pPath = NULL;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, NULL, &pPath))) {
+            PWSTR pPath = nullptr;
+            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, nullptr, &pPath))) {
                 windowsAppsPathLen = (uint32_t) wcslen(pPath);
                 memcpy(windowsAppsPath, pPath, windowsAppsPathLen * sizeof(wchar_t));
                 memcpy(windowsAppsPath + windowsAppsPathLen, L"\\WindowsApps\\", sizeof(L"\\WindowsApps\\"));
@@ -117,7 +117,7 @@ static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE
 const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
     alignas(UNICODE_STRING) uint8_t buffer[4096];
     UNICODE_STRING* filePath = (UNICODE_STRING*) buffer;
-    SYSTEM_PROCESS_INFORMATION* FF_AUTO_FREE pstart = NULL;
+    FF_AUTO_FREE SYSTEM_PROCESS_INFORMATION* pstart = nullptr;
 
     // Multiple attempts in case processes change while
     // we are in the middle of querying them.
@@ -138,11 +138,11 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
     }
 
     for (SYSTEM_PROCESS_INFORMATION* ptr = pstart;; ptr = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) ptr + ptr->NextEntryOffset)) {
-        assert(ptr->ImageName.Length == 0 || ptr->ImageName.MaximumLength >= ptr->ImageName.Length + 2); // NULL terminated
+        assert(ptr->ImageName.Length == 0 || ptr->ImageName.MaximumLength >= ptr->ImageName.Length + 2); // nullptr terminated
         if (ptr->ImageName.Length == strlen("FancyWM-GUI.exe") * sizeof(wchar_t) &&
             ffStrEqualNWS(ptr->ImageName.Buffer, "FancyWM-GUI.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_WINDOWS_STORE | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))) {
-            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName)) {
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, nullptr, pluginName)) {
                 ffStrbufPrependS(pluginName, "FancyWM ");
             } else {
                 ffStrbufSetStatic(pluginName, "FancyWM");
@@ -151,7 +151,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
         } else if (ptr->ImageName.Length == strlen("glazewm-watcher.exe") * sizeof(wchar_t) &&
             ffStrEqualNWS(ptr->ImageName.Buffer, "glazewm-watcher.exe") &&
             isProcessTrusted((DWORD) (uintptr_t) ptr->UniqueProcessId, FF_PROCESS_TYPE_SIGNED | FF_PROCESS_TYPE_GUI, filePath, sizeof(buffer))) {
-            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, NULL, pluginName)) {
+            if (instance.config.general.detectVersion && ffGetFileVersion(filePath->Buffer, nullptr, pluginName)) {
                 ffStrbufPrependS(pluginName, "GlazeWM ");
             } else {
                 ffStrbufSetStatic(pluginName, "GlazeWM");
@@ -165,8 +165,8 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
                 if (ffProcessAppendStdOut(pluginName, (char* const[]) {
                                                           path.chars,
                                                           "--version",
-                                                          NULL,
-                                                      }) == NULL) {
+                                                          nullptr,
+                                                      }) == nullptr) {
                     ffStrbufSubstrBeforeFirstC(pluginName, '\n');
                 }
             }
@@ -181,24 +181,24 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNUSED FFWMOptions* options) {
+const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     if (!wmName) {
         return "No WM detected";
     }
 
     if (ffStrbufEqualS(wmName, "dwm.exe")) {
-        PWSTR pPath = NULL;
-        if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_System, KF_FLAG_DEFAULT, NULL, &pPath))) {
+        PWSTR pPath = nullptr;
+        if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_System, KF_FLAG_DEFAULT, nullptr, &pPath))) {
             wchar_t fullPath[MAX_PATH];
             wcscpy(fullPath, pPath);
             wcscat(fullPath, L"\\dwm.exe");
-            ffGetFileVersion(fullPath, NULL, result);
+            ffGetFileVersion(fullPath, nullptr, result);
         }
         CoTaskMemFree(pPath);
-        return NULL;
+        return nullptr;
     }
     return "Not supported on this platform";
 }

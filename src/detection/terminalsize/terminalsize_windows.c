@@ -9,7 +9,7 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
     {
         DWORD outputMode;
         if (!GetConsoleMode(hOutput, &outputMode)) {
-            hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+            hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, nullptr);
             hOutput = hConout;
         }
     }

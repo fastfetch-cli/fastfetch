@@ -86,7 +86,7 @@ static const char* smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t* i
     if (IOConnectCallStructMethod(conn, selector, inputStructure, size, outputStructure, &size) != kIOReturnSuccess) {
         return "IOConnectCallStructMethod(conn) failed";
     }
-    return NULL;
+    return nullptr;
 }
 
 // Provides key info, using a cache to dramatically improve the energy impact of smcFanControl
@@ -103,7 +103,7 @@ static const char* smcGetKeyInfo(io_connect_t conn, const uint32_t key, SmcKeyDa
     }
 
     *key_info = outputStructure.keyInfo;
-    return NULL;
+    return nullptr;
 }
 
 static const char* smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcVal_t* val) {
@@ -130,7 +130,7 @@ static const char* smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 
     memcpy(val->bytes, outputStructure.bytes, sizeof(outputStructure.bytes));
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* smcOpen(io_connect_t* conn) {
@@ -143,13 +143,13 @@ static const char* smcOpen(io_connect_t* conn) {
         return "IOServiceOpen() failed";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, double* value) {
     SmcVal_t val = { 0 };
     const char* error = smcReadSmcVal(conn, key, &val);
-    if (error != NULL) {
+    if (error != nullptr) {
         return error;
     }
     if (val.dataSize == 0) {
@@ -270,7 +270,7 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
         default:
             return "Unsupported SMC data type";
     }
-    return NULL;
+    return nullptr;
 }
 
 static bool detectTemp(io_connect_t conn, const char* sensor, double* sum) {
@@ -291,7 +291,7 @@ static io_connect_t conn;
 
 const char* ffDetectSmcSpecificTemp(const char* sensor, double* result) {
     if (!conn) {
-        if (smcOpen(&conn) != NULL) {
+        if (smcOpen(&conn) != nullptr) {
             conn = (io_connect_t) -1;
         }
     }
@@ -303,12 +303,12 @@ const char* ffDetectSmcSpecificTemp(const char* sensor, double* result) {
         return "Could not read SMC temperature";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
     if (!conn) {
-        if (smcOpen(&conn) != NULL) {
+        if (smcOpen(&conn) != nullptr) {
             conn = (io_connect_t) -1;
         }
     }
@@ -392,6 +392,27 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tp0e", result); // CPU performance core 8
             break;
 
+        case FF_TEMP_CPU_M5X:
+            count += detectTemp(conn, "Tp00", result); // CPU super core 1
+            count += detectTemp(conn, "Tp04", result); // CPU super core 2
+            count += detectTemp(conn, "Tp08", result); // CPU super core 3
+            count += detectTemp(conn, "Tp0C", result); // CPU super core 4
+            count += detectTemp(conn, "Tp0G", result); // CPU super core 5
+            count += detectTemp(conn, "Tp0K", result); // CPU super core 6
+            count += detectTemp(conn, "Tp0O", result); // CPU performance core 1
+            count += detectTemp(conn, "Tp0R", result); // CPU performance core 2
+            count += detectTemp(conn, "Tp0U", result); // CPU performance core 3
+            count += detectTemp(conn, "Tp0X", result); // CPU performance core 4
+            count += detectTemp(conn, "Tp0a", result); // CPU performance core 5
+            count += detectTemp(conn, "Tp0d", result); // CPU performance core 6
+            count += detectTemp(conn, "Tp0g", result); // CPU performance core 7
+            count += detectTemp(conn, "Tp0j", result); // CPU performance core 8
+            count += detectTemp(conn, "Tp0m", result); // CPU performance core 9
+            count += detectTemp(conn, "Tp0p", result); // CPU performance core 10
+            count += detectTemp(conn, "Tp0u", result); // CPU performance core 11
+            count += detectTemp(conn, "Tp0y", result); // CPU performance core 12
+            break;
+
         case FF_TEMP_GPU_INTEL:
             count += detectTemp(conn, "TCGC", result); // GPU Intel Graphics
             goto gpu_unknown;
@@ -442,6 +463,17 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tg0k", result); // GPU 8
             break;
 
+        case FF_TEMP_GPU_M5X:
+            count += detectTemp(conn, "Tg0U", result); // GPU 1
+            count += detectTemp(conn, "Tg0X", result); // GPU 2
+            count += detectTemp(conn, "Tg0d", result); // GPU 3
+            count += detectTemp(conn, "Tg0g", result); // GPU 4
+            count += detectTemp(conn, "Tg0j", result); // GPU 5
+            count += detectTemp(conn, "Tg1Y", result); // GPU 6
+            count += detectTemp(conn, "Tg1c", result); // GPU 7
+            count += detectTemp(conn, "Tg1g", result); // GPU 8
+            break;
+
         case FF_TEMP_BATTERY:
             count += detectTemp(conn, "TB1T", result); // Battery
             count += detectTemp(conn, "TB2T", result); // Battery
@@ -452,6 +484,9 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             count += detectTemp(conn, "Tm06", result); // Memory 2
             count += detectTemp(conn, "Tm08", result); // Memory 3
             count += detectTemp(conn, "Tm09", result); // Memory 4
+            count += detectTemp(conn, "Tm0p", result); // Memory Proximity 1 (M4)
+            count += detectTemp(conn, "Tm1p", result); // Memory Proximity 2 (M4)
+            count += detectTemp(conn, "Tm2p", result); // Memory Proximity 3 (M4)
             break;
     }
 
@@ -461,5 +496,5 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
 
     *result /= count;
 
-    return NULL;
+    return nullptr;
 }

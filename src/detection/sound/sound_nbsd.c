@@ -54,5 +54,5 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
         device->type = FF_SOUND_TYPE_ACTIVE | (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE);
     }
 
-    return NULL;
+    return nullptr;
 }

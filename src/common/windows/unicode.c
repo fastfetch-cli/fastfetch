@@ -9,7 +9,7 @@ void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source) {
     }
 
     ULONG size_needed = 0;
-    NTSTATUS status = RtlUnicodeToUTF8N(NULL, 0, &size_needed, source, length * sizeof(wchar_t));
+    NTSTATUS status = RtlUnicodeToUTF8N(nullptr, 0, &size_needed, source, length * sizeof(wchar_t));
 
     if (size_needed == 0) {
         ffStrbufSetF(result, "RtlUnicodeToUTF8N failed: %X", (unsigned) status);
@@ -29,7 +29,7 @@ void ffStrbufAppendNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
     }
 
     ULONG size_needed = 0;
-    NTSTATUS status = RtlUnicodeToUTF8N(NULL, 0, &size_needed, source, length * sizeof(wchar_t));
+    NTSTATUS status = RtlUnicodeToUTF8N(nullptr, 0, &size_needed, source, length * sizeof(wchar_t));
 
     if (size_needed == 0) {
         ffStrbufAppendF(result, "RtlUnicodeToUTF8N failed: %X", (unsigned) status);

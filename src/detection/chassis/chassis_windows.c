@@ -2,7 +2,7 @@
 #include "common/smbios.h"
 
 // 7.4
-typedef struct FFSmbiosSystemEnclosure {
+typedef struct [[gnu::packed]] FFSmbiosSystemEnclosure {
     FFSmbiosHeader Header;
 
     uint8_t Manufacturer;   // string
@@ -24,7 +24,7 @@ typedef struct FFSmbiosSystemEnclosure {
     uint8_t ContainedElementCount; // varies
     uint8_t ContainedRecordLength; // varies
     uint8_t ContainedElements[];   // varies
-} FF_A_PACKED FFSmbiosSystemEnclosure;
+} FFSmbiosSystemEnclosure;
 
 static_assert(offsetof(FFSmbiosSystemEnclosure, ContainedElements) == 0x15,
     "FFSmbiosSystemEnclosure: Wrong struct alignment");
@@ -50,5 +50,5 @@ const char* ffDetectChassis(FFChassisResult* result) {
     ffCleanUpSmbiosValue(&result->version);
     ffStrbufSetStatic(&result->type, ffChassisTypeToString(data->Type));
 
-    return NULL;
+    return nullptr;
 }

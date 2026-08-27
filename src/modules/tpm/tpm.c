@@ -12,19 +12,19 @@ bool ffPrintTPM(FFTPMOptions* options) {
     const char* error = ffDetectTPM(&result);
 
     if (error) {
-        ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.description.length > 0) {
             ffStrbufPutTo(&result.description, stdout);
         } else {
             ffStrbufPutTo(&result.version, stdout);
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                         FF_ARG(result.version, "version"),
                                                                                                         FF_ARG(result.description, "description"),
                                                                                                     }));
@@ -44,7 +44,7 @@ void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TPM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -52,7 +52,7 @@ void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTPMJsonResult(FF_A_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTPMJsonResult([[maybe_unused]] FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
         .description = ffStrbufCreate()
@@ -83,8 +83,30 @@ void ffDestroyTPMOptions(FFTPMOptions* options) {
 }
 
 FFModuleBaseInfo ffTPMModuleInfo = {
-    .name = FF_TPM_MODULE_NAME,
+    .name = "TPM",
     .description = "Print information about the Trusted Platform Module (TPM) security device",
+    .displayName = {
+        .en = "TPM",
+        .ar = "TPM",
+        .cs = "TPM",
+        .de = "TPM",
+        .es = "TPM",
+        .fr = "TPM",
+        .gl = "TPM",
+        .he = "TPM",
+        .id = "TPM",
+        .it = "TPM",
+        .ja = "TPM",
+        .ko = "TPM",
+        .pl = "TPM",
+        .pt = "TPM",
+        .ru = "TPM",
+        .tr = "TPM",
+        .uk = "TPM",
+        .vi = "TPM",
+        .zh_CN = "TPM",
+        .zh_TW = "TPM",
+    },
     .initOptions = (void*) ffInitTPMOptions,
     .destroyOptions = (void*) ffDestroyTPMOptions,
     .parseJsonObject = (void*) ffParseTPMJsonObject,
@@ -94,5 +116,6 @@ FFModuleBaseInfo ffTPMModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "TPM device version", "version" },
         { "TPM general description", "description" },
-    }))
+    })),
+    .defaultOrder = 69,
 };

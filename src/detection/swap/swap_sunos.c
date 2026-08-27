@@ -28,5 +28,5 @@ const char* ffDetectSwap(FFlist* result) {
         swap->bytesUsed = swap->bytesTotal - (uint64_t) table->swt_ent[i].ste_free * pageSize;
     }
 
-    return NULL;
+    return nullptr;
 }

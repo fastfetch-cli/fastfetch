@@ -47,5 +47,5 @@ const char* ffDetectTPM(FFTPMResult* result) {
             break;
     }
 
-    return NULL;
+    return nullptr;
 }

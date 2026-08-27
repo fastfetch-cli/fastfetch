@@ -5,26 +5,26 @@
 #include "common/FFstrbuf.h"
 #include "common/FFlist.h"
 
-typedef enum FF_A_PACKED FFSizeBinaryPrefixType {
+typedef enum FFSizeBinaryPrefixType: uint8_t {
     FF_SIZE_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
     FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 kB, 1000 kB = 1 MB, ...
     FF_SIZE_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 KB, 1024 KB = 1 MB, ...
 } FFSizeBinaryPrefixType;
 
-typedef enum FF_A_PACKED FFTemperatureUnit {
+typedef enum FFTemperatureUnit: uint8_t {
     FF_TEMPERATURE_UNIT_DEFAULT,
     FF_TEMPERATURE_UNIT_CELSIUS,
     FF_TEMPERATURE_UNIT_FAHRENHEIT,
     FF_TEMPERATURE_UNIT_KELVIN,
 } FFTemperatureUnit;
 
-typedef enum FF_A_PACKED FFSpaceBeforeUnitType {
+typedef enum FFSpaceBeforeUnitType: uint8_t {
     FF_SPACE_BEFORE_UNIT_DEFAULT,
     FF_SPACE_BEFORE_UNIT_ALWAYS,
     FF_SPACE_BEFORE_UNIT_NEVER,
 } FFSpaceBeforeUnitType;
 
-typedef enum FF_A_PACKED FFFractionTrailingZerosType {
+typedef enum FFFractionTrailingZerosType: uint8_t {
     FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT,
     FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS,
     FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER,
@@ -80,6 +80,7 @@ typedef struct FFOptionsDisplay {
     uint8_t percentWidth;
     bool noBuffer;
     FFModuleKeyType keyType;
+    uint32_t keyLanguage; // Offset of FFModuleDisplayName member
     uint16_t keyWidth;
     uint16_t keyPaddingLeft;
     int8_t freqNdigits;

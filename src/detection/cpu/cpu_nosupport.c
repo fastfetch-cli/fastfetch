@@ -1,5 +1,5 @@
 #include "cpu.h"
 
-const char* ffDetectCPUImpl(FF_A_UNUSED const FFCPUOptions* options, FF_A_UNUSED FFCPUResult* cpu) {
+const char* ffDetectCPUImpl([[maybe_unused]] const FFCPUOptions* options, [[maybe_unused]] FFCPUResult* cpu) {
     return "Not supported on this platform";
 }

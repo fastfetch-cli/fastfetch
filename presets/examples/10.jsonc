@@ -42,12 +42,12 @@
         },
         {
             "type": "kernel",
-            "key": "│ ├",
+            "key": "│ ├{icon}",
             "keyColor": "yellow"
         },
         {
             "type": "packages",
-            "key": "│ ├󰏖",
+            "key": "│ ├{icon}",
             "keyColor": "yellow"
         },
         {
@@ -62,22 +62,22 @@
         },
         {
             "type": "lm",
-            "key": "│ ├󰧨",
+            "key": "│ ├{icon}",
             "keyColor": "blue"
         },
         {
             "type": "wmtheme",
-            "key": "│ ├󰉼",
+            "key": "│ ├{icon}",
             "keyColor": "blue"
         },
         {
             "type": "icons",
-            "key": "│ ├󰀻",
+            "key": "│ ├{icon}",
             "keyColor": "blue"
         },
         {
             "type": "terminal",
-            "key": "│ ├",
+            "key": "│ ├{icon}",
             "keyColor": "blue"
         },
         {
@@ -92,32 +92,32 @@
         },
         {
             "type": "cpu",
-            "key": "│ ├󰻠",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
             "type": "gpu",
-            "key": "│ ├󰍛",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
             "type": "disk",
-            "key": "│ ├",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
             "type": "memory",
-            "key": "│ ├󰑭",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
             "type": "swap",
-            "key": "│ ├󰓡",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
             "type": "uptime",
-            "key": "│ ├󰅐",
+            "key": "│ ├{icon}",
             "keyColor": "green"
         },
         {
@@ -132,7 +132,7 @@
         },
         {
             "type": "player",
-            "key": "│ ├󰥠",
+            "key": "│ ├{icon}",
             "keyColor": "cyan"
         },
         {

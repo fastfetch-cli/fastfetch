@@ -27,7 +27,7 @@ const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu) {
     ffCPUDetectX86Specific(cpu);
 #endif
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffCPUAppleCodeToName(uint32_t code) {
@@ -63,7 +63,7 @@ const char* ffCPUAppleCodeToName(uint32_t code) {
         case 6041:
             return "Apple M4 Max";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -79,7 +79,7 @@ const char* ffCPUQualcommCodeToName(uint32_t code) {
         case 8280:
             return "Qualcomm Snapdragon 8cx Gen 3";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -299,7 +299,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
     uint64_t caps[2] = { 0 }; // 80-bit capability mask, split into two 64-bit values
     size_t size = sizeof(caps);
 
-    if (sysctlbyname("hw.optional.arm.caps", caps, &size, NULL, 0) != 0) {
+    if (sysctlbyname("hw.optional.arm.caps", caps, &size, nullptr, 0) != 0) {
         return;
     }
 
@@ -510,14 +510,14 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
     }
 }
     #else
-void ffCPUDetectByCpuid(FF_A_UNUSED FFCPUResult* cpu) {
+void ffCPUDetectByCpuid([[maybe_unused]] FFCPUResult* cpu) {
     // Unsupported system
 }
     #endif
 
 #else
 
-void ffCPUDetectByCpuid(FF_A_UNUSED FFCPUResult* cpu) {
+void ffCPUDetectByCpuid([[maybe_unused]] FFCPUResult* cpu) {
     // Unsupported architecture
 }
 

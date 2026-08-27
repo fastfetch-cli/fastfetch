@@ -15,18 +15,18 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     io_registry_entry_t registryEntry;
     while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryBattery = registryEntry;
-        FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
+        FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = nullptr;
         if (IORegistryEntryCreateCFProperties(entryBattery, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
             continue;
         }
 
         int currentCapacity, maxCapacity;
 
-        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity) != NULL || maxCapacity <= 0) {
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity) != nullptr || maxCapacity <= 0) {
             continue;
         }
 
-        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity) != NULL || currentCapacity <= 0) {
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity) != nullptr || currentCapacity <= 0) {
             continue;
         }
 
@@ -63,7 +63,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         battery->cycleCount = cycleCount < 0 ? 0 : (uint32_t) cycleCount;
 
         battery->timeRemaining = -1;
-        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) == NULL) {
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) == nullptr) {
             if (boolValue) {
                 battery->status |= FF_BATTERY_STATUS_AC_CONNECTED;
             } else {
@@ -76,24 +76,24 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
                 }
             }
         }
-        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) == NULL && boolValue) {
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) == nullptr && boolValue) {
             battery->status |= FF_BATTERY_STATUS_CHARGING;
         }
-        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) == NULL && boolValue) {
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) == nullptr && boolValue) {
             battery->status |= FF_BATTERY_STATUS_CRITICAL;
         }
 
         int sbdsManufactureDate = 0;
-        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSManufactureDateKey), &sbdsManufactureDate) == NULL) {
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSManufactureDateKey), &sbdsManufactureDate) == nullptr) {
             int day = sbdsManufactureDate & 0b11111;
             int month = (sbdsManufactureDate >> 5) & 0b1111;
             int year = (sbdsManufactureDate >> 9) + 1800;
             ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
         } else {
             CFDictionaryRef batteryData;
-            if (ffCfDictGetDict(properties, CFSTR("BatteryData"), &batteryData) == NULL) {
+            if (ffCfDictGetDict(properties, CFSTR("BatteryData"), &batteryData) == nullptr) {
                 char manufactureDate[sizeof(uint64_t)];
-                if (ffCfDictGetInt64(batteryData, CFSTR(kIOPMPSManufactureDateKey), (int64_t*) manufactureDate) == NULL) {
+                if (ffCfDictGetInt64(batteryData, CFSTR(kIOPMPSManufactureDateKey), (int64_t*) manufactureDate) == nullptr) {
                     // https://github.com/AsahiLinux/linux/blob/b5c05cbffb0488c7618106926d522cc3b43d93d5/drivers/power/supply/macsmc_power.c#L410-L419
                     int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
                     int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
@@ -113,5 +113,5 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

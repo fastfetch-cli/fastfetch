@@ -16,7 +16,7 @@ static inline bool allValuesSet(const FFQtResult* result) {
         result->wallpaper.length > 0;
 }
 
-typedef enum FF_A_PACKED PlasmaCategory {
+typedef enum PlasmaCategory: uint8_t {
     PLASMA_CATEGORY_GENERAL,
     PLASMA_CATEGORY_KDE,
     PLASMA_CATEGORY_ICONS,
@@ -25,11 +25,11 @@ typedef enum FF_A_PACKED PlasmaCategory {
 
 static bool detectPlasmaFromFile(const char* filename, FFQtResult* result) {
     FILE* kdeglobals = fopen(filename, "r");
-    if (kdeglobals == NULL) {
+    if (kdeglobals == nullptr) {
         return false;
     }
 
-    char* line = NULL;
+    char* line = nullptr;
     size_t len = 0;
 
     PlasmaCategory category = PLASMA_CATEGORY_OTHER;
@@ -153,7 +153,7 @@ static void detectQtCt(char qver, FFQtResult* result) {
 
         while (*p) {
             if (p[0] == '\\' && p[1] == 'x' && isxdigit(p[2]) && isxdigit(p[3]) && isxdigit(p[4]) && isxdigit(p[5])) {
-                uint32_t codepoint = (uint32_t) strtoul((char[]) { p[2], p[3], p[4], p[5], '\0' }, NULL, 16);
+                uint32_t codepoint = (uint32_t) strtoul((char[]) { p[2], p[3], p[4], p[5], '\0' }, nullptr, 16);
                 ffStrbufAppendUtf32CodePoint(&result->font, codepoint);
                 p += 6;
             } else {

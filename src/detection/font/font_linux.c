@@ -49,5 +49,5 @@ const char* ffDetectFontImpl(FFFontResult* result) {
 
     generateString(result);
 
-    return NULL;
+    return nullptr;
 }

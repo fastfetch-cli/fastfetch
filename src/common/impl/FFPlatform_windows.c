@@ -21,10 +21,10 @@ static void getExePath(FFPlatform* platform) {
         ffGetPeb()->ProcessParameters->ImagePathName.Buffer,
         GENERIC_READ,
         FILE_SHARE_READ,
-        NULL,
+        nullptr,
         OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS,
-        NULL);
+        nullptr);
     if (hPath != INVALID_HANDLE_VALUE) {
         DWORD len = GetFinalPathNameByHandleW(hPath, exePathW, MAX_PATH, FILE_NAME_NORMALIZED);
         if (len > 0 && len < MAX_PATH) {
@@ -44,8 +44,8 @@ static void getExePath(FFPlatform* platform) {
 }
 
 static void getHomeDir(FFPlatform* platform) {
-    PWSTR pPath = NULL;
-    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_Profile, KF_FLAG_DEFAULT, NULL, &pPath))) {
+    PWSTR pPath = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_Profile, KF_FLAG_DEFAULT, nullptr, &pPath))) {
         ffStrbufSetWS(&platform->homeDir, pPath);
         ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
@@ -58,8 +58,8 @@ static void getHomeDir(FFPlatform* platform) {
 }
 
 static void getCacheDir(FFPlatform* platform) {
-    PWSTR pPath = NULL;
-    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, NULL, &pPath))) {
+    PWSTR pPath = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &pPath))) {
         ffStrbufSetWS(&platform->cacheDir, pPath);
         ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
@@ -71,8 +71,8 @@ static void getCacheDir(FFPlatform* platform) {
 }
 
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId) {
-    PWSTR pPath = NULL;
-    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, NULL, &pPath))) {
+    PWSTR pPath = nullptr;
+    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &pPath))) {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
         CoTaskMemFree(pPath);
         ffStrbufReplaceAllC(&buffer, '\\', '/');
@@ -107,7 +107,7 @@ static void getConfigDirs(FFPlatform* platform) {
     if (getenv("MSYSTEM")) {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->configDirs, "HOME", ".config/");
-        platformPathAddEnvSuffix(&platform->configDirs, "HOME", NULL);
+        platformPathAddEnvSuffix(&platform->configDirs, "HOME", nullptr);
         platformPathAddEnvSuffix(&platform->configDirs, "MINGW_PREFIX", "etc");
     }
 
@@ -122,7 +122,7 @@ static void getDataDirs(FFPlatform* platform) {
     if (getenv("MSYSTEM") && getenv("HOME")) {
         // We are in MSYS2 / Git Bash
         platformPathAddEnvSuffix(&platform->dataDirs, "HOME", ".local/share/");
-        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", NULL);
+        platformPathAddEnvSuffix(&platform->dataDirs, "HOME", nullptr);
         platformPathAddEnvSuffix(&platform->dataDirs, "MINGW_PREFIX", "share");
     }
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
@@ -142,8 +142,8 @@ static void getUserName(FFPlatform* platform) {
     NTSYSAPI NTSTATUS NTAPI LsaGetUserName(
         _Outptr_ PLSA_UNICODE_STRING * UserName,
         _Outptr_opt_ PLSA_UNICODE_STRING * DomainName);
-    PLSA_UNICODE_STRING userName = NULL;
-    if (NT_SUCCESS(LsaGetUserName(&userName, NULL))) {
+    PLSA_UNICODE_STRING userName = nullptr;
+    if (NT_SUCCESS(LsaGetUserName(&userName, nullptr))) {
         ffStrbufSetNWS(&platform->userName, userName->Length / sizeof(wchar_t), userName->Buffer);
         RtlFreeUnicodeString(userName); // Required. userName.Buffer is allocated separately
         LsaFreeMemory(userName);
@@ -187,18 +187,18 @@ static const char* detectWine(void) {
     const char* __cdecl wine_get_version(void);
     void* hntdll = ffLibraryGetModule(L"ntdll.dll");
     if (!hntdll) {
-        return NULL;
+        return nullptr;
     }
     FF_LIBRARY_LOAD_SYMBOL_LAZY(hntdll, wine_get_version);
     if (!ffwine_get_version) {
-        return NULL;
+        return nullptr;
     }
     return ffwine_get_version();
 }
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info) {
-    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL)) {
+    FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, nullptr)) {
         return;
     }
 
@@ -207,7 +207,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info) {
                                  FF_ARG(ubr, L"UBR"),
                                  FF_ARG(info->version, L"BuildLabEx"),
                              },
-        NULL);
+        nullptr);
 
     PPEB_FULL peb = ffGetPeb();
 
@@ -228,7 +228,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info) {
 
 static void getSystemPageSize(FFPlatformSysinfo* info) {
     SYSTEM_BASIC_INFORMATION sbi;
-    if (NT_SUCCESS(NtQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), NULL))) {
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), nullptr))) {
         info->pageSize = sbi.PhysicalPageSize;
     } else {
         info->pageSize = 4096;
@@ -236,54 +236,38 @@ static void getSystemPageSize(FFPlatformSysinfo* info) {
 }
 
 static void getSystemArchitecture(FFPlatformSysinfo* info) {
-    SYSTEM_PROCESSOR_INFORMATION spi;
-    if (NT_SUCCESS(NtQuerySystemInformation(SystemProcessorInformation, &spi, sizeof(spi), NULL))) {
-        switch (spi.ProcessorArchitecture) {
-            case PROCESSOR_ARCHITECTURE_AMD64:
-                ffStrbufSetStatic(&info->architecture, "x86_64");
-                break;
-            case PROCESSOR_ARCHITECTURE_IA64:
-                ffStrbufSetStatic(&info->architecture, "ia64");
-                break;
-            case PROCESSOR_ARCHITECTURE_INTEL:
-                switch (spi.ProcessorLevel) {
-                    case 4:
-                        ffStrbufSetStatic(&info->architecture, "i486");
-                        break;
-                    case 5:
-                        ffStrbufSetStatic(&info->architecture, "i586");
-                        break;
-                    case 6:
-                        ffStrbufSetStatic(&info->architecture, "i686");
-                        break;
-                    default:
-                        ffStrbufSetStatic(&info->architecture, "i386");
-                        break;
-                }
-                break;
-            case PROCESSOR_ARCHITECTURE_ARM64:
-                ffStrbufSetStatic(&info->architecture, "aarch64");
-                break;
-            case PROCESSOR_ARCHITECTURE_ARM:
-                ffStrbufSetStatic(&info->architecture, "arm");
-                break;
-            case PROCESSOR_ARCHITECTURE_PPC:
-                ffStrbufSetStatic(&info->architecture, "ppc");
-                break;
-            case PROCESSOR_ARCHITECTURE_MIPS:
-                ffStrbufSetStatic(&info->architecture, "mips");
-                break;
-            case PROCESSOR_ARCHITECTURE_ALPHA:
-                ffStrbufSetStatic(&info->architecture, "alpha");
-                break;
-            case PROCESSOR_ARCHITECTURE_ALPHA64:
-                ffStrbufSetStatic(&info->architecture, "alpha64");
-                break;
-            case PROCESSOR_ARCHITECTURE_UNKNOWN:
-            default:
-                ffStrbufSetStatic(&info->architecture, "unknown");
-                break;
-        }
+    switch (SharedUserData->NativeProcessorArchitecture) {
+        case PROCESSOR_ARCHITECTURE_AMD64:
+            ffStrbufSetStatic(&info->architecture, "x86_64");
+            break;
+        case PROCESSOR_ARCHITECTURE_IA64:
+            ffStrbufSetStatic(&info->architecture, "ia64");
+            break;
+        case PROCESSOR_ARCHITECTURE_INTEL:
+            ffStrbufSetStatic(&info->architecture, "i686");
+            break;
+        case PROCESSOR_ARCHITECTURE_ARM64:
+            ffStrbufSetStatic(&info->architecture, "aarch64");
+            break;
+        case PROCESSOR_ARCHITECTURE_ARM:
+            ffStrbufSetStatic(&info->architecture, "arm");
+            break;
+        case PROCESSOR_ARCHITECTURE_PPC:
+            ffStrbufSetStatic(&info->architecture, "ppc");
+            break;
+        case PROCESSOR_ARCHITECTURE_MIPS:
+            ffStrbufSetStatic(&info->architecture, "mips");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA:
+            ffStrbufSetStatic(&info->architecture, "alpha");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA64:
+            ffStrbufSetStatic(&info->architecture, "alpha64");
+            break;
+        case PROCESSOR_ARCHITECTURE_UNKNOWN:
+        default:
+            ffStrbufSetStatic(&info->architecture, "unknown");
+            break;
     }
 }
 

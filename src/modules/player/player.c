@@ -6,18 +6,16 @@
 
 #include <ctype.h>
 
-#define FF_PLAYER_DISPLAY_NAME "Media Player"
-
 bool ffPrintPlayer(FFPlayerOptions* options) {
     const FFMediaResult* media = ffDetectMedia(false);
 
     if (media->error.length > 0) {
-        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return false;
     }
 
     if (media->player.length == 0) {
-        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No media player detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No media player detected");
         return false;
     }
 
@@ -65,10 +63,10 @@ bool ffPrintPlayer(FFPlayerOptions* options) {
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&playerPretty, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(playerPretty, "player"),
                                                                                                             FF_ARG(media->player, "name"),
                                                                                                             FF_ARG(media->playerId, "id"),
@@ -87,7 +85,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Player), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -95,7 +93,7 @@ void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGeneratePlayerJsonResult(FF_A_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePlayerJsonResult([[maybe_unused]] FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     yyjson_mut_obj_add_str(doc, module, "error", "Player module is an alias of Media module");
     return false;
 }
@@ -109,8 +107,30 @@ void ffDestroyPlayerOptions(FFPlayerOptions* options) {
 }
 
 FFModuleBaseInfo ffPlayerModuleInfo = {
-    .name = FF_PLAYER_MODULE_NAME,
+    .name = "Player",
     .description = "Print the music player name that is currently active",
+    .displayName = {
+        .en = "Media Player",
+        .ar = "مشغل الوسائط",
+        .cs = "Přehrávač médií",
+        .de = "Medienplayer",
+        .es = "Reproductor multimedia",
+        .fr = "Lecteur multimédia",
+        .gl = "Reprodutor multimedia",
+        .he = "נגן מדיה",
+        .id = "Pemutar Media",
+        .it = "Lettore multimediale",
+        .ja = "メディアプレイヤー",
+        .ko = "미디어 플레이어",
+        .pl = "Odtwarzacz multimediów",
+        .pt = "Reprodutor de mídia",
+        .ru = "Медиаплеер",
+        .tr = "Medya Oynatıcı",
+        .uk = "Медіаплеєр",
+        .vi = "Trình phát phương tiện",
+        .zh_CN = "媒体播放器",
+        .zh_TW = "媒體播放器",
+    },
     .initOptions = (void*) ffInitPlayerOptions,
     .destroyOptions = (void*) ffDestroyPlayerOptions,
     .parseJsonObject = (void*) ffParsePlayerJsonObject,
@@ -122,5 +142,6 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         { "Player name", "name" },
         { "Player Identifier", "id" },
         { "URL name", "url" },
-    }))
+    })),
+    .defaultOrder = 46,
 };

@@ -11,9 +11,9 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (result->modelName.length > 0) {
-            ffStrbufSetF(&key, "%s (%s)", FF_BATTERY_MODULE_NAME, result->modelName.chars);
+            ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Battery), result->modelName.chars);
         } else {
-            ffStrbufSetS(&key, FF_BATTERY_MODULE_NAME);
+            ffStrbufSetS(&key, FF_MODULE_GET_DISPLAY_NAME(Battery));
         }
     } else {
         ffStrbufClear(&key);
@@ -121,36 +121,35 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffDurationAppendNum((uint32_t) result->timeRemaining, &timeStr);
         }
 
-        FF_STRBUF_AUTO_DESTROY statusStr = ffStrbufCreate();
+        FF_LIST_AUTO_DESTROY status = ffListCreate();
         if (result->status & FF_BATTERY_STATUS_AC_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "AC Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "AC Connected");
         }
         if (result->status & FF_BATTERY_STATUS_USB_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "USB Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "USB Connected");
         }
         if (result->status & FF_BATTERY_STATUS_WIRELESS_CONNECTED) {
-            ffStrbufAppendS(&statusStr, "Wireless Connected, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Wireless Connected");
         }
         if (result->status & FF_BATTERY_STATUS_CHARGING) {
-            ffStrbufAppendS(&statusStr, "Charging, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Charging");
         }
         if (result->status & FF_BATTERY_STATUS_DISCHARGING) {
-            ffStrbufAppendS(&statusStr, "Discharging, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Discharging");
         }
         if (result->status & FF_BATTERY_STATUS_CRITICAL) {
-            ffStrbufAppendS(&statusStr, "Critical, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Critical");
         }
         if (result->status & FF_BATTERY_STATUS_UNKNOWN) {
-            ffStrbufAppendS(&statusStr, "Unknown, ");
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, status), "Unknown");
         }
-        ffStrbufSubstrBefore(&statusStr, statusStr.length - 2); // Remove last ", "
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                      FF_ARG(result->manufacturer, "manufacturer"),
                                                                                                      FF_ARG(result->modelName, "model-name"),
                                                                                                      FF_ARG(result->technology, "technology"),
                                                                                                      FF_ARG(capacityNum, "capacity"),
-                                                                                                     FF_ARG(statusStr, "status"),
+                                                                                                     FF_ARG(status, "status"),
                                                                                                      FF_ARG(tempStr, "temperature"),
                                                                                                      FF_ARG(result->cycleCount, "cycle-count"),
                                                                                                      FF_ARG(result->serial, "serial"),
@@ -171,11 +170,11 @@ bool ffPrintBattery(FFBatteryOptions* options) {
     const char* error = ffDetectBattery(options, &results);
 
     if (error) {
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
     if (results.length == 0) {
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
         return false;
     }
 
@@ -210,7 +209,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -298,8 +297,30 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options) {
 }
 
 FFModuleBaseInfo ffBatteryModuleInfo = {
-    .name = FF_BATTERY_MODULE_NAME,
+    .name = "Battery",
     .description = "Print battery information",
+    .displayName = {
+        .en = "Battery",
+        .ar = "البطارية",
+        .cs = "Baterie",
+        .de = "Akku",
+        .es = "Batería",
+        .fr = "Batterie",
+        .gl = "Batería",
+        .he = "סוללה",
+        .id = "Baterai",
+        .it = "Batteria",
+        .ja = "バッテリー",
+        .ko = "배터리",
+        .pl = "Bateria",
+        .pt = "Bateria",
+        .ru = "Батарея",
+        .tr = "Pil",
+        .uk = "Батарея",
+        .vi = "Pin",
+        .zh_CN = "电池",
+        .zh_TW = "電池",
+    },
     .initOptions = (void*) ffInitBatteryOptions,
     .destroyOptions = (void*) ffDestroyBatteryOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,
@@ -322,5 +343,6 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         { "Battery time remaining minutes", "time-minutes" },
         { "Battery time remaining seconds", "time-seconds" },
         { "Battery time remaining (formatted)", "time-formatted" },
-    }))
+    })),
+    .defaultOrder = 44,
 };

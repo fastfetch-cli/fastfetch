@@ -5,19 +5,19 @@
 
 #include <limits.h>
 
-// Return start position of the inner key if the argument key belongs to the module specified, NULL otherwise
+// Return start position of the inner key if the argument key belongs to the module specified, nullptr otherwise
 const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName) {
     assert(argumentKey && moduleName);
 
     const char* subKey = argumentKey;
     if (!(subKey[0] == '-' && subKey[1] == '-')) {
-        return NULL;
+        return nullptr;
     }
 
     subKey += 2;
     uint32_t moduleNameLen = (uint32_t) strlen(moduleName);
     if (strncasecmp(subKey, moduleName, moduleNameLen) != 0) {
-        return NULL;
+        return nullptr;
     }
 
     subKey += moduleNameLen;
@@ -27,7 +27,7 @@ const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName) 
     }
 
     if (subKey[0] != '-') {
-        return NULL;
+        return nullptr;
     }
 
     subKey += 1;
@@ -36,7 +36,7 @@ const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName) 
 }
 
 void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer) {
-    if (value == NULL) {
+    if (value == nullptr) {
         fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
         exit(477);
     }
@@ -45,7 +45,7 @@ void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* b
 }
 
 uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value) {
-    if (value == NULL) {
+    if (value == nullptr) {
         fprintf(stderr, "Error: usage: %s <num>\n", argumentKey);
         exit(480);
     }
@@ -61,7 +61,7 @@ uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value) {
 }
 
 int32_t ffOptionParseInt32(const char* argumentKey, const char* value) {
-    if (value == NULL) {
+    if (value == nullptr) {
         fprintf(stderr, "Error: usage: %s <num>\n", argumentKey);
         exit(480);
     }
@@ -77,7 +77,7 @@ int32_t ffOptionParseInt32(const char* argumentKey, const char* value) {
 }
 
 int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]) {
-    if (requestedKey == NULL) {
+    if (requestedKey == nullptr) {
         fprintf(stderr, "Error: usage: %s <value>\n", argumentKey);
         exit(476);
     }
@@ -139,7 +139,7 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer) {
         } else if (value[0] == '@') {
             // Xterm 256 color
             ++value;
-            char* pend = NULL;
+            char* pend = nullptr;
             uint32_t color = (uint32_t) strtoul(value, &pend, 10);
             if (pend == value || color > 255) {
                 fprintf(stderr, "Error: invalid 256 color code found: %s\n", value);
@@ -153,7 +153,7 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer) {
         } else if (value[0] == '#') {
             // RGB color
             ++value;
-            char* pend = NULL;
+            char* pend = nullptr;
             uint32_t rgb = (uint32_t) strtoul(value, &pend, 16);
             if (pend == value) {
                 fprintf(stderr, "Error: invalid RGB color code found: %s\n", value);

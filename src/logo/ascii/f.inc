@@ -169,10 +169,23 @@ static const FFlogo F[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_FLATCAR
+    // Flatcar
+    {
+        .names = { "Flatcar" },
+        .lines = FASTFETCH_DATATEXT_LOGO_FLATCAR,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_FILOTIMO
     // Filotimo
     {
-        .names = { "filotimo" },
+        .names = { "Filotimo" },
         .lines = FASTFETCH_DATATEXT_LOGO_FILOTIMO,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -268,19 +281,6 @@ static const FFlogo F[] = {
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_DEFAULT,
-    },
-    #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_FURRETO
-    // Furreto
-    {
-        .names = { "Furreto" },
-        .lines = FASTFETCH_DATATEXT_LOGO_FURRETO,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_LIGHT_MAGENTA,
-        },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
     },
     #endif
     // LAST

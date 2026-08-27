@@ -3,7 +3,7 @@
 
 #include <private/drivers/poke.h>
 
-const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
+const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist* gpus) {
     FF_AUTO_CLOSE_FD int pokefd = open(POKE_DEVICE_FULLNAME, O_RDWR | O_CLOEXEC);
     if (pokefd < 0) {
         return "open(POKE_DEVICE_FULLNAME) failed";
@@ -48,5 +48,5 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
         }
     }
 
-    return NULL;
+    return nullptr;
 }

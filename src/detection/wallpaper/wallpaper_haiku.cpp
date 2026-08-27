@@ -50,5 +50,5 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
     }
 
     ffStrbufAppendS(result, path.String());
-    return NULL;
+    return nullptr;
 }

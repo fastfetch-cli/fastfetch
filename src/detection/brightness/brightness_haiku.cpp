@@ -6,7 +6,7 @@ extern "C" {
 #include <Application.h>
 #include <Screen.h>
 
-const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
+const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
     // We need a valid be_app to query the app_server here.
     BApplication app("application/x-vnd.fastfetch-cli-fastfetch");
     BScreen screen{}; // default screen is the main one
@@ -42,5 +42,5 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
 
     } while (screen.SetToNext() == B_OK);
 
-    return NULL;
+    return nullptr;
 }

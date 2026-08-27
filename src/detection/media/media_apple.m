@@ -9,14 +9,14 @@
 #import <CoreServices/CoreServices.h>
 
 // https://github.com/andrewwiik/iOS-Blocks/blob/master/Widgets/Music/MediaRemote.h
-extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void (^callback)(_Nullable CFDictionaryRef info)) FF_A_WEAK_IMPORT;
-extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing)) FF_A_WEAK_IMPORT;
-extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID)) FF_A_WEAK_IMPORT;
-extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name)) FF_A_WEAK_IMPORT;
+[[clang::weak_import]] extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void (^callback)(_Nullable CFDictionaryRef info));
+[[clang::weak_import]] extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing));
+[[clang::weak_import]] extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID));
+[[clang::weak_import]] extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name));
 
 static uint32_t getTrueElapsedTime(CFDictionaryRef info) {
     double elapsedTime;
-    if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoElapsedTime"), &elapsedTime) != NULL) {
+    if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoElapsedTime"), &elapsedTime) != nullptr) {
         return 0;
     }
 
@@ -24,8 +24,8 @@ static uint32_t getTrueElapsedTime(CFDictionaryRef info) {
 
     double playbackRate;
     uint64_t timestampEpoch;
-    if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoPlaybackRate"), &playbackRate) == NULL &&
-        ffCfDictGetDateAsEpoch(info, CFSTR("kMRMediaRemoteNowPlayingInfoTimestamp"), &timestampEpoch) == NULL) {
+    if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoPlaybackRate"), &playbackRate) == nullptr &&
+        ffCfDictGetDateAsEpoch(info, CFSTR("kMRMediaRemoteNowPlayingInfoTimestamp"), &timestampEpoch) == nullptr) {
         uint64_t timeDiff = ffTimeGetNow() - timestampEpoch;
         elapsedTime += (double) timeDiff * playbackRate;
     }
@@ -44,14 +44,14 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
 
     dispatch_group_enter(group);
-    __block const char* error = NULL;
+    __block const char* error = nullptr;
     MRMediaRemoteGetNowPlayingInfo(queue, ^(_Nullable CFDictionaryRef info) {
         if (info != nil) {
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
             double value;
-            if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoDuration"), &value) == NULL) {
+            if (ffCfDictGetDouble(info, CFSTR("kMRMediaRemoteNowPlayingInfoDuration"), &value) == nullptr) {
                 result->length = (uint32_t) (value * 1000);
                 result->position = getTrueElapsedTime(info);
             }
@@ -62,7 +62,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
                     CFStringRef mime = (CFStringRef) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkMIMEType"));
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                    FF_CFTYPE_AUTO_RELEASE CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+                    FF_CFTYPE_AUTO_RELEASE CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, nullptr);
                     FF_CFTYPE_AUTO_RELEASE CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
 #pragma clang diagnostic pop
                     NSString* tmpDir = NSTemporaryDirectory();
@@ -104,15 +104,14 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
     // Don't dispatch_release because we are using ARC
 
     if (result->song.length > 0) {
-        return NULL;
+        return nullptr;
     }
 
     return error;
 }
 
 #if !FF_MODULE_DISABLE_MEDIA
-__attribute__((visibility("default"), used))
-int ffPrintMediaByMediaRemote(bool saveCover) {
+[[gnu::visibility("default"), gnu::used]] int ffPrintMediaByMediaRemote(int saveCover) {
     FFMediaResult media = {
         .status = ffStrbufCreate(),
         .song = ffStrbufCreate(),
@@ -122,7 +121,7 @@ int ffPrintMediaByMediaRemote(bool saveCover) {
         .player = ffStrbufCreate(),
         .cover = ffStrbufCreate(),
     };
-    if (getMediaByMediaRemote(&media, saveCover) != NULL) {
+    if (getMediaByMediaRemote(&media, !!saveCover) != nullptr) {
         return 1;
     }
     ffStrbufAppendC(&media.status, '\n');
@@ -157,13 +156,19 @@ int ffPrintMediaByMediaRemote(bool saveCover) {
 
 static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveCover) {
     // #1737
-    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("import ctypes;ctypes.CDLL('%s').ffPrintMediaByMediaRemote(%s)", instance.state.platform.exePath.chars, saveCover ? "True" : "False");
+    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("require DynaLoader;\
+my $so = DynaLoader::dl_load_file('%s', 0);\
+my $sym = DynaLoader::dl_find_symbol($so, 'ffPrintMediaByMediaRemote');\
+DynaLoader::dl_install_xsub('fn', $sym, __FILE__);\
+exit(fn(%c))",
+                                                    instance.state.platform.exePath.chars,
+                                                    saveCover ? '1' : '0');
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     const char* error = ffProcessAppendStdOut(
         &buffer,
-        (char* const[]) { "/usr/bin/python3", // Must be signed by Apple. Homebrew python doesn't work
-                          "-c",
+        (char* const[]) { "/usr/bin/perl", // Must be signed by Apple. Homebrew version doesn't work
+                          "-e",
                           script.chars,
                           nil });
     if (error) {
@@ -175,16 +180,16 @@ static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveC
 
     // status\ntitle\nartist\nalbum\nbundleName\nappName\ncoverPath\nelapsedTimeMS\ndurationMS
     FFstrbuf* const strList[] = { &result->status, &result->song, &result->artist, &result->album, &result->playerId, &result->player, &result->cover };
-    char* line = NULL;
+    char* line = nullptr;
     size_t len = 0;
     for (uint32_t i = 0; i < ARRAY_SIZE(strList) && ffStrbufGetline(&line, &len, &buffer); ++i) {
         ffStrbufSetS(strList[i], line);
     }
     uint32_t* const numList[] = { &result->position, &result->length };
     for (uint32_t i = 0; i < ARRAY_SIZE(numList) && ffStrbufGetline(&line, &len, &buffer); ++i) {
-        *numList[i] = (uint32_t) strtoul(line, NULL, 10);
+        *numList[i] = (uint32_t) strtoul(line, nullptr, 10);
     }
-    return NULL;
+    return nullptr;
 }
 
 void ffDetectMediaImpl(FFMediaResult* media, bool saveCover) {

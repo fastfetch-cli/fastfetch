@@ -14,5 +14,5 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
             device->battery = 0;
         }
     }
-    return NULL;
+    return nullptr;
 }

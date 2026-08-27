@@ -11,12 +11,12 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
     const char* error = ffDetectBrightness(options, &result);
 
     if (error) {
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
         return false;
     }
 
@@ -34,7 +34,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
             ffPercentAppendNum(&str, percent, options->percent, false, &options->moduleArgs);
         }
 
-        ffPrintLogoAndKey(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&str, stdout);
         return true;
     }
@@ -44,7 +44,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
     uint32_t index = 0;
     FF_LIST_FOR_EACH (FFBrightnessResult, item, result) {
         if (options->moduleArgs.key.length == 0) {
-            ffStrbufAppendF(&key, "%s (%s)", FF_BRIGHTNESS_MODULE_NAME, item->name.chars);
+            ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Brightness), item->name.chars);
         } else {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -130,7 +130,7 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
             continue;
         }
 
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Brightness), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -148,7 +148,7 @@ void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-bool ffGenerateBrightnessJsonResult(FF_A_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBrightnessJsonResult([[maybe_unused]] FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectBrightness(options, &result);
@@ -190,8 +190,30 @@ void ffDestroyBrightnessOptions(FFBrightnessOptions* options) {
 }
 
 FFModuleBaseInfo ffBrightnessModuleInfo = {
-    .name = FF_BRIGHTNESS_MODULE_NAME,
+    .name = "Brightness",
     .description = "Print the current brightness level of your monitors",
+    .displayName = {
+        .en = "Brightness",
+        .ar = "السطوع",
+        .cs = "Jas",
+        .de = "Helligkeit",
+        .es = "Brillo",
+        .fr = "Luminosité",
+        .gl = "Brillo",
+        .he = "בהירות",
+        .id = "Kecerahan",
+        .it = "Luminosità",
+        .ja = "明るさ",
+        .ko = "밝기",
+        .pl = "Jasność",
+        .pt = "Brilho",
+        .ru = "Яркость",
+        .tr = "Parlaklık",
+        .uk = "Яскравість",
+        .vi = "Độ sáng",
+        .zh_CN = "亮度",
+        .zh_TW = "亮度",
+    },
     .initOptions = (void*) ffInitBrightnessOptions,
     .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
@@ -206,5 +228,6 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
         { "Current brightness value", "current" },
         { "Screen brightness (percentage bar)", "percentage-bar" },
         { "Is built-in screen", "is-builtin" },
-    }))
+    })),
+    .defaultOrder = 18,
 };

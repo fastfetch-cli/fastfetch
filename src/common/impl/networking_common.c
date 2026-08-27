@@ -29,9 +29,9 @@ const char* ffNetworkingLoadZlibLibrary(void) {
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateInit2_)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflate)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateEnd)
-        zlib = NULL; // don't auto dlclose
+        zlib = nullptr; // don't auto dlclose
     }
-    return zlibData.ffinflateEnd == NULL ? "Failed to load libz" : NULL;
+    return zlibData.ffinflateEnd == nullptr ? "Failed to load libz" : nullptr;
 }
 
 // Try to pre-read gzip header to determine uncompressed size
@@ -64,14 +64,14 @@ static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize) {
 
 // Decompress gzip content
 bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd) {
-    assert(headerEnd != NULL && *headerEnd == '\r');
+    assert(headerEnd != nullptr && *headerEnd == '\r');
 
     // Calculate header size
     uint32_t headerSize = (uint32_t) (headerEnd - buffer->chars);
 
     *headerEnd = '\0'; // Replace delimiter with null character for easier processing
     // Ensure Content-Encoding is in response headers, not in response body
-    bool hasGzip = strcasestr(buffer->chars, "\nContent-Encoding: gzip") != NULL;
+    bool hasGzip = strcasestr(buffer->chars, "\nContent-Encoding: gzip") != nullptr;
     *headerEnd = '\r'; // Restore delimiter
 
     if (!hasGzip) {
@@ -165,7 +165,7 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd) {
     // Use decompressedBuffer.length (total) not decompressedSize (last chunk only)
     FF_STRBUF_AUTO_DESTROY newBuffer = ffStrbufCreateA(headerSize + decompressedBuffer.length + 64);
 
-    char* line = NULL;
+    char* line = nullptr;
     size_t len = 0;
     while (ffStrbufGetline(&line, &len, buffer)) {
         if (ffStrStartsWithIgnCase(line, "Content-Encoding:")) {

@@ -6,7 +6,7 @@ const char* ffDetectLibc(FFLibcResult* result) {
 #ifdef FF_LIBSYSTEM_VERSION
     result->version = FF_LIBSYSTEM_VERSION;
 #else
-    result->version = NULL;
+    result->version = nullptr;
 #endif
-    return NULL;
+    return nullptr;
 }

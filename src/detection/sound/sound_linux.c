@@ -11,7 +11,7 @@ struct DetectionInfoBundle {
     FFSoundOptions* options;
 };
 
-static void paSinkInfoCallback(FF_A_UNUSED pa_context* c, const pa_sink_info* i, int eol, void* userdata) {
+static void paSinkInfoCallback([[maybe_unused]] pa_context* c, const pa_sink_info* i, int eol, void* userdata) {
     if (eol > 0 || !i) {
         return;
     }
@@ -39,7 +39,7 @@ static void paSinkInfoCallback(FF_A_UNUSED pa_context* c, const pa_sink_info* i,
     device->type = (isMain ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE) | (isActive ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE);
 }
 
-static void paServerInfoCallback(FF_A_UNUSED pa_context* c, const pa_server_info* i, void* userdata) {
+static void paServerInfoCallback([[maybe_unused]] pa_context* c, const pa_server_info* i, void* userdata) {
     if (!i) {
         return;
     }
@@ -96,9 +96,9 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
         .result = devices,
         .options = options,
     };
-    const char* error = NULL;
+    const char* error = nullptr;
 
-    if (ffpa_context_connect(context, NULL, PA_CONTEXT_NOFLAGS, NULL) < 0) {
+    if (ffpa_context_connect(context, nullptr, PA_CONTEXT_NOFLAGS, nullptr) < 0) {
         error = "Failed to connect to pulseaudio context";
         goto exit;
     }
@@ -110,7 +110,7 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
             goto exit;
         }
 
-        ffpa_mainloop_iterate(mainloop, 1, NULL);
+        ffpa_mainloop_iterate(mainloop, 1, nullptr);
     }
 
     {
@@ -120,7 +120,7 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
             goto exit;
         }
         while (ffpa_operation_get_state(operation) == PA_OPERATION_RUNNING) {
-            ffpa_mainloop_iterate(mainloop, 1, NULL);
+            ffpa_mainloop_iterate(mainloop, 1, nullptr);
         }
 
         ffpa_operation_unref(operation);
@@ -138,7 +138,7 @@ static const char* detectSound(FFSoundOptions* options, FFlist* devices) {
                 ffpa_operation_cancel(operation);
             }
 
-            ffpa_mainloop_iterate(mainloop, 1, NULL);
+            ffpa_mainloop_iterate(mainloop, 1, nullptr);
         }
 
         ffpa_operation_unref(operation);

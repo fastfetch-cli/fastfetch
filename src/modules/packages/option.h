@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum FF_A_PACKED FFPackagesFlags {
+typedef enum FFPackagesFlags: uint64_t {
     FF_PACKAGES_FLAG_NONE = 0,
     FF_PACKAGES_FLAG_APK_BIT = UINT64_C(1) << 0U,
     FF_PACKAGES_FLAG_BREW_BIT = UINT64_C(1) << 1U,
@@ -41,8 +41,6 @@ typedef enum FF_A_PACKED FFPackagesFlags {
     FF_PACKAGES_FLAG_CARDS_BIT = UINT64_C(1) << 34U,
     FF_PACKAGES_FLAG_PORG_BIT = UINT64_C(1) << 35U,
     FF_PACKAGES_FLAG_INSTALLRELEASE_BIT = UINT64_C(1) << 36U,
-    FF_PACKAGES_FLAG_YMP_BIT = UINT64_C(1) << 37U,
-    FF_PACKAGES_FLAG_FORCE_UNSIGNED = UINT64_MAX,
 } FFPackagesFlags;
 static_assert(sizeof(FFPackagesFlags) == sizeof(uint64_t), "");
 

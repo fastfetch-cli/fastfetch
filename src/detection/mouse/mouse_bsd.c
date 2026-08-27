@@ -52,5 +52,5 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
         hid_dispose_report_desc(repDesc);
     }
 
-    return NULL;
+    return nullptr;
 }

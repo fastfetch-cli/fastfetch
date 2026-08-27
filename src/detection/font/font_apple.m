@@ -33,5 +33,5 @@ const char* ffDetectFontImpl(FFFontResult* result)
     ffStrbufAppendS(&result->fonts[3], [NSFont userFixedPitchFontOfSize:12].familyName.UTF8String);
     generateString(result);
 
-    return NULL;
+    return nullptr;
 }

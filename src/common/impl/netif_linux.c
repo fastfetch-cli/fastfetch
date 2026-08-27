@@ -44,7 +44,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 
     uint32_t pid = ffNetifGetNetlinkPortId(sock_fd);
 
-    struct FF_A_PACKED {
+    struct [[gnu::packed]] {
         struct nlmsghdr nlh;
         struct rtmsg rtm;
         struct rtattr rta;
@@ -97,7 +97,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    FF_A_UNUSED int routeCount = 0;
+    [[maybe_unused]] int routeCount = 0;
 
     while (true) {
         ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0, (struct sockaddr*) &src_addr, &src_addr_len);
@@ -163,7 +163,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
             }
 
             FF_DEBUG("Processing IPv4 default route candidate #%d", routeCount);
-            entry = (__typeof__(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
+            entry = (typeof(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
 
             // Parse route attributes
             size_t rtm_len = RTM_PAYLOAD(nlh);
@@ -254,7 +254,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
 
     uint32_t pid = ffNetifGetNetlinkPortId(sock_fd);
 
-    struct FF_A_PACKED {
+    struct [[gnu::packed]] {
         struct nlmsghdr nlh;
         struct rtmsg rtm;
         struct rtattr rta;
@@ -307,7 +307,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    FF_A_UNUSED int routeCount = 0;
+    [[maybe_unused]] int routeCount = 0;
 
     while (true) {
         ssize_t received = recvfrom(sock_fd, buffer, sizeof(buffer), 0, (struct sockaddr*) &src_addr, &src_addr_len);
@@ -372,7 +372,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
             }
 
             FF_DEBUG("Processing IPv6 default route candidate #%d", routeCount);
-            entry = (__typeof__(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
+            entry = (typeof(entry)) {}; // Default to zero metric (no RTA_PRIORITY found)
 
             // Parse route attributes
             size_t rtm_len = RTM_PAYLOAD(nlh);
@@ -382,7 +382,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
                 switch (rta->rta_type) {
                     case RTA_DST:
                         if (RTA_PAYLOAD(rta) >= sizeof(struct in6_addr)) {
-                            FF_A_UNUSED char str[INET6_ADDRSTRLEN];
+                            [[maybe_unused]] char str[INET6_ADDRSTRLEN];
                             FF_DEBUG("Unexpected RTA_DST: %s", inet_ntop(AF_INET6, RTA_DATA(rta), str, sizeof(str)));
                             goto next;
                         }
@@ -399,7 +399,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
                             if (IN6_IS_ADDR_UNSPECIFIED(gw)) {
                                 goto next;
                             }
-                            FF_A_UNUSED char str[INET6_ADDRSTRLEN];
+                            [[maybe_unused]] char str[INET6_ADDRSTRLEN];
                             FF_DEBUG("Found gateway: %s", inet_ntop(AF_INET6, gw, str, sizeof(str)));
                         }
                         break;

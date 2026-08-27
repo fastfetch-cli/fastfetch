@@ -9,25 +9,25 @@
 // DDC/CI
 #ifdef __aarch64__
 typedef CFTypeRef IOAVServiceRef;
-extern IOAVServiceRef IOAVServiceCreate(CFAllocatorRef allocator) FF_A_WEAK_IMPORT;
-extern IOAVServiceRef IOAVServiceCreateWithService(CFAllocatorRef allocator, io_service_t service) FF_A_WEAK_IMPORT;
-extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2) FF_A_WEAK_IMPORT;
-extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize) FF_A_WEAK_IMPORT;
-extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize) FF_A_WEAK_IMPORT;
+[[clang::weak_import]] extern IOAVServiceRef IOAVServiceCreate(CFAllocatorRef allocator);
+[[clang::weak_import]] extern IOAVServiceRef IOAVServiceCreateWithService(CFAllocatorRef allocator, io_service_t service);
+[[clang::weak_import]] extern IOReturn IOAVServiceCopyEDID(IOAVServiceRef service, CFDataRef* x2);
+[[clang::weak_import]] extern IOReturn IOAVServiceReadI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t offset, void* outputBuffer, uint32_t outputBufferSize);
+[[clang::weak_import]] extern IOReturn IOAVServiceWriteI2C(IOAVServiceRef service, uint32_t chipAddress, uint32_t dataAddress, void* inputBuffer, uint32_t inputBufferSize);
 #else
     // DDC/CI (Intel)
     #include <IOKit/IOKitLib.h>
     #include <IOKit/graphics/IOGraphicsLib.h>
     #include <IOKit/i2c/IOI2CInterface.h>
-extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service) FF_A_WEAK_IMPORT;
+[[clang::weak_import]] extern void CGSServiceForDisplayNumber(CGDirectDisplayID display, io_service_t* service);
 #endif
 
 // ACPI
-extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float* brightness) FF_A_WEAK_IMPORT;
+[[clang::weak_import]] extern int DisplayServicesGetBrightness(CGDirectDisplayID display, float* brightness);
 
 // Works for internal display
 static const char* detectWithDisplayServices(const FFDisplayServerResult* displayServer, FFlist* result) {
-    if (DisplayServicesGetBrightness == NULL) {
+    if (DisplayServicesGetBrightness == nullptr) {
         return "DisplayServices function DisplayServicesGetBrightness is not available";
     }
 
@@ -45,13 +45,13 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #ifdef __aarch64__
 // https://github.com/waydabber/m1ddc
 // Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
-static const char* detectWithDdcci(FF_A_UNUSED const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result) {
+static const char* detectWithDdcci([[maybe_unused]] const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result) {
     if (!IOAVServiceCreate || !IOAVServiceReadI2C || !IOAVServiceWriteI2C) {
         return "IOAVService is not available";
     }
@@ -63,7 +63,7 @@ static const char* detectWithDdcci(FF_A_UNUSED const FFDisplayServerResult* disp
 
     io_registry_entry_t registryEntry;
     while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL) {
-        FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = NULL;
+        FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = nullptr;
         {
             FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryAv = registryEntry;
 
@@ -118,7 +118,7 @@ static const char* detectWithDdcci(FF_A_UNUSED const FFDisplayServerResult* disp
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 #else
 static IOOptionBits getSupportedTransactionType(void) {
@@ -181,7 +181,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 }
 
                 uint8_t i2cOut[12] = {};
-                IOI2CConnectRef connect = NULL;
+                IOI2CConnectRef connect = nullptr;
                 if (IOI2CInterfaceOpen(interface, kNilOptions, &connect) != KERN_SUCCESS) {
                     continue;
                 }
@@ -227,7 +227,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 
@@ -240,5 +240,5 @@ const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result) {
         detectWithDdcci(displayServer, options, result);
     }
 
-    return NULL;
+    return nullptr;
 }

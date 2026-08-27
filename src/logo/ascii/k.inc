@@ -129,7 +129,7 @@ static const FFlogo K[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_KISS
     // KISSLinux
     {
-        .names = { "KISS", "kiss-linux", "kisslinux" },
+        .names = { "KISS" },
         .lines = FASTFETCH_DATATEXT_LOGO_KISS,
         .colors = {
             FF_COLOR_FG_MAGENTA,

@@ -1,6 +1,7 @@
 #include "common/FFstrbuf.h"
 #include "common/mallocHelper.h"
 #include "common/strutil.h"
+#include "common/debug.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -20,9 +21,9 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate) {
 }
 
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != NULL);
+    assert(format != nullptr);
 
-    char* buffer = NULL;
+    char* buffer = nullptr;
     int len = vasprintf(&buffer, format, arguments);
     assert(len >= 0);
 
@@ -32,7 +33,7 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
 // Takes ownership of `heapStr`. The caller must not free `heapStr` after calling this
 // function; the memory will be managed and freed via the associated FFstrbuf.
 void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr) {
-    assert(heapStr != NULL);
+    assert(heapStr != nullptr);
 
     strbuf->length = length;
     size_t allocSize = ffMallocUsableSize(heapStr);
@@ -45,18 +46,45 @@ void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr) {
     strbuf->chars = heapStr;
 }
 
-void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free) {
-    if (ffStrbufGetFree(strbuf) >= free && !(strbuf->allocated == 0 && strbuf->length > 0)) {
-        return;
+void ffStrbufInitF(FFstrbuf* strbuf, const char* format, ...) {
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(strbuf, format, arguments);
+    va_end(arguments);
+}
+
+FFstrbuf ffStrbufCreateF(const char* format, ...) {
+    FFstrbuf strbuf;
+
+    va_list arguments;
+    va_start(arguments, format);
+    ffStrbufInitVF(&strbuf, format, arguments);
+    va_end(arguments);
+
+    return strbuf;
+}
+
+void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free) {
+    uint32_t allocate;
+    if (__builtin_expect(__builtin_uadd_overflow(strbuf->length, free, &allocate), false)) {
+        FF_DEBUG("Error: Integer overflow when calculating allocation size. Aborting");
+        abort();
     }
 
-    uint32_t allocate = strbuf->allocated;
-    if (allocate < FASTFETCH_STRBUF_DEFAULT_ALLOC) {
+    if (allocate < FASTFETCH_STRBUF_DEFAULT_ALLOC) { // `<` for null terminator
         allocate = FASTFETCH_STRBUF_DEFAULT_ALLOC;
-    }
+    } else {
+        if (__builtin_expect(allocate > (UINT32_MAX >> 1), false)) {
+            // User tried to allocate more than 2GB of memory, which exceeds the maximum size supported by FFstrbuf.
+            // This is likely an error or an attempt to exploit the program. Abort to prevent potential issues.
+            FF_DEBUG("Error: Attempted to allocate %" PRIu32 " bytes more than 2GB of memory in FFstrbuf. Aborting", allocate);
+            abort();
+        }
 
-    while ((strbuf->length + free + 1) > allocate) { // + 1 for the null byte
-        allocate *= 2;
+        // Round up to the next power of 2.
+        // If the value is already a power of 2, it will be rounded up to the next power of 2.
+        // allocate = __builtin_stdc_bit_ceil(allocate + 1); // Currently generates worse asm code
+        allocate = 1U << (32 - __builtin_clz(allocate));
     }
 
     if (strbuf->allocated == 0) {
@@ -76,16 +104,17 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free) {
 
 // Ensure that at least `free` bytes are available in the buffer besides the current length
 // for an empty buffer, free + 1 length memory will be allocated(+1 for the NUL)
+// This function ensures a dynamic buffer is allocated even if free == 0
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free) {
-    uint32_t oldFree = ffStrbufGetFree(strbuf);
-    if (oldFree >= free && !(strbuf->allocated == 0 && strbuf->length > 0)) {
-        return;
-    }
-
-    uint32_t newCap = strbuf->allocated + (free - oldFree);
+    uint32_t newCap;
 
     if (strbuf->allocated == 0) {
-        newCap += strbuf->length + 1;
+        assert(strbuf->length < UINT32_MAX - 1); // We don't use static strings with length >= UINT32_MAX - 1, so this should never happen
+        if (__builtin_expect(__builtin_uadd_overflow(strbuf->length + 1, free, &newCap), false)) {
+            FF_DEBUG("Error: Integer overflow when calculating new capacity. Aborting");
+            abort();
+        }
+
         char* newbuf = malloc(sizeof(*strbuf->chars) * newCap);
         if (strbuf->length == 0) {
             *newbuf = '\0';
@@ -94,54 +123,23 @@ void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free) {
         }
         strbuf->chars = newbuf;
     } else {
+        uint32_t oldFree = ffStrbufGetFree(strbuf);
+        if (oldFree >= free) {
+            return;
+        }
+
+        if (__builtin_expect(__builtin_uadd_overflow(strbuf->allocated, free - oldFree, &newCap), false)) {
+            FF_DEBUG("Error: Integer overflow when calculating new capacity. Aborting");
+            abort();
+        }
         strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * newCap);
     }
 
     strbuf->allocated = newCap;
 }
 
-void ffStrbufClear(FFstrbuf* strbuf) {
-    assert(strbuf != NULL);
-
-    if (strbuf->allocated == 0) {
-        strbuf->chars = CHAR_NULL_PTR;
-    } else {
-        strbuf->chars[0] = '\0';
-    }
-
-    strbuf->length = 0;
-}
-
-void ffStrbufAppendC(FFstrbuf* strbuf, char c) {
-    ffStrbufEnsureFree(strbuf, 1);
-    strbuf->chars[strbuf->length++] = c;
-    strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c) {
-    if (num == 0) {
-        return;
-    }
-
-    ffStrbufEnsureFree(strbuf, num);
-    memset(&strbuf->chars[strbuf->length], c, num);
-    strbuf->length += num;
-    strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
-    if (value == NULL || length == 0) {
-        return;
-    }
-
-    ffStrbufEnsureFree(strbuf, length);
-    memcpy(&strbuf->chars[strbuf->length], value, length);
-    strbuf->length += length;
-    strbuf->chars[strbuf->length] = '\0';
-}
-
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transformFunc)(int)) {
-    if (value == NULL) {
+    if (value == nullptr) {
         return;
     }
 
@@ -159,7 +157,7 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transfo
 }
 
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != NULL);
+    assert(format != nullptr);
 
     va_list copy;
     va_copy(copy, arguments);
@@ -168,7 +166,7 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
     int written = vsnprintf(strbuf->chars + strbuf->length, strbuf->allocated > 0 ? free + 1 : 0, format, arguments);
 
     if (written > 0 && (uint32_t) written > free) {
-        ffStrbufEnsureFree(strbuf, (uint32_t) written);
+        ffStrbufEnsureFreeNoCheck(strbuf, (uint32_t) written);
         written = vsnprintf(strbuf->chars + strbuf->length, (uint32_t) written + 1, format, copy);
     }
 
@@ -180,12 +178,12 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
 }
 
 const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until) {
-    if (value == NULL) {
-        return NULL;
+    if (value == nullptr) {
+        return nullptr;
     }
 
     const char* end = strchr(value, until);
-    if (end == NULL) {
+    if (end == nullptr) {
         ffStrbufAppendS(strbuf, value);
     } else {
         ffStrbufAppendNS(strbuf, (uint32_t) (end - value), value);
@@ -194,7 +192,7 @@ const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char unti
 }
 
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != NULL);
+    assert(format != nullptr);
 
     va_list arguments;
     va_start(arguments, format);
@@ -211,7 +209,7 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
 }
 
 void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != NULL);
+    assert(format != nullptr);
 
     va_list arguments;
     va_start(arguments, format);
@@ -220,7 +218,7 @@ void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...) {
 }
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
-    if (value == NULL || length == 0) {
+    if (value == nullptr || length == 0) {
         return;
     }
 
@@ -238,14 +236,14 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c) {
 }
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
-    assert(strbuf != NULL);
+    assert(strbuf != nullptr);
 
     if (length == 0) {
         ffStrbufClear(strbuf);
         return;
     }
 
-    assert(value != NULL);
+    assert(value != nullptr);
 
     if (strbuf->allocated <= length) {
         char* newBuf = malloc(sizeof(char) * (length + 1));
@@ -435,9 +433,7 @@ bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index) {
 
     if (strbuf->allocated == 0) {
         // static string
-        if (index < strbuf->length) {
-            ffStrbufInitNS(strbuf, index, strbuf->chars);
-        }
+        ffStrbufInitNS(strbuf, index, strbuf->chars);
         return true;
     }
 
@@ -550,33 +546,6 @@ bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c) {
     return true;
 }
 
-void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file) {
-    fwrite(strbuf->chars, sizeof(*strbuf->chars), strbuf->length, file);
-}
-
-void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file) {
-    ffStrbufWriteTo(strbuf, file);
-    fputc('\n', file);
-}
-
-double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue) {
-    char* str_end;
-    double result = strtod(strbuf->chars, &str_end);
-    return str_end == strbuf->chars ? defaultValue : result;
-}
-
-uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue) {
-    char* str_end;
-    unsigned long long result = strtoull(strbuf->chars, &str_end, 10);
-    return str_end == strbuf->chars ? defaultValue : (uint64_t) result;
-}
-
-int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue) {
-    char* str_end;
-    long long result = strtoll(strbuf->chars, &str_end, 10);
-    return str_end == strbuf->chars ? defaultValue : (int64_t) result;
-}
-
 void ffStrbufAppendSInt(FFstrbuf* strbuf, int64_t value) {
     ffStrbufEnsureFree(strbuf, 21); // Required by yyjson_write_number
     char* start = strbuf->chars + strbuf->length;
@@ -585,7 +554,7 @@ void ffStrbufAppendSInt(FFstrbuf* strbuf, int64_t value) {
     unsafe_yyjson_set_sint(&val, value);
     char* end = yyjson_write_number(&val, start);
 
-    assert(end != NULL);
+    assert(end != nullptr);
 
     strbuf->length += (uint32_t) (end - start);
 }
@@ -598,7 +567,7 @@ void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value) {
     unsafe_yyjson_set_uint(&val, value);
     char* end = yyjson_write_number(&val, start);
 
-    assert(end != NULL);
+    assert(end != nullptr);
 
     strbuf->length += (uint32_t) (end - start);
 }
@@ -765,7 +734,7 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
 
     for (const char* p = comp; p < comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
-        if (colon == NULL) {
+        if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
             return strbuf->length == remainingLen && memcmp(strbuf->chars, p, remainingLen) == 0;
         }
@@ -793,7 +762,7 @@ bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength
 
     for (const char* p = comp; p < comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
-        if (colon == NULL) {
+        if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
             return strbuf->length == remainingLen && strncasecmp(strbuf->chars, p, remainingLen) == 0;
         }

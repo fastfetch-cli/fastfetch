@@ -53,5 +53,5 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

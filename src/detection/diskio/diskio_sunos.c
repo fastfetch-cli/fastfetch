@@ -10,7 +10,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 }
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
-    FF_A_CLEANUP(kstatFreeWrap) kstat_ctl_t* kc = kstat_open();
+    [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
         return "kstat_open() failed";
     }
@@ -38,5 +38,5 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         device->writeCount = kio.writes;
     }
 
-    return NULL;
+    return nullptr;
 }

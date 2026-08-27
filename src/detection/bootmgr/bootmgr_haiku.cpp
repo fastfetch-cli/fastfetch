@@ -13,5 +13,5 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
 
     // TODO: detectSecureBoot(&result->secureBoot);
 
-    return NULL;
+    return nullptr;
 }

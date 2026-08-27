@@ -4,19 +4,17 @@
 #include "detection/physicalmemory/physicalmemory.h"
 #include "modules/physicalmemory/physicalmemory.h"
 
-#define FF_PHYSICALMEMORY_DISPLAY_NAME "Physical Memory"
-
 bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
     FF_LIST_AUTO_DESTROY result = ffListCreate();
     const char* error = ffDetectPhysicalMemory(options, &result);
 
     if (error) {
-        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory devices detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory devices detected");
         return false;
     }
 
@@ -30,7 +28,7 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
         }
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_PHYSICALMEMORY_DISPLAY_NAME, result.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), result.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             if (device->installed) {
                 fputs(prettySize.chars, stdout);
@@ -59,7 +57,7 @@ bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options) {
             }
             putchar('\n');
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_PHYSICALMEMORY_DISPLAY_NAME, (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                                         FF_ARG(device->size, "bytes"),
                                                                                                                                         FF_ARG(prettySize, "size"),
                                                                                                                                         FF_ARG(device->maxSpeed, "max-speed"),
@@ -103,7 +101,7 @@ void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_va
             continue;
         }
 
-        ffPrintError(FF_PHYSICALMEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalMemory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -159,8 +157,30 @@ void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options) {
 }
 
 FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
-    .name = FF_PHYSICALMEMORY_MODULE_NAME,
+    .name = "PhysicalMemory",
     .description = "Print system physical memory devices",
+    .displayName = {
+        .en = "Physical Memory",
+        .ar = "الذاكرة الفعلية",
+        .cs = "Fyzická paměť",
+        .de = "Physischer Speicher",
+        .es = "Memoria física",
+        .fr = "Mémoire physique",
+        .gl = "Memoria física",
+        .he = "זיכרון פיזי",
+        .id = "Memori Fisik",
+        .it = "Memoria fisica",
+        .ja = "物理メモリ",
+        .ko = "물리 메모리",
+        .pl = "Pamięć fizyczna",
+        .pt = "Memória física",
+        .ru = "Физическая память",
+        .tr = "Fiziksel Bellek",
+        .uk = "Фізична пам'ять",
+        .vi = "Bộ nhớ vật lý",
+        .zh_CN = "物理内存",
+        .zh_TW = "實體記憶體",
+    },
     .initOptions = (void*) ffInitPhysicalMemoryOptions,
     .destroyOptions = (void*) ffDestroyPhysicalMemoryOptions,
     .parseJsonObject = (void*) ffParsePhysicalMemoryJsonObject,
@@ -180,5 +200,6 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         { "Part number", "part-number" },
         { "True if ECC enabled", "is-ecc-enabled" },
         { "True if a memory module is installed in the slot", "is-installed" },
-    }))
+    })),
+    .defaultOrder = 39,
 };

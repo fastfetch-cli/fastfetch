@@ -10,11 +10,11 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     size_t length = sizeof(ram->bytesTotal);
 
 #if FF_APPLE_MEMSIZE_USABLE
-    if (sysctlbyname("hw.memsize_usable", &ram->bytesTotal, &length, NULL, 0) != 0) {
+    if (sysctlbyname("hw.memsize_usable", &ram->bytesTotal, &length, nullptr, 0) != 0) {
         return "Failed to read hw.memsize_usable";
     }
 #else
-    if (sysctl((int[]) { CTL_HW, HW_MEMSIZE }, 2, &ram->bytesTotal, &length, NULL, 0) != 0) {
+    if (sysctl((int[]) { CTL_HW, HW_MEMSIZE }, 2, &ram->bytesTotal, &length, nullptr, 0) != 0) {
         return "Failed to read hw.memsize";
     }
 #endif
@@ -31,5 +31,5 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     uint64_t pagesFileBacked = vmstat.external_page_count; // Cached files
     ram->bytesUsed = ram->bytesTotal - (pagesFree + pagesFileBacked) * instance.state.platform.sysinfo.pageSize;
 
-    return NULL;
+    return nullptr;
 }

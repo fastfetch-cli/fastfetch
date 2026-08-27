@@ -32,23 +32,23 @@ const char* ffDetectFontImpl(FFFontResult* result) {
     // We need a valid be_app to query the app_server here.
     BApplication app("application/x-vnd.fastfetch-cli-fastfetch");
 
-    if ((f = be_plain_font) != NULL) {
+    if ((f = be_plain_font) != nullptr) {
         f->GetFamilyAndStyle(&menuInfo.f_family, &menuInfo.f_style);
         ffStrbufAppendF(&result->fonts[0], "%s %s (%dpt)", menuInfo.f_family, menuInfo.f_style, (int) f->Size());
     }
     if (get_menu_info(&menuInfo) == B_OK) {
         ffStrbufAppendF(&result->fonts[1], "%s %s (%dpt)", menuInfo.f_family, menuInfo.f_style, (int) menuInfo.font_size);
     }
-    if ((f = be_bold_font) != NULL) {
+    if ((f = be_bold_font) != nullptr) {
         f->GetFamilyAndStyle(&menuInfo.f_family, &menuInfo.f_style);
         ffStrbufAppendF(&result->fonts[2], "%s %s (%dpt)", menuInfo.f_family, menuInfo.f_style, (int) f->Size());
     }
-    if ((f = be_fixed_font) != NULL) {
+    if ((f = be_fixed_font) != nullptr) {
         f->GetFamilyAndStyle(&menuInfo.f_family, &menuInfo.f_style);
         ffStrbufAppendF(&result->fonts[3], "%s %s (%dpt)", menuInfo.f_family, menuInfo.f_style, (int) f->Size());
     }
 
     generateString(result);
 
-    return NULL;
+    return nullptr;
 }

@@ -70,5 +70,5 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             disk->createTime = (uint64_t) crTime * 1000;
         }
     }
-    return NULL;
+    return nullptr;
 }

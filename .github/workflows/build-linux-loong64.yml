@@ -1,0 +1,60 @@
+name: Reusable Linux loong64
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: set up QEMU for loong64
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: build in loong64 container
+        run: |
+          docker run --rm --platform linux/loong64 \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            lcr.loongnix.cn/debian:14 \
+            bash -c '
+              set -e
+              uname -a
+              cat /etc/os-release || true
+
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                cmake make gcc g++ \
+                libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev \
+                libdconf-dev libdbus-1-dev libmagickcore-dev \
+                libsqlite3-dev librpm-dev \
+                libegl-dev libglx-dev ocl-icd-opencl-dev \
+                libpulse-dev libdrm-dev \
+                libelf-dev libefl-all-dev \
+                liblua5.4-dev \
+                libvdpau-dev libva-dev \
+                rpm
+
+              cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+              cmake --build . --target package --verbose -j$(nproc)
+              ./fastfetch --list-features
+              time ./fastfetch -c presets/ci.jsonc --stat false
+              time ./fastfetch -c presets/ci.jsonc --format json
+              time ./flashfetch
+              ldd fastfetch
+              ctest --output-on-failure
+            '
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fastfetch-linux-loong64
+          path: ./fastfetch-*.*

@@ -12,13 +12,13 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 }
 
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
-    FF_A_CLEANUP(kstatFreeWrap) kstat_ctl_t* kc = kstat_open();
+    [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
         return "kstat_open() failed";
     }
 
     for (int i = 0;; ++i) {
-        kstat_t* ks = kstat_lookup(kc, "cpu_stat", i, NULL);
+        kstat_t* ks = kstat_lookup(kc, "cpu_stat", i, nullptr);
 
         cpu_stat_t cs;
         if (!ks || kstat_read(kc, ks, &cs) < 0) {
@@ -34,5 +34,5 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
             .totalAll = total,
         };
     }
-    return NULL;
+    return nullptr;
 }

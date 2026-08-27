@@ -2,8 +2,6 @@
 
 #include "option.h"
 
-#define FF_COMMAND_MODULE_NAME "Command"
-
 bool ffPrepareCommand(FFCommandOptions* options);
 
 bool ffPrintCommand(FFCommandOptions* options);

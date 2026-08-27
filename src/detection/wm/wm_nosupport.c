@@ -1,9 +1,9 @@
 #include "wm.h"
 
-const char* ffDetectWMPlugin(FF_A_UNUSED FFstrbuf* pluginName) {
+const char* ffDetectWMPlugin([[maybe_unused]] FFstrbuf* pluginName) {
     return "Not supported on this platform";
 }
 
-const char* ffDetectWMVersion(FF_A_UNUSED const FFstrbuf* wmName, FF_A_UNUSED FFstrbuf* result, FF_A_UNUSED FFWMOptions* options) {
+const char* ffDetectWMVersion([[maybe_unused]] const FFstrbuf* wmName, [[maybe_unused]] FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     return "Not supported on this platform";
 }

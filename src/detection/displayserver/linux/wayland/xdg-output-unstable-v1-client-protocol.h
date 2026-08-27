@@ -172,7 +172,7 @@ extern const struct wl_interface zxdg_output_v1_interface;
 // zxdg_output_manager_v1_destroy(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
 // {
 // 	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
-// 			 ZXDG_OUTPUT_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), WL_MARSHAL_FLAG_DESTROY);
+// 			 ZXDG_OUTPUT_MANAGER_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), WL_MARSHAL_FLAG_DESTROY);
 // }
 
 // /**
@@ -186,7 +186,7 @@ extern const struct wl_interface zxdg_output_v1_interface;
 // 	struct wl_proxy *id;
 
 // 	id = wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
-// 			 ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), 0, NULL, output);
+// 			 ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), 0, nullptr, output);
 
 // 	return (struct zxdg_output_v1 *) id;
 // }
@@ -404,7 +404,7 @@ zxdg_output_v1_add_listener(struct zxdg_output_v1* zxdg_output_v1,
 // zxdg_output_v1_destroy(struct zxdg_output_v1 *zxdg_output_v1)
 // {
 // 	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_v1,
-// 			 ZXDG_OUTPUT_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1), WL_MARSHAL_FLAG_DESTROY);
+// 			 ZXDG_OUTPUT_V1_DESTROY, nullptr, wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1), WL_MARSHAL_FLAG_DESTROY);
 // }
 
 #ifdef __cplusplus

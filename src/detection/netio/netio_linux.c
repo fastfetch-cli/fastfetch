@@ -58,7 +58,7 @@ static void getData(FFstrbuf* buffer, const char* ifName, bool isDefaultRoute, i
 const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/net");
     if (!dirp) {
-        return "opendir(\"/sys/class/net\") == NULL";
+        return "opendir(\"/sys/class/net\") == nullptr";
     }
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -67,13 +67,13 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
 
     if (options->defaultRouteOnly) {
         if (options->namePrefix.length && strncmp(defaultRouteIfName, options->namePrefix.chars, options->namePrefix.length) != 0) {
-            return NULL;
+            return nullptr;
         }
 
         getData(&buffer, defaultRouteIfName, true, dirfd(dirp), result);
     } else {
         struct dirent* entry;
-        while ((entry = readdir(dirp)) != NULL) {
+        while ((entry = readdir(dirp)) != nullptr) {
             const char* ifName = entry->d_name;
             if (ifName[0] == '.') {
                 continue;
@@ -87,5 +87,5 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

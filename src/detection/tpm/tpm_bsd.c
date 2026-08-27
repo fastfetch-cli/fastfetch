@@ -3,7 +3,7 @@
 #include "common/kmod.h"
 
 const char* ffDetectTPM(FFTPMResult* result) {
-    if (ffSysctlGetString("dev.tpmcrb.0.%desc", &result->description) != NULL) {
+    if (ffSysctlGetString("dev.tpmcrb.0.%desc", &result->description) != nullptr) {
         if (!ffKmodLoaded("tpm")) {
             return "`tpm` kernel module is not loaded";
         }
@@ -18,5 +18,5 @@ const char* ffDetectTPM(FFTPMResult* result) {
         ffStrbufSetStatic(&result->version, "unknown");
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -7,7 +7,7 @@
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege) {
-    FF_AUTO_CLOSE_FD HANDLE token = NULL;
+    FF_AUTO_CLOSE_FD HANDLE token = nullptr;
     if (!NT_SUCCESS(NtOpenProcessToken(NtCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token))) {
         return "NtOpenProcessToken() failed";
     }
@@ -17,11 +17,11 @@ const char* enablePrivilege(const wchar_t* privilege) {
         .Privileges = {
             (LUID_AND_ATTRIBUTES) { .Attributes = SE_PRIVILEGE_ENABLED } },
     };
-    if (!LookupPrivilegeValueW(NULL, privilege, &tp.Privileges[0].Luid)) {
+    if (!LookupPrivilegeValueW(nullptr, privilege, &tp.Privileges[0].Luid)) {
         return "LookupPrivilegeValue() failed";
     }
 
-    NTSTATUS status = NtAdjustPrivilegesToken(token, false, &tp, sizeof(tp), NULL, NULL);
+    NTSTATUS status = NtAdjustPrivilegesToken(token, false, &tp, sizeof(tp), nullptr, nullptr);
     if (!NT_SUCCESS(status)) {
         return "NtAdjustPrivilegesToken() failed";
     }
@@ -30,12 +30,12 @@ const char* enablePrivilege(const wchar_t* privilege) {
         return "The token does not have the specified privilege; try sudo please";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectBootmgr(FFBootmgrResult* result) {
     const char* err = enablePrivilege(L"SeSystemEnvironmentPrivilege");
-    if (err != NULL) {
+    if (err != nullptr) {
         return err;
     }
 
@@ -45,7 +45,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     }
 
     ULONG size = sizeof(result->order);
-    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"BootCurrent"), &efiGlobalGuid, &result->order, &size, NULL))) {
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"BootCurrent"), &efiGlobalGuid, &result->order, &size, nullptr))) {
         return "NtQuerySystemEnvironmentValueEx(BootCurrent) failed";
     }
     if (size != sizeof(result->order)) {
@@ -56,7 +56,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     wchar_t key[9];
     swprintf(key, ARRAY_SIZE(key), L"Boot%04X", result->order);
     size = sizeof(buffer);
-    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(key), &efiGlobalGuid, buffer, &size, NULL))) {
+    if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(key), &efiGlobalGuid, buffer, &size, nullptr))) {
         return "NtQuerySystemEnvironmentValueEx(Boot####) failed";
     }
     if (size < sizeof(FFEfiLoadOption) || size == ARRAY_SIZE(buffer)) {
@@ -66,9 +66,9 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     ffEfiFillLoadOption((FFEfiLoadOption*) buffer, result);
 
     SYSTEM_SECUREBOOT_INFORMATION ssi;
-    if (NT_SUCCESS(NtQuerySystemInformation(SystemSecureBootInformation, &ssi, sizeof(ssi), NULL))) {
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemSecureBootInformation, &ssi, sizeof(ssi), nullptr))) {
         result->secureBoot = ssi.SecureBootEnabled;
     }
 
-    return NULL;
+    return nullptr;
 }

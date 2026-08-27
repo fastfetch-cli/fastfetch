@@ -25,7 +25,7 @@ static const char* detectDnsFromConf(const char* path, FFDNSOptions* options, FF
         ffListClear(results);
     }
 
-    FF_AUTO_FREE char* line = NULL;
+    FF_AUTO_FREE char* line = nullptr;
     size_t len = 0;
 
     while (getline(&line, &len, file) != -1) {
@@ -56,7 +56,7 @@ static const char* detectDnsFromConf(const char* path, FFDNSOptions* options, FF
     }
 
     FF_DEBUG("Found %u DNS servers in %s", results->length, path);
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
@@ -64,10 +64,10 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
     FF_DEBUG("Using SystemConfiguration framework for macOS");
 
     // Create a reference to the dynamic store
-    FF_CFTYPE_AUTO_RELEASE SCDynamicStoreRef store = SCDynamicStoreCreate(NULL, CFSTR("fastfetch"), NULL, NULL);
+    FF_CFTYPE_AUTO_RELEASE SCDynamicStoreRef store = SCDynamicStoreCreate(nullptr, CFSTR("fastfetch"), nullptr, nullptr);
     if (store) {
         // Get the network global IPv4 and IPv6 configuration
-        FF_CFTYPE_AUTO_RELEASE CFStringRef key = SCDynamicStoreKeyCreateNetworkGlobalEntity(NULL, kSCDynamicStoreDomainState, kSCEntNetDNS);
+        FF_CFTYPE_AUTO_RELEASE CFStringRef key = SCDynamicStoreKeyCreateNetworkGlobalEntity(nullptr, kSCDynamicStoreDomainState, kSCEntNetDNS);
         if (key) {
             FF_CFTYPE_AUTO_RELEASE CFDictionaryRef dict = SCDynamicStoreCopyValue(store, key);
             if (dict) {
@@ -77,7 +77,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
                 if (dnsServers) {
                     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
                     for (CFIndex i = 0; i < CFArrayGetCount(dnsServers); i++) {
-                        if (ffCfStrGetString(CFArrayGetValueAtIndex(dnsServers, i), &buffer) == NULL) {
+                        if (ffCfStrGetString(CFArrayGetValueAtIndex(dnsServers, i), &buffer) == nullptr) {
                             // Check if the address matches our filter
                             if ((ffStrbufContainC(&buffer, ':') && !(options->showType & FF_DNS_TYPE_IPV6_BIT)) ||
                                 (ffStrbufContainC(&buffer, '.') && !(options->showType & FF_DNS_TYPE_IPV4_BIT))) {
@@ -97,7 +97,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
 
     // If we didn't find any servers, try resolv.conf as fallback
     if (results->length > 0) {
-        return NULL;
+        return nullptr;
     }
 
     FF_DEBUG("No DNS servers found via SystemConfiguration, trying resolv.conf");

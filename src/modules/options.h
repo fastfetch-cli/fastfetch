@@ -64,6 +64,7 @@
 #include "modules/terminaltheme/option.h"
 #include "modules/theme/option.h"
 #include "modules/title/option.h"
+#include "modules/top/option.h"
 #include "modules/tpm/option.h"
 #include "modules/uptime/option.h"
 #include "modules/users/option.h"

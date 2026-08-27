@@ -22,5 +22,5 @@ const char* ffDetectBoard(FFBoardResult* board) {
             ffStrbufSubstrBefore(&board->vendor, comma);
         }
     }
-    return NULL;
+    return nullptr;
 }

@@ -13,7 +13,7 @@ const char* ffDetectLoadavg(double result[3]) {
         buf[nRead] = '\0';
 
         if (sscanf(buf, "%lf%lf%lf", &result[0], &result[1], &result[2]) == 3) {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -29,5 +29,5 @@ const char* ffDetectLoadavg(double result[3]) {
         result[i] = (double) si.loads[i] / (1 << SI_LOAD_SHIFT);
     }
 #endif
-    return NULL;
+    return nullptr;
 }

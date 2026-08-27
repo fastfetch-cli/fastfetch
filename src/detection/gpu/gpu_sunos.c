@@ -3,7 +3,7 @@
 
 #include <libdevinfo.h>
 
-static int walkDevTree(di_node_t node, FF_A_UNUSED di_minor_t minor, FFlist* gpus) {
+static int walkDevTree(di_node_t node, [[maybe_unused]] di_minor_t minor, FFlist* gpus) {
     int* vendorId;
     int* deviceId;
     if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "vendor-id", &vendorId) > 0 && di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-id", &deviceId) > 0) {
@@ -19,7 +19,7 @@ static int walkDevTree(di_node_t node, FF_A_UNUSED di_minor_t minor, FFlist* gpu
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = strtoul(di_bus_addr(node), NULL, 16);
+        gpu->deviceId = strtoul(di_bus_addr(node), nullptr, 16);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
@@ -43,7 +43,7 @@ static int walkDevTree(di_node_t node, FF_A_UNUSED di_minor_t minor, FFlist* gpu
     return DI_WALK_CONTINUE;
 }
 
-const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
+const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist* gpus) {
     di_node_t rootNode = di_init("/", DINFOCPYALL);
     if (rootNode == DI_NODE_NIL) {
         return "di_init() failed";
@@ -51,5 +51,5 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
     di_walk_minor(rootNode, DDI_NT_DISPLAY, DI_WALK_CLDFIRST, gpus, (void*) walkDevTree);
     di_fini(rootNode);
 
-    return NULL;
+    return nullptr;
 }

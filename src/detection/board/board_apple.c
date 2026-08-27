@@ -28,5 +28,5 @@ const char* ffDetectBoard(FFBoardResult* result) {
         ffCfStrGetString(manufacturer, &result->vendor);
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -3,18 +3,18 @@
 #include "common/smbios.h"
 
 const char* ffDetectBoard(FFBoardResult* board) {
-    if (ffSysctlGetString("machdep.dmi.board-product", &board->name) == NULL) {
+    if (ffSysctlGetString("machdep.dmi.board-product", &board->name) == nullptr) {
         ffCleanUpSmbiosValue(&board->name);
     }
-    if (ffSysctlGetString("machdep.dmi.board-version", &board->version) == NULL) {
+    if (ffSysctlGetString("machdep.dmi.board-version", &board->version) == nullptr) {
         ffCleanUpSmbiosValue(&board->version);
     }
-    if (ffSysctlGetString("machdep.dmi.board-vendor", &board->vendor) == NULL) {
+    if (ffSysctlGetString("machdep.dmi.board-vendor", &board->vendor) == nullptr) {
         ffCleanUpSmbiosValue(&board->vendor);
     }
-    if (ffSysctlGetString("machdep.dmi.board-serial", &board->serial) == NULL) {
+    if (ffSysctlGetString("machdep.dmi.board-serial", &board->serial) == nullptr) {
         ffCleanUpSmbiosValue(&board->serial);
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -168,19 +168,6 @@ static const FFlogo H[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_HYPROS
-    // HyprOS
-    {
-        .names = { "hypros" },
-        .lines = FASTFETCH_DATATEXT_LOGO_HYPROS,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_BLUE,
-        },
-    },
-    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_HYPERBOLA
     // Hyperbola
     {

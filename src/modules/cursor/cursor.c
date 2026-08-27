@@ -14,7 +14,7 @@ bool ffPrintCursor(FFCursorOptions* options) {
     ffDetectCursor(&result);
 
     if (result.error.length) {
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result.error.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Cursor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result.error.chars);
     } else {
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursors");
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursor");
@@ -25,7 +25,7 @@ bool ffPrintCursor(FFCursorOptions* options) {
         }
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Cursor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&result.theme, stdout);
 
             if (result.size.length > 0 && !ffStrbufEqualS(&result.size, "0")) {
@@ -34,7 +34,7 @@ bool ffPrintCursor(FFCursorOptions* options) {
 
             putchar('\n');
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Cursor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                FF_ARG(result.theme, "theme"),
                                                                                                                FF_ARG(result.size, "size"),
                                                                                                            }));
@@ -58,7 +58,7 @@ void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Cursor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -66,7 +66,7 @@ void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateCursorJsonResult(FF_A_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateCursorJsonResult([[maybe_unused]] FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
@@ -100,8 +100,30 @@ void ffDestroyCursorOptions(FFCursorOptions* options) {
 }
 
 FFModuleBaseInfo ffCursorModuleInfo = {
-    .name = FF_CURSOR_MODULE_NAME,
+    .name = "Cursor",
     .description = "Print cursor style name",
+    .displayName = {
+        .en = "Cursor",
+        .ar = "المؤشر",
+        .cs = "Kurzor",
+        .de = "Mauszeiger",
+        .es = "Cursor",
+        .fr = "Curseur",
+        .gl = "Cursor",
+        .he = "סמן",
+        .id = "Kursor",
+        .it = "Cursore",
+        .ja = "カーソル",
+        .ko = "커서",
+        .pl = "Kursor",
+        .pt = "Cursor",
+        .ru = "Курсор",
+        .tr = "İmleç",
+        .uk = "Курсор",
+        .vi = "Con trỏ",
+        .zh_CN = "光标",
+        .zh_TW = "游標",
+    },
     .initOptions = (void*) ffInitCursorOptions,
     .destroyOptions = (void*) ffDestroyCursorOptions,
     .parseJsonObject = (void*) ffParseCursorJsonObject,
@@ -112,4 +134,5 @@ FFModuleBaseInfo ffCursorModuleInfo = {
         { "Cursor theme", "theme" },
         { "Cursor size", "size" },
     })),
+    .defaultOrder = 27,
 };

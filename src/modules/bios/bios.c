@@ -18,12 +18,12 @@ bool ffPrintBios(FFBiosOptions* options) {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if (error) {
-        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bios), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
     if (bios.version.length == 0) {
-        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "bios_version is not set.");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bios), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "bios_version is not set.");
         goto exit;
     }
 
@@ -34,7 +34,7 @@ bool ffPrintBios(FFBiosOptions* options) {
             ffStrbufSetStatic(&bios.type, "Legacy");
         }
 
-        ffStrbufSetF(&key, FF_BIOS_MODULE_NAME " (%s)", bios.type.chars);
+        ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Bios), bios.type.chars);
     } else {
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -80,7 +80,7 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bios), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -88,7 +88,7 @@ void ffGenerateBiosJsonConfig(FFBiosOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateBiosJsonResult(FF_A_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBiosJsonResult([[maybe_unused]] FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
@@ -130,8 +130,30 @@ void ffDestroyBiosOptions(FFBiosOptions* options) {
 }
 
 FFModuleBaseInfo ffBiosModuleInfo = {
-    .name = FF_BIOS_MODULE_NAME,
+    .name = "BIOS",
     .description = "Print first-stage bootloader information (name, version, release date, etc.)",
+    .displayName = {
+        .en = "BIOS",
+        .ar = "BIOS",
+        .cs = "BIOS",
+        .de = "BIOS",
+        .es = "BIOS",
+        .fr = "BIOS",
+        .gl = "BIOS",
+        .he = "BIOS",
+        .id = "BIOS",
+        .it = "BIOS",
+        .ja = "BIOS",
+        .ko = "BIOS",
+        .pl = "BIOS",
+        .pt = "BIOS",
+        .ru = "BIOS",
+        .tr = "BIOS",
+        .uk = "BIOS",
+        .vi = "BIOS",
+        .zh_CN = "BIOS",
+        .zh_TW = "BIOS",
+    },
     .initOptions = (void*) ffInitBiosOptions,
     .destroyOptions = (void*) ffDestroyBiosOptions,
     .parseJsonObject = (void*) ffParseBiosJsonObject,
@@ -144,5 +166,6 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         { "BIOS vendor", "vendor" },
         { "BIOS version", "version" },
         { "Firmware type", "type" },
-    }))
+    })),
+    .defaultOrder = 5,
 };

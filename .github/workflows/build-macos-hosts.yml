@@ -10,6 +10,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
 
@@ -18,7 +21,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: uname -a
         run: uname -a
@@ -26,7 +29,7 @@ jobs:
       - name: install required packages
         run: |
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew update
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa lua quickjs-ng
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa lua quickjs-ng jq
 
       - name: configure project
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
@@ -38,10 +41,32 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --stat false
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan:bluetooth:bluetoothradio --stat false
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --format json
+        run: |
+          { time -p ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan:bluetooth:bluetoothradio --format json > fastfetch.raw.json 2> fastfetch.error; } 2> fastfetch.time
+          sed -n '/^[[:space:]]*\[/,$p' fastfetch.raw.json > fastfetch.json
+          cat fastfetch.json
+          cat fastfetch.error >&2
+          cat fastfetch.time >&2
+
+      - name: prepare benchmark data
+        run: |
+          real_seconds=$(awk '$1 == "real" { print $2 }' fastfetch.time)
+          jq -e 'type == "array"' fastfetch.json > /dev/null
+          jq --arg platform "macos" --arg arch "${{ inputs.arch }}" --argjson real_seconds "$real_seconds" '
+            map(select(.stat | type == "number") | {
+              name: ("fastfetch " + $platform + " " + $arch + " module " + .type),
+              unit: "ms",
+              value: .stat
+            }) + [{
+              name: ("fastfetch " + $platform + " " + $arch + " total process time"),
+              unit: "ms",
+              value: ($real_seconds * 1000)
+            }]
+          ' fastfetch.json > benchmark.json
+          cat benchmark.json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -53,7 +78,13 @@ jobs:
         run: ctest --output-on-failure
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-macos-${{ inputs.arch }}
           path: ./fastfetch-*.*
+
+      - name: upload benchmark data
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-macos-${{ inputs.arch }}
+          path: benchmark.json

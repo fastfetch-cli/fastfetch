@@ -10,11 +10,11 @@
 
 static const char* getInfoByNqsi(FFlist* cpuTimes) {
     ULONG size = 0;
-    if (NtQuerySystemInformation(SystemProcessorPerformanceInformation, NULL, 0, &size) != STATUS_INFO_LENGTH_MISMATCH) {
-        return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, NULL) failed";
+    if (NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr, 0, &size) != STATUS_INFO_LENGTH_MISMATCH) {
+        return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr) failed";
     }
 
-    SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* FF_AUTO_FREE pinfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*) malloc(size);
+    FF_AUTO_FREE SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* pinfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*) malloc(size);
     if (!NT_SUCCESS(NtQuerySystemInformation(SystemProcessorPerformanceInformation, pinfo, size, &size))) {
         return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, size) failed";
     }
@@ -35,13 +35,13 @@ static const char* getInfoByNqsi(FFlist* cpuTimes) {
         };
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* getInfoByPerflib(FFlist* cpuTimes) {
-    static HANDLE hQuery = NULL;
+    static HANDLE hQuery = nullptr;
 
-    if (hQuery == NULL) {
+    if (hQuery == nullptr) {
         struct FFPerfQuerySpec {
             PERF_COUNTER_IDENTIFIER Identifier;
             WCHAR Name[16];
@@ -57,7 +57,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
             .Name = PERF_WILDCARD_INSTANCE,
         };
 
-        if (PerfOpenQueryHandle(NULL, &hQuery) != ERROR_SUCCESS) {
+        if (PerfOpenQueryHandle(nullptr, &hQuery) != ERROR_SUCCESS) {
             PerfCloseQueryHandle(hQuery);
             hQuery = INVALID_HANDLE_VALUE;
             return "PerfOpenQueryHandle() failed";
@@ -81,8 +81,8 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
     }
 
     DWORD dataSize = 0;
-    if (PerfQueryCounterData(hQuery, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
-        return "PerfQueryCounterData(NULL) failed";
+    if (PerfQueryCounterData(hQuery, nullptr, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
+        return "PerfQueryCounterData(nullptr) failed";
     }
 
     if (dataSize <= sizeof(PERF_DATA_HEADER) + sizeof(PERF_COUNTER_HEADER)) {
@@ -133,7 +133,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
             pCounterData = (PERF_COUNTER_DATA*) ((BYTE*) pCounterData + pCounterData->dwSize);
         }
 
-        if (wcschr(instanceName, L'_') == NULL /* ignore `_Total` */) {
+        if (wcschr(instanceName, L'_') == nullptr /* ignore `_Total` */) {
             if (processorUtility == UINT64_MAX) {
                 return "Counter \"% Processor Utility\" are not supported";
             }
@@ -148,17 +148,17 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
         pInstanceHeader = (PERF_INSTANCE_HEADER*) pCounterData;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
-    const char* error = NULL;
+    const char* error = nullptr;
 
     if (ffIsWindows10OrGreater()) {
         error = getInfoByPerflib(cpuTimes);
         FF_DEBUG("Get CPU usage info by Perflib: %s", error ?: "success");
         if (!error) {
-            return NULL;
+            return nullptr;
         }
         ffListClear(cpuTimes);
     }

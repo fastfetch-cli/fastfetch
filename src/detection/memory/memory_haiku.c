@@ -12,5 +12,5 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     ram->bytesTotal = pageSize * info.max_pages;
     ram->bytesUsed = pageSize * info.used_pages;
 
-    return NULL;
+    return nullptr;
 }

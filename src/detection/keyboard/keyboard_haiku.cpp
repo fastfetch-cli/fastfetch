@@ -23,5 +23,5 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
         ffStrbufInitS(&item->name, device->Name());
     }
 
-    return NULL;
+    return nullptr;
 }

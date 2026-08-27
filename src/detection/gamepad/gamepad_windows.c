@@ -23,7 +23,7 @@ static const char* detectKnownDeviceName(uint32_t vendorId, uint32_t productId) 
                     return "Nintendo Switch SNES Controller";
 
                 default:
-                    return NULL;
+                    return nullptr;
             }
         }
 
@@ -46,7 +46,7 @@ static const char* detectKnownDeviceName(uint32_t vendorId, uint32_t productId) 
                     return "Sony DualSense Edge";
 
                 default:
-                    return NULL;
+                    return nullptr;
             }
         }
 
@@ -67,25 +67,25 @@ static const char* detectKnownDeviceName(uint32_t vendorId, uint32_t productId) 
                     return "Logitech F710";
 
                 default:
-                    return NULL;
+                    return nullptr;
             }
         }
 
         case 0x045E: // Microsoft Xbox compatible controllers should be handled by Windows without problems
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
     UINT nDevices = 0;
-    if (GetRawInputDeviceList(NULL, &nDevices, sizeof(RAWINPUTDEVICELIST))) {
-        return "GetRawInputDeviceList(NULL) failed";
+    if (GetRawInputDeviceList(nullptr, &nDevices, sizeof(RAWINPUTDEVICELIST))) {
+        return "GetRawInputDeviceList(nullptr) failed";
     }
     if (nDevices == 0) {
         return "No HID devices found";
     }
-    RAWINPUTDEVICELIST* FF_AUTO_FREE pRawInputDeviceList = (RAWINPUTDEVICELIST*) malloc(sizeof(RAWINPUTDEVICELIST) * nDevices);
+    FF_AUTO_FREE RAWINPUTDEVICELIST* pRawInputDeviceList = (RAWINPUTDEVICELIST*) malloc(sizeof(RAWINPUTDEVICELIST) * nDevices);
     if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1) {
         return "GetRawInputDeviceList(pRawInputDeviceList) failed";
     }
@@ -122,7 +122,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
         if (knownGamepad) {
             ffStrbufSetS(&device->name, knownGamepad);
         }
-        HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+        FF_AUTO_CLOSE_FD HANDLE hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, nullptr);
         if (hHidFile == INVALID_HANDLE_VALUE) {
             if (!knownGamepad) {
                 ffStrbufSetF(&device->name, "Unknown gamepad %04X-%04X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
@@ -150,7 +150,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
             ffStrbufSetWS(&device->serial, serialNumber);
         }
 
-        PHIDP_PREPARSED_DATA preparsedData = NULL;
+        PHIDP_PREPARSED_DATA preparsedData = nullptr;
         if (HidD_GetPreparsedData(hHidFile, &preparsedData)) {
             HIDP_CAPS caps;
             NTSTATUS capsResult = HidP_GetCaps(preparsedData, &caps);
@@ -197,5 +197,5 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

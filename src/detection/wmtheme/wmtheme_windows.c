@@ -105,16 +105,16 @@ const char* colorHexToString(DWORD hex) {
         case 0xFFFFFF:
             return "White";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
 bool ffDetectWmTheme(FFstrbuf* themeOrError) {
     {
-        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, NULL)) {
+        FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes", &hKey, nullptr)) {
             FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
-            if (ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, NULL)) {
+            if (ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, nullptr)) {
                 ffStrbufSubstrBeforeLastC(&theme, '.');
                 ffStrbufSubstrAfterLastC(&theme, '\\');
                 if (isalpha(theme.chars[0])) {
@@ -129,11 +129,11 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
     do {
         uint32_t rgbColor;
         uint32_t bgrColor;
-        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", &hKey, NULL)) {
-            if (ffRegReadUint(hKey, L"AccentColor", &bgrColor, NULL)) {
+        FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\DWM", &hKey, nullptr)) {
+            if (ffRegReadUint(hKey, L"AccentColor", &bgrColor, nullptr)) {
                 rgbColor = ((bgrColor & 0xFF) << 16) | (bgrColor & 0xFF00) | ((bgrColor >> 16) & 0xFF);
-            } else if (ffRegReadUint(hKey, L"ColorizationColor", &rgbColor, NULL)) {
+            } else if (ffRegReadUint(hKey, L"ColorizationColor", &rgbColor, nullptr)) {
                 rgbColor &= 0xFFFFFF;
             } else {
                 break;
@@ -154,14 +154,14 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
     } while (false);
 
     {
-        FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, NULL)) {
+        FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+        if (ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", &hKey, nullptr)) {
             uint32_t system = 1, apps = 1;
             if (ffRegReadValues(hKey, 2, (FFRegValueArg[]) {
                                              FF_ARG(system, L"SystemUsesLightTheme"),
                                              FF_ARG(apps, L"AppsUseLightTheme"),
                                          },
-                    NULL)) {
+                    nullptr)) {
                 bool paren = themeOrError->length > 0;
                 if (paren) {
                     ffStrbufAppendS(themeOrError, " (");

@@ -6,7 +6,7 @@
 #include <iphlpapi.h>
 
 const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
-    IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
+    FF_AUTO_FREE IP_ADAPTER_ADDRESSES* adapter_addresses = nullptr;
 
     // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
@@ -22,7 +22,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
                 ? options->showType & FF_DNS_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
                 : AF_INET6,
             GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_FRIENDLY_NAME,
-            NULL,
+            nullptr,
             adapter_addresses,
             &adapter_addresses_buffer_size);
 
@@ -59,5 +59,5 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
         }
         break;
     }
-    return NULL;
+    return nullptr;
 }

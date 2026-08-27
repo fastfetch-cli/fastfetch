@@ -8,12 +8,12 @@ bool ffPrintShell(FFShellOptions* options) {
     const FFShellResult* result = ffDetectShell();
 
     if (result->processName.length == 0) {
-        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result->prettyName, stdout);
 
         if (result->version.length > 0) {
@@ -23,7 +23,7 @@ bool ffPrintShell(FFShellOptions* options) {
 
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result->processName, "process-name"),
                                                                                                           FF_ARG(result->exe, "exe"),
                                                                                                           FF_ARG(result->exeName, "exe-name"),
@@ -46,7 +46,7 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Shell), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -54,7 +54,7 @@ void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateShellJsonResult(FF_A_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateShellJsonResult([[maybe_unused]] FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFShellResult* result = ffDetectShell();
 
     if (result->processName.length == 0) {
@@ -89,8 +89,30 @@ void ffDestroyShellOptions(FFShellOptions* options) {
 }
 
 FFModuleBaseInfo ffShellModuleInfo = {
-    .name = FF_SHELL_MODULE_NAME,
+    .name = "Shell",
     .description = "Print the current shell name and version",
+    .displayName = {
+        .en = "Shell",
+        .ar = "الصدفة",
+        .cs = "Shell",
+        .de = "Shell",
+        .es = "Shell",
+        .fr = "Shell",
+        .gl = "Shell",
+        .he = "מעטפת",
+        .id = "Shell",
+        .it = "Shell",
+        .ja = "シェル",
+        .ko = "셸",
+        .pl = "Powłoka",
+        .pt = "Shell",
+        .ru = "Оболочка",
+        .tr = "Kabuk",
+        .uk = "Оболонка",
+        .vi = "Shell",
+        .zh_CN = "命令行解释器",
+        .zh_TW = "命令列直譯器",
+    },
     .initOptions = (void*) ffInitShellOptions,
     .destroyOptions = (void*) ffDestroyShellOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,
@@ -106,5 +128,6 @@ FFModuleBaseInfo ffShellModuleInfo = {
         { "Shell pretty name", "pretty-name" },
         { "Shell full exe path", "exe-path" },
         { "Shell tty used", "tty" },
-    }))
+    })),
+    .defaultOrder = 15,
 };

@@ -13,12 +13,12 @@
 #include <shlobj.h>
 
 static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t* ignore) {
-    FF_AUTO_CLOSE_FD HANDLE dfd = CreateFileA(searchPath, FILE_LIST_DIRECTORY | SYNCHRONIZE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    FF_AUTO_CLOSE_FD HANDLE dfd = CreateFileA(searchPath, FILE_LIST_DIRECTORY | SYNCHRONIZE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
     if (dfd == INVALID_HANDLE_VALUE) {
         return 0;
     }
 
-    bool flag = ignore == NULL;
+    bool flag = ignore == nullptr;
     uint32_t counter = 0;
     alignas(8) uint8_t buffer[64 * 1024];
     BOOLEAN firstScan = TRUE;
@@ -29,15 +29,15 @@ static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t
         IO_STATUS_BLOCK ioStatus = {};
         NTSTATUS status = NtQueryDirectoryFile(
             dfd,
-            NULL,
-            NULL,
-            NULL,
+            nullptr,
+            nullptr,
+            nullptr,
             &ioStatus,
             buffer,
             ARRAY_SIZE(buffer),
             FileDirectoryInformation,
             FALSE,
-            NULL,
+            nullptr,
             firstScan);
         firstScan = FALSE;
 
@@ -90,13 +90,13 @@ static void detectScoop(FFPackagesResult* result) {
     ffStrbufAppend(&scoopPath, &instance.state.platform.homeDir);
     ffStrbufAppendS(&scoopPath, ".config/scoop/config.json");
 
-    yyjson_val* root = NULL;
+    yyjson_val* root = nullptr;
 
-    yyjson_doc* FF_A_CLEANUP(wrapYyjsonFree) doc = yyjson_read_file(scoopPath.chars, 0, NULL, NULL);
+    [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_file(scoopPath.chars, 0, nullptr, nullptr);
     if (doc) {
         root = yyjson_doc_get_root(doc);
         if (!yyjson_is_obj(root)) {
-            root = NULL;
+            root = nullptr;
         }
     }
 
@@ -119,8 +119,8 @@ static void detectScoop(FFPackagesResult* result) {
             ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "global_path"));
         }
         if (scoopPath.length == 0) {
-            PWSTR pPath = NULL;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, NULL, &pPath))) {
+            PWSTR pPath = nullptr;
+            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, nullptr, &pPath))) {
                 ffStrbufSetWS(&scoopPath, pPath);
                 CoTaskMemFree(pPath);
             }
@@ -131,7 +131,7 @@ static void detectScoop(FFPackagesResult* result) {
     }
 }
 
-static void detectChoco(FF_A_UNUSED FFPackagesResult* result) {
+static void detectChoco([[maybe_unused]] FFPackagesResult* result) {
     const char* chocoInstall = getenv("ChocolateyInstall");
     if (!chocoInstall || chocoInstall[0] == '\0') {
         return;
@@ -153,7 +153,7 @@ static void detectPacman(FFPackagesResult* result) {
     char pacmanPath[MAX_PATH + 3];
     char* pend = ffStrCopy(pacmanPath, msystemPrefix, ARRAY_SIZE(pacmanPath));
     ffStrCopy(pend, "/../var/lib/pacman/local/", ARRAY_SIZE(pacmanPath) - (size_t) (pend - pacmanPath));
-    result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, NULL);
+    result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, nullptr);
 }
 
 static void detectWinget(FFPackagesResult* result) {
@@ -162,7 +162,7 @@ static void detectWinget(FFPackagesResult* result) {
                                            "winget.exe",
                                            "list",
                                            "--disable-interactivity",
-                                           NULL,
+                                           nullptr,
                                        })) {
         return;
     }

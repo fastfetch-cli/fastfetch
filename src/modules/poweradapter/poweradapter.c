@@ -4,20 +4,18 @@
 #include "detection/poweradapter/poweradapter.h"
 #include "modules/poweradapter/poweradapter.h"
 
-#define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
-
 bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
     FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectPowerAdapter(&results);
 
     if (error) {
-        ffPrintError(FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (results.length == 0) {
-        ffPrintError(FF_POWERADAPTER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No power adapters found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No power adapters found");
         return false;
     }
 
@@ -25,7 +23,7 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
         FFPowerAdapterResult* result = FF_LIST_GET(FFPowerAdapterResult, results, i);
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             if (result->name.length > 0) {
                 puts(result->name.chars);
@@ -33,7 +31,7 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
                 printf("%dW\n", result->watts);
             }
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                       FF_ARG(result->watts, "watts"),
                                                                                                                       FF_ARG(result->name, "name"),
                                                                                                                       FF_ARG(result->manufacturer, "manufacturer"),
@@ -65,11 +63,11 @@ void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* m
             continue;
         }
 
-        ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PowerAdapter), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-bool ffGeneratePowerAdapterJsonResult(FF_A_UNUSED FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGeneratePowerAdapterJsonResult([[maybe_unused]] FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectPowerAdapter(&results);
@@ -110,8 +108,30 @@ void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options) {
 }
 
 FFModuleBaseInfo ffPowerAdapterModuleInfo = {
-    .name = FF_POWERADAPTER_MODULE_NAME,
+    .name = "PowerAdapter",
     .description = "Print power adapter name and charging watts",
+    .displayName = {
+        .en = "Power Adapter",
+        .ar = "محول الطاقة",
+        .cs = "Napájecí adaptér",
+        .de = "Netzteil",
+        .es = "Adaptador de corriente",
+        .fr = "Adaptateur secteur",
+        .gl = "Adaptador de corrente",
+        .he = "מתאם מתח",
+        .id = "Adaptor Daya",
+        .it = "Alimentatore",
+        .ja = "電源アダプター",
+        .ko = "전원 어댑터",
+        .pl = "Zasilacz",
+        .pt = "Fonte de alimentação",
+        .ru = "Адаптер питания",
+        .tr = "Güç Adaptörü",
+        .uk = "Блок живлення",
+        .vi = "Bộ chuyển đổi nguồn",
+        .zh_CN = "电源适配器",
+        .zh_TW = "電源轉接器",
+    },
     .initOptions = (void*) ffInitPowerAdapterOptions,
     .destroyOptions = (void*) ffDestroyPowerAdapterOptions,
     .parseJsonObject = (void*) ffParsePowerAdapterJsonObject,
@@ -125,5 +145,6 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         { "Power adapter model", "model" },
         { "Power adapter description", "description" },
         { "Power adapter serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 45,
 };

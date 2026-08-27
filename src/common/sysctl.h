@@ -7,11 +7,11 @@
 
 #ifdef __OpenBSD__
 const char* ffSysctlGetString(int mib1, int mib2, FFstrbuf* result);
-FF_A_NODISCARD int ffSysctlGetInt(int mib1, int mib2, int defaultValue);
-FF_A_NODISCARD int64_t ffSysctlGetInt64(int mib1, int mib2, int64_t defaultValue);
+[[nodiscard]] int ffSysctlGetInt(int mib1, int mib2, int defaultValue);
+[[nodiscard]] int64_t ffSysctlGetInt64(int mib1, int mib2, int64_t defaultValue);
 #else
 const char* ffSysctlGetString(const char* propName, FFstrbuf* result);
-FF_A_NODISCARD int ffSysctlGetInt(const char* propName, int defaultValue);
-FF_A_NODISCARD int64_t ffSysctlGetInt64(const char* propName, int64_t defaultValue);
+[[nodiscard]] int ffSysctlGetInt(const char* propName, int defaultValue);
+[[nodiscard]] int64_t ffSysctlGetInt64(const char* propName, int64_t defaultValue);
 #endif
-FF_A_NODISCARD void* ffSysctlGetData(int* request, u_int requestLength, size_t* resultLength);
+[[nodiscard]] void* ffSysctlGetData(int* request, u_int requestLength, size_t* resultLength);

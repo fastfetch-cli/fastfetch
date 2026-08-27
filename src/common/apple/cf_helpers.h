@@ -4,7 +4,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
-// Return error info if failed, NULL otherwise
+// Return error info if failed, nullptr otherwise
 const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result);
 const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result);
 const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result);
@@ -32,7 +32,7 @@ static inline void cfReleaseWrapper(void* type) {
     }
 }
 
-#define FF_CFTYPE_AUTO_RELEASE FF_A_CLEANUP(cfReleaseWrapper)
+#define FF_CFTYPE_AUTO_RELEASE [[gnu::cleanup(cfReleaseWrapper)]]
 
 static inline void wrapIoObjectRelease(io_object_t* service) {
     assert(service);
@@ -40,4 +40,4 @@ static inline void wrapIoObjectRelease(io_object_t* service) {
         IOObjectRelease(*service);
     }
 }
-#define FF_IOOBJECT_AUTO_RELEASE FF_A_CLEANUP(wrapIoObjectRelease)
+#define FF_IOOBJECT_AUTO_RELEASE [[gnu::cleanup(wrapIoObjectRelease)]]

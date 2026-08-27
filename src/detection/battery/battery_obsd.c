@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* result) {
+const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* result) {
     FF_AUTO_CLOSE_FD int devfd = open("/dev/apm", O_RDONLY | O_CLOEXEC);
 
     if (devfd < 0) {
@@ -20,7 +20,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
     }
 
     if (info.battery_state == APM_BATTERY_ABSENT) {
-        return NULL;
+        return nullptr;
     }
 
     FFBatteryResult* battery = FF_LIST_ADD(FFBatteryResult, *result);
@@ -56,5 +56,5 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
         }
     }
 
-    return NULL;
+    return nullptr;
 }

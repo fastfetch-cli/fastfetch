@@ -18,6 +18,18 @@ on:
       msys-arch:
         required: true
         type: string
+    secrets:
+      SIGNPATH_API_TOKEN:
+        description: SignPath REST API token used to submit the signing request
+        # Optional so that runs without the secret (pull requests, forks)
+        # still work; the signing step is skipped there anyway.
+        required: false
+
+permissions:
+  contents: read
+  # The SignPath action reads job details and downloads the unsigned
+  # artifact with the workflow token.
+  actions: read
 
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
@@ -30,14 +42,14 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: setup-msys2
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
           msystem: ${{ inputs.msystem }}
           update: true
-          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-quickjs-ng mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
+          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-jq mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-quickjs-ng mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
 
       - name: print msys version
         run: uname -a
@@ -58,7 +70,29 @@ jobs:
         run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
+        run: |
+          { time -p ./fastfetch -c presets/ci.jsonc --format json > fastfetch.raw.json 2> fastfetch.error; } 2> fastfetch.time
+          sed -n '/^[[:space:]]*\[/,$p' fastfetch.raw.json > fastfetch.json
+          cat fastfetch.json
+          cat fastfetch.error >&2
+          cat fastfetch.time >&2
+
+      - name: prepare benchmark data
+        run: |
+          real_seconds=$(awk '$1 == "real" { print $2 }' fastfetch.time)
+          jq -e 'type == "array"' fastfetch.json > /dev/null
+          jq --arg platform "windows" --arg arch "${{ inputs.arch }}" --argjson real_seconds "$real_seconds" '
+            map(select(.stat | type == "number") | {
+              name: ("fastfetch " + $platform + " " + $arch + " module " + .type),
+              unit: "ms",
+              value: .stat
+            }) + [{
+              name: ("fastfetch " + $platform + " " + $arch + " total process time"),
+              unit: "ms",
+              value: ($real_seconds * 1000)
+            }]
+          ' fastfetch.json > benchmark.json
+          cat benchmark.json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -72,7 +106,7 @@ jobs:
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         id: upload-unsigned-artifact
         name: upload artifacts for signing
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: |
@@ -82,7 +116,7 @@ jobs:
 
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         name: submit signing request
-        uses: signpath/github-action-submit-signing-request@v1
+        uses: signpath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2.3
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
@@ -99,8 +133,14 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ inputs.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: ./fastfetch-windows-${{ inputs.arch }}.*
           overwrite: true
+
+      - name: upload benchmark data
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-windows-${{ inputs.arch }}
+          path: benchmark.json

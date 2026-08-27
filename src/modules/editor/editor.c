@@ -16,12 +16,12 @@ bool ffPrintEditor(FFEditorOptions* options) {
     const char* error = ffDetectEditor(&result);
 
     if (error) {
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.exe.length) {
             ffStrbufWriteTo(&result.exe, stdout);
             if (result.version.length) {
@@ -32,7 +32,7 @@ bool ffPrintEditor(FFEditorOptions* options) {
         }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(result.type, "type"),
                                                                                                            FF_ARG(result.name, "name"),
                                                                                                            FF_ARG(result.exe, "exe-name"),
@@ -57,7 +57,7 @@ void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -65,7 +65,7 @@ void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateEditorJsonResult(FF_A_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateEditorJsonResult([[maybe_unused]] FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),
@@ -103,8 +103,30 @@ void ffDestroyEditorOptions(FFEditorOptions* options) {
 }
 
 FFModuleBaseInfo ffEditorModuleInfo = {
-    .name = FF_EDITOR_MODULE_NAME,
+    .name = "Editor",
     .description = "Print information about the default editor ($VISUAL or $EDITOR)",
+    .displayName = {
+        .en = "Editor",
+        .ar = "المحرر",
+        .cs = "Editor",
+        .de = "Editor",
+        .es = "Editor",
+        .fr = "Éditeur",
+        .gl = "Editor",
+        .he = "עורך",
+        .id = "Editor",
+        .it = "Editor",
+        .ja = "エディター",
+        .ko = "편집기",
+        .pl = "Edytor",
+        .pt = "Editor",
+        .ru = "Редактор",
+        .tr = "Düzenleyici",
+        .uk = "Редактор",
+        .vi = "Trình soạn thảo",
+        .zh_CN = "编辑器",
+        .zh_TW = "編輯器",
+    },
     .initOptions = (void*) ffInitEditorOptions,
     .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
@@ -117,5 +139,6 @@ FFModuleBaseInfo ffEditorModuleInfo = {
         { "Exe name of real path", "exe-name" },
         { "Full path of real path", "path" },
         { "Version", "version" },
-    }))
+    })),
+    .defaultOrder = 16,
 };

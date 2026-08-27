@@ -1,7 +1,7 @@
 #include "board.h"
 #include "common/smbios.h"
 
-typedef struct FFSmbiosBaseboard {
+typedef struct [[gnu::packed]] FFSmbiosBaseboard {
     FFSmbiosHeader Header;
 
     uint8_t Manufacturer;                   // string
@@ -15,7 +15,7 @@ typedef struct FFSmbiosBaseboard {
     uint8_t BoardType;                      // enum
     uint8_t NumberOfContainedObjectHandles; // varies
     uint16_t ContainedObjectHandles[];      // varies
-} FF_A_PACKED FFSmbiosBaseboard;
+} FFSmbiosBaseboard;
 
 static_assert(offsetof(FFSmbiosBaseboard, ContainedObjectHandles) == 0x0F,
     "FFSmbiosBaseboard: Wrong struct alignment");
@@ -42,5 +42,5 @@ const char* ffDetectBoard(FFBoardResult* board) {
     ffStrbufSetStatic(&board->version, ffSmbiosLocateString(strings, data->Version));
     ffCleanUpSmbiosValue(&board->version);
 
-    return NULL;
+    return nullptr;
 }

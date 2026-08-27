@@ -8,33 +8,33 @@ bool ffPrintCommand(FFCommandOptions* options) {
     const char* error = ffDetectCommand(options, &result);
 
     if (error) {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (!result.length) {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
         return false;
     }
 
     if (options->splitLines) {
         uint8_t index = 0;
-        char* line = NULL;
+        char* line = nullptr;
         size_t len = 0;
         while (ffStrbufGetline(&line, &len, &result)) {
             if (options->moduleArgs.outputFormat.length == 0) {
-                ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
                 puts(line);
             } else {
-                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
+                FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(line, "result") }));
             }
         }
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufPutTo(&result, stdout);
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result, "result") }));
         }
     }
 
@@ -79,7 +79,7 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -94,7 +94,7 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_bool(doc, module, "splitLines", options->splitLines);
 }
 
-bool ffGenerateCommandJsonResult(FF_A_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateCommandJsonResult([[maybe_unused]] FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffDetectCommand(options, &result);
 
@@ -110,7 +110,7 @@ bool ffGenerateCommandJsonResult(FF_A_UNUSED FFCommandOptions* options, yyjson_m
 
     if (options->splitLines) {
         yyjson_mut_val* jsonArray = yyjson_mut_obj_add_arr(doc, module, "result");
-        char* line = NULL;
+        char* line = nullptr;
         size_t len = 0;
         while (ffStrbufGetline(&line, &len, &result)) {
             yyjson_mut_arr_add_strncpy(doc, jsonArray, line, len);
@@ -153,8 +153,30 @@ void ffDestroyCommandOptions(FFCommandOptions* options) {
 }
 
 FFModuleBaseInfo ffCommandModuleInfo = {
-    .name = FF_COMMAND_MODULE_NAME,
+    .name = "Command",
     .description = "Run custom shell scripts",
+    .displayName = {
+        .en = "Command",
+        .ar = "الأمر",
+        .cs = "Příkaz",
+        .de = "Befehl",
+        .es = "Comando",
+        .fr = "Commande",
+        .gl = "Comando",
+        .he = "פקודה",
+        .id = "Perintah",
+        .it = "Comando",
+        .ja = "コマンド",
+        .ko = "명령어",
+        .pl = "Polecenie",
+        .pt = "Comando",
+        .ru = "Команда",
+        .tr = "Komut",
+        .uk = "Команда",
+        .vi = "Lệnh",
+        .zh_CN = "命令",
+        .zh_TW = "命令",
+    },
     .initOptions = (void*) ffInitCommandOptions,
     .destroyOptions = (void*) ffDestroyCommandOptions,
     .parseJsonObject = (void*) ffParseCommandJsonObject,
@@ -163,5 +185,5 @@ FFModuleBaseInfo ffCommandModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Command result", "result" },
-    }))
+    })),
 };

@@ -15,7 +15,7 @@ const char* ffDetectLibc(FFLibcResult* result) {
     #endif
 
         ;
-    return NULL;
+    return nullptr;
 #else
     return "Unknown Android libc";
 #endif

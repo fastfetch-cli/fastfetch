@@ -18,7 +18,7 @@ typedef struct nvmlDevice_t* nvmlDevice_t;
 // https://docs.nvidia.com/deploy/nvml-api/structnvmlPciInfo__t.html
 // PCI information about a GPU device
 typedef struct {
-    // The legacy tuple domain:bus:device.function PCI identifier (& NULL terminator)
+    // The legacy tuple domain:bus:device.function PCI identifier (& nullptr terminator)
     char busIdLegacy[NVML_DEVICE_PCI_BUS_ID_BUFFER_V2_SIZE];
     // The PCI domain on which the device's bus resides, 0 to 0xffffffff
     unsigned int domain;
@@ -30,7 +30,7 @@ typedef struct {
     unsigned int pciDeviceId;
     // The 32-bit Sub System Device ID
     unsigned int pciSubSystemId;
-    // The tuple domain:bus:device.function PCI identifier (& NULL terminator)
+    // The tuple domain:bus:device.function PCI identifier (& nullptr terminator)
     char busId[NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE];
 } nvmlPciInfo_t;
 

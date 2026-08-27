@@ -39,7 +39,7 @@ static const char* detectSecureBoot(bool* result) {
     *result = *CFDataGetBytePtr((CFDataRef) prop) != 0x02 /* Permissive Security */;
 #endif
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectBootmgr(FFBootmgrResult* result) {
@@ -65,5 +65,5 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
 
     detectSecureBoot(&result->secureBoot);
 
-    return NULL;
+    return nullptr;
 }

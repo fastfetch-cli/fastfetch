@@ -34,15 +34,15 @@ typedef struct XrandrData {
 static unsigned char* x11GetProperty(XrandrData* data, Display* display, Window window, const char* request) {
     Atom requestAtom = data->ffXInternAtom(display, request, False);
     if (requestAtom == None) {
-        return NULL;
+        return nullptr;
     }
 
     Atom actualType;
     unsigned long unused;
-    unsigned char* result = NULL;
+    unsigned char* result = nullptr;
 
     if (data->ffXGetWindowProperty(display, window, requestAtom, 0, 64, False, AnyPropertyType, &actualType, (int*) &unused, &unused, &unused, &result) != Success) {
-        return NULL;
+        return nullptr;
     }
 
     return result;
@@ -50,7 +50,7 @@ static unsigned char* x11GetProperty(XrandrData* data, Display* display, Window 
 
 static uint8_t* xrandrGetProperty(XrandrData* data, RROutput output, const char* name, uint32_t* bufSize) {
     unsigned long size = 0;
-    uint8_t* result = NULL;
+    uint8_t* result = nullptr;
     Atom atomEdid = data->ffXInternAtom(data->display, name, true);
     if (atomEdid != None) {
         int actual_format = 0;
@@ -68,7 +68,7 @@ static uint8_t* xrandrGetProperty(XrandrData* data, RROutput output, const char*
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static void x11DetectWMFromEWMH(XrandrData* data, FFDisplayServerResult* result) {
@@ -77,7 +77,7 @@ static void x11DetectWMFromEWMH(XrandrData* data, FFDisplayServerResult* result)
     }
 
     Window* wmWindow = (Window*) x11GetProperty(data, data->display, DefaultRootWindow(data->display), "_NET_SUPPORTING_WM_CHECK");
-    if (wmWindow == NULL) {
+    if (wmWindow == nullptr) {
         return;
     }
 
@@ -103,12 +103,12 @@ static void x11FetchServerVendor(XrandrData* data, FFDisplayServerResult* result
 
 static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, uint32_t dpi, bool randrEmulation) {
     // We do the check here, because we want the best fallback display if this call failed
-    if (screenResources == NULL) {
+    if (screenResources == nullptr) {
         return false;
     }
 
     XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, screenResources, output->crtc);
-    if (crtcInfo == NULL) {
+    if (crtcInfo == nullptr) {
         return false;
     }
 
@@ -128,7 +128,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
             break;
     }
 
-    XRRModeInfo* currentMode = NULL;
+    XRRModeInfo* currentMode = nullptr;
     for (int i = 0; i < screenResources->nmode; i++) {
         if (screenResources->modes[i].id == crtcInfo->mode) {
             currentMode = &screenResources->modes[i];
@@ -136,7 +136,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         }
     }
 
-    XRRModeInfo* preferredMode = output->npreferred > 0 ? &screenResources->modes[0] : NULL;
+    XRRModeInfo* preferredMode = output->npreferred > 0 ? &screenResources->modes[0] : nullptr;
 
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
@@ -179,7 +179,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
 
 static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType, XRRScreenResources* screenResources, uint8_t bitDepth, uint32_t dpi) {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, screenResources, output);
-    if (outputInfo == NULL) {
+    if (outputInfo == nullptr) {
         return false;
     }
 
@@ -193,7 +193,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
         edidLength = 0;
     }
 
-    uint8_t* randrEmulation = xrandrGetProperty(data, output, "RANDR Emulation", NULL);
+    uint8_t* randrEmulation = xrandrGetProperty(data, output, "RANDR Emulation", nullptr);
 
     bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, edidLength, screenResources, bitDepth, dpi, randrEmulation ? !!randrEmulation[0] : false);
 
@@ -250,7 +250,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, X
 static bool xrandrHandleMonitors(XrandrData* data, Screen* screen) {
     int numberOfMonitors;
     XRRMonitorInfo* monitorInfos = data->ffXRRGetMonitors(data->display, RootWindowOfScreen(screen), True, &numberOfMonitors);
-    if (monitorInfos == NULL) {
+    if (monitorInfos == nullptr) {
         return false;
     }
 
@@ -297,7 +297,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen) {
         0,
         0,
         0,
-        NULL,
+        nullptr,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
         RootWindowOfScreen(screen),
@@ -329,8 +329,8 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRFreeScreenResources);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xrandr, data, XRRFreeMonitors);
 
-    data.display = ffXOpenDisplay(NULL);
-    if (data.display == NULL) {
+    data.display = ffXOpenDisplay(nullptr);
+    if (data.display == nullptr) {
         return "XOpenDisplay() failed";
     }
 
@@ -352,7 +352,7 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result) {
         ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #else

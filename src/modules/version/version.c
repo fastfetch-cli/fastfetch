@@ -9,7 +9,7 @@ bool ffPrintVersion(FFVersionOptions* options) {
     FFVersionResult* result = &ffVersionResult;
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Version), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
     } else {
         FFLibcResult libcResult;
@@ -23,7 +23,7 @@ bool ffPrintVersion(FFVersionOptions* options) {
         }
 
         const char* buildType = result->debugMode ? "debug" : "release";
-        FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Version), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(result->projectName, "project-name"),
                                                                                                             FF_ARG(result->version, "version"),
                                                                                                             FF_ARG(result->versionTweak, "version-tweak"),
@@ -48,7 +48,7 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Version), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -56,7 +56,7 @@ void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateVersionJsonResult(FF_A_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateVersionJsonResult([[maybe_unused]] FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFVersionResult* result = &ffVersionResult;
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -94,8 +94,30 @@ void ffDestroyVersionOptions(FFVersionOptions* options) {
 }
 
 FFModuleBaseInfo ffVersionModuleInfo = {
-    .name = FF_VERSION_MODULE_NAME,
+    .name = "Version",
     .description = "Print the Fastfetch version and build information",
+    .displayName = {
+        .en = "Version",
+        .ar = "الإصدار",
+        .cs = "Verze",
+        .de = "Version",
+        .es = "Versión",
+        .fr = "Version",
+        .gl = "Versión",
+        .he = "גרסה",
+        .id = "Versi",
+        .it = "Versione",
+        .ja = "バージョン",
+        .ko = "버전",
+        .pl = "Wersja",
+        .pt = "Versão",
+        .ru = "Версия",
+        .tr = "Sürüm",
+        .uk = "Версія",
+        .vi = "Phiên bản",
+        .zh_CN = "版本",
+        .zh_TW = "版本",
+    },
     .initOptions = (void*) ffInitVersionOptions,
     .destroyOptions = (void*) ffDestroyVersionOptions,
     .parseJsonObject = (void*) ffParseVersionJsonObject,
@@ -113,5 +135,6 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         { "Date time when compiling", "compile-time" },
         { "Compiler used when compiling", "compiler" },
         { "Libc used when compiling", "libc" },
-    }))
+    })),
+    .defaultOrder = 70,
 };

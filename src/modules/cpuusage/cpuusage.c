@@ -5,14 +5,12 @@
 #include "detection/cpuusage/cpuusage.h"
 #include "modules/cpuusage/cpuusage.h"
 
-#define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
-
 bool ffPrintCPUUsage(FFCPUUsageOptions* options) {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate();
     const char* error = ffGetCpuUsageResult(options, &percentages);
 
     if (error) {
-        ffPrintError(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPUUsage), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -54,7 +52,7 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options) {
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(CPUUsage), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!options->separate) {
@@ -102,7 +100,7 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options) {
             ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(CPUUsage), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(avgNum, "avg"),
                                                                                                               FF_ARG(maxNum, "max"),
                                                                                                               FF_ARG(maxIndex, "max-index"),
@@ -139,7 +137,7 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPUUsage), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -181,8 +179,30 @@ void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options) {
 }
 
 FFModuleBaseInfo ffCPUUsageModuleInfo = {
-    .name = FF_CPUUSAGE_MODULE_NAME,
+    .name = "CPUUsage",
     .description = "Print CPU usage. Collecting data takes some time",
+    .displayName = {
+        .en = "CPU Usage",
+        .ar = "استخدام المعالج",
+        .cs = "Využití CPU",
+        .de = "CPU-Auslastung",
+        .es = "Uso de la CPU",
+        .fr = "Utilisation du CPU",
+        .gl = "Uso da CPU",
+        .he = "שימוש במעבד",
+        .id = "Penggunaan CPU",
+        .it = "Utilizzo della CPU",
+        .ja = "CPU使用率",
+        .ko = "CPU 사용량",
+        .pl = "Użycie CPU",
+        .pt = "Uso da CPU",
+        .ru = "Использование процессора",
+        .tr = "CPU Kullanımı",
+        .uk = "Використання ЦП",
+        .vi = "Mức sử dụng CPU",
+        .zh_CN = "CPU使用率",
+        .zh_TW = "CPU使用率",
+    },
     .initOptions = (void*) ffInitCPUUsageOptions,
     .destroyOptions = (void*) ffDestroyCPUUsageOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,
@@ -198,5 +218,6 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         { "CPU usage (percentage bar, average)", "avg-bar" },
         { "CPU usage (percentage bar, maximum)", "max-bar" },
         { "CPU usage (percentage bar, minimum)", "min-bar" },
-    }))
+    })),
+    .defaultOrder = 35,
 };

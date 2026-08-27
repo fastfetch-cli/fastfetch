@@ -1,4 +1,5 @@
 #include "common/strutil.h"
+#include "common/wcwidth.h"
 
 uint8_t ffUtf8CharLenWidth(const char* str, uint32_t length, uint8_t* width) {
     if (__builtin_expect(length == 0 || *str == '\0', false)) {

@@ -11,7 +11,7 @@ static const char* detectWithBacklight(FFlist* result) {
     const char* backlightDirPath = "/sys/class/backlight/";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(backlightDirPath);
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "Failed to open `/sys/class/backlight/`";
     }
 
@@ -23,7 +23,7 @@ static const char* detectWithBacklight(FFlist* result) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.') {
             continue;
         }
@@ -72,7 +72,7 @@ static const char* detectWithBacklight(FFlist* result) {
         ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #ifdef FF_HAVE_DDCUTIL
@@ -90,7 +90,7 @@ double ddca_set_default_sleep_multiplier(double multiplier); // ddcutil 1.4
 DDCA_Status ddca_init(const char* libopts, int syslog_level, int opts);
     #endif
 
-static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
+static const char* detectWithDdcci([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(libddcutil, "libddcutil" FF_LIBRARY_EXTENSION, 5);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_display_info_list2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_open_display2)
@@ -103,7 +103,7 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
     if (ffddca_init) {
         FF_SUPPRESS_IO();
         // Ref: https://github.com/rockowitz/ddcutil/issues/344
-        if (ffddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
+        if (ffddca_init(nullptr, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
             return "ddca_init() failed";
         }
     } else {
@@ -112,11 +112,11 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
             ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
         }
 
-        libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
+        libddcutil = nullptr; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
     }
     #else
         #if DDCUTIL_VMAJOR >= 2
-    if (ddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
+    if (ddca_init(nullptr, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
         return "ddca_init() failed";
     }
         #else
@@ -124,7 +124,7 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
         #endif
     #endif
 
-    FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
+    FF_AUTO_FREE DDCA_Display_Info_List* infoList = nullptr;
     if (ffddca_get_display_info_list2(false, &infoList) < 0) {
         return "ddca_get_display_info_list2(false, &infoList) failed";
     }
@@ -138,7 +138,7 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
 
         DDCA_Display_Handle handle;
         if (ffddca_open_display2(display->dref, false, &handle) >= 0) {
-            DDCA_Any_Vcp_Value* vcpValue = NULL;
+            DDCA_Any_Vcp_Value* vcpValue = nullptr;
             if (ffddca_get_any_vcp_value_using_explicit_type(handle, 0x10 /*brightness*/, DDCA_NON_TABLE_VCP_VALUE, &vcpValue) >= 0) {
                 assert(vcpValue->value_type == DDCA_NON_TABLE_VCP_VALUE);
                 int current = VALREC_CUR_VAL(vcpValue), max = VALREC_MAX_VAL(vcpValue);
@@ -154,11 +154,11 @@ static const char* detectWithDdcci(FF_A_UNUSED FFBrightnessOptions* options, FFl
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 #endif
 
-const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist* result) {
+const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
     detectWithBacklight(result);
 
 #ifdef FF_HAVE_DDCUTIL
@@ -170,5 +170,5 @@ const char* ffDetectBrightness(FF_A_UNUSED FFBrightnessOptions* options, FFlist*
     }
 #endif
 
-    return NULL;
+    return nullptr;
 }

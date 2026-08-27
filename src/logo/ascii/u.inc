@@ -35,7 +35,7 @@ static const FFlogo U[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU
     // Ubuntu
     {
-        .names = { "ubuntu", "ubuntu-linux" },
+        .names = { "ubuntu" },
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU,
         .colors = {
             FF_COLOR_FG_RED,
@@ -46,7 +46,7 @@ static const FFlogo U[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL
     // UbuntuSmall
     {
-        .names = { "ubuntu_small", "ubuntu-linux_small" },
+        .names = { "ubuntu_small" },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL,
         .colors = {
@@ -58,7 +58,7 @@ static const FFlogo U[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD
     // UbuntuOld
     {
-        .names = { "ubuntu_old", "ubuntu-linux_old" },
+        .names = { "ubuntu_old" },
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD,
         .colors = {
@@ -87,7 +87,7 @@ static const FFlogo U[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2_SMALL
     // UbuntuOld2Small
     {
-        .names = { "ubuntu_old2_small", "ubuntu_old2_small" },
+        .names = { "ubuntu_old2_small" },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2_SMALL,
         .colors = {
@@ -211,7 +211,7 @@ static const FFlogo U[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_ULTRAMARINE
     // Ultramarine
     {
-        .names = { "Ultramarine", "Ultramarine Linux" },
+        .names = { "Ultramarine" },
         .lines = FASTFETCH_DATATEXT_LOGO_ULTRAMARINE,
         .colors = {
             FF_COLOR_FG_BLUE,

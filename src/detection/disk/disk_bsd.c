@@ -51,10 +51,10 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk) {
         ffStrbufSetS(&disk->name, str ? str + 1 : provider->lg_name);
     }
 
-    return NULL;
+    return nullptr;
 }
     #else
-static const char* detectFsLabel(FF_A_UNUSED struct statfs* fs, FF_A_UNUSED FFDisk* disk) {
+static const char* detectFsLabel([[maybe_unused]] struct statfs* fs, [[maybe_unused]] FFDisk* disk) {
     return "Fastfetch was compiled without libgeom support";
 }
     #endif
@@ -84,11 +84,11 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk) {
         #define MNT_REMOVABLE 0x00000200
     #endif
 
-struct CmnAttrBuf {
+struct [[gnu::packed]] CmnAttrBuf {
     uint32_t length;
     attrreference_t nameRef;
     char nameSpace[NAME_MAX * 3 + 1];
-} FF_A_PACKED;
+};
 
 void detectFsInfo(struct statfs* fs, FFDisk* disk) {
     if (fs->f_flags & MNT_DONTBROWSE) {
@@ -127,14 +127,14 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk) {
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
 #ifndef __NetBSD__
-    int size = getfsstat(NULL, 0, MNT_WAIT);
+    int size = getfsstat(nullptr, 0, MNT_WAIT);
     if (size <= 0) {
-        return "getfsstat(NULL, 0, MNT_WAIT) failed";
+        return "getfsstat(nullptr, 0, MNT_WAIT) failed";
     }
 #else
-    int size = getvfsstat(NULL, 0, ST_WAIT);
+    int size = getvfsstat(nullptr, 0, ST_WAIT);
     if (size <= 0) {
-        return "getvfsstat(NULL, 0, ST_WAIT) failed";
+        return "getvfsstat(nullptr, 0, ST_WAIT) failed";
     }
 #endif
 
@@ -210,5 +210,5 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
 #endif
     }
 
-    return NULL;
+    return nullptr;
 }

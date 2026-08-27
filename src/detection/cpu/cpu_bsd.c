@@ -28,11 +28,11 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
 
     // In tenth of degrees Kelvin
     *current = (double) temp / 10 - 273.15;
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    if (ffSysctlGetString("hw.model", &cpu->name) != NULL) {
+    if (ffSysctlGetString("hw.model", &cpu->name) != nullptr) {
         return "sysctlbyname(hw.model) failed";
     }
 
@@ -41,7 +41,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
     cpu->coresOnline = (uint16_t) ffSysctlGetInt("kern.smp.cpus", cpu->coresLogical);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    if (ffSysctlGetString("kern.sched.topology_spec", &buffer) == NULL && buffer.length > 0) {
+    if (ffSysctlGetString("kern.sched.topology_spec", &buffer) == nullptr && buffer.length > 0) {
         // <groups>
         //  <group level="1" cache-level="3">
         //   <cpu count="4" mask="f,0,0,0">0, 1, 2, 3</cpu>
@@ -82,13 +82,13 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
         ffStrbufClear(&buffer);
         char key[32];
         snprintf(key, sizeof(key), "dev.cpu.%u.freq_levels", i);
-        if (ffSysctlGetString(key, &buffer) == NULL) {
+        if (ffSysctlGetString(key, &buffer) == nullptr) {
             if (buffer.length == 0) {
                 continue;
             }
 
             // MHz/Watts pairs like: 2501/32000 2187/27125 2000/24000
-            uint32_t fmax = (uint32_t) strtoul(buffer.chars, NULL, 10);
+            uint32_t fmax = (uint32_t) strtoul(buffer.chars, nullptr, 10);
             if (cpu->frequencyMax < fmax) {
                 cpu->frequencyMax = fmax;
             }
@@ -105,5 +105,5 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
 
     cpu->numaNodes = (uint16_t) ffSysctlGetInt("vm.ndomains", 0);
 
-    return NULL;
+    return nullptr;
 }

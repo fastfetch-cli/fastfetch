@@ -1,5 +1,5 @@
 #include "de.h"
 
-const char* ffDetectDEVersion(FF_A_UNUSED const FFstrbuf* deName, FF_A_UNUSED FFstrbuf* result, FF_A_UNUSED FFDEOptions* options) {
+const char* ffDetectDEVersion([[maybe_unused]] const FFstrbuf* deName, [[maybe_unused]] FFstrbuf* result, [[maybe_unused]] FFDEOptions* options) {
     return "Not supported on this platform";
 }

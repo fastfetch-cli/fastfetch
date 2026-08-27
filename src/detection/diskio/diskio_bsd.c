@@ -12,7 +12,7 @@
     #include <libgeom.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
-    FF_A_CLEANUP(geom_deletetree) struct gmesh geomTree = {};
+    [[gnu::cleanup(geom_deletetree)]] struct gmesh geomTree = {};
     if (geom_gettree(&geomTree) < 0) {
         return "geom_gettree() failed";
     }
@@ -27,12 +27,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     }
 
     struct devstat* snapIter;
-    while ((snapIter = geom_stats_snapshot_next(snap)) != NULL) {
+    while ((snapIter = geom_stats_snapshot_next(snap)) != nullptr) {
         if (snapIter->device_type & DEVSTAT_TYPE_PASS) {
             continue;
         }
         struct gident* geomId = geom_lookupid(&geomTree, snapIter->id);
-        if (geomId == NULL) {
+        if (geomId == nullptr) {
             continue;
         }
         if (geomId->lg_what != ISPROVIDER) {
@@ -69,7 +69,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     geom_stats_snapshot_free(snap);
     geom_stats_close();
 
-    return NULL;
+    return nullptr;
 }
 
 #else
@@ -114,7 +114,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     free(stats.dinfo->mem_ptr);
     free(stats.dinfo);
 
-    return NULL;
+    return nullptr;
 }
 
 #endif

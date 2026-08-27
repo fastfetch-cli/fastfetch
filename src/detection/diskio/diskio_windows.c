@@ -6,7 +6,7 @@
 #include <winioctl.h>
 
 static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIOOptions* options) {
-    FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hDevice == INVALID_HANDLE_VALUE) {
         return false;
     }
@@ -24,7 +24,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
             &sddBuffer,
             ARRAY_SIZE(sddBuffer),
             &retSize,
-            NULL) ||
+            nullptr) ||
         retSize == 0) {
         return true;
     }
@@ -57,7 +57,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
     }
 
     DISK_PERFORMANCE dp = {};
-    if (DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, NULL, 0, &dp, sizeof(dp), &retSize, NULL)) {
+    if (DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, nullptr, 0, &dp, sizeof(dp), &retSize, nullptr)) {
         device->bytesRead = (uint64_t) dp.BytesRead.QuadPart;
         device->readCount = (uint64_t) dp.ReadCount;
         device->bytesWritten = (uint64_t) dp.BytesWritten.QuadPart;
@@ -97,5 +97,5 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

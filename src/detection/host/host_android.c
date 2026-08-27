@@ -23,5 +23,5 @@ const char* ffDetectHost(FFHostResult* host) {
         ffStrbufPrepend(&host->name, &host->vendor);
     }
 
-    return NULL;
+    return nullptr;
 }

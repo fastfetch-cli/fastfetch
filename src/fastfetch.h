@@ -31,7 +31,6 @@ typedef struct FFstate {
     uint32_t logoWidth;
     uint32_t logoHeight;
     uint32_t keysHeight;
-    bool terminalLightTheme;
     bool titleFqdn;
     uint32_t dynamicInterval;
     FFPlatform platform;

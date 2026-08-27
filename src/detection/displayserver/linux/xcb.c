@@ -55,20 +55,20 @@ typedef struct XcbRandrData {
 
 static void* xcbGetProperty(XcbRandrData* data, xcb_window_t window, const char* request) {
     xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen(request), request);
-    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
-    if (requestAtomReply == NULL) {
-        return NULL;
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, nullptr);
+    if (requestAtomReply == nullptr) {
+        return nullptr;
     }
 
     xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(data->connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 8 * 1024);
-    FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(data->connection, propertyCookie, NULL);
-    if (propertyReply == NULL) {
-        return NULL;
+    FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(data->connection, propertyCookie, nullptr);
+    if (propertyReply == nullptr) {
+        return nullptr;
     }
 
     int length = data->ffxcb_get_property_value_length(propertyReply);
     if (length <= 0) {
-        return NULL;
+        return nullptr;
     }
 
     // Why are xcb property strings not null terminated???
@@ -81,13 +81,13 @@ static void* xcbGetProperty(XcbRandrData* data, xcb_window_t window, const char*
 
 static xcb_randr_get_output_property_reply_t* xcbRandrGetProperty(XcbRandrData* data, xcb_randr_output_t output, const char* name) {
     xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen(name), name);
-    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, nullptr);
 
     if (requestAtomReply) {
         xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
-        return data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
+        return data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, nullptr);
     }
-    return NULL;
+    return nullptr;
 }
 
 static void xcbDetectWMfromEWMH(XcbRandrData* data, xcb_window_t rootWindow, FFDisplayServerResult* result) {
@@ -96,7 +96,7 @@ static void xcbDetectWMfromEWMH(XcbRandrData* data, xcb_window_t rootWindow, FFD
     }
 
     FF_AUTO_FREE xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, rootWindow, "_NET_SUPPORTING_WM_CHECK");
-    if (wmWindow == NULL) {
+    if (wmWindow == nullptr) {
         return;
     }
 
@@ -131,13 +131,13 @@ static void xcbFetchServerVendor(XcbRandrData* data, FFDisplayServerResult* resu
 
 static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType, struct xcb_randr_get_screen_resources_current_reply_t* screenResources, uint8_t bitDepth, uint32_t dpi) {
     xcb_randr_get_output_info_cookie_t outputInfoCookie = data->ffxcb_randr_get_output_info(data->connection, output, XCB_CURRENT_TIME);
-    FF_AUTO_FREE xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
-    if (outputInfoReply == NULL) {
+    FF_AUTO_FREE xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, nullptr);
+    if (outputInfoReply == nullptr) {
         return false;
     }
 
     FF_AUTO_FREE xcb_randr_get_output_property_reply_t* edidReply = xcbRandrGetProperty(data, output, "EDID");
-    uint8_t* edidData = NULL;
+    uint8_t* edidData = nullptr;
     uint32_t edidLength = 0;
     if (edidReply) {
         int len = data->ffxcb_randr_get_output_property_data_length(edidReply);
@@ -162,8 +162,8 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
     }
 
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, outputInfoReply->crtc, XCB_CURRENT_TIME);
-    FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
-    if (crtcInfoReply == NULL) {
+    FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, nullptr);
+    if (crtcInfoReply == nullptr) {
         return false;
     }
 
@@ -183,8 +183,8 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
             break;
     }
 
-    xcb_randr_mode_info_t* currentMode = NULL;
-    xcb_randr_mode_info_t* preferredMode = NULL;
+    xcb_randr_mode_info_t* currentMode = nullptr;
+    xcb_randr_mode_info_t* preferredMode = nullptr;
 
     if (screenResources) {
         xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(screenResources);
@@ -253,7 +253,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
     FF_AUTO_FREE xcb_get_atom_name_reply_t* nameReply = data->ffxcb_get_atom_name_reply(
         data->connection,
         data->ffxcb_get_atom_name(data->connection, monitor->name),
-        NULL);
+        nullptr);
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateNS(
         (uint32_t) data->ffxcb_get_atom_name_name_length(nameReply),
         data->ffxcb_get_atom_name_name(nameReply));
@@ -297,14 +297,14 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
 
 static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen) {
     xcb_randr_get_monitors_cookie_t monitorsCookie = data->ffxcb_randr_get_monitors(data->connection, screen->root, true);
-    FF_AUTO_FREE xcb_randr_get_monitors_reply_t* monitorsReply = data->ffxcb_randr_get_monitors_reply(data->connection, monitorsCookie, NULL);
-    if (monitorsReply == NULL) {
+    FF_AUTO_FREE xcb_randr_get_monitors_reply_t* monitorsReply = data->ffxcb_randr_get_monitors_reply(data->connection, monitorsCookie, nullptr);
+    if (monitorsReply == nullptr) {
         return false;
     }
 
-    // Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == NULL", to fail as late as possible.
+    // Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == nullptr", to fail as late as possible.
     xcb_randr_get_screen_resources_current_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources_current(data->connection, screen->root);
-    FF_AUTO_FREE struct xcb_randr_get_screen_resources_current_reply_t* screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, NULL);
+    FF_AUTO_FREE struct xcb_randr_get_screen_resources_current_reply_t* screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, nullptr);
 
     uint32_t dpi = 0;
     FF_AUTO_FREE const char* resourceManager = xcbGetProperty(data, screen->root, "RESOURCE_MANAGER");
@@ -347,7 +347,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen) {
         0,
         0,
         0,
-        NULL,
+        nullptr,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
         (uint64_t) screen->root,
@@ -401,7 +401,7 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_crtc_info)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(xcbRandr, data, xcb_randr_get_crtc_info_reply)
 
-    data.connection = ffxcb_connect(NULL, NULL);
+    data.connection = ffxcb_connect(nullptr, nullptr);
     if (ffxcb_connection_has_error(data.connection) > 0) {
         ffxcb_disconnect(data.connection);
         return "xcb_connect() failed";
@@ -428,7 +428,7 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result) {
         ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #else

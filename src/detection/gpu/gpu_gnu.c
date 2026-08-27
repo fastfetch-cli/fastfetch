@@ -15,19 +15,19 @@ enum {
     PCI_CONF_SIZE = 0x40,
 };
 
-const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpus) {
+const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist* gpus) {
     int dDomainFd = open(_SERVERS_BUS "/pci/0000", O_RDONLY | O_CLOEXEC);
     if (dDomainFd < 0) {
         return "open(_SERVERS_BUS \"/pci/0000\") failed";
     }
 
     FF_AUTO_CLOSE_DIR DIR* dirDomain = fdopendir(dDomainFd);
-    if (dirDomain == NULL) {
+    if (dirDomain == nullptr) {
         return "fdopendir(domain) failed";
     }
 
     struct dirent* busEntry;
-    while ((busEntry = readdir(dirDomain)) != NULL) {
+    while ((busEntry = readdir(dirDomain)) != nullptr) {
         if (busEntry->d_type != DT_DIR || busEntry->d_name[0] == '.') {
             continue;
         }
@@ -44,12 +44,12 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
         }
 
         FF_AUTO_CLOSE_DIR DIR* dirBus = fdopendir(dBusFd);
-        if (dirBus == NULL) {
+        if (dirBus == nullptr) {
             continue;
         }
 
         struct dirent* devEntry;
-        while ((devEntry = readdir(dirBus)) != NULL) {
+        while ((devEntry = readdir(dirBus)) != nullptr) {
             if (devEntry->d_type != DT_DIR || devEntry->d_name[0] == '.') {
                 continue;
             }
@@ -65,12 +65,12 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
             }
 
             FF_AUTO_CLOSE_DIR DIR* dirDev = fdopendir(dDevFd);
-            if (dirDev == NULL) {
+            if (dirDev == nullptr) {
                 continue;
             }
 
             struct dirent* funcEntry;
-            while ((funcEntry = readdir(dirDev)) != NULL) {
+            while ((funcEntry = readdir(dirDev)) != nullptr) {
                 if (funcEntry->d_type != DT_DIR || funcEntry->d_name[0] == '.') {
                     continue;
                 }
@@ -143,5 +143,5 @@ const char* ffDetectGPUImpl(FF_A_UNUSED const FFGPUOptions* options, FFlist* gpu
         }
     }
 
-    return NULL;
+    return nullptr;
 }

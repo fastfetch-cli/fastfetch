@@ -2,14 +2,13 @@
 
 #include "fastfetch.h"
 
-typedef enum FF_A_PACKED FFLogoLineType {
+typedef enum FFLogoLineType: uint8_t {
     FF_LOGO_LINE_TYPE_NORMAL = 0,
     FF_LOGO_LINE_TYPE_SMALL_BIT = 1 << 0, // The names of small logo must end with `_small` or `-small`
     FF_LOGO_LINE_TYPE_ALTER_BIT = 1 << 1,
-    FF_LOGO_LINE_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFLogoLineType;
 
-typedef enum FF_A_PACKED FFLogoSize {
+typedef enum FFLogoSize: uint8_t {
     FF_LOGO_SIZE_UNKNOWN,
     FF_LOGO_SIZE_NORMAL,
     FF_LOGO_SIZE_SMALL,

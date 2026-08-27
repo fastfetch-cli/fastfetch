@@ -11,9 +11,9 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (result->name.length > 0) {
-            ffStrbufSetF(&buffer, "%s (%s)", FF_ZPOOL_MODULE_NAME, result->name.chars);
+            ffStrbufSetF(&buffer, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Zpool), result->name.chars);
         } else {
-            ffStrbufSetS(&buffer, FF_ZPOOL_MODULE_NAME);
+            ffStrbufSetS(&buffer, FF_MODULE_GET_DISPLAY_NAME(Zpool));
         }
     } else {
         ffStrbufClear(&buffer);
@@ -105,11 +105,11 @@ bool ffPrintZpool(FFZpoolOptions* options) {
     const char* error = ffDetectZpool(&results);
 
     if (error) {
-        ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Zpool), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
     if (results.length == 0) {
-        ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No zpool found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Zpool), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No zpool found");
         return false;
     }
 
@@ -138,7 +138,7 @@ void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Zpool), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -148,7 +148,7 @@ void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-bool ffGenerateZpoolJsonResult(FF_A_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateZpoolJsonResult([[maybe_unused]] FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectZpool(&results);
@@ -192,8 +192,30 @@ void ffDestroyZpoolOptions(FFZpoolOptions* options) {
 }
 
 FFModuleBaseInfo ffZpoolModuleInfo = {
-    .name = FF_ZPOOL_MODULE_NAME,
+    .name = "Zpool",
     .description = "Print ZFS storage pools",
+    .displayName = {
+        .en = "Zpool",
+        .ar = "Zpool",
+        .cs = "Zpool",
+        .de = "Zpool",
+        .es = "Zpool",
+        .fr = "Zpool",
+        .gl = "Zpool",
+        .he = "Zpool",
+        .id = "Zpool",
+        .it = "Zpool",
+        .ja = "Zpool",
+        .ko = "Zpool",
+        .pl = "Zpool",
+        .pt = "Zpool",
+        .ru = "Zpool",
+        .tr = "Zpool",
+        .uk = "Zpool",
+        .vi = "Zpool",
+        .zh_CN = "Zpool",
+        .zh_TW = "Zpool",
+    },
     .initOptions = (void*) ffInitZpoolOptions,
     .destroyOptions = (void*) ffDestroyZpoolOptions,
     .parseJsonObject = (void*) ffParseZpoolJsonObject,
@@ -214,5 +236,6 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         { "Size allocated percentage bar", "allocated-percentage-bar" },
         { "Fragmentation percentage bar", "frag-percentage-bar" },
         { "Is read-only", "is-readonly" },
-    }))
+    })),
+    .defaultOrder = 43,
 };

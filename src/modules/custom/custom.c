@@ -5,7 +5,7 @@
 #include "modules/custom/custom.h"
 
 bool ffPrintCustom(FFCustomOptions* options) {
-    ffPrintFormat(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, 0, ((FFformatarg[]) {}));
+    ffPrintFormat(FF_MODULE_GET_DISPLAY_NAME(Custom), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, 0, ((FFformatarg[]) {}));
     return true;
 }
 
@@ -21,7 +21,7 @@ void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Custom), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -35,8 +35,29 @@ void ffDestroyCustomOptions(FFCustomOptions* options) {
 }
 
 FFModuleBaseInfo ffCustomModuleInfo = {
-    .name = FF_CUSTOM_MODULE_NAME,
+    .name = "Custom",
     .description = "Print a custom string, with or without key",
+    .displayName = {
+        .en = "Custom",
+        .ar = "مخصص",
+        .cs = "Vlastní",
+        .de = "Benutzerdefiniert",
+        .es = "Personalizado",
+        .fr = "Personnalisé",
+        .he = "מותאם אישית",
+        .id = "Kustom",
+        .it = "Personalizzato",
+        .ja = "カスタム",
+        .ko = "사용자 정의",
+        .pl = "Niestandardowy",
+        .pt = "Personalizado",
+        .ru = "Пользовательский",
+        .tr = "Özel",
+        .uk = "Власний",
+        .vi = "Tùy chỉnh",
+        .zh_CN = "自定义",
+        .zh_TW = "自訂",
+    },
     .initOptions = (void*) ffInitCustomOptions,
     .destroyOptions = (void*) ffDestroyCustomOptions,
     .parseJsonObject = (void*) ffParseCustomJsonObject,

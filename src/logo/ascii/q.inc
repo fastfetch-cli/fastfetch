@@ -50,6 +50,18 @@ static const FFlogo Q[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUBES_SMALL
+    // Qubes
+    {
+        .names = { "Qubes_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_QUBES_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_QUBYT
     // Qubyt
     {

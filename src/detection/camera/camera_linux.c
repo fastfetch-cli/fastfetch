@@ -86,7 +86,7 @@ const char* ffDetectCamera(FFlist* result) {
         camera->height = fmt.fmt.pix.height;
     }
 
-    return NULL;
+    return nullptr;
 #else
     FF_UNUSED(result);
     return "Fastfetch was compiled without <linux/videodev2.h>";

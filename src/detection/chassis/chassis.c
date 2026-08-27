@@ -76,6 +76,6 @@ const char* ffChassisTypeToString(uint32_t type) {
         case 0x24:
             return "Stick PC";
         default:
-            return NULL;
+            return nullptr;
     }
 }

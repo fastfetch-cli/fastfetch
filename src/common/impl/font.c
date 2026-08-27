@@ -16,7 +16,7 @@ void ffFontInit(FFfont* font) {
 }
 
 static void strbufAppendNSExcludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude) {
-    if (value == NULL || length == 0) {
+    if (value == nullptr || length == 0) {
         return;
     }
 
@@ -151,7 +151,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
         ffStrStartsWithIgnCase(wordStart, "Black") ||
         ffStrStartsWithIgnCase(wordStart, "Condensed") ||
         ffStrStartsWithIgnCase(wordStart, "Expanded")) {
-        if (alternativeBuffer == NULL) {
+        if (alternativeBuffer == nullptr) {
             alternativeBuffer = FF_LIST_ADD(FFstrbuf, font->styles);
             ffStrbufInit(alternativeBuffer);
         }
@@ -169,7 +169,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
         return;
     }
 
-    if (alternativeBuffer != NULL) {
+    if (alternativeBuffer != nullptr) {
         strbufAppendNSExcludingC(alternativeBuffer, wordLength, wordStart, '-');
         return;
     }
@@ -184,7 +184,7 @@ void ffFontInitPango(FFfont* font, const char* data) {
     ffFontInit(font);
 
     while (*data != '\0' && *data != '`' && *data != '\\') {
-        fontPangoParseWord(&data, font, NULL);
+        fontPangoParseWord(&data, font, nullptr);
     }
 
     fontInitPretty(font);
@@ -329,8 +329,8 @@ void ffFontInitXft(FFfont* font, const char* xft) {
     }
 
     // Try parse trailing "-<number>" as size, otherwise entire head is name
-    const char* dashPos = NULL;
-    const char* sizeStart = NULL;
+    const char* dashPos = nullptr;
+    const char* sizeStart = nullptr;
 
     for (const char* q = headEnd; q > headStart;) {
         --q;
@@ -488,7 +488,7 @@ void ffFontInitMoveValues(FFfont* font, FFstrbuf* name, FFstrbuf* size, FFstrbuf
 
 void ffFontInitWithSpace(FFfont* font, const char* rawName) {
     const char* pspace = strrchr(rawName, ' ');
-    if (pspace == NULL) {
+    if (pspace == nullptr) {
         ffFontInitCopy(font, rawName);
         return;
     }

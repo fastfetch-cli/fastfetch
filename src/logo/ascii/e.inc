@@ -65,17 +65,6 @@ static const FFlogo E[] = {
         },
     },
     #endif
-    #ifdef FASTFETCH_DATATEXT_LOGO_EMPEROROS
-    // EmperorOS
-    {
-        .names = { "Emperor" },
-        .lines = FASTFETCH_DATATEXT_LOGO_EMPEROROS,
-        .colors = {
-            FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_DEFAULT,
-        },
-    },
-    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ENOS
     // EN-OS
     {

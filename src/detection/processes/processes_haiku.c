@@ -10,5 +10,5 @@ const char* ffDetectProcesses(uint32_t* result) {
 
     *result = info.used_teams;
 
-    return NULL;
+    return nullptr;
 }

@@ -83,6 +83,16 @@
                 "type": "num",
                 "default": 0
             }
+        },
+        {
+            "long": "watch",
+            "short": "w",
+            "desc": "Alias of dynamic-interval, but the value is in seconds instead of milliseconds. If no value is provided, it defaults to 1 second",
+            "arg": {
+                "type": "num",
+                "optional": true,
+                "default": 1
+            }
         }
     ],
     "Config": [
@@ -97,26 +107,8 @@
         },
         {
             "long": "gen-config",
-            "desc": "Generate a minimal config file at the specified path",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Prints the generated config if <path> is \"-\"",
-            "arg": {
-                "type": "path",
-                "optional": true
-            }
-        },
-        {
-            "long": "gen-config-full",
-            "desc": "Generate a full config file with all optional settings at the specified path",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Prints the generated config if <path> is \"-\"",
-            "arg": {
-                "type": "path",
-                "optional": true
-            }
-        },
-        {
-            "long": "gen-config-force",
-            "desc": "Generate a config file at the specified path, overwriting any existing file",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\"",
+            "desc": "Interactively generate a config file at the specified path",
+            "remark": "Opens an interactive configuration UI when run in a terminal. Falls back to non-interactive generation when env-var `$NO_COLOR` is set or stdin/stdout is not a TTY. Defaults to \"~/.config/fastfetch/config.jsonc\". Prints the generated config if <path> is \"-\"",
             "arg": {
                 "type": "path",
                 "optional": true
@@ -591,6 +583,38 @@
                     "both-4": "Show both icon and string with 4 spaces between them"
                 },
                 "default": "string"
+            }
+        },
+        {
+            "long": "key-language",
+            "desc": "Specify the language used for module keys",
+            "remark": "Leave empty for auto-detection based on the system locale. Unsupported locales fall back to English",
+            "arg": {
+                "type": "enum",
+                "default": "en",
+                "optional": true,
+                "enum": {
+                    "en": "English",
+                    "ar": "Arabic",
+                    "cs": "Czech",
+                    "de": "German",
+                    "es": "Spanish",
+                    "fr": "French",
+                    "gl": "Galician",
+                    "he": "Hebrew",
+                    "id": "Indonesian",
+                    "it": "Italian",
+                    "ja": "Japanese",
+                    "ko": "Korean",
+                    "pl": "Polish",
+                    "pt": "Portuguese",
+                    "ru": "Russian",
+                    "tr": "Turkish",
+                    "uk": "Ukrainian",
+                    "vi": "Vietnamese",
+                    "zh_CN": "Simplified Chinese",
+                    "zh_TW": "Traditional Chinese"
+                }
             }
         },
         {

@@ -27,7 +27,7 @@ double ffGPUDetectTempFromTZ(void) {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         int dfd = dirfd(dirp);
         struct dirent* entry;
-        while ((entry = readdir(dirp)) != NULL) {
+        while ((entry = readdir(dirp)) != nullptr) {
             if (entry->d_name[0] == '.') {
                 continue;
             }

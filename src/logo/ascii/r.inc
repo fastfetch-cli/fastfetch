@@ -157,7 +157,7 @@ static const FFlogo R[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_REDSTAR
     // RedstarOS
     {
-        .names = { "redstar", "redstar-os", "redstaros" },
+        .names = { "Redstar" },
         .lines = FASTFETCH_DATATEXT_LOGO_REDSTAR,
         .colors = {
             FF_COLOR_FG_RED,
@@ -257,7 +257,7 @@ static const FFlogo R[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_ROSA
     // RosaLinux
     {
-        .names = { "rosa", "rosa-linux", "rosalinux" },
+        .names = { "ROSA" },
         .lines = FASTFETCH_DATATEXT_LOGO_ROSA,
         .colors = {
             FF_COLOR_FG_RGB "250;250;250",

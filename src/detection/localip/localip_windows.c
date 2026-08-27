@@ -30,7 +30,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         (int) options->namePrefix.length,
         options->namePrefix.chars);
 
-    IP_ADAPTER_ADDRESSES* FF_AUTO_FREE adapter_addresses = NULL;
+    FF_AUTO_FREE IP_ADAPTER_ADDRESSES* adapter_addresses = nullptr;
 
     // Multiple attempts in case interfaces change while
     // we are in the middle of querying them.
@@ -51,7 +51,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         DWORD error = GetAdaptersAddresses(
             family,
             GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
-            NULL,
+            nullptr,
             adapter_addresses,
             &adapter_addresses_buffer_size);
 
@@ -67,7 +67,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         }
     }
 
-    FF_A_UNUSED int adapterCount = 0, processedCount = 0;
+    [[maybe_unused]] int adapterCount = 0, processedCount = 0;
 
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next) {
@@ -127,7 +127,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         uint32_t typesToAdd = options->showType & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT);
         FF_DEBUG("Types to add for adapter %u: 0x%X", (unsigned) adapter->IfIndex, typesToAdd);
 
-        FF_A_UNUSED int ipv4Count = 0, ipv6Count = 0;
+        [[maybe_unused]] int ipv4Count = 0, ipv6Count = 0;
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next) {
             FF_DEBUG("Processing unicast address: prefix origin=%d, suffix origin=%d, family=%d, DadState=%d",
@@ -266,5 +266,5 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         processedCount,
         results->length);
 
-    return NULL;
+    return nullptr;
 }

@@ -18,14 +18,14 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     buf[nRead] = '\0';
 
     // Skip first line
-    char* start = NULL;
-    if ((start = strchr(buf, '\n')) == NULL) {
+    char* start = nullptr;
+    if ((start = strchr(buf, '\n')) == nullptr) {
         return "skip first line failed";
     }
     ++start;
 
     uint64_t user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0;
-    char* token = NULL;
+    char* token = nullptr;
     while ((token = strchr(start, '\n'))) {
         if (sscanf(start, "cpu%*d%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%" PRIu64 "%*[^\n]\n", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7) {
             uint64_t inUse = user + nice + system + irq + softirq;
@@ -42,5 +42,5 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
         start = token + 1;
     }
 
-    return NULL;
+    return nullptr;
 }

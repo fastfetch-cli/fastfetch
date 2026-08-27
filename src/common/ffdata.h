@@ -2,7 +2,7 @@
 
 #include "common/FFstrbuf.h"
 
-typedef enum FF_A_PACKED FFDataResultDocType {
+typedef enum FFDataResultDocType: uint8_t {
     FF_RESULT_DOC_TYPE_DEFAULT = 0,
     FF_RESULT_DOC_TYPE_JSON,
     FF_RESULT_DOC_TYPE_CONFIG,
@@ -19,4 +19,5 @@ typedef struct FFdata {
     FFstrbuf genConfigPath;      // Path to generate configuration file
     FFDataResultDocType docType; // Type of result document
     bool configLoaded;
+    bool genConfigInteractive; // `--gen-config` entered the interactive CUI
 } FFdata;

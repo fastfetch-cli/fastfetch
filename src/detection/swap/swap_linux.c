@@ -17,13 +17,13 @@ static const char* detectByProcMeminfo(FFlist* result) {
 
     uint64_t swapTotal = 0, swapFree = 0;
 
-    char* token = NULL;
-    if ((token = strstr(buf, "SwapTotal:")) != NULL) {
-        swapTotal = strtoul(token + strlen("SwapTotal:"), NULL, 10);
+    char* token = nullptr;
+    if ((token = strstr(buf, "SwapTotal:")) != nullptr) {
+        swapTotal = strtoul(token + strlen("SwapTotal:"), nullptr, 10);
     }
 
-    if ((token = strstr(buf, "SwapFree:")) != NULL) {
-        swapFree = strtoul(token + strlen("SwapFree:"), NULL, 10);
+    if ((token = strstr(buf, "SwapFree:")) != nullptr) {
+        swapFree = strtoul(token + strlen("SwapFree:"), nullptr, 10);
     }
 
     FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
@@ -31,7 +31,7 @@ static const char* detectByProcMeminfo(FFlist* result) {
     swap->bytesTotal = swapTotal * 1024lu;
     swap->bytesUsed = (swapTotal - swapFree) * 1024lu;
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* detectByProcSwaps(FFlist* result) {
@@ -59,7 +59,7 @@ static const char* detectByProcSwaps(FFlist* result) {
         for (size_t i = 0; i < nameLen; ++i) {
             if (name[i] == '\\') {
                 char octal[4] = { name[i + 1], name[i + 2], name[i + 3], '\0' };
-                ffStrbufAppendC(&swap->name, (char) strtol(octal, NULL, 8));
+                ffStrbufAppendC(&swap->name, (char) strtol(octal, nullptr, 8));
                 i += 3;
             } else {
                 ffStrbufAppendC(&swap->name, name[i]);
@@ -71,12 +71,12 @@ static const char* detectByProcSwaps(FFlist* result) {
         line = memchr(line, '\n', (size_t) (nRead - (line - buf)));
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectSwap(FFlist* result) {
-    if (detectByProcSwaps(result) == NULL) {
-        return NULL;
+    if (detectByProcSwaps(result) == nullptr) {
+        return nullptr;
     }
     return detectByProcMeminfo(result);
 }

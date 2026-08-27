@@ -231,6 +231,20 @@ static const FFlogo L[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT2_SMALL
+    // LinuxMint2Small
+    {
+        .names = { "linuxmint2_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT2_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_LINUXMINT_OLD
     // LinuxMintOld
     {

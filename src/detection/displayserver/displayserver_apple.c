@@ -12,9 +12,9 @@
 #include <IOKit/IOKitLib.h>
 
 #ifdef MAC_OS_X_VERSION_10_15
-extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
-extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
-extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) FF_A_WEAK_IMPORT;
+[[clang::weak_import]] extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display);
+[[clang::weak_import]] extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display);
+[[clang::weak_import]] extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display);
 #else
     #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
@@ -50,7 +50,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             }
 
             ffStrbufClear(&buffer);
-            CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = NULL;
+            FF_CFTYPE_AUTO_RELEASE CFDictionaryRef displayInfo = nullptr;
 #ifdef MAC_OS_X_VERSION_10_15
             if (CoreDisplay_DisplayCreateInfoDictionary) {
                 displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
@@ -77,14 +77,14 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                         ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
                         ffEdidGetSerial(edidData, &serial);
                     }
-                } else if (!builtin && ffCfDictGetString(displayInfo, CFSTR(kIODisplayLocationKey), &buffer) == NULL) {
+                } else if (!builtin && ffCfDictGetString(displayInfo, CFSTR(kIODisplayLocationKey), &buffer) == nullptr) {
                     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t ioDisplay = IORegistryEntryFromPath(MACH_PORT_NULL, buffer.chars);
                     ffStrbufClear(&buffer);
                     if (ioDisplay) {
                         FF_CFTYPE_AUTO_RELEASE CFDictionaryRef displayAttrRef = IORegistryEntryCreateCFProperty(ioDisplay, CFSTR("DisplayAttributes"), kCFAllocatorDefault, kNilOptions);
                         if (displayAttrRef && CFGetTypeID(displayAttrRef) == CFDictionaryGetTypeID()) {
                             CFDictionaryRef productAttrs;
-                            if (ffCfDictGetDict(displayAttrRef, CFSTR("ProductAttributes"), &productAttrs) == NULL) {
+                            if (ffCfDictGetDict(displayAttrRef, CFSTR("ProductAttributes"), &productAttrs) == nullptr) {
                                 ffCfDictGetString(productAttrs, CFSTR("AlphanumericSerialNumber"), &serial);
                                 ffCfDictGetString(productAttrs, CFSTR("ProductName"), &buffer);
                             }
@@ -94,13 +94,13 @@ static void detectDisplays(FFDisplayServerResult* ds) {
 
                 if (!buffer.length) {
                     CFDictionaryRef productNames;
-                    if (ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames) == NULL) {
+                    if (ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames) == nullptr) {
                         ffCfDictGetString(productNames, CFSTR("en_US"), &buffer);
                     }
                 }
 
                 if (!physicalWidth || !physicalHeight) {
-                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayHorizontalImageSize), (int*) &physicalWidth) == NULL) {
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayHorizontalImageSize), (int*) &physicalWidth) == nullptr) {
                         ffCfDictGetInt(displayInfo, CFSTR(kDisplayVerticalImageSize), (int*) &physicalHeight);
                     }
                 }
@@ -108,7 +108,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelWidth"), (int*) &preferredWidth);
                 ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelHeight"), (int*) &preferredHeight);
                 if (preferredWidth && preferredHeight) {
-                    FF_CFTYPE_AUTO_RELEASE CFArrayRef allModes = CGDisplayCopyAllDisplayModes(screen, NULL);
+                    FF_CFTYPE_AUTO_RELEASE CFArrayRef allModes = CGDisplayCopyAllDisplayModes(screen, nullptr);
                     if (allModes) {
                         for (CFIndex i = 0, count = CFArrayGetCount(allModes); i < count; i++) {
                             CGDisplayModeRef modeInfo = (CGDisplayModeRef) CFArrayGetValueAtIndex(allModes, i);
@@ -196,10 +196,10 @@ static void detectDisplays(FFDisplayServerResult* ds) {
 
                 if (displayInfo) {
                     int value;
-                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL) {
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == nullptr) {
                         display->manufactureYear = (uint16_t) value;
                     }
-                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL) {
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == nullptr) {
                         display->manufactureWeek = (uint16_t) value;
                     }
                 }

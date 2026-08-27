@@ -28,7 +28,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(GPU), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
@@ -145,7 +145,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             snprintf(currSpeed, sizeof(currSpeed), "%d x%d", gpu->psCurr.gen, gpu->psCurr.lanes);
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(GPU), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(gpu->vendor, "vendor"),
                                                                                                             FF_ARG(gpu->name, "name"),
                                                                                                             FF_ARG(gpu->driver, "driver"),
@@ -176,7 +176,7 @@ bool ffPrintGPU(FFGPUOptions* options) {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate();
     const char* error = ffDetectGPU(options, &gpus);
     if (error) {
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(GPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -213,7 +213,7 @@ bool ffPrintGPU(FFGPUOptions* options) {
     }
 
     if (selectedGPUs.length == 0) {
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (gpus.length > 0 ? "GPUs found but all hidden by hideType option" : "No GPUs detected"));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(GPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (gpus.length > 0 ? "GPUs found but all hidden by hideType option" : "No GPUs detected"));
         return false;
     }
 
@@ -249,7 +249,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(GPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->detectionMethod = (FFGPUDetectionMethod) value;
             }
@@ -269,7 +269,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(GPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->hideType = (FFGPUType) value;
                 }
@@ -281,7 +281,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(GPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -412,7 +412,7 @@ bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
                 type = "Discrete";
                 break;
             default:
-                type = NULL;
+                type = nullptr;
                 break;
         }
         if (type) {
@@ -479,8 +479,30 @@ void ffDestroyGPUOptions(FFGPUOptions* options) {
 }
 
 FFModuleBaseInfo ffGPUModuleInfo = {
-    .name = FF_GPU_MODULE_NAME,
+    .name = "GPU",
     .description = "Print GPU names, memory sizes, types, etc",
+    .displayName = {
+        .en = "GPU",
+        .ar = "معالج الرسوميات",
+        .cs = "GPU",
+        .de = "GPU",
+        .es = "GPU",
+        .fr = "GPU",
+        .gl = "GPU",
+        .he = "מעבד גרפי",
+        .id = "GPU",
+        .it = "GPU",
+        .ja = "GPU",
+        .ko = "GPU",
+        .pl = "GPU",
+        .pt = "GPU",
+        .ru = "Видеокарта",
+        .tr = "GPU",
+        .uk = "GPU",
+        .vi = "GPU",
+        .zh_CN = "显卡",
+        .zh_TW = "顯卡",
+    },
     .initOptions = (void*) ffInitGPUOptions,
     .destroyOptions = (void*) ffDestroyGPUOptions,
     .parseJsonObject = (void*) ffParseGPUJsonObject,
@@ -511,4 +533,5 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         { "PCIe maximum speed in gen and lanes", "pcie-max-speed" },
         { "PCIe current speed in gen and lanes", "pcie-curr-speed" },
     })),
+    .defaultOrder = 36,
 };

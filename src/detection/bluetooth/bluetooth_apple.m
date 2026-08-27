@@ -108,5 +108,5 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         }
     }
 
-    return NULL;
+    return nullptr;
 }

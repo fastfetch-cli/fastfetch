@@ -12,8 +12,18 @@ static FF_LIBRARY_SYMBOL(ResizeImage)
 }
 
 FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData) {
-    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-7.Q16HDRI" FF_LIBRARY_EXTENSION, 11, "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11, "libMagickCore-7.Q16HDRI-10" FF_LIBRARY_EXTENSION, -1 // Required for Windows
+    // clang-format off
+    #if _WIN32
+    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
+        "libMagickCore-7.Q16HDRI-10" FF_LIBRARY_EXTENSION, 0
     )
+    #else
+    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
+        "libMagickCore-7.Q16HDRI" FF_LIBRARY_EXTENSION, 11,
+        "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11
+    )
+    #endif
+    // clang-format on
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
     FFLogoImageResult result = ffLogoPrintImageImpl(requestData, &(FFIMData) {
@@ -21,7 +31,7 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData) {
                                                                      .library = imageMagick,
                                                                  });
 
-    imageMagick = NULL; // leak imageMagick to prevent fastfetch from crashing #552
+    imageMagick = nullptr; // leak imageMagick to prevent fastfetch from crashing #552
     return result;
 }
 

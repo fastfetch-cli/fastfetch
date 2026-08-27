@@ -18,7 +18,7 @@ const char* ffDetectPowerAdapter(FFlist* results) {
         adapter->watts = 0;
 
         ffCfDictGetString(details, CFSTR(kIOPSNameKey), &adapter->name);
-        if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL) {
+        if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != nullptr) {
             int adapterId;
             if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterIDKey), &adapterId) == 0) {
                 ffStrbufSetF(&adapter->modelName, "%d", adapterId);
@@ -26,7 +26,7 @@ const char* ffDetectPowerAdapter(FFlist* results) {
         }
         ffCfDictGetString(details, CFSTR("Manufacturer"), &adapter->manufacturer);
         ffCfDictGetString(details, CFSTR("Description"), &adapter->description);
-        if (ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial) != NULL) {
+        if (ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial) != nullptr) {
             int serialNumber;
             if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterSerialNumberKey), &serialNumber) == 0) {
                 ffStrbufSetF(&adapter->serial, "%X", serialNumber);
@@ -35,5 +35,5 @@ const char* ffDetectPowerAdapter(FFlist* results) {
         ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterWattsKey), &adapter->watts);
     }
 
-    return NULL;
+    return nullptr;
 }

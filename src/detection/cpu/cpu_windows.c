@@ -10,9 +10,9 @@
 #include <wchar.h>
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery) {
-    if (*phQuery != NULL) {
+    if (*phQuery != nullptr) {
         PerfCloseQueryHandle(*phQuery);
-        *phQuery = NULL;
+        *phQuery = nullptr;
     }
 }
 
@@ -33,13 +33,13 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
     };
 
     if (options->tempSensor.length > 0) {
-        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(querySpec.Name, (ULONG) sizeof(querySpec.Name), NULL, options->tempSensor.chars, (ULONG) options->tempSensor.length + 1))) {
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(querySpec.Name, (ULONG) sizeof(querySpec.Name), nullptr, options->tempSensor.chars, (ULONG) options->tempSensor.length + 1))) {
             return "Invalid temp sensor string";
         }
     }
 
     DWORD dataSize = 0;
-    if (PerfEnumerateCounterSetInstances(NULL, &querySpec.Identifier.CounterSetGuid, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
+    if (PerfEnumerateCounterSetInstances(nullptr, &querySpec.Identifier.CounterSetGuid, nullptr, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
         return "PerfEnumerateCounterSetInstances() failed";
     }
 
@@ -49,7 +49,7 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
 
     {
         FF_AUTO_FREE PERF_INSTANCE_HEADER* const pHead = malloc(dataSize);
-        if (PerfEnumerateCounterSetInstances(NULL, &querySpec.Identifier.CounterSetGuid, pHead, dataSize, &dataSize) != ERROR_SUCCESS) {
+        if (PerfEnumerateCounterSetInstances(nullptr, &querySpec.Identifier.CounterSetGuid, pHead, dataSize, &dataSize) != ERROR_SUCCESS) {
             return "PerfEnumerateCounterSetInstances() failed to get instance headers";
         }
 
@@ -77,10 +77,10 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
         }
     }
 
-    FF_A_CLEANUP(ffPerfCloseQueryHandle)
-    HANDLE hQuery = NULL;
+    [[gnu::cleanup(ffPerfCloseQueryHandle)]]
+    HANDLE hQuery = nullptr;
 
-    if (PerfOpenQueryHandle(NULL, &hQuery) != ERROR_SUCCESS) {
+    if (PerfOpenQueryHandle(nullptr, &hQuery) != ERROR_SUCCESS) {
         return "PerfOpenQueryHandle() failed";
     }
 
@@ -92,8 +92,8 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
         return "PerfAddCounters() reports invalid identifier";
     }
 
-    if (PerfQueryCounterData(hQuery, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
-        return "PerfQueryCounterData(NULL) failed";
+    if (PerfQueryCounterData(hQuery, nullptr, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
+        return "PerfQueryCounterData(nullptr) failed";
     }
 
     if (dataSize <= sizeof(PERF_DATA_HEADER) + sizeof(PERF_COUNTER_HEADER)) { // PERF_ERROR_RETURN, should not happen
@@ -135,11 +135,11 @@ const char* detectThermalTemp(const FFCPUOptions* options, double* result) {
         pCounterData = (PERF_COUNTER_DATA*) ((BYTE*) pCounterData + pCounterData->dwSize);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 // 7.5
-typedef struct FFSmbiosProcessorInfo {
+typedef struct [[gnu::packed]] FFSmbiosProcessorInfo {
     FFSmbiosHeader Header;
 
     uint8_t SocketDesignation;     // string
@@ -181,7 +181,7 @@ typedef struct FFSmbiosProcessorInfo {
 
     // 3.6+
     uint16_t ThreadEnabled; // varies
-} FF_A_PACKED FFSmbiosProcessorInfo;
+} FFSmbiosProcessorInfo;
 
 static_assert(offsetof(FFSmbiosProcessorInfo, ThreadEnabled) == 0x30,
     "FFSmbiosProcessorInfo: Wrong struct alignment");
@@ -213,7 +213,7 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu) {
 
     cpu->frequencyMax = speed;
 
-    return NULL;
+    return nullptr;
 }
 
 static uint32_t getNumLogicalCores(const SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr) {
@@ -233,12 +233,12 @@ static uint32_t getNumLogicalCores(const SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
 static const char* detectNCores(const FFCPUOptions* options, FFCPUResult* cpu) {
     LOGICAL_PROCESSOR_RELATIONSHIP lpr = RelationAll;
     ULONG length = 0;
-    NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), NULL, 0, &length);
+    NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), nullptr, 0, &length);
     if (length == 0) {
-        return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
+        return "GetLogicalProcessorInformationEx(RelationAll, nullptr, &length) failed";
     }
 
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
+    FF_AUTO_FREE SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*
         pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*) malloc(length);
 
     if (!NT_SUCCESS(NtQuerySystemInformationEx(SystemLogicalProcessorAndGroupInformation, &lpr, sizeof(lpr), pProcessorInfo, length, &length))) {
@@ -276,13 +276,13 @@ static const char* detectNCores(const FFCPUOptions* options, FFCPUResult* cpu) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* detectByRegistry(FFCPUResult* cpu) {
-    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL)) {
-        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
+    FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, nullptr)) {
+        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, nullptr) failed";
     }
 
     if (ffRegReadValues(hKey, 3, (FFRegValueArg[]){
@@ -290,13 +290,13 @@ static const char* detectByRegistry(FFCPUResult* cpu) {
                                      FF_ARG(cpu->vendor, L"VendorIdentifier"),
                                      FF_ARG(cpu->frequencyBase, L"~MHz"),
                                  },
-            NULL)) {
+            nullptr)) {
         ffStrbufTrimRightSpace(&cpu->vendor);
     } else {
         return "ffRegReadValues() failed for CPU registry key";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
@@ -317,5 +317,5 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
         detectThermalTemp(options, &cpu->temperature);
     }
 
-    return NULL;
+    return nullptr;
 }

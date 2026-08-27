@@ -8,34 +8,31 @@ bool ffPrintLM(FFLMOptions* options) {
     bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
-    ffStrbufInit(&result.type);
+    ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     const char* error = ffDetectLM(&result);
 
     if (error) {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
     if (result.service.length == 0) {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
         goto exit;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result.service, stdout);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffStrbufWriteTo(&result.prettyName, stdout);
         if (result.version.length) {
             printf(" %s", result.version.chars);
         }
-        if (result.type.length) {
-            printf(" (%s)", result.type.chars);
-        }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                        FF_ARG(result.service, "service"),
-                                                                                                       FF_ARG(result.type, "type"),
+                                                                                                       FF_ARG(result.prettyName, "pretty-name"),
                                                                                                        FF_ARG(result.version, "version"),
                                                                                                    }));
     }
@@ -43,7 +40,7 @@ bool ffPrintLM(FFLMOptions* options) {
 
 exit:
     ffStrbufDestroy(&result.service);
-    ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.prettyName);
     ffStrbufDestroy(&result.version);
 
     return success;
@@ -57,7 +54,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(LM), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -65,11 +62,11 @@ void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateLMJsonResult(FF_A_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLMJsonResult([[maybe_unused]] FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
-    ffStrbufInit(&result.type);
+    ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     const char* error = ffDetectLM(&result);
 
@@ -85,13 +82,13 @@ bool ffGenerateLMJsonResult(FF_A_UNUSED FFLMOptions* options, yyjson_mut_doc* do
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "service", &result.service);
-    yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result.prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
     success = true;
 
 exit:
     ffStrbufDestroy(&result.service);
-    ffStrbufDestroy(&result.type);
+    ffStrbufDestroy(&result.prettyName);
     ffStrbufDestroy(&result.version);
 
     return success;
@@ -106,8 +103,30 @@ void ffDestroyLMOptions(FFLMOptions* options) {
 }
 
 FFModuleBaseInfo ffLMModuleInfo = {
-    .name = FF_LM_MODULE_NAME,
+    .name = "LM",
     .description = "Print login manager (desktop manager) name and version",
+    .displayName = {
+        .en = "Login Manager",
+        .ar = "مدير تسجيل الدخول",
+        .cs = "Správce přihlášení",
+        .de = "Anmeldemanager",
+        .es = "Gestor de inicio de sesión",
+        .fr = "Gestionnaire de connexion",
+        .gl = "Xestor de inicio de sesión",
+        .he = "מנהל התחברות",
+        .id = "Manajer Login",
+        .it = "Gestore di accesso",
+        .ja = "ログインマネージャー",
+        .ko = "로그인 관리자",
+        .pl = "Menedżer logowania",
+        .pt = "Gerenciador de login",
+        .ru = "Менеджер входа",
+        .tr = "Oturum Açma Yöneticisi",
+        .uk = "Менеджер входу",
+        .vi = "Trình quản lý đăng nhập",
+        .zh_CN = "登录管理器",
+        .zh_TW = "登入管理器",
+    },
     .initOptions = (void*) ffInitLMOptions,
     .destroyOptions = (void*) ffDestroyLMOptions,
     .parseJsonObject = (void*) ffParseLMJsonObject,
@@ -115,8 +134,9 @@ FFModuleBaseInfo ffLMModuleInfo = {
     .generateJsonResult = (void*) ffGenerateLMJsonResult,
     .generateJsonConfig = (void*) ffGenerateLMJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "LM service", "service" },
-        { "LM type", "type" },
+        { "LM service / process name", "service" },
+        { "LM pretty name", "pretty-name" },
         { "LM version", "version" },
-    }))
+    })),
+    .defaultOrder = 20,
 };

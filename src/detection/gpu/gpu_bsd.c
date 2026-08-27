@@ -77,10 +77,10 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
             }
         }
 
-        ffGPUFillVendorByDeviceName(gpu);
+        ffGPUDetectTypeByVendorAndName(gpu);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
@@ -88,7 +88,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
     if (options->detectionMethod == FF_GPU_DETECTION_METHOD_AUTO) {
         ffGPUDetectByDrmBSD(options, gpus);
         if (gpus->length > 0) {
-            return NULL;
+            return nullptr;
         }
     }
 #endif

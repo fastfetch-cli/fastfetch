@@ -47,7 +47,7 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
         }
     #endif
 
-        return NULL;
+        return nullptr;
     }
     ffStrbufClear(result);
     return "Executable not found";
@@ -60,13 +60,13 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
 
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
     char buffer[MAX_PATH + 1];
-    DWORD length = SearchPathA(NULL, name, ".exe", sizeof(buffer), buffer, NULL);
+    DWORD length = SearchPathA(nullptr, name, ".exe", sizeof(buffer), buffer, nullptr);
     if (length == 0) {
         ffStrbufClear(result);
         return "Executable not found";
     }
     ffStrbufSetS(result, buffer);
-    return NULL;
+    return nullptr;
 }
 
 static inline int winerr2Errno(DWORD err) {
@@ -93,7 +93,7 @@ static inline int winerr2Errno(DWORD err) {
 char* frealpath(HANDLE hFile, char* resolved_name) {
     if (__builtin_expect(hFile == INVALID_HANDLE_VALUE || !hFile, false)) {
         errno = EINVAL;
-        return NULL;
+        return nullptr;
     }
 
     wchar_t resolvedNameW[MAX_PATH + 4]; /* +4 for "\\\\?\\" prefix */
@@ -101,11 +101,11 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
 
     if (lenW == 0) {
         errno = winerr2Errno(GetLastError());
-        return NULL;
+        return nullptr;
     }
     if (lenW >= ARRAY_SIZE(resolvedNameW)) {
         errno = E2BIG;
-        return NULL;
+        return nullptr;
     }
     lenW++; // Include null terminator
 
@@ -126,7 +126,7 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
         ULONG outBytes = 0;
         if (!NT_SUCCESS(RtlUnicodeToUTF8N(resolved_name, MAX_PATH, &outBytes, srcW, (ULONG) (srcLenW * sizeof(wchar_t))))) {
             errno = E2BIG;
-            return NULL;
+            return nullptr;
         }
     } else {
         /* UTF-8 worst-case: up to 4 bytes per UTF-16 code unit */
@@ -135,13 +135,13 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
 
         if (!NT_SUCCESS(RtlUnicodeToUTF8N(tmp, (ULONG) sizeof(tmp), &outBytes, srcW, (ULONG) (srcLenW * sizeof(wchar_t))))) {
             errno = E2BIG;
-            return NULL;
+            return nullptr;
         }
 
         resolved_name = (char*) malloc(outBytes);
         if (!resolved_name) {
             errno = ENOMEM;
-            return NULL;
+            return nullptr;
         }
 
         memcpy(resolved_name, tmp, outBytes);
@@ -153,7 +153,7 @@ char* frealpath(HANDLE hFile, char* resolved_name) {
 char* realpath(const char* __restrict file_name, char* __restrict resolved_name) {
     if (!file_name) {
         errno = EINVAL;
-        return NULL;
+        return nullptr;
     }
 
     wchar_t fileNameW[MAX_PATH];
@@ -161,21 +161,21 @@ char* realpath(const char* __restrict file_name, char* __restrict resolved_name)
 
     if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &lenBytes, file_name, (ULONG) strlen(file_name) + 1))) {
         errno = EINVAL;
-        return NULL;
+        return nullptr;
     }
 
     FF_AUTO_CLOSE_FD HANDLE hFile = CreateFileW(
         fileNameW,
         0,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        NULL,
+        nullptr,
         OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS,
-        NULL);
+        nullptr);
 
     if (hFile == INVALID_HANDLE_VALUE) {
         errno = winerr2Errno(GetLastError());
-        return NULL;
+        return nullptr;
     }
 
     return frealpath(hFile, resolved_name);
@@ -189,13 +189,13 @@ ssize_t freadlink(HANDLE hFile, char* buf, size_t bufsiz) {
 
     alignas(REPARSE_DATA_BUFFER) BYTE reparseBuf[MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
     DWORD bytesReturned = 0;
-    if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, NULL, 0, reparseBuf, (DWORD) sizeof(reparseBuf), &bytesReturned, NULL)) {
+    if (!DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, nullptr, 0, reparseBuf, (DWORD) sizeof(reparseBuf), &bytesReturned, nullptr)) {
         errno = winerr2Errno(GetLastError());
         return -1;
     }
 
     REPARSE_DATA_BUFFER* rp = (REPARSE_DATA_BUFFER*) reparseBuf;
-    const wchar_t* targetW = NULL;
+    const wchar_t* targetW = nullptr;
     USHORT targetBytes = 0;
 
     if (rp->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
@@ -262,10 +262,10 @@ ssize_t readlink(const char* path, char* buf, size_t bufsiz) {
         pathW,
         0,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        NULL,
+        nullptr,
         OPEN_EXISTING,
         FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-        NULL);
+        nullptr);
 
     if (hFile == INVALID_HANDLE_VALUE) {
         errno = winerr2Errno(GetLastError());

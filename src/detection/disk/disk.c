@@ -11,7 +11,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks) {
         return error;
     }
     if (disks->length == 0) {
-        return NULL;
+        return nullptr;
     }
 
     // We need to sort the disks, so that we can detect, which disk a path resides on
@@ -27,7 +27,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #ifndef _WIN32

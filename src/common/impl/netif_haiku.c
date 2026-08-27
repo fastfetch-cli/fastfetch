@@ -29,7 +29,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     }
 
     FF_AUTO_FREE void* buffer = malloc((size_t) size);
-    if (buffer == NULL) {
+    if (buffer == nullptr) {
         return false;
     }
 
@@ -54,13 +54,13 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
         }
 
         size_t addressSize = 0;
-        if (interface->ifr_route.destination != NULL) {
+        if (interface->ifr_route.destination != nullptr) {
             addressSize += interface->ifr_route.destination->sa_len;
         }
-        if (interface->ifr_route.mask != NULL) {
+        if (interface->ifr_route.mask != nullptr) {
             addressSize += interface->ifr_route.mask->sa_len;
         }
-        if (interface->ifr_route.gateway != NULL) {
+        if (interface->ifr_route.gateway != nullptr) {
             addressSize += interface->ifr_route.gateway->sa_len;
         }
 
@@ -88,7 +88,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     }
 
     FF_AUTO_FREE void* buffer = malloc((size_t) size);
-    if (buffer == NULL) {
+    if (buffer == nullptr) {
         return false;
     }
 
@@ -109,13 +109,13 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
         }
 
         size_t addressSize = 0;
-        if (interface->ifr_route.destination != NULL) {
+        if (interface->ifr_route.destination != nullptr) {
             addressSize += interface->ifr_route.destination->sa_len;
         }
-        if (interface->ifr_route.mask != NULL) {
+        if (interface->ifr_route.mask != nullptr) {
             addressSize += interface->ifr_route.mask->sa_len;
         }
-        if (interface->ifr_route.gateway != NULL) {
+        if (interface->ifr_route.gateway != nullptr) {
             addressSize += interface->ifr_route.gateway->sa_len;
         }
 

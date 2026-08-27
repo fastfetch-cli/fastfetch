@@ -11,21 +11,21 @@ extern "C" {
 #include <functiondiscoverykeys_devpkey.h>
 
 static void ffCoTaskMemFreeWrapper(void* pptr) {
-    assert(pptr != NULL);
+    assert(pptr != nullptr);
     void* ptr = *(void**) pptr;
     if (ptr) {
         CoTaskMemFree(ptr);
     }
 }
-#define FF_COTASK_AUTO_FREE FF_A_CLEANUP(ffCoTaskMemFreeWrapper)
+#define FF_COTASK_AUTO_FREE [[gnu::cleanup(ffCoTaskMemFreeWrapper)]]
 
 static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */, IMMDevice* immDevice, LPWSTR mainDeviceId) {
-    LPWSTR FF_COTASK_AUTO_FREE immDeviceId = NULL;
+    FF_COTASK_AUTO_FREE LPWSTR immDeviceId = nullptr;
     if (FAILED(immDevice->GetId(&immDeviceId))) {
         return "immDevice->GetId() failed";
     }
 
-    IPropertyStore* FF_AUTO_RELEASE_COM_OBJECT immPropStore = NULL;
+    FF_AUTO_RELEASE_COM_OBJECT IPropertyStore* immPropStore = nullptr;
     if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore))) {
         return "immDevice->OpenPropertyStore() failed";
     }
@@ -54,8 +54,8 @@ static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */
         }
     }
 
-    IAudioEndpointVolume* FF_AUTO_RELEASE_COM_OBJECT immEndpointVolume = NULL;
-    if (SUCCEEDED(immDevice->Activate(IID_IAudioEndpointVolume, CLSCTX_ALL, NULL, (void**) &immEndpointVolume))) {
+    FF_AUTO_RELEASE_COM_OBJECT IAudioEndpointVolume* immEndpointVolume = nullptr;
+    if (SUCCEEDED(immDevice->Activate(IID_IAudioEndpointVolume, CLSCTX_ALL, nullptr, (void**) &immEndpointVolume))) {
         BOOL muted;
         if (FAILED(immEndpointVolume->GetMute(&muted)) || !muted) {
             FLOAT volume;
@@ -65,7 +65,7 @@ static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
@@ -74,23 +74,23 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         return error;
     }
 
-    IMMDeviceEnumerator* FF_AUTO_RELEASE_COM_OBJECT pEnum = NULL;
+    FF_AUTO_RELEASE_COM_OBJECT IMMDeviceEnumerator*  pEnum = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pEnum)))) {
+    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pEnum)))) {
         return "CoCreateInstance(CLSID_MMDeviceEnumerator) failed";
     }
 
-    LPWSTR FF_COTASK_AUTO_FREE mainDeviceId = NULL;
+    FF_COTASK_AUTO_FREE LPWSTR mainDeviceId = nullptr;
 
     {
-        IMMDevice* FF_AUTO_RELEASE_COM_OBJECT pDefaultDevice = NULL;
+        FF_AUTO_RELEASE_COM_OBJECT IMMDevice* pDefaultDevice = nullptr;
 
         if (FAILED(pEnum->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDefaultDevice))) {
             return "GetDefaultAudioEndpoint() failed";
         }
 
         if (options->soundType & FF_SOUND_TYPE_MAIN) {
-            return detectSoundDevice(devices, pDefaultDevice, NULL);
+            return detectSoundDevice(devices, pDefaultDevice, nullptr);
         }
 
         if (FAILED(pDefaultDevice->GetId(&mainDeviceId))) {
@@ -98,7 +98,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         }
     }
 
-    IMMDeviceCollection* FF_AUTO_RELEASE_COM_OBJECT pDevices = NULL;
+    FF_AUTO_RELEASE_COM_OBJECT IMMDeviceCollection* pDevices = nullptr;
 
     if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | (options->soundType & FF_SOUND_TYPE_ACTIVE ? 0 : DEVICE_STATE_DISABLED), &pDevices))) {
         return "EnumAudioEndpoints() failed";
@@ -110,7 +110,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
     }
 
     for (uint32_t deviceIdx = 0; deviceIdx < deviceCount; ++deviceIdx) {
-        IMMDevice* FF_AUTO_RELEASE_COM_OBJECT immDevice = NULL;
+        FF_AUTO_RELEASE_COM_OBJECT IMMDevice* immDevice = nullptr;
         if (FAILED(pDevices->Item(deviceIdx, &immDevice))) {
             continue;
         }
@@ -118,5 +118,5 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         detectSoundDevice(devices, immDevice, mainDeviceId);
     }
 
-    return NULL;
+    return nullptr;
 }

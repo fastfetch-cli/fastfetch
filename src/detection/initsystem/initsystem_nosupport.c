@@ -1,5 +1,5 @@
 #include "initsystem.h"
 
-const char* ffDetectInitSystem(FF_A_UNUSED FFInitSystemResult* result) {
+const char* ffDetectInitSystem([[maybe_unused]] FFInitSystemResult* result) {
     return "Not supported on this platform";
 }

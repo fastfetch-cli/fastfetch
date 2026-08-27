@@ -8,12 +8,12 @@ bool ffPrintTerminal(FFTerminalOptions* options) {
     const FFTerminalResult* result = ffDetectTerminal();
 
     if (result->processName.length == 0) {
-        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect terminal");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect terminal");
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         if (result->version.length) {
             printf("%s %s\n", result->prettyName.chars, result->version.chars);
@@ -21,7 +21,7 @@ bool ffPrintTerminal(FFTerminalOptions* options) {
             ffStrbufPutTo(&result->prettyName, stdout);
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                              FF_ARG(result->processName, "process-name"),
                                                                                                              FF_ARG(result->exe, "exe"),
                                                                                                              FF_ARG(result->exeName, "exe-name"),
@@ -44,7 +44,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Terminal), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -52,7 +52,7 @@ void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* do
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalJsonResult(FF_A_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTerminalJsonResult([[maybe_unused]] FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFTerminalResult* result = ffDetectTerminal();
 
     if (result->processName.length == 0) {
@@ -83,8 +83,30 @@ void ffDestroyTerminalOptions(FFTerminalOptions* options) {
 }
 
 FFModuleBaseInfo ffTerminalModuleInfo = {
-    .name = FF_TERMINAL_MODULE_NAME,
+    .name = "Terminal",
     .description = "Print the current terminal name and version",
+    .displayName = {
+        .en = "Terminal",
+        .ar = "الطرفية",
+        .cs = "Terminál",
+        .de = "Terminal",
+        .es = "Terminal",
+        .fr = "Terminal",
+        .gl = "Terminal",
+        .he = "טרמינל",
+        .id = "Terminal",
+        .it = "Terminale",
+        .ja = "ターミナル",
+        .ko = "터미널",
+        .pl = "Terminal",
+        .pt = "Terminal",
+        .ru = "Терминал",
+        .tr = "Terminal",
+        .uk = "Термінал",
+        .vi = "Terminal",
+        .zh_CN = "终端",
+        .zh_TW = "終端機",
+    },
     .initOptions = (void*) ffInitTerminalOptions,
     .destroyOptions = (void*) ffDestroyTerminalOptions,
     .parseJsonObject = (void*) ffParseTerminalJsonObject,
@@ -100,5 +122,6 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         { "Terminal version", "version" },
         { "Terminal full exe path", "exe-path" },
         { "Terminal tty / pts used", "tty" },
-    }))
+    })),
+    .defaultOrder = 29,
 };

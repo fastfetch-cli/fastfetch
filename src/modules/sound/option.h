@@ -3,7 +3,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum FF_A_PACKED FFSoundType {
+typedef enum FFSoundType: uint8_t {
     FF_SOUND_TYPE_NONE = 0,
     FF_SOUND_TYPE_MAIN = 1 << 0,
     FF_SOUND_TYPE_ACTIVE = 1 << 1,

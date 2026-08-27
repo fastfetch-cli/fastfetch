@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum FF_A_PACKED FFOpenGLLibrary {
+typedef enum FFOpenGLLibrary: uint8_t {
     FF_OPENGL_LIBRARY_AUTO,
     FF_OPENGL_LIBRARY_EGL,
     FF_OPENGL_LIBRARY_GLX,

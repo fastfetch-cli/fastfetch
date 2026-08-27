@@ -107,8 +107,8 @@ static void detectStats(FFDisk* disk) {
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     FF_AUTO_CLOSE_FILE FILE* mountsFile = fopen(MNTTAB, "r");
-    if (mountsFile == NULL) {
-        return "fopen(\"" MNTTAB "\", \"r\") == NULL";
+    if (mountsFile == nullptr) {
+        return "fopen(\"" MNTTAB "\", \"r\") == nullptr";
     }
 
     struct mnttab device;
@@ -141,5 +141,5 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         detectStats(disk);
     }
 
-    return NULL;
+    return nullptr;
 }

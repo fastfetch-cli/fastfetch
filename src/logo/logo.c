@@ -56,7 +56,7 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
     }
 
     for (uint32_t i = 0; i < options->paddingTop; ++i) {
-        logoLineCachePush(NULL, 0, cache);
+        logoLineCachePush(nullptr, 0, cache);
     }
 
     if (*data != '\0') {
@@ -184,7 +184,7 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
 
     uint32_t totalLines = instance.state.logoHeight + 1;
     while (cache->lines.length < totalLines) {
-        logoLineCachePush(NULL, 0, cache);
+        logoLineCachePush(nullptr, 0, cache);
     }
 
     cache->nextLine = 0;
@@ -298,7 +298,7 @@ static void logoApplyColors(const FFlogo* logo, bool replacement) {
         FFOptionsLogo* options = &instance.config.logo;
 
         const char* const* colors = logo->colors;
-        for (int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++) {
+        for (int i = 0; *colors != nullptr && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++) {
             if (options->colors[i].length == 0) {
                 ffStrbufAppendS(&options->colors[i], *colors);
             }
@@ -309,7 +309,7 @@ static void logoApplyColors(const FFlogo* logo, bool replacement) {
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small) {
     for (
         const char* const* logoName = logo->names;
-        *logoName != NULL && logoName <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
+        *logoName != nullptr && logoName <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
         ++logoName) {
         if (small) {
             uint32_t logoNameLength = (uint32_t) (strlen(*logoName) - strlen("_small"));
@@ -327,7 +327,7 @@ static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small) {
 
 static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size) {
     if (name->length == 0 || !isalpha(name->chars[0])) {
-        return NULL;
+        return nullptr;
     }
 
     for (const FFlogo* logo = ffLogoBuiltins[toupper(name->chars[0]) - 'A']; *logo->names; ++logo) {
@@ -352,19 +352,19 @@ static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const FFlogo* logoGetBuiltinDetected(FFLogoSize size) {
     const FFOSResult* os = ffDetectOS();
 
     const FFlogo* logo = logoGetBuiltin(&os->id, size);
-    if (logo != NULL) {
+    if (logo != nullptr) {
         return logo;
     }
 
     logo = logoGetBuiltin(&os->name, size);
-    if (logo != NULL) {
+    if (logo != nullptr) {
         return logo;
     }
 
@@ -376,7 +376,7 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size) {
             start = end + 1, end = ffStrbufNextIndexC(&os->idLike, start, ' ')) {
             ffStrbufSetNS(&buf, end - start, os->idLike.chars + start);
             logo = logoGetBuiltin(&buf, size);
-            if (logo != NULL) {
+            if (logo != nullptr) {
                 return logo;
             }
 
@@ -386,13 +386,13 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size) {
         }
     } else {
         logo = logoGetBuiltin(&os->idLike, size);
-        if (logo != NULL) {
+        if (logo != nullptr) {
             return logo;
         }
     }
 
     logo = logoGetBuiltin(&instance.state.platform.sysinfo.name, size);
-    if (logo != NULL) {
+    if (logo != nullptr) {
         return logo;
     }
 
@@ -427,7 +427,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size) {
     }
 
     const FFlogo* logo = ffLogoGetBuiltinForName(name, size);
-    if (logo == NULL) {
+    if (logo == nullptr) {
         return false;
     }
 
@@ -561,7 +561,7 @@ static bool logoTryKnownType(void) {
                                                                "/bin/sh", "-c",
 #endif
                                                                options->source.chars,
-                                                               NULL });
+                                                               nullptr });
 
         if (error) {
             if (instance.config.display.showErrors) {
@@ -786,7 +786,7 @@ void ffLogoBuiltinList(void) {
 
             for (
                 const char* const* names = logo->names;
-                *names != NULL && names <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
+                *names != nullptr && names <= &logo->names[FASTFETCH_LOGO_MAX_NAMES];
                 ++names) {
                 printf("\"%s\" ", *names);
             }

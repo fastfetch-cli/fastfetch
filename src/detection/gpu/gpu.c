@@ -73,7 +73,7 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
         case 0x1234: // https://admin.pci-ids.ucw.cz/read/PC/1234
             return FF_GPU_VENDOR_NAME_QEMU;
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -106,7 +106,7 @@ const char* detectByOpenGL(FFlist* gpus) {
     ffStrbufInit(&result.slv);
     ffStrbufInit(&result.library);
 
-    FF_A_CLEANUP(ffDestroyOpenGLOptions) FFOpenGLOptions options;
+    [[gnu::cleanup(ffDestroyOpenGLOptions)]] FFOpenGLOptions options;
     ffInitOpenGLOptions(&options);
     const char* error = ffDetectOpenGL(&options, &result);
     FF_DEBUG("OpenGL detection returns: %s", error ?: "success");
@@ -202,7 +202,7 @@ const char* detectByEglext(FFlist* result) {
 
             const char* name = ffeglQueryDeviceStringEXT(device, EGL_RENDERER_EXT);
             if (!name) {
-                FF_DEBUG("eglQueryDeviceStringEXT() returned NULL name for device %d, skipping", i);
+                FF_DEBUG("eglQueryDeviceStringEXT() returned nullptr name for device %d, skipping", i);
                 continue;
             }
 
@@ -222,7 +222,7 @@ const char* detectByEglext(FFlist* result) {
             gpu->frequency = FF_GPU_FREQUENCY_UNSET;
             gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 
-            ffeglQueryDeviceBinaryEXT(device, EGL_DEVICE_UUID_EXT, sizeof(gpu->deviceId), &gpu->deviceId, NULL);
+            ffeglQueryDeviceBinaryEXT(device, EGL_DEVICE_UUID_EXT, sizeof(gpu->deviceId), &gpu->deviceId, nullptr);
 
             if (!normalizeVendorName(gpu)) {
                 ffStrbufSetS(&gpu->vendor, ffeglQueryDeviceStringEXT(device, EGL_VENDOR));
@@ -234,7 +234,7 @@ const char* detectByEglext(FFlist* result) {
         FF_DEBUG("eglQueryDevicesEXT() returned EGL_FALSE");
     }
 
-    return NULL;
+    return nullptr;
 }
     #endif
 
@@ -249,7 +249,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         const char* error = ffDetectGPUImpl(options, result);
         if (!error && result->length > 0) {
             FF_DEBUG("PCI/native GPU detection succeeded with %u GPU(s)", result->length);
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("PCI/native GPU detection did not produce results (error=%s, gpuCount=%u)",
@@ -272,7 +272,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
             }
 #endif
 
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("Vulkan detection did not produce results (error=%s, gpuCount=%u)",
@@ -286,7 +286,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
             FF_DEBUG("OpenCL detection succeeded with %u GPU(s)", opencl->gpus.length);
             ffListDestroy(result);
             ffListInitMove(result, &opencl->gpus);
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("OpenCL detection did not produce results (error=%s, gpuCount=%u)",
@@ -299,7 +299,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         const char* error = detectByEglext(result);
         if (!error && result->length > 0) {
             FF_DEBUG("EGL_EXT GPU detection succeeded with %u GPU(s)", result->length);
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("EGL_EXT GPU detection did not produce results (error=%s, gpuCount=%u)",
@@ -312,9 +312,9 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENGL) {
         FF_DEBUG("Trying OpenGL GPU detection fallback");
         const char* error = detectByOpenGL(result);
-        if (error == NULL) {
+        if (error == nullptr) {
             FF_DEBUG("OpenGL fallback succeeded with %u GPU(s)", result->length);
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("OpenGL fallback failed: %s", error);
@@ -324,7 +324,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
     return "GPU detection failed";
 }
 
-bool ffGPUFillVendorByDeviceName(FFGPUResult* gpu) {
+bool ffGPUDetectTypeByVendorAndName(FFGPUResult* gpu) {
     if (gpu->type != FF_GPU_TYPE_UNKNOWN) {
         return true;
     }

@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum FF_A_PACKED FFLocalIpType {
+typedef enum FFLocalIpType: uint16_t {
     FF_LOCALIP_TYPE_NONE,
     FF_LOCALIP_TYPE_LOOP_BIT = 1 << 0,
     FF_LOCALIP_TYPE_IPV4_BIT = 1 << 1,
@@ -16,11 +16,10 @@ typedef enum FF_A_PACKED FFLocalIpType {
     FF_LOCALIP_TYPE_COMPACT_BIT = 1 << 10,
     FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT = 1 << 11,
     FF_LOCALIP_TYPE_ALL_IPS_BIT = 1 << 12,
-    FF_LOCALIP_TYPE_FORCE_UNSIGNED = UINT16_MAX,
 } FFLocalIpType;
 static_assert(sizeof(FFLocalIpType) == sizeof(uint16_t), "");
 
-typedef enum FF_A_PACKED FFLocalIpIpv6Type {
+typedef enum FFLocalIpIpv6Type: uint8_t {
     FF_LOCALIP_IPV6_TYPE_NONE = 0b00000000,
     FF_LOCALIP_IPV6_TYPE_GUA_BIT = 0b00000001,
     FF_LOCALIP_IPV6_TYPE_ULA_BIT = 0b00000010,

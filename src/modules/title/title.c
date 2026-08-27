@@ -45,7 +45,7 @@ bool ffPrintTitle(FFTitleOptions* options) {
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Title), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&userNameColored, stdout);
         ffStrbufWriteTo(&atColored, stdout);
@@ -68,7 +68,7 @@ bool ffPrintTitle(FFTitleOptions* options) {
             ffStrbufTrimRight(&cwdTilde, '/');
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Title), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(instance.state.platform.userName, "user-name"),
                                                                                                           FF_ARG(hostName, "host-name"),
                                                                                                           FF_ARG(instance.state.platform.homeDir, "home-dir"),
@@ -124,7 +124,7 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Title), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -139,7 +139,7 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
 }
 
-bool ffGenerateTitleJsonResult(FF_A_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTitleJsonResult([[maybe_unused]] FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
 #ifdef _WIN32
     yyjson_mut_obj_add_strbuf(doc, obj, "userId", &instance.state.platform.sid);
@@ -176,8 +176,30 @@ void ffDestroyTitleOptions(FFTitleOptions* options) {
 }
 
 FFModuleBaseInfo ffTitleModuleInfo = {
-    .name = FF_TITLE_MODULE_NAME,
+    .name = "Title",
     .description = "Print the title, including your username and hostname",
+    .displayName = {
+        .en = "Title",
+        .ar = "العنوان",
+        .cs = "Titulek",
+        .de = "Titel",
+        .es = "Título",
+        .fr = "Titre",
+        .gl = "Título",
+        .he = "כותרת",
+        .id = "Judul",
+        .it = "Titolo",
+        .ja = "タイトル",
+        .ko = "제목",
+        .pl = "Tytuł",
+        .pt = "Título",
+        .ru = "Заголовок",
+        .tr = "Başlık",
+        .uk = "Заголовок",
+        .vi = "Tiêu đề",
+        .zh_CN = "标题",
+        .zh_TW = "標題",
+    },
     .initOptions = (void*) ffInitTitleOptions,
     .destroyOptions = (void*) ffDestroyTitleOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,
@@ -197,5 +219,6 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         { "UID (*nix) / SID (Windows)", "user-id" },
         { "PID of current process", "pid" },
         { "CWD with home dir replaced by `~`", "cwd" },
-    }))
+    })),
+    .defaultOrder = 1,
 };

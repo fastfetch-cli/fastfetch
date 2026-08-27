@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum FF_A_PACKED FFPhysicalDiskType {
+typedef enum FFPhysicalDiskType: uint8_t {
     FF_PHYSICALDISK_TYPE_NONE = 0,
 
     // If none is set, it's unknown
@@ -17,8 +17,6 @@ typedef enum FF_A_PACKED FFPhysicalDiskType {
     FF_PHYSICALDISK_TYPE_READONLY = 1 << 6,
 
     FF_PHYSICALDISK_TYPE_UNUSED = 1 << 7,
-
-    FF_PHYSICALDISK_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFPhysicalDiskType;
 static_assert(sizeof(FFPhysicalDiskType) == sizeof(uint8_t), "");
 

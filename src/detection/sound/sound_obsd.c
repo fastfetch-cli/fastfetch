@@ -57,7 +57,7 @@ static void enumerate_props(FFSoundDeviceBundle* bundle, struct sioctl_desc* des
 }
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
-    FF_A_CLEANUP(close_hdl) struct sioctl_hdl* hdl = sioctl_open(SIO_DEVANY, SIOCTL_READ, 0);
+    [[gnu::cleanup(close_hdl)]] struct sioctl_hdl* hdl = sioctl_open(SIO_DEVANY, SIOCTL_READ, 0);
     if (!hdl) {
         return "sio_open() failed";
     }
@@ -86,5 +86,5 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
     }
     device->volume = (uint8_t) ((totalLevel * 100 + bundle.iLevel / 2) / bundle.iLevel);
 
-    return NULL;
+    return nullptr;
 }

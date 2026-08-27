@@ -7,7 +7,7 @@ ssize_t getline(char** lineptr, size_t* n, FILE* stream) {
     ssize_t pos = -1;
     int c;
 
-    if (lineptr == NULL || stream == NULL || n == NULL) {
+    if (lineptr == nullptr || stream == nullptr || n == nullptr) {
         errno = EINVAL;
         return -1;
     }
@@ -19,9 +19,9 @@ ssize_t getline(char** lineptr, size_t* n, FILE* stream) {
         goto exit;
     }
 
-    if (*lineptr == NULL) {
+    if (*lineptr == nullptr) {
         *lineptr = malloc(128);
-        if (*lineptr == NULL) {
+        if (*lineptr == nullptr) {
             goto exit;
         }
         *n = 128;
@@ -35,7 +35,7 @@ ssize_t getline(char** lineptr, size_t* n, FILE* stream) {
                 new_size = 128;
             }
             char* new_ptr = realloc(*lineptr, new_size);
-            if (new_ptr == NULL) {
+            if (new_ptr == nullptr) {
                 pos = -1;
                 goto exit;
             }

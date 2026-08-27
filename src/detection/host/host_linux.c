@@ -86,7 +86,7 @@ const char* ffDetectHost(FFHostResult* host) {
     if (host->family.length == 0 && host->name.length == 0) {
         const char* wslDistroName = getenv("WSL_DISTRO_NAME");
         // On WSL, the real host can't be detected. Instead use WSL as host.
-        if (wslDistroName != NULL || getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL) {
+        if (wslDistroName != nullptr || getenv("WSL_DISTRO") != nullptr || getenv("WSL_INTEROP") != nullptr) {
             ffStrbufSetStatic(&host->name, "Windows Subsystem for Linux");
             if (wslDistroName) {
                 ffStrbufAppendF(&host->name, " - %s", wslDistroName);
@@ -99,7 +99,7 @@ const char* ffDetectHost(FFHostResult* host) {
                                                           "wslinfo",
                                                           "--wsl-version",
                                                           "-n",
-                                                          NULL,
+                                                          nullptr,
                                                       }); // supported in 2.2.3 and later
             }
         } else if (ffStrbufStartsWithS(&instance.state.platform.sysinfo.version, "FreeBSD ")) {
@@ -113,5 +113,5 @@ const char* ffDetectHost(FFHostResult* host) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -28,5 +28,5 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
         result->secureBoot = buffer[4] == 1;
     }
 
-    return NULL;
+    return nullptr;
 }

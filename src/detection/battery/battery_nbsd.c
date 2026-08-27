@@ -14,13 +14,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* results) {
+const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* results) {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
         return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
     }
 
-    prop_dictionary_t root = NULL;
+    prop_dictionary_t root = nullptr;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0) {
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
     }
@@ -35,7 +35,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
     }
 
     prop_object_iterator_t itKey = prop_dictionary_iterator(root);
-    for (prop_dictionary_keysym_t key; (key = prop_object_iterator_next(itKey)) != NULL;) {
+    for (prop_dictionary_keysym_t key; (key = prop_object_iterator_next(itKey)) != nullptr;) {
         if (!ffStrStartsWith(prop_dictionary_keysym_value(key), "acpibat")) {
             continue;
         }
@@ -44,12 +44,12 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
         uint32_t max = 0, curr = 0, dischargeRate = 0;
         bool charging = false, critical = false;
         prop_object_iterator_t iter = prop_array_iterator(bat);
-        for (prop_dictionary_t dict; (dict = prop_object_iterator_next(iter)) != NULL;) {
+        for (prop_dictionary_t dict; (dict = prop_object_iterator_next(iter)) != nullptr;) {
             if (prop_object_type(dict) != PROP_TYPE_DICTIONARY) {
                 continue;
             }
 
-            const char* desc = NULL;
+            const char* desc = nullptr;
             if (!prop_dictionary_get_string(dict, "description", &desc)) {
                 continue;
             }
@@ -64,7 +64,7 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
             } else if (ffStrEquals(desc, "charge")) {
                 prop_dictionary_get_uint32(dict, "max-value", &max);
                 prop_dictionary_get_uint32(dict, "cur-value", &curr);
-                const char* state = NULL;
+                const char* state = nullptr;
                 if (prop_dictionary_get_string(dict, "state", &state) && ffStrEquals(state, "critical")) {
                     critical = true;
                 }
@@ -105,5 +105,5 @@ const char* ffDetectBattery(FF_A_UNUSED FFBatteryOptions* options, FFlist* resul
     prop_object_iterator_release(itKey);
     prop_object_release(root);
 
-    return NULL;
+    return nullptr;
 }

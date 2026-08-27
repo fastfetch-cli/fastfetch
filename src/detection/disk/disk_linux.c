@@ -107,14 +107,14 @@ static bool isPhysicalDevice(const struct mntent* device) {
 
 static void detectNameFromPath(FFDisk* disk, const struct stat* deviceStat, FFstrbuf* basePath) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath->chars);
-    if (dir == NULL) {
+    if (dir == nullptr) {
         return;
     }
 
     uint32_t basePathLength = basePath->length;
 
     struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_name[0] == '.') {
             continue;
         }
@@ -162,7 +162,7 @@ static void detectName(FFDisk* disk) {
 
 #ifdef __ANDROID__
 
-static void detectType(FF_A_UNUSED const FFlist* disks, FFDisk* currentDisk, FF_A_UNUSED struct mntent* device) {
+static void detectType([[maybe_unused]] const FFlist* disks, FFDisk* currentDisk, [[maybe_unused]] struct mntent* device) {
     if (ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated")) {
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
     } else if (ffStrbufStartsWithS(&currentDisk->mountpoint, "/mnt/media_rw/")) {
@@ -218,11 +218,11 @@ static bool isRemovable(FFDisk* currentDisk) {
     snprintf(sysBlockPartition, ARRAY_SIZE(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
 
     char sysBlockVolume[PATH_MAX]; // /sys/devices/pci0000:00/0000:00:14.0/usb4/4-3/4-3:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
-    if (realpath(sysBlockPartition, sysBlockVolume) == NULL) {
+    if (realpath(sysBlockPartition, sysBlockVolume) == nullptr) {
         return false;
     }
     char* lastSlash = strrchr(sysBlockVolume, '/');
-    if (lastSlash == NULL) {
+    if (lastSlash == nullptr) {
         return false;
     }
     strcpy(lastSlash + 1, "removable");
@@ -284,8 +284,8 @@ static void detectStats(FFDisk* disk) {
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     FILE* mountsFile = setmntent("/proc/mounts", "r");
-    if (mountsFile == NULL) {
-        return "setmntent(\"/proc/mounts\", \"r\") == NULL";
+    if (mountsFile == nullptr) {
+        return "setmntent(\"/proc/mounts\", \"r\") == nullptr";
     }
 
     struct mntent* device;
@@ -333,5 +333,5 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
 
     endmntent(mountsFile);
 
-    return NULL;
+    return nullptr;
 }

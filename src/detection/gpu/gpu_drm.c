@@ -50,7 +50,7 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     }
 
     if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
-                                             .request = RADEON_INFO_MAX_SCLK, // MHz
+                                             .request = RADEON_INFO_MAX_SCLK, // KHz
                                              .value = (uintptr_t) &value,
                                          }) >= 0) {
         gpu->frequency = (uint32_t) (value / 1000u);
@@ -59,7 +59,7 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     if (options->driverSpecific) {
         struct drm_radeon_gem_info gemInfo;
         if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0) {
-            // vram_usage can be bigger than vram_usage, so we use vram_size here
+            // vram_usage can be bigger than vram_size, so we use vram_size here
             gpu->dedicated.total = gemInfo.vram_size;
             gpu->shared.total = gemInfo.gart_size;
 
@@ -80,7 +80,7 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
@@ -146,6 +146,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
                 ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", devInfo.vram_type);
                 break;
         }
+    #undef FF_VRAM_CASE
     }
 
     struct drm_amdgpu_memory_info memInfo;
@@ -171,7 +172,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
         gpu->coreUsage = value;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
@@ -212,7 +213,7 @@ const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static inline int popcountBytes(uint8_t* bytes, uint32_t length) {
@@ -228,12 +229,12 @@ static inline int popcountBytes(uint8_t* bytes, uint32_t length) {
         length -= 4;
     }
     if (length >= 2) {
-        count += __builtin_popcountl(*(uint16_t*) bytes);
+        count += __builtin_popcount(*(uint16_t*) bytes);
         bytes += 2;
         length -= 2;
     }
     if (length) {
-        count += __builtin_popcountl(*(uint8_t*) bytes);
+        count += __builtin_popcount(*(uint8_t*) bytes);
     }
     return count;
 }
@@ -295,7 +296,7 @@ const char* ffDrmDetectXe(FFGPUResult* gpu, int fd) {
             }
         }
     }
-    return flag ? NULL : "Failed to query Xe GPU information";
+    return flag ? nullptr : "Failed to query Xe GPU information";
 }
 
 const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd) {
@@ -306,7 +307,11 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd) {
                                                   .size = sizeof(paramsGlobal),
                                               }) >= 0) {
         // They removed `unstable_uabi_version` from the struct. Hopefully they won't introduce new ABI changes.
-        gpu->coreCount = (int32_t) (paramsGlobal.num_clusters_total * paramsGlobal.num_cores_per_cluster);
+        assert(paramsGlobal.num_clusters_total <= DRM_ASAHI_MAX_CLUSTERS);
+        gpu->coreCount = 0;
+        for (uint32_t i = 0; i < paramsGlobal.num_clusters_total; i++) {
+            gpu->coreCount += __builtin_popcountll(paramsGlobal.core_masks[i]);
+        }
         gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
         gpu->deviceId = ffGPUGeneral2Id(paramsGlobal.chip_id);
 
@@ -329,7 +334,7 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd) {
             ffStrbufSetF(&gpu->name, "Apple M%d%s (G%d%c %02X)", paramsGlobal.gpu_generation - 12, variant, paramsGlobal.gpu_generation, paramsGlobal.gpu_variant, paramsGlobal.gpu_revision + 0xA0);
         }
 
-        return NULL;
+        return nullptr;
     }
 
     return "Failed to query Asahi GPU information";
@@ -357,7 +362,7 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
         gpu->coreCount = (int32_t) getparam.value;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #endif // FF_HAVE_DRM
@@ -366,7 +371,7 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId) {
 #if !__OpenBSD__
-    __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
+    typeof(&ffDetectNvidiaGpuInfo) detectFn;
     const char* soName;
     if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &soName) && (options->temp || options->driverSpecific)) {
         return detectFn(&(FFGpuDriverCondition) {
@@ -375,17 +380,17 @@ const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* 
                         },
             (FFGpuDriverResult) {
                 .index = &gpu->index,
-                .temp = options->temp ? &gpu->temperature : NULL,
-                .memory = options->driverSpecific ? &gpu->dedicated : NULL,
-                .sharedMemory = options->driverSpecific ? &gpu->shared : NULL,
-                .memoryType = options->driverSpecific ? &gpu->memoryType : NULL,
-                .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
+                .temp = options->temp ? &gpu->temperature : nullptr,
+                .memory = options->driverSpecific ? &gpu->dedicated : nullptr,
+                .sharedMemory = options->driverSpecific ? &gpu->shared : nullptr,
+                .memoryType = options->driverSpecific ? &gpu->memoryType : nullptr,
+                .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : nullptr,
+                .coreUsage = options->driverSpecific ? &gpu->coreUsage : nullptr,
                 .type = &gpu->type,
-                .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                .frequency = options->driverSpecific ? &gpu->frequency : nullptr,
                 .name = &gpu->name,
-                .psCurr = options->driverSpecific ? &gpu->psCurr : NULL,
-                .psMax = options->driverSpecific ? &gpu->psMax : NULL,
+                .psCurr = options->driverSpecific ? &gpu->psCurr : nullptr,
+                .psMax = options->driverSpecific ? &gpu->psMax : nullptr,
             },
             soName);
     }

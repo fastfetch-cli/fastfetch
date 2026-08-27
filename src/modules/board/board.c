@@ -14,24 +14,24 @@ bool ffPrintBoard(FFBoardOptions* options) {
 
     const char* error = ffDetectBoard(&result);
     if (error) {
-        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Board), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
     if (result.name.length == 0) {
-        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "board_name is not set.");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Board), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "board_name is not set.");
         goto exit;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Board), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufWriteTo(&result.name, stdout);
         if (result.version.length) {
             printf(" (%s)", result.version.chars);
         }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Board), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result.name, "name"),
                                                                                                           FF_ARG(result.vendor, "vendor"),
                                                                                                           FF_ARG(result.version, "version"),
@@ -56,7 +56,7 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Board), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -64,7 +64,7 @@ void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateBoardJsonResult(FF_A_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBoardJsonResult([[maybe_unused]] FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFBoardResult board;
     ffStrbufInit(&board.name);
@@ -108,8 +108,30 @@ void ffDestroyBoardOptions(FFBoardOptions* options) {
 }
 
 FFModuleBaseInfo ffBoardModuleInfo = {
-    .name = FF_BOARD_MODULE_NAME,
+    .name = "Board",
     .description = "Print motherboard name and other information",
+    .displayName = {
+        .en = "Board",
+        .ar = "اللوحة الأم",
+        .cs = "Základní deska",
+        .de = "Mainboard",
+        .es = "Placa base",
+        .fr = "Carte mère",
+        .gl = "Placa base",
+        .he = "לוח אם",
+        .id = "Papan Induk",
+        .it = "Scheda madre",
+        .ja = "マザーボード",
+        .ko = "메인보드",
+        .pl = "Płyta główna",
+        .pt = "Placa-mãe",
+        .ru = "Материнская плата",
+        .tr = "Anakart",
+        .uk = "Материнська плата",
+        .vi = "Bo mạch chủ",
+        .zh_CN = "主板",
+        .zh_TW = "主機板",
+    },
     .initOptions = (void*) ffInitBoardOptions,
     .destroyOptions = (void*) ffDestroyBoardOptions,
     .parseJsonObject = (void*) ffParseBoardJsonObject,
@@ -121,5 +143,6 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         { "Board vendor", "vendor" },
         { "Board version", "version" },
         { "Board serial number", "serial" },
-    }))
+    })),
+    .defaultOrder = 7,
 };

@@ -75,7 +75,7 @@ static const FFlogo S[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_SAMBABOX
     // SambaBOX
     {
-        .names = { "SambaBOX", "Profelis SambaBOX" },
+        .names = { "SambaBOX" },
         .lines = FASTFETCH_DATATEXT_LOGO_SAMBABOX,
         .colors = {
             FF_COLOR_FG_YELLOW,

@@ -15,5 +15,5 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
 
     ram->bytesTotal = statex.ullTotalPhys;
     ram->bytesUsed = statex.ullTotalPhys - statex.ullAvailPhys;
-    return NULL;
+    return nullptr;
 }

@@ -2,7 +2,7 @@
 
 #include "common/option.h"
 
-typedef enum FF_A_PACKED FFColorsSymbol {
+typedef enum FFColorsSymbol: uint8_t {
     FF_COLORS_SYMBOL_BLOCK,
     FF_COLORS_SYMBOL_BACKGROUND,
     FF_COLORS_SYMBOL_CIRCLE,
@@ -17,7 +17,7 @@ typedef struct FFBlockConfig {
     uint8_t range[2];
 } FFBlockConfig;
 
-typedef enum FF_A_PACKED FFColorsBrightness {
+typedef enum FFColorsBrightness: uint8_t {
     FF_COLORS_BRIGHTNESS_DEFAULT,
     FF_COLORS_BRIGHTNESS_NORMAL,
     FF_COLORS_BRIGHTNESS_LIGHT,

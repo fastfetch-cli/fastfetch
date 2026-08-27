@@ -3,7 +3,7 @@
 #include "fastfetch.h"
 #include "modules/codec/option.h"
 
-typedef enum FF_A_PACKED FFCodecType {
+typedef enum FFCodecType: uint32_t {
     FF_CODEC_TYPE_NONE = 0,
     FF_CODEC_TYPE_UNKNOWN = UINT32_C(1) << 0,
     FF_CODEC_TYPE_H261 = UINT32_C(1) << 1,
@@ -25,7 +25,6 @@ typedef enum FF_A_PACKED FFCodecType {
     FF_CODEC_TYPE_PRORES = UINT32_C(1) << 17,
     FF_CODEC_TYPE_PRORES_RAW = UINT32_C(1) << 18,
     FF_CODEC_TYPE_MAX = FF_CODEC_TYPE_PRORES_RAW,
-    FF_CODEC_TYPE_FORCE_UNSIGNED = UINT32_MAX,
 } FFCodecType;
 
 typedef struct FFCodecResult {

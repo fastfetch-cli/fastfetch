@@ -31,5 +31,5 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
         ffGetFileVersion(path, &result->version);
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -23,5 +23,5 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
         ffStrbufInitS(&item->name, device->Name());
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -18,7 +18,7 @@
         #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
     #endif
 
-void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString) {
+void ffOpenGLHandleResult(FFOpenGLResult* result, typeof(&glGetString) ffglGetString) {
     ffStrbufAppendS(&result->version, (const char*) ffglGetString(GL_VERSION));
     ffStrbufAppendS(&result->renderer, (const char*) ffglGetString(GL_RENDERER));
     ffStrbufAppendS(&result->vendor, (const char*) ffglGetString(GL_VENDOR));
@@ -67,7 +67,7 @@ static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data) {
         result->vendor.chars,
         result->slv.chars,
         result->library.chars);
-    return NULL;
+    return nullptr;
 }
 
 static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data, bool gles) {
@@ -166,10 +166,10 @@ const char* ffOpenGLDetectByEGL(FFOpenGLResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
     FF_DEBUG("Resolving glGetString via eglGetProcAddress()");
-    eglData.ffglGetString = (__typeof__(&glGetString)) ffeglGetProcAddress("glGetString");
+    eglData.ffglGetString = (typeof(&glGetString)) ffeglGetProcAddress("glGetString");
     if (!eglData.ffglGetString) {
-        FF_DEBUG("eglGetProcAddress('glGetString') returned NULL");
-        return "eglGetProcAddress(glGetString) returned NULL";
+        FF_DEBUG("eglGetProcAddress('glGetString') returned nullptr");
+        return "eglGetProcAddress(glGetString) returned nullptr";
     }
 
     FF_DEBUG("Loaded EGL library and required symbols");
@@ -184,7 +184,7 @@ const char* ffOpenGLDetectByEGL(FFOpenGLResult* result) {
     }
     if (ffeglGetPlatformDisplay) {
         FF_DEBUG("Trying eglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA)");
-        display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, NULL);
+        display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, nullptr /*EGL_DEFAULT_DISPLAY*/, nullptr);
         FF_DEBUG("eglGetPlatformDisplay() %s", display == EGL_NO_DISPLAY ? "failed" : "succeeded");
     } else {
         FF_DEBUG("eglGetPlatformDisplay is unavailable, falling back to eglGetDisplay");

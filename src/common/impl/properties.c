@@ -95,7 +95,7 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer) {
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries) {
     FF_AUTO_CLOSE_FILE FILE* file = fopen(filename, "r");
-    if (file == NULL) {
+    if (file == nullptr) {
         return false;
     }
 
@@ -115,7 +115,7 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     }
 
     if (!allSet) {
-        FF_AUTO_FREE char* line = NULL;
+        FF_AUTO_FREE char* line = nullptr;
         size_t len = 0;
 
         while (getline(&line, &len, file) != -1) {

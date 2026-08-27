@@ -20,7 +20,7 @@ typedef struct {
 
 static inline void wrapMunmap(FFMemoryMapping* mapping) {
     assert(mapping);
-    if (mapping->data == NULL || mapping->data == MAP_FAILED) {
+    if (mapping->data == nullptr || mapping->data == MAP_FAILED) {
         return;
     }
     munmap((void*) mapping->data, mapping->length);
@@ -31,12 +31,12 @@ static inline void wrapMunmap(FFMemoryMapping* mapping) {
  */
 static inline const void* readData(const FFMemoryMapping* mapping, size_t size, off_t offset) {
     if (offset < 0) {
-        return NULL;
+        return nullptr;
     }
 
     size_t start = (size_t) offset;
     if (start > mapping->length || size > mapping->length - start) {
-        return NULL;
+        return nullptr;
     }
 
     return mapping->data + start;
@@ -99,7 +99,7 @@ static bool handleMachSection(const FFMemoryMapping* mapping, const char* name, 
  * @param userdata User data for the callback
  * @param minLength Minimum string length to extract
  *
- * @return NULL on success, error message on failure
+ * @return nullptr on success, error message on failure
  */
 static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, bool is_64, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata, uint32_t minLength) {
     uint32_t ncmds;
@@ -124,7 +124,7 @@ static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, 
     }
 
     off_t commandOffset = loadCommandsOffset;
-    const struct load_command* cmd = NULL;
+    const struct load_command* cmd = nullptr;
     for (uint32_t i = 0U; i < ncmds; i++, commandOffset += cmd->cmdsize) {
         cmd = readData(mapping, sizeof(*cmd), commandOffset);
         if (!cmd) {
@@ -153,7 +153,7 @@ static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, 
                 }
 
                 if (!handleMachSection(mapping, section->sectname, (off_t) section->offset, (size_t) section->size, cb, userdata, minLength)) {
-                    return NULL;
+                    return nullptr;
                 }
             }
         } else if (cmd->cmd == LC_SEGMENT) {
@@ -174,13 +174,13 @@ static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, 
                 }
 
                 if (!handleMachSection(mapping, section->sectname, (off_t) section->offset, (size_t) section->size, cb, userdata, minLength)) {
-                    return NULL;
+                    return nullptr;
                 }
             }
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -195,7 +195,7 @@ static const char* dumpMachHeader(const FFMemoryMapping* mapping, off_t offset, 
  * @param userdata User data for the callback
  * @param minLength Minimum string length to extract
  *
- * @return NULL on success, error message on failure
+ * @return nullptr on success, error message on failure
  */
 static const char* dumpFatHeader(const FFMemoryMapping* mapping, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata, uint32_t minLength) {
     const struct fat_header* headerRaw = readData(mapping, sizeof(struct fat_header), 0);
@@ -273,8 +273,8 @@ const char* ffBinaryExtractStrings(const char* machoFile, bool (*cb)(const char*
         return "Failed to stat file";
     }
 
-    FF_A_CLEANUP(wrapMunmap) FFMemoryMapping mapping = {
-        .data = mmap(NULL, (size_t) st.st_size, PROT_READ, MAP_PRIVATE, fd, 0),
+    [[gnu::cleanup(wrapMunmap)]] FFMemoryMapping mapping = {
+        .data = mmap(nullptr, (size_t) st.st_size, PROT_READ, MAP_PRIVATE, fd, 0),
         .length = (size_t) st.st_size,
     };
     if (mapping.data == MAP_FAILED) {

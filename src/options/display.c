@@ -5,12 +5,106 @@
 #include "common/strutil.h"
 #include "options/display.h"
 
+#if !FF_MODULE_DISABLE_TERMINALTHEME
+    #include "detection/terminaltheme/terminaltheme.h"
+#endif
+#if !FF_MODULE_DISABLE_LOCALE
+    #include "detection/locale/locale.h"
+#endif
+
 #include <unistd.h>
+
+// @returns offsetof(FFModuleDisplayName, <language>)
+// @see src/common/option.h
+static uint32_t optionParseLanguageString(FFstrbuf* language) {
+    const bool detected = language->length == 0;
+
+    if (detected) {
+#if !FF_MODULE_DISABLE_LOCALE
+        const char* error = ffDetectLocale(language);
+        if (__builtin_expect(error != nullptr, false)) {
+            fprintf(stderr, "ffDetectLocale: %s\n", error);
+            exit(477);
+        }
+#else
+        fputs("Error: --key-language requires a value\n", stderr);
+        exit(477);
+#endif
+    }
+
+    ffStrbufSubstrBeforeFirstC(language, '.'); // Remove the encoding part of the locale
+    #if __linux__
+        ffStrbufSubstrBeforeFirstC(language, '@'); // Remove the modifier part of the locale (Linux only)
+    #endif
+    ffStrbufLowerCase(language);
+
+    if (language->length <= 1) {
+        if (language->chars[0] == 'c') {
+            return offsetof(FFModuleDisplayName, en);
+        } else {
+            goto error;
+        }
+    } else if (language->length > 2) {
+        if (language->chars[2] == '-') {
+            language->chars[2] = '_';
+        } else if (__builtin_expect(language->chars[2] != '_', false)) {
+            goto error;
+        }
+    }
+
+    // The language code is expected to be in the format of "en", "en_US", "de", "de_DE", etc.
+    // First try to match the full language code, then try to match just the first two characters (the language part).
+    // If no match is found, report a language not supported error, unless the language was auto-detected.
+    // en_US -> offsetof(FFModuleDisplayName, en)
+    // en -> offsetof(FFModuleDisplayName, en)
+    // zh_CN -> offsetof(FFModuleDisplayName, zh_CN)
+    // zh -> Error: Language 'zh' is not supported. This is an intentional design decision, as the language code 'zh' could refer to either Simplified or Traditional Chinese.
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+    switch (language->chars[0] << 8 | language->chars[1]) {
+        case 'en': return offsetof(FFModuleDisplayName, en);
+        case 'ar': return offsetof(FFModuleDisplayName, ar);
+        case 'cs': return offsetof(FFModuleDisplayName, cs);
+        case 'de': return offsetof(FFModuleDisplayName, de);
+        case 'es': return offsetof(FFModuleDisplayName, es);
+        case 'fr': return offsetof(FFModuleDisplayName, fr);
+        case 'gl': return offsetof(FFModuleDisplayName, gl);
+        case 'he': return offsetof(FFModuleDisplayName, he);
+        case 'id': return offsetof(FFModuleDisplayName, id);
+        case 'it': return offsetof(FFModuleDisplayName, it);
+        case 'ja': return offsetof(FFModuleDisplayName, ja);
+        case 'ko': return offsetof(FFModuleDisplayName, ko);
+        case 'pl': return offsetof(FFModuleDisplayName, pl);
+        case 'pt': return offsetof(FFModuleDisplayName, pt);
+        case 'ru': return offsetof(FFModuleDisplayName, ru);
+        case 'tr': return offsetof(FFModuleDisplayName, tr);
+        case 'uk': return offsetof(FFModuleDisplayName, uk);
+        case 'vi': return offsetof(FFModuleDisplayName, vi);
+        case 'zh': {
+            if (ffStrbufEqualS(language, "zh_cn")) {
+                return offsetof(FFModuleDisplayName, zh_CN);
+            } else if (ffStrbufEqualS(language, "zh_tw")) {
+                return offsetof(FFModuleDisplayName, zh_TW);
+            }
+            goto error;
+        }
+    }
+#pragma GCC diagnostic pop
+
+error:
+    // The user asked for the system locale, not for this specific language. Most locales have no
+    // translation, so falling back to English is friendlier than aborting fastfetch entirely.
+    if (detected) return offsetof(FFModuleDisplayName, en);
+
+    fprintf(stderr, "Error: Language '%s' is not supported\n", language->chars);
+    exit(477);
+}
 
 const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "display");
     if (!object) {
-        return NULL;
+        return nullptr;
     }
     if (!yyjson_is_obj(object)) {
         return "Property 'display' must be an object";
@@ -479,6 +573,17 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (paddingLeft) {
                     options->keyPaddingLeft = (uint16_t) yyjson_get_uint(paddingLeft);
                 }
+
+                yyjson_val* language = yyjson_obj_get(val, "language");
+                if (language) {
+                    FF_STRBUF_AUTO_DESTROY languageBuffer = ffStrbufCreate();
+                    if (yyjson_is_str(language)) {
+                        ffStrbufSetJsonVal(&languageBuffer, language);
+                    } else if (!yyjson_is_null(language)) {
+                        return "display.key.language must be a string or null";
+                    }
+                    options->keyLanguage = optionParseLanguageString(&languageBuffer);
+                }
             } else {
                 return "display.key must be an object";
             }
@@ -571,11 +676,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static inline void optionCheckString(const char* key, const char* value, FFstrbuf* buffer) {
-    if (value == NULL) {
+    if (value == nullptr) {
         fprintf(stderr, "Error: usage: %s <str>\n", key);
         exit(477);
     }
@@ -647,6 +752,9 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) { { "none", FF_MODULE_KEY_TYPE_NONE }, { "string", FF_MODULE_KEY_TYPE_STRING }, { "icon", FF_MODULE_KEY_TYPE_ICON }, { "both", FF_MODULE_KEY_TYPE_BOTH }, { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 }, { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 }, { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 }, { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 }, { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 }, {} });
         } else if (ffStrEqualsIgnCase(subkey, "padding-left")) {
             options->keyPaddingLeft = (uint16_t) ffOptionParseUInt32(key, value);
+        } else if (ffStrEqualsIgnCase(subkey, "language")) {
+            FF_STRBUF_AUTO_DESTROY language = ffStrbufCreateS(value);
+            options->keyLanguage = optionParseLanguageString(&language);
         } else {
             return false;
         }
@@ -825,11 +933,22 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
 }
 
 void ffOptionsInitDisplay(FFOptionsDisplay* options) {
+    bool terminalLightTheme = false;
+    #if !FF_MODULE_DISABLE_TERMINALTHEME
+    {
+        // don't enable bright color if the terminal is in light mode
+        FFTerminalThemeResult result;
+        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark) {
+            terminalLightTheme = true;
+        }
+    }
+    #endif
+
     ffStrbufInit(&options->colorKeys);
     ffStrbufInit(&options->colorTitle);
     ffStrbufInit(&options->colorOutput);
     ffStrbufInit(&options->colorSeparator);
-    options->brightColor = !instance.state.terminalLightTheme;
+    options->brightColor = !terminalLightTheme;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
@@ -852,12 +971,13 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->keyWidth = 0;
     options->keyPaddingLeft = 0;
     options->keyType = FF_MODULE_KEY_TYPE_STRING;
+    options->keyLanguage = offsetof(FFModuleDisplayName, en);
 
     options->tempUnit = FF_TEMPERATURE_UNIT_DEFAULT;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->tempColorYellow, terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->tempColorRed, terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->tempSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
@@ -867,8 +987,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     ffStrbufInit(&options->barBorderLeftElapsed);
     ffStrbufInit(&options->barBorderRightElapsed);
     ffStrbufInitStatic(&options->barColorElapsed, "auto");
-    ffStrbufInitStatic(&options->barColorTotal, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
-    ffStrbufInitStatic(&options->barColorBorder, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorTotal, terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorBorder, terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     options->barWidth = 10;
 
     options->durationAbbreviation = false;
@@ -876,8 +996,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     options->percentType = FF_PERCENTAGE_TYPE_NUM_BIT | FF_PERCENTAGE_TYPE_NUM_COLOR_BIT;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->percentColorYellow, terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->percentColorRed, terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentWidth = 0;
 
@@ -897,6 +1017,19 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options) {
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);
+    ffStrbufDestroy(&options->barBorderLeft);
+    ffStrbufDestroy(&options->barBorderRight);
+    ffStrbufDestroy(&options->barBorderLeftElapsed);
+    ffStrbufDestroy(&options->barBorderRightElapsed);
+    ffStrbufDestroy(&options->barColorElapsed);
+    ffStrbufDestroy(&options->barColorTotal);
+    ffStrbufDestroy(&options->barColorBorder);
+    ffStrbufDestroy(&options->tempColorGreen);
+    ffStrbufDestroy(&options->tempColorYellow);
+    ffStrbufDestroy(&options->tempColorRed);
+    ffStrbufDestroy(&options->percentColorGreen);
+    ffStrbufDestroy(&options->percentColorYellow);
+    ffStrbufDestroy(&options->percentColorRed);
     FF_LIST_FOR_EACH (FFstrbuf, item, options->constants) {
         ffStrbufDestroy(item);
     }
@@ -1140,6 +1273,69 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
         }
 
         yyjson_mut_obj_add_uint(doc, key, "paddingLeft", options->keyPaddingLeft);
+
+        switch (options->keyLanguage) {
+            case offsetof(FFModuleDisplayName, en):
+                yyjson_mut_obj_add_str(doc, key, "language", "en");
+                break;
+            case offsetof(FFModuleDisplayName, ar):
+                yyjson_mut_obj_add_str(doc, key, "language", "ar");
+                break;
+            case offsetof(FFModuleDisplayName, cs):
+                yyjson_mut_obj_add_str(doc, key, "language", "cs");
+                break;
+            case offsetof(FFModuleDisplayName, de):
+                yyjson_mut_obj_add_str(doc, key, "language", "de");
+                break;
+            case offsetof(FFModuleDisplayName, es):
+                yyjson_mut_obj_add_str(doc, key, "language", "es");
+                break;
+            case offsetof(FFModuleDisplayName, fr):
+                yyjson_mut_obj_add_str(doc, key, "language", "fr");
+                break;
+            case offsetof(FFModuleDisplayName, gl):
+                yyjson_mut_obj_add_str(doc, key, "language", "gl");
+                break;
+            case offsetof(FFModuleDisplayName, he):
+                yyjson_mut_obj_add_str(doc, key, "language", "he");
+                break;
+            case offsetof(FFModuleDisplayName, id):
+                yyjson_mut_obj_add_str(doc, key, "language", "id");
+                break;
+            case offsetof(FFModuleDisplayName, it):
+                yyjson_mut_obj_add_str(doc, key, "language", "it");
+                break;
+            case offsetof(FFModuleDisplayName, ja):
+                yyjson_mut_obj_add_str(doc, key, "language", "ja");
+                break;
+            case offsetof(FFModuleDisplayName, ko):
+                yyjson_mut_obj_add_str(doc, key, "language", "ko");
+                break;
+            case offsetof(FFModuleDisplayName, pl):
+                yyjson_mut_obj_add_str(doc, key, "language", "pl");
+                break;
+            case offsetof(FFModuleDisplayName, pt):
+                yyjson_mut_obj_add_str(doc, key, "language", "pt");
+                break;
+            case offsetof(FFModuleDisplayName, ru):
+                yyjson_mut_obj_add_str(doc, key, "language", "ru");
+                break;
+            case offsetof(FFModuleDisplayName, tr):
+                yyjson_mut_obj_add_str(doc, key, "language", "tr");
+                break;
+            case offsetof(FFModuleDisplayName, uk):
+                yyjson_mut_obj_add_str(doc, key, "language", "uk");
+                break;
+            case offsetof(FFModuleDisplayName, vi):
+                yyjson_mut_obj_add_str(doc, key, "language", "vi");
+                break;
+            case offsetof(FFModuleDisplayName, zh_CN):
+                yyjson_mut_obj_add_str(doc, key, "language", "zh_CN");
+                break;
+            case offsetof(FFModuleDisplayName, zh_TW):
+                yyjson_mut_obj_add_str(doc, key, "language", "zh_TW");
+                break;
+        }
     }
 
     {

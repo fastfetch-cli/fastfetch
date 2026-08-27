@@ -59,5 +59,5 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

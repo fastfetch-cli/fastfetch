@@ -15,19 +15,19 @@
  * Each string found is passed to the callback function for processing.
  */
 const char* ffBinaryExtractStrings(const char* peFile, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata, uint32_t minLength) {
-    FF_AUTO_CLOSE_FD HANDLE hFile = CreateFileA(peFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    FF_AUTO_CLOSE_FD HANDLE hFile = CreateFileA(peFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
         return "CreateFileA() failed";
     }
 
-    FF_AUTO_CLOSE_FD HANDLE hSection = NULL;
-    if (!NT_SUCCESS(NtCreateSection(&hSection, SECTION_MAP_READ, NULL, NULL, PAGE_READONLY, SEC_COMMIT, hFile))) {
+    FF_AUTO_CLOSE_FD HANDLE hSection = nullptr;
+    if (!NT_SUCCESS(NtCreateSection(&hSection, SECTION_MAP_READ, nullptr, nullptr, PAGE_READONLY, SEC_COMMIT, hFile))) {
         return "NtCreateSection() failed";
     }
 
-    PVOID base = NULL;
+    PVOID base = nullptr;
     SIZE_T viewSize = 0;
-    if (!NT_SUCCESS(NtMapViewOfSection(hSection, NtCurrentProcess(), &base, 0, 0, NULL, &viewSize, ViewUnmap, 0, PAGE_READONLY))) {
+    if (!NT_SUCCESS(NtMapViewOfSection(hSection, NtCurrentProcess(), &base, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY))) {
         return "NtMapViewOfSection() failed";
     }
 
@@ -67,5 +67,5 @@ const char* ffBinaryExtractStrings(const char* peFile, bool (*cb)(const char* st
     }
 
     NtUnmapViewOfSection(NtCurrentProcess(), base);
-    return NULL;
+    return nullptr;
 }

@@ -10,7 +10,7 @@ extern "C" {
 #include <mfapi.h>
 #include <mfidl.h>
 
-extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
+extern "C" const char* ffDetectCamera([[maybe_unused]] FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(mfplat, "mfplat" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
     FF_LIBRARY_LOAD_MESSAGE(mf, "mf" FF_LIBRARY_EXTENSION, 1)
@@ -21,7 +21,7 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
         return error;
     }
 
-    IMFAttributes* FF_AUTO_RELEASE_COM_OBJECT attrs = nullptr;
+    FF_AUTO_RELEASE_COM_OBJECT IMFAttributes* attrs = nullptr;
     if (FAILED(ffMFCreateAttributes(&attrs, 1))) {
         return "MFCreateAttributes() failed";
     }
@@ -32,7 +32,7 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
         return "SetGUID(MF_*) failed";
     }
 
-    IMFActivate** devices = NULL;
+    IMFActivate** devices = nullptr;
     uint32_t count;
 
     if (FAILED(ffMFEnumDeviceSources(attrs, &devices, &count))) {
@@ -40,7 +40,7 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
     }
 
     for (uint32_t i = 0; i < count; i++) {
-        IMFActivate* FF_AUTO_RELEASE_COM_OBJECT device = devices[i];
+        FF_AUTO_RELEASE_COM_OBJECT IMFActivate* device = devices[i];
 
         wchar_t buffer[256];
         uint32_t length = 0;
@@ -60,25 +60,25 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
             ffStrbufSetNWS(&camera->id, length, buffer);
         }
 
-        IMFMediaSource* FF_AUTO_RELEASE_COM_OBJECT source = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT IMFMediaSource* source = nullptr;
         if (FAILED(device->ActivateObject(IID_PPV_ARGS(&source)))) {
             continue;
         }
 
         on_scope_exit destroySource([&] { source->Shutdown(); });
 
-        IMFPresentationDescriptor* FF_AUTO_RELEASE_COM_OBJECT pd = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT IMFPresentationDescriptor* pd = nullptr;
         if (FAILED(source->CreatePresentationDescriptor(&pd))) {
             continue;
         }
 
-        IMFStreamDescriptor* FF_AUTO_RELEASE_COM_OBJECT sd = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT IMFStreamDescriptor* sd = nullptr;
         BOOL selected;
         if (FAILED(pd->GetStreamDescriptorByIndex(0, &selected, &sd))) {
             continue;
         }
 
-        IMFMediaTypeHandler* FF_AUTO_RELEASE_COM_OBJECT handler = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT IMFMediaTypeHandler* handler = nullptr;
         if (FAILED(sd->GetMediaTypeHandler(&handler))) {
             continue;
         }
@@ -89,7 +89,7 @@ extern "C" const char* ffDetectCamera(FF_A_UNUSED FFlist* result) {
         }
 
         // Assume first type is the maximum resolution
-        IMFMediaType* type = NULL;
+        IMFMediaType* type = nullptr;
         for (DWORD idx = 0; SUCCEEDED(handler->GetMediaTypeByIndex(idx, &type)); ++idx) {
             on_scope_exit destroyType([=] { type->Release(); });
 

@@ -33,7 +33,7 @@ static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* 
             *size = unsafe_yyjson_get_num(psize);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static inline void wrapYyjsonFree(yyjson_doc** doc) {
@@ -44,7 +44,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 }
 
 static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size) {
-    yyjson_doc* FF_A_CLEANUP(wrapYyjsonFree) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, NULL);
+    [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, nullptr, nullptr);
     if (!doc) {
         return "Failed to parse WT JSON config file";
     }
@@ -86,13 +86,13 @@ static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* s
     if (*size < 0) {
         *size = 12;
     }
-    return NULL;
+    return nullptr;
 }
 
 static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont) {
     // https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
     FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
-    const char* error = NULL;
+    const char* error = nullptr;
 
     if (terminalExe && ffIsAbsolutePath(terminalExe->chars)) {
         FF_STRBUF_AUTO_DESTROY jsonPath = ffStrbufCreateA(MAX_PATH);
@@ -106,8 +106,8 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
                 error = "Error reading Windows Terminal portable settings JSON file";
             }
         } else {
-            PWSTR localAppDataW = NULL;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, NULL, &localAppDataW))) {
+            PWSTR localAppDataW = nullptr;
+            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &localAppDataW))) {
                 ffStrbufSetWS(&jsonPath, localAppDataW);
                 CoTaskMemFree(localAppDataW);
 
@@ -146,7 +146,7 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
                                                  "else if exist \"%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json\" "
                                                  "( type %LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json ) "
                                                  "else ( call )",
-                                                 NULL });
+                                                 nullptr });
     }
 
     if (error) {
@@ -242,7 +242,7 @@ static void detectConEmu(FFTerminalFontResult* terminalFont) {
 }
 
 static void detectWarp(FFTerminalFontResult* terminalFont) {
-    FF_AUTO_CLOSE_FD HANDLE key = NULL;
+    FF_AUTO_CLOSE_FD HANDLE key = nullptr;
     if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Warp.dev\\Warp", &key, &terminalFont->error)) {
         return;
     }
@@ -261,7 +261,7 @@ static void detectWarp(FFTerminalFontResult* terminalFont) {
 
     FFstrbuf* fontWeight = FF_LIST_ADD(FFstrbuf, terminalFont->font.styles);
     ffStrbufInit(fontWeight);
-    if (ffRegReadStrbuf(key, L"FontWeight", fontWeight, NULL)) {
+    if (ffRegReadStrbuf(key, L"FontWeight", fontWeight, nullptr)) {
         ffStrbufTrim(fontWeight, '"');
     } else {
         ffStrbufSetStatic(fontWeight, "Normal");

@@ -19,8 +19,8 @@ static const char* spawnProcess(FFCommandOptions* options, FFProcessHandle* hand
                                                       options->shell.chars,
                                                       options->param.chars,
                                                       options->text.chars,
-                                                      NULL }
-                                                : (char* const[]) { options->shell.chars, options->text.chars, NULL },
+                                                      nullptr }
+                                                : (char* const[]) { options->shell.chars, options->text.chars, nullptr },
         options->useStdErr,
         handle);
 }
@@ -54,5 +54,5 @@ const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result) {
     }
 
     ffStrbufTrimRightSpace(result);
-    return NULL;
+    return nullptr;
 }

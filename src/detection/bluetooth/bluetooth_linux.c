@@ -124,14 +124,14 @@ static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFB
 
 static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter) {
     if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY) {
-        return NULL;
+        return nullptr;
     }
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
     if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_OBJECT_PATH) {
-        return NULL;
+        return nullptr;
     }
 
     const char* objectPath;
@@ -139,13 +139,13 @@ static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbu
 
     // We don't want adapter objects
     if (!ffStrContains(objectPath, "/dev_")) {
-        return NULL;
+        return nullptr;
     }
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
     if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY) {
-        return NULL;
+        return nullptr;
     }
 
     DBusMessageIter arrayIter;
@@ -202,7 +202,7 @@ static const char* detectBluetooth(FFBluetoothOptions* options, FFlist* devices,
         return error;
     }
 
-    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", NULL, NULL);
+    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", nullptr, nullptr);
     if (!managedObjects) {
         return "Failed to call GetManagedObjects";
     }
@@ -216,19 +216,19 @@ static const char* detectBluetooth(FFBluetoothOptions* options, FFlist* devices,
     detectBluetoothRoot(options, devices, &dbus, &rootIter, connectedCount);
 
     dbus.lib->ffdbus_message_unref(managedObjects);
-    return NULL;
+    return nullptr;
 }
 
 static uint32_t connectedDevices(void) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return 0;
     }
 
     uint32_t result = 0;
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
-        if (strchr(entry->d_name, ':') != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
+        if (strchr(entry->d_name, ':') != nullptr) {
             ++result;
         }
     }
@@ -244,7 +244,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
     if (!options->showDisconnected) {
         connectedCount = (int32_t) connectedDevices();
         if (connectedCount == 0) {
-            return NULL;
+            return nullptr;
         }
     }
 

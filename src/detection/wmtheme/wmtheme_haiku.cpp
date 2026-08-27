@@ -12,7 +12,7 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
     BApplication app("application/x-vnd.fastfetch-cli-fastfetch");
 
     DecorInfoUtility *util = new DecorInfoUtility();
-    DecorInfo* decor = NULL;
+    DecorInfo* decor = nullptr;
 
     if (util) {
         decor = util->CurrentDecorator();

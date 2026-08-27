@@ -52,7 +52,7 @@ get_rt_address(struct rt_msghdr* rtm, int desired) {
             sa = (struct sockaddr*) (ROUNDUP(salen) + (char*) sa);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {

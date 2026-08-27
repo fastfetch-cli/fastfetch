@@ -21,7 +21,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid) {
     pid_t ppid = 0;
     int32_t tty = -1;
 
-    const char* userShellName = NULL;
+    const char* userShellName = nullptr;
     {
         uint32_t index = ffStrbufLastIndexC(&instance.state.platform.userShell, '/');
         if (index == instance.state.platform.userShell.length) {
@@ -31,7 +31,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid) {
         }
     }
 
-    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL) {
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == nullptr) {
         if (!ffStrbufEqualS(&result->processName, userShellName)) {
             // Common programs that are between terminal and own process, but are not the shell
             if (
@@ -79,7 +79,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid) {
 static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid) {
     pid_t ppid = 0;
 
-    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL) {
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, nullptr) == nullptr) {
         // Known shells
         if (
             pid == 1 || // init/systemd
@@ -130,7 +130,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid) {
                         break;
                     }
                 }
-                if (pLeft == pRight && ffProcessGetBasicInfoLinux(ppid, &result->processName, &ppid, NULL) != NULL) {
+                if (pLeft == pRight && ffProcessGetBasicInfoLinux(ppid, &result->processName, &ppid, nullptr) != nullptr) {
                     return 0;
                 }
             }
@@ -147,13 +147,13 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid) {
 
 static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv) {
     const char* envStr = getenv(pidEnv);
-    if (envStr == NULL) {
+    if (envStr == nullptr) {
         return false;
     }
 
-    pid_t pid = (pid_t) strtol(envStr, NULL, 10);
+    pid_t pid = (pid_t) strtol(envStr, nullptr, 10);
     result->pid = (uint32_t) pid;
-    if (ffProcessGetBasicInfoLinux(pid, &result->processName, (pid_t*) &result->ppid, NULL) == NULL) {
+    if (ffProcessGetBasicInfoLinux(pid, &result->processName, (pid_t*) &result->ppid, nullptr) == nullptr) {
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         return true;
     }
@@ -185,15 +185,15 @@ static void getTerminalFromEnv(FFTerminalResult* result) {
         result->pid = result->ppid = 0;
     }
 
-    const char* term = NULL;
+    const char* term = nullptr;
 
     // SSH
     if (
-        getenv("SSH_TTY") != NULL) {
+        getenv("SSH_TTY") != nullptr) {
         term = getenv("SSH_TTY");
     } else if (
-        getenv("KITTY_PID") != NULL ||
-        getenv("KITTY_INSTALLATION_DIR") != NULL) {
+        getenv("KITTY_PID") != nullptr ||
+        getenv("KITTY_INSTALLATION_DIR") != nullptr) {
         if (getTerminalInfoByPidEnv(result, "KITTY_PID")) {
             return;
         }
@@ -203,29 +203,29 @@ static void getTerminalFromEnv(FFTerminalResult* result) {
 #ifdef __linux__ // WSL
     // Windows Terminal
     else if (
-        getenv("WT_SESSION") != NULL ||
-        getenv("WT_PROFILE_ID") != NULL)
+        getenv("WT_SESSION") != nullptr ||
+        getenv("WT_PROFILE_ID") != nullptr)
         term = "Windows Terminal";
 
     // ConEmu
     else if (
-        getenv("ConEmuPID") != NULL) {
+        getenv("ConEmuPID") != nullptr) {
         term = "ConEmu";
     }
 #endif
 
     // Alacritty
     else if (
-        getenv("ALACRITTY_SOCKET") != NULL ||
-        getenv("ALACRITTY_LOG") != NULL ||
-        getenv("ALACRITTY_WINDOW_ID") != NULL) {
+        getenv("ALACRITTY_SOCKET") != nullptr ||
+        getenv("ALACRITTY_LOG") != nullptr ||
+        getenv("ALACRITTY_WINDOW_ID") != nullptr) {
         term = "Alacritty";
     }
 #ifdef __ANDROID__
     // Termux
     else if (
-        getenv("TERMUX_VERSION") != NULL ||
-        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL) {
+        getenv("TERMUX_VERSION") != nullptr ||
+        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != nullptr) {
         if (getTerminalInfoByPidEnv(result, "TERMUX_APP__PID")) {
             return;
         }
@@ -236,22 +236,22 @@ static void getTerminalFromEnv(FFTerminalResult* result) {
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__GNU__)
     // Konsole
     else if (
-        getenv("KONSOLE_VERSION") != NULL)
+        getenv("KONSOLE_VERSION") != nullptr)
         term = "konsole";
 
     else if (
-        getenv("GNOME_TERMINAL_SCREEN") != NULL ||
-        getenv("GNOME_TERMINAL_SERVICE") != NULL) {
+        getenv("GNOME_TERMINAL_SCREEN") != nullptr ||
+        getenv("GNOME_TERMINAL_SERVICE") != nullptr) {
         term = "gnome-terminal";
     }
 #endif
 
     // MacOS, mintty
-    else if (getenv("TERM_PROGRAM") != NULL) {
+    else if (getenv("TERM_PROGRAM") != nullptr) {
         term = getenv("TERM_PROGRAM");
     }
 
-    else if (getenv("LC_TERMINAL") != NULL) {
+    else if (getenv("LC_TERMINAL") != nullptr) {
         term = getenv("LC_TERMINAL");
     }
 
@@ -398,7 +398,7 @@ const FFShellResult* ffDetectShell() {
     const char* ignoreParent = getenv("FFTS_IGNORE_PARENT");
     if (ignoreParent && ffStrEquals(ignoreParent, "1")) {
         FF_STRBUF_AUTO_DESTROY _ = ffStrbufCreate();
-        ffProcessGetBasicInfoLinux(ppid, &_, &ppid, NULL);
+        ffProcessGetBasicInfoLinux(ppid, &_, &ppid, nullptr);
     }
 
     ppid = getShellInfo(&result, ppid);

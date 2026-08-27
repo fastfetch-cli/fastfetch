@@ -20,5 +20,5 @@ const char* ffDetectTPM(FFTPMResult* result) {
         ffStrbufTrimRightSpace(&result->description);
     }
 
-    return NULL;
+    return nullptr;
 }

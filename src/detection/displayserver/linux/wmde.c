@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #if __FreeBSD__
     #include <sys/sysctl.h>
@@ -51,39 +52,39 @@ static const char* parseEnv(void) {
         return env;
     }
 
-    if (getenv("KDE_FULL_SESSION") != NULL || getenv("KDE_SESSION_UID") != NULL || getenv("KDE_SESSION_VERSION") != NULL) {
+    if (getenv("KDE_FULL_SESSION") != nullptr || getenv("KDE_SESSION_UID") != nullptr || getenv("KDE_SESSION_VERSION") != nullptr) {
         return "KDE";
     }
 
-    if (getenv("GNOME_DESKTOP_SESSION_ID") != NULL) {
+    if (getenv("GNOME_DESKTOP_SESSION_ID") != nullptr) {
         return "GNOME";
     }
 
-    if (getenv("MATE_DESKTOP_SESSION_ID") != NULL) {
+    if (getenv("MATE_DESKTOP_SESSION_ID") != nullptr) {
         return "Mate";
     }
 
-    if (getenv("TDE_FULL_SESSION") != NULL) {
+    if (getenv("TDE_FULL_SESSION") != nullptr) {
         return "Trinity";
     }
 
-    if (getenv("HYPRLAND_CMD") != NULL) {
+    if (getenv("HYPRLAND_CMD") != nullptr) {
         return "Hyprland";
     }
 
-    if (getenv("SWAYSOCK") != NULL) {
+    if (getenv("SWAYSOCK") != nullptr) {
         return "Sway";
     }
 
 #if __linux__ && !__ANDROID__
     if (
-        getenv("WAYLAND_DISPLAY") != NULL &&
+        getenv("WAYLAND_DISPLAY") != nullptr &&
         ffPathExists("/mnt/wslg/", FF_PATHTYPE_DIRECTORY)) {
         return "WSLg";
     }
 #endif
 
-    return NULL;
+    return nullptr;
 }
 
 static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name) {
@@ -285,12 +286,12 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId };
     size_t length = 0;
 
-    if (sysctl(request, ARRAY_SIZE(request), NULL, &length, NULL, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, NULL) failed";
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
-    if (sysctl(request, ARRAY_SIZE(request), procs, &length, NULL, 0) != 0) {
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
     }
 
@@ -310,7 +311,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
         }
     }
 #elif __OpenBSD__
-    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     int count = 0;
     const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, (int) userId, sizeof(*proc), &count);
     if (proc) {
@@ -331,7 +332,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     kvm_close(kd);
 #elif __sun
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
-    if (procdir == NULL) {
+    if (procdir == nullptr) {
         return "opendir(\"/proc\") failed";
     }
 
@@ -341,7 +342,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     uint32_t procPathLength = procPath.length;
 
     struct dirent* dirent;
-    while ((dirent = readdir(procdir)) != NULL) {
+    while ((dirent = readdir(procdir)) != nullptr) {
         if (!ffCharIsDigit(dirent->d_name[0])) {
             continue;
         }
@@ -371,53 +372,65 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     }
 #elif __linux__ || __GNU__
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
-    if (procdir == NULL) {
+    if (procdir == nullptr) {
         return "opendir(\"/proc\") failed";
     }
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
-    ffStrbufAppendS(&procPath, "/proc/");
-
-    uint32_t procPathLength = procPath.length;
-
-    FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); // Some processes have large command lines (looking at you chrome)
+    int procfd = dirfd(procdir);
 
     struct dirent* dirent;
-    while ((dirent = readdir(procdir)) != NULL) {
+    while ((dirent = readdir(procdir)) != nullptr) {
         // Match only folders starting with a number (the pid folders)
-        if (dirent->d_type != DT_DIR || !ffCharIsDigit(dirent->d_name[0])) {
+        if ((dirent->d_type != DT_DIR && dirent->d_type != DT_UNKNOWN) || !ffCharIsDigit(dirent->d_name[0])) {
             continue;
         }
 
-        ffStrbufAppendS(&procPath, dirent->d_name);
+        ffStrbufSetS(&procPath, dirent->d_name);
         uint32_t procFolderPathLength = procPath.length;
 
         // Don't check for processes not owned by the current user.
+        char loginuid[32];
         ffStrbufAppendS(&procPath, "/loginuid");
-        ffReadFileBuffer(procPath.chars, &loginuid);
-        if (ffStrbufToUInt(&loginuid, (uint64_t) -1) != userId) {
-            ffStrbufSubstrBefore(&procPath, procPathLength);
+        ssize_t bytesRead = ffReadFileDataRelative(procfd, procPath.chars, sizeof(loginuid) - 1, loginuid);
+        if (bytesRead <= 0) {
+            continue;
+        }
+        loginuid[bytesRead] = '\0';
+        if (strtol(loginuid, nullptr, 10) != (long) userId) {
             continue;
         }
 
         ffStrbufSubstrBefore(&procPath, procFolderPathLength);
 
-        // We check the cmdline for the process name, because it is not trimmed.
-        ffStrbufAppendS(&procPath, "/cmdline");
-        ffReadFileBuffer(procPath.chars, &processName);
-        ffStrbufTrimRightSpace(&processName);
-        ffStrbufSubstrBeforeFirstC(&processName, '\0'); // Trim the arguments
-        ffStrbufSubstrAfterLastC(&processName, '/');
-
-        ffStrbufSubstrBefore(&procPath, procPathLength);
+        // We check the realpath for the process name
+        ffStrbufAppendS(&procPath, "/exe");
+        char exePath[PATH_MAX];
+        ssize_t exePathLength = readlinkat(procfd, procPath.chars, exePath, sizeof(exePath) - 1);
+        const char* processName;
+        if (exePathLength >= 0) {
+            exePath[exePathLength] = '\0';
+            processName = basename(exePath);
+        } else {
+            ffStrbufSubstrBefore(&procPath, procFolderPathLength);
+            ffStrbufAppendS(&procPath, "/comm");
+            exePathLength = ffReadFileDataRelative(procfd, procPath.chars, sizeof(exePath) - 1, exePath);
+            if (exePathLength <= 0) {
+                continue;
+            }
+            if (exePath[exePathLength - 1] == '\n') {
+                --exePathLength;
+            }
+            exePath[exePathLength] = '\0';
+            processName = exePath;
+        }
 
         if (result->dePrettyName.length == 0) {
-            applyPrettyNameIfDE(result, processName.chars);
+            applyPrettyNameIfDE(result, processName);
         }
 
         if (result->wmPrettyName.length == 0) {
-            applyNameIfWM(result, processName.chars);
+            applyNameIfWM(result, processName);
         }
 
         if (result->dePrettyName.length > 0 && result->wmPrettyName.length > 0) {
@@ -428,13 +441,13 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     int request[] = { CTL_KERN, KERN_PROC2, KERN_PROC_UID, (int) userId, sizeof(struct kinfo_proc2), INT_MAX };
 
     size_t size = 0;
-    if (sysctl(request, ARRAY_SIZE(request), NULL, &size, NULL, 0) != 0) {
-        return "sysctl(KERN_PROC_UID, NULL) failed";
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &size, nullptr, 0) != 0) {
+        return "sysctl(KERN_PROC_UID, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc2* procs = malloc(size);
 
-    if (sysctl(request, ARRAY_SIZE(request), procs, &size, NULL, 0) != 0) {
+    if (sysctl(request, ARRAY_SIZE(request), procs, &size, nullptr, 0) != 0) {
         return "sysctl(KERN_PROC_UID, procs) failed";
     }
 
@@ -453,7 +466,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     }
 #endif
 
-    return NULL;
+    return nullptr;
 }
 
 void ffdsDetectWMDE(FFDisplayServerResult* result) {

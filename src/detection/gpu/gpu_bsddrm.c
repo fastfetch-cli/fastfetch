@@ -1,6 +1,7 @@
+#include "gpu.h"
+
 #if FF_HAVE_DRM
 
-    #include "gpu.h"
     #include "common/strutil.h"
     #include "common/io.h"
 
@@ -45,7 +46,7 @@ static const char* drmGetPciinfo(int drmfd, const char* drmId, struct drm_pciinf
     snprintf(requestBuf, ARRAY_SIZE(requestBuf), "hw.dri.%s.busid", drmId);
     char pciidBuf[64];
     size_t pciidLen = ARRAY_SIZE(pciidBuf);
-    if (sysctlbyname(requestBuf, pciidBuf, &pciidLen, NULL, 0) < 0) {
+    if (sysctlbyname(requestBuf, pciidBuf, &pciidLen, nullptr, 0) < 0) {
         return "sysctlbyname(hw.dri.%s.busid) failed";
     }
     // hw.dri.0.busid: pci:0000:01:00.0
@@ -72,7 +73,6 @@ static const char* drmGetPciinfo(int drmfd, const char* drmId, struct drm_pciinf
     };
 
     if (ioctl(pcifd, PCIOCGETCONF, &pcio) < 0) {
-        perror("ioctl");
         return "ioctl(pcifd, PCIOCGETCONF, &pc) failed";
     }
 
@@ -100,18 +100,18 @@ static const char* drmGetPciinfo(int drmfd, const char* drmId, struct drm_pciinf
         // dev.drm.0.PCI_ID: 10de:2782
     #endif
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "opendir(/dev/dri/) failed";
     }
     int drifd = dirfd(dirp);
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.' || !ffStrStartsWith(entry->d_name, "card")) {
             continue;
         }
@@ -123,7 +123,7 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
 
         // Currently, DRM_BUS_PCI is the only bus type supported by drm-kmod on BSD (hard-coded in libdrm source tree)
         struct drm_pciinfo pciInfo;
-        if (drmGetPciinfo(fd, entry->d_name + strlen("card"), &pciInfo) != NULL) {
+        if (drmGetPciinfo(fd, entry->d_name + strlen("card"), &pciInfo) != nullptr) {
             continue;
         }
 
@@ -157,11 +157,11 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
         if (ffStrStartsWith(driverName, "i915")) {
             ffDrmDetectI915(gpu, fd);
         } else if (ffStrStartsWith(driverName, "amdgpu")) {
-            uint32_t primaryNodeId = (uint32_t) strtoul(entry->d_name + strlen("card"), NULL, 10);
+            uint32_t primaryNodeId = (uint32_t) strtoul(entry->d_name + strlen("card"), nullptr, 10);
             FF_STRBUF_AUTO_DESTROY renderNode = ffStrbufCreateF("/dev/dri/renderD%d", primaryNodeId + 128);
             ffDrmDetectAmdgpu(options, gpu, renderNode.chars);
         } else if (ffStrStartsWith(driverName, "radeon")) {
-            uint32_t primaryNodeId = (uint32_t) strtoul(entry->d_name + strlen("card"), NULL, 10);
+            uint32_t primaryNodeId = (uint32_t) strtoul(entry->d_name + strlen("card"), nullptr, 10);
             FF_STRBUF_AUTO_DESTROY renderNode = ffStrbufCreateF("/dev/dri/renderD%d", primaryNodeId + 128);
             ffDrmDetectRadeon(options, gpu, renderNode.chars);
         } else if (ffStrStartsWith(driverName, "xe")) {
@@ -188,10 +188,10 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
             }
         }
 
-        ffGPUFillVendorByDeviceName(gpu);
+        ffGPUDetectTypeByVendorAndName(gpu);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #else
@@ -201,4 +201,4 @@ const char* ffGPUDetectByDrmBSD(const FFGPUOptions* options, FFlist* gpus) {
     return "Fastfetch was built without libdrm support";
 }
 
-#endif // __FreeBSD__ || __OpenBSD__
+#endif // FF_HAVE_DRM

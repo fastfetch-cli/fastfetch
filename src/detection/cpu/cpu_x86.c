@@ -1311,7 +1311,7 @@ bool ffCPUDetectX86Specific(FFCPUResult* cpu) {
     int32_t xmodel = (eax >> 16) & 0xF;
     int32_t ext_model = model + (xmodel << 4);
 
-    const struct match_entry_t* matchtable = NULL;
+    const struct match_entry_t* matchtable = nullptr;
     uint32_t count = 0;
 
     if (ffStrbufEqualS(&cpu->vendor, "GenuineIntel")) {
@@ -1327,7 +1327,7 @@ bool ffCPUDetectX86Specific(FFCPUResult* cpu) {
         return false;
     }
 
-    const FFCPUX86MatchEntry* bestEntry = NULL;
+    const FFCPUX86MatchEntry* bestEntry = nullptr;
     int32_t bestScore = -1;
 
     for (uint32_t i = 0; i < count; i++) {

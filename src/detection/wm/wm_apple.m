@@ -15,7 +15,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
 
     size_t length = 0;
     FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
-    if (processes == NULL) {
+    if (processes == nullptr) {
         return "sysctl(CTL_KERN, KERN_PROC, KERN_PROC_ALL) failed";
     }
     assert(length % sizeof(struct kinfo_proc) == 0);
@@ -68,10 +68,10 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
         break;
     }
 
-    return NULL;
+    return nullptr;
 }
 
-const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNUSED FFWMOptions* options) {
+const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     if (!wmName) {
         return "No WM detected";
     }
@@ -90,5 +90,5 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_A_UNU
         }
     }
 
-    return NULL;
+    return nullptr;
 }

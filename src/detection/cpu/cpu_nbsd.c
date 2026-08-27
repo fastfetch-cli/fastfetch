@@ -10,8 +10,8 @@
 #include <fcntl.h>
 
 static void freePropDict(prop_dictionary_t* pdict) {
-    assert(pdict != NULL);
-    if (*pdict == NULL) {
+    assert(pdict != nullptr);
+    if (*pdict == nullptr) {
         return;
     }
     prop_object_release(*pdict);
@@ -23,7 +23,7 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
         return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
     }
 
-    FF_A_CLEANUP(freePropDict) prop_dictionary_t root = NULL;
+    [[gnu::cleanup(freePropDict)]] prop_dictionary_t root = nullptr;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0) {
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
     }
@@ -67,18 +67,18 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
 
     *current = temp / 1e6 - 273.15;
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL &&
-        ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != NULL &&
-        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL &&
-        ffSysctlGetString("hw.model", &cpu->name) != NULL) {
+    if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != nullptr &&
+        ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != nullptr &&
+        ffSysctlGetString("hw.cpu0.name", &cpu->name) != nullptr &&
+        ffSysctlGetString("hw.model", &cpu->name) != nullptr) {
         ffStrbufSetS(&cpu->name, "Unknown CPU");
     }
 
-    if (ffSysctlGetString("machdep.dmi.processor-vendor", &cpu->vendor) == NULL) {
+    if (ffSysctlGetString("machdep.dmi.processor-vendor", &cpu->vendor) == nullptr) {
         ffStrbufTrimRightSpace(&cpu->vendor);
     }
 
@@ -105,5 +105,5 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
         detectCpuTemp(options, &cpu->temperature);
     }
 
-    return NULL;
+    return nullptr;
 }

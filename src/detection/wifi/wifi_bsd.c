@@ -20,7 +20,7 @@ const char* ffDetectWifi(FFlist* result) {
         return "socket() failed";
     }
 
-    for (struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i) {
+    for (struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == nullptr); ++i) {
         if (!ffStrStartsWith(i->if_name, "wlan")) {
             continue;
         }
@@ -37,6 +37,7 @@ const char* ffDetectWifi(FFlist* result) {
         item->conn.rxRate = -DBL_MAX;
         item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
+        item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
         char ssid[IEEE80211_NWID_LEN + 1] = {};
@@ -80,6 +81,16 @@ const char* ffDetectWifi(FFlist* result) {
             item->conn.channel = curchan.ic_ieee;
             item->conn.frequency = curchan.ic_freq;
 
+            // Determine channel width from channel flags
+            if (curchan.ic_flags & IEEE80211_CHAN_VHT160)
+                item->conn.channelWidth = 160;
+            else if (curchan.ic_flags & IEEE80211_CHAN_VHT80)
+                item->conn.channelWidth = 80;
+            else if (curchan.ic_flags & IEEE80211_CHAN_HT40)
+                item->conn.channelWidth = 40;
+            else
+                item->conn.channelWidth = 20;
+
 #ifdef IEEE80211_IS_CHAN_HE // for future use
             if (IEEE80211_IS_CHAN_HE(&curchan)) {
                 ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
@@ -119,7 +130,7 @@ const char* ffDetectWifi(FFlist* result) {
         }
 
         ireq.i_type = IEEE80211_IOC_AUTHMODE;
-        ireq.i_data = NULL;
+        ireq.i_data = nullptr;
         ireq.i_len = 0;
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
             switch (ireq.i_val) {
@@ -159,5 +170,5 @@ const char* ffDetectWifi(FFlist* result) {
     }
 
     if_freenameindex(infs);
-    return NULL;
+    return nullptr;
 }

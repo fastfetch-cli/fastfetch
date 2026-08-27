@@ -19,7 +19,7 @@ static bool loadLibSymbols(FFDBusLibrary* lib) {
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_unref, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_send_with_reply_and_block, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_unref, false)
-    dbus = NULL; // don't auto dlclose
+    dbus = nullptr; // don't auto dlclose
     return true;
 }
 
@@ -33,27 +33,27 @@ static const FFDBusLibrary* loadLib(void) {
         loadSuccess = loadLibSymbols(&lib);
     }
 
-    return loadSuccess ? &lib : NULL;
+    return loadSuccess ? &lib : nullptr;
 }
 
 const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data) {
     data->lib = loadLib();
-    if (data->lib == NULL) {
+    if (data->lib == nullptr) {
         return "Failed to load DBus library";
     }
 
-    data->connection = data->lib->ffdbus_bus_get(busType, NULL);
-    if (data->connection == NULL) {
+    data->connection = data->lib->ffdbus_bus_get(busType, nullptr);
+    if (data->connection == nullptr) {
         return "Failed to connect to DBus";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void ffDBusDestroyData(FFDBusData* data) {
-    if (data->connection != NULL) {
+    if (data->connection != nullptr) {
         data->lib->ffdbus_connection_unref(data->connection);
-        data->connection = NULL;
+        data->connection = nullptr;
     }
 }
 
@@ -61,7 +61,7 @@ bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result) 
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
     if (argType == DBUS_TYPE_STRING || argType == DBUS_TYPE_OBJECT_PATH) {
-        const char* value = NULL;
+        const char* value = nullptr;
         dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
 
         if (!ffStrSet(value)) {
@@ -254,8 +254,8 @@ bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int64_t* result) {
 
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg1, const char* arg2) {
     DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, interface, method);
-    if (message == NULL) {
-        return NULL;
+    if (message == nullptr) {
+        return nullptr;
     }
 
     if (arg1) {
@@ -266,7 +266,7 @@ DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const c
         }
     }
 
-    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, nullptr);
 
     dbus->lib->ffdbus_message_unref(message);
 
@@ -275,8 +275,8 @@ DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const c
 
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property) {
     DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, "org.freedesktop.DBus.Properties", "Get");
-    if (message == NULL) {
-        return NULL;
+    if (message == nullptr) {
+        return nullptr;
     }
 
     dbus->lib->ffdbus_message_append_args(message,
@@ -286,7 +286,7 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
         &property,
         DBUS_TYPE_INVALID);
 
-    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, nullptr);
 
     dbus->lib->ffdbus_message_unref(message);
 
@@ -295,7 +295,7 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
 
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result) {
     DBusMessage* reply = ffDBusGetProperty(dbus, busName, objectPath, interface, property);
-    if (reply == NULL) {
+    if (reply == nullptr) {
         return false;
     }
 
@@ -314,7 +314,7 @@ bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
 
 bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint64_t* result) {
     DBusMessage* reply = ffDBusGetProperty(dbus, busName, objectPath, interface, property);
-    if (reply == NULL) {
+    if (reply == nullptr) {
         return false;
     }
 

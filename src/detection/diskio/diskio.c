@@ -22,14 +22,14 @@ void ffPrepareDiskIO(FFDiskIOOptions* options) {
 }
 
 const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
-    const char* error = NULL;
+    const char* error = nullptr;
 
     if (options->detectTotal) {
         error = ffDiskIOGetIoCounters(result, options);
         if (error) {
             return error;
         }
-        return NULL;
+        return nullptr;
     }
 
     if (time1 == 0) {
@@ -72,8 +72,7 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
             uint64_t* prevValue = (uint64_t*) ((uint8_t*) icPrev + off);
             uint64_t* currValue = (uint64_t*) ((uint8_t*) icCurr + off);
             uint64_t temp = *currValue;
-            *currValue -= *prevValue;
-            *currValue /= (time2 - time1) / 1000 /* seconds */;
+            *currValue = (*currValue - *prevValue) * 1000 / (time2 - time1); // Calculate per second
 
             // For next function call
             *prevValue = temp;
@@ -84,5 +83,5 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
     time1 = time2;
     // Leak ioCounters1 here
 
-    return NULL;
+    return nullptr;
 }

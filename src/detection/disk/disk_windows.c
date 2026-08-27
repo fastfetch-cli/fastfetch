@@ -46,7 +46,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             continue;
         }
 
-        FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(mountpointW, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+        FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(mountpointW, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
         if (handle == INVALID_HANDLE_VALUE) {
             continue;
         }
@@ -56,7 +56,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         alignas(FILE_FS_ATTRIBUTE_INFORMATION) uint8_t bufFsAttr[1024];
         FILE_FS_ATTRIBUTE_INFORMATION* fsAttr = NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, bufFsAttr, sizeof(bufFsAttr), FileFsAttributeInformation))
             ? (FILE_FS_ATTRIBUTE_INFORMATION*) bufFsAttr
-            : NULL;
+            : nullptr;
 
         FF_STRBUF_AUTO_DESTROY diskFileSystemBuf = ffStrbufCreate();
         if (fsAttr) {
@@ -97,7 +97,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         alignas(FILE_FS_VOLUME_INFORMATION) uint8_t bufFsVolume[1024];
         FILE_FS_VOLUME_INFORMATION* fsVolume = NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, bufFsVolume, sizeof(bufFsVolume), FileFsVolumeInformation))
             ? (FILE_FS_VOLUME_INFORMATION*) bufFsVolume
-            : NULL;
+            : nullptr;
 
         if (fsVolume) {
             if (fsVolume->VolumeLabelLength > 0) {
@@ -124,5 +124,5 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

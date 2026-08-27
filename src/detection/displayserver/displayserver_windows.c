@@ -10,10 +10,9 @@ static inline void freeArgBuffer(FFArgBuffer* buffer) {
     if (buffer->data) {
         free(buffer->data);
     }
-    buffer->data = NULL;
+    buffer->data = nullptr;
     buffer->length = 0;
-}
-#define FF_AUTO_FREE_ARG_BUFFER FF_A_CLEANUP(freeArgBuffer)
+}\
 
 // http://undoc.airesoft.co.uk/user32.dll/IsThreadDesktopComposited.php
 BOOL WINAPI IsThreadDesktopComposited();
@@ -31,7 +30,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             paths,
             &modeCount,
             modes,
-            NULL) == ERROR_SUCCESS) {
+            nullptr) == ERROR_SUCCESS) {
         for (uint32_t i = 0; i < pathCount; ++i) {
             const DISPLAYCONFIG_PATH_INFO* path = &paths[i];
             const DISPLAYCONFIG_SOURCE_MODE* sourceMode = &modes[path->sourceInfo.modeInfoIdx].sourceMode;
@@ -47,7 +46,7 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                     .id = path->targetInfo.id,
                 },
             };
-            FF_AUTO_FREE_ARG_BUFFER FFArgBuffer edid = {};
+            [[gnu::cleanup(freeArgBuffer)]] FFArgBuffer edid = {};
             if (DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS) {
                 wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
                 wchar_t* pRegPath = regPath + strlen("SYSTEM\\CurrentControlSet\\Enum");
@@ -64,9 +63,9 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 }
                 wcscpy(pRegPath, L"Device Parameters");
 
-                FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, NULL) &&
-                    ffRegReadData(hKey, L"EDID", &edid, NULL) &&
+                FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+                if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPath, &hKey, nullptr) &&
+                    ffRegReadData(hKey, L"EDID", &edid, nullptr) &&
                     ffEdidIsValid(edid.data, edid.length)) {
                     ffEdidGetName(edid.data, &name);
                     ffEdidGetPhysicalSize(edid.data, &physicalWidth, &physicalHeight);
@@ -122,12 +121,12 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             }
 
             if (systemDpi == 0) {
-                HDC hdc = GetDC(NULL);
+                HDC hdc = GetDC(nullptr);
                 systemDpi = (uint32_t) GetDeviceCaps(hdc, LOGPIXELSX);
                 if (systemDpi == 0) {
                     systemDpi = 96;
                 }
-                ReleaseDC(NULL, hdc);
+                ReleaseDC(nullptr, hdc);
             }
 
             if (path->targetInfo.rotation == DISPLAYCONFIG_ROTATION_ROTATE90 ||

@@ -12,7 +12,7 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
     for (mib[2] = 0; mib[2] < 1024; mib[2]++) {
         struct sensordev sensordev;
         size_t sdlen = sizeof(struct sensordev);
-        if (sysctl(mib, 3, &sensordev, &sdlen, NULL, 0) < 0) {
+        if (sysctl(mib, 3, &sensordev, &sdlen, nullptr, 0) < 0) {
             if (errno == ENOENT) {
                 break;
             }
@@ -35,7 +35,7 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
         for (mib[4] = 0; mib[4] < sensordev.maxnumt[SENSOR_TEMP]; mib[4]++) {
             struct sensor sensor;
             size_t slen = sizeof(struct sensor);
-            if (sysctl(mib, 5, &sensor, &slen, NULL, 0) < 0) {
+            if (sysctl(mib, 5, &sensor, &slen, nullptr, 0) < 0) {
                 if (errno != ENOENT) {
                     return "sysctl(sensor) failed";
                 }
@@ -46,7 +46,7 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
             }
 
             cpu->temperature = (double) (sensor.value - 273150000) / 1E6;
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -74,5 +74,5 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
         detectCPUTemp(options, cpu);
     }
 
-    return NULL;
+    return nullptr;
 }

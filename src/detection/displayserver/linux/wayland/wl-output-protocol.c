@@ -52,38 +52,38 @@ extern const struct wl_interface wl_surface_interface;
 extern const struct wl_interface wl_touch_interface;
 
 static const struct wl_interface *wayland_types[] = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_callback_interface,
 	&wl_registry_interface,
 	&wl_surface_interface,
 	&wl_region_interface,
 	&wl_buffer_interface,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_shm_pool_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_data_source_interface,
 	&wl_surface_interface,
 	&wl_surface_interface,
-	NULL,
+	nullptr,
 	&wl_data_source_interface,
-	NULL,
+	nullptr,
 	&wl_data_offer_interface,
-	NULL,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_data_offer_interface,
 	&wl_data_offer_interface,
 	&wl_data_source_interface,
@@ -92,27 +92,27 @@ static const struct wl_interface *wayland_types[] = {
 	&wl_shell_surface_interface,
 	&wl_surface_interface,
 	&wl_seat_interface,
-	NULL,
+	nullptr,
 	&wl_seat_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_output_interface,
 	&wl_seat_interface,
-	NULL,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_output_interface,
 	&wl_buffer_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_callback_interface,
 	&wl_region_interface,
 	&wl_region_interface,
@@ -121,27 +121,27 @@ static const struct wl_interface *wayland_types[] = {
 	&wl_pointer_interface,
 	&wl_keyboard_interface,
 	&wl_touch_interface,
-	NULL,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
 	&wl_surface_interface,
-	NULL,
-	NULL,
-	NULL,
+	nullptr,
+	nullptr,
+	nullptr,
 	&wl_subsurface_interface,
 	&wl_surface_interface,
 	&wl_surface_interface,
@@ -187,7 +187,7 @@ static const struct wl_message wl_callback_events[] = {
 
 WL_EXPORT const struct wl_interface wl_callback_interface = {
 	"wl_callback", 1,
-	0, NULL,
+	0, nullptr,
 	1, wl_callback_events,
 };
 
@@ -199,7 +199,7 @@ static const struct wl_message wl_compositor_requests[] = {
 WL_EXPORT const struct wl_interface wl_compositor_interface = {
 	"wl_compositor", 6,
 	2, wl_compositor_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_shm_pool_requests[] = {
@@ -211,7 +211,7 @@ static const struct wl_message wl_shm_pool_requests[] = {
 WL_EXPORT const struct wl_interface wl_shm_pool_interface = {
 	"wl_shm_pool", 2,
 	3, wl_shm_pool_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_shm_requests[] = {
@@ -313,7 +313,7 @@ static const struct wl_message wl_data_device_manager_requests[] = {
 WL_EXPORT const struct wl_interface wl_data_device_manager_interface = {
 	"wl_data_device_manager", 3,
 	2, wl_data_device_manager_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_shell_requests[] = {
@@ -323,7 +323,7 @@ static const struct wl_message wl_shell_requests[] = {
 WL_EXPORT const struct wl_interface wl_shell_interface = {
 	"wl_shell", 1,
 	1, wl_shell_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_shell_surface_requests[] = {
@@ -488,7 +488,7 @@ static const struct wl_message wl_region_requests[] = {
 WL_EXPORT const struct wl_interface wl_region_interface = {
 	"wl_region", 1,
 	3, wl_region_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_subcompositor_requests[] = {
@@ -499,7 +499,7 @@ static const struct wl_message wl_subcompositor_requests[] = {
 WL_EXPORT const struct wl_interface wl_subcompositor_interface = {
 	"wl_subcompositor", 1,
 	2, wl_subcompositor_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_subsurface_requests[] = {
@@ -514,7 +514,7 @@ static const struct wl_message wl_subsurface_requests[] = {
 WL_EXPORT const struct wl_interface wl_subsurface_interface = {
 	"wl_subsurface", 1,
 	6, wl_subsurface_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 static const struct wl_message wl_fixes_requests[] = {
@@ -525,7 +525,7 @@ static const struct wl_message wl_fixes_requests[] = {
 WL_EXPORT const struct wl_interface wl_fixes_interface = {
 	"wl_fixes", 1,
 	2, wl_fixes_requests,
-	0, NULL,
+	0, nullptr,
 };
 
 #endif

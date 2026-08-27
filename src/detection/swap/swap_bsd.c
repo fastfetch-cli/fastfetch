@@ -25,7 +25,7 @@ static void addSwapEntry(FFlist* result, struct xswdev* xsw, uint32_t pageSize) 
 const char* ffDetectSwap(FFlist* result) {
     struct xswdev xsws[32];
     size_t size = sizeof(xsws);
-    if (sysctlbyname("vm.swap_info_array", xsws, &size, NULL, 0) < 0) {
+    if (sysctlbyname("vm.swap_info_array", xsws, &size, nullptr, 0) < 0) {
         return "sysctlbyname(\"vm.swap_info_array\") failed";
     }
 
@@ -33,7 +33,7 @@ const char* ffDetectSwap(FFlist* result) {
 
     size_t count = size / sizeof(struct xswdev);
     if (count == 0) {
-        return NULL;
+        return nullptr;
     }
 
     if (xsws->xsw_version != XSWDEV_VERSION) {
@@ -44,7 +44,7 @@ const char* ffDetectSwap(FFlist* result) {
         addSwapEntry(result, &xsws[i], pageSize);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #elif __FreeBSD__
@@ -62,7 +62,7 @@ const char* ffDetectSwap(FFlist* result) {
         mib[mibsize] = n;
         struct xswdev xsw;
         size_t size = sizeof(xsw);
-        if (sysctl(mib, (uint32_t) (mibsize + 1), &xsw, &size, NULL, 0) < 0) {
+        if (sysctl(mib, (uint32_t) (mibsize + 1), &xsw, &size, nullptr, 0) < 0) {
             break;
         }
         if (xsw.xsw_version != XSWDEV_VERSION) {
@@ -72,7 +72,7 @@ const char* ffDetectSwap(FFlist* result) {
         addSwapEntry(result, &xsw, pageSize);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #endif

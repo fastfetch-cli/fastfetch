@@ -51,21 +51,21 @@ static FFBatteryWmiEntry* getBatteryEntry(FFlist* entries, FFlist* results, ULON
 }
 
 static const char* queryWmiAllData(const GUID* guid, const char* guidStr, PWNODE_ALL_DATA* pAllData, ULONG* pBufferSize) {
-    FF_AUTO_CLOSE_WMI_BLOCK HANDLE hBlock = NULL;
+    [[gnu::cleanup(ffCloseWmiBlock)]] HANDLE hBlock = nullptr;
     ULONG status = WmiOpenBlock(guid, WMIGUID_QUERY, &hBlock);
     if (status != ERROR_SUCCESS) {
         FF_DEBUG("WMI: WmiOpenBlock() failed for %s: %s", guidStr, ffDebugWin32Error(status));
         return "WmiOpenBlock() failed";
     }
 
-    status = WmiQueryAllDataW(hBlock, pBufferSize, NULL);
+    status = WmiQueryAllDataW(hBlock, pBufferSize, nullptr);
     if (status != ERROR_SUCCESS && status != ERROR_INSUFFICIENT_BUFFER) {
         FF_DEBUG("WMI: first WmiQueryAllDataW() failed: %s", ffDebugWin32Error(status));
-        return "WmiQueryAllDataW(NULL) failed";
+        return "WmiQueryAllDataW(nullptr) failed";
     }
 
     if (*pBufferSize == 0) {
-        return "WmiQueryAllDataW(NULL) returned no data";
+        return "WmiQueryAllDataW(nullptr) returned no data";
     }
 
     if (*pBufferSize < sizeof(WNODE_ALL_DATA)) {
@@ -79,11 +79,11 @@ static const char* queryWmiAllData(const GUID* guid, const char* guidStr, PWNODE
     if (status != ERROR_SUCCESS) {
         FF_DEBUG("WMI: second WmiQueryAllDataW failed: %s", ffDebugWin32Error(status));
         free(*pAllData);
-        *pAllData = NULL;
+        *pAllData = nullptr;
         return "WmiQueryAllDataW(*pAllData) failed";
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static bool getInstanceData(const PWNODE_ALL_DATA allData, ULONG bufferSize, ULONG index, const uint8_t** instanceData, ULONG* instanceLength) {
@@ -109,7 +109,7 @@ static bool getInstanceData(const PWNODE_ALL_DATA allData, ULONG bufferSize, ULO
 
 static void detectStaticData(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectStaticData");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_STATIC_DATA_WMI_GUID, "BATTERY_STATIC_DATA_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -117,7 +117,7 @@ static void detectStaticData(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < offsetof(BATTERY_WMI_STATIC_DATA, Strings)) {
             continue;
@@ -187,7 +187,7 @@ static void detectStaticData(FFlist* entries, FFlist* results) {
 
 static void detectStatus(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectStatus");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_STATUS_WMI_GUID, "BATTERY_STATUS_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -195,7 +195,7 @@ static void detectStatus(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < sizeof(BATTERY_WMI_STATUS)) {
             continue;
@@ -225,7 +225,7 @@ static void detectStatus(FFlist* entries, FFlist* results) {
 
 static void detectRuntime(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectRuntime");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_RUNTIME_WMI_GUID, "BATTERY_RUNTIME_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -233,7 +233,7 @@ static void detectRuntime(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < sizeof(BATTERY_WMI_RUNTIME)) {
             continue;
@@ -249,7 +249,7 @@ static void detectRuntime(FFlist* entries, FFlist* results) {
 
 static void detectFullChargedCapacity(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectFullChargedCapacity");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_FULL_CHARGED_CAPACITY_WMI_GUID, "BATTERY_FULL_CHARGED_CAPACITY_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -257,7 +257,7 @@ static void detectFullChargedCapacity(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < sizeof(BATTERY_WMI_FULL_CHARGED_CAPACITY)) {
             continue;
@@ -275,7 +275,7 @@ static void detectFullChargedCapacity(FFlist* entries, FFlist* results) {
 
 static void detectCycleCount(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectCycleCount");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_CYCLE_COUNT_WMI_GUID, "BATTERY_CYCLE_COUNT_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -283,7 +283,7 @@ static void detectCycleCount(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < sizeof(BATTERY_WMI_CYCLE_COUNT)) {
             continue;
@@ -296,7 +296,7 @@ static void detectCycleCount(FFlist* entries, FFlist* results) {
 
 static void detectTemperature(FFlist* entries, FFlist* results) {
     FF_DEBUG("detectTemperature");
-    FF_AUTO_FREE PWNODE_ALL_DATA allData = NULL;
+    FF_AUTO_FREE PWNODE_ALL_DATA allData = nullptr;
     ULONG bufferSize = 0;
     const char* error = queryWmiAllData(&BATTERY_TEMPERATURE_WMI_GUID, "BATTERY_TEMPERATURE_WMI_GUID", &allData, &bufferSize);
     if (error) {
@@ -304,7 +304,7 @@ static void detectTemperature(FFlist* entries, FFlist* results) {
     }
 
     for (ULONG i = 0; i < allData->InstanceCount; ++i) {
-        const uint8_t* instanceData = NULL;
+        const uint8_t* instanceData = nullptr;
         ULONG instanceLength = 0;
         if (!getInstanceData(allData, bufferSize, i, &instanceData, &instanceLength) || instanceLength < sizeof(BATTERY_WMI_TEMPERATURE)) {
             continue;
@@ -319,7 +319,7 @@ static const char* detectWithNtApi(FFBatteryResult* battery) {
     // Reports summary battery information, not per battery
     FF_DEBUG("NtApi: start detection");
     SYSTEM_BATTERY_STATE info;
-    NTSTATUS status = NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info));
+    NTSTATUS status = NtPowerInformation(SystemBatteryState, nullptr, 0, &info, sizeof(info));
     if (!NT_SUCCESS(status)) {
         FF_DEBUG("NtApi: NtPowerInformation(SystemBatteryState) failed: %s", ffDebugNtStatus(status));
         return "NtPowerInformation(SystemBatteryState) failed";
@@ -346,7 +346,7 @@ static const char* detectWithNtApi(FFBatteryResult* battery) {
         battery->status |= FF_BATTERY_STATUS_CRITICAL;
     }
     battery->timeRemaining = info.EstimatedTime == BATTERY_UNKNOWN_TIME ? -1 : (int32_t) info.EstimatedTime;
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
@@ -355,7 +355,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     FF_LIST_AUTO_DESTROY entries = ffListCreate();
     detectStaticData(&entries, results);
     if (results->length == 0) {
-        return NULL;
+        return nullptr;
     } else if (results->length == 1) {
         // Fast path for single battery
         detectWithNtApi(FF_LIST_FIRST(FFBatteryWmiEntry, entries)->result);
@@ -380,5 +380,5 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     }
 
     FF_DEBUG("WMI: finished detection, total results=%u", results->length);
-    return NULL;
+    return nullptr;
 }

@@ -13,18 +13,18 @@ bool ffPrintUsers(FFUsersOptions* options) {
     const char* error = ffDetectUsers(options, &users);
 
     if (error) {
-        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Users), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (users.length == 0) {
-        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Unable to detect any users");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Users), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Unable to detect any users");
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
         if (options->compact) {
-            ffPrintLogoAndKey(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Users), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
             for (uint32_t i = 0; i < users.length; ++i) {
@@ -39,7 +39,7 @@ bool ffPrintUsers(FFUsersOptions* options) {
             for (uint32_t i = 0; i < users.length; ++i) {
                 FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
 
-                ffPrintLogoAndKey(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Users), users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
                 FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateCopy(&user->name);
                 if (user->hostName.length) {
@@ -71,7 +71,7 @@ bool ffPrintUsers(FFUsersOptions* options) {
 
             FFTimeGetAgeResult age = ffTimeGetAge(user->loginTime, ffTimeGetNow());
 
-            FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Users), users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                                                       FF_ARG(user->name, "name"),
                                                                                                                                                       FF_ARG(user->hostName, "host-name"),
                                                                                                                                                       FF_ARG(user->sessionName, "session-name"),
@@ -121,7 +121,7 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Users), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -180,8 +180,30 @@ void ffDestroyUsersOptions(FFUsersOptions* options) {
 }
 
 FFModuleBaseInfo ffUsersModuleInfo = {
-    .name = FF_USERS_MODULE_NAME,
+    .name = "Users",
     .description = "Print users who are currently logged in",
+    .displayName = {
+        .en = "Users",
+        .ar = "المستخدمون",
+        .cs = "Uživatelé",
+        .de = "Benutzer",
+        .es = "Usuarios",
+        .fr = "Utilisateurs",
+        .gl = "Usuarios",
+        .he = "משתמשים",
+        .id = "Pengguna",
+        .it = "Utenti",
+        .ja = "ユーザー",
+        .ko = "사용자",
+        .pl = "Użytkownicy",
+        .pt = "Usuários",
+        .ru = "Пользователи",
+        .tr = "Kullanıcılar",
+        .uk = "Користувачі",
+        .vi = "Người dùng",
+        .zh_CN = "用户",
+        .zh_TW = "使用者",
+    },
     .initOptions = (void*) ffInitUsersOptions,
     .destroyOptions = (void*) ffDestroyUsersOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,
@@ -202,5 +224,6 @@ FFModuleBaseInfo ffUsersModuleInfo = {
         { "Years integer after login", "years" },
         { "Days of year after login", "days-of-year" },
         { "Years fraction after login", "years-fraction" },
-    }))
+    })),
+    .defaultOrder = 57,
 };

@@ -13,7 +13,7 @@ typedef struct WGLData {
     FF_LIBRARY_SYMBOL(wglDeleteContext)
 } WGLData;
 
-void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
+void ffOpenGLHandleResult(FFOpenGLResult* result, typeof(&glGetString) ffglGetString);
 
 static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HDC hdc, HGLRC context) {
     if (wglData->ffwglMakeCurrent(hdc, context) == FALSE) {
@@ -21,16 +21,16 @@ static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HD
     }
     ffOpenGLHandleResult(result, wglData->ffglGetString);
     ffStrbufSetStatic(&result->library, "WGL 1.0");
-    if (wglData->ffwglMakeCurrent(NULL, NULL) == FALSE) {
-        return "wglMakeCurrent(NULL, NULL) failed";
+    if (wglData->ffwglMakeCurrent(nullptr, nullptr) == FALSE) {
+        return "wglMakeCurrent(nullptr, nullptr) failed";
     }
-    return NULL;
+    return nullptr;
 }
 
 static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result, HWND hWnd) {
     HDC hdc = GetDC(hWnd);
 
-    if (hdc == NULL) {
+    if (hdc == nullptr) {
         return "GetDC() failed";
     }
 
@@ -55,7 +55,7 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
     }
 
     HGLRC context = wglData->ffwglCreateContext(hdc);
-    if (context == NULL) {
+    if (context == nullptr) {
         ReleaseDC(hWnd, hdc);
         return "wglCreateContext() failed";
     }
@@ -91,7 +91,7 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result) {
         return "RegisterClassW() failed";
     }
 
-    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, NULL, NULL, hInstance, NULL);
+    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, nullptr, nullptr, hInstance, nullptr);
     if (!hWnd) {
         return "CreateWindowW() failed";
     }

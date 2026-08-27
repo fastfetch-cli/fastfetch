@@ -11,7 +11,7 @@
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
     AudioDeviceID mainDeviceId;
     UInt32 dataSize = sizeof(mainDeviceId);
-    if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &mainDeviceId) != kAudioHardwareNoError) {
+    if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &mainDeviceId) != kAudioHardwareNoError) {
         return "AudioObjectGetPropertyData(kAudioHardwarePropertyDefaultOutputDevice) failed";
     }
 
@@ -21,7 +21,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         dataSize = sizeof(mainDeviceId);
     } else {
         dataSize = sizeof(deviceIds);
-        if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &deviceIds) != kAudioHardwareNoError) {
+        if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &deviceIds) != kAudioHardwareNoError) {
             return "AudioObjectGetPropertyData(kAudioHardwarePropertyDevices) failed";
         }
     }
@@ -30,16 +30,16 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         AudioDeviceID deviceId = deviceIds[index];
 
         // Ignore input devices
-        if (AudioObjectGetPropertyDataSize(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyStreams, kAudioObjectPropertyScopeInput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize) == kAudioHardwareNoError && dataSize > 0) {
+        if (AudioObjectGetPropertyDataSize(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyStreams, kAudioObjectPropertyScopeInput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize) == kAudioHardwareNoError && dataSize > 0) {
             continue;
         }
 
         uint32_t dataSource;
         dataSize = sizeof(dataSource);
-        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDataSource, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &dataSource) == kAudioHardwareNoError && dataSource == 'hdpn') {
+        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDataSource, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &dataSource) == kAudioHardwareNoError && dataSource == 'hdpn') {
             uint32_t connected;
             dataSize = sizeof(connected);
-            if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyJackIsConnected, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &connected) == kAudioHardwareNoError) {
+            if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyJackIsConnected, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &connected) == kAudioHardwareNoError) {
                 if (!connected) {
                     continue;
                 }
@@ -48,7 +48,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
 
         uint32_t active = true;
         dataSize = sizeof(active);
-        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDeviceIsAlive, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &active) == kAudioHardwareNoError) {
+        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDeviceIsAlive, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &active) == kAudioHardwareNoError) {
             if ((options->soundType & FF_SOUND_TYPE_ACTIVE) && !active) {
                 continue;
             }
@@ -62,17 +62,17 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         ffStrbufInit(&device->name);
         ffStrbufInitStatic(&device->platformApi, "Core Audio");
 
-        FF_CFTYPE_AUTO_RELEASE CFStringRef uid = NULL;
+        FF_CFTYPE_AUTO_RELEASE CFStringRef uid = nullptr;
         dataSize = sizeof(uid);
-        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDeviceUID, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &uid) == kAudioHardwareNoError) {
+        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyDeviceUID, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &uid) == kAudioHardwareNoError) {
             ffCfStrGetString(uid, &device->identifier);
         } else {
             ffStrbufAppendF(&device->identifier, "ID-%u", (unsigned) deviceId);
         }
 
-        FF_CFTYPE_AUTO_RELEASE CFStringRef name = NULL;
+        FF_CFTYPE_AUTO_RELEASE CFStringRef name = nullptr;
         dataSize = sizeof(name);
-        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioObjectPropertyName, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &name) == kAudioHardwareNoError) {
+        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioObjectPropertyName, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &name) == kAudioHardwareNoError) {
             ffCfStrGetString(name, &device->name);
         } else {
             ffStrbufSet(&device->name, &device->identifier);
@@ -80,7 +80,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
 
         uint32_t muted;
         dataSize = sizeof(muted);
-        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyMute, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &muted) != kAudioHardwareNoError) {
+        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyMute, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &muted) != kAudioHardwareNoError) {
             muted = false; // Device may not support volume control
         }
 
@@ -89,17 +89,17 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         } else {
             float volume;
             dataSize = sizeof(volume);
-            if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, &volume) == kAudioHardwareNoError) {
+            if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &volume) == kAudioHardwareNoError) {
                 device->volume = (uint8_t) (volume * 100 + 0.5);
             } else {
                 // Try detecting volume from channels
                 uint32_t channels[2];
                 dataSize = sizeof(channels);
-                if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyPreferredChannelsForStereo, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, NULL, &dataSize, channels) == kAudioHardwareNoError) {
+                if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyPreferredChannelsForStereo, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, channels) == kAudioHardwareNoError) {
                     dataSize = sizeof(volume);
-                    if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, channels[0] }, 0, NULL, &dataSize, &volume) == kAudioHardwareNoError) {
+                    if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, channels[0] }, 0, nullptr, &dataSize, &volume) == kAudioHardwareNoError) {
                         float temp;
-                        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, channels[1] }, 0, NULL, &dataSize, &temp) == kAudioHardwareNoError) {
+                        if (AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) { kAudioDevicePropertyVolumeScalar, kAudioObjectPropertyScopeOutput, channels[1] }, 0, nullptr, &dataSize, &temp) == kAudioHardwareNoError) {
                             device->volume = (uint8_t) ((volume + temp) / 2 * 100 + 0.5);
                         }
                     }
@@ -108,5 +108,5 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         }
     }
 
-    return NULL;
+    return nullptr;
 }

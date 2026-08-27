@@ -19,7 +19,7 @@
     #include <IOKit/IOKitLib.h>
 #endif
 
-typedef struct FFSmbiosBios {
+typedef struct [[gnu::packed]] FFSmbiosBios {
     FFSmbiosHeader Header;
 
     uint8_t Vendor;                      // string
@@ -38,7 +38,7 @@ typedef struct FFSmbiosBios {
 
     // 3.1+
     uint16_t ExtendedBiosRomSize; // bit field
-} FF_A_PACKED FFSmbiosBios;
+} FFSmbiosBios;
 
 static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
     "FFSmbiosBios: Wrong struct alignment");
@@ -71,7 +71,7 @@ const char* ffDetectBios(FFBiosResult* bios) {
     // Same as GetFirmwareType, but support (?) Windows 7
     // https://ntdoc.m417z.com/system_information_class
     SYSTEM_BOOT_ENVIRONMENT_INFORMATION sbei;
-    if (NT_SUCCESS(NtQuerySystemInformation(SystemBootEnvironmentInformation, &sbei, sizeof(sbei), NULL))) {
+    if (NT_SUCCESS(NtQuerySystemInformation(SystemBootEnvironmentInformation, &sbei, sizeof(sbei), nullptr))) {
         switch (sbei.FirmwareType) {
             case FirmwareTypeBios:
                 ffStrbufSetStatic(&bios->type, "BIOS");
@@ -86,7 +86,7 @@ const char* ffDetectBios(FFBiosResult* bios) {
 #elif __sun
     di_node_t rootNode = di_init("/", DINFOPROP);
     if (rootNode != DI_NODE_NIL) {
-        char* efiVersion = NULL;
+        char* efiVersion = nullptr;
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, rootNode, "efi-version", &efiVersion) > 0) {
             ffStrbufSetStatic(&bios->type, "UEFI");
         } else {
@@ -103,5 +103,5 @@ const char* ffDetectBios(FFBiosResult* bios) {
     ffStrbufSetStatic(&bios->type, deviceEfi ? "UEFI" : "BIOS");
 #endif
 
-    return NULL;
+    return nullptr;
 }

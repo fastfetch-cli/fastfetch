@@ -6,7 +6,7 @@
 #include "common/debug.h"
 
 // Helper function to convert ADL status code to string
-FF_A_UNUSED static const char* ffAdlStatusToString(int status) {
+[[maybe_unused]] static const char* ffAdlStatusToString(int status) {
     switch (status) {
 #define FF_ADL_STATUS_CASE(name) \
     case name:                   \
@@ -72,7 +72,7 @@ static void shutdownAdl() {
     if (adlData.apiHandle) {
         FF_DEBUG("Destroying ADL context");
         adlData.ffADL2_Main_Control_Destroy(adlData.apiHandle);
-        adlData.apiHandle = NULL;
+        adlData.apiHandle = nullptr;
     }
 }
 
@@ -110,7 +110,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         }
 
         atexit(shutdownAdl);
-        atiadl = NULL; // don't close atiadl
+        atiadl = nullptr; // don't close atiadl
         FF_DEBUG("ADL initialization complete");
     }
 
@@ -119,7 +119,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         return "ffADL2_Main_Control_Create() failed";
     }
 
-    FF_AUTO_FREE AdapterInfo* devices = NULL;
+    FF_AUTO_FREE AdapterInfo* devices = nullptr;
     int numDevices = 0;
     int adapterResult = adlData.ffADL2_Adapter_AdapterInfoX3_Get(adlData.apiHandle, -1, &numDevices, &devices);
     FF_DEBUG("ADL2_Adapter_AdapterInfoX3_Get returned %s (%d)", ffAdlStatusToString(adapterResult), adapterResult);
@@ -131,7 +131,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         return "ffADL2_Adapter_AdapterInfoX3_Get() failed";
     }
 
-    const AdapterInfo* device = NULL;
+    const AdapterInfo* device = nullptr;
     for (int iDev = 0; iDev < numDevices; iDev++) {
         if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID) {
             FF_DEBUG("Checking device %d: bus=%d, device=%d, func=%d against requested bus=%u, device=%u, func=%u",
@@ -492,5 +492,5 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         return "Unknown Overdrive version";
     }
     FF_DEBUG("AMD GPU detection complete - returning success");
-    return NULL;
+    return nullptr;
 }

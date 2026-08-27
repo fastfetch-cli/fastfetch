@@ -4,7 +4,7 @@
 
 #include <utmp.h>
 
-const char* ffDetectUsers(FF_A_UNUSED FFUsersOptions* options, FFlist* users) {
+const char* ffDetectUsers([[maybe_unused]] FFUsersOptions* options, FFlist* users) {
     FF_AUTO_CLOSE_FILE FILE* fp = fopen(_PATH_UTMP, "r");
     if (!fp) {
         return "fopen(_PATH_UTMP, r) failed";
@@ -35,5 +35,5 @@ next:
         user->loginTime = (uint64_t) n.ut_time * 1000;
     }
 
-    return NULL;
+    return nullptr;
 }

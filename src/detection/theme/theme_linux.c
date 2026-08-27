@@ -56,5 +56,5 @@ const char* ffDetectTheme(FFThemeResult* result) {
         ffStrbufAppendS(&result->theme1, " [Qt]");
     }
 
-    return NULL;
+    return nullptr;
 }

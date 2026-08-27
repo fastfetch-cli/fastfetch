@@ -1,5 +1,5 @@
 #include "cursor.h"
 
-void ffDetectCursor(FF_A_UNUSED FFCursorResult* result) {
+void ffDetectCursor([[maybe_unused]] FFCursorResult* result) {
     ffStrbufInitS(&result->error, "Not supported on this platform");
 }

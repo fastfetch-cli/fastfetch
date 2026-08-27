@@ -50,20 +50,20 @@
 #define FF_WM_PROTOCOL_WAYLAND "Wayland"
 #define FF_WM_PROTOCOL_SURFACEFLINGER "SurfaceFlinger"
 
-typedef enum FF_A_PACKED FFDisplayType {
+typedef enum FFDisplayType: uint8_t {
     FF_DISPLAY_TYPE_UNKNOWN,
     FF_DISPLAY_TYPE_BUILTIN,
     FF_DISPLAY_TYPE_EXTERNAL,
 } FFDisplayType;
 
-typedef enum FF_A_PACKED FFDisplayHdrStatus {
+typedef enum FFDisplayHdrStatus: uint8_t {
     FF_DISPLAY_HDR_STATUS_UNKNOWN,
     FF_DISPLAY_HDR_STATUS_UNSUPPORTED,
     FF_DISPLAY_HDR_STATUS_SUPPORTED,
     FF_DISPLAY_HDR_STATUS_ENABLED,
 } FFDisplayHdrStatus;
 
-typedef enum FF_A_PACKED FFDisplayVrrStatus {
+typedef enum FFDisplayVrrStatus: uint8_t {
     FF_DISPLAY_DRR_STATUS_UNKNOWN,
     FF_DISPLAY_DRR_STATUS_DISABLED,
     FF_DISPLAY_DRR_STATUS_ENABLED,

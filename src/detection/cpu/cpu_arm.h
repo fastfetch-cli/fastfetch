@@ -221,7 +221,7 @@ static const char* armPartId2name(uint32_t partId) {
         case 0xd90:
             return "C1-Premium";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -234,7 +234,7 @@ static const char* brcmPartId2name(uint32_t partId) {
         case 0x516:
             return "ThunderX2";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -245,7 +245,7 @@ static const char* decPartId2name(uint32_t partId) {
         case 0xa11:
             return "SA1100";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -278,7 +278,7 @@ static const char* caviumPartId2name(uint32_t partId) {
         case 0x0b8:
             return "ThunderX3-T110";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -287,7 +287,7 @@ static const char* apmPartId2name(uint32_t partId) {
         case 0x000:
             return "X-Gene";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -328,7 +328,7 @@ static const char* qcomPartId2name(uint32_t partId) {
         case 0xc01:
             return "Saphira";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -343,7 +343,7 @@ static const char* samsungPartId2name(uint32_t partId) {
         case 0x004:
             return "Exynos-M5";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -358,7 +358,7 @@ static const char* nvidiaPartId2name(uint32_t partId) {
         case 0x010:
             return "Olympus";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -371,7 +371,7 @@ static const char* marvellPartId2name(uint32_t partId) {
         case 0x584:
             return "PJ4B-MP";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -456,7 +456,7 @@ static const char* applePartId2name(uint32_t partId) {
         case 0x049:
             return "Everest-M3-Max";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -467,7 +467,7 @@ static const char* faradayPartId2name(uint32_t partId) {
         case 0x626:
             return "FA626";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -516,7 +516,7 @@ static const char* intelPartId2name(uint32_t partId) {
         case 0xc12:
             return "IPX1200";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -527,7 +527,7 @@ static const char* fujitsuPartId2name(uint32_t partId) {
         case 0x003:
             return "MONAKA";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -542,7 +542,7 @@ static const char* hisiPartId2name(uint32_t partId) {
         case 0xd41:
             return "Cortex-A77"; /* HiSilicon uses this ID though advertises A77 */
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -553,7 +553,7 @@ static const char* amperePartId2name(uint32_t partId) {
         case 0xac4:
             return "Ampere-1a";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -574,7 +574,7 @@ static const char* ftPartId2name(uint32_t partId) {
         case 0x862:
             return "FTC862";
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -583,6 +583,6 @@ static const char* msPartId2name(uint32_t partId) {
         case 0xd49:
             return "Azure-Cobalt-100";
         default:
-            return NULL;
+            return nullptr;
     }
 }

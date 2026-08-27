@@ -16,11 +16,11 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 const char* ffDetectWifi(FFlist* result) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    if (ffProcessAppendStdOut(&buffer, (char* const[]) { FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, NULL })) {
+    if (ffProcessAppendStdOut(&buffer, (char* const[]) { FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, nullptr })) {
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
     }
 
-    yyjson_doc* FF_A_CLEANUP(wrapYyjsonFree) doc = yyjson_read_opts(buffer.chars, buffer.length, 0, NULL, NULL);
+    [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(buffer.chars, buffer.length, 0, nullptr, nullptr);
     if (!doc) {
         return "Failed to parse wifi connection info";
     }
@@ -42,16 +42,17 @@ const char* ffDetectWifi(FFlist* result) {
     item->conn.rxRate = -DBL_MAX;
     item->conn.txRate = -DBL_MAX;
     item->conn.channel = 0;
+    item->conn.channelWidth = 0;
     item->conn.frequency = 0;
 
     ffStrbufAppendJsonVal(&item->inf.status, yyjson_obj_get(root, "supplicant_state"));
     if (!item->inf.status.length) {
         ffStrbufAppendS(&item->inf.status, "Unknown");
-        return NULL;
+        return nullptr;
     }
 
     if (!ffStrbufEqualS(&item->inf.status, "COMPLETED")) {
-        return NULL;
+        return nullptr;
     }
 
     double rssi = yyjson_get_num(yyjson_obj_get(root, "rssi"));
@@ -65,5 +66,5 @@ const char* ffDetectWifi(FFlist* result) {
     item->conn.txRate = yyjson_get_num(yyjson_obj_get(root, "link_speed_mbps"));
     item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
 
-    return NULL;
+    return nullptr;
 }

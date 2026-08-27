@@ -6,11 +6,11 @@
 static inline const char* ffFindFileName(const char* file) {
     const char* lastSlash = __builtin_strrchr(file, '/');
 #ifdef _WIN32
-    if (lastSlash == NULL) {
+    if (lastSlash == nullptr) {
         lastSlash = __builtin_strrchr(file, '\\');
     }
 #endif
-    if (lastSlash != NULL) {
+    if (lastSlash != nullptr) {
         return lastSlash + 1;
     }
     return file;

@@ -13,7 +13,7 @@ const char* ffDetectBios(FFBiosResult* bios) {
         return "IODeviceTree:/rom not found";
     }
 
-    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceRomProps = NULL;
+    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceRomProps = nullptr;
     if (IORegistryEntryCreateCFProperties(deviceRom, &deviceRomProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
         return "IORegistryEntryCreateCFProperties(deviceRom) failed";
     }
@@ -54,5 +54,5 @@ const char* ffDetectBios(FFBiosResult* bios) {
     }
 #endif
 
-    return NULL;
+    return nullptr;
 }

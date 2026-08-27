@@ -11,7 +11,7 @@ const char* ffDetectChassis(FFChassisResult* result) {
         .uuid = ffStrbufCreate(),
         .vendor = ffStrbufCreate(),
     };
-    if (ffDetectHost(&host) != NULL) {
+    if (ffDetectHost(&host) != nullptr) {
         return "Failed to detect host";
     }
 
@@ -36,5 +36,5 @@ const char* ffDetectChassis(FFChassisResult* result) {
     ffStrbufDestroy(&host.uuid);
     ffStrbufDestroy(&host.vendor);
 
-    return NULL;
+    return nullptr;
 }

@@ -10,7 +10,7 @@
 #include <cfgmgr32.h>
 
 static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice, FFlist* result, FFPhysicalDiskOptions* options) {
-    FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hDevice == INVALID_HANDLE_VALUE) {
         return "CreateFileW() failed";
     }
@@ -19,30 +19,30 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
     FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
-    const char* interconnect = NULL;
+    const char* interconnect = nullptr;
     uint64_t size = 0;
     {
         alignas(DISK_GEOMETRY_EX) uint8_t dgeBuffer[4096];
         if (DeviceIoControl(
                 hDevice,
                 IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
-                NULL,
+                nullptr,
                 0,
                 dgeBuffer,
                 sizeof(dgeBuffer),
                 &retSize,
-                NULL)) {
+                nullptr)) {
             const DISK_GEOMETRY_EX* dge = (const DISK_GEOMETRY_EX*) dgeBuffer;
             size = (uint64_t) dge->DiskSize.QuadPart;
         } else if (DeviceIoControl(
                        hDevice,
                        IOCTL_DISK_GET_DRIVE_GEOMETRY,
-                       NULL,
+                       nullptr,
                        0,
                        dgeBuffer,
                        sizeof(dgeBuffer),
                        &retSize,
-                       NULL) &&
+                       nullptr) &&
             retSize >= sizeof(DISK_GEOMETRY)) {
             const DISK_GEOMETRY* dg = (const DISK_GEOMETRY*) dgeBuffer;
             size = (uint64_t) dg->BytesPerSector * dg->SectorsPerTrack * dg->TracksPerCylinder * (uint64_t) dg->Cylinders.QuadPart;
@@ -91,7 +91,7 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         type |= FF_PHYSICALDISK_TYPE_UNUSED;
     }
 
-    const STORAGE_DEVICE_DESCRIPTOR* sdd = NULL;
+    const STORAGE_DEVICE_DESCRIPTOR* sdd = nullptr;
     alignas(STORAGE_DEVICE_DESCRIPTOR) uint8_t sddBuffer[4096];
     if (!interconnect) {
         if (DeviceIoControl(
@@ -105,7 +105,7 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
                 &sddBuffer,
                 sizeof(sddBuffer),
                 &retSize,
-                NULL) ||
+                nullptr) ||
             retSize == 0) {
             sdd = (const STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
 
@@ -236,23 +236,23 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         if (DeviceIoControl(
                 hDevice,
                 IOCTL_STORAGE_GET_MEDIA_TYPES_EX,
-                NULL,
+                nullptr,
                 0,
                 gmt,
                 sizeof(buffer),
                 &retSize,
-                NULL) &&
+                nullptr) &&
             gmt->MediaInfoCount > 0) {
             // DiskInfo and RemovableDiskInfo have the same structures. TapeInfo doesn't.
             if (gmt->DeviceType != FILE_DEVICE_TAPE) {
-                __auto_type diskInfo = &gmt->MediaInfo[0].DeviceSpecific.DiskInfo;
+                auto diskInfo = &gmt->MediaInfo[0].DeviceSpecific.DiskInfo;
                 if (diskInfo->MediaCharacteristics & MEDIA_READ_ONLY) {
                     device->type |= FF_PHYSICALDISK_TYPE_READONLY;
                 } else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE) {
                     device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
                 }
             } else {
-                __auto_type tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
+                auto tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
                 if (tapeInfo->MediaCharacteristics & MEDIA_READ_ONLY) {
                     device->type |= FF_PHYSICALDISK_TYPE_READONLY;
                 } else if (tapeInfo->MediaCharacteristics & MEDIA_READ_WRITE) {
@@ -275,7 +275,7 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
                 &dspd,
                 sizeof(dspd),
                 &retSize,
-                NULL) &&
+                nullptr) &&
             retSize == sizeof(dspd)) {
             device->type |= dspd.IncursSeekPenalty ? FF_PHYSICALDISK_TYPE_HDD : FF_PHYSICALDISK_TYPE_SSD;
         }
@@ -293,14 +293,14 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
                     &stdd,
                     sizeof(stdd),
                     &retSize,
-                    NULL) &&
+                    nullptr) &&
                 retSize == sizeof(stdd)) {
                 device->temperature = stdd.TemperatureInfo[0].Temperature;
             }
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static void detectPhysicalDisksByInterfaceClass(const char* type, const GUID* interfaceClassGuid, FFlist* result, FFPhysicalDiskOptions* options) {
@@ -308,20 +308,20 @@ static void detectPhysicalDisksByInterfaceClass(const char* type, const GUID* in
     if (CM_Get_Device_Interface_List_SizeW(
             &cchDeviceInterfaces,
             (LPGUID) interfaceClassGuid,
-            NULL,
+            nullptr,
             CM_GET_DEVICE_INTERFACE_LIST_PRESENT) != CR_SUCCESS ||
         cchDeviceInterfaces <= 1) {
         return;
     }
 
-    wchar_t* FF_AUTO_FREE mszDeviceInterfaces = (wchar_t*) malloc(cchDeviceInterfaces * sizeof(wchar_t));
+    FF_AUTO_FREE wchar_t* mszDeviceInterfaces = (wchar_t*) malloc(cchDeviceInterfaces * sizeof(wchar_t));
     if (!mszDeviceInterfaces) {
         return;
     }
 
     if (CM_Get_Device_Interface_ListW(
             (LPGUID) interfaceClassGuid,
-            NULL,
+            nullptr,
             mszDeviceInterfaces,
             cchDeviceInterfaces,
             CM_GET_DEVICE_INTERFACE_LIST_PRESENT) != CR_SUCCESS) {
@@ -331,8 +331,8 @@ static void detectPhysicalDisksByInterfaceClass(const char* type, const GUID* in
     // MULTI_SZ: "str1\0str2\0...\0\0"
     for (const wchar_t* p = mszDeviceInterfaces; *p; p += wcslen(p) + 1) {
         FF_DEBUG("Probing %s: %ls", type, p);
-        FF_A_UNUSED const char* error = detectPhysicalDisk(type, p, result, options);
-        if (error == NULL) {
+        [[maybe_unused]] const char* error = detectPhysicalDisk(type, p, result, options);
+        if (error == nullptr) {
             FF_DEBUG("Detected device \"%s\"", FF_LIST_LAST(FFPhysicalDiskResult, *result)->name.chars);
         } else {
             FF_DEBUG("Failed to detect device %s: %s", type, error);
@@ -345,5 +345,5 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
     detectPhysicalDisksByInterfaceClass("Disk", &GUID_DEVINTERFACE_DISK, result, options);
     detectPhysicalDisksByInterfaceClass("CD-ROM", &GUID_DEVINTERFACE_CDROM, result, options);
     detectPhysicalDisksByInterfaceClass("Tape", &GUID_DEVINTERFACE_TAPE, result, options);
-    return NULL;
+    return nullptr;
 }

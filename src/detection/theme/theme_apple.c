@@ -18,5 +18,5 @@ const char* ffDetectTheme(FFThemeResult* result) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

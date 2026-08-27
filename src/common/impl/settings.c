@@ -19,10 +19,10 @@ typedef struct GVariantGetters {
 static FFvariant getGVariantValue(GVariant* variant, FFvarianttype type, const GVariantGetters* variantGetters) {
     FFvariant result;
 
-    if (variant == NULL) {
+    if (variant == nullptr) {
         result = FF_VARIANT_NULL;
     } else if (type == FF_VARIANT_TYPE_STRING) {
-        result = (FFvariant) { .strValue = variantGetters->ffg_variant_dup_string(variant, NULL) }; // Dup string, so that variant itself can be freed
+        result = (FFvariant) { .strValue = variantGetters->ffg_variant_dup_string(variant, nullptr) }; // Dup string, so that variant itself can be freed
     } else if (type == FF_VARIANT_TYPE_BOOL) {
         result = (FFvariant) { .boolValue = (bool) variantGetters->ffg_variant_get_boolean(variant), .boolValueSet = true };
     } else if (type == FF_VARIANT_TYPE_INT) {
@@ -57,27 +57,27 @@ static const GSettingsData* getGSettingsData(void) {
 
     if (!data.inited) {
         data.inited = true;
-        FF_LIBRARY_LOAD(libgsettings, NULL, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_lookup, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_has_key, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_new_full, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_value, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_user_value, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_default_value, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_get_default, NULL)
+        FF_LIBRARY_LOAD(libgsettings, nullptr, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_lookup, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_has_key, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_new_full, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_value, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_user_value, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_default_value, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_get_default, nullptr)
 
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_dup_string, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_boolean, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_int32, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_unref, NULL);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_dup_string, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_boolean, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_int32, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_unref, nullptr);
 
         data.schemaSource = data.ffg_settings_schema_source_get_default();
         if (data.schemaSource) {
-            libgsettings = NULL;
+            libgsettings = nullptr;
         }
     }
     if (!data.schemaSource) {
-        return NULL;
+        return nullptr;
     }
 
     return &data;
@@ -85,12 +85,12 @@ static const GSettingsData* getGSettingsData(void) {
 
 FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type) {
     const GSettingsData* data = getGSettingsData();
-    if (data == NULL) {
+    if (data == nullptr) {
         return FF_VARIANT_NULL;
     }
 
     GSettingsSchema* schema = data->ffg_settings_schema_source_lookup(data->schemaSource, schemaName, true);
-    if (schema == NULL) {
+    if (schema == nullptr) {
         return FF_VARIANT_NULL;
     }
 
@@ -98,18 +98,18 @@ FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const
         return FF_VARIANT_NULL;
     }
 
-    GSettings* settings = data->ffg_settings_new_full(schema, NULL, path);
-    if (settings == NULL) {
+    GSettings* settings = data->ffg_settings_new_full(schema, nullptr, path);
+    if (settings == nullptr) {
         return FF_VARIANT_NULL;
     }
 
     GVariant* variant = data->ffg_settings_get_value(settings, key);
-    if (variant != NULL) {
+    if (variant != nullptr) {
         return getGVariantValue(variant, type, &data->variantGetters);
     }
 
     variant = data->ffg_settings_get_user_value(settings, key);
-    if (variant != NULL) {
+    if (variant != nullptr) {
         return getGVariantValue(variant, type, &data->variantGetters);
     }
 
@@ -141,21 +141,21 @@ static const DConfData* getDConfData(void) {
     if (!data.inited) {
         data.inited = true;
 
-        FF_LIBRARY_LOAD(libdconf, NULL, "libdconf" FF_LIBRARY_EXTENSION, 2);
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_read_full, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_new, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_dup_string, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_boolean, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_int32, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_unref, NULL)
+        FF_LIBRARY_LOAD(libdconf, nullptr, "libdconf" FF_LIBRARY_EXTENSION, 2);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_read_full, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_new, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_dup_string, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_boolean, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_int32, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_unref, nullptr)
 
         data.client = data.ffdconf_client_new();
         if (data.client) {
-            libdconf = NULL;
+            libdconf = nullptr;
         }
     }
     if (!data.client) {
-        return NULL;
+        return nullptr;
     }
 
     return &data;
@@ -163,21 +163,21 @@ static const DConfData* getDConfData(void) {
 
 FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type) {
     const DConfData* data = getDConfData();
-    if (data == NULL) {
+    if (data == nullptr) {
         return FF_VARIANT_NULL;
     }
 
-    GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, NULL);
-    if (variant != NULL) {
+    GVariant* variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_FLAGS_NONE, nullptr);
+    if (variant != nullptr) {
         return getGVariantValue(variant, type, &data->variantGetters);
     }
 
-    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_USER_VALUE, NULL);
-    if (variant != NULL) {
+    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_USER_VALUE, nullptr);
+    if (variant != nullptr) {
         return getGVariantValue(variant, type, &data->variantGetters);
     }
 
-    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, NULL);
+    variant = data->ffdconf_client_read_full(data->client, key, DCONF_READ_DEFAULT_VALUE, nullptr);
     return getGVariantValue(variant, type, &data->variantGetters);
 }
 #else  // FF_HAVE_DCONF
@@ -192,7 +192,7 @@ FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaNa
 
     if (
         (type == FF_VARIANT_TYPE_BOOL && gsettings.boolValueSet) ||
-        (type != FF_VARIANT_TYPE_BOOL && gsettings.strValue != NULL)) {
+        (type != FF_VARIANT_TYPE_BOOL && gsettings.strValue != nullptr)) {
         return gsettings;
     }
 
@@ -204,7 +204,7 @@ FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaNa
 
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
-    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL) {
+    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != nullptr) {
         return FF_VARIANT_NULL;
     }
 
@@ -260,7 +260,7 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
 
 FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* propertyPrefix, FFvarianttype type, void* data, FFTestXfconfPropCallback* cb) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
-    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL) {
+    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != nullptr) {
         return FF_VARIANT_NULL;
     }
 
@@ -361,20 +361,20 @@ static const SQLiteData* getSQLiteData(void) {
 
     if (!data.inited) {
         data.inited = true;
-        FF_LIBRARY_LOAD(libsqlite, NULL, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_open_v2, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_prepare_v2, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_step, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_data_count, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_int, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_text, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_finalize, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_close, NULL)
-        libsqlite = NULL;
+        FF_LIBRARY_LOAD(libsqlite, nullptr, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_open_v2, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_prepare_v2, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_step, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_data_count, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_int, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_text, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_finalize, nullptr)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_close, nullptr)
+        libsqlite = nullptr;
     }
 
     if (!data.ffsqlite3_close) {
-        return NULL;
+        return nullptr;
     }
 
     return &data;
@@ -386,17 +386,17 @@ int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
     }
 
     const SQLiteData* data = getSQLiteData();
-    if (data == NULL) {
+    if (data == nullptr) {
         return 0;
     }
 
     sqlite3* db;
-    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, NULL) != SQLITE_OK) {
+    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, nullptr) != SQLITE_OK) {
         return 0;
     }
 
     sqlite3_stmt* stmt;
-    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, NULL) != SQLITE_OK) {
+    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, nullptr) != SQLITE_OK) {
         data->ffsqlite3_close(db);
         return 0;
     }
@@ -421,17 +421,17 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
     }
 
     const SQLiteData* data = getSQLiteData();
-    if (data == NULL) {
+    if (data == nullptr) {
         return false;
     }
 
     sqlite3* db;
-    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
+    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, nullptr) != SQLITE_OK) {
         return false;
     }
 
     sqlite3_stmt* stmt;
-    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, NULL) != SQLITE_OK) {
+    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, nullptr) != SQLITE_OK) {
         data->ffsqlite3_close(db);
         return false;
     }
@@ -450,12 +450,10 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
     return true;
 }
 #else  // FF_HAVE_SQLITE3
-int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
-    FF_UNUSED(dbPath, query)
+int ffSettingsGetSQLite3Int(const char*, const char*) {
     return 0;
 }
-bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result) {
-    FF_UNUSED(dbPath, query, result)
+bool ffSettingsGetSQLite3String(const char*, const char*, FFstrbuf*) {
     return false;
 }
 #endif // FF_HAVE_SQLITE3
@@ -514,12 +512,12 @@ typedef struct E_Config {
     #define FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, struct_type, member, type)                                                                                 \
         do {                                                                                                                                                 \
             struct_type ___ett;                                                                                                                              \
-            ffeet_data_descriptor_element_add(edd, #member, type, EET_G_UNKNOWN, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ NULL, NULL); \
+            ffeet_data_descriptor_element_add(edd, #member, type, EET_G_UNKNOWN, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ nullptr, nullptr); \
         } while (0)
     #define FF_EET_DATA_DESCRIPTOR_ADD_LIST(edd, struct_type, member, subtype)                                                                                       \
         do {                                                                                                                                                         \
             struct_type ___ett;                                                                                                                                      \
-            ffeet_data_descriptor_element_add(edd, #member, EET_T_UNKNOW, EET_G_LIST, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ NULL, subtype); \
+            ffeet_data_descriptor_element_add(edd, #member, EET_T_UNKNOW, EET_G_LIST, (char*) (&(___ett.member)) - (char*) (&(___ett)), 0, /* 0,  */ nullptr, subtype); \
         } while (0)
 
 bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
@@ -603,7 +601,7 @@ bool ffSettingsGetEnlightenmentProperty(ffEnlightenmentSettings* result) {
     return !!parsed;
 }
 #else
-bool ffSettingsGetEnlightenmentProperty(FF_A_UNUSED ffEnlightenmentSettings* result) {
+bool ffSettingsGetEnlightenmentProperty([[maybe_unused]] ffEnlightenmentSettings* result) {
     return false;
 }
 #endif

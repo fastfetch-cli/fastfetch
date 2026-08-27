@@ -48,7 +48,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result) {
     size_t size = 4096;
     ffStrbufEnsureFixedLengthFree(&result->wmProcessName, (uint32_t) size);
 
-    if (sysctl((int[]) { CTL_KERN, KERN_PROC, KERN_PROC_ARGS, ucred.cr_pid }, 4, result->wmProcessName.chars, &size, NULL, 0) != 0) {
+    if (sysctl((int[]) { CTL_KERN, KERN_PROC, KERN_PROC_ARGS, ucred.cr_pid }, 4, result->wmProcessName.chars, &size, nullptr, 0) != 0) {
         return false;
     }
     result->wmProcessName.length = (uint32_t) size - 1;
@@ -82,17 +82,17 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
     if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wl_output_interface.name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_GLOBAL;
-        if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL) {
+        if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != nullptr) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, kde_output_device_registry_v2_interface.name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_REGISTRY;
-        if (ffWaylandHandleKdeOutputRegistry(wldata, registry, name, version) != NULL) {
+        if (ffWaylandHandleKdeOutputRegistry(wldata, registry, name, version) != nullptr) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED) && ffStrEquals(interface, kde_output_device_v2_interface.name)) {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE_DEPRECATED;
-        if (ffWaylandHandleKdeOutput(wldata, registry, name, version) != NULL) {
+        if (ffWaylandHandleKdeOutput(wldata, registry, name, version) != nullptr) {
             wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
         }
     } else if ((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name)) {
@@ -102,19 +102,19 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     }
 }
 
-static FF_A_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* wldata) {
+[[maybe_unused]] static bool matchDrmConnector(const char* connName, WaylandDisplay* wldata) {
     // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
     // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
     // However I can't find a better method to get the edid data
     const char* drmDirPath = "/sys/class/drm/";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return false;
     }
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         const char* plainName = entry->d_name;
         if (ffStrStartsWith(plainName, "card")) {
             const char* tmp = strchr(plainName + strlen("card"), '-');
@@ -149,7 +149,7 @@ static FF_A_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* 
     return false;
 }
 
-void ffWaylandOutputNameListener(void* data, FF_A_UNUSED void* output, const char* name) {
+void ffWaylandOutputNameListener(void* data, [[maybe_unused]] void* output, const char* name) {
     WaylandDisplay* display = data;
     if (display->id) {
         return;
@@ -165,7 +165,7 @@ void ffWaylandOutputNameListener(void* data, FF_A_UNUSED void* output, const cha
     ffStrbufAppendS(&display->name, name);
 }
 
-void ffWaylandOutputDescriptionListener(void* data, FF_A_UNUSED void* output, const char* description) {
+void ffWaylandOutputDescriptionListener(void* data, [[maybe_unused]] void* output, const char* description) {
     WaylandDisplay* display = data;
     if (display->description.length) {
         return;
@@ -217,8 +217,41 @@ uint32_t ffWaylandHandleRotation(WaylandDisplay* display) {
     return rotation;
 }
 
+const char* ffWaylandWaitForDone(WaylandDisplay* display) {
+    int32_t timeout = instance.config.general.processingTimeout;
+    struct timespec ts;
+    if (timeout == 0) {
+        return "timeout is disabled";
+    } else if (timeout > 0) {
+        if (!display->parent->ffwl_display_dispatch_timeout) {
+            return "timeout is enabled, but the libwayland-client version is too old to support it";
+        }
+        ts.tv_sec = timeout / 1000;
+        ts.tv_nsec = (timeout % 1000) * 1000000;
+    }
+
+    WaylandData* wldata = display->parent;
+
+    // Some compositors emit the final output state asynchronously after the roundtrip callback (#2074)
+    while (!display->done) {
+        if (timeout > 0) {
+            if (wldata->ffwl_display_dispatch_timeout(wldata->display, &ts) < 0) {
+                return "wl_display_dispatch_timeout() failed";
+            }
+        } else if (timeout < 0) {
+            if (wldata->ffwl_display_dispatch(wldata->display) < 0) {
+                return "wl_display_dispatch() failed";
+            }
+        } else {
+            return "Timeout exceeded, but the compositor did not send a done event";
+        }
+    }
+
+    return nullptr;
+}
+
 const char* ffdsConnectWayland(FFDisplayServerResult* result) {
-    if (getenv("XDG_RUNTIME_DIR") == NULL) {
+    if (getenv("XDG_RUNTIME_DIR") == nullptr) {
         return "Wayland requires $XDG_RUNTIME_DIR being set";
     }
 
@@ -236,24 +269,30 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_destroy)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_display_roundtrip)
 
-    data.display = ffwl_display_connect(NULL);
-    if (data.display == NULL) {
-        return "wl_display_connect returned NULL";
+    if (instance.config.general.processingTimeout < 0) {
+        FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(wayland, data, wl_display_dispatch)
+    } else if (instance.config.general.processingTimeout > 0) {
+        FF_LIBRARY_LOAD_SYMBOL_VAR_LAZY(wayland, data, wl_display_dispatch_timeout)
+    }
+
+    data.display = ffwl_display_connect(nullptr);
+    if (data.display == nullptr) {
+        return "wl_display_connect returned nullptr";
     }
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
-    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, NULL);
-    if (registry == NULL) {
+    struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, nullptr);
+    if (registry == nullptr) {
         ffwl_display_disconnect(data.display);
-        return "wl_display_get_registry returned NULL";
+        return "wl_display_get_registry returned nullptr";
     }
 
     data.result = result;
 
     struct wl_registry_listener registry_listener = {
         .global = waylandGlobalAddListener,
-        .global_remove = (void*) stubListener
+        .global_remove = (void*) ffUnused
     };
 
     data.ffwl_proxy_add_listener(registry, (void (**)(void)) &registry_listener, &data);
@@ -275,7 +314,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
             ? "monitors.xml"
             : ffStrbufEqualS(&result->wmProcessName, "cinnamon")
             ? "cinnamon-monitors.xml"
-            : NULL;
+            : nullptr;
         if (fileName) {
             FF_STRBUF_AUTO_DESTROY monitorsXml = ffStrbufCreate();
             FF_LIST_FOR_EACH (FFstrbuf, basePath, instance.state.platform.configDirs) {
@@ -336,12 +375,12 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     // So we can set set the session type to wayland.
     // This is used as an indicator that we are running wayland by the x11 backends.
     ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
-    return NULL;
+    return nullptr;
 }
 
 #else
 
-const char* ffdsConnectWayland(FF_A_UNUSED FFDisplayServerResult* result) {
+const char* ffdsConnectWayland([[maybe_unused]] FFDisplayServerResult* result) {
     return "Fastfetch was compiled without Wayland support";
 }
 

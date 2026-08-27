@@ -21,14 +21,14 @@ extern const struct wl_interface kde_output_device_mode_v2_interface;
 extern const struct wl_interface kde_output_device_v2_interface;
 
 static const struct wl_interface* kde_output_device_v2_types[] = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     &kde_output_device_v2_interface,
     &kde_output_device_mode_v2_interface,
     &kde_output_device_mode_v2_interface,
@@ -120,7 +120,7 @@ WL_EXPORT const struct wl_interface kde_output_device_mode_v2_interface = {
     "kde_output_device_mode_v2",
     22,
     0,
-    NULL,
+    nullptr,
     5,
     kde_output_device_mode_v2_events,
 };

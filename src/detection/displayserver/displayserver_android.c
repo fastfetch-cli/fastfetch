@@ -33,8 +33,8 @@ static void detectWithDumpsys(FFDisplayServerResult* ds) {
     if (ffProcessAppendStdOut(&buf, (char*[]) {
                                         "/system/bin/dumpsys",
                                         "display",
-                                        NULL,
-                                    }) != NULL ||
+                                        nullptr,
+                                    }) != nullptr ||
         buf.length == 0) {
         return; // Only works in `adb shell`, or when rooted
     }
@@ -119,7 +119,7 @@ static bool detectWithGetprop(FFDisplayServerResult* ds) {
             0,
             0,
             0,
-            NULL,
+            nullptr,
             FF_DISPLAY_TYPE_BUILTIN,
             false,
             0,
@@ -174,6 +174,11 @@ static bool detectDE(FFDisplayServerResult* ds) {
         ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
         return true;
     }
+    if (ffSettingsGetAndroidProperty("ro.product.brand", &ds->dePrettyName) && ffStrbufEqualS(&ds->dePrettyName, "asus")) {
+        ffStrbufClear(&ds->dePrettyName);
+        ffSettingsGetAndroidProperty("ro.build.version.incremental", &ds->dePrettyName);
+        return true;
+    }
     if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName)) {
         if (ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS")) {
             ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
@@ -187,13 +192,23 @@ static bool detectDE(FFDisplayServerResult* ds) {
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
-    const char* error = ffdsConnectXcbRandr(ds);
-    if (error) {
-        error = ffdsConnectXrandr(ds);
-    }
-    if (!error) {
-        ffdsDetectWMDE(ds);
-        return;
+    // Keep the same display-server preference as Linux: Wayland provides the
+    // richest output information, followed by XCB and XRandR.
+    if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE) {
+        ffdsConnectWayland(ds);
+
+        if (ds->displays.length == 0) {
+            ffdsConnectXcbRandr(ds);
+        }
+
+        if (ds->displays.length == 0) {
+            ffdsConnectXrandr(ds);
+        }
+
+        if (ds->displays.length > 0) {
+            ffdsDetectWMDE(ds);
+            return;
+        }
     }
 
     // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager

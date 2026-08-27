@@ -27,5 +27,5 @@ const char* ffDetectBios(FFBiosResult* result) {
                     : "BIOS");
         }
     }
-    return NULL;
+    return nullptr;
 }

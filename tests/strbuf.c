@@ -23,6 +23,8 @@ int shouldNotBeCalled(int c) {
     exit(1);
 }
 
+const FFstrbuf testCreateStatic = FF_STRBUF_STATIC("TEST");
+
 int main(void) {
     FFstrbuf strbuf;
 
@@ -414,7 +416,7 @@ int main(void) {
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 0);
     VERIFY(strbuf.length == 0);
-    VERIFY(strbuf.allocated == 0);
+    VERIFY(strbuf.allocated == 1);
     ffStrbufDestroy(&strbuf);
 
     // ffStrbufEnsureFixedLengthFree / empty buffer but oldFree >= newFree
@@ -769,7 +771,7 @@ int main(void) {
         ffStrbufAppendUtf32CodePoint(&strbuf, 0x6587);
         ffStrbufAppendUtf32CodePoint(&strbuf, 0x6cc9);
         ffStrbufAppendUtf32CodePoint(&strbuf, 0x9a7f);
-        VERIFY(ffStrbufEqualS(&strbuf, u8"文泉驿"));
+        VERIFY(ffStrbufEqualS(&strbuf, (const char*) u8"文泉驿"));
 
         ffStrbufDestroy(&strbuf);
     }
@@ -1138,6 +1140,32 @@ int main(void) {
     VERIFY(ffStrbufEqualS(&strbuf, "STATIC"));
     VERIFY(strbuf.allocated == 0);
     ffStrbufDestroy(&strbuf);
+
+    #if FASTFETCH_STRBUF_DEFAULT_ALLOC == 32
+    ffStrbufEnsureFreeNoCheck(&strbuf, 1);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufEnsureFreeNoCheck(&strbuf, 31);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufEnsureFreeNoCheck(&strbuf, 32);
+    VERIFY(strbuf.allocated == 64);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufEnsureFreeNoCheck(&strbuf, 33);
+    VERIFY(strbuf.allocated == 64);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufEnsureFreeNoCheck(&strbuf, 63);
+    VERIFY(strbuf.allocated == 64);
+    ffStrbufDestroy(&strbuf);
+
+    ffStrbufEnsureFreeNoCheck(&strbuf, 64);
+    VERIFY(strbuf.allocated == 128);
+    ffStrbufDestroy(&strbuf);
+    #endif
 
     // Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);

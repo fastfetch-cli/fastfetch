@@ -7,7 +7,7 @@
     #include <netinet/in.h>
 #endif
 
-typedef enum FF_A_PACKED FFNetifDefaultRouteResultStatus {
+typedef enum FFNetifDefaultRouteResultStatus: uint8_t {
     FF_NETIF_UNINITIALIZED,
     FF_NETIF_INVALID,
     FF_NETIF_OK

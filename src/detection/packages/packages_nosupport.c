@@ -1,4 +1,4 @@
 #include "packages.h"
 
-void ffDetectPackagesImpl(FF_A_UNUSED FFPackagesResult* result, FF_A_UNUSED FFPackagesOptions* options) {
+void ffDetectPackagesImpl([[maybe_unused]] FFPackagesResult* result, [[maybe_unused]] FFPackagesOptions* options) {
 }

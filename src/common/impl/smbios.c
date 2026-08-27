@@ -63,10 +63,10 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header) {
 }
 
 static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
-    const FFSmbiosHeader* endOfTable = NULL;
+    const FFSmbiosHeader* endOfTable = nullptr;
 
     FF_DEBUG("Parsing SMBIOS table structures with length %u bytes", length);
-    FF_A_UNUSED int structureCount = 0, totalCount = 0;
+    [[maybe_unused]] int structureCount = 0, totalCount = 0;
     for (
         const FFSmbiosHeader* header = (const FFSmbiosHeader*) data;
         (const uint8_t*) header + sizeof(FFSmbiosHeader) < (const uint8_t*) data + length;
@@ -214,7 +214,7 @@ static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffe
     size_t pageOffset = (size_t) (address - alignedAddress);
     size_t mapLength = pageOffset + length;
 
-    void* p = mmap(NULL, mapLength, PROT_READ, MAP_SHARED, fd, alignedAddress);
+    void* p = mmap(nullptr, mapLength, PROT_READ, MAP_SHARED, fd, alignedAddress);
     if (p == MAP_FAILED) {
         FF_DEBUG("mmap failed at aligned address 0x%lx for %zu bytes: %s",
             (unsigned long) alignedAddress,
@@ -228,7 +228,7 @@ static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffe
     return true;
 }
 
-typedef struct FFSmbios20EntryPoint {
+typedef struct [[gnu::packed]] FFSmbios20EntryPoint {
     uint8_t AnchorString[4];
     uint8_t EntryPointStructureChecksum;
     uint8_t EntryPointLength;
@@ -243,11 +243,11 @@ typedef struct FFSmbios20EntryPoint {
     uint32_t StructureTableAddress;
     uint16_t NumberOfSmbiosStructures;
     uint8_t SmbiosBcdRevision;
-} FF_A_PACKED FFSmbios20EntryPoint;
+} FFSmbios20EntryPoint;
 static_assert(offsetof(FFSmbios20EntryPoint, SmbiosBcdRevision) == 0x1E,
     "FFSmbios20EntryPoint: Wrong struct alignment");
 
-typedef struct FFSmbios30EntryPoint {
+typedef struct [[gnu::packed]] FFSmbios30EntryPoint {
     uint8_t AnchorString[5];
     uint8_t EntryPointStructureChecksum;
     uint8_t EntryPointLength;
@@ -258,7 +258,7 @@ typedef struct FFSmbios30EntryPoint {
     uint8_t Reversed;
     uint32_t StructureTableMaximumSize;
     uint64_t StructureTableAddress;
-} FF_A_PACKED FFSmbios30EntryPoint;
+} FFSmbios30EntryPoint;
 
 static_assert(offsetof(FFSmbios30EntryPoint, StructureTableAddress) == 0x10,
     "FFSmbios30EntryPoint: Wrong struct alignment");
@@ -457,7 +457,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
     } while (address < lineEnd && (*address == ' ' || *address == '\t'));
 
     errno = 0;
-    char* addressEnd = NULL;
+    char* addressEnd = nullptr;
     unsigned long long parsedAddress = strtoull(address, &addressEnd, 16);
     if (errno != 0 || addressEnd == address || parsedAddress == 0) {
         FF_DEBUG("Failed to parse OpenBSD SMBIOS table address from line: %.*s",
@@ -541,7 +541,7 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
         }
             #endif
 
-        off_t entryAddress = (off_t) strtol(strEntryAddress.chars, NULL, 16);
+        off_t entryAddress = (off_t) strtol(strEntryAddress.chars, nullptr, 16);
         if (entryAddress == 0) {
             FF_DEBUG("Invalid SMBIOS entry address: 0");
             return false;
@@ -671,7 +671,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
             if (!fillTableBufferFallback(&buffer)) {
                 FF_DEBUG("Fallback SMBIOS retrieval also failed");
                 ffStrbufDestroy(&buffer);
-                return NULL;
+                return nullptr;
             }
         }
 
@@ -682,7 +682,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
 
     if (buffer.length == 0) {
         FF_DEBUG("No valid SMBIOS data available");
-        return NULL;
+        return nullptr;
     }
 
     return &smbiosTable;
@@ -717,13 +717,13 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         NtQuerySystemInformation(SystemFirmwareTableInformation, &sfti, sizeof(sfti), &bufSize);
         if (bufSize <= sizeof(FFRawSmbiosData) + sizeof(sfti)) {
             FF_DEBUG("Invalid firmware table size: %lu (must be > %zu)", bufSize, sizeof(FFRawSmbiosData) + sizeof(sfti));
-            return NULL;
+            return nullptr;
         }
         if (bufSize != sfti.TableBufferLength + (ULONG) sizeof(sfti)) {
             FF_DEBUG("Firmware table size mismatch: NtQuerySystemInformation returned %lu but expected %lu",
                 bufSize,
                 sfti.TableBufferLength + (ULONG) sizeof(sfti));
-            return NULL;
+            return nullptr;
         }
         FF_DEBUG("Firmware table size: %lu bytes", bufSize);
 
@@ -734,8 +734,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
         if (!NT_SUCCESS(NtQuerySystemInformation(SystemFirmwareTableInformation, buffer, bufSize, &bufSize))) {
             FF_DEBUG("NtQuerySystemInformation(SystemFirmwareTableInformation) failed");
             free(buffer);
-            buffer = NULL;
-            return NULL;
+            buffer = nullptr;
+            return nullptr;
         }
         FFRawSmbiosData* rawData = (FFRawSmbiosData*) buffer->TableBuffer;
 
@@ -746,14 +746,14 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
 
         if (!parseSmbiosTable(rawData->SMBIOSTableData, rawData->Length)) {
             free(buffer);
-            buffer = NULL;
-            return NULL;
+            buffer = nullptr;
+            return nullptr;
         }
     }
 
     if (!buffer) {
         FF_DEBUG("No valid SMBIOS data available");
-        return NULL;
+        return nullptr;
     }
     return &smbiosTable;
 }
@@ -771,33 +771,33 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable() {
 
         if (!registryEntry) {
             FF_DEBUG("IOServiceGetMatchingService() failed to find AppleSMBIOS");
-            return NULL;
+            return nullptr;
         }
 
         FF_DEBUG("AppleSMBIOS service found, retrieving SMBIOS data");
         smbiosDataBuffer = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("SMBIOS"), kCFAllocatorDefault, kNilOptions);
         if (!smbiosDataBuffer) {
             FF_DEBUG("IORegistryEntryCreateCFProperty() failed to get SMBIOS data");
-            return NULL;
+            return nullptr;
         }
         if (CFGetTypeID(smbiosDataBuffer) != CFDataGetTypeID()) {
             FF_DEBUG("Unexpected SMBIOS data type: expected CFData");
             CFRelease(smbiosDataBuffer);
-            smbiosDataBuffer = NULL;
-            return NULL;
+            smbiosDataBuffer = nullptr;
+            return nullptr;
         }
 
         FF_DEBUG("Successfully retrieved SMBIOS data: %lu bytes", CFDataGetLength(smbiosDataBuffer));
         if (!parseSmbiosTable((const uint8_t*) CFDataGetBytePtr(smbiosDataBuffer), (uint32_t) CFDataGetLength(smbiosDataBuffer))) {
             CFRelease(smbiosDataBuffer);
-            smbiosDataBuffer = NULL;
-            return NULL;
+            smbiosDataBuffer = nullptr;
+            return nullptr;
         }
     }
 
     if (!smbiosDataBuffer) {
         FF_DEBUG("No valid SMBIOS data available");
-        return NULL;
+        return nullptr;
     }
 
     return &smbiosTable;

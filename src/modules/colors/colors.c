@@ -37,7 +37,7 @@ bool ffPrintColors(FFColorsOptions* options) {
             }
         }
         if (result.length > 0) {
-            ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             flag = true;
 
             if (options->paddingLeft > 0) {
@@ -122,7 +122,7 @@ bool ffPrintColors(FFColorsOptions* options) {
         if (flag) {
             ffLogoPrintLine();
         } else {
-            ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             flag = true;
         }
 
@@ -136,7 +136,7 @@ bool ffPrintColors(FFColorsOptions* options) {
     }
 
     if (!flag) {
-        ffPrintError(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Nothing to print");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Nothing to print");
         return false;
     }
 
@@ -164,7 +164,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->symbol = (FFColorsSymbol) value;
             }
@@ -178,7 +178,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
 
         if (unsafe_yyjson_equals_str(key, "block")) {
             if (!yyjson_is_obj(val)) {
-                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: must be an object", unsafe_yyjson_get_str(key));
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: must be an object", unsafe_yyjson_get_str(key));
             } else {
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width) {
@@ -188,14 +188,14 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
                 yyjson_val* range = yyjson_obj_get(val, "range");
                 if (range) {
                     if (!yyjson_is_arr(range) || yyjson_arr_size(range) != 2) {
-                        ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: must be an array of 2 elements", unsafe_yyjson_get_str(key));
+                        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: must be an array of 2 elements", unsafe_yyjson_get_str(key));
                     } else {
                         uint8_t start = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 0));
                         uint8_t end = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 1));
                         if (start > end) {
-                            ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[0] > range[1]", unsafe_yyjson_get_str(key));
+                            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[0] > range[1]", unsafe_yyjson_get_str(key));
                         } else if (end > 15) {
-                            ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[1] > 15", unsafe_yyjson_get_str(key));
+                            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[1] > 15", unsafe_yyjson_get_str(key));
                         } else {
                             options->block.range[0] = start;
                             options->block.range[1] = end;
@@ -215,14 +215,14 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->brightness = (FFColorsBrightness) value;
             }
             continue;
         }
 
-        ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -295,11 +295,34 @@ void ffDestroyColorsOptions(FFColorsOptions* options) {
 }
 
 FFModuleBaseInfo ffColorsModuleInfo = {
-    .name = FF_COLORS_MODULE_NAME,
+    .name = "Colors",
     .description = "Display the terminal's 16-color palette",
+    .displayName = {
+        .en = "Colors",
+        .ar = "الألوان",
+        .cs = "Barvy",
+        .de = "Farben",
+        .es = "Colores",
+        .fr = "Couleurs",
+        .gl = "Cores",
+        .he = "צבעים",
+        .id = "Warna",
+        .it = "Colori",
+        .ja = "色",
+        .ko = "색상",
+        .pl = "Kolory",
+        .pt = "Cores",
+        .ru = "Цвета",
+        .tr = "Renkler",
+        .uk = "Кольори",
+        .vi = "Màu sắc",
+        .zh_CN = "颜色",
+        .zh_TW = "顏色",
+    },
     .initOptions = (void*) ffInitColorsOptions,
     .destroyOptions = (void*) ffDestroyColorsOptions,
     .parseJsonObject = (void*) ffParseColorsJsonObject,
     .printModule = (void*) ffPrintColors,
     .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
+    .defaultOrder = 72,
 };

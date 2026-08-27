@@ -19,9 +19,9 @@ static const char* detectCosmicComp(FFstrbuf* result) {
 
         if (!ffStrbufEqualS(&cleaned, "[]")) {
             const char* firstQuote = strchr(backgrounds.chars, '"');
-            if (firstQuote != NULL) {
+            if (firstQuote != nullptr) {
                 const char* secondQuote = strchr(firstQuote + 1, '"');
-                if (secondQuote != NULL && secondQuote > firstQuote + 1) {
+                if (secondQuote != nullptr && secondQuote > firstQuote + 1) {
                     ffStrbufAppendNS(&monitorName, (uint32_t) (secondQuote - firstQuote - 1), firstQuote + 1);
                     sharedWallpaper = false;
                 }
@@ -43,12 +43,12 @@ static const char* detectCosmicComp(FFstrbuf* result) {
     }
 
     const char* sourceStart = strstr(output.chars, "source:");
-    if (sourceStart == NULL) {
+    if (sourceStart == nullptr) {
         return "COSMIC wallpaper config doesn't contain source";
     }
 
     const char* pathStart = strstr(sourceStart, "Path(");
-    if (pathStart == NULL) {
+    if (pathStart == nullptr) {
         return "COSMIC wallpaper source is not a Path value";
     }
 
@@ -64,12 +64,12 @@ static const char* detectCosmicComp(FFstrbuf* result) {
     char quote = *pathStart;
     ++pathStart;
     const char* pathEnd = strchr(pathStart, quote);
-    if (pathEnd == NULL || pathEnd == pathStart) {
+    if (pathEnd == nullptr || pathEnd == pathStart) {
         return "COSMIC wallpaper path is empty";
     }
 
     ffStrbufAppendNS(result, (uint32_t) (pathEnd - pathStart), pathStart);
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectWallpaper(FFstrbuf* result) {
@@ -78,7 +78,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
         return detectCosmicComp(result);
     }
 
-    const FFstrbuf* wallpaper = NULL;
+    const FFstrbuf* wallpaper = nullptr;
     const FFGTKResult* gtk = ffDetectGTK4();
     if (gtk->wallpaper.length) {
         wallpaper = &gtk->wallpaper;
@@ -98,5 +98,5 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
     } else {
         ffStrbufAppend(result, wallpaper);
     }
-    return NULL;
+    return nullptr;
 }

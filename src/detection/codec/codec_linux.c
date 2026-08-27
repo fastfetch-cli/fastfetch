@@ -226,13 +226,13 @@ static const char* detectCodecByVaDrm(FFVAData* vaData, FFCodecOptions* options,
     const char* error = "No DRM device could initialize VA-API";
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return "opendir(/dev/dri/) failed";
     }
     int drifd = dirfd(dirp);
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         if (entry->d_name[0] == '.' || !ffStrStartsWith(entry->d_name, "renderD")) {
             continue;
         }
@@ -248,7 +248,7 @@ static const char* detectCodecByVaDrm(FFVAData* vaData, FFCodecOptions* options,
         }
 
         if (vaDetectDisplay(display, vaData, options, result, "VA-API (DRM)")) {
-            error = NULL;
+            error = nullptr;
         }
     }
 
@@ -266,7 +266,7 @@ static const char* detectCodecByVaX11(FFVAData* vaData, FFCodecOptions* options,
     FF_LIBRARY_LOAD_MESSAGE(libvaX11, "libva-x11" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvaX11, vaGetDisplay)
 
-    Display* x11Display = ffXOpenDisplay(NULL);
+    Display* x11Display = ffXOpenDisplay(nullptr);
     if (!x11Display) {
         return "XOpenDisplay() failed";
     }
@@ -283,7 +283,7 @@ static const char* detectCodecByVaX11(FFVAData* vaData, FFCodecOptions* options,
     }
     ffXCloseDisplay(x11Display);
 
-    return NULL;
+    return nullptr;
 }
         #endif
 
@@ -301,14 +301,14 @@ static const char* detectCodecByVa(FFCodecOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libva, vaData, vaGetConfigAttributes)
 
         #if FF_HAVE_VADRM
-    if (detectCodecByVaDrm(&vaData, options, result) == NULL) {
-        return NULL;
+    if (detectCodecByVaDrm(&vaData, options, result) == nullptr) {
+        return nullptr;
     }
         #endif
 
         #if FF_HAVE_VAX11
-    if (detectCodecByVaX11(&vaData, options, result) == NULL) {
-        return NULL;
+    if (detectCodecByVaX11(&vaData, options, result) == nullptr) {
+        return nullptr;
     }
         #endif
 
@@ -378,26 +378,26 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
     FF_LIBRARY_LOAD_MESSAGE(libvdpau, "libvdpau" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libvdpau, vdp_device_create_x11)
 
-    Display* x11Display = ffXOpenDisplay(NULL);
+    Display* x11Display = ffXOpenDisplay(nullptr);
     if (!x11Display) {
         return "XOpenDisplay() failed";
     }
 
     VdpDevice device = VDP_INVALID_HANDLE;
-    VdpGetProcAddress* ffvdp_get_proc_address = NULL;
+    VdpGetProcAddress* ffvdp_get_proc_address = nullptr;
     if (ffvdp_device_create_x11(x11Display, ffXDefaultScreen(x11Display), &device, &ffvdp_get_proc_address) != VDP_STATUS_OK ||
         device == VDP_INVALID_HANDLE ||
-        ffvdp_get_proc_address == NULL) {
+        ffvdp_get_proc_address == nullptr) {
         ffXCloseDisplay(x11Display);
         return "vdp_device_create_x11() failed";
     }
 
-    VdpDeviceDestroy* ffvdp_device_destroy = NULL;
-    VdpDecoderQueryCapabilities* ffvdp_decoder_query_capabilities = NULL;
+    VdpDeviceDestroy* ffvdp_device_destroy = nullptr;
+    VdpDecoderQueryCapabilities* ffvdp_decoder_query_capabilities = nullptr;
     if (ffvdp_get_proc_address(device, VDP_FUNC_ID_DEVICE_DESTROY, (void**) &ffvdp_device_destroy) != VDP_STATUS_OK ||
         ffvdp_get_proc_address(device, VDP_FUNC_ID_DECODER_QUERY_CAPABILITIES, (void**) &ffvdp_decoder_query_capabilities) != VDP_STATUS_OK ||
-        ffvdp_device_destroy == NULL ||
-        ffvdp_decoder_query_capabilities == NULL) {
+        ffvdp_device_destroy == nullptr ||
+        ffvdp_decoder_query_capabilities == nullptr) {
         if (ffvdp_device_destroy) {
             ffvdp_device_destroy(device);
         }
@@ -426,7 +426,7 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
     ffXCloseDisplay(x11Display);
 
     if (decoderTypes == FF_CODEC_TYPE_NONE) {
-        return NULL;
+        return nullptr;
     }
 
     FFCodecResult* item = FF_LIST_ADD(FFCodecResult, *result);
@@ -441,7 +441,7 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
     item->encoders = FF_CODEC_TYPE_NONE;
     item->platformApi = "VDPAU";
 
-    return NULL;
+    return nullptr;
 }
     #endif
 
@@ -449,13 +449,13 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list 
     FF_SUPPRESS_IO();
 
     #if FF_HAVE_VA
-    if (detectCodecByVa(options, result) == NULL) {
-        return NULL;
+    if (detectCodecByVa(options, result) == nullptr) {
+        return nullptr;
     }
     #endif
     #if FF_HAVE_VDPAU
-    if (detectCodecByVdpau(options, result) == NULL) {
-        return NULL;
+    if (detectCodecByVdpau(options, result) == nullptr) {
+        return nullptr;
     }
     #endif
 

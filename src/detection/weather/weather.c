@@ -37,7 +37,7 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result) {
         ffPrepareWeather(options);
     }
 
-    if (status != NULL) {
+    if (status != nullptr) {
         return status;
     }
 
@@ -47,7 +47,7 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result) {
     state = (FFNetworkingState) {};
     status = FF_UNITIALIZED;
 
-    if (error == NULL) {
+    if (error == nullptr) {
         ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");
         ffStrbufTrimRightSpace(result);
     } else {
@@ -58,5 +58,5 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result) {
         return "Empty server response received";
     }
 
-    return NULL;
+    return nullptr;
 }

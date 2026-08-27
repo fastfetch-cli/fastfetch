@@ -4,15 +4,15 @@
 #include <sys/module.h>
 #include <sys/param.h>
 
-typedef struct FF_A_PACKED FFNbsdModList {
+typedef struct [[gnu::packed]] FFNbsdModList {
     int len;
     modstat_t mods[];
 } FFNbsdModList;
 
 bool ffKmodLoaded(const char* modName) {
-    static FFNbsdModList* list = NULL;
+    static FFNbsdModList* list = nullptr;
 
-    if (list == NULL) {
+    if (list == nullptr) {
         struct iovec iov = {};
 
         for (size_t len = 8192;; len = iov.iov_len) {

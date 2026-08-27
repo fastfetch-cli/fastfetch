@@ -39,20 +39,20 @@ get_rt_address(struct rt_msghdr* rtm, int desired) {
             sa = (struct sockaddr*) (ROUNDUP(sa->sa_len) + (char*) sa);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result) {
     int mib[6] = { CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY };
     size_t needed;
 
-    if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0 || needed == 0) {
+    if (sysctl(mib, 6, nullptr, &needed, nullptr, 0) < 0 || needed == 0) {
         return false;
     }
 
     FF_AUTO_FREE char* buf = malloc(needed);
 
-    if (sysctl(mib, 6, buf, &needed, NULL, 0) < 0) {
+    if (sysctl(mib, 6, buf, &needed, nullptr, 0) < 0) {
         return false;
     }
 
@@ -89,13 +89,13 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result) {
     int mib[6] = { CTL_NET, PF_ROUTE, 0, AF_INET6, NET_RT_FLAGS, RTF_GATEWAY };
     size_t needed;
 
-    if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0 || needed == 0) {
+    if (sysctl(mib, 6, nullptr, &needed, nullptr, 0) < 0 || needed == 0) {
         return false;
     }
 
     FF_AUTO_FREE char* buf = malloc(needed);
 
-    if (sysctl(mib, 6, buf, &needed, NULL, 0) < 0) {
+    if (sysctl(mib, 6, buf, &needed, nullptr, 0) < 0) {
         return false;
     }
 

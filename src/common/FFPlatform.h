@@ -31,6 +31,10 @@ typedef struct FFPlatform {
     FFstrbuf userShell;
 
     FFPlatformSysinfo sysinfo;
+
+#if _WIN32
+    uint32_t initCP; // The code page used by the console when the program started
+#endif
 } FFPlatform;
 
 void ffPlatformInit(FFPlatform* platform);

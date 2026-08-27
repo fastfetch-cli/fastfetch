@@ -2,7 +2,7 @@
 #include "common/smbios.h"
 
 // 7.18
-typedef struct FFSmbiosMemoryDevice {
+typedef struct [[gnu::packed]] FFSmbiosMemoryDevice {
     FFSmbiosHeader Header;
 
     // 2.1+
@@ -59,7 +59,7 @@ typedef struct FFSmbiosMemoryDevice {
     uint16_t Pmic0RevisionNumber; // varies
     uint16_t RcdManufacturerID;   // varies
     uint16_t RcdRevisionNumber;   // varies
-} FF_A_PACKED FFSmbiosMemoryDevice;
+} FFSmbiosMemoryDevice;
 
 static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
     "FFSmbiosMemoryDevice: Wrong struct alignment");
@@ -129,7 +129,7 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
         }
 
         const char* formFactorNames[] = {
-            NULL,               // 0x00 (Placeholder for indexing)
+            nullptr,               // 0x00 (Placeholder for indexing)
             "Other",            // 0x01
             "Unknown",          // 0x02
             "SIMM",             // 0x03
@@ -157,7 +157,7 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
         }
 
         const char* memoryTypeNames[] = {
-            NULL,                          // 0x00 (Placeholder for indexing)
+            nullptr,                          // 0x00 (Placeholder for indexing)
             "Other",                       // 0x01
             "Unknown",                     // 0x02
             "DRAM",                        // 0x03
@@ -231,5 +231,5 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
         }
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -13,12 +13,12 @@ const char* ffDetectUptime(FFUptimeResult* result) {
     if (nRead > 0) {
         buf[nRead] = '\0';
 
-        char* err = NULL;
+        char* err = nullptr;
         double sec = strtod(buf, &err);
         if (err != buf) {
             result->uptime = (uint64_t) (sec * 1000);
             result->bootTime = ffTimeGetNow() - result->uptime;
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -31,7 +31,7 @@ const char* ffDetectUptime(FFUptimeResult* result) {
 
     result->uptime = (uint64_t) uptime.tv_sec * 1000 + (uint64_t) uptime.tv_nsec / 1000000;
     result->bootTime = ffTimeGetNow() - result->uptime;
-    return NULL;
+    return nullptr;
 #else
     return "read(/proc/uptime) failed";
 #endif

@@ -18,7 +18,7 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
         result->all += ((uint32_t*) result)[i];
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result) {
@@ -36,7 +36,7 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
 
     uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000ull + (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
 #else
-    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
     if (handle == INVALID_HANDLE_VALUE) // file doesn't exist or isn't accessible
     {
@@ -85,14 +85,14 @@ bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t n
 #ifndef _WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
-    if (dirp == NULL) {
+    if (dirp == nullptr) {
         return 0;
     }
 
     uint32_t num_elements = 0;
 
     struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL) {
+    while ((entry = readdir(dirp)) != nullptr) {
         bool ok = false;
 
         if (entry->d_name[0] != '.') {

@@ -8,7 +8,7 @@
 
 #ifdef MAC_OS_VERSION_14_0
 // To make fastfetch compiled on newer macOS versions runs on older ones
-AVF_EXPORT FF_A_WEAK_IMPORT AVCaptureDeviceType const AVCaptureDeviceTypeExternal;
+[[clang::weak_import]] AVF_EXPORT AVCaptureDeviceType const AVCaptureDeviceTypeExternal;
 #endif
 
 const char* ffDetectCamera(FFlist* result)
@@ -16,17 +16,13 @@ const char* ffDetectCamera(FFlist* result)
     #ifdef MAC_OS_X_VERSION_10_15
     FF_SUPPRESS_IO(); // #822
 
-    AVCaptureDeviceType deviceType = NULL;
+    AVCaptureDeviceType deviceType = nullptr;
 
     #ifdef MAC_OS_VERSION_14_0
-    // Strangely `@available(macOS 14.0, *)` doesn't work here (#1594)
-    if (@available(macOS 14.0, *))
-    {
-        if (&AVCaptureDeviceTypeExternal)
-            deviceType = AVCaptureDeviceTypeExternal;
-    }
+    if (&AVCaptureDeviceTypeExternal)
+        deviceType = AVCaptureDeviceTypeExternal;
     #endif
-    if (deviceType == NULL)
+    if (deviceType == nullptr)
         deviceType = AVCaptureDeviceTypeExternalUnknown;
 
     AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
@@ -54,7 +50,7 @@ const char* ffDetectCamera(FFlist* result)
         camera->width = size.width < 0 ? 0 : (uint32_t) size.width;
         camera->height = size.height < 0 ? 0 : (uint32_t) size.height;
     }
-    return NULL;
+    return nullptr;
     #else
     return "No support for old MacOS version";
     #endif

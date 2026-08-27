@@ -19,7 +19,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if (dsResult->displays.length == 0) {
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
         return false;
     }
 
@@ -28,7 +28,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
     }
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE) {
-        ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         FF_LIST_FOR_EACH (FFDisplayResult, result, dsResult->displays) {
@@ -65,17 +65,17 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
     for (uint32_t i = 0; i < dsResult->displays.length; i++) {
         FFDisplayResult* result = FF_LIST_GET(FFDisplayResult, dsResult->displays, i);
         uint32_t moduleIndex = dsResult->displays.length == 1 ? 0 : i + 1;
-        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "Built-in"
+        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? nullptr : result->type == FF_DISPLAY_TYPE_BUILTIN ? "Built-in"
                                                                                                                            : "External";
 
         ffStrbufClear(&key);
         if (options->moduleArgs.key.length == 0) {
             if (result->name.length) {
-                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
+                ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Display), result->name.chars);
             } else if (moduleIndex > 0) {
-                ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
+                ffStrbufAppendF(&key, "%s (%d)", FF_MODULE_GET_DISPLAY_NAME(Display), moduleIndex);
             } else {
-                ffStrbufAppendS(&key, FF_DISPLAY_MODULE_NAME);
+                ffStrbufAppendS(&key, FF_MODULE_GET_DISPLAY_NAME(Display));
             }
         } else {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -221,7 +221,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->compactType = (FFDisplayCompactType) value;
                 }
@@ -246,7 +246,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
                                                                            {},
                                                                        });
                 if (error) {
-                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
                 } else {
                     options->order = (FFDisplayOrder) value;
                 }
@@ -254,7 +254,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Display), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -294,7 +294,7 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
     }
 }
 
-bool ffGenerateDisplayJsonResult(FF_A_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateDisplayJsonResult([[maybe_unused]] FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if (dsResult->displays.length == 0) {
@@ -411,8 +411,30 @@ void ffDestroyDisplayOptions(FFDisplayOptions* options) {
 }
 
 FFModuleBaseInfo ffDisplayModuleInfo = {
-    .name = FF_DISPLAY_MODULE_NAME,
+    .name = "Display",
     .description = "Print resolutions, refresh rates, etc",
+    .displayName = {
+        .en = "Display",
+        .ar = "الشاشة",
+        .cs = "Displej",
+        .de = "Anzeige",
+        .es = "Pantalla",
+        .fr = "Écran",
+        .gl = "Pantalla",
+        .he = "תצוגה",
+        .id = "Tampilan",
+        .it = "Display",
+        .ja = "ディスプレイ",
+        .ko = "디스플레이",
+        .pl = "Wyświetlacz",
+        .pt = "Tela",
+        .ru = "Дисплей",
+        .tr = "Ekran",
+        .uk = "Дисплей",
+        .vi = "Hiển thị",
+        .zh_CN = "显示器",
+        .zh_TW = "顯示器",
+    },
     .initOptions = (void*) ffInitDisplayOptions,
     .destroyOptions = (void*) ffDestroyDisplayOptions,
     .parseJsonObject = (void*) ffParseDisplayJsonObject,
@@ -445,5 +467,6 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         { "Screen preferred height (in pixels)", "preferred-height" },
         { "Screen preferred refresh rate (in Hz)", "preferred-refresh-rate" },
         { "DPI", "dpi" },
-    }))
+    })),
+    .defaultOrder = 17,
 };

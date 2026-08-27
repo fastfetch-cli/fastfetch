@@ -1,26 +1,28 @@
 #include "wifi.h"
 #include "common/processing.h"
 #include "common/strutil.h"
+#include "common/apple/cf_helpers.h"
 
 #import <CoreWLAN/CoreWLAN.h>
+#import <IOKit/IOKitLib.h>
+#import <IOKit/kext/KextManager.h>
 
-static inline double rssiToSignalQuality(int rssi)
-{
-    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2);
+static inline double rssiToSignalQuality(int rssi) {
+    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0
+                                                      : (rssi + 100) * 2);
 }
 
-@interface CWNetworkProfile()
-@property(readonly, retain, nullable) NSArray<NSDictionary *> *bssidList;
+@interface CWNetworkProfile ()
+@property (readonly, retain, nullable) NSArray<NSDictionary*>* bssidList;
 @end
 
-const char* ffDetectWifi(FFlist* result)
-{
+const char* ffDetectWifi(FFlist* result) {
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
-    if (!interfaces)
+    if (!interfaces) {
         return "CWWiFiClient.sharedWiFiClient.interfaces is nil";
+    }
 
-    for (CWInterface* inf in interfaces)
-    {
+    for (CWInterface* inf in interfaces) {
         FFWifiResult* item = FF_LIST_ADD(FFWifiResult, *result);
         ffStrbufInit(&item->inf.description);
         ffStrbufInit(&item->inf.status);
@@ -33,37 +35,42 @@ const char* ffDetectWifi(FFlist* result)
         item->conn.rxRate = -DBL_MAX;
         item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
+        item->conn.channelWidth = 0;
         item->conn.frequency = 0;
 
-        ffStrbufAppendS(&item->inf.description, inf.interfaceName.UTF8String);
+        ffStrbufSetS(&item->inf.description, inf.interfaceName.UTF8String);
         ffStrbufSetStatic(&item->inf.status, inf.powerOn ? "Power On" : "Power Off");
-        if(!inf.powerOn)
+
+        if (!inf.powerOn) {
             continue;
+        }
 
         ffStrbufSetStatic(&item->conn.status, inf.interfaceMode != kCWInterfaceModeNone ? "Active" : "Inactive");
-        if(inf.interfaceMode == kCWInterfaceModeNone)
+        if (inf.interfaceMode == kCWInterfaceModeNone) {
             continue;
+        }
 
         FF_STRBUF_AUTO_DESTROY ipconfig = ffStrbufCreate();
 
         CWNetworkProfile* networkProfile = inf.configuration.networkProfiles.firstObject;
 
-        if (inf.ssid) // https://developer.apple.com/forums/thread/732431
+        if (inf.ssid) { // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (networkProfile.ssid)
+        } else if (networkProfile.ssid) {
             ffStrbufSetStatic(&item->conn.ssid, inf.configuration.networkProfiles.firstObject.ssid.UTF8String);
-        else
+        } else {
             ffStrbufSetStatic(&item->conn.ssid, "<redacted>"); // https://developer.apple.com/forums/thread/732431
+        }
 
-        if (inf.bssid)
+        if (inf.bssid) {
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
-        else if (networkProfile.bssidList)
+        } else if (networkProfile.bssidList) {
             ffStrbufSetStatic(&item->conn.bssid, [networkProfile.bssidList.firstObject[@"BSSID"] UTF8String]);
-        else
+        } else {
             ffStrbufSetStatic(&item->conn.bssid, "<redacted>");
+        }
 
-        switch(inf.activePHYMode)
-        {
+        switch (inf.activePHYMode) {
             case kCWPHYModeNone:
                 ffStrbufSetStatic(&item->conn.protocol, "none");
                 break;
@@ -89,15 +96,15 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
-                if (inf.activePHYMode < 8)
+                if (inf.activePHYMode < 8) {
                     ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
+                }
                 break;
         }
         item->conn.signalQuality = rssiToSignalQuality((int) inf.rssiValue);
         item->conn.txRate = inf.transmitRate;
 
-        switch(inf.security)
-        {
+        switch (inf.security) {
             case kCWSecurityNone:
                 ffStrbufSetStatic(&item->conn.security, "Insecure");
                 break;
@@ -152,14 +159,35 @@ const char* ffDetectWifi(FFlist* result)
         }
 
         item->conn.channel = (uint16_t) inf.wlanChannel.channelNumber;
-        switch (inf.wlanChannel.channelBand)
-        {
-            case kCWChannelBand2GHz: item->conn.frequency = 2400; break;
-            case kCWChannelBand5GHz: item->conn.frequency = 5400; break;
-            case 3 /*kCWChannelBand6GHz*/: item->conn.frequency = 6400; break;
-            default: item->conn.frequency = 0; break;
+        switch (inf.wlanChannel.channelWidth) {
+            case kCWChannelWidth20MHz: item->conn.channelWidth = 20; break;
+            case kCWChannelWidth40MHz: item->conn.channelWidth = 40; break;
+            case kCWChannelWidth80MHz: item->conn.channelWidth = 80; break;
+            case kCWChannelWidth160MHz: item->conn.channelWidth = 160; break;
+            default: item->conn.channelWidth = 0; break;
+        }
+
+        FF_IOOBJECT_AUTO_RELEASE io_object_t service = IOServiceGetMatchingService(MACH_PORT_NULL, IOBSDNameMatching(MACH_PORT_NULL, 0, item->inf.description.chars));
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef frequency;
+        // Note: IO80211ChannelFrequency is only available when the interface is connected
+        while (!(frequency = IORegistryEntryCreateCFProperty(service, CFSTR("IO80211ChannelFrequency"), nullptr, kNilOptions))) {
+            io_object_t parentService = IO_OBJECT_NULL;
+            if (IORegistryEntryGetParentEntry(service, kIOServicePlane, &parentService) == KERN_SUCCESS) {
+                IOObjectRelease(service);
+                service = parentService;
+            } else {
+                IOObjectRelease(service);
+                service = IO_OBJECT_NULL;
+                break;
+            }
+        }
+        if (frequency) {
+            int64_t value;
+            if (ffCfNumGetInt64(frequency, &value) == nil) {
+                item->conn.frequency = (uint16_t) value;
+            }
         }
     }
 
-    return NULL;
+    return nullptr;
 }

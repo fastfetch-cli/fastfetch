@@ -7,48 +7,37 @@ extern "C" {
 #endif
 
 template <uint32_t Major, uint32_t Minor>
-class version_t {
-    constexpr static auto buflen() noexcept {
-        unsigned int len = 2; // "."
-        if (Major == 0) {
+struct version_t {
+    static constexpr uint32_t digits(uint32_t n) noexcept {
+        uint32_t len = 1;
+        for (auto temp = n / 10; temp; temp /= 10) {
             len++;
-        } else {
-            for (auto n = Major; n; len++, n /= 10);
-        }
-
-        if (Minor == 0) {
-            len++;
-        } else {
-            for (auto n = Minor; n; len++, n /= 10);
         }
         return len;
     }
 
-    char buf[buflen()] = {};
+    char buf[digits(Major) + digits(Minor) + 2];
 
-  public:
     constexpr version_t() noexcept {
-        auto ptr = buf + buflen();
+        auto ptr = buf + sizeof(buf);
         *--ptr = '\0';
 
-        if (Minor == 0) {
-            *--ptr = '0';
-        } else {
-            for (auto n = Minor; n; n /= 10) {
-                *--ptr = "0123456789"[n % 10];
+        auto append = [&](uint32_t n) noexcept {
+            if (n == 0) {
+                *--ptr = '0';
+            } else {
+                for (; n; n /= 10) {
+                    *--ptr = static_cast<char>('0' + n % 10);
+                }
             }
-        }
+        };
+
+        append(Minor);
         *--ptr = '.';
-        if (Major == 0) {
-            *--ptr = '0';
-        } else {
-            for (auto n = Major; n; n /= 10) {
-                *--ptr = "0123456789"[n % 10];
-            }
-        }
+        append(Major);
     }
 
-    constexpr operator const char*() const {
+    constexpr operator const char*() const noexcept {
         return buf;
     }
 };
@@ -63,6 +52,6 @@ extern "C" const char* ffDetectLibc(FFLibcResult* result) {
     result->name = "msvcrt";
 #endif
 
-    result->version = version<(__MSVCRT_VERSION__ >> 8), (__MSVCRT_VERSION__ & 8)>;
-    return NULL;
+    result->version = version<(__MSVCRT_VERSION__ >> 8), (__MSVCRT_VERSION__ & 0xFF)>;
+    return nullptr;
 }

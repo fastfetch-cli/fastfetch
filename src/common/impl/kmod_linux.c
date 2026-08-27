@@ -3,7 +3,7 @@
 
 bool ffKmodLoaded(const char* modName) {
     static FFstrbuf modules;
-    if (modules.chars == NULL) {
+    if (modules.chars == nullptr) {
         ffStrbufInitS(&modules, "\n");
         ffAppendFileBuffer("/proc/modules", &modules);
     }
@@ -21,5 +21,5 @@ bool ffKmodLoaded(const char* modName) {
     temp[0] = '\n';
     memcpy(temp + 1, modName, len);
     temp[1 + len] = ' ';
-    return memmem(modules.chars, modules.length, temp, len + 2) != NULL;
+    return memmem(modules.chars, modules.length, temp, len + 2) != nullptr;
 }

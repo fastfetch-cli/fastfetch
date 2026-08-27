@@ -5,12 +5,18 @@
 #include "detection/bluetoothradio/bluetoothradio.h"
 #include "modules/bluetoothradio/bluetoothradio.h"
 
-#define FF_BLUETOOTHRADIO_DISPLAY_NAME "Bluetooth Radio"
+static void destroyBluetoothRadios(FFlist* radios) {
+    FF_LIST_FOR_EACH (FFBluetoothRadioResult, radio, *radios) {
+        ffStrbufDestroy(&radio->name);
+        ffStrbufDestroy(&radio->address);
+        ffStrbufDestroy(&radio->vendor);
+    }
+}
 
 static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadioResult* radio, uint8_t index) {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufAppendF(&key, "%s (%s)", FF_BLUETOOTHRADIO_DISPLAY_NAME, radio->name.chars);
+        ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(BluetoothRadio), radio->name.chars);
     } else {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                                                                            FF_ARG(index, "index"),
@@ -19,7 +25,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
                                                                        }));
     }
 
-    const char* version = NULL;
+    const char* version = nullptr;
 
     switch (radio->lmpVersion < 0 ? -radio->lmpVersion : radio->lmpVersion) {
         case 0:
@@ -93,7 +99,7 @@ bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options) {
     const char* error = ffDetectBluetoothRadio(&radios);
 
     if (error) {
-        ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(BluetoothRadio), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -109,18 +115,15 @@ bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options) {
 
     if (index == 0) {
         if (radios.length > 0) {
-            ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Bluetooth radios found but none enabled");
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(BluetoothRadio), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Bluetooth radios found but none enabled");
         } else {
-            ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(BluetoothRadio), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         }
+        destroyBluetoothRadios(&radios);
         return false;
     }
 
-    FF_LIST_FOR_EACH (FFBluetoothRadioResult, radio, radios) {
-        ffStrbufDestroy(&radio->name);
-        ffStrbufDestroy(&radio->address);
-        ffStrbufDestroy(&radio->vendor);
-    }
+    destroyBluetoothRadios(&radios);
     return true;
 }
 
@@ -132,7 +135,7 @@ void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_va
             continue;
         }
 
-        ffPrintError(FF_BLUETOOTHRADIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(BluetoothRadio), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -140,7 +143,7 @@ void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateBluetoothRadioJsonResult(FF_A_UNUSED FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateBluetoothRadioJsonResult([[maybe_unused]] FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FF_LIST_AUTO_DESTROY results = ffListCreate();
 
     const char* error = ffDetectBluetoothRadio(&results);
@@ -171,11 +174,7 @@ bool ffGenerateBluetoothRadioJsonResult(FF_A_UNUSED FFBluetoothRadioOptions* opt
         yyjson_mut_obj_add_bool(doc, obj, "connectable", item->connectable);
     }
 
-    FF_LIST_FOR_EACH (FFBluetoothRadioResult, radio, results) {
-        ffStrbufDestroy(&radio->name);
-        ffStrbufDestroy(&radio->address);
-        ffStrbufDestroy(&radio->vendor);
-    }
+    destroyBluetoothRadios(&results);
 
     return true;
 }
@@ -189,8 +188,30 @@ void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options) {
 }
 
 FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
-    .name = FF_BLUETOOTHRADIO_MODULE_NAME,
+    .name = "BluetoothRadio",
     .description = "List Bluetooth radios (supported versions, vendors, etc.)",
+    .displayName = {
+        .en = "Bluetooth Radio",
+        .ar = "راديو بلوتوث",
+        .cs = "Bluetooth rádio",
+        .de = "Bluetooth-Adapter",
+        .es = "Adaptador Bluetooth",
+        .fr = "Adaptateur Bluetooth",
+        .gl = "Adaptador Bluetooth",
+        .he = "רדיו בלוטות'",
+        .id = "Radio Bluetooth",
+        .it = "Adattatore Bluetooth",
+        .ja = "ブルートゥースアダプター",
+        .ko = "블루투스 어댑터",
+        .pl = "Adapter Bluetooth",
+        .pt = "Adaptador Bluetooth",
+        .ru = "Bluetooth-адаптер",
+        .tr = "Bluetooth Radyosu",
+        .uk = "Радіомодуль Bluetooth",
+        .vi = "Radio Bluetooth",
+        .zh_CN = "蓝牙适配器",
+        .zh_TW = "藍牙配接器",
+    },
     .initOptions = (void*) ffInitBluetoothRadioOptions,
     .destroyOptions = (void*) ffDestroyBluetoothRadioOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
@@ -206,5 +227,6 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         { "Vendor", "vendor" },
         { "Discoverable", "discoverable" },
         { "Connectable / Pairable", "connectable" },
-    }))
+    })),
+    .defaultOrder = 59,
 };

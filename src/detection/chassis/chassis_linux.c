@@ -35,5 +35,5 @@ const char* ffDetectChassis(FFChassisResult* result) {
             result->type.chars[0] = (char) toupper(result->type.chars[0]);
         }
     }
-    return NULL;
+    return nullptr;
 }

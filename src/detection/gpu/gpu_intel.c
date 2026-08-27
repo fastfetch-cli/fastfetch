@@ -26,7 +26,7 @@ struct FFIgclData {
 static void shutdownIgcl() {
     if (igclData.apiHandle) {
         igclData.ffctlClose(igclData.apiHandle);
-        igclData.apiHandle = NULL;
+        igclData.apiHandle = nullptr;
     }
 }
 
@@ -58,24 +58,31 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
             return "loading igcl library failed";
         }
         atexit(shutdownIgcl);
-        libigcl = NULL; // don't close igcl
+        libigcl = nullptr; // don't close igcl
     }
 
     if (!igclData.apiHandle) {
         return "loading igcl library failed";
     }
 
-    ctl_device_adapter_handle_t devices[64];
-    uint32_t deviceCount = ARRAY_SIZE(devices);
-    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices)) {
-        return "ctlEnumerateDevices(devices) failed";
+    uint32_t deviceCount = 0;
+    // ctlEnumerateDevices MUST be called with deviceCount = 0 and devices = nullptr first,
+    // otherwise it will be silently ignored and return CTL_RESULT_SUCCESS with deviceCount and devices unmodified.
+    // VERY STRANGE BEHAVIOR
+    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, nullptr) != CTL_RESULT_SUCCESS) {
+        return "ctlEnumerateDevices(nullptr) failed";
     }
 
     if (deviceCount == 0) {
         return "No Intel graphics adapter found";
     }
 
-    ctl_device_adapter_handle_t device = NULL;
+    FF_AUTO_FREE ctl_device_adapter_handle_t* devices = malloc(deviceCount * sizeof(*devices));
+    if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices) != CTL_RESULT_SUCCESS) {
+        return "ctlEnumerateDevices(devices) failed";
+    }
+
+    ctl_device_adapter_handle_t device = nullptr;
 
     uint64_t /* LUID */ deviceId = 0;
     ctl_device_adapter_properties_t properties = {
@@ -251,5 +258,5 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         }
     }
 
-    return NULL;
+    return nullptr;
 }

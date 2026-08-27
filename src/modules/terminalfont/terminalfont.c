@@ -4,8 +4,6 @@
 #include "detection/terminalfont/terminalfont.h"
 #include "modules/terminalfont/terminalfont.h"
 
-#define FF_TERMINALFONT_DISPLAY_NAME "Terminal Font"
-
 bool ffPrintTerminalFont(FFTerminalFontOptions* options) {
     bool success = false;
     FFTerminalFontResult terminalFont;
@@ -14,10 +12,10 @@ bool ffPrintTerminalFont(FFTerminalFontOptions* options) {
     ffStrbufInit(&terminalFont.error);
 
     if (!ffDetectTerminalFont(&terminalFont)) {
-        ffPrintError(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", terminalFont.error.chars);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", terminalFont.error.chars);
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             ffStrbufWriteTo(&terminalFont.font.pretty, stdout);
             if (terminalFont.fallback.pretty.length) {
                 fputs(" / ", stdout);
@@ -25,7 +23,7 @@ bool ffPrintTerminalFont(FFTerminalFontOptions* options) {
             }
             putchar('\n');
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                       FF_ARG(terminalFont.font.pretty, "combined"),
                                                                                                                       FF_ARG(terminalFont.font.name, "name"),
                                                                                                                       FF_ARG(terminalFont.font.size, "size"),
@@ -50,7 +48,7 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
             continue;
         }
 
-        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TerminalFont), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -58,7 +56,7 @@ void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateTerminalFontJsonResult(FF_A_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateTerminalFontJsonResult([[maybe_unused]] FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     bool success = false;
     FFTerminalFontResult result;
     ffFontInit(&result.font);
@@ -105,8 +103,30 @@ void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options) {
 }
 
 FFModuleBaseInfo ffTerminalFontModuleInfo = {
-    .name = FF_TERMINALFONT_MODULE_NAME,
+    .name = "TerminalFont",
     .description = "Print the font name and size used by the current terminal",
+    .displayName = {
+        .en = "Terminal Font",
+        .ar = "خط الطرفية",
+        .cs = "Písmo terminálu",
+        .de = "Terminalschriftart",
+        .es = "Fuente del terminal",
+        .fr = "Police du terminal",
+        .gl = "Fonte do terminal",
+        .he = "גופן טרמינל",
+        .id = "Font Terminal",
+        .it = "Carattere del terminale",
+        .ja = "ターミナルフォント",
+        .ko = "터미널 글꼴",
+        .pl = "Czcionka terminala",
+        .pt = "Fonte do terminal",
+        .ru = "Шрифт терминала",
+        .tr = "Terminal Yazı Tipi",
+        .uk = "Шрифт терміналу",
+        .vi = "Phông chữ Terminal",
+        .zh_CN = "终端字体",
+        .zh_TW = "終端機字型",
+    },
     .initOptions = (void*) ffInitTerminalFontOptions,
     .destroyOptions = (void*) ffDestroyTerminalFontOptions,
     .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
@@ -119,4 +139,5 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
         { "Terminal font size", "size" },
         { "Terminal font styles", "styles" },
     })),
+    .defaultOrder = 30,
 };

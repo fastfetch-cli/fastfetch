@@ -19,7 +19,7 @@ static const FFlogo G[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_GARUDA
     // Garuda
     {
-        .names = { "Garuda", "garuda-linux" },
+        .names = { "Garuda" },
         .lines = FASTFETCH_DATATEXT_LOGO_GARUDA,
         .colors = {
             FF_COLOR_FG_RED,
@@ -167,7 +167,7 @@ static const FFlogo G[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_GOLDENDOGLINUX
     // GoldenDogLinux
     {
-        .names = { "GoldenDog Linux", "GDL", "goldendoglinux" },
+        .names = { "GoldenDogLinux" },
         .lines = FASTFETCH_DATATEXT_LOGO_GOLDENDOGLINUX,
         .colors = {
             FF_COLOR_FG_YELLOW,

@@ -32,7 +32,7 @@ typedef struct MtmlMemory MtmlMemory;
  */
 typedef struct
 {
-    char sbdf[MTML_DEVICE_PCI_SBDF_BUFFER_SIZE]; //!< The tuple segment:bus:device.function PCI identifier (&amp; NULL terminator).
+    char sbdf[MTML_DEVICE_PCI_SBDF_BUFFER_SIZE]; //!< The tuple segment:bus:device.function PCI identifier (&amp; nullptr terminator).
     unsigned int segment;                        //!< The PCI segment group(domain) on which the device's bus resides, 0 to 0xffffffff.
     unsigned int bus;                            //!< The bus on which the device resides, 0 to 0xff.
     unsigned int device;                         //!< The device ID on the bus, 0 to 31.

@@ -29,7 +29,7 @@ struct FFMtmlData {
     MtmlSystem* sys;
 } mtmlData;
 
-FF_A_UNUSED static void shutdownMtml(void) {
+[[maybe_unused]] static void shutdownMtml(void) {
     mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
 }
 
@@ -61,23 +61,23 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlLibraryShutDown)
 
         if (ffmtmlLibraryInit(&mtmlData.lib) != MTML_SUCCESS) {
-            mtmlData.ffmtmlLibraryInitSystem = NULL;
+            mtmlData.ffmtmlLibraryInitSystem = nullptr;
             return "mtmlLibraryInit failed";
         }
         if (mtmlData.ffmtmlLibraryInitSystem(mtmlData.lib, &mtmlData.sys) != MTML_SUCCESS) {
             mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
-            mtmlData.ffmtmlLibraryInitSystem = NULL;
+            mtmlData.ffmtmlLibraryInitSystem = nullptr;
             return "mtmlLibraryInitSystem failed";
         }
         atexit(shutdownMtml);
-        libmtml = NULL; // don't close mtml
+        libmtml = nullptr; // don't close mtml
     }
 
-    if (mtmlData.ffmtmlLibraryInitSystem == NULL) {
+    if (mtmlData.ffmtmlLibraryInitSystem == nullptr) {
         return "loading mtml library failed";
     }
 
-    MtmlDevice* device = NULL;
+    MtmlDevice* device = nullptr;
     if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID) {
         char pciBusIdStr[32];
         snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
@@ -92,7 +92,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
             return "mtmlLibraryCountDevice() failed";
         }
 
-        for (uint32_t i = 0; i < count; i++, device = NULL) {
+        for (uint32_t i = 0; i < count; i++, device = nullptr) {
             if (mtmlData.ffmtmlLibraryInitDeviceByIndex(mtmlData.lib, i, &device) != MTML_SUCCESS) {
                 continue;
             }
@@ -135,7 +135,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
     }
 
     if (result.temp) {
-        MtmlGpu* gpu = NULL;
+        MtmlGpu* gpu = nullptr;
         if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
             uint32_t value;
             if (mtmlData.ffmtmlGpuGetTemperature(gpu, &value) == MTML_SUCCESS) {
@@ -145,7 +145,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
     }
 
     if (result.memory) {
-        MtmlMemory* mem = NULL;
+        MtmlMemory* mem = nullptr;
         if (mtmlData.ffmtmlDeviceInitMemory(device, &mem) == MTML_SUCCESS) {
             unsigned long long total;
             if (mtmlData.ffmtmlMemoryGetTotal(mem, &total) == MTML_SUCCESS) {
@@ -164,7 +164,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
     }
 
     if (result.frequency) {
-        MtmlGpu* gpu = NULL;
+        MtmlGpu* gpu = nullptr;
         if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
             uint32_t clockMHz;
             if (mtmlData.ffmtmlGpuGetMaxClock(gpu, &clockMHz) == MTML_SUCCESS) {
@@ -174,7 +174,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
     }
 
     if (result.coreUsage) {
-        MtmlGpu* gpu = NULL;
+        MtmlGpu* gpu = nullptr;
         if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS) {
             unsigned int utilization;
             if (mtmlData.ffmtmlGpuGetUtilization(gpu, &utilization) == MTML_SUCCESS) {
@@ -204,7 +204,7 @@ const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDrive
         }
     }
 
-    return NULL;
+    return nullptr;
 
 #else
 

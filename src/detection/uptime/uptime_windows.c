@@ -13,5 +13,5 @@ const char* ffDetectUptime(FFUptimeResult* result) {
     // whose result exactly equals what WMI `Win32_OperatingSystem` reports
     // with much lower accuracy (0.5 seconds)
 
-    return NULL;
+    return nullptr;
 }

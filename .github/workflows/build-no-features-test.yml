@@ -3,6 +3,9 @@ name: Reusable No Features Test
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 env:
   CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
 
@@ -12,7 +15,7 @@ jobs:
 
     steps:
       - name: checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: uname -a
         run: uname -a

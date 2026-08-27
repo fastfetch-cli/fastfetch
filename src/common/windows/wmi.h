@@ -49,6 +49,4 @@ static inline void ffCloseWmiBlock(HANDLE* hBlock) {
     }
 }
 
-#define FF_AUTO_CLOSE_WMI_BLOCK __attribute__((cleanup(ffCloseWmiBlock)))
-
 // MOF: https://github.com/tpn/winsdk-10/blob/master/Include/10.0.16299.0/km/wmicore.mof

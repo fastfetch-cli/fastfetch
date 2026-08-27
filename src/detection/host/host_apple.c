@@ -44,7 +44,7 @@ const char* getOthersByIokit(FFHostResult* host) {
         ffCfStrGetString(version, &host->version);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectHost(FFHostResult* host) {
@@ -64,5 +64,5 @@ const char* ffDetectHost(FFHostResult* host) {
         ffStrbufSet(&host->name, &host->family);
     }
     getOthersByIokit(host);
-    return NULL;
+    return nullptr;
 }

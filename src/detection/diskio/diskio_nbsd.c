@@ -9,14 +9,14 @@
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     int mib[] = { CTL_HW, HW_IOSTATS, sizeof(struct io_sysctl) };
     size_t len;
-    if (sysctl(mib, ARRAY_SIZE(mib), NULL, &len, NULL, 0) < 0) {
-        return "sysctl({HW_IOSTATS}, NULL) failed";
+    if (sysctl(mib, ARRAY_SIZE(mib), nullptr, &len, nullptr, 0) < 0) {
+        return "sysctl({HW_IOSTATS}, nullptr) failed";
     }
     uint32_t nDrive = (uint32_t) (len / sizeof(struct io_sysctl));
 
     FF_AUTO_FREE struct io_sysctl* stats = malloc(len);
 
-    if (sysctl(mib, ARRAY_SIZE(mib), stats, &len, NULL, 0) < 0) {
+    if (sysctl(mib, ARRAY_SIZE(mib), stats, &len, nullptr, 0) < 0) {
         return "sysctl({HW_IOSTATS}, stats) failed";
     }
 
@@ -46,5 +46,5 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         device->writeCount = st->wxfer;
     }
 
-    return NULL;
+    return nullptr;
 }

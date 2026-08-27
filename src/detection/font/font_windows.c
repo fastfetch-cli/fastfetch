@@ -21,8 +21,8 @@ static void generateString(FFFontResult* font) {
 }
 
 const char* ffDetectFontImpl(FFFontResult* result) {
-    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop\\WindowMetrics", &hKey, NULL)) {
+    FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Control Panel\\Desktop\\WindowMetrics", &hKey, nullptr)) {
         return "ffRegOpenKeyForRead(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
     }
 
@@ -40,7 +40,7 @@ const char* ffDetectFontImpl(FFFontResult* result) {
                                       FF_ARG(fontBuffers[2], L"MessageFont"),
                                       FF_ARG(fontBuffers[3], L"StatusFont"),
                                   },
-            NULL)) {
+            nullptr)) {
         return "ffRegReadValues(HKEY_CURRENT_USER\\Control Panel\\Desktop\\WindowMetrics) failed";
     }
 
@@ -59,5 +59,5 @@ const char* ffDetectFontImpl(FFFontResult* result) {
 
     generateString(result);
 
-    return NULL;
+    return nullptr;
 }

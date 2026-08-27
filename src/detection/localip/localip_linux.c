@@ -181,7 +181,7 @@ static FFLocalIpIpv6Type getIpv6Type(struct ifaddrs* ifa) {
             return result;
         }
 
-        char* line = NULL;
+        char* line = nullptr;
         size_t len = 0;
         while (ffStrbufGetline(&line, &len, &buffer)) {
             struct in6_addr* entry = FF_LIST_ADD(struct in6_addr, addresses);
@@ -278,7 +278,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         options->showType,
         options->namePrefix.chars);
 
-    struct ifaddrs* ifAddrStruct = NULL;
+    struct ifaddrs* ifAddrStruct = nullptr;
     if (getifaddrs(&ifAddrStruct) < 0) {
         FF_DEBUG("getifaddrs() failed");
         return "getifaddrs(&ifAddrStruct) failed";
@@ -335,7 +335,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
             ifa->ifa_addr->sa_family,
             (unsigned long) ifa->ifa_flags);
 
-        FFAdapter* adapter = NULL;
+        FFAdapter* adapter = nullptr;
         FF_LIST_FOR_EACH (FFAdapter, x, adapters) {
             if (ffStrEquals(x->mac->ifa_name, ifa->ifa_name)) {
                 adapter = x;
@@ -425,7 +425,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
             }
 
             if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)) {
-                struct ifaddrs* ifa = NULL;
+                struct ifaddrs* ifa = nullptr;
                 if (isDefaultRouteIf && defaultRouteV4->preferredSourceAddrV4 != 0) {
                     FF_LIST_FOR_EACH (struct ifaddrs*, pifa, adapter->ipv4) {
                         struct sockaddr_in* ipv4 = (struct sockaddr_in*) (*pifa)->ifa_addr;
@@ -468,8 +468,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
             if (options->ipv6Type == FF_LOCALIP_IPV6_TYPE_AUTO) {
                 if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)) {
-                    struct ifaddrs* selected = NULL;
-                    struct ifaddrs* secondary = NULL;
+                    struct ifaddrs* selected = nullptr;
+                    struct ifaddrs* secondary = nullptr;
 
                     FF_LIST_FOR_EACH (struct ifaddrs*, pifa, adapter->ipv6) {
                         FFLocalIpIpv6Type type = getIpv6Type(*pifa);
@@ -542,7 +542,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
     if (ifAddrStruct) {
         freeifaddrs(ifAddrStruct);
-        ifAddrStruct = NULL;
+        ifAddrStruct = nullptr;
         FF_DEBUG("Cleaned up interface address structures");
     }
 
@@ -982,13 +982,13 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 #endif
 #if __sun
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT) {
-                    FF_A_CLEANUP(kstatFreeWrap) kstat_ctl_t* kc = kstat_open();
+                    [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
                     for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next) {
                         if (!ffStrEquals(ks->ks_class, "net") || !ffStrEquals(ks->ks_module, "link")) {
                             continue;
                         }
                         if (ffStrbufEqualS(&iface->name, ks->ks_name)) {
-                            if (kstat_read(kc, ks, NULL) >= 0) {
+                            if (kstat_read(kc, ks, nullptr) >= 0) {
                                 kstat_named_t* ifspeed = (kstat_named_t*) kstat_data_lookup(ks, "ifspeed");
                                 if (ifspeed) {
                                     iface->speed = (int32_t) (ifspeed->value.ui64 / 1000 / 1000);
@@ -1007,5 +1007,5 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
     }
 
     FF_DEBUG("Local IP detection completed, found %u interfaces", results->length);
-    return NULL;
+    return nullptr;
 }

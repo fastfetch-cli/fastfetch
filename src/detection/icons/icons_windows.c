@@ -2,21 +2,21 @@
 #include "common/windows/registry.h"
 
 const char* ffDetectIcons(FFIconsResult* result) {
-    FF_AUTO_CLOSE_FD HANDLE hKey = NULL;
-    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
-        !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, NULL)) {
+    FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, nullptr) &&
+        !ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu", &hKey, nullptr)) {
         // If the key doesn't exist, it means that the user never changed the default settings.
         ffStrbufSetStatic(&result->icons2, "Recycle Bin");
-        return NULL;
+        return nullptr;
     }
 
     // Whether these icons are hidden
     uint32_t ThisPC = 1, UsersFiles = 1, RemoteNetwork = 1, RecycleBin = 0 /* Shown by default */, ControlPanel = 1;
-    ffRegReadUint(hKey, L"{20D04FE0-3AEA-1069-A2D8-08002B30309D}", &ThisPC, NULL);
-    ffRegReadUint(hKey, L"{59031a47-3f72-44a7-89c5-5595fe6b30ee}", &UsersFiles, NULL);
-    ffRegReadUint(hKey, L"{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}", &RemoteNetwork, NULL);
-    ffRegReadUint(hKey, L"{645FF040-5081-101B-9F08-00AA002F954E}", &RecycleBin, NULL);
-    ffRegReadUint(hKey, L"{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}", &ControlPanel, NULL);
+    ffRegReadUint(hKey, L"{20D04FE0-3AEA-1069-A2D8-08002B30309D}", &ThisPC, nullptr);
+    ffRegReadUint(hKey, L"{59031a47-3f72-44a7-89c5-5595fe6b30ee}", &UsersFiles, nullptr);
+    ffRegReadUint(hKey, L"{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}", &RemoteNetwork, nullptr);
+    ffRegReadUint(hKey, L"{645FF040-5081-101B-9F08-00AA002F954E}", &RecycleBin, nullptr);
+    ffRegReadUint(hKey, L"{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}", &ControlPanel, nullptr);
 
     if (ThisPC && UsersFiles && RemoteNetwork && RecycleBin && ControlPanel) {
         return "All icons are hidden";
@@ -43,5 +43,5 @@ const char* ffDetectIcons(FFIconsResult* result) {
     ffStrbufTrimRight(&result->icons2, ' ');
     ffStrbufTrimRight(&result->icons2, ',');
 
-    return NULL;
+    return nullptr;
 }

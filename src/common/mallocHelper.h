@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "common/attributes.h"
 
 #if FF_HAVE_MALLOC_USABLE_SIZE || FF_HAVE_MSVC_MSIZE
     #if __has_include(<malloc.h>)
@@ -14,7 +13,7 @@
     #include <malloc/malloc.h>
 #endif
 
-FF_A_ALWAYS_INLINE FF_A_NONNULL(1)
+[[gnu::always_inline, gnu::nonnull(1)]]
 static inline void ffWrapFree(const void* pPtr) {
     assert(pPtr);
     if (*(void**) pPtr) {
@@ -22,7 +21,7 @@ static inline void ffWrapFree(const void* pPtr) {
     }
 }
 
-#define FF_AUTO_FREE FF_A_CLEANUP(ffWrapFree)
+#define FF_AUTO_FREE [[gnu::cleanup(ffWrapFree)]]
 
 // ptr MUST be a malloc'ed pointer
 static inline size_t ffMallocUsableSize(const void* ptr) {

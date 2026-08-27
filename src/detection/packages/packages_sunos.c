@@ -3,7 +3,7 @@
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {
     if (FF_PACKAGES_IS_ENABLED(options, PKG)) {
-        yyjson_doc* doc = yyjson_read_file(FASTFETCH_TARGET_DIR_ROOT "/var/pkg/state/installed/catalog.attrs", YYJSON_READ_NOFLAG, NULL, NULL);
+        yyjson_doc* doc = yyjson_read_file(FASTFETCH_TARGET_DIR_ROOT "/var/pkg/state/installed/catalog.attrs", YYJSON_READ_NOFLAG, nullptr, nullptr);
         if (doc) {
             yyjson_val* packageCount = yyjson_obj_get(yyjson_doc_get_root(doc), "package-count");
             if (packageCount) {

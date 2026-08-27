@@ -17,11 +17,11 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    if (ffProcessAppendStdOut(&buffer, (char* const[]) { FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, NULL })) {
+    if (ffProcessAppendStdOut(&buffer, (char* const[]) { FF_TERMUX_API_PATH, FF_TERMUX_API_PARAM, nullptr })) {
         return "Starting `" FF_TERMUX_API_PATH " " FF_TERMUX_API_PARAM "` failed";
     }
 
-    yyjson_doc* FF_A_CLEANUP(wrapYyjsonFree) doc = yyjson_read_opts(buffer.chars, buffer.length, 0, NULL, NULL);
+    [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(buffer.chars, buffer.length, 0, nullptr, nullptr);
     if (!doc) {
         return "Failed to parse battery info";
     }
@@ -66,7 +66,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results) {
         battery->temperature = yyjson_get_num(yyjson_obj_get(root, "temperature"));
     }
 
-    return NULL;
+    return nullptr;
 }
 
 static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
@@ -74,8 +74,8 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
     if (ffProcessAppendStdOut(&buf, (char*[]) {
                                         "/system/bin/dumpsys",
                                         "battery",
-                                        NULL,
-                                    }) != NULL ||
+                                        nullptr,
+                                    }) != nullptr ||
         buf.length == 0) {
         return "Executing `/system/bin/dumpsys battery` failed"; // Only works in `adb shell`, or when rooted
     }
@@ -88,7 +88,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
 
     FF_STRBUF_AUTO_DESTROY temp = ffStrbufCreate();
     if (!ffParsePropLines(start, "present: ", &temp) || !ffStrbufEqualS(&temp, "true")) {
-        return NULL;
+        return nullptr;
     }
     ffStrbufClear(&temp);
 
@@ -148,13 +148,13 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
 
     ffParsePropLines(start, "technology: ", &battery->technology);
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     const char* error = parseTermuxApi(options, results);
-    if (error && parseDumpsys(options, results) == NULL) {
-        return NULL;
+    if (error && parseDumpsys(options, results) == nullptr) {
+        return nullptr;
     }
     return error;
 }

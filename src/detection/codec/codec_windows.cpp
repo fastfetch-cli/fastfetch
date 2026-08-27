@@ -277,8 +277,8 @@ static const FFCodecMftEncoderSubtype FF_D3D11VA_MFT_ENCODER_SUBTYPES[] = {
     { &MFVideoFormat_AV1, FF_CODEC_TYPE_AV1 },
 };
 
-static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, __typeof__(&D3D11CreateDevice) ffD3D11CreateDevice) {
-    ID3D11Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
+static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, typeof(&D3D11CreateDevice) ffD3D11CreateDevice) {
+    FF_AUTO_RELEASE_COM_OBJECT ID3D11Device* d3dDevice = nullptr;
     D3D_FEATURE_LEVEL featureLevel;
     if (FAILED(ffD3D11CreateDevice(
             adapter,
@@ -295,7 +295,7 @@ static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, __typeof__(&D
         return FF_CODEC_TYPE_NONE;
     }
 
-    ID3D11VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
+    FF_AUTO_RELEASE_COM_OBJECT ID3D11VideoDevice* videoDevice = nullptr;
     if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D11VideoDevice), (void**) &videoDevice)) || !videoDevice) {
         return FF_CODEC_TYPE_NONE;
     }
@@ -319,8 +319,8 @@ static FFCodecType ffDetectD3d11vaDecoders(IDXGIAdapter1* adapter, __typeof__(&D
     return decoders;
 }
 
-static FFCodecType ffDetectD3d11MftEncoders(const LUID& adapterLuid, __typeof__(&MFCreateAttributes) ffMFCreateAttributes, __typeof__(&MFTEnum2) ffMFTEnum2) {
-    IMFAttributes* FF_AUTO_RELEASE_COM_OBJECT attributes = nullptr;
+static FFCodecType ffDetectD3d11MftEncoders(const LUID& adapterLuid, typeof(&MFCreateAttributes) ffMFCreateAttributes, typeof(&MFTEnum2) ffMFTEnum2) {
+    FF_AUTO_RELEASE_COM_OBJECT IMFAttributes* attributes = nullptr;
     if (FAILED(ffMFCreateAttributes(&attributes, 1)) || !attributes) {
         return FF_CODEC_TYPE_NONE;
     }
@@ -382,7 +382,7 @@ static FFCodecType ffCodecEncoderToType(D3D12_VIDEO_ENCODER_CODEC codec) {
 template <typename Func>
 static void ffEnumHardwareAdapters(IDXGIFactory1* factory, Func&& onAdapter) {
     for (UINT adapterIndex = 0;; ++adapterIndex) {
-        IDXGIAdapter1* FF_AUTO_RELEASE_COM_OBJECT adapter = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT IDXGIAdapter1* adapter = nullptr;
         HRESULT adapterStatus = factory->EnumAdapters1(adapterIndex, &adapter);
         if (adapterStatus == DXGI_ERROR_NOT_FOUND) {
             break;
@@ -468,7 +468,7 @@ const char* detectD3d12va(FFCodecOptions* options, FFlist* result /*list of FFCo
     const uint32_t resultLengthBefore = result->length;
 
     ffEnumHardwareAdapters(factory, [&](IDXGIAdapter1* adapter, const DXGI_ADAPTER_DESC1& desc) {
-        ID3D12Device* FF_AUTO_RELEASE_COM_OBJECT d3dDevice = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT ID3D12Device* d3dDevice = nullptr;
         if (FAILED(ffD3D12CreateDevice(
                 adapter,
                 D3D_FEATURE_LEVEL_11_0,
@@ -478,7 +478,7 @@ const char* detectD3d12va(FFCodecOptions* options, FFlist* result /*list of FFCo
             return;
         }
 
-        ID3D12VideoDevice* FF_AUTO_RELEASE_COM_OBJECT videoDevice = nullptr;
+        FF_AUTO_RELEASE_COM_OBJECT ID3D12VideoDevice* videoDevice = nullptr;
         if (FAILED(d3dDevice->QueryInterface(__uuidof(ID3D12VideoDevice), (void**) &videoDevice)) || !videoDevice) {
             return;
         }
@@ -538,7 +538,7 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list o
         return error;
     }
 
-    IDXGIFactory1* FF_AUTO_RELEASE_COM_OBJECT factory = nullptr;
+    FF_AUTO_RELEASE_COM_OBJECT IDXGIFactory1* factory = nullptr;
     if (FAILED(ffCreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) &factory)) || !factory) {
         return "CreateDXGIFactory1() failed";
     }

@@ -58,5 +58,5 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
         result->secureBoot = !!buffer[0];
     }
 
-    return NULL;
+    return nullptr;
 }

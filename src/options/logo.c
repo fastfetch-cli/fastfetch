@@ -38,7 +38,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
     if (subKey) {
         if (subKey[0] == '\0') {
         logoType:
-            if (value == NULL) {
+            if (value == nullptr) {
                 fprintf(stderr, "Error: usage: %s <none|small|logo-source>\n", key);
                 exit(477);
             }
@@ -80,7 +80,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                 fprintf(stderr, "Error: invalid --color-[1-9] index: %c\n", key[13]);
                 exit(472);
             }
-            if (value == NULL) {
+            if (value == nullptr) {
                 fprintf(stderr, "Error: usage: %s <str>\n", key);
                 exit(477);
             }
@@ -219,7 +219,7 @@ void ffOptionsDestroyLogo(FFOptionsLogo* options) {
 const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey) {
     yyjson_val* object = yyjson_obj_get(root, "logo");
     if (!object) {
-        return NULL;
+        return nullptr;
     }
     if (yyjson_is_null(object)) {
         options->type = FF_LOGO_TYPE_NONE;
@@ -227,12 +227,12 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         options->paddingBottom = 0;
         options->paddingRight = 0;
         options->paddingLeft = 0;
-        return NULL;
+        return nullptr;
     }
 
     if (yyjson_is_str(object)) {
         ffStrbufSetJsonVal(&options->source, object);
-        return NULL;
+        return nullptr;
     }
 
     if (!yyjson_is_obj(object)) {
@@ -281,7 +281,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             yyjson_val *keyc, *valc;
             size_t idxc, maxc;
             yyjson_obj_foreach (val, idxc, maxc, keyc, valc) {
-                uint32_t index = (uint32_t) strtoul(unsafe_yyjson_get_str(keyc), NULL, 10);
+                uint32_t index = (uint32_t) strtoul(unsafe_yyjson_get_str(keyc), nullptr, 10);
                 if (index < 1 || index > FASTFETCH_LOGO_MAX_COLORS) {
                     return "Keys of property 'color' must be a number between 1 to 9";
                 }
@@ -428,7 +428,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {

@@ -18,7 +18,7 @@ static IDXCoreAdapterFactory* loadDxCoreFactory() {
     }
 
     initialized = true;
-    FF_LIBRARY_LOAD(dxcore, NULL, "dxcore" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(dxcore, nullptr, "dxcore" FF_LIBRARY_EXTENSION, 1)
 
     // DXCoreCreateAdapterFactory is a reloaded function, so we can't use FF_LIBRARY_LOAD_SYMBOL_MESSAGE here
     typedef HRESULT (*DXCoreCreateAdapterFactory_t)(REFIID riid, void** ppvFactory);
@@ -26,7 +26,7 @@ static IDXCoreAdapterFactory* loadDxCoreFactory() {
     #ifndef FF_DISABLE_DLOPEN
     auto ffDXCoreCreateAdapterFactory = (DXCoreCreateAdapterFactory_t) dlsym(dxcore, "DXCoreCreateAdapterFactory");
     if (ffDXCoreCreateAdapterFactory == nullptr) {
-        return NULL;
+        return nullptr;
     }
     #else
     auto ffDXCoreCreateAdapterFactory = (DXCoreCreateAdapterFactory_t) DXCoreCreateAdapterFactory;
@@ -35,10 +35,10 @@ static IDXCoreAdapterFactory* loadDxCoreFactory() {
     HRESULT hr = ffDXCoreCreateAdapterFactory(IID_PPV_ARGS(&factory));
     if (FAILED(hr)) {
         FF_DEBUG("DXCoreCreateAdapterFactory failed with HRESULT: 0x%08lX (%s)", hr, ffDebugHResult(hr));
-        return NULL;
+        return nullptr;
     }
 
-    dxcore = NULL; // Don't unload
+    dxcore = nullptr; // Don't unload
     return factory;
 }
 

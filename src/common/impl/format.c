@@ -78,7 +78,7 @@ static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs,
     }
 
     if (firstChar >= '0' && firstChar <= '9') {
-        char* pEnd = NULL;
+        char* pEnd = nullptr;
         uint32_t result = (uint32_t) strtoul(placeholderValue, &pEnd, 10);
         if (result > numArgs) {
             return UINT32_MAX;
@@ -109,10 +109,24 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 }
 
 static inline bool formatArgSet(const FFformatarg* arg) {
-    return arg->value != NULL && ((arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) || (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) || (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) || (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) || (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) || (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0));
+    // clang-format off
+    return arg->value != nullptr && (
+        (arg->type == FF_ARG_TYPE_DOUBLE && *(double*) arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_FLOAT && *(float*) arg->value > 0.0) ||
+        (arg->type == FF_ARG_TYPE_INT && *(int32_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_STRBUF && ((FFstrbuf*) arg->value)->length > 0) ||
+        (arg->type == FF_ARG_TYPE_STRING && ffStrSet((char*) arg->value)) ||
+        (arg->type == FF_ARG_TYPE_UINT8 && *(uint8_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT16 && *(uint16_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT && *(uint32_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_UINT64 && *(uint64_t*) arg->value > 0) ||
+        (arg->type == FF_ARG_TYPE_BOOL && *(bool*) arg->value) ||
+        (arg->type == FF_ARG_TYPE_LIST && ((FFlist*) arg->value)->length > 0)
+    );
+    // clang-format on
 }
 
-FF_A_UNUSED static inline void normalizeArgName(FFstrbuf* dst, const char* src) {
+[[maybe_unused]] static inline void normalizeArgName(FFstrbuf* dst, const char* src) {
     ffStrbufClear(dst);
     bool flag = false;
     for (const char* p = src; *p; ++p) {
@@ -131,7 +145,7 @@ FF_A_UNUSED static inline void normalizeArgName(FFstrbuf* dst, const char* src) 
     #include "common/lua.h"
 
 static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
-    const char* err = lua_tolstring(L, -1, NULL);
+    const char* err = lua_tolstring(L, -1, nullptr);
     if (err) {
         const char* tmp = strchr(err, ':');
         if (tmp) {
@@ -228,12 +242,12 @@ static bool parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
                 ffStrbufAppendS(buffer, "Lua result error: no result");
             } else {
                 // Convert first result to string
-                const char* res = lua_tolstring(L, 1, NULL);
+                const char* res = lua_tolstring(L, 1, nullptr);
                 if (res) {
                     ffStrbufAppendS(buffer, res);
                 } else {
-                    luaL_tolstring(L, 1, NULL);
-                    const char* sval = lua_tolstring(L, -1, NULL);
+                    luaL_tolstring(L, 1, nullptr);
+                    const char* sval = lua_tolstring(L, -1, nullptr);
                     if (sval) {
                         ffStrbufAppendS(buffer, sval);
                     }
@@ -273,10 +287,10 @@ struct FFQuickJSData {
 
 static const char* loadQuickJSState(void) {
     if (qjsData.inited) {
-        if (qjsData.ctx == NULL) {
+        if (qjsData.ctx == nullptr) {
             return "QuickJS is not available";
         }
-        return NULL;
+        return nullptr;
     }
 
     qjsData.inited = true;
@@ -301,20 +315,20 @@ static const char* loadQuickJSState(void) {
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libqjs, qjsData, JS_FreeValue)
 
     qjsData.rt = qjsData.ffJS_NewRuntime();
-    if (qjsData.rt == NULL) {
+    if (qjsData.rt == nullptr) {
         return "JS_NewRuntime() failed";
     }
 
     qjsData.ctx = qjsData.ffJS_NewContext(qjsData.rt);
-    if (qjsData.ctx == NULL) {
+    if (qjsData.ctx == nullptr) {
         qjsData.ffJS_FreeRuntime(qjsData.rt);
-        qjsData.rt = NULL;
+        qjsData.rt = nullptr;
         return "JS_NewContext() failed";
     }
 
-    libqjs = NULL; // don't close quickjs
+    libqjs = nullptr; // don't close quickjs
 
-    return NULL;
+    return nullptr;
 }
 
 static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t scriptLen, uint32_t numArgs, const FFformatarg* arguments) {
@@ -401,7 +415,7 @@ static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
     bool ret = false;
     if (JS_IsException(result)) {
         JSValue exc = qjsData.ffJS_GetException(ctx);
-        const char* message = qjsData.ffJS_ToCStringLen2(ctx, NULL, exc, false);
+        const char* message = qjsData.ffJS_ToCStringLen2(ctx, nullptr, exc, false);
         qjsData.ffJS_FreeValue(ctx, exc);
         ffStrbufAppendF(buffer, "Qjs runtime error: %s", message ?: "unknown");
         if (message) {
@@ -587,7 +601,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
 
         // test for constant or env var, if so evaluate it
         if (firstChar == '$') {
-            char* pend = NULL;
+            char* pend = nullptr;
             int32_t indexSigned = (int32_t) strtol(placeholderValue.chars + 1, &pend, 10);
             if (pend == placeholderValue.chars + 1) {
                 // treat placeholder as an environment variable
@@ -620,7 +634,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             cSep = *pSep;
             *pSep = '\0';
         } else {
-            pSep = NULL;
+            pSep = nullptr;
         }
 
         uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
@@ -646,7 +660,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             FF_STRBUF_AUTO_DESTROY trailingEscape = ffStrbufCreate();
             skipAnsiEscape(&tempString, buffer, &trailingEscape);
 
-            char* pEnd = NULL;
+            char* pEnd = nullptr;
             int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
             if (start < 0) {
                 start = (int32_t) tempString.length + start;
@@ -680,7 +694,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
                 continue;
             }
         } else {
-            char* pEnd = NULL;
+            char* pEnd = nullptr;
             int32_t truncLength = (int32_t) strtol(pSep + 1, &pEnd, 10);
             if (*pEnd != '\0') {
                 *pSep = cSep;

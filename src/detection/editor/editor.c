@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 
-static bool extractNvimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
+static bool extractNvimVersionFromBinary(const char* str, [[maybe_unused]] uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "NVIM v")) {
         return true;
     }
@@ -15,7 +15,7 @@ static bool extractNvimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t l
     return false;
 }
 
-static bool extractVimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
+static bool extractVimVersionFromBinary(const char* str, [[maybe_unused]] uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "VIM - Vi IMproved ")) {
         return true;
     }
@@ -24,7 +24,7 @@ static bool extractVimVersionFromBinary(const char* str, FF_A_UNUSED uint32_t le
     return false;
 }
 
-static bool extractNanoVersionFromBinary(const char* str, FF_A_UNUSED uint32_t len, void* userdata) {
+static bool extractNanoVersionFromBinary(const char* str, [[maybe_unused]] uint32_t len, void* userdata) {
     if (!ffStrStartsWith(str, "GNU nano ")) {
         return true;
     }
@@ -50,14 +50,14 @@ const char* ffDetectEditor(FFEditorResult* result) {
     } else {
         const char* error = ffFindExecutableInPath(result->name.chars, &result->path);
         if (error) {
-            return NULL;
+            return nullptr;
         }
     }
 
     {
         char buf[PATH_MAX + 1];
         if (!realpath(result->path.chars, buf)) {
-            return NULL;
+            return nullptr;
         }
 
         // WIN32: Should we handle scoop shim exe here?
@@ -77,11 +77,11 @@ const char* ffDetectEditor(FFEditorResult* result) {
 #endif
         );
         if (index == result->path.length) {
-            return NULL;
+            return nullptr;
         }
         ffStrbufSetS(&result->exe, &result->path.chars[index + 1]);
         if (!result->exe.length) {
-            return NULL;
+            return nullptr;
         }
 
 #ifdef _WIN32
@@ -92,7 +92,7 @@ const char* ffDetectEditor(FFEditorResult* result) {
     }
 
     if (!instance.config.general.detectVersion) {
-        return NULL;
+        return nullptr;
     }
 
     if (ffStrbufEqualS(&result->exe, "nvim")) {
@@ -104,10 +104,10 @@ const char* ffDetectEditor(FFEditorResult* result) {
     }
 
     if (result->version.length > 0) {
-        return NULL;
+        return nullptr;
     }
 
-    const char* param = NULL;
+    const char* param = nullptr;
     if (
         ffStrbufEqualS(&result->exe, "nano") ||
         ffStrbufEqualS(&result->exe, "vim") ||
@@ -130,24 +130,24 @@ const char* ffDetectEditor(FFEditorResult* result) {
         ffStrbufEqualS(&result->exe, "ne")) {
         param = "-h";
     } else {
-        return NULL;
+        return nullptr;
     }
 
     ffProcessAppendStdOut(&result->version, (char* const[]) {
                                                 result->path.chars,
                                                 (char*) param,
-                                                NULL,
+                                                nullptr,
                                             });
 
     if (result->version.length == 0) {
-        return NULL;
+        return nullptr;
     }
 
     ffStrbufSubstrBeforeFirstC(&result->version, '\n');
     const char* versionStart = strpbrk(result->version.chars, "0123456789");
-    if (versionStart != NULL) {
+    if (versionStart != nullptr) {
         const char* versionEnd = strpbrk(versionStart, " \t\v\f\r");
-        if (versionEnd != NULL) {
+        if (versionEnd != nullptr) {
             ffStrbufSubstrBefore(&result->version, (uint32_t) (versionEnd - result->version.chars));
         }
 
@@ -156,5 +156,5 @@ const char* ffDetectEditor(FFEditorResult* result) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }

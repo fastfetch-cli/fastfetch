@@ -9,7 +9,7 @@ bool ffPrintDE(FFDEOptions* options) {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if (result->dePrettyName.length == 0) {
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
         return false;
     }
 
@@ -17,7 +17,7 @@ bool ffPrintDE(FFDEOptions* options) {
     ffDetectDEVersion(&result->dePrettyName, &version, options);
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&result->dePrettyName, stdout);
 
@@ -28,7 +28,7 @@ bool ffPrintDE(FFDEOptions* options) {
 
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result->deProcessName, "process-name"), FF_ARG(result->dePrettyName, "pretty-name"), FF_ARG(version, "version") }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result->deProcessName, "process-name"), FF_ARG(result->dePrettyName, "pretty-name"), FF_ARG(version, "version") }));
     }
 
     return true;
@@ -43,11 +43,11 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "slowVersionDetection")) {
-            ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Key `slowVersionDetection` is deprecated, it's always true");
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Key `slowVersionDetection` is deprecated, it's always true");
             continue;
         }
 
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DE), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -55,7 +55,7 @@ void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-bool ffGenerateDEJsonResult(FF_A_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateDEJsonResult([[maybe_unused]] FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if (result->dePrettyName.length == 0) {
@@ -82,8 +82,30 @@ void ffDestroyDEOptions(FFDEOptions* options) {
 }
 
 FFModuleBaseInfo ffDEModuleInfo = {
-    .name = FF_DE_MODULE_NAME,
+    .name = "DE",
     .description = "Print desktop environment name",
+    .displayName = {
+        .en = "Desktop Environment",
+        .ar = "بيئة سطح المكتب",
+        .cs = "Pracovní prostředí",
+        .de = "Desktop-Umgebung",
+        .es = "Entorno de escritorio",
+        .fr = "Environnement de Bureau",
+        .gl = "Contorno do Escritorio",
+        .he = "סביבת שולחן עבודה",
+        .id = "Lingkungan Desktop",
+        .it = "Ambiente Desktop",
+        .ja = "デスクトップ環境",
+        .ko = "데스크탑 환경",
+        .pl = "Środowisko graficzne",
+        .pt = "Ambiente de desktop",
+        .ru = "Рабочее окружение",
+        .tr = "Masaüstü Ortamı",
+        .uk = "Стільниче середовище",
+        .vi = "Môi trường desktop",
+        .zh_CN = "桌面环境",
+        .zh_TW = "桌面環境",
+    },
     .initOptions = (void*) ffInitDEOptions,
     .destroyOptions = (void*) ffDestroyDEOptions,
     .parseJsonObject = (void*) ffParseDEJsonObject,
@@ -94,5 +116,6 @@ FFModuleBaseInfo ffDEModuleInfo = {
         { "DE process name", "process-name" },
         { "DE pretty name", "pretty-name" },
         { "DE version", "version" },
-    }))
+    })),
+    .defaultOrder = 21,
 };

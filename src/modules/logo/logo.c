@@ -3,12 +3,12 @@
 #include "modules/logo/logo.h"
 #include "options/logo.h"
 
-bool ffPrintLogo(FF_A_UNUSED FFLogoOptions* options) {
-    ffPrintError(FF_LOGO_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_DEFAULT, "Supported in JSON format only");
+bool ffPrintLogo([[maybe_unused]] FFLogoOptions* options) {
+    ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Logo), 0, nullptr, FF_PRINT_TYPE_DEFAULT, "Supported in JSON format only");
     return false;
 }
 
-void ffParseLogoJsonObject(FF_A_UNUSED FFLogoOptions* options, FF_A_UNUSED yyjson_val* module) {
+void ffParseLogoJsonObject([[maybe_unused]] FFLogoOptions* options, [[maybe_unused]] yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
     yyjson_obj_foreach (module, idx, max, key, val) {
@@ -16,11 +16,11 @@ void ffParseLogoJsonObject(FF_A_UNUSED FFLogoOptions* options, FF_A_UNUSED yyjso
             continue;
         }
 
-        ffPrintError(FF_LOGO_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Logo), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
-bool ffGenerateLogoJsonResult(FF_A_UNUSED FFLogoOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+bool ffGenerateLogoJsonResult([[maybe_unused]] FFLogoOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFLogoSize size = FF_LOGO_SIZE_UNKNOWN;
     FFOptionsLogo* logoOptions = &instance.config.logo;
     if (logoOptions->type == FF_LOGO_TYPE_SMALL) {
@@ -70,15 +70,37 @@ bool ffGenerateLogoJsonResult(FF_A_UNUSED FFLogoOptions* options, yyjson_mut_doc
     return true;
 }
 
-void ffInitLogoOptions(FF_A_UNUSED FFLogoOptions* options) {
+void ffInitLogoOptions([[maybe_unused]] FFLogoOptions* options) {
 }
 
-void ffDestroyLogoOptions(FF_A_UNUSED FFLogoOptions* options) {
+void ffDestroyLogoOptions([[maybe_unused]] FFLogoOptions* options) {
 }
 
 FFModuleBaseInfo ffLogoModuleInfo = {
-    .name = FF_LOGO_MODULE_NAME,
+    .name = "Logo",
     .description = "Query built-in logo for JSON output",
+    .displayName = {
+        .en = "Logo",
+        .ar = "الشعار",
+        .cs = "Logo",
+        .de = "Logo",
+        .es = "Logo",
+        .fr = "Logo",
+        .gl = "Logo",
+        .he = "לוגו",
+        .id = "Logo",
+        .it = "Logo",
+        .ja = "ロゴ",
+        .ko = "로고",
+        .pl = "Logo",
+        .pt = "Logo",
+        .ru = "Логотип",
+        .tr = "Logo",
+        .uk = "Логотип",
+        .vi = "Logo",
+        .zh_CN = "徽标",
+        .zh_TW = "標誌",
+    },
     .initOptions = (void*) ffInitLogoOptions,
     .destroyOptions = (void*) ffDestroyLogoOptions,
     .parseJsonObject = (void*) ffParseLogoJsonObject,

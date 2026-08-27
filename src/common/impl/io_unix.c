@@ -22,8 +22,8 @@
 static void createSubfolders(const char* fileName) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
-    const char* token = NULL;
-    while ((token = strchr(fileName, '/')) != NULL) {
+    const char* token = nullptr;
+    while ((token = strchr(fileName, '/')) != nullptr) {
         ffStrbufAppendNS(&path, (uint32_t) (token - fileName + 1), fileName);
         mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
         fileName = token + 1;
@@ -34,7 +34,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
     int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC;
     mode_t openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
-    int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
+    FF_AUTO_CLOSE_FD int fd = open(fileName, openFlagsModes, openFlagsRights);
     if (fd == -1) {
         if (errno == ENOENT) {
             createSubfolders(fileName);
@@ -119,7 +119,7 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
                 | GLOB_BRACE
     #endif
             ,
-            NULL,
+            nullptr,
             &gb) != 0)
         return false;
 
@@ -174,7 +174,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         fd_set rd;
         FD_ZERO(&rd);
         FD_SET(ftty, &rd);
-        if (select(ftty + 1, &rd, NULL, NULL, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0) {
+        if (select(ftty + 1, &rd, nullptr, nullptr, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0) {
             return "select(/dev/tty) timeout or failed";
         }
     }
@@ -213,7 +213,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     va_end(args);
 
-    return NULL;
+    return nullptr;
 }
 
 bool ffSuppressIO(bool suppress) {
@@ -258,14 +258,14 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
     }
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
-    if (dir == NULL) {
+    if (dir == nullptr) {
         close(dfd);
         return; // Should not happen
     }
 
     uint32_t folderLength = folder->length;
 
-    if (pretty && folderName != NULL) {
+    if (pretty && folderName != nullptr) {
         for (uint8_t i = 0; i < indentation - 1; i++) {
             fputs("  | ", stdout);
         }
@@ -274,7 +274,7 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     struct dirent* entry;
 
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_name[0] == '.') { // skip hidden files
             continue;
         }
@@ -316,7 +316,7 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 void ffListFilesRecursively(const char* path, bool pretty) {
     FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
-    listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
+    listFilesRecursively(folder.length, &folder, 0, nullptr, pretty);
 }
 
 FFNativeFD ffGetNullFD(void) {

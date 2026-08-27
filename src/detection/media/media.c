@@ -13,7 +13,7 @@ static void removeMediaCoverFile(void) {
 }
 
 const FFMediaResult* ffDetectMedia(bool saveCover) {
-    if (result.error.chars == NULL) {
+    if (result.error.chars == nullptr) {
         ffStrbufInit(&result.error);
         ffStrbufInit(&result.playerId);
         ffStrbufInit(&result.player);

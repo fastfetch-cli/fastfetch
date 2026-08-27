@@ -52,8 +52,8 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
             1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvapi, nvapi_QueryInterface)
     #define FF_NVAPI_INTERFACE(iName, iOffset)                          \
-        __typeof__(&iName) ff##iName = ffnvapi_QueryInterface(iOffset); \
-        if (ff##iName == NULL) return "nvapi_QueryInterface " #iName " failed";
+        typeof(&iName) ff##iName = ffnvapi_QueryInterface(iOffset); \
+        if (ff##iName == nullptr) return "nvapi_QueryInterface " #iName " failed";
 
         FF_NVAPI_INTERFACE(nvapi_Initialize, NVAPI_INTERFACE_OFFSET_INITIALIZE)
         FF_NVAPI_INTERFACE(nvapi_Unload, NVAPI_INTERFACE_OFFSET_UNLOAD)
@@ -72,10 +72,10 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
         nvapiData.ffnvapi_Unload = ffnvapi_Unload;
 
         atexit((void*) ffnvapi_Unload);
-        libnvapi = NULL; // don't close nvapi
+        libnvapi = nullptr; // don't close nvapi
     }
 
-    if (nvapiData.ffnvapi_EnumPhysicalGPUs == NULL) {
+    if (nvapiData.ffnvapi_EnumPhysicalGPUs == nullptr) {
         return "loading nvapi library failed";
     }
 
@@ -141,7 +141,7 @@ static const char* detectMoreByNvapi(FFGpuDriverResult* result) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 #endif
@@ -173,18 +173,18 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetName)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS) {
-            nvmlData.ffnvmlDeviceGetNumGpuCores = NULL;
+            nvmlData.ffnvmlDeviceGetNumGpuCores = nullptr;
             return "nvmlInit_v2() failed";
         }
         atexit((void*) ffnvmlShutdown);
-        libnvml = NULL; // don't close nvml
+        libnvml = nullptr; // don't close nvml
     }
 
-    if (nvmlData.ffnvmlDeviceGetNumGpuCores == NULL) {
+    if (nvmlData.ffnvmlDeviceGetNumGpuCores == nullptr) {
         return "loading nvml library failed";
     }
 
-    nvmlDevice_t device = NULL;
+    nvmlDevice_t device = nullptr;
     if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID) {
         char pciBusIdStr[32];
         snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr), "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
@@ -199,7 +199,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
             return "nvmlDeviceGetCount_v2() failed";
         }
 
-        for (uint32_t i = 0; i < count; i++, device = NULL) {
+        for (uint32_t i = 0; i < count; i++, device = nullptr) {
             if (nvmlData.ffnvmlDeviceGetHandleByIndex_v2(i, &device) != NVML_SUCCESS) {
                 continue;
             }
@@ -319,7 +319,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         }
     }
 
-    return NULL;
+    return nullptr;
 
 #else
 

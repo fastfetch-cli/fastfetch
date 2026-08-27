@@ -8,12 +8,13 @@ typedef struct FFTempValue {
     double value;
 } FFTempValue;
 
-enum FFTempType {
+enum FFTempType: uint8_t {
     FF_TEMP_CPU_X64,
     FF_TEMP_CPU_M1X,
     FF_TEMP_CPU_M2X,
     FF_TEMP_CPU_M3X,
     FF_TEMP_CPU_M4X,
+    FF_TEMP_CPU_M5X,
 
     FF_TEMP_GPU_INTEL,
     FF_TEMP_GPU_AMD,
@@ -22,6 +23,7 @@ enum FFTempType {
     FF_TEMP_GPU_M2X,
     FF_TEMP_GPU_M3X,
     FF_TEMP_GPU_M4X,
+    FF_TEMP_GPU_M5X,
 
     FF_TEMP_BATTERY,
 

@@ -61,5 +61,5 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
         hid_dispose_report_desc(repDesc);
     }
 
-    return NULL;
+    return nullptr;
 }

@@ -15,9 +15,9 @@ const char* ffDetectLibc(FFLibcResult* result) {
     #ifdef FF_MUSL_VERSION
     result->version = FF_MUSL_VERSION;
     #else
-    result->version = NULL;
+    result->version = nullptr;
     #endif
 #endif
 
-    return NULL;
+    return nullptr;
 }

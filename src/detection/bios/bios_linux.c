@@ -17,5 +17,5 @@ const char* ffDetectBios(FFBiosResult* bios) {
     } else {
         ffStrbufSetStatic(&bios->type, "BIOS");
     }
-    return NULL;
+    return nullptr;
 }

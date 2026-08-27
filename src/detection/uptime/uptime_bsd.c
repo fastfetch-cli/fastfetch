@@ -12,7 +12,7 @@ const char* ffDetectUptime(FFUptimeResult* result) {
 #endif
     size_t bootTimeSize = sizeof(bootTime);
     if (sysctl(
-            (int[]) { CTL_KERN, KERN_BOOTTIME }, 2, &bootTime, &bootTimeSize, NULL, 0) != 0) {
+            (int[]) { CTL_KERN, KERN_BOOTTIME }, 2, &bootTime, &bootTimeSize, nullptr, 0) != 0) {
         return "sysctl({CTL_KERN, KERN_BOOTTIME}) failed";
     }
 
@@ -23,5 +23,5 @@ const char* ffDetectUptime(FFUptimeResult* result) {
 #endif
     result->uptime = ffTimeGetNow() - result->bootTime;
 
-    return NULL;
+    return nullptr;
 }

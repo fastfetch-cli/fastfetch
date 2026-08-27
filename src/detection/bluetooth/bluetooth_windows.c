@@ -35,10 +35,10 @@ static const char* ffBluetoothDetectBattery(FFlist* devices) {
     }
 
     if (idListLength == 0) {
-        return NULL;
+        return nullptr;
     }
 
-    wchar_t* FF_AUTO_FREE idList = (wchar_t*) malloc((size_t) idListLength * sizeof(wchar_t));
+    FF_AUTO_FREE wchar_t* idList = (wchar_t*) malloc((size_t) idListLength * sizeof(wchar_t));
     if (!idList) {
         return "malloc() failed";
     }
@@ -94,7 +94,7 @@ static const char* ffBluetoothDetectBattery(FFlist* devices) {
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
@@ -114,7 +114,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         &btdi);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {
-            return NULL;
+            return nullptr;
         }
         return "BluetoothFindFirstDevice() failed";
     }
@@ -219,5 +219,5 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         ffBluetoothDetectBattery(devices);
     }
 
-    return NULL;
+    return nullptr;
 }

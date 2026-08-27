@@ -12,5 +12,5 @@ const char* ffDetectBios(FFBiosResult* bios) {
 
     ffStrbufSetStatic(&bios->type, "Bootloader");
 
-    return NULL;
+    return nullptr;
 }

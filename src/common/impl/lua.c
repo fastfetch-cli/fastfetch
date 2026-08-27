@@ -109,7 +109,7 @@ static int yyjsonEncode(lua_State* L) {
         pretty = (int) lua_toboolean(L, 2);
     }
 
-    yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+    yyjson_mut_doc* doc = yyjson_mut_doc_new(nullptr);
     if (__builtin_expect(!doc, false)) {
         lua_pushlstring(L, "yyjson: yyjson_mut_doc_new() failed", strlen("yyjson: yyjson_mut_doc_new() failed"));
         return lua_error(L);
@@ -120,9 +120,9 @@ static int yyjsonEncode(lua_State* L) {
 
     size_t jsonLen;
     yyjson_write_err err = {};
-    FF_AUTO_FREE const char* jsonStr = yyjson_mut_write_opts(doc, YYJSON_WRITE_ALLOW_INF_AND_NAN | (pretty ? YYJSON_WRITE_PRETTY_TWO_SPACES : 0), NULL, &jsonLen, &err);
+    FF_AUTO_FREE const char* jsonStr = yyjson_mut_write_opts(doc, YYJSON_WRITE_ALLOW_INF_AND_NAN | (pretty ? YYJSON_WRITE_PRETTY_TWO_SPACES : 0), nullptr, &jsonLen, &err);
 
-    if (__builtin_expect(jsonStr != NULL, true)) {
+    if (__builtin_expect(jsonStr != nullptr, true)) {
         lua_pushlstring(L, jsonStr, jsonLen);
         yyjson_mut_doc_free(doc);
         return 1;
@@ -140,10 +140,10 @@ static int yyjsonEncode(lua_State* L) {
 
 const char* ffLuaLoadState(void) {
     if (luaData.inited) {
-        if (luaData.L == NULL) {
+        if (luaData.L == nullptr) {
             return "Lua library is not available";
         }
-        return NULL;
+        return nullptr;
     }
 
     luaData.inited = true;
@@ -211,7 +211,7 @@ const char* ffLuaLoadState(void) {
     #endif
 
     lua_State* L = ffluaL_newstate();
-    if (L == NULL) {
+    if (L == nullptr) {
         return "luaL_newstate() failed";
     }
     #if LUA_VERSION_NUM >= 505
@@ -226,8 +226,8 @@ const char* ffLuaLoadState(void) {
     lua_pushcfunction(L, yyjsonEncode);
     lua_setglobal(L, "json_encode");
     luaData.L = L;
-    liblua = NULL; // don't close lua
-    return NULL;
+    liblua = nullptr; // don't close lua
+    return nullptr;
 }
 
 #endif
