@@ -41,10 +41,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --stat false
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan:bluetooth:bluetoothradio --stat false
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan --format json
+        run: time ./fastfetch -c presets/ci.jsonc --structure-disabled vulkan:bluetooth:bluetoothradio --format json
 
       - name: run flashfetch
         run: time ./flashfetch

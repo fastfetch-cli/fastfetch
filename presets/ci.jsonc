@@ -95,8 +95,8 @@
         "opengl",
         "opencl",
         "users",
-        // "bluetooth", // doesn't work on macOS because it requires bluetooth permissions
-        // "bluetoothradio",
+        "bluetooth",
+        "bluetoothradio",
         "sound",
         "camera",
         "gamepad",
