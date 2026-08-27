@@ -176,6 +176,17 @@ jobs:
     secrets:
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
+  benchmark:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && github.repository == 'fastfetch-cli/fastfetch'
+    name: Benchmark
+    needs:
+      - linux-hosts
+      - macos-hosts
+      - windows-hosts
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-benchmark.yml
+
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
