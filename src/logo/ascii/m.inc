@@ -103,6 +103,19 @@ static const FFlogo M[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACOS_OLD
+    // MacOS_old
+    {
+        .names = { "macOS_old" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS_OLD,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_MAINSAILOS
     // MainsailOS
     {

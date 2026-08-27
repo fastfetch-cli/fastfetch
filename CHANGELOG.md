@@ -29,6 +29,9 @@ Bugfixes:
     * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
 * Some internal cleanups and optimizations.
 
+Logos:
+* Added macOS_old
+
 # 2.67.1
 
 Bugfixes:
