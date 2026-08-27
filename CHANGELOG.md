@@ -4,6 +4,10 @@ Changes:
 * The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
 
 Features:
+* Improved Login Manager (LM) module
+    * Added support on macOS, Windows and POSIX systems without systemd (by process list enumeration).
+    * Reports pretty name on Linux.
+* Added Top module to print processes with the highest CPU, memory or disk I/O usage. (Top)
 * Added module key localization support. (General)
     * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
     * See `fastfetch -h key-language` for all supported languages.
@@ -15,9 +19,14 @@ Features:
 * Added terminal font size detection support on Termux. (TerminalFont, Android)
 * Improved GTK theme/icons/font detection on standalone WMs such as Hyprland, sway, niri and i3. (Theme, Linux)
 * Improved fish completion scripts to print enum descriptions. (Completion)
+* Enabled Wayland support on Android. (DisplayServer, Android)
+* Added DE detection support for ASUS Zenfone. (DE, Android)
 
 Bugfixes:
 * Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
+* Fixed the fast path of ash version detection. (Shell)
+* Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
+    * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
 * Some internal cleanups and optimizations.
 
 # 2.67.1
