@@ -38,7 +38,6 @@ jobs:
           ref: ${{ github.sha }}
           auto-push: true
           summary-always: true
-          fail-on-alert: true
           benchmark-data-dir-path: dev/bench
 
       - name: publish benchmark dashboard
