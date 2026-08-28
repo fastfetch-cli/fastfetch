@@ -18,40 +18,49 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
     }
 
     ffStrbufSetNS(&result->name, (uint32_t) (close - open - 1), open + 1);
-    const char* cursor = close + 2; // state, then fields 4..
-    if (*cursor == '\0') {
-        FF_DEBUG("parseStat(%s): truncated after state field", result->name.chars);
-        return false;
-    }
-    ++cursor;
 
-    uint64_t values[19];
-    for (uint32_t field = 4; field <= 22; ++field) {
-        while (*cursor == ' ') {
-            ++cursor;
-        }
-        if (*cursor == '\0') {
-            FF_DEBUG("parseStat(%s): truncated at field %u", result->name.chars, field);
-            return false;
-        }
-        char* end;
-        errno = 0;
-        unsigned long long value = strtoull(cursor, &end, 10);
-        if (end == cursor || errno == ERANGE) {
-            FF_DEBUG("parseStat(%s): invalid number at field %u", result->name.chars, field);
-            return false;
-        }
-        values[field - 4] = (uint64_t) value;
-        cursor = end;
-    }
-
-    if (values[5] & PF_KTHREAD) { // values[5] is field 9 (flags)
-        FF_DEBUG("Skip kernel thread: %s", result->name.chars);
+    const char* cursor = close + 2; // skip ") "
+    if (__builtin_expect(cursor >= buffer + length, false)) {
         return false;
     }
 
-    result->cpuTime = values[11] + values[12]; // user + system
-    result->startTime = values[18];
+    result->cpuTime = 0;
+
+    char* p;
+    for (uint32_t field = 3; field <= 22 /*start time*/; ++field) {
+        switch (field) {
+            case 9: // flags
+                if ((strtoul(cursor, &p, 10) & PF_KTHREAD)) {
+                    FF_DEBUG("parseStat: skipping kernel task %s", result->name.chars);
+                    return false;
+                }
+                cursor = p;
+                break;
+
+            case 14: // user
+            case 15: // system
+                result->cpuTime += (uint64_t) strtoull(cursor, &p, 10);
+                cursor = p;
+                break;
+
+            case 22: // start time
+                result->startTime = (uint64_t) strtoull(cursor, &p, 10);
+                cursor = p;
+                break;
+
+            default:
+                while (*cursor != ' ' && __builtin_expect(*cursor != '\0', true)) {
+                    ++cursor;
+                }
+                break;
+        }
+
+        ++cursor;
+        if (__builtin_expect(cursor >= buffer + length, false)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -72,7 +81,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int procfd = dirfd(dir);
 
     struct dirent* entry;
-    char statBuffer[4096];
+    char statBuffer[1024];
     char statmBuffer[256];
     while ((entry = readdir(dir))) {
         if (!entry->d_name[0] || !ffCharIsDigit(entry->d_name[0])) {
@@ -119,6 +128,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
 
         auto snapshot = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
         ffStrbufInit(&snapshot->name);
+
         if (!parseStat(statBuffer, (size_t) statLength, snapshot)) {
             ffStrbufDestroy(&snapshot->name);
             --snapshots->length;
