@@ -46,6 +46,17 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
         ffStrbufInitS(&item->name, proc->kp_proc.p_comm);
         item->pid = (uint32_t) pid;
+        // Note: Do NOT use proc->kp_proc.p_pctcpu for CPU usage. p_pctcpu is a
+        // decaying average (fixpt_t with FSCALE=2048) updated roughly once per
+        // second by the kernel. It is heavily smoothed, lags short bursts, has
+        // low resolution, and its multicore scaling (>100%) is inconsistent
+        // across XNU versions. It also breaks the unified model where
+        // FFTopProcessSnapshot.cpuTime is cumulative time and top.c computes
+        // (new - old) / elapsed * 100 for all platforms. proc_pid_rusage with
+        // RUSAGE_INFO_V2 provides precise cumulative ri_user_time +
+        // ri_system_time in nanoseconds and is the modern recommended API on
+        // Darwin, consistent with Linux/BSD differential sampling and accurate
+        // for the short waitTime interval (e.g. 100ms).
         item->cpuTime = (rusage.ri_user_time + rusage.ri_system_time) / 1000000u; // ns -> ms
         item->memBytes = rusage.ri_resident_size;
         item->bytesRead = rusage.ri_diskio_bytesread;
