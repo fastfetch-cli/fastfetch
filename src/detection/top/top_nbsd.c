@@ -11,24 +11,15 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     size_t length;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL}) failed";
+        return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, nullptr}) failed";
     }
 
     // The process table may change between the two sysctl calls; retry with a larger buffer.
-    FF_AUTO_FREE struct kinfo_proc2* processes = nullptr;
-    for (int attempts = 0;; ++attempts) {
-        length += length / 8 + sizeof(struct kinfo_proc2);
-        struct kinfo_proc2* newProcesses = (struct kinfo_proc2*) realloc(processes, length);
-        if (!newProcesses) {
-            return "realloc(struct kinfo_proc2[]) failed";
-        }
-        processes = newProcesses;
-        if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) == 0) {
-            break;
-        }
-        if ((errno != ENOMEM && errno != EINVAL) || attempts >= 4) {
-            return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL}) failed";
-        }
+    length += length / 8 + sizeof(struct kinfo_proc2);
+
+    FF_AUTO_FREE struct kinfo_proc2* processes = malloc(length);
+    if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, processes}) failed";
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc2));
 

@@ -15,20 +15,10 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     }
 
     // The process table may change between the two sysctl calls; retry with a larger buffer.
-    FF_AUTO_FREE struct kinfo_proc* processes = nullptr;
-    for (int attempts = 0;; ++attempts) {
-        length += length / 8 + sizeof(struct kinfo_proc);
-        struct kinfo_proc* newProcesses = (struct kinfo_proc*) realloc(processes, length);
-        if (!newProcesses) {
-            return "realloc(struct kinfo_proc[]) failed";
-        }
-        processes = newProcesses;
-        if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) == 0) {
-            break;
-        }
-        if ((errno != ENOMEM && errno != EINVAL) || attempts >= 4) {
-            return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
-        }
+    length += length / 8 + sizeof(struct kinfo_proc);
+    FF_AUTO_FREE struct kinfo_proc* processes = malloc(length);
+    if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
 
