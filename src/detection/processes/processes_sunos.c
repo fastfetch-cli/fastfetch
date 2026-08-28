@@ -5,34 +5,36 @@
 
 #include <procfs.h>
 
-const char* ffDetectProcesses(FFProcessesResult* result) {
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (dir == nullptr) {
         return "opendir(\"/proc\") failed";
     }
-
-    uint32_t processes = 0;
-    uint32_t threads = 0;
 
     int procfd = dirfd(dir);
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != nullptr) {
         if (ffCharIsDigit(entry->d_name[0])) {
-            ++processes;
+            char path[32];
+            char* pidEnd = ffStrCopy(path, entry->d_name, sizeof(path));
+            if (!options->countKprocs) {
+                pstatus_t status;
+                strcpy(pidEnd, "/status");
+                if (ffReadFileDataRelative(procfd, path, sizeof(status), &status) != (ssize_t) sizeof(status) ||
+                    status.pr_flags & PR_ISSYS) {
+                    continue; // The process may have exited, no permission or is a kernel process
+                }
+            }
 
-            char psinfoPath[32];
-            strcpy(ffStrCopy(psinfoPath, entry->d_name, sizeof(psinfoPath)), "/psinfo");
-
+            strcpy(pidEnd, "/psinfo");
             psinfo_t info;
-            if (ffReadFileDataRelative(procfd, psinfoPath, sizeof(info), &info) == (ssize_t) sizeof(info)) {
-                threads += info.pr_nlwp;
+            if (ffReadFileDataRelative(procfd, path, sizeof(info), &info) == (ssize_t) sizeof(info)) {
+                ++result->processes;
+                result->threads += (uint32_t) info.pr_nlwp;
             }
         }
     }
-
-    result->processes = processes;
-    result->threads = threads;
 
     return nullptr;
 }

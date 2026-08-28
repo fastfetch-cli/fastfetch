@@ -3,7 +3,7 @@
 #include <hurd.h>
 #include <ps.h>
 
-const char* ffDetectProcesses(FFProcessesResult* result) {
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     struct ps_context* context = nullptr;
     if (ps_context_create(getproc(), &context) != 0) {
         return "ps_context_create(getproc()) failed";
@@ -16,26 +16,27 @@ const char* ffDetectProcesses(FFProcessesResult* result) {
         goto done;
     }
 
-    struct proc_stat **stats = nullptr;
-    unsigned int numProcs = 0;
-    if (proc_stat_list_add_all(list, &stats, &numProcs) != 0) {
+    if (proc_stat_list_add_all(list, nullptr, nullptr) != 0) {
         error = "proc_stat_list_add_all() failed";
         goto done;
     }
 
-    uint32_t nthread = 0;
-    for (unsigned int i = 0; i < numProcs; i++) {
-        proc_stat_get_basic_info(stats[i]);
-        nthread += proc_stat_thread_count(stats[i]);
+    proc_stat_list_set_flags(list, PSTAT_NUM_THREADS);
+
+    for (uint32_t i = 0; i < list->num_procs; i++) {
+        struct proc_stat* stat = list->proc_stats[i];
+        if (!options->countKprocs && proc_stat_pid(stat) == 2) { // Kernel Task
+            continue;
+        }
+
+        if (proc_stat_has(stat, PSTAT_NUM_THREADS)) {
+            result->threads += proc_stat_num_threads(stat);
+        }
     }
 
-    result->processes = (uint32_t) numProcs;
-    result->threads = nthread;
+    result->processes = (uint32_t) list->num_procs;
 
 done:
-    if (stats) {
-        proc_stat_list_free_stats(stats, numProcs);
-    }
     if (list) {
         proc_stat_list_free(list);
     }

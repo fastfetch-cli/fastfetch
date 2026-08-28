@@ -4,7 +4,7 @@
 #include <ntstatus.h>
 #include <winternl.h>
 
-const char* ffDetectProcesses(FFProcessesResult* result) {
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     FF_AUTO_FREE SYSTEM_PROCESS_INFORMATION* pstart = nullptr;
 
     // Multiple attempts in case processes change while
@@ -25,17 +25,16 @@ const char* ffDetectProcesses(FFProcessesResult* result) {
         }
     }
 
-    uint32_t processes = 0;
-    uint32_t threads = 0;
     for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ; ptr = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) ptr + ptr->NextEntryOffset)) {
-        ++processes;
-        threads += ptr->NumberOfThreads;
+        if (!options->countKprocs && ptr->CreateTime.QuadPart == 0) {
+            continue;
+        }
+        ++result->processes;
+        result->threads += ptr->NumberOfThreads;
         if (ptr->NextEntryOffset == 0) {
             break;
         }
     }
-    result->processes = processes;
-    result->threads = threads;
 
     return nullptr;
 }

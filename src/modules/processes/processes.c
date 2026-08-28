@@ -6,7 +6,7 @@
 
 bool ffPrintProcesses(FFProcessesOptions* options) {
     FFProcessesResult result = {};
-    const char* error = ffDetectProcesses(&result);
+    const char* error = ffDetectProcesses(options, &result);
 
     if (error) {
         ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
@@ -32,17 +32,23 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "countKprocs")) {
+            options->countKprocs = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateProcessesJsonConfig(FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "countKprocs", options->countKprocs);
 }
 
 bool ffGenerateProcessesJsonResult([[maybe_unused]] FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFProcessesResult result = {};
-    const char* error = ffDetectProcesses(&result);
+    const char* error = ffDetectProcesses(options, &result);
 
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
@@ -57,6 +63,8 @@ bool ffGenerateProcessesJsonResult([[maybe_unused]] FFProcessesOptions* options,
 
 void ffInitProcessesOptions(FFProcessesOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->countKprocs = false;
 }
 
 void ffDestroyProcessesOptions(FFProcessesOptions* options) {
@@ -65,7 +73,7 @@ void ffDestroyProcessesOptions(FFProcessesOptions* options) {
 
 FFModuleBaseInfo ffProcessesModuleInfo = {
     .name = "Processes",
-    .description = "Print number of running processes",
+    .description = "Print number of running processes and threads",
     .displayName = {
         .en = "Processes",
         .ar = "العمليات",

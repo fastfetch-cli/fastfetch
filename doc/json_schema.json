@@ -3984,7 +3984,12 @@
                                 "properties": {
                                     "type": {
                                         "const": "processes",
-                                        "description": "Print the number of running processes"
+                                        "description": "Print the number of running processes and threads"
+                                    },
+                                    "countKprocs": {
+                                        "description": "Whether to take kernel processes and threads into account",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

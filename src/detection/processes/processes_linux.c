@@ -4,26 +4,23 @@
 #include "common/memrchr.h"
 #include "common/strutil.h"
 
-const char* ffDetectProcesses(FFProcessesResult* result) {
+#define PF_KTHREAD 0x00200000 // defined in kernel include/linux/sched.h
+
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (dir == nullptr) {
         return "opendir(\"/proc\") failed";
     }
-
-    uint32_t processes = 0;
-    uint32_t threads = 0;
 
     int procfd = dirfd(dir);
 
     struct dirent* entry;
     while ((entry = readdir(dir)) != nullptr) {
         if ((entry->d_type == DT_DIR || entry->d_type == DT_UNKNOWN) && ffCharIsDigit(entry->d_name[0])) {
-            ++processes;
-
             char statPath[32];
             strcpy(ffStrCopy(statPath, entry->d_name, sizeof(statPath)), "/stat");
 
-            char statBuffer[256];
+            char statBuffer[512];
             ssize_t statLength = ffReadFileDataRelative(procfd, statPath, sizeof(statBuffer) - 1, statBuffer);
             if (statLength < 0) {
                 continue;
@@ -34,27 +31,43 @@ const char* ffDetectProcesses(FFProcessesResult* result) {
             if (!cursor) {
                 continue;
             }
-            ++cursor;
+            cursor += 2; // skip ") "
+            if (__builtin_expect(cursor >= statBuffer + statLength, false)) {
+                goto skip_process;
+            }
 
-            for (uint32_t field = 2 /*comm*/; field < 20 /*num_threads*/; ++field) {
-                while (*cursor != ' ' && __builtin_expect(*cursor != '\0', true)) {
-                    ++cursor;
+            char* p;
+            for (uint32_t field = 3; field <= 20 /*num_threads*/; ++field) {
+                switch (field) {
+                    case 9: // flags
+                        if ((strtoul(cursor, &p, 10) & PF_KTHREAD) && !options->countKprocs) {
+                            goto skip_process;
+                        }
+                        cursor = p;
+                        break;
+
+                    case 20: // num_threads
+                        result->threads += (uint32_t) strtoul(cursor, &p, 10);
+                        cursor = p;
+                        break;
+
+                    default:
+                        while (*cursor != ' ' && __builtin_expect(*cursor != '\0', true)) {
+                            ++cursor;
+                        }
+                        break;
                 }
+
                 ++cursor;
-                if (__builtin_expect(*cursor == '\0', false)) {
-                    break;
+                if (__builtin_expect(cursor >= statBuffer + statLength, false)) {
+                    goto skip_process;
                 }
             }
-            if (__builtin_expect(*cursor == '\0', false)) {
-                continue;
-            }
 
-            threads += (uint32_t) strtoul(cursor, nullptr, 10);
+            ++result->processes;
         }
+        skip_process:;
     }
-
-    result->processes = processes;
-    result->threads = threads;
 
     return nullptr;
 }

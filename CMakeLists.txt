@@ -813,7 +813,6 @@ elseif(FreeBSD)
         src/detection/os/os_linux.c
         src/detection/packages/packages_bsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_bsd.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_bsd.c
         src/detection/swap/swap_bsd.c
@@ -833,12 +832,14 @@ elseif(FreeBSD)
     if(DragonFly)
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_nosupport.c
+            src/detection/processes/processes_dbsd.c
             src/detection/top/top_dbsd.c
             src/detection/wifi/wifi_nosupport.c
         )
     else()
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_bsd.c
+            src/detection/processes/processes_bsd.c
             src/detection/top/top_bsd.c
             src/detection/wifi/wifi_bsd.c
         )

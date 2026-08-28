@@ -1,26 +1,36 @@
 #include "processes.h"
 
+#include "common/mallocHelper.h"
+
 #include <sys/param.h>
 #include <sys/sysctl.h>
+#include <kvm.h>
 
-const char* ffDetectProcesses(FFProcessesResult* result) {
-    int procRequest[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), 0 };
-    size_t procLength = 0;
-
-    if (sysctl(procRequest, ARRAY_SIZE(procRequest), nullptr, &procLength, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}) failed";
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
+    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    if (!kd) {
+        return "kvm_open() failed";
     }
 
-    result->processes = (uint32_t) (procLength / sizeof(struct kinfo_proc));
-
-    int threadRequest[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL | KERN_PROC_SHOW_THREADS, 0, sizeof(struct kinfo_proc), 0 };
-    size_t threadLength = 0;
-
-    if (sysctl(threadRequest, ARRAY_SIZE(threadRequest), nullptr, &threadLength, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL | KERN_PROC_SHOW_THREADS}) failed";
+    int count = 0;
+    // KERN_PROC_ALL returns all user-level processes, excluding kernel processes and threads
+    const struct kinfo_proc* procs = kvm_getprocs(kd,
+        (options->countKprocs ? KERN_PROC_KTHREAD : KERN_PROC_ALL) | KERN_PROC_SHOW_THREADS,
+        0, sizeof(struct kinfo_proc), &count);
+    if (!procs) {
+        kvm_close(kd);
+        return "kvm_getprocs() failed";
     }
 
-    result->threads = (uint32_t) (threadLength / sizeof(struct kinfo_proc));
+    for (int i = 0; i < count; ++i) {
+        const struct kinfo_proc* proc = &procs[i];
 
+        ++result->threads;
+        if (proc->p_tid == -1) {
+            ++result->processes;
+        }
+    }
+
+    kvm_close(kd);
     return nullptr;
 }
