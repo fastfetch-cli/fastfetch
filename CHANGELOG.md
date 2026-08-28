@@ -31,6 +31,7 @@ Bugfixes:
 
 Logos:
 * Added macOS_old
+* Added Omarchy, Omarchy2
 
 # 2.67.1
 
