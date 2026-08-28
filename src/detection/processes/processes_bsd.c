@@ -1,23 +1,23 @@
 #include "processes.h"
 
 #include <sys/sysctl.h>
-#ifdef __FreeBSD__
-    #include <sys/types.h>
-    #include <sys/user.h>
-#endif
+#include <sys/types.h>
+#include <sys/user.h>
 
-#ifndef KERN_PROC_PROC
-    #define KERN_PROC_PROC KERN_PROC_ALL // Apple
-#endif
-
-const char* ffDetectProcesses(uint32_t* result) {
-    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_PROC };
-    size_t length;
-
-    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+const char* ffDetectProcesses(FFProcessesResult* result) {
+    int procRequest[] = { CTL_KERN, KERN_PROC, KERN_PROC_PROC };
+    size_t procLength;
+    if (sysctl(procRequest, ARRAY_SIZE(procRequest), nullptr, &procLength, nullptr, 0) != 0) {
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
 
-    *result = (uint32_t) (length / sizeof(struct kinfo_proc));
+    int threadRequest[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
+    size_t threadLength;
+    if (sysctl(threadRequest, ARRAY_SIZE(threadRequest), nullptr, &threadLength, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}) failed";
+    }
+
+    result->processes = (uint32_t) (procLength / sizeof(struct kinfo_proc));
+    result->threads = (uint32_t) (threadLength / sizeof(struct kinfo_proc));
     return nullptr;
 }

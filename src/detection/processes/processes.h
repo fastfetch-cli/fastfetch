@@ -2,4 +2,10 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectProcesses(uint32_t* result);
+typedef struct FFProcessesResult
+{
+    uint32_t processes;
+    uint32_t threads;
+} FFProcessesResult;
+
+const char* ffDetectProcesses(FFProcessesResult* result);

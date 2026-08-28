@@ -1065,7 +1065,7 @@ elseif(APPLE)
         src/detection/packages/packages_apple.c
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_apple.c
-        src/detection/processes/processes_bsd.c
+        src/detection/processes/processes_apple.c
         src/detection/sound/sound_apple.c
         src/detection/swap/swap_apple.c
         src/detection/terminalfont/terminalfont_apple.m
@@ -1240,7 +1240,7 @@ elseif(SunOS)
         src/detection/os/os_sunos.c
         src/detection/packages/packages_sunos.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_linux.c
+        src/detection/processes/processes_sunos.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_sunos.c
         src/detection/swap/swap_sunos.c
