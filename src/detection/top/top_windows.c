@@ -33,7 +33,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         if (pidValue <= UINT32_MAX && info->CreateTime.QuadPart > 0) {
             FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
             item->pid = (uint32_t) pidValue;
-            item->startTime = info->CreateTime.QuadPart > 0 ? (uint64_t) info->CreateTime.QuadPart : 0;
+            item->startTime = (uint64_t) info->CreateTime.QuadPart;
             item->cpuTime = ((uint64_t) info->UserTime.QuadPart + (uint64_t) info->KernelTime.QuadPart) / 10000u;
             item->memBytes = (uint64_t) info->VirtualMemoryCounters.WorkingSetSize;
             item->bytesRead = (uint64_t) info->IoCounters.ReadTransferCount;

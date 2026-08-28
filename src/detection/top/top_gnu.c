@@ -39,6 +39,11 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             continue;
         }
 
+        uint32_t pid = (uint32_t) proc_stat_pid(stat);
+        if (pid == 2) { // Kernel Task
+            continue;
+        }
+
         FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
 
         // There is no kernel-side comm on the Hurd; use the first argument.
@@ -51,7 +56,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             ffStrbufAppendS(&item->name, "(unknown)");
         }
 
-        item->pid = (uint32_t) proc_stat_pid(stat);
+        item->pid = pid;
 
         if (proc_stat_has(stat, PSTAT_TASK_BASIC)) {
             const task_basic_info_t info = proc_stat_task_basic_info(stat);

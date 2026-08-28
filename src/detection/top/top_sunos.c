@@ -26,15 +26,21 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
             continue;
         }
 
+        pstatus_t status;
+        if (ffReadFileDataRelative(subfd, "status", sizeof(status), &status) != (ssize_t) sizeof(status) ||
+            status.pr_flags & PR_ISSYS) {
+            continue; // The process may have exited, no permission or is a kernel process
+        }
+
         // The data model of the returned structure depends on the data model of
         // the calling process, not of the observed process.
         psinfo_t psinfo;
         if (ffReadFileDataRelative(subfd, "psinfo", sizeof(psinfo), &psinfo) != (ssize_t) sizeof(psinfo)) {
-            continue; // The process may have exited
+            continue;
         }
 
-        // pr_nlwp is zero for system processes and zombies
-        if (psinfo.pr_nlwp == 0 || psinfo.pr_lwp.pr_sname == 'Z') {
+        // zombies
+        if (psinfo.pr_lwp.pr_sname == 'Z') {
             continue;
         }
 

@@ -28,8 +28,8 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
     for (uint32_t i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &processes[i];
 
-        // Kernel threads are reported with P_SYSTEM flags and pid -1.
-        if ((proc->kp_flags & P_SYSTEM) || proc->kp_stat == SZOMB) {
+        // KERN_PROC_ALL won't return kernel threads
+        if (proc->kp_stat == SZOMB) { // Ignore zombie processes
             continue;
         }
 
