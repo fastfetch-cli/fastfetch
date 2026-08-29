@@ -55,8 +55,9 @@ bool ffGenerateProcessesJsonResult([[maybe_unused]] FFProcessesOptions* options,
         return false;
     }
 
-    yyjson_mut_obj_add_uint(doc, module, "processes", result.processes);
-    yyjson_mut_obj_add_uint(doc, module, "threads", result.threads);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_uint(doc, obj, "processes", result.processes);
+    yyjson_mut_obj_add_uint(doc, obj, "threads", result.threads);
 
     return true;
 }
