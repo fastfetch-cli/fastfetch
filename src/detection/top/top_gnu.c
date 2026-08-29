@@ -60,16 +60,16 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
         if (proc_stat_has(stat, PSTAT_TASK_BASIC)) {
             const task_basic_info_t info = proc_stat_task_basic_info(stat);
-            item->cpuTime = (uint64_t) info->user_time.seconds * 1000 +
-                (uint64_t) info->user_time.microseconds / 1000 +
-                (uint64_t) info->system_time.seconds * 1000 +
-                (uint64_t) info->system_time.microseconds / 1000;
+            item->cpuTime = (uint64_t) info->user_time64.seconds * 1000 +
+                (uint64_t) info->user_time64.nanoseconds / 1000000 +
+                (uint64_t) info->system_time64.seconds * 1000 +
+                (uint64_t) info->system_time64.nanoseconds / 1000000;
             item->memBytes = (uint64_t) info->resident_size;
+            item->startTime = (uint64_t) info->creation_time64.seconds * 1000 +
+                (uint64_t) info->creation_time64.nanoseconds / 1000000;
         }
 
-        // Neither process start times nor storage io counters are exposed by
-        // the Hurd; leave them zeroed.
-        item->startTime = 0;
+        // Storage io counters aren't exposed by kernel; leave them zeroed.
         item->bytesRead = 0;
         item->bytesWritten = 0;
     }
