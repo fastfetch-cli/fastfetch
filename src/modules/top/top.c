@@ -223,7 +223,11 @@ bool ffGenerateTopJsonResult(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffInitTopOptions(FFTopOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰍛");
     options->sort = FF_TOP_TYPE_CPU;
-    options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
+    options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY
+    #if !__GNU__ && !__HAIKU__
+        | FF_TOP_TYPE_DISK
+    #endif
+    ;
     options->nProcesses = 5;
     options->waitTime = 500;
     options->compact = false;
