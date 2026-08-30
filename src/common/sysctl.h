@@ -14,4 +14,3 @@ const char* ffSysctlGetString(const char* propName, FFstrbuf* result);
 [[nodiscard]] int ffSysctlGetInt(const char* propName, int defaultValue);
 [[nodiscard]] int64_t ffSysctlGetInt64(const char* propName, int64_t defaultValue);
 #endif
-[[nodiscard]] void* ffSysctlGetData(int* request, u_int requestLength, size_t* resultLength);

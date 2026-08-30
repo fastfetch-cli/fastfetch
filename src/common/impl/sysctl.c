@@ -116,18 +116,3 @@ int64_t ffSysctlGetInt64(const char* propName, int64_t defaultValue) {
     }
 }
 #endif // OpenBSD
-
-void* ffSysctlGetData(int* request, u_int requestLength, size_t* resultLength) {
-    if (sysctl(request, requestLength, nullptr, resultLength, nullptr, 0) != 0) {
-        return nullptr;
-    }
-
-    void* data = malloc(*resultLength);
-
-    if (sysctl(request, requestLength, data, resultLength, nullptr, 0) != 0) {
-        free(data);
-        return nullptr;
-    }
-
-    return data;
-}
