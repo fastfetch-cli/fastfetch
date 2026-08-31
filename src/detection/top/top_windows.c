@@ -30,7 +30,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
     for (SYSTEM_PROCESS_INFORMATION* info = pstart;; info = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) info + info->NextEntryOffset)) {
         uintptr_t pidValue = (uintptr_t) info->UniqueProcessId;
-        if (pidValue <= UINT32_MAX && info->CreateTime.QuadPart > 0) {
+        if (pidValue <= UINT32_MAX && (uintptr_t) info->InheritedFromUniqueProcessId > 0) {
             FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
             item->pid = (uint32_t) pidValue;
             item->startTime = (uint64_t) info->CreateTime.QuadPart;

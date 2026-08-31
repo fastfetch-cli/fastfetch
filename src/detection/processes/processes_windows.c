@@ -26,7 +26,7 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
     }
 
     for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ; ptr = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) ptr + ptr->NextEntryOffset)) {
-        if (!options->countKprocs && ptr->CreateTime.QuadPart == 0) {
+        if (!options->countKprocs && (uintptr_t) ptr->InheritedFromUniqueProcessId > 0) {
             continue;
         }
         ++result->processes;
