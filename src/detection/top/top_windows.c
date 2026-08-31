@@ -38,6 +38,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             item->memBytes = (uint64_t) info->VirtualMemoryCounters.WorkingSetSize;
             item->bytesRead = (uint64_t) info->IoCounters.ReadTransferCount;
             item->bytesWritten = (uint64_t) info->IoCounters.WriteTransferCount;
+            item->threads = info->NumberOfThreads;
             ffStrbufInitNWS(&item->name, info->ImageName.Length / sizeof(wchar_t), info->ImageName.Buffer);
         }
         if (info->NextEntryOffset == 0) {

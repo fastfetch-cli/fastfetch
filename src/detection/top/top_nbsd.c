@@ -6,7 +6,7 @@
 #include <sys/sysctl.h>
 #include <errno.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC2, KERN_PROC_ALL, -1, sizeof(struct kinfo_proc2), INT_MAX };
     size_t length;
 
@@ -50,6 +50,14 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
         item->bytesRead = (uint64_t) proc->p_uru_inblock * DEV_BSIZE;
         item->bytesWritten = (uint64_t) proc->p_uru_oublock * DEV_BSIZE;
+        item->threads = 0;
+        if (showTypes & FF_TOP_TYPE_THREADS) {
+            int lwpRequest[] = { CTL_KERN, KERN_LWP, proc->p_pid, sizeof(struct kinfo_lwp), 0 };
+            size_t lwpLength = 0;
+            if (sysctl(lwpRequest, ARRAY_SIZE(lwpRequest), nullptr, &lwpLength, nullptr, 0) == 0) {
+                item->threads = (uint32_t) (lwpLength / sizeof(struct kinfo_lwp));
+            }
+        }
     }
 
     return NULL;

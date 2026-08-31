@@ -5,7 +5,7 @@
 #include <sys/sysctl.h>
 #include <kvm.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     if (!kd) {
         return "kvm_open() failed";
@@ -37,6 +37,23 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         item->startTime = (uint64_t) proc->p_ustart_sec * 1000 + (uint64_t) proc->p_ustart_usec / 1000;
         item->bytesRead = (uint64_t) proc->p_uru_inblock * DEV_BSIZE;
         item->bytesWritten = (uint64_t) proc->p_uru_oublock * DEV_BSIZE;
+        item->threads = 0;
+    }
+
+    if (showTypes & FF_TOP_TYPE_THREADS) {
+        int threadCount = 0;
+        const struct kinfo_proc* threads = kvm_getprocs(kd,
+            KERN_PROC_ALL | KERN_PROC_SHOW_THREADS, 0, sizeof(struct kinfo_proc), &threadCount);
+        if (threads) {
+            for (uint32_t i = 0; i < snapshots->length; ++i) {
+                FFTopProcessSnapshot* item = FF_LIST_GET(FFTopProcessSnapshot, *snapshots, i);
+                for (int j = 0; j < threadCount; ++j) {
+                    if (threads[j].p_pid == (pid_t) item->pid && threads[j].p_tid != -1) {
+                        ++item->threads;
+                    }
+                }
+            }
+        }
     }
 
     kvm_close(kd);

@@ -24,8 +24,6 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
         return false;
     }
 
-    result->cpuTime = 0;
-
     char* p;
     for (uint32_t field = 3; field <= 22 /*start time*/; ++field) {
         switch (field) {
@@ -40,6 +38,11 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
             case 14: // user
             case 15: // system
                 result->cpuTime += (uint64_t) strtoull(cursor, &p, 10);
+                cursor = p;
+                break;
+
+            case 20: // number of threads
+                result->threads = (uint32_t) strtoul(cursor, &p, 10);
                 cursor = p;
                 break;
 
@@ -128,6 +131,9 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
 
         auto snapshot = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
         ffStrbufInit(&snapshot->name);
+        snapshot->threads = 0;
+        snapshot->cpuTime = 0;
+        snapshot->startTime = 0;
 
         if (!parseStat(statBuffer, (size_t) statLength, snapshot)) {
             ffStrbufDestroy(&snapshot->name);

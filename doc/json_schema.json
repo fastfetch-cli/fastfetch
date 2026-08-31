@@ -506,7 +506,7 @@
             "type": "string"
         },
         "topFormat": {
-            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {pid}: Process ID\n    3. {cpu}: CPU usage\n    4. {mem}: Memory usage (RSS) in bytes\n    5. {disk-read}: Disk read bytes per second (0 if unsupported)\n    6. {disk-write}: Disk write bytes per second (0 if unsupported)\n    7. {cpu-percentage}: CPU usage percentage\n    8. {mem-formatted}: Memory usage (RSS) formatted\n    9. {disk-read-formatted}: Disk read formatted\n    10. {disk-write-formatted}: Disk write formatted",
+            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {pid}: Process ID\n    3. {cpu}: CPU usage\n    4. {mem}: Memory usage (RSS) in bytes\n    5. {disk-read}: Disk read bytes per second (0 if unsupported)\n    6. {disk-write}: Disk write bytes per second (0 if unsupported)\n    7. {threads}: Number of threads\n    8. {cpu-percentage}: CPU usage percentage\n    9. {mem-formatted}: Memory usage (RSS) formatted\n    10. {disk-read-formatted}: Disk read formatted\n    11. {disk-write-formatted}: Disk write formatted",
             "type": "string"
         },
         "themeFormat": {
@@ -4441,22 +4441,23 @@
                                 "properties": {
                                     "type": {
                                         "const": "top",
-                                        "description": "Print processes with the highest CPU, memory, disk I/O usage or latest start time"
+                                        "description": "Print processes with the highest CPU, memory, disk I/O usage, latest start time or thread count"
                                     },
                                     "sort": {
                                         "type": "string",
-                                        "description": "Sort processes by CPU, memory, disk IO usage or start time",
+                                        "description": "Sort processes by CPU, memory, disk IO usage, start time or thread count",
                                         "enum": [
                                             "cpu",
                                             "memory",
                                             "disk-read",
                                             "disk-write",
-                                            "start-time"
+                                            "start-time",
+                                            "threads"
                                         ],
                                         "default": "cpu"
                                     },
                                     "showTypes": {
-                                        "description": "Specify which resource usages are detected and displayed.\nIf memory is enabled is enabled alone, only a single process snapshot is taken and `waitTime` sampling wait is skipped",
+                                        "description": "Specify which resource usages are detected and displayed.\nIf memory or threads is enabled is enabled alone, only a single process snapshot is taken and `waitTime` sampling wait is skipped",
                                         "default": [
                                             "cpu",
                                             "memory",
@@ -4468,7 +4469,8 @@
                                                 "enum": [
                                                     "cpu",
                                                     "memory",
-                                                    "disk"
+                                                    "disk",
+                                                    "threads"
                                                 ]
                                             },
                                             {
@@ -4479,7 +4481,8 @@
                                                     "enum": [
                                                         "cpu",
                                                         "memory",
-                                                        "disk"
+                                                        "disk",
+                                                        "threads"
                                                     ]
                                                 }
                                             }

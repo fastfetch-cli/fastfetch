@@ -10,6 +10,7 @@ typedef struct FFTopProcessResult {
     uint64_t bytesRead;
     uint64_t bytesWritten;
     uint64_t startTime;
+    uint32_t threads;
     uint32_t pid;
 } FFTopProcessResult;
 
@@ -20,6 +21,7 @@ typedef struct FFTopProcessSnapshot {
     uint64_t bytesRead;    // Physical storage read
     uint64_t bytesWritten; // Physical storage written
     uint64_t startTime;    // Differs between platforms
+    uint32_t threads;
     uint32_t pid;
 } FFTopProcessSnapshot;
 

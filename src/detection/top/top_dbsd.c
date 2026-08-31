@@ -6,7 +6,7 @@
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     size_t length;
 
@@ -52,6 +52,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
         item->bytesRead = (uint64_t) (proc->kp_ru.ru_inblock + proc->kp_lwp.kl_ru.ru_inblock) * DEV_BSIZE;
         item->bytesWritten = (uint64_t) (proc->kp_ru.ru_oublock + proc->kp_lwp.kl_ru.ru_oublock) * DEV_BSIZE;
+        item->threads = (uint32_t) proc->kp_nthreads;
     }
 
     return nullptr;

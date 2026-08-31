@@ -60,6 +60,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
 
         item->bytesRead = 0;
         item->bytesWritten = 0;
+        item->threads = (uint32_t) psinfo.pr_nlwp;
         if (showTypes & FF_TOP_TYPE_DISK) {
             prusage_t usage;
             if (ffReadFileDataRelative(subfd, "usage", sizeof(usage), &usage) == (ssize_t) sizeof(usage)) {

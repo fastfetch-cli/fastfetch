@@ -3,7 +3,7 @@
 #include <OS.h>
 #include <string.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int32 cookie = 0;
     team_info team;
     while (get_next_team_info(&cookie, &team) == B_OK) {
@@ -41,6 +41,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         // Storage io counters are not exposed by Haiku; leave them zeroed.
         item->bytesRead = 0;
         item->bytesWritten = 0;
+        item->threads = (uint32_t) team.thread_count;
     }
 
     return nullptr;

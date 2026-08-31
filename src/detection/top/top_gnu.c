@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ps.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     struct ps_context* context = nullptr;
     if (ps_context_create(getproc(), &context) != 0) {
         return "ps_context_create(getproc()) failed";
@@ -24,7 +24,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
     // Flags that cannot be fetched for some process are simply left unset;
     // each field must be checked before use.
-    if (proc_stat_list_set_flags(list, PSTAT_ARGS | PSTAT_STATE | PSTAT_TASK_BASIC) != 0) {
+    if (proc_stat_list_set_flags(list, PSTAT_ARGS | PSTAT_STATE | PSTAT_TASK_BASIC | ((showTypes & FF_TOP_TYPE_THREADS) ? PSTAT_NUM_THREADS : 0)) != 0) {
         error = "proc_stat_list_set_flags() failed";
         goto done;
     }
@@ -60,6 +60,13 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         item->cpuTime = 0;
         item->memBytes = 0;
         item->startTime = 0;
+        item->threads = 0;
+
+        if (showTypes & FF_TOP_TYPE_THREADS) {
+            if (proc_stat_has(stat, PSTAT_NUM_THREADS)) {
+                item->threads = (uint32_t) proc_stat_num_threads(stat);
+            }
+        }
 
         if (proc_stat_has(stat, PSTAT_TASK_BASIC)) {
             const task_basic_info_t info = proc_stat_task_basic_info(stat);

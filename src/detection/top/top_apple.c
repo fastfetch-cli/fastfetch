@@ -5,7 +5,7 @@
 #include <sys/sysctl.h>
 #include <libproc.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
     size_t length;
 
@@ -54,6 +54,13 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         item->bytesRead = rusage.ri_diskio_bytesread;
         item->bytesWritten = rusage.ri_diskio_byteswritten;
         item->startTime = rusage.ri_proc_start_abstime;
+        item->threads = 0;
+        if (showTypes & FF_TOP_TYPE_THREADS) {
+            struct proc_taskinfo taskInfo;
+            if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, sizeof(taskInfo)) == sizeof(taskInfo)) {
+                item->threads = (uint32_t) taskInfo.pti_threadnum;
+            }
+        }
     }
 
     return nullptr;
