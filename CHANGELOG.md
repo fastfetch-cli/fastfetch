@@ -21,6 +21,7 @@ Features:
 * Improved fish completion scripts to print enum descriptions. (Completion)
 * Enabled Wayland support on Android. (DisplayServer, Android)
 * Added DE detection support for ASUS Zenfone. (DE, Android)
+* Added new ARM SoCs (CPU, Linux / Android)
 
 Bugfixes:
 * Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
