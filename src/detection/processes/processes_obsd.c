@@ -13,7 +13,8 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
     }
 
     int count = 0;
-    // KERN_PROC_ALL returns all user-level processes, excluding kernel processes and threads
+    // KERN_PROC_ALL returns all user-level processes
+    // KERN_PROC_KTHREAD returns all processes, including user-level processes (despite the name)
     const struct kinfo_proc* procs = kvm_getprocs(kd,
         (options->countKprocs ? KERN_PROC_KTHREAD : KERN_PROC_ALL) | KERN_PROC_SHOW_THREADS,
         0, sizeof(struct kinfo_proc), &count);

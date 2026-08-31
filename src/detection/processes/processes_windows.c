@@ -26,11 +26,10 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
     }
 
     for (SYSTEM_PROCESS_INFORMATION* ptr = pstart; ; ptr = (SYSTEM_PROCESS_INFORMATION*) ((uint8_t*) ptr + ptr->NextEntryOffset)) {
-        if (!options->countKprocs && (uintptr_t) ptr->InheritedFromUniqueProcessId > 0) {
-            continue;
+        if (options->countKprocs || (uintptr_t) ptr->InheritedFromUniqueProcessId > 0) {
+            ++result->processes;
+            result->threads += ptr->NumberOfThreads;
         }
-        ++result->processes;
-        result->threads += ptr->NumberOfThreads;
         if (ptr->NextEntryOffset == 0) {
             break;
         }
