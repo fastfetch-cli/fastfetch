@@ -1,4 +1,5 @@
 #include "common/base64.h"
+#include "common/endian.h"
 
 // https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
 void ffBase64EncodeRaw(uint32_t size, const char* str, uint32_t* out_size, char* output) {
@@ -7,12 +8,8 @@ void ffBase64EncodeRaw(uint32_t size, const char* str, uint32_t* out_size, char*
     const char* ends = str + (size - size % 3);
     while (str != ends) {
         uint32_t n = *(uint32_t*) str;
-        #if !__BIG_ENDIAN__
-        // The 3 input bytes must be laid out big-endian (str[0] in the most
-        // significant position). On little-endian hosts swap; on big-endian
-        // hosts the word is already in the right order.
-        n = __builtin_bswap32(n);
-        #endif
+        // The 3 input bytes must be laid out big-endian (str[0] in the most significant position).
+        n = FF_READ_BE(n);
         *out++ = chars[(n >> 26) & 63];
         *out++ = chars[(n >> 20) & 63];
         *out++ = chars[(n >> 14) & 63];

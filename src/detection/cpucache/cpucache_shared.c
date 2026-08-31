@@ -1,4 +1,5 @@
 #include "cpucache.h"
+#include "common/endian.h"
 #include "common/smbios.h"
 #include "common/strutil.h"
 
@@ -43,24 +44,26 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
             continue;
         }
 
-        bool enabled = !!(data->CacheConfiguration & (1 << 7));
+        uint16_t cacheConfiguration = FF_READ_LE(data->CacheConfiguration);
+        uint16_t installedSize = FF_READ_LE(data->InstalledSize);
+        bool enabled = !!(cacheConfiguration & (1 << 7));
         if (!enabled) {
             continue;
         }
 
-        uint32_t size = data->InstalledSize;
+        uint32_t size = installedSize;
         if (size == 0) {
             continue;
         }
 
-        if (data->InstalledSize != 0xFFFF) {
+        if (installedSize != 0xFFFF) {
             size *= (size >> 15 ? 64 : 1) * 1024u;
         } else if (data->Header.Length > offsetof(FFSmbiosCacheInfo, InstalledCacheSize2)) {
-            size = data->InstalledCacheSize2;
+            size = FF_READ_LE(data->InstalledCacheSize2);
             size *= (size >> 31 ? 64 : 1) * 1024u;
         }
 
-        uint32_t level = (data->CacheConfiguration & 0b111u) + 1;
+        uint32_t level = (cacheConfiguration & 0b111u) + 1;
 
         FFCPUCacheType type;
         switch (data->SystemCacheType) {
