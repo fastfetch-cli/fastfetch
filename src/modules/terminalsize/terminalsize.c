@@ -83,6 +83,7 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
         .de = "Terminalgröße",
         .es = "Tamaño del terminal",
         .fr = "Taille du terminal",
+        .gl = "Tamaño do terminal",
         .he = "גודל טרמינל",
         .id = "Ukuran Terminal",
         .it = "Dimensioni terminale",

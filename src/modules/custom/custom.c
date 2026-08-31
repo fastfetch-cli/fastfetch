@@ -44,6 +44,7 @@ FFModuleBaseInfo ffCustomModuleInfo = {
         .de = "Benutzerdefiniert",
         .es = "Personalizado",
         .fr = "Personnalisé",
+        .gl = "Personalizado",
         .he = "מותאם אישית",
         .id = "Kustom",
         .it = "Personalizzato",
