@@ -1,3 +1,20 @@
+# 2.66.1
+
+Bugfixes:
+* Fixed I/O rate calculation precision and prevented division by zero. (DiskIO / NetIO)
+* Fixed ash and fish version detection, including a potential out-of-bounds read. (Shell)
+* Fixed integer handling for varying sysctl data lengths. (Sysctl)
+* Fixed several memory leaks in Camera, Codec, Display, Separator and Weather.
+* Fixed Base64 encoding on big-endian hosts. (Base64)
+* Fixed VP9 codec detection and macOS 10.15 Codec compatibility. (Codec, macOS)
+* Relaxed accepted HTTP response formats and fixed invalid PublicIP URL parsing. (Networking / PublicIP)
+* Added a response size limit to prevent excessive network memory allocation. (Networking)
+* Added integer overflow checks to string buffer capacity handling. (FFstrbuf)
+* Fixed Ubuntu Studio Core detection. (OS, Linux)
+* Fixed preferred monitor mode detection for KDE Plasma. (Display, Linux)
+* Fixed bright colors being enabled incorrectly in light themes. (Display)
+* Fixed a macOS compiler warning. (Version, macOS)
+
 # 2.66.0
 
 Changes:
