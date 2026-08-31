@@ -910,7 +910,7 @@ int main(int argc, char** argv) {
             ffStrbufSetS(&data.structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
         }
         if (data.genConfigInteractive && !ffGenConfigInteractive(&data)) {
-            // User cancelled the interactive config generation
+            // User canceled the interactive config generation
             ffStrbufDestroy(&data.structure);
             ffStrbufDestroy(&data.structureDisabled);
             yyjson_doc_free(data.configDoc);

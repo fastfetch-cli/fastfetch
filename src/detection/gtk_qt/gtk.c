@@ -111,7 +111,7 @@ static void detectGTKFromSettings(FFGTKResult* result) {
     } else {
         // Standalone WMs (Hyprland, sway, niri, i3, ...) report no DE and have no settings
         // daemon, but GTK apps on them still read org.gnome.desktop.interface.
-        // Read via DConf, not GSettings: GSettings synthesises the schema default for keys
+        // Read via DConf, not GSettings: GSettings synthesizes the schema default for keys
         // the user never set, DConf returns nothing. Runs last; applyGTKSettings() only
         // fills still-empty fields, so config files always win.
         themeName = ffSettingsGetDConf("/org/gnome/desktop/interface/gtk-theme", FF_VARIANT_TYPE_STRING).strValue;

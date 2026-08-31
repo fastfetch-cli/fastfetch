@@ -3314,7 +3314,7 @@ Features:
 * Enhance `--percent-type` to allow hiding other texts (#387)
 * Add Wifi module support for Linux
 * Detect scaled resolutions (Windows, macOS)
-* Optimise font module printing (Windows)
+* Optimize font module printing (Windows)
 * Detect pacman package count inside MSYS2 environment (Windows)
 * Add Wifi / Battery module support for Android
 * Disk name support for Linux
