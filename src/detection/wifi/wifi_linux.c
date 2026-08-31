@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "common/endian.h"
 #include "common/io.h"
 #include "common/debug.h"
 #include "common/strutil.h"
@@ -11,12 +12,11 @@
 #include <linux/wireless.h>
 #include <unistd.h>
 
-#if !__BIG_ENDIAN__
-    #include <linux/genetlink.h>
-    #include <linux/nl80211.h>
+#include <linux/genetlink.h>
+#include <linux/nl80211.h>
 
-    // Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
-    #pragma GCC diagnostic ignored "-Wsign-conversion"
+// Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 
 typedef struct FFWifiNlContext {
     int sockFd;
@@ -459,7 +459,7 @@ static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags*
     if (pos + 2 > len) { // pairwise cipher suite count field length
         return;
     }
-    uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
+    uint16_t pairwiseCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip pairwise cipher suite count field
 
     size_t pairwiseLen = (size_t) pairwiseCount * 4; // each suite selector is 4 bytes
@@ -471,7 +471,7 @@ static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags*
     if (pos + 2 > len) { // AKM suite count field length
         return;
     }
-    uint16_t akmCount = *(uint16_t*) (ie + pos);
+    uint16_t akmCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip AKM suite count field
 
     for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
@@ -528,13 +528,13 @@ static void ffWifiParseWpaVendorIe(const uint8_t* ie, size_t len, FFWifiSecurity
     if (pos + 2 > len) { // unicast cipher suite count field length
         return;
     }
-    uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
+    uint16_t pairwiseCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2 + (size_t) pairwiseCount * 4; // count field(2) + N unicast suite selectors(4 each)
 
     if (pos + 2 > len) { // AKM suite count field length
         return;
     }
-    uint16_t akmCount = *(uint16_t*) (ie + pos);
+    uint16_t akmCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip AKM suite count field
 
     for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
@@ -845,8 +845,6 @@ static const char* detectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, u
     FF_DEBUG("Netlink wifi detection completed");
     return nullptr;
 }
-#endif
-
 typedef struct FFWifiIcContext {
     int sockFd;
 } FFWifiIcContext;
@@ -1049,9 +1047,7 @@ const char* ffDetectWifi(FFlist* result) {
         return "if_nameindex() failed";
     }
 
-#if !__BIG_ENDIAN__
     FFWifiNlContext nl = { .sockFd = -1 };
-#endif
     FFWifiIcContext ic = { .sockFd = -1 };
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -1090,9 +1086,7 @@ const char* ffDetectWifi(FFlist* result) {
         if (operstate == 'u') {
             ffStrbufSetStatic(&item->inf.status, "up");
 
-#if !__BIG_ENDIAN__
             detectWithNetlink(&nl, item, i->if_index);
-#endif
             detectWithIoctl(&ic, item, i->if_name);
         } else {
             ffStrbufSetStatic(&item->conn.status, "disconnected");
@@ -1116,11 +1110,9 @@ const char* ffDetectWifi(FFlist* result) {
     }
 
     if_freenameindex(infs);
-#if !__BIG_ENDIAN__
     if (nl.sockFd >= 0) {
         close(nl.sockFd);
     }
-#endif
     if (ic.sockFd >= 0) {
         close(ic.sockFd);
     }
