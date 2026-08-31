@@ -214,9 +214,15 @@ static void detectQualcomm(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 8975:
+            name = "8 Elite Extreme Gen 6";
+            break;
+        case 8950:
+            name = "8 Elite Gen 6";
+            break;
         case 8845:
             name = "8 Gen 5";
-            break; // ?
+            break;
         case 8850:
             name = "8 Elite Gen 5";
             break;
@@ -237,6 +243,9 @@ static void detectQualcomm(FFCPUResult* cpu) {
             break;
         case 8475:
             name = "8+ Gen 1";
+            break;
+        case 8425:
+            name = "8+ Gen 1 4G";
             break;
         case 8450:
             name = "8 Gen 1";
@@ -271,11 +280,17 @@ static void detectQualcomm(FFCPUResult* cpu) {
         case 6475:
             name = "6 Gen 3";
             break;
+        case 6225:
+            name = "6s 4G Gen 2";
+            break;
         case 6115:
-            name = "6s Gen 1";
+            name = "6s 4G Gen 1";
             break;
         case 6450:
             name = "6 Gen 1";
+            break;
+        case 4850:
+            name = "4 Gen 5";
             break;
         case 4635:
             name = "4s Gen 2";
@@ -305,6 +320,9 @@ static void detectMediaTek(FFCPUResult* cpu) {
 
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
+        case 6995:
+            name = "9600";
+            break;
         case 6993:
             name = "9500";
             break;
@@ -357,6 +375,9 @@ static void detectExynos(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 9975:
+            name = "2700";
+            break;
         case 9965:
             name = "2600";
             break;
@@ -374,6 +395,9 @@ static void detectExynos(FFCPUResult* cpu) {
             name = "2100";
             break;
 
+        case 8865:
+            name = "1680";
+            break;
         case 8855:
             name = "1580";
             break;
