@@ -11,7 +11,12 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), total == 1 ? 0 : (uint8_t) (index + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
-        ffStrbufAppendF(&output, "%s (%u)", process->name.chars, process->pid);
+        if (process->name.length == 0) {
+            ffStrbufAppendS(&output, "<unknown>");
+        } else {
+            ffStrbufAppend(&output, &process->name);
+        }
+        ffStrbufAppendF(&output, " (%u)", process->pid);
         if ((options->showTypes & FF_TOP_TYPE_CPU) && (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)) {
             ffStrbufAppendS(&output, " - CPU ");
             ffPercentAppendNum(&output, process->cpuPercent, options->percent, false, &options->moduleArgs);
