@@ -8,6 +8,7 @@ typedef enum FFTopTypes: uint8_t {
     FF_TOP_TYPE_MEMORY = 1 << 1,
     FF_TOP_TYPE_DISK_READ = 1 << 2,
     FF_TOP_TYPE_DISK_WRITE = 1 << 3,
+    FF_TOP_TYPE_START_TIME = 1 << 4,
 
     FF_TOP_TYPE_DISK = FF_TOP_TYPE_DISK_READ | FF_TOP_TYPE_DISK_WRITE,
 } FFTopTypes;

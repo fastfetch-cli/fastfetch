@@ -101,6 +101,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
                                                                        { "memory", FF_TOP_TYPE_MEMORY },
                                                                        { "disk-read", FF_TOP_TYPE_DISK_READ },
                                                                        { "disk-write", FF_TOP_TYPE_DISK_WRITE },
+                                                                       { "start-time", FF_TOP_TYPE_START_TIME },
                                                                        {},
                                                                    });
             if (error) {
@@ -183,6 +184,8 @@ void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_str(doc, module, "sort", "disk-read");
     } else if (options->sort == FF_TOP_TYPE_DISK_WRITE) {
         yyjson_mut_obj_add_str(doc, module, "sort", "disk-write");
+    } else if (options->sort == FF_TOP_TYPE_START_TIME) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "start-time");
     }
     yyjson_mut_obj_add_uint(doc, module, "processes", options->nProcesses);
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);

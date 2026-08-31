@@ -53,6 +53,12 @@ static int compareDiskWriteResults(const FFTopProcessResult* a, const FFTopProce
     if (a->bytesWritten > b->bytesWritten) return -1;
     return (int) (a->pid - b->pid);
 }
+
+static int compareStartTimeResults(const FFTopProcessResult* a, const FFTopProcessResult* b) {
+    if (a->startTime < b->startTime) return 1;
+    if (a->startTime > b->startTime) return -1;
+    return (int) (a->pid - b->pid);
+}
 // clang-format on
 
 const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
@@ -147,6 +153,7 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
     const void* compare = options->sort == FF_TOP_TYPE_DISK_WRITE ? (void*) compareDiskWriteResults
         : options->sort == FF_TOP_TYPE_DISK_READ                  ? (void*) compareDiskReadResults
         : options->sort == FF_TOP_TYPE_MEMORY                     ? (void*) compareMemoryResults
+        : options->sort == FF_TOP_TYPE_START_TIME                 ? (void*) compareStartTimeResults
                                                                   : (void*) compareCpuResults;
     ffListSort(result, sizeof(FFTopProcessResult), (void*) compare);
     if (result->length > options->nProcesses) {

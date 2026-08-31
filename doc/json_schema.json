@@ -4441,16 +4441,17 @@
                                 "properties": {
                                     "type": {
                                         "const": "top",
-                                        "description": "Print processes with the highest CPU or memory usage"
+                                        "description": "Print processes with the highest CPU, memory, disk I/O usage or latest start time"
                                     },
                                     "sort": {
                                         "type": "string",
-                                        "description": "Sort processes by CPU, memory or disk IO usage",
+                                        "description": "Sort processes by CPU, memory, disk IO usage or start time",
                                         "enum": [
                                             "cpu",
                                             "memory",
                                             "disk-read",
-                                            "disk-write"
+                                            "disk-write",
+                                            "start-time"
                                         ],
                                         "default": "cpu"
                                     },
