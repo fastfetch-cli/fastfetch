@@ -43,7 +43,7 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
         FF_STRBUF_AUTO_DESTROY diskWriteFormatted = ffStrbufCreate();
         ffSizeAppendNum(process->bytesWritten, &diskWriteFormatted);
         ffStrbufAppendS(&diskWriteFormatted, "/s");
-        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Top), (uint8_t) index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Top), total == 1 ? 0 : (uint8_t) (index + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                                                                                                                                    FF_ARG(process->name, "name"),
                                                                                                                                    FF_ARG(process->pid, "pid"),
                                                                                                                                    FF_ARG(process->cpuPercent, "cpu"),
@@ -73,11 +73,12 @@ bool ffPrintTop(FFTopOptions* options) {
     } else {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_LIST_FOR_EACH (FFTopProcessResult, process, results) {
-            ffStrbufWriteTo(&process->name, stdout);
             if ((void*) process != results.data) {
                 putchar(' ');
             }
+            ffStrbufWriteTo(&process->name, stdout);
         }
+        putchar('\n');
     }
 
     FF_LIST_FOR_EACH (FFTopProcessResult, item, results) {
@@ -271,7 +272,6 @@ FFModuleBaseInfo ffTopModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateTopJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "Process name", "name" },
-        { "Executable path", "path" },
         { "Process ID", "pid" },
         { "CPU usage", "cpu" },
         { "Memory usage (RSS) in bytes", "mem" },

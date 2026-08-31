@@ -1,4 +1,4 @@
-# Unreleased
+# 2.68.0
 
 Changes:
 * The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.

@@ -126,6 +126,9 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module) {
 
         if (unsafe_yyjson_equals_str(key, "waitTime")) {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
+            if (options->waitTime == 0) {
+                options->waitTime = 1;
+            }
             continue;
         }
 

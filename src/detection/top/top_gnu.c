@@ -57,6 +57,9 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         }
 
         item->pid = pid;
+        item->cpuTime = 0;
+        item->memBytes = 0;
+        item->startTime = 0;
 
         if (proc_stat_has(stat, PSTAT_TASK_BASIC)) {
             const task_basic_info_t info = proc_stat_task_basic_info(stat);

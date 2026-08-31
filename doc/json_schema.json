@@ -322,7 +322,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name\n    14. {technology}: CPU technology",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -506,7 +506,7 @@
             "type": "string"
         },
         "topFormat": {
-            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {path}: Executable path\n    3. {pid}: Process ID\n    4. {cpu}: CPU usage\n    5. {mem}: Memory usage (RSS) in bytes\n    6. {disk-read}: Disk read bytes per second (0 if unsupported)\n    7. {disk-write}: Disk write bytes per second (0 if unsupported)\n    8. {cpu-percentage}: CPU usage percentage\n    9. {mem-formatted}: Memory usage (RSS) formatted\n    10. {disk-read-formatted}: Disk read formatted\n    11. {disk-write-formatted}: Disk write formatted",
+            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {pid}: Process ID\n    3. {cpu}: CPU usage\n    4. {mem}: Memory usage (RSS) in bytes\n    5. {disk-read}: Disk read bytes per second (0 if unsupported)\n    6. {disk-write}: Disk write bytes per second (0 if unsupported)\n    7. {cpu-percentage}: CPU usage percentage\n    8. {mem-formatted}: Memory usage (RSS) formatted\n    9. {disk-read-formatted}: Disk read formatted\n    10. {disk-write-formatted}: Disk write formatted",
             "type": "string"
         },
         "themeFormat": {

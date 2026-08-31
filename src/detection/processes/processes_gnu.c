@@ -29,12 +29,11 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
             continue;
         }
 
+        ++result->processes;
         if (proc_stat_has(stat, PSTAT_NUM_THREADS)) {
             result->threads += proc_stat_num_threads(stat);
         }
     }
-
-    result->processes = (uint32_t) list->num_procs;
 
 done:
     if (list) {

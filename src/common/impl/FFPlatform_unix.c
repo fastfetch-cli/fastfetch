@@ -238,7 +238,9 @@ static void getDataDirs(FFPlatform* platform) {
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     ffPlatformPathAddAbsolute(&platform->dataDirs, FF_PATH_PKG_BASE "/share/");
+#endif
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/local/share/");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }
