@@ -41,6 +41,7 @@ bool ffPrintLoadavg(FFLoadavgOptions* options) {
                                                                                           FF_ARG(index, "index"),
                                                                                           FF_ARG(duration, "duration"),
                                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                                          FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Loadavg), "module-name"),
                                                                                       }));
                 }
 

@@ -21,6 +21,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                                                                            FF_ARG(index, "index"),
                                                                            FF_ARG(result->modelName, "name"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Battery), "module-name"),
                                                                        }));
     }
 

@@ -47,6 +47,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                 FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, ((FFformatarg[]) {
                                                                            FF_ARG(moduleIndex, "index"),
                                                                            FF_ARG(moduleArgs->keyIcon, "icon"),
+                                                                           FF_ARG(moduleName, "module-name"),
                                                                        }));
                 ffStrbufWriteTo(&key, stdout);
             }

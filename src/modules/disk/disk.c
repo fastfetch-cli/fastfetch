@@ -45,6 +45,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
                                                                            FF_ARG(disk->filesystem, "filesystem"),
                                                                            FF_ARG(mountpointLink, "mountpoint-link"),
                                                                            FF_ARG(nameLink, "name-link"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Disk), "module-name"),
                                                                        }));
     }
 

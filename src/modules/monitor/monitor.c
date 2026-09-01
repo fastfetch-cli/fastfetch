@@ -33,6 +33,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
                                                                                FF_ARG(moduleIndex, "index"),
                                                                                FF_ARG(display->name, "name"),
                                                                                FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                               FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Monitor), "module-name"),
                                                                            }));
         }
 

@@ -22,6 +22,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
                                                                               FF_ARG(result->name, "name"),
                                                                               FF_ARG(result->guid, "guid"),
                                                                               FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                              FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Zpool), "module-name"),
                                                                           }));
     }
 

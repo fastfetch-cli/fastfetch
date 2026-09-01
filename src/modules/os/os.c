@@ -63,6 +63,7 @@ bool ffPrintOS(FFOSOptions* options) {
                                                                            FF_ARG(instance.state.platform.sysinfo.name, "sysname"),
                                                                            FF_ARG(os->name, "name"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(OS), "module-name"),
                                                                        }));
     }
 
