@@ -89,7 +89,14 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version) {
     if (version->length < strlen("fish, v") || !ffStrbufStartsWithS(version, "fish")) {
         return false;
     }
-    uint32_t index = ffStrbufNextIndexC(version, strlen("fish, "), ' ');
+    uint32_t index = ffStrbufFirstIndexC(version, ' '); // skip "fish,"
+    while (index + 1 < version->length && !ffCharIsDigit(version->chars[index + 1])) {
+        index = ffStrbufNextIndexC(version, index + 1, ' '); // skip "version"
+    }
+    if (index + 1 >= version->length) {
+        return false;
+    }
+
     ffStrbufSubstrAfter(version, index);
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
