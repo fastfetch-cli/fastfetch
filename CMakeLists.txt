@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21.0) # C_STANDARD
+cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
     VERSION 2.68.0
