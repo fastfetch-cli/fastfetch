@@ -308,19 +308,19 @@ static uint16_t ffWifiChannelWidthToMhz(uint32_t width) {
             return 80;
         case NL80211_CHAN_WIDTH_160:
             return 160;
-        case NL80211_CHAN_WIDTH_5:
+        case 6 /* NL80211_CHAN_WIDTH_5 */:
             return 5;
-        case NL80211_CHAN_WIDTH_10:
+        case 7 /* NL80211_CHAN_WIDTH_10 */:
             return 10;
-        case NL80211_CHAN_WIDTH_1:
+        case 8 /* NL80211_CHAN_WIDTH_1 */:
             return 1;
-        case NL80211_CHAN_WIDTH_2:
+        case 9 /* NL80211_CHAN_WIDTH_2 */:
             return 2;
-        case NL80211_CHAN_WIDTH_4:
+        case 10 /* NL80211_CHAN_WIDTH_4 */:
             return 4;
-        case NL80211_CHAN_WIDTH_8:
+        case 11 /* NL80211_CHAN_WIDTH_8 */:
             return 8;
-        case NL80211_CHAN_WIDTH_16:
+        case 12 /* NL80211_CHAN_WIDTH_16 */:
             return 16;
         case 13 /* NL80211_CHAN_WIDTH_320 */:
             return 320;
