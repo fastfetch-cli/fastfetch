@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/endian.h"
 #include "common/windows/registry.h"
 #include "common/windows/nt.h"
 #include "common/mallocHelper.h"
@@ -205,7 +206,7 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu) {
         }
     }
 
-    uint32_t speed = data->MaxSpeed;
+    uint32_t speed = FF_READ_LE(data->MaxSpeed);
     // Sometimes SMBIOS reports invalid value. We assume that max speed is small than 2x of base
     if (speed < cpu->frequencyBase || speed > cpu->frequencyBase * 2) {
         return "Possible invalid CPU max speed in SMBIOS data. See #800";

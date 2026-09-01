@@ -8,17 +8,8 @@
 
 #include <ctype.h>
 #include <stdint.h>
-#ifdef __FreeBSD__
-    #include <paths.h>
-    #ifndef _PATH_LOCALBASE
-        #define _PATH_LOCALBASE "/usr/local"
-    #endif
-#elif __OpenBSD__
-    #define _PATH_LOCALBASE "/usr/local"
-#elif __NetBSD__
-    #define _PATH_LOCALBASE "/usr/pkg"
-#elif _WIN32
 
+#if _WIN32
     #include "common/windows/registry.h"
     #include "common/windows/version.h"
     #include <windows.h>
@@ -194,6 +185,9 @@ static bool extractBusyboxVersion(const char* line, uint32_t len, void* userdata
 
 static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version) {
     ffBinaryExtractStrings(exe->chars, extractBusyboxVersion, version, (uint32_t) strlen("BusyBox v0.0.0"));
+    if (version->length > 0) {
+        return true;
+    }
 
     const char* error = ffStrbufEndsWithS(exe, "busybox")
         ? ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "ash", "--help", nullptr })
@@ -660,7 +654,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version) {
         ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer) ||
         ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
         #else
-        ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
+        ffReadFileData(FF_PATH_PKG_BASE "/share/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
         #endif
     ) {
         // Starts from version 0.17.0

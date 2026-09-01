@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fastfetch · Benchmark</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f5f7fb;
+      --card: #fff;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #dbe3ef;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --chart-text: #334155;
+      --chart-grid: #cbd5e1;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --page: #0f172a; --card: #172033; --text: #e5edf8; --muted: #9aabc1; --border: #334155; --accent-soft: #1e3a8a;
+      --chart-text: #f1f5f9;
+      --chart-grid: #475569;
+    }
+    * { box-sizing: border-box; }
+    body { max-width: 1440px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; background: var(--page); color: var(--text); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+    header { margin-bottom: 1.75rem; }
+    .header-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+    h2 { margin: 0; font-size: 1.25rem; }
+    p { color: var(--muted); }
+    .intro { margin: .6rem 0 1rem; }
+    .links a { color: var(--accent); font-weight: 600; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+    .theme-toggle, .fullscreen { border: 1px solid var(--border); border-radius: .55rem; padding: .5rem .8rem; background: var(--card); color: var(--text); cursor: pointer; font: inherit; font-weight: 600; }
+    .theme-toggle:hover, .fullscreen:hover { border-color: var(--accent); color: var(--accent); }
+    .tabs { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.5rem 0; padding: .35rem; border: 1px solid var(--border); border-radius: .8rem; background: var(--card); }
+    .tab { border: 0; border-radius: .55rem; padding: .65rem 1.15rem; background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-weight: 700; }
+    .tab:hover, .tab[aria-selected="true"] { background: var(--accent); color: #fff; }
+    .tab-panel[hidden] { display: none; }
+    .platform-title { display: flex; align-items: center; gap: .65rem; margin: 1.5rem 0 1rem; }
+    .platform-title::before { content: ''; width: .35rem; height: 1.4rem; border-radius: 1rem; background: var(--accent); }
+    .charts { display: flex; flex-direction: column; gap: 1.25rem; }
+    .chart { min-width: 0; padding: 1.25rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--card); box-shadow: 0 8px 28px #0f172a0c; }
+    .chart:fullscreen { overflow: auto; padding: 2rem; background: var(--page); }
+    .chart:fullscreen .canvas-wrap { height: calc(100vh - 13rem); }
+    .chart-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+    .chart-header span { color: var(--muted); font-size: .85rem; }
+    .canvas-wrap { position: relative; height: 360px; }
+    .chart-actions { display: flex; align-items: center; gap: .75rem; }
+    .legend-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; }
+    .legend-action { border: 1px solid var(--border); border-radius: .45rem; padding: .35rem .6rem; background: var(--card); color: var(--muted); cursor: pointer; font: inherit; font-size: .8rem; }
+    .legend-action:hover { border-color: var(--accent); color: var(--accent); }
+    .legend { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin-top: 1rem; }
+    .legend-item { display: inline-flex; align-items: center; gap: .4rem; border: 0; padding: .15rem 0; background: transparent; color: var(--text); cursor: pointer; font: inherit; font-size: .85rem; }
+    .legend-item.is-hidden { color: var(--muted); }
+    .legend-swatch { width: .75rem; height: .75rem; border-radius: 50%; }
+    .legend-item.is-hidden .legend-swatch { opacity: .35; }
+    .chart-tooltip { position: fixed; z-index: 1000; pointer-events: none; width: min(90vw, 900px); max-height: calc(100vh - 24px); overflow: hidden; padding: .7rem .85rem; border: 1px solid var(--border); border-radius: .6rem; background: var(--card); color: var(--text); box-shadow: 0 10px 30px #0f172a33; font-size: .8rem; opacity: 0; transition: opacity .1s ease; }
+    .chart-tooltip-title { margin-bottom: .35rem; font-weight: 700; white-space: normal; overflow-wrap: anywhere; }
+    .chart-tooltip-body { max-height: calc(100vh - 76px); overflow: auto; columns: 220px auto; column-gap: 1.5rem; }
+    .chart-tooltip-row { display: flex; align-items: center; gap: .45rem; break-inside: avoid; white-space: nowrap; }
+    .chart-tooltip-swatch { width: .55rem; height: .55rem; border-radius: 50%; flex: 0 0 auto; }
+    .empty { padding: 2rem 0; color: var(--muted); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <h1>Fastfetch Benchmark</h1>
+      <button id="theme-toggle" class="theme-toggle" type="button"></button>
+    </div>
+    <p class="intro">Performance history grouped by CPU family. Each chart contains all modules and total process time for one operating system and architecture. Module curves are available from the legend and hidden by default.</p>
+    <p class="links"><a href="data.js">Download raw benchmark data</a></p>
+  </header>
+  <nav id="tabs" class="tabs" aria-label="CPU architecture"></nav>
+  <main id="panels"></main>
+  <script>
+    (() => {
+      const benchmarkData = window.BENCHMARK_DATA || {};
+      const entries = Object.values(benchmarkData.entries || {}).flat();
+      const groups = new Map();
+
+      function architectureFamily(arch) {
+        const normalized = arch.toLowerCase();
+        if (/^(amd64|x86_64|x86|i[3-6]86)$/.test(normalized)) return 'Intel';
+        if (/^(aarch64|arm64|armv[5-8].*|arm)$/.test(normalized)) return 'ARM';
+        return 'Other';
+      }
+
+      function parseName(name) {
+        let match = name.match(/^fastfetch (linux|macos|windows) ([^ ]+) (module .+|total process time)$/i);
+        if (match) {
+          return { platform: match[1].toLowerCase(), arch: match[2], metric: match[3] };
+        }
+
+        // Keep older macOS records visible while new records use the platform field.
+        match = name.match(/^fastfetch ([^ ]+) (module .+|total process time)$/i);
+        return match ? { platform: 'macos', arch: match[1], metric: match[2] } : null;
+      }
+
+      function entryMetadata(entry) {
+        const raw = entry.commit && entry.commit.timestamp || entry.date;
+        const date = new Date(raw);
+        return {
+          date: Number.isNaN(date.valueOf()) ? String(entry.date || '') : date.toISOString(),
+          sha: entry.commit && entry.commit.id ? entry.commit.id : 'unknown'
+        };
+      }
+
+      for (const entry of entries) {
+        const metricsByGroup = new Map();
+        for (const bench of entry.benches || []) {
+          const parsed = parseName(bench.name);
+          if (!parsed) continue;
+          const key = `${parsed.platform} ${parsed.arch}`;
+          if (!metricsByGroup.has(key)) metricsByGroup.set(key, new Map());
+          metricsByGroup.get(key).set(parsed.metric, bench.value);
+        }
+
+        for (const [key, metrics] of metricsByGroup) {
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push({ ...entryMetadata(entry), metrics });
+        }
+      }
+
+      const colors = [
+        '#2563eb', '#dc2626', '#16a34a', '#9333ea', '#ea580c', '#0891b2',
+        '#db2777', '#65a30d', '#4f46e5', '#ca8a04', '#0f766e', '#be123c'
+      ];
+      const tabs = document.getElementById('tabs');
+      const panels = document.getElementById('panels');
+      const root = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const savedTheme = localStorage.getItem('fastfetch-benchmark-theme');
+      let theme = savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const chartsByInstance = [];
+
+      function chartColors() {
+        const styles = getComputedStyle(root);
+        return {
+          text: styles.getPropertyValue('--chart-text').trim(),
+          grid: styles.getPropertyValue('--chart-grid').trim()
+        };
+      }
+
+      function externalTooltipHandler(context) {
+        const { chart, tooltip } = context;
+        let tooltipElement = chart.canvas.parentNode.querySelector('.chart-tooltip');
+        if (!tooltipElement) {
+          tooltipElement = document.createElement('div');
+          tooltipElement.className = 'chart-tooltip';
+          chart.canvas.parentNode.appendChild(tooltipElement);
+        }
+
+        if (tooltip.opacity === 0) {
+          tooltipElement.style.opacity = '0';
+          return;
+        }
+
+        tooltipElement.replaceChildren();
+        const title = document.createElement('div');
+        title.className = 'chart-tooltip-title';
+        const row = chart._benchmarkRows[tooltip.dataPoints[0].dataIndex];
+        title.textContent = `${new Date(row.date).toLocaleString()} · ${row.sha}`;
+        tooltipElement.appendChild(title);
+        const bodyElement = document.createElement('div');
+        bodyElement.className = 'chart-tooltip-body';
+        for (const body of [...tooltip.dataPoints].sort((a, b) => b.parsed.y - a.parsed.y)) {
+          const item = document.createElement('div');
+          item.className = 'chart-tooltip-row';
+          const swatch = document.createElement('span');
+          swatch.className = 'chart-tooltip-swatch';
+          swatch.style.background = body.dataset.borderColor;
+          const value = document.createElement('span');
+          value.textContent = `${body.dataset.label}: ${body.formattedValue} ms`;
+          item.append(swatch, value);
+          bodyElement.appendChild(item);
+        }
+        tooltipElement.appendChild(bodyElement);
+
+        const canvasRect = chart.canvas.getBoundingClientRect();
+        const margin = 12;
+        let left = canvasRect.left + tooltip.caretX + margin;
+        let top = canvasRect.top + tooltip.caretY + margin;
+        tooltipElement.style.left = `${left}px`;
+        tooltipElement.style.top = `${top}px`;
+        tooltipElement.style.opacity = '0';
+        const tooltipRect = tooltipElement.getBoundingClientRect();
+        if (left + tooltipRect.width > window.innerWidth - margin) left = canvasRect.left + tooltip.caretX - tooltipRect.width - margin;
+        if (top + tooltipRect.height > window.innerHeight - margin) top = canvasRect.top + tooltip.caretY - tooltipRect.height - margin;
+        tooltipElement.style.left = `${Math.max(margin, left)}px`;
+        tooltipElement.style.top = `${Math.max(margin, top)}px`;
+        tooltipElement.style.opacity = '1';
+      }
+
+      function updateTheme() {
+        root.dataset.theme = theme;
+        themeToggle.textContent = theme === 'dark' ? '☀ Light mode' : '☾ Dark mode';
+        themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+        const colors = chartColors();
+        Chart.defaults.color = colors.text;
+        Chart.defaults.borderColor = colors.grid;
+        for (const chart of chartsByInstance) {
+          chart.options.scales.x.title.color = colors.text;
+          chart.options.scales.x.ticks.color = colors.text;
+          chart.options.scales.x.grid.color = colors.grid;
+          chart.options.scales.y.title.color = colors.text;
+          chart.options.scales.y.ticks.color = colors.text;
+          chart.options.scales.y.grid.color = colors.grid;
+          chart.update();
+        }
+      }
+      themeToggle.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('fastfetch-benchmark-theme', theme);
+        updateTheme();
+      });
+      updateTheme();
+      const families = new Map();
+
+      for (const [key, rows] of groups) {
+        const arch = key.slice(key.lastIndexOf(' ') + 1);
+        const family = architectureFamily(arch);
+        if (!families.has(family)) families.set(family, []);
+        families.get(family).push({ key, rows });
+      }
+
+      const familyOrder = ['Intel', 'ARM', 'Other'];
+      const availableFamilies = familyOrder.filter(family => families.has(family));
+
+      for (const [index, family] of availableFamilies.entries()) {
+        const tab = document.createElement('button');
+        const panelId = `panel-${family.toLowerCase()}`;
+        tab.className = 'tab';
+        tab.type = 'button';
+        tab.id = `tab-${family.toLowerCase()}`;
+        tab.setAttribute('role', 'tab');
+        tab.textContent = family;
+        tab.setAttribute('aria-controls', panelId);
+        tab.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        tabs.appendChild(tab);
+
+        const panel = document.createElement('section');
+        panel.className = 'tab-panel';
+        panel.id = panelId;
+        panel.setAttribute('role', 'tabpanel');
+        panel.hidden = index !== 0;
+        panel.setAttribute('aria-labelledby', tab.id);
+        const title = document.createElement('h2');
+        title.className = 'platform-title';
+        title.textContent = `${family} processors`;
+        panel.appendChild(title);
+        const chartGrid = document.createElement('div');
+        chartGrid.className = 'charts';
+        panel.appendChild(chartGrid);
+        panels.appendChild(panel);
+
+        tab.addEventListener('click', () => {
+          for (const otherTab of tabs.children) otherTab.setAttribute('aria-selected', otherTab === tab ? 'true' : 'false');
+          for (const otherPanel of panels.children) otherPanel.hidden = otherPanel !== panel;
+        });
+
+        for (const { key, rows } of families.get(family).sort((a, b) => a.key.localeCompare(b.key))) {
+          rows.sort((a, b) => a.date.localeCompare(b.date));
+          const metrics = [...new Set(rows.flatMap(row => [...row.metrics.keys()]))].sort((a, b) => {
+            if (a === 'total process time') return -1;
+            if (b === 'total process time') return 1;
+            return a.localeCompare(b);
+          });
+          const section = document.createElement('article');
+          section.className = 'chart';
+          const chartHeader = document.createElement('div');
+          chartHeader.className = 'chart-header';
+          const chartTitle = document.createElement('h2');
+          chartTitle.textContent = key;
+          const chartActions = document.createElement('div');
+          chartActions.className = 'chart-actions';
+          const chartHint = document.createElement('span');
+          chartHint.textContent = `${rows.length} run${rows.length === 1 ? '' : 's'}`;
+          const fullscreen = document.createElement('button');
+          fullscreen.className = 'fullscreen';
+          fullscreen.type = 'button';
+          fullscreen.textContent = '⛶ Fullscreen';
+          fullscreen.addEventListener('click', () => {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else section.requestFullscreen();
+          });
+          chartActions.append(chartHint, fullscreen);
+          chartHeader.append(chartTitle, chartActions);
+          const canvasWrap = document.createElement('div');
+          canvasWrap.className = 'canvas-wrap';
+          const canvas = document.createElement('canvas');
+          canvasWrap.appendChild(canvas);
+          section.append(chartHeader, canvasWrap);
+          chartGrid.appendChild(section);
+
+          const colorsForChart = chartColors();
+          const chart = new Chart(canvas, {
+            type: 'line',
+            data: {
+              labels: rows.map(row => row.sha.slice(0, 7)),
+              datasets: metrics.map((metric, index) => ({
+                label: metric,
+                data: rows.map(row => row.metrics.has(metric) ? row.metrics.get(metric) : null),
+                borderColor: colors[index % colors.length],
+                backgroundColor: colors[index % colors.length],
+                pointRadius: 3,
+                tension: 0.2,
+                spanGaps: true,
+                hidden: metric !== 'total process time'
+              }))
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: false,
+                  external: externalTooltipHandler,
+                  callbacks: {
+                    title: tooltipItems => {
+                      const row = rows[tooltipItems[0].dataIndex];
+                      return `${row.date} · ${row.sha}`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: { title: { display: true, text: 'Date', color: colorsForChart.text }, ticks: { color: colorsForChart.text }, grid: { color: colorsForChart.grid } },
+                y: { beginAtZero: true, title: { display: true, text: 'Milliseconds', color: colorsForChart.text }, ticks: { color: colorsForChart.text }, grid: { color: colorsForChart.grid } }
+              }
+            }
+          });
+          chart._benchmarkRows = rows;
+          chartsByInstance.push(chart);
+          const legendActions = document.createElement('div');
+          legendActions.className = 'legend-actions';
+          const legend = document.createElement('div');
+          legend.className = 'legend';
+          const legendItems = [];
+
+          function refreshLegend() {
+            legendItems.forEach((item, metricIndex) => {
+              item.classList.toggle('is-hidden', !chart.isDatasetVisible(metricIndex));
+            });
+          }
+
+          function setAllLegends(visible) {
+            metrics.forEach((metric, metricIndex) => chart.setDatasetVisibility(metricIndex, visible));
+            refreshLegend();
+            chart.update();
+          }
+
+          function addLegendAction(label, action) {
+            const button = document.createElement('button');
+            button.className = 'legend-action';
+            button.type = 'button';
+            button.textContent = label;
+            button.addEventListener('click', action);
+            legendActions.appendChild(button);
+          }
+
+          addLegendAction('Show all', () => setAllLegends(true));
+          addLegendAction('Toggle all', () => {
+            metrics.forEach((metric, metricIndex) => chart.setDatasetVisibility(metricIndex, !chart.isDatasetVisible(metricIndex)));
+            refreshLegend();
+            chart.update();
+          });
+          addLegendAction('Reset', () => {
+            metrics.forEach((metric, metricIndex) => chart.setDatasetVisibility(metricIndex, metric === 'total process time'));
+            refreshLegend();
+            chart.update();
+          });
+
+          metrics.forEach((metric, metricIndex) => {
+            const item = document.createElement('button');
+            item.className = `legend-item${chart.isDatasetVisible(metricIndex) ? '' : ' is-hidden'}`;
+            item.type = 'button';
+            item.innerHTML = `<span class="legend-swatch" style="background:${colors[metricIndex % colors.length]}"></span>${metric}`;
+            item.addEventListener('click', () => {
+              chart.setDatasetVisibility(metricIndex, !chart.isDatasetVisible(metricIndex));
+              item.classList.toggle('is-hidden', !chart.isDatasetVisible(metricIndex));
+              chart.update();
+            });
+            legendItems.push(item);
+            legend.appendChild(item);
+          });
+          section.append(legendActions, legend);
+        }
+      }
+
+      if (!groups.size) {
+        tabs.hidden = true;
+        panels.innerHTML = '<p class="empty">No benchmark data available.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>

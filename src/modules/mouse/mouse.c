@@ -7,10 +7,10 @@
 
 static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, uint8_t index) {
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_MOUSE_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Mouse), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&device->name, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_MOUSE_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Mouse), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(device->name, "name"),
                                                                                                               FF_ARG(device->serial, "serial"),
                                                                                                           }));
@@ -23,12 +23,12 @@ bool ffPrintMouse(FFMouseOptions* options) {
     const char* error = ffDetectMouse(&result);
 
     if (error) {
-        ffPrintError(FF_MOUSE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Mouse), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (!result.length) {
-        ffPrintError(FF_MOUSE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Mouse), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         return false;
     }
 
@@ -49,7 +49,7 @@ bool ffPrintMouse(FFMouseOptions* options) {
 
     bool ret = true;
     if (!filtered.length) {
-        ffPrintError(FF_MOUSE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Mouse), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
         ret = false;
     } else {
         uint8_t index = 0;
@@ -87,7 +87,7 @@ void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_MOUSE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Mouse), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -152,8 +152,30 @@ void ffDestroyMouseOptions(FFMouseOptions* options) {
 }
 
 FFModuleBaseInfo ffMouseModuleInfo = {
-    .name = FF_MOUSE_MODULE_NAME,
+    .name = "Mouse",
     .description = "List connected mice",
+    .displayName = {
+        .en = "Mouse",
+        .ar = "الفأرة",
+        .cs = "Myš",
+        .de = "Maus",
+        .es = "Ratón",
+        .fr = "Souris",
+        .gl = "Rato",
+        .he = "עכבר",
+        .id = "Tetikus",
+        .it = "Mouse",
+        .ja = "マウス",
+        .ko = "마우스",
+        .pl = "Mysz",
+        .pt = "Mouse",
+        .ru = "Мышь",
+        .tr = "Fare",
+        .uk = "Миша",
+        .vi = "Chuột",
+        .zh_CN = "鼠标",
+        .zh_TW = "滑鼠",
+    },
     .initOptions = (void*) ffInitMouseOptions,
     .destroyOptions = (void*) ffDestroyMouseOptions,
     .parseJsonObject = (void*) ffParseMouseJsonObject,

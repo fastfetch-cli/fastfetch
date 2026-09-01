@@ -15,13 +15,13 @@ bool ffPrintOpenGL(FFOpenGLOptions* options) {
 
     const char* error = ffDetectOpenGL(options, &result);
     if (error) {
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OpenGL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     } else {
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(OpenGL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             puts(result.version.chars);
         } else {
-            FF_PRINT_FORMAT_CHECKED(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(OpenGL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                FF_ARG(result.version, "version"),
                                                                                                                FF_ARG(result.renderer, "renderer"),
                                                                                                                FF_ARG(result.vendor, "vendor"),
@@ -58,14 +58,14 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OpenGL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->library = (FFOpenGLLibrary) value;
             }
             continue;
         }
 
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OpenGL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -127,8 +127,30 @@ void ffDestroyOpenGLOptions(FFOpenGLOptions* options) {
 }
 
 FFModuleBaseInfo ffOpenGLModuleInfo = {
-    .name = FF_OPENGL_MODULE_NAME,
+    .name = "OpenGL",
     .description = "Print the highest OpenGL version supported by the GPU",
+    .displayName = {
+        .en = "OpenGL",
+        .ar = "OpenGL",
+        .cs = "OpenGL",
+        .de = "OpenGL",
+        .es = "OpenGL",
+        .fr = "OpenGL",
+        .gl = "OpenGL",
+        .he = "OpenGL",
+        .id = "OpenGL",
+        .it = "OpenGL",
+        .ja = "OpenGL",
+        .ko = "OpenGL",
+        .pl = "OpenGL",
+        .pt = "OpenGL",
+        .ru = "OpenGL",
+        .tr = "OpenGL",
+        .uk = "OpenGL",
+        .vi = "OpenGL",
+        .zh_CN = "OpenGL",
+        .zh_TW = "OpenGL",
+    },
     .initOptions = (void*) ffInitOpenGLOptions,
     .destroyOptions = (void*) ffDestroyOpenGLOptions,
     .parseJsonObject = (void*) ffParseOpenGLJsonObject,

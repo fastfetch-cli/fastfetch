@@ -4,18 +4,16 @@
 #include "detection/terminalsize/terminalsize.h"
 #include "modules/terminalsize/terminalsize.h"
 
-#define FF_TERMINALSIZE_DISPLAY_NAME "Terminal Size"
-
 bool ffPrintTerminalSize(FFTerminalSizeOptions* options) {
     FFTerminalSizeResult result = {};
 
     if (!ffDetectTerminalSize(&result)) {
-        ffPrintError(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal size");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal size");
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         printf("%u columns x %u rows", result.columns, result.rows);
 
         if (result.width != 0 && result.height != 0) {
@@ -24,7 +22,7 @@ bool ffPrintTerminalSize(FFTerminalSizeOptions* options) {
 
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                   FF_ARG(result.rows, "rows"),
                                                                                                                   FF_ARG(result.columns, "columns"),
                                                                                                                   FF_ARG(result.width, "width"),
@@ -42,7 +40,7 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
             continue;
         }
 
-        ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -76,8 +74,30 @@ void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options) {
 }
 
 FFModuleBaseInfo ffTerminalSizeModuleInfo = {
-    .name = FF_TERMINALSIZE_MODULE_NAME,
+    .name = "TerminalSize",
     .description = "Print the current terminal size",
+    .displayName = {
+        .en = "Terminal Size",
+        .ar = "حجم الطرفية",
+        .cs = "Velikost terminálu",
+        .de = "Terminalgröße",
+        .es = "Tamaño del terminal",
+        .fr = "Taille du terminal",
+        .gl = "Tamaño do terminal",
+        .he = "גודל טרמינל",
+        .id = "Ukuran Terminal",
+        .it = "Dimensioni terminale",
+        .ja = "ターミナルサイズ",
+        .ko = "터미널 크기",
+        .pl = "Rozmiar terminala",
+        .pt = "Tamanho do terminal",
+        .ru = "Размер терминала",
+        .tr = "Terminal Boyutu",
+        .uk = "Розмір терміналу",
+        .vi = "Kích thước Terminal",
+        .zh_CN = "终端大小",
+        .zh_TW = "終端機大小",
+    },
     .initOptions = (void*) ffInitTerminalSizeOptions,
     .destroyOptions = (void*) ffDestroyTerminalSizeOptions,
     .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,

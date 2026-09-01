@@ -18,10 +18,35 @@ typedef struct FFModuleFormatArgList {
 
 #define FF_FORMAT_ARG_LIST(list) { .args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg) }
 
+typedef struct FFModuleDisplayName {
+    const char* en; // English
+
+    const char* ar; // Arabic
+    const char* cs; // Czech
+    const char* de; // German
+    const char* es; // Spanish
+    const char* fr; // French
+    const char* gl; // Galician
+    const char* he; // Hebrew
+    const char* id; // Indonesian
+    const char* it; // Italian
+    const char* ja; // Japanese
+    const char* ko; // Korean
+    const char* pl; // Polish
+    const char* pt; // (Brazilian) Portuguese
+    const char* ru; // Russian
+    const char* tr; // Turkish
+    const char* uk; // Ukrainian
+    const char* vi; // Vietnamese
+    const char* zh_CN; // Simplified Chinese
+    const char* zh_TW; // Traditional Chinese
+} FFModuleDisplayName;
+
 // Must be the first field of FFModuleOptions
 typedef struct FFModuleBaseInfo {
     const char* name;
     const char* description;
+    FFModuleDisplayName displayName;
     // A dirty polymorphic implementation in C.
     // This is UB, because `void*` is not compatible with `FF*Options*`.
     // However we can't do it better unless we move to C++, so that `option` becomes a `this` pointer
@@ -94,3 +119,5 @@ static inline void ffOptionDestroyModuleArg(FFModuleArgs* args) {
 }
 
 enum { FF_OPTION_MAX_SIZE = 1 << 8 }; // Maximum size of a single option value, used for static allocation
+
+#define FF_MODULE_GET_DISPLAY_NAME(moduleName) (*(const char**) ((uint8_t*) &ff ## moduleName ## ModuleInfo.displayName + instance.config.display.keyLanguage))

@@ -23,9 +23,9 @@ bool ffPrintCPU(FFCPUOptions* options) {
     const char* error = ffDetectCPU(options, &cpu);
 
     if (error) {
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     } else if (cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1) {
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No CPU detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No CPU detected");
     } else {
         FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
         if (options->showPeCoreCount) {
@@ -43,7 +43,7 @@ bool ffPrintCPU(FFCPUOptions* options) {
         }
 
         if (options->moduleArgs.outputFormat.length == 0) {
-            ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
@@ -85,7 +85,7 @@ bool ffPrintCPU(FFCPUOptions* options) {
 
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
-            FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                             FF_ARG(cpu.name, "name"),
                                                                                                             FF_ARG(cpu.vendor, "vendor"),
                                                                                                             FF_ARG(cpu.coresPhysical, "cores-physical"),
@@ -131,7 +131,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "freqNdigits")) {
-            ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "modules.CPU.freqNdigits has been moved to display.freq.ndigits");
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "modules.CPU.freqNdigits has been moved to display.freq.ndigits");
             continue;
         }
 
@@ -140,7 +140,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPU), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -251,8 +251,30 @@ void ffDestroyCPUOptions(FFCPUOptions* options) {
 }
 
 FFModuleBaseInfo ffCPUModuleInfo = {
-    .name = FF_CPU_MODULE_NAME,
+    .name = "CPU",
     .description = "Print CPU name, frequency, etc.",
+    .displayName = {
+        .en = "CPU",
+        .ar = "المعالج",
+        .cs = "CPU",
+        .de = "CPU",
+        .es = "CPU",
+        .fr = "CPU",
+        .gl = "CPU",
+        .he = "מעבד",
+        .id = "CPU",
+        .it = "CPU",
+        .ja = "CPU",
+        .ko = "CPU",
+        .pl = "CPU",
+        .pt = "CPU",
+        .ru = "Процессор",
+        .tr = "CPU",
+        .uk = "CPU",
+        .vi = "CPU",
+        .zh_CN = "CPU",
+        .zh_TW = "CPU",
+    },
     .initOptions = (void*) ffInitCPUOptions,
     .destroyOptions = (void*) ffDestroyCPUOptions,
     .parseJsonObject = (void*) ffParseCPUJsonObject,

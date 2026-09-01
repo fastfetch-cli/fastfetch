@@ -72,8 +72,7 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
             uint64_t* prevValue = (uint64_t*) ((uint8_t*) icPrev + off);
             uint64_t* currValue = (uint64_t*) ((uint8_t*) icCurr + off);
             uint64_t temp = *currValue;
-            *currValue -= *prevValue;
-            *currValue /= (time2 - time1) / 1000 /* seconds */;
+            *currValue = (*currValue - *prevValue) * 1000 / (time2 - time1); // Calculate per second
 
             // For next function call
             *prevValue = temp;

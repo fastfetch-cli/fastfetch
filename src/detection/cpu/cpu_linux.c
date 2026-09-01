@@ -214,9 +214,15 @@ static void detectQualcomm(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 8975:
+            name = "8 Elite Extreme Gen 6";
+            break;
+        case 8950:
+            name = "8 Elite Gen 6";
+            break;
         case 8845:
             name = "8 Gen 5";
-            break; // ?
+            break;
         case 8850:
             name = "8 Elite Gen 5";
             break;
@@ -237,6 +243,9 @@ static void detectQualcomm(FFCPUResult* cpu) {
             break;
         case 8475:
             name = "8+ Gen 1";
+            break;
+        case 8425:
+            name = "8+ Gen 1 4G";
             break;
         case 8450:
             name = "8 Gen 1";
@@ -271,11 +280,17 @@ static void detectQualcomm(FFCPUResult* cpu) {
         case 6475:
             name = "6 Gen 3";
             break;
+        case 6225:
+            name = "6s 4G Gen 2";
+            break;
         case 6115:
-            name = "6s Gen 1";
+            name = "6s 4G Gen 1";
             break;
         case 6450:
             name = "6 Gen 1";
+            break;
+        case 4850:
+            name = "4 Gen 5";
             break;
         case 4635:
             name = "4s Gen 2";
@@ -305,6 +320,9 @@ static void detectMediaTek(FFCPUResult* cpu) {
 
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
+        case 6995:
+            name = "9600";
+            break;
         case 6993:
             name = "9500";
             break;
@@ -357,6 +375,9 @@ static void detectExynos(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 9975:
+            name = "2700";
+            break;
         case 9965:
             name = "2600";
             break;
@@ -374,6 +395,9 @@ static void detectExynos(FFCPUResult* cpu) {
             name = "2100";
             break;
 
+        case 8865:
+            name = "1680";
+            break;
         case 8855:
             name = "1580";
             break;
@@ -813,6 +837,46 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     return nullptr;
 }
 
+[[maybe_unused]] static bool detectSnapdragonX(FFstrbuf* name, const char* model) {
+    // SoC models are enumerated in the form of `x<gen>[e|p]<part><rev>`, e.g. `x1e80100`,
+    // which is marketed as `X1E-80-100`, where `e` stands for Elite and `p` for Plus.
+    // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips#Snapdragon_X_series
+    const char* prefix;
+    uint32_t prefixLen;
+
+    if (ffStrStartsWith(model, "x1e")) {
+        prefix = "Qualcomm Snapdragon X Elite";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x1p")) {
+        prefix = "Qualcomm Snapdragon X Plus";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x2e")) {
+        // Only X2E-94-100 and X2E-96-100 are branded as Extreme
+        prefix = model[3] == '9' ? "Qualcomm Snapdragon X2 Elite Extreme" : "Qualcomm Snapdragon X2 Elite";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x2p")) {
+        prefix = "Qualcomm Snapdragon X2 Plus";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x1")) {
+        prefix = "Qualcomm Snapdragon X";
+        prefixLen = 2;
+    } else {
+        return false;
+    }
+
+    uint32_t length = (uint32_t) strlen(model);
+    bool splitCode = length - prefixLen == 5;
+
+    ffStrbufSetF(name, "%s X", prefix);
+    for (uint32_t i = 1; i < length; ++i) {
+        if (i == prefixLen || (splitCode && i == length - 3)) {
+            ffStrbufAppendC(name, '-');
+        }
+        ffStrbufAppendC(name, (char) toupper(model[i]));
+    }
+    return true;
+}
+
 [[maybe_unused]] static void parseIsa(FFstrbuf* cpuIsa) {
     // Always use the last part of the ISA string. Ref: #590 #1204
     ffStrbufSubstrAfterLastC(cpuIsa, ' ');
@@ -914,22 +978,19 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     }
     #endif
     else if (ffStrEquals(vendor, "qcom")) {
-        // https://elixir.bootlin.com/linux/v6.11/source/arch/arm64/boot/dts/qcom
-        if (ffStrStartsWith(model, "x")) {
-            ffStrbufSetS(&cpu->name, "Qualcomm Snapdragon X Elite ");
-            for (const char* p = model + 1; *p; ++p) {
-                ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+        // https://elixir.bootlin.com/linux/latest/source/arch/arm64/boot/dts/qcom
+        if (!detectSnapdragonX(&cpu->name, model)) {
+            if (ffStrStartsWith(model, "sc")) {
+                const char* code = model + 2;
+                uint32_t deviceId = (uint32_t) strtoul(code, nullptr, 10);
+                ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
+                if (!cpu->name.length) {
+                    ffStrbufAppendS(&cpu->name, "Qualcomm Snapdragon SC");
+                    ffStrbufAppendS(&cpu->name, code);
+                }
+            } else {
+                ffStrbufSetS(&cpu->name, model);
             }
-        } else if (ffStrStartsWith(model, "sc")) {
-            const char* code = model + 2;
-            uint32_t deviceId = (uint32_t) strtoul(code, nullptr, 10);
-            ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
-            if (!cpu->name.length) {
-                ffStrbufAppendS(&cpu->name, "Qualcomm Snapdragon SC");
-                ffStrbufAppendS(&cpu->name, code);
-            }
-        } else {
-            ffStrbufSetS(&cpu->name, model);
         }
 
         ffStrbufSetStatic(&cpu->vendor, "Qualcomm");

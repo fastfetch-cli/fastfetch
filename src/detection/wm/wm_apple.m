@@ -11,16 +11,23 @@
 
 const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
-    u_int requestLength = ARRAY_SIZE(request);
+    size_t length;
 
-    size_t length = 0;
-    FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
-    if (processes == nullptr) {
-        return "sysctl(CTL_KERN, KERN_PROC, KERN_PROC_ALL) failed";
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL, nullptr}) failed";
     }
-    assert(length % sizeof(struct kinfo_proc) == 0);
 
-    for (size_t i = 0; i < length / sizeof(struct kinfo_proc); i++) {
+    // The process table may change between the two sysctl calls; retry with a larger buffer.
+    length += length / 8 + sizeof(struct kinfo_proc);
+    FF_AUTO_FREE struct kinfo_proc* processes = malloc(length);
+
+    if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL, processes}) failed";
+    }
+
+    uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
+
+    for (size_t i = 0; i < count; i++) {
         const struct kinfo_proc* proc = &processes[i];
         if (proc->kp_eproc.e_ppid != 1) {
             continue;

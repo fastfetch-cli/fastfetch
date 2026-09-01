@@ -1,6 +1,7 @@
 #define INITGUID
 
 #include "battery.h"
+#include "common/endian.h"
 
 #include "common/debug.h"
 #include "common/mallocHelper.h"
@@ -127,29 +128,24 @@ static void detectStaticData(FFlist* entries, FFlist* results) {
         FFBatteryWmiEntry* entry = getBatteryEntry(entries, results, data->Tag);
 
         FF_DEBUG("chemistry: %.4s", (const char*) &data->Chemistry);
-#if __BIG_ENDIAN__
-    #define htobe32(x) (x) // Should not happen on Windows, but just in case
-#else
-    #define htobe32(x) __builtin_bswap32(x)
-#endif
         switch (data->Chemistry) {
-            case htobe32('PbAc'):
+            case FF_READ_BE((uint32_t) 'PbAc'):
                 ffStrbufSetStatic(&entry->result->technology, "Lead Acid");
                 break;
-            case htobe32('LION'):
-            case htobe32('Li-I'):
+            case FF_READ_BE((uint32_t) 'LION'):
+            case FF_READ_BE((uint32_t) 'Li-I'):
                 ffStrbufSetStatic(&entry->result->technology, "Lithium Ion");
                 break;
-            case htobe32('NiCd'):
+            case FF_READ_BE((uint32_t) 'NiCd'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Cadmium");
                 break;
-            case htobe32('NiMH'):
+            case FF_READ_BE((uint32_t) 'NiMH'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Metal Hydride");
                 break;
-            case htobe32('NiZn'):
+            case FF_READ_BE((uint32_t) 'NiZn'):
                 ffStrbufSetStatic(&entry->result->technology, "Nickel Zinc");
                 break;
-            case htobe32('RAM\0'):
+            case FF_READ_BE((uint32_t) 'RAM\0'):
                 ffStrbufSetStatic(&entry->result->technology, "Rechargeable Alkaline-Manganese");
                 break;
             default:

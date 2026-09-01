@@ -1,4 +1,5 @@
 #include "host.h"
+#include "common/endian.h"
 #include "common/smbios.h"
 
 typedef struct [[gnu::packed]] FFSmbiosSystemInfo {
@@ -52,7 +53,14 @@ const char* ffDetectHost(FFHostResult* host) {
 
     static_assert(offsetof(FFSmbiosSystemInfo, UUID) == 0x08, "FFSmbiosSystemInfo.UUID offset is wrong");
     if (data->Header.Length > offsetof(FFSmbiosSystemInfo, UUID)) {
-        ffStrbufSetF(&host->uuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", data->UUID.TimeLow, data->UUID.TimeMid, data->UUID.TimeHighAndVersion, data->UUID.ClockSeqHiAndReserved, data->UUID.ClockSeqLow, data->UUID.Node[0], data->UUID.Node[1], data->UUID.Node[2], data->UUID.Node[3], data->UUID.Node[4], data->UUID.Node[5]);
+           ffStrbufSetF(&host->uuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+              FF_READ_LE(data->UUID.TimeLow),
+              FF_READ_LE(data->UUID.TimeMid),
+              FF_READ_LE(data->UUID.TimeHighAndVersion),
+              data->UUID.ClockSeqHiAndReserved,
+              data->UUID.ClockSeqLow,
+              data->UUID.Node[0], data->UUID.Node[1], data->UUID.Node[2],
+              data->UUID.Node[3], data->UUID.Node[4], data->UUID.Node[5]);
     }
 
     static_assert(offsetof(FFSmbiosSystemInfo, SKUNumber) == 0x19, "FFSmbiosSystemInfo.SKUNumber offset is wrong");

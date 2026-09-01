@@ -13,3 +13,5 @@ fastfetch.kdev4
 *.user.*
 *.swp
 *.log
+/*.zh.md
+/.*-ai/

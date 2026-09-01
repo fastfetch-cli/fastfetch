@@ -138,7 +138,6 @@ jobs:
     uses: ./.github/workflows/build-dragonfly-amd64.yml
 
   haiku-amd64:
-    if: false # Disabled because the Haiku build is currently broken
     needs: no-features-test
     name: Haiku-amd64
     permissions:
@@ -176,6 +175,17 @@ jobs:
     secrets:
       SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
+  benchmark:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && github.repository == 'fastfetch-cli/fastfetch'
+    name: Benchmark
+    needs:
+      - linux-hosts
+      - macos-hosts
+      - windows-hosts
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-benchmark.yml
+
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
@@ -193,7 +203,7 @@ jobs:
       - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
-      # - haiku-amd64
+      - haiku-amd64
       - windows-hosts
     permissions:
       contents: write

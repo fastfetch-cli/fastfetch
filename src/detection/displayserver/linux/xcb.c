@@ -331,7 +331,7 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen) {
 }
 
 static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen) {
-    // With all the initialisation done, start the detection
+    // With all the initialization done, start the detection
     if (xcbRandrHandleMonitors(data, screen)) {
         return;
     }

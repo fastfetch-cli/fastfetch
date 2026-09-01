@@ -271,6 +271,9 @@ static FFModuleBaseInfo* T[] = {
 #if !FF_MODULE_DISABLE_TITLE
     &ffTitleModuleInfo,
 #endif
+#if !FF_MODULE_DISABLE_TOP
+    &ffTopModuleInfo,
+#endif
 #if !FF_MODULE_DISABLE_THEME
     &ffThemeModuleInfo,
 #endif

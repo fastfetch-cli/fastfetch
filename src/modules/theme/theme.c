@@ -12,12 +12,12 @@ bool ffPrintTheme(FFThemeOptions* options) {
     const char* error = ffDetectTheme(&result);
 
     if (error) {
-        ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (result.theme1.length) {
             ffStrbufWriteTo(&result.theme1, stdout);
         }
@@ -29,7 +29,7 @@ bool ffPrintTheme(FFThemeOptions* options) {
         }
         putchar('\n');
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                           FF_ARG(result.theme1, "theme1"),
                                                                                                           FF_ARG(result.theme2, "theme2"),
                                                                                                       }));
@@ -48,7 +48,7 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Theme), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -87,8 +87,30 @@ void ffDestroyThemeOptions(FFThemeOptions* options) {
 }
 
 FFModuleBaseInfo ffThemeModuleInfo = {
-    .name = FF_THEME_MODULE_NAME,
+    .name = "Theme",
     .description = "Print the current desktop environment theme",
+    .displayName = {
+        .en = "Theme",
+        .ar = "السمة",
+        .cs = "Motiv",
+        .de = "Thema",
+        .es = "Tema",
+        .fr = "Thème",
+        .gl = "Tema",
+        .he = "ערכת נושא",
+        .id = "Tema",
+        .it = "Tema",
+        .ja = "テーマ",
+        .ko = "테마",
+        .pl = "Motyw",
+        .pt = "Tema",
+        .ru = "Тема",
+        .tr = "Tema",
+        .uk = "Тема",
+        .vi = "Chủ đề",
+        .zh_CN = "主题",
+        .zh_TW = "主題",
+    },
     .initOptions = (void*) ffInitThemeOptions,
     .destroyOptions = (void*) ffDestroyThemeOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,

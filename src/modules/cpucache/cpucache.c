@@ -5,8 +5,6 @@
 #include "detection/cpucache/cpucache.h"
 #include "modules/cpucache/cpucache.h"
 
-#define FF_CPUCACHE_DISPLAY_NAME "CPU Cache"
-
 static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOptions* options) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -16,7 +14,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
         ffStrbufClear(&key);
         levelStr[1] = (char) ('1' + i);
         if (options->moduleArgs.key.length == 0) {
-            ffStrbufAppendF(&key, "%s (%s)", FF_CPUCACHE_DISPLAY_NAME, levelStr);
+            ffStrbufAppendF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(CPUCache), levelStr);
         } else {
             uint32_t index = i + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -88,12 +86,12 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(CPUCache), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&buffer, stdout);
     } else {
         FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
         ffSizeAppendNum(sum, &buffer2);
-        FF_PRINT_FORMAT_CHECKED(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(CPUCache), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                               FF_ARG(buffer, "result"),
                                                                                                               FF_ARG(buffer2, "sum"),
                                                                                                           }));
@@ -114,7 +112,7 @@ bool ffPrintCPUCache(FFCPUCacheOptions* options) {
     const char* error = ffDetectCPUCache(&result);
 
     if (error) {
-        ffPrintError(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPUCache), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         goto exit;
     }
 
@@ -147,7 +145,7 @@ void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(CPUCache), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -223,8 +221,30 @@ void ffDestroyCPUCacheOptions(FFCPUCacheOptions* options) {
 }
 
 FFModuleBaseInfo ffCPUCacheModuleInfo = {
-    .name = FF_CPUCACHE_MODULE_NAME,
+    .name = "CPUCache",
     .description = "Print CPU cache sizes",
+    .displayName = {
+        .en = "CPU Cache",
+        .ar = "ذاكرة المعالج المؤقتة",
+        .cs = "Mezipaměť CPU",
+        .de = "CPU-Cache",
+        .es = "Caché de la CPU",
+        .fr = "Cache CPU",
+        .gl = "Caché da CPU",
+        .he = "מטמון מעבד",
+        .id = "Cache CPU",
+        .it = "Cache CPU",
+        .ja = "CPUキャッシュ",
+        .ko = "CPU 캐시",
+        .pl = "Pamięć podręczna CPU",
+        .pt = "Cache da CPU",
+        .ru = "Кэш процессора",
+        .tr = "CPU Önbelleği",
+        .uk = "Кеш ЦП",
+        .vi = "Bộ nhớ đệm CPU",
+        .zh_CN = "CPU缓存",
+        .zh_TW = "CPU快取記憶體",
+    },
     .initOptions = (void*) ffInitCPUCacheOptions,
     .destroyOptions = (void*) ffDestroyCPUCacheOptions,
     .parseJsonObject = (void*) ffParseCPUCacheJsonObject,

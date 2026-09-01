@@ -83,6 +83,7 @@ void ffStrbufEnsureFreeNoCheck(FFstrbuf* strbuf, uint32_t free) {
 
         // Round up to the next power of 2.
         // If the value is already a power of 2, it will be rounded up to the next power of 2.
+        // allocate = __builtin_stdc_bit_ceil(allocate + 1); // Currently generates worse asm code
         allocate = 1U << (32 - __builtin_clz(allocate));
     }
 

@@ -8,7 +8,7 @@
 static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* device, uint8_t index) {
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         bool showBatteryLevel = device->battery > 0 && device->battery <= 100;
@@ -44,7 +44,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
             ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                   FF_ARG(device->name, "name"),
                                                                                                                   FF_ARG(device->address, "address"),
                                                                                                                   FF_ARG(device->type, "type"),
@@ -60,12 +60,12 @@ bool ffPrintBluetooth(FFBluetoothOptions* options) {
     const char* error = ffDetectBluetooth(options, &devices);
 
     if (error) {
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (devices.length == 0) {
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
         return false;
     }
 
@@ -100,7 +100,7 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -151,8 +151,30 @@ void ffDestroyBluetoothOptions(FFBluetoothOptions* options) {
 }
 
 FFModuleBaseInfo ffBluetoothModuleInfo = {
-    .name = FF_BLUETOOTH_MODULE_NAME,
+    .name = "Bluetooth",
     .description = "List connected Bluetooth devices",
+    .displayName = {
+        .en = "Bluetooth",
+        .ar = "بلوتوث",
+        .cs = "Bluetooth",
+        .de = "Bluetooth",
+        .es = "Bluetooth",
+        .fr = "Bluetooth",
+        .gl = "Bluetooth",
+        .he = "בלוטות'",
+        .id = "Bluetooth",
+        .it = "Bluetooth",
+        .ja = "ブルートゥース",
+        .ko = "블루투스",
+        .pl = "Bluetooth",
+        .pt = "Bluetooth",
+        .ru = "Bluetooth",
+        .tr = "Bluetooth",
+        .uk = "Bluetooth",
+        .vi = "Bluetooth",
+        .zh_CN = "蓝牙设备",
+        .zh_TW = "藍牙裝置",
+    },
     .initOptions = (void*) ffInitBluetoothOptions,
     .destroyOptions = (void*) ffDestroyBluetoothOptions,
     .parseJsonObject = (void*) ffParseBluetoothJsonObject,

@@ -10,12 +10,12 @@ bool ffPrintDNS(FFDNSOptions* options) {
     const char* error = ffDetectDNS(options, &result);
 
     if (error) {
-        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "NO DNS servers detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "NO DNS servers detected");
         return false;
     }
 
@@ -40,11 +40,11 @@ bool ffPrintDNS(FFDNSOptions* options) {
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufPutTo(&buf, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                         FF_ARG(buf, "result"),
                                                                                                     }));
     }
@@ -73,14 +73,14 @@ void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module) {
                                                                        {},
                                                                    });
             if (error) {
-                ffPrintError(FF_DNS_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             } else {
                 options->showType = (FFDNSShowType) value;
             }
             continue;
         }
 
-        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DNS), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -134,8 +134,30 @@ void ffDestroyDNSOptions(FFDNSOptions* options) {
 }
 
 FFModuleBaseInfo ffDNSModuleInfo = {
-    .name = FF_DNS_MODULE_NAME,
+    .name = "DNS",
     .description = "Print configured DNS servers",
+    .displayName = {
+        .en = "DNS",
+        .ar = "DNS",
+        .cs = "DNS",
+        .de = "DNS",
+        .es = "DNS",
+        .fr = "DNS",
+        .gl = "DNS",
+        .he = "DNS",
+        .id = "DNS",
+        .it = "DNS",
+        .ja = "DNS",
+        .ko = "DNS",
+        .pl = "DNS",
+        .pt = "DNS",
+        .ru = "DNS",
+        .tr = "DNS",
+        .uk = "DNS",
+        .vi = "DNS",
+        .zh_CN = "DNS",
+        .zh_TW = "DNS",
+    },
     .initOptions = (void*) ffInitDNSOptions,
     .destroyOptions = (void*) ffDestroyDNSOptions,
     .parseJsonObject = (void*) ffParseDNSJsonObject,

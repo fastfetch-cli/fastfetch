@@ -1,5 +1,6 @@
 # Fastfetch
 
+[![Benchmark](https://img.shields.io/badge/GitHub%20Pages-live-blue?logo=github)](https://fastfetch-cli.github.io/fastfetch/dev/bench)
 [![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fastfetch-cli/fastfetch/ci.yml)](https://github.com/fastfetch-cli/fastfetch/actions)
 [![GitHub license](https://img.shields.io/github/license/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/blob/dev/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/graphs/contributors)
@@ -99,7 +100,7 @@ See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 * View all data that fastfetch detects: `fastfetch -s <module1>[:<module2>][:<module3>] --format json`
 * Display help messages: `fastfetch --help`
 * Generate a minimal config file: `fastfetch [-s <module1>[:<module2>]] --gen-config [</path/to/config.jsonc>]`
-    * Use: `--gen-config-full` to generate a full config file with all optional options
+    * Use [The online configuration generator](https://fastfetch-cli.github.io/fastfetch-config/) to generate a full config file with all optional options
 
 ## Customization
 

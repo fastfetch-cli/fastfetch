@@ -5,7 +5,7 @@
 
 static void printDevice(FFCameraOptions* options, const FFCameraResult* device, uint8_t index) {
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Camera), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&device->name, stdout);
         if (device->colorspace.length > 0) {
@@ -19,7 +19,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
             putchar('\n');
         }
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Camera), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (((FFformatarg[]) {
                                                                                                                FF_ARG(device->name, "name"),
                                                                                                                FF_ARG(device->vendor, "vendor"),
                                                                                                                FF_ARG(device->colorspace, "colorspace"),
@@ -35,12 +35,12 @@ bool ffPrintCamera(FFCameraOptions* options) {
     const char* error = ffDetectCamera(&result);
 
     if (error) {
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Camera), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (result.length == 0) {
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No camera found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Camera), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No camera found");
         return false;
     }
 
@@ -67,7 +67,7 @@ void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Camera), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -115,8 +115,30 @@ void ffDestroyCameraOptions(FFCameraOptions* options) {
 }
 
 FFModuleBaseInfo ffCameraModuleInfo = {
-    .name = FF_CAMERA_MODULE_NAME,
+    .name = "Camera",
     .description = "Print available cameras",
+    .displayName = {
+        .en = "Camera",
+        .ar = "الكاميرا",
+        .cs = "Kamera",
+        .de = "Kamera",
+        .es = "Cámara",
+        .fr = "Caméra",
+        .gl = "Cámara",
+        .he = "מצלמה",
+        .id = "Kamera",
+        .it = "Fotocamera",
+        .ja = "カメラ",
+        .ko = "카메라",
+        .pl = "Kamera",
+        .pt = "Câmera",
+        .ru = "Камера",
+        .tr = "Kamera",
+        .uk = "Камера",
+        .vi = "Máy ảnh",
+        .zh_CN = "摄像头",
+        .zh_TW = "攝像頭",
+    },
     .initOptions = (void*) ffInitCameraOptions,
     .destroyOptions = (void*) ffDestroyCameraOptions,
     .parseJsonObject = (void*) ffParseCameraJsonObject,

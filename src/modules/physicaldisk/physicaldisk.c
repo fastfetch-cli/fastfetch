@@ -5,15 +5,13 @@
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
 
-#define FF_PHYSICALDISK_DISPLAY_NAME "Physical Disk"
-
 static int sortDevices(const FFPhysicalDiskResult* left, const FFPhysicalDiskResult* right) {
     return ffStrbufComp(&left->name, &right->name);
 }
 
 static void formatKey(const FFPhysicalDiskOptions* options, FFPhysicalDiskResult* dev, uint32_t index, FFstrbuf* key) {
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufSetF(key, FF_PHYSICALDISK_DISPLAY_NAME " (%s)", dev->name.length ? dev->name.chars : dev->devPath.chars);
+        ffStrbufSetF(key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), dev->name.length ? dev->name.chars : dev->devPath.chars);
     } else {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -30,7 +28,7 @@ bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options) {
     const char* error = ffDetectPhysicalDisk(&result, options);
 
     if (error) {
-        ffPrintError(FF_PHYSICALDISK_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -140,7 +138,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
 
         if (unsafe_yyjson_equals_str(key, "hideVirtual")) {
             if (!yyjson_is_bool(val)) {
-                ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideVirtual must be a boolean");
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideVirtual must be a boolean");
             } else {
                 if (unsafe_yyjson_is_true(val)) {
                     options->hideType |= FF_PHYSICALDISK_TYPE_VIRTUAL;
@@ -153,7 +151,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
 
         if (unsafe_yyjson_equals_str(key, "hideUnused")) {
             if (!yyjson_is_bool(val)) {
-                ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideUnused must be a boolean");
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "hideUnused must be a boolean");
             } else {
                 if (unsafe_yyjson_is_true(val)) {
                     options->hideType |= FF_PHYSICALDISK_TYPE_UNUSED;
@@ -168,7 +166,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
             continue;
         }
 
-        ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -265,8 +263,30 @@ void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options) {
 }
 
 FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
-    .name = FF_PHYSICALDISK_MODULE_NAME,
+    .name = "PhysicalDisk",
     .description = "Print physical disk information",
+    .displayName = {
+        .en = "Physical Disk",
+        .ar = "القرص الفعلي",
+        .cs = "Fyzický disk",
+        .de = "Physische Festplatte",
+        .es = "Disco físico",
+        .fr = "Disque physique",
+        .gl = "Disco físico",
+        .he = "דיסק פיזי",
+        .id = "Disk Fisik",
+        .it = "Disco fisico",
+        .ja = "物理ディスク",
+        .ko = "물리 디스크",
+        .pl = "Dysk fizyczny",
+        .pt = "Disco físico",
+        .ru = "Физический диск",
+        .tr = "Fiziksel Disk",
+        .uk = "Фізичний диск",
+        .vi = "Ổ đĩa vật lý",
+        .zh_CN = "物理磁盘",
+        .zh_TW = "物理磁碟",
+    },
     .initOptions = (void*) ffInitPhysicalDiskOptions,
     .destroyOptions = (void*) ffDestroyPhysicalDiskOptions,
     .parseJsonObject = (void*) ffParsePhysicalDiskJsonObject,

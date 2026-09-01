@@ -10,7 +10,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if (!result->displays.length) {
-        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No display detected");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Monitor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No display detected");
         return false;
     }
 
@@ -23,7 +23,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
 
         ffStrbufClear(&key);
         if (options->moduleArgs.key.length == 0) {
-            ffStrbufAppendS(&key, FF_MONITOR_MODULE_NAME);
+            ffStrbufAppendS(&key, FF_MODULE_GET_DISPLAY_NAME(Monitor));
             if (display->name.length > 0) {
                 ffStrbufAppendF(&key, " (%s)", display->name.chars);
             }
@@ -82,7 +82,7 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Monitor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -104,8 +104,30 @@ void ffDestroyMonitorOptions(FFMonitorOptions* options) {
 }
 
 FFModuleBaseInfo ffMonitorModuleInfo = {
-    .name = FF_MONITOR_MODULE_NAME,
+    .name = "Monitor",
     .description = "Same as Display module, but with a different default output format",
+    .displayName = {
+        .en = "Monitor",
+        .ar = "الشاشة",
+        .cs = "Monitor",
+        .de = "Monitor",
+        .es = "Monitor",
+        .fr = "Moniteur",
+        .gl = "Monitor",
+        .he = "צג",
+        .id = "Monitor",
+        .it = "Monitor",
+        .ja = "モニター",
+        .ko = "모니터",
+        .pl = "Monitor",
+        .pt = "Monitor",
+        .ru = "Монитор",
+        .tr = "Monitör",
+        .uk = "Монітор",
+        .vi = "Màn hình",
+        .zh_CN = "监视器",
+        .zh_TW = "監視器",
+    },
     .initOptions = (void*) ffInitMonitorOptions,
     .destroyOptions = (void*) ffDestroyMonitorOptions,
     .parseJsonObject = (void*) ffParseMonitorJsonObject,

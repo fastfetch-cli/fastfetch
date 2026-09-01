@@ -11,9 +11,9 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     if (options->moduleArgs.key.length == 0) {
         if (result->modelName.length > 0) {
-            ffStrbufSetF(&key, "%s (%s)", FF_BATTERY_MODULE_NAME, result->modelName.chars);
+            ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Battery), result->modelName.chars);
         } else {
-            ffStrbufSetS(&key, FF_BATTERY_MODULE_NAME);
+            ffStrbufSetS(&key, FF_MODULE_GET_DISPLAY_NAME(Battery));
         }
     } else {
         ffStrbufClear(&key);
@@ -170,11 +170,11 @@ bool ffPrintBattery(FFBatteryOptions* options) {
     const char* error = ffDetectBattery(options, &results);
 
     if (error) {
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
     if (results.length == 0) {
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
         return false;
     }
 
@@ -209,7 +209,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Battery), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -297,8 +297,30 @@ void ffDestroyBatteryOptions(FFBatteryOptions* options) {
 }
 
 FFModuleBaseInfo ffBatteryModuleInfo = {
-    .name = FF_BATTERY_MODULE_NAME,
+    .name = "Battery",
     .description = "Print battery information",
+    .displayName = {
+        .en = "Battery",
+        .ar = "البطارية",
+        .cs = "Baterie",
+        .de = "Akku",
+        .es = "Batería",
+        .fr = "Batterie",
+        .gl = "Batería",
+        .he = "סוללה",
+        .id = "Baterai",
+        .it = "Batteria",
+        .ja = "バッテリー",
+        .ko = "배터리",
+        .pl = "Bateria",
+        .pt = "Bateria",
+        .ru = "Батарея",
+        .tr = "Pil",
+        .uk = "Батарея",
+        .vi = "Pin",
+        .zh_CN = "电池",
+        .zh_TW = "電池",
+    },
     .initOptions = (void*) ffInitBatteryOptions,
     .destroyOptions = (void*) ffDestroyBatteryOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,

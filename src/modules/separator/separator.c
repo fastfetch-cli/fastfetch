@@ -95,11 +95,11 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
         }
 
         if (unsafe_yyjson_equals_str(key, "length")) {
-            ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "The option length has been renamed to times.");
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Separator), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "The option length has been renamed to times.");
             continue;
         }
 
-        ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Separator), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -121,8 +121,30 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options) {
 }
 
 FFModuleBaseInfo ffSeparatorModuleInfo = {
-    .name = FF_SEPARATOR_MODULE_NAME,
+    .name = "Separator",
     .description = "Print a separator line",
+    .displayName = {
+        .en = "Separator",
+        .ar = "الفاصل",
+        .cs = "Oddělovač",
+        .de = "Trennlinie",
+        .es = "Separador",
+        .fr = "Séparateur",
+        .gl = "Separador",
+        .he = "מפריד",
+        .id = "Pemisah",
+        .it = "Separatore",
+        .ja = "セパレーター",
+        .ko = "구분선",
+        .pl = "Separator",
+        .pt = "Separador",
+        .ru = "Разделитель",
+        .tr = "Ayraç",
+        .uk = "Роздільник",
+        .vi = "Dấu phân cách",
+        .zh_CN = "分隔线",
+        .zh_TW = "分隔線",
+    },
     .initOptions = (void*) ffInitSeparatorOptions,
     .destroyOptions = (void*) ffDestroySeparatorOptions,
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,

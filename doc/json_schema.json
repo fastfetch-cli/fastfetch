@@ -398,7 +398,7 @@
             "type": "string"
         },
         "lmFormat": {
-            "description": "Output format for the `LM` module. See Wiki for formatting syntax\n    1. {service}: LM service\n    2. {type}: LM type\n    3. {version}: LM version",
+            "description": "Output format for the `LM` module. See Wiki for formatting syntax\n    1. {service}: LM service / process name\n    2. {pretty-name}: LM pretty name\n    3. {version}: LM version",
             "type": "string"
         },
         "loadavgFormat": {
@@ -505,6 +505,10 @@
             "description": "Output format for the `Title` module. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name\n    10. {user-id}: UID (*nix) / SID (Windows)\n    11. {pid}: PID of current process\n    12. {cwd}: CWD with home dir replaced by `~`",
             "type": "string"
         },
+        "topFormat": {
+            "description": "Output format for the `Top` module. See Wiki for formatting syntax\n    1. {name}: Process name\n    2. {pid}: Process ID\n    3. {cpu}: CPU usage\n    4. {mem}: Memory usage (RSS) in bytes\n    5. {disk-read}: Disk read bytes per second (0 if unsupported)\n    6. {disk-write}: Disk write bytes per second (0 if unsupported)\n    7. {threads}: Number of threads\n    8. {cpu-percentage}: CPU usage percentage\n    9. {mem-formatted}: Memory usage (RSS) formatted\n    10. {disk-read-formatted}: Disk read formatted\n    11. {disk-write-formatted}: Disk write formatted",
+            "type": "string"
+        },
         "themeFormat": {
             "description": "Output format for the `Theme` module. See Wiki for formatting syntax\n    1. {theme1}: Theme part 1\n    2. {theme2}: Theme part 2",
             "type": "string"
@@ -542,7 +546,7 @@
             "type": "string"
         },
         "wifiFormat": {
-            "description": "Output format for the `Wifi` module. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {band}: Connection channel band in GHz",
+            "description": "Output format for the `Wifi` module. See Wiki for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {channel-width}: Connection channel width in MHz\n    14. {band}: Connection channel band in GHz",
             "type": "string"
         },
         "wmthemeFormat": {
@@ -1057,6 +1061,116 @@
                             "description": "Left padding for keys",
                             "minimum": 0,
                             "default": 0
+                        },
+                        "language": {
+                            "description": "Language used for module keys. `null` for auto detection based on system locale",
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detection based on system locale"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "en",
+                                    "description": "English"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ar",
+                                    "description": "Arabic"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "cs",
+                                    "description": "Czech"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "de",
+                                    "description": "German"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "es",
+                                    "description": "Spanish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "fr",
+                                    "description": "French"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "gl",
+                                    "description": "Galician"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "he",
+                                    "description": "Hebrew"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "id",
+                                    "description": "Indonesian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "it",
+                                    "description": "Italian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ja",
+                                    "description": "Japanese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ko",
+                                    "description": "Korean"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "pl",
+                                    "description": "Polish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "pt",
+                                    "description": "Portuguese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "ru",
+                                    "description": "Russian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "tr",
+                                    "description": "Turkish"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "uk",
+                                    "description": "Ukrainian"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "vi",
+                                    "description": "Vietnamese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "zh_CN",
+                                    "description": "Simplified Chinese"
+                                },
+                                {
+                                    "type": "string",
+                                    "const": "zh_TW",
+                                    "description": "Traditional Chinese"
+                                }
+                            ],
+                            "default": "en"
                         }
                     }
                 },
@@ -1482,6 +1596,7 @@
                             "poweradapter",
                             "processes",
                             "publicip",
+                            "top",
                             "separator",
                             "shell",
                             "sound",
@@ -2585,8 +2700,8 @@
                                     },
                                     "waitTime": {
                                         "type": "integer",
-                                        "description": "Wait time (in ms). Disk I/O = (totalBytesEnd - totalBytesStart) / waitTime",
-                                        "default": 200,
+                                        "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
+                                        "default": 500,
                                         "minimum": 1
                                     },
                                     "key": {
@@ -3486,8 +3601,8 @@
                                     },
                                     "waitTime": {
                                         "type": "integer",
-                                        "description": "Wait time (in ms). Net I/O = (totalBytesEnd - totalBytesStart) / waitTime",
-                                        "default": 200,
+                                        "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
+                                        "default": 500,
                                         "minimum": 1
                                     },
                                     "key": {
@@ -3869,7 +3984,12 @@
                                 "properties": {
                                     "type": {
                                         "const": "processes",
-                                        "description": "Print the number of running processes"
+                                        "description": "Print the number of running processes and threads"
+                                    },
+                                    "countKprocs": {
+                                        "description": "Whether to take kernel processes and threads into account",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -4308,6 +4428,103 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/titleFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Top",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "top",
+                                        "description": "Print processes with the highest CPU, memory, disk I/O usage, latest start time or thread count"
+                                    },
+                                    "sort": {
+                                        "type": "string",
+                                        "description": "Sort processes by CPU, memory, disk IO usage, start time or thread count",
+                                        "enum": [
+                                            "cpu",
+                                            "memory",
+                                            "disk-read",
+                                            "disk-write",
+                                            "start-time",
+                                            "threads"
+                                        ],
+                                        "default": "cpu"
+                                    },
+                                    "showTypes": {
+                                        "description": "Specify which resource usages are detected and displayed.\nIf memory or threads is enabled is enabled alone, only a single process snapshot is taken and `waitTime` sampling wait is skipped",
+                                        "default": [
+                                            "cpu",
+                                            "memory",
+                                            "disk"
+                                        ],
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "cpu",
+                                                    "memory",
+                                                    "disk",
+                                                    "threads"
+                                                ]
+                                            },
+                                            {
+                                                "type": "array",
+                                                "minItems": 1,
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "cpu",
+                                                        "memory",
+                                                        "disk",
+                                                        "threads"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    "processes": {
+                                        "type": "integer",
+                                        "description": "Number of top processes to print",
+                                        "minimum": 1,
+                                        "default": 5
+                                    },
+                                    "waitTime": {
+                                        "type": "integer",
+                                        "description": "Wait time between process samples, in milliseconds. Ignored when showTypes contains \"memory\" only",
+                                        "minimum": 1,
+                                        "default": 500
+                                    },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Print all process on a single line",
+                                        "default": false
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/topFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"

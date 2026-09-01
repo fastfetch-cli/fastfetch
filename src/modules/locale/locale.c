@@ -8,15 +8,15 @@ bool ffPrintLocale(FFLocaleOptions* options) {
 
     const char* error = ffDetectLocale(&locale);
     if (error) {
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&locale, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(locale, "result") }));
     }
 
     return true;
@@ -30,7 +30,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Locale), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -67,8 +67,30 @@ void ffDestroyLocaleOptions(FFLocaleOptions* options) {
 }
 
 FFModuleBaseInfo ffLocaleModuleInfo = {
-    .name = FF_LOCALE_MODULE_NAME,
+    .name = "Locale",
     .description = "Print system locale name",
+    .displayName = {
+        .en = "Locale",
+        .ar = "اللغة",
+        .cs = "Národní prostředí",
+        .de = "Sprachraum",
+        .es = "Configuración regional",
+        .fr = "Paramètres régionaux",
+        .gl = "Configuración rexional",
+        .he = "לוקאל",
+        .id = "Lokal",
+        .it = "Impostazioni locali",
+        .ja = "ロケール",
+        .ko = "로케일",
+        .pl = "Ustawienia regionalne",
+        .pt = "Configuração regional",
+        .ru = "Локаль",
+        .tr = "Yerel Ayar",
+        .uk = "Локаль",
+        .vi = "Bản địa",
+        .zh_CN = "语言环境",
+        .zh_TW = "語言環境",
+    },
     .initOptions = (void*) ffInitLocaleOptions,
     .destroyOptions = (void*) ffDestroyLocaleOptions,
     .parseJsonObject = (void*) ffParseLocaleJsonObject,

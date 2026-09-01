@@ -16,7 +16,7 @@ void ffParseBreakJsonObject([[maybe_unused]] FFBreakOptions* options, [[maybe_un
             continue;
         }
 
-        ffPrintError(FF_BREAK_MODULE_NAME, 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Break), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -27,8 +27,30 @@ void ffDestroyBreakOptions([[maybe_unused]] FFBreakOptions* options) {
 }
 
 FFModuleBaseInfo ffBreakModuleInfo = {
-    .name = FF_BREAK_MODULE_NAME,
+    .name = "Break",
     .description = "Print an empty line",
+    .displayName = {
+        .en = "Break",
+        .ar = "فاصل",
+        .cs = "Konec řádku",
+        .de = "Umbruch",
+        .es = "Salto de línea",
+        .fr = "Saut de ligne",
+        .gl = "Salto de liña",
+        .he = "מעבר שורה",
+        .id = "Baris Baru",
+        .it = "Interruzione",
+        .ja = "改行",
+        .ko = "줄 바꿈",
+        .pl = "Przerwa",
+        .pt = "Quebra",
+        .ru = "Разрыв",
+        .tr = "Satır Sonu",
+        .uk = "Розрив рядка",
+        .vi = "Xuống dòng",
+        .zh_CN = "换行",
+        .zh_TW = "換行",
+    },
     .initOptions = (void*) ffInitBreakOptions,
     .destroyOptions = (void*) ffDestroyBreakOptions,
     .parseJsonObject = (void*) ffParseBreakJsonObject,

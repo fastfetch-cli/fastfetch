@@ -996,7 +996,7 @@ bool ffGenConfigInteractive(FFdata* data) {
             success = true;
         }
     } else {
-        fputs("\nConfig generation cancelled.\n", stderr);
+        fputs("\nConfig generation canceled.\n", stderr);
     }
 
     ffListDestroy(&ui.items);

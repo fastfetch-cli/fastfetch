@@ -1,8 +1,44 @@
+# 2.68.0
+
+Changes:
+* The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
+
+Features:
+* Improved Login Manager (LM) module
+    * Added support on macOS, Windows and POSIX systems without systemd (by process list enumeration).
+    * Reports pretty name on Linux.
+* Added Top module to print processes with the highest CPU, memory or disk I/O usage. (Top)
+* Added module key localization support. (General)
+    * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
+    * See `fastfetch -h key-language` for all supported languages.
+* Improved Wi-Fi module
+    * Added Wifi channel width detection, exposed via `{channel-width}` in custom format (reports 0 when not supported).
+    * Improved Wifi channel frequency accuracy and fortified detection on Windows, macOS.
+    * Added Wifi detection support on SunOS, Haiku.
+* Added Battery detection support on SunOS. (Battery, SunOS)
+* Added terminal font size detection support on Termux. (TerminalFont, Android)
+* Improved GTK theme/icons/font detection on standalone WMs such as Hyprland, sway, niri and i3. (Theme, Linux)
+* Improved fish completion scripts to print enum descriptions. (Completion)
+* Enabled Wayland support on Android. (DisplayServer, Android)
+* Added DE detection support for ASUS Zenfone. (DE, Android)
+* Added new ARM SoCs (CPU, Linux / Android)
+
+Bugfixes:
+* Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
+* Fixed the fast path of ash version detection. (Shell)
+* Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
+    * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
+* Some internal cleanups and optimizations.
+
+Logos:
+* Added macOS_old
+* Added Omarchy, Omarchy2
+
 # 2.67.1
 
 Bugfixes:
-* Fixed a `Symbol not found` error when running on macOS 10.15. (Codec, macOS)
-* Fixed Alacritty font size never being parsed from the TOML config. (TerminalFont)
+* Fixed a `Symbol not found` error when running on macOS 10.15. (#2499, Codec, macOS)
+* Fixed Alacritty font size never being parsed from the TOML config. (#2501, TerminalFont)
 * Fixed bright colors incorrectly being active when the terminal uses a light theme. (#2509, Display)
 * Fixed Ghostty terminal font detection (TerminalFont)
     * Now tries to load the config with the `.ghostty` extension. (#2500)
@@ -3279,7 +3315,7 @@ Features:
 * Enhance `--percent-type` to allow hiding other texts (#387)
 * Add Wifi module support for Linux
 * Detect scaled resolutions (Windows, macOS)
-* Optimise font module printing (Windows)
+* Optimize font module printing (Windows)
 * Detect pacman package count inside MSYS2 environment (Windows)
 * Add Wifi / Battery module support for Android
 * Disk name support for Linux

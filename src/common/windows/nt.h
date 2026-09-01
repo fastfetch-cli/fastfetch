@@ -11,6 +11,7 @@ enum {
     SystemFirmwareTableInformation = 76,
     SystemBootEnvironmentInformation = 90,
     SystemLogicalProcessorAndGroupInformation = 107,
+    SystemBasicPerformanceInformation = 123,
     SystemSecureBootInformation = 146,
 };
 
@@ -169,7 +170,7 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
 );
 
 NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
-NTSTATUS NTAPI RtlStringFromGUIDEx(IN GUID* Guid, OUT PCUNICODE_STRING GuidString, _In_ BOOLEAN AllocateGuidString);
+NTSTATUS NTAPI RtlStringFromGUIDEx(IN const GUID* Guid, OUT PUNICODE_STRING GuidString, IN BOOLEAN AllocateGuidString);
 
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION {
     BOOLEAN SecureBootEnabled;
@@ -197,6 +198,13 @@ typedef struct _SYSTEM_FIRMWARE_TABLE_INFORMATION {
     ULONG TableBufferLength;
     _Field_size_bytes_(TableBufferLength) UCHAR TableBuffer[];
 } SYSTEM_FIRMWARE_TABLE_INFORMATION, *PSYSTEM_FIRMWARE_TABLE_INFORMATION;
+
+typedef struct _SYSTEM_BASIC_PERFORMANCE_INFORMATION {
+    SIZE_T AvailablePages;
+    SIZE_T CommittedPages;
+    SIZE_T CommitLimit;
+    SIZE_T PeakCommitment;
+} SYSTEM_BASIC_PERFORMANCE_INFORMATION, *PSYSTEM_BASIC_PERFORMANCE_INFORMATION;
 
 NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
@@ -598,6 +606,54 @@ typedef struct _KUSER_SHARED_DATA {
             ULONG SpareBits : 19;
         };
     };
+
+    //
+    // Reserved padding field to preserve structure alignment and compatibility.
+    //
+
+    ULONG DataFlagsPad[1];
+
+    //
+    // Depending on the processor, the code for fast system call will differ,
+    // Stub code is provided pointers below to access the appropriate code.
+    //
+    // N.B. The following field is only used on 32-bit systems.
+    //
+
+    ULONGLONG TestRetInstruction;
+
+    //
+    // Query-performance counter (QPC) frequency, in counts per second.
+    //
+    // N.B. This value represents the fixed frequency of the system's high-resolution
+    // performance counter. It is used by user-mode time routines to convert QPC
+    // ticks into elapsed time without requiring a system call. The frequency is
+    // constant for the lifetime of the system and reflects the hardware or
+    // virtualized timer source selected by the kernel.
+    //
+
+    LONGLONG QpcFrequency;
+
+    //
+    // On AMD64, this value is initialized to a nonzero value if the system
+    // operates with an altered view of the system service call mechanism.
+    //
+
+    ULONG SystemCall;
+
+    //
+    // Reserved field - do not use. Used to be UserCetAvailableEnvironments.
+    //
+
+    ULONG Reserved2;
+
+    //
+    // Full 64 bit version of the number of physical pages in the system.
+    // This can dynamically change as physical memory can be added or removed
+    // from a running system.
+    //
+
+    ULONGLONG FullNumberOfPhysicalPages;
 
     // ... more fields follow, but we don't need them
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;

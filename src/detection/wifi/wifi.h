@@ -18,7 +18,8 @@ struct FFWifiConnection {
     double rxRate;
     double txRate;
     uint16_t channel;
-    uint16_t frequency; // MHz
+    uint16_t channelWidth; // MHz
+    uint16_t frequency;    // MHz
 };
 
 typedef struct FFWifiResult {
@@ -58,5 +59,20 @@ static inline uint16_t ffWifiFreqToChannel(uint16_t frequency) {
         return (uint16_t) ((frequency - 5950) / 5);
     }
 
+    return 0;
+}
+
+static inline uint16_t ffWifiChannelToFreq(uint16_t channel) {
+    // Inverse of ffWifiFreqToChannel for the common 2.4 GHz and 5 GHz bands.
+    // 4.9 GHz and 6 GHz channels overlap numerically, so they are not handled here.
+    if (channel == 14) {
+        return 2484;
+    }
+    if (channel >= 1 && channel <= 13) {
+        return (uint16_t) (2407 + 5 * channel);
+    }
+    if (channel >= 36 && channel <= 177) { // 5 GHz: 5000 + 5*channel covers 36..177
+        return (uint16_t) (5000 + 5 * channel);
+    }
     return 0;
 }

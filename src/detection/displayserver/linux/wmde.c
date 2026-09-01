@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #if __FreeBSD__
     #include <sys/sysctl.h>
@@ -376,48 +377,60 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
     }
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
-    ffStrbufAppendS(&procPath, "/proc/");
-
-    uint32_t procPathLength = procPath.length;
-
-    FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); // Some processes have large command lines (looking at you chrome)
+    int procfd = dirfd(procdir);
 
     struct dirent* dirent;
     while ((dirent = readdir(procdir)) != nullptr) {
         // Match only folders starting with a number (the pid folders)
-        if (dirent->d_type != DT_DIR || !ffCharIsDigit(dirent->d_name[0])) {
+        if ((dirent->d_type != DT_DIR && dirent->d_type != DT_UNKNOWN) || !ffCharIsDigit(dirent->d_name[0])) {
             continue;
         }
 
-        ffStrbufAppendS(&procPath, dirent->d_name);
+        ffStrbufSetS(&procPath, dirent->d_name);
         uint32_t procFolderPathLength = procPath.length;
 
         // Don't check for processes not owned by the current user.
+        char loginuid[32];
         ffStrbufAppendS(&procPath, "/loginuid");
-        ffReadFileBuffer(procPath.chars, &loginuid);
-        if (ffStrbufToUInt(&loginuid, (uint64_t) -1) != userId) {
-            ffStrbufSubstrBefore(&procPath, procPathLength);
+        ssize_t bytesRead = ffReadFileDataRelative(procfd, procPath.chars, sizeof(loginuid) - 1, loginuid);
+        if (bytesRead <= 0) {
+            continue;
+        }
+        loginuid[bytesRead] = '\0';
+        if (strtol(loginuid, nullptr, 10) != (long) userId) {
             continue;
         }
 
         ffStrbufSubstrBefore(&procPath, procFolderPathLength);
 
-        // We check the cmdline for the process name, because it is not trimmed.
-        ffStrbufAppendS(&procPath, "/cmdline");
-        ffReadFileBuffer(procPath.chars, &processName);
-        ffStrbufTrimRightSpace(&processName);
-        ffStrbufSubstrBeforeFirstC(&processName, '\0'); // Trim the arguments
-        ffStrbufSubstrAfterLastC(&processName, '/');
-
-        ffStrbufSubstrBefore(&procPath, procPathLength);
+        // We check the realpath for the process name
+        ffStrbufAppendS(&procPath, "/exe");
+        char exePath[PATH_MAX];
+        ssize_t exePathLength = readlinkat(procfd, procPath.chars, exePath, sizeof(exePath) - 1);
+        const char* processName;
+        if (exePathLength >= 0) {
+            exePath[exePathLength] = '\0';
+            processName = basename(exePath);
+        } else {
+            ffStrbufSubstrBefore(&procPath, procFolderPathLength);
+            ffStrbufAppendS(&procPath, "/comm");
+            exePathLength = ffReadFileDataRelative(procfd, procPath.chars, sizeof(exePath) - 1, exePath);
+            if (exePathLength <= 0) {
+                continue;
+            }
+            if (exePath[exePathLength - 1] == '\n') {
+                --exePathLength;
+            }
+            exePath[exePathLength] = '\0';
+            processName = exePath;
+        }
 
         if (result->dePrettyName.length == 0) {
-            applyPrettyNameIfDE(result, processName.chars);
+            applyPrettyNameIfDE(result, processName);
         }
 
         if (result->wmPrettyName.length == 0) {
-            applyNameIfWM(result, processName.chars);
+            applyNameIfWM(result, processName);
         }
 
         if (result->dePrettyName.length > 0 && result->wmPrettyName.length > 0) {

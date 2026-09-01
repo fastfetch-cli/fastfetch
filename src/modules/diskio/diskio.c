@@ -5,15 +5,13 @@
 #include "detection/diskio/diskio.h"
 #include "modules/diskio/diskio.h"
 
-#define FF_DISKIO_DISPLAY_NAME "Disk IO"
-
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right) {
     return ffStrbufComp(&left->name, &right->name);
 }
 
 static void formatKey(const FFDiskIOOptions* options, FFDiskIOResult* dev, uint32_t index, FFstrbuf* key) {
     if (options->moduleArgs.key.length == 0) {
-        ffStrbufSetF(key, FF_DISKIO_DISPLAY_NAME " (%s)", dev->name.length ? dev->name.chars : dev->devPath.chars);
+        ffStrbufSetF(key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(DiskIO), dev->name.length ? dev->name.chars : dev->devPath.chars);
     } else {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
@@ -30,7 +28,7 @@ bool ffPrintDiskIO(FFDiskIOOptions* options) {
     const char* error = ffDetectDiskIO(&result, options);
 
     if (error) {
-        ffPrintError(FF_DISKIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DiskIO), 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
         return false;
     }
 
@@ -113,10 +111,13 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module) {
 
         if (unsafe_yyjson_equals_str(key, "waitTime")) {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
+            if (options->waitTime == 0) {
+                options->waitTime = 1;
+            }
             continue;
         }
 
-        ffPrintError(FF_DISKIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DiskIO), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -163,7 +164,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options) {
 
     ffStrbufInit(&options->namePrefix);
     options->detectTotal = false;
-    options->waitTime = 1000;
+    options->waitTime = 500;
 }
 
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options) {
@@ -172,8 +173,30 @@ void ffDestroyDiskIOOptions(FFDiskIOOptions* options) {
 }
 
 FFModuleBaseInfo ffDiskIOModuleInfo = {
-    .name = FF_DISKIO_MODULE_NAME,
+    .name = "DiskIO",
     .description = "Print physical disk I/O throughput",
+    .displayName = {
+        .en = "Disk I/O",
+        .ar = "إدخال/إخراج القرص",
+        .cs = "Diskové I/O",
+        .de = "Festplatten I/O",
+        .es = "E/S del disco",
+        .fr = "Entrée/Sortie disque",
+        .gl = "E/S do disco",
+        .he = "קלט/פלט דיסק",
+        .id = "I/O Disk",
+        .it = "I/O del disco",
+        .ja = "ディスク I/O",
+        .ko = "디스크 I/O",
+        .pl = "Dysk I/O",
+        .pt = "Disco I/O",
+        .ru = "Дисковый I/O",
+        .tr = "Disk G/Ç",
+        .uk = "Диск В/В",
+        .vi = "Đĩa I/O",
+        .zh_CN = "磁盘 I/O",
+        .zh_TW = "磁碟 I/O",
+    },
     .initOptions = (void*) ffInitDiskIOOptions,
     .destroyOptions = (void*) ffDestroyDiskIOOptions,
     .parseJsonObject = (void*) ffParseDiskIOJsonObject,

@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
+cmake_minimum_required(VERSION 3.21.0) # C_STANDARD
 
 project(fastfetch
-    VERSION 2.67.1
+    VERSION 2.68.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -78,7 +78,7 @@ endif()
 include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
+cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "ANDROID OR LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
@@ -128,7 +128,7 @@ if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
 endif()
 
-file(GLOB FF_MODULE_DIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/")
+file(GLOB FF_MODULE_DIRS CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/")
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
     if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
         string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
@@ -484,6 +484,7 @@ set(LIBFASTFETCH_SRC
     src/detection/physicalmemory/physicalmemory.c
     src/detection/publicip/publicip.c
     src/detection/terminaltheme/terminaltheme.c
+    src/detection/top/top.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
@@ -559,6 +560,7 @@ set(LIBFASTFETCH_SRC
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
     src/modules/title/title.c
+    src/modules/top/top.c
     src/modules/tpm/tpm.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
@@ -651,6 +653,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_linux.c
         src/detection/tpm/tpm_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -691,6 +694,13 @@ elseif(ANDROID)
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/kde-output.c
+        src/detection/displayserver/linux/wayland/wl-output-protocol.c
+        src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
+        src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -726,6 +736,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_linux.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -802,7 +813,6 @@ elseif(FreeBSD)
         src/detection/os/os_linux.c
         src/detection/packages/packages_bsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_bsd.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_bsd.c
         src/detection/swap/swap_bsd.c
@@ -822,11 +832,15 @@ elseif(FreeBSD)
     if(DragonFly)
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_nosupport.c
+            src/detection/processes/processes_dbsd.c
+            src/detection/top/top_dbsd.c
             src/detection/wifi/wifi_nosupport.c
         )
     else()
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_bsd.c
+            src/detection/processes/processes_bsd.c
+            src/detection/top/top_bsd.c
             src/detection/wifi/wifi_bsd.c
         )
     endif()
@@ -904,6 +918,7 @@ elseif(NetBSD)
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
+        src/detection/top/top_nbsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -964,7 +979,7 @@ elseif(OpenBSD)
         src/detection/gpu/gpu_bsddrm.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
@@ -990,6 +1005,7 @@ elseif(OpenBSD)
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
+        src/detection/top/top_obsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -1035,7 +1051,7 @@ elseif(APPLE)
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_apple.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_apple.m
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
@@ -1050,13 +1066,14 @@ elseif(APPLE)
         src/detection/packages/packages_apple.c
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_apple.c
-        src/detection/processes/processes_bsd.c
+        src/detection/processes/processes_apple.c
         src/detection/sound/sound_apple.c
         src/detection/swap/swap_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_apple.c
+        src/detection/top/top_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -1128,7 +1145,7 @@ elseif(WIN32)
         src/detection/initsystem/initsystem_windows.c
         src/detection/keyboard/keyboard_windows.c
         src/detection/libc/libc_windows.cpp
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_windows.c
         src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
@@ -1149,6 +1166,7 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
         src/detection/theme/theme_windows.c
+        src/detection/top/top_windows.c
         src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -1169,7 +1187,7 @@ elseif(SunOS)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/kmod_sunos.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_sunos.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
@@ -1210,7 +1228,7 @@ elseif(SunOS)
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
-        src/detection/lm/lm_nosupport.c
+        src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_sunos.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
@@ -1223,7 +1241,7 @@ elseif(SunOS)
         src/detection/os/os_sunos.c
         src/detection/packages/packages_sunos.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_linux.c
+        src/detection/processes/processes_sunos.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_sunos.c
         src/detection/swap/swap_sunos.c
@@ -1231,11 +1249,12 @@ elseif(SunOS)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_sunos.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_sunos.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_sunos.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
@@ -1301,11 +1320,12 @@ elseif(Haiku)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/top/top_haiku.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_haiku.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_haiku.cpp
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_haiku.cpp
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_haiku.cpp
@@ -1377,7 +1397,7 @@ elseif(GNU)
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_linux.c
+        src/detection/processes/processes_gnu.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
@@ -1385,6 +1405,7 @@ elseif(GNU)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/top/top_gnu.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
@@ -1995,6 +2016,7 @@ elseif(SunOS)
 elseif(GNU)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE "ps"
     )
 elseif(ANDROID)
     target_link_libraries(libfastfetch

@@ -11,7 +11,7 @@ bool ffPrintMemory(FFMemoryOptions* options) {
     const char* error = ffDetectMemory(&storage);
 
     if (error) {
-        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Memory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -27,7 +27,7 @@ bool ffPrintMemory(FFMemoryOptions* options) {
 
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Memory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         if (storage.bytesTotal == 0) {
             puts("Disabled");
         } else {
@@ -59,7 +59,7 @@ bool ffPrintMemory(FFMemoryOptions* options) {
             ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         }
 
-        FF_PRINT_FORMAT_CHECKED(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Memory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(usedPretty, "used"),
                                                                                                            FF_ARG(totalPretty, "total"),
                                                                                                            FF_ARG(percentageNum, "percentage"),
@@ -82,7 +82,7 @@ void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Memory), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -118,8 +118,30 @@ void ffDestroyMemoryOptions(FFMemoryOptions* options) {
 }
 
 FFModuleBaseInfo ffMemoryModuleInfo = {
-    .name = FF_MEMORY_MODULE_NAME,
+    .name = "Memory",
     .description = "Print system memory usage information",
+    .displayName = {
+        .en = "Memory",
+        .ar = "الذاكرة",
+        .cs = "Paměť",
+        .de = "Speicher",
+        .es = "Memoria",
+        .fr = "Mémoire",
+        .gl = "Memoria",
+        .he = "זיכרון",
+        .id = "Memori",
+        .it = "Memoria",
+        .ja = "メモリ",
+        .ko = "메모리",
+        .pl = "Pamięć",
+        .pt = "Memória",
+        .ru = "Память",
+        .tr = "Bellek",
+        .uk = "Пам'ять",
+        .vi = "Bộ nhớ",
+        .zh_CN = "内存",
+        .zh_TW = "記憶體",
+    },
     .initOptions = (void*) ffInitMemoryOptions,
     .destroyOptions = (void*) ffDestroyMemoryOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,

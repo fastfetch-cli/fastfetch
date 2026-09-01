@@ -99,15 +99,16 @@
         "gamepad",
         "mouse",
         "keyboard",
-        {
-          "type": "weather",
-          "timeout": 1000
-        },
+        "top",
         "netio",
         "diskio",
         {
             "type": "physicaldisk",
             "temp": true
+        },
+        {
+          "type": "weather",
+          "timeout": 1000
         },
         "tpm",
         "version",

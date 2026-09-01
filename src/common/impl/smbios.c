@@ -1,3 +1,4 @@
+#include "common/endian.h"
 #include "common/smbios.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
@@ -81,9 +82,9 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
             break;
         }
 
-        if (header->Handle >= 0xFF00) {
+            if (FF_READ_LE(header->Handle) >= 0xFF00) {
             FF_DEBUG("Invalid SMBIOS structure handle 0x%04x at offset 0x%lx",
-                header->Handle,
+            FF_READ_LE(header->Handle),
                 (unsigned long) ((const uint8_t*) header - data));
             break;
         }
@@ -103,25 +104,25 @@ static bool parseSmbiosTable(const uint8_t* data, uint32_t length) {
                 smbiosTable[header->Type] = header;
                 FF_DEBUG("Found SMBIOS structure type %u, handle 0x%04X, length %u",
                     header->Type,
-                    header->Handle,
+                    FF_READ_LE(header->Handle),
                     header->Length);
                 structureCount++;
             } else {
                 FF_DEBUG("Duplicate SMBIOS structure type %u, handle 0x%04X, length %u",
                     header->Type,
-                    header->Handle,
+                    FF_READ_LE(header->Handle),
                     header->Length);
             }
         } else if (header->Type == FF_SMBIOS_TYPE_END_OF_TABLE) {
             FF_DEBUG("Reached SMBIOS end of type %u, handle 0x%04X, length %u",
                 header->Type,
-                header->Handle,
+                FF_READ_LE(header->Handle),
                 header->Length);
             break;
         } else {
             FF_DEBUG("Found custom SMBIOS structure type %u, handle 0x%04X, length %u; ignoring",
                 header->Type,
-                header->Handle,
+                FF_READ_LE(header->Handle),
                 header->Length);
         }
     }
@@ -308,8 +309,8 @@ static bool fillTableBufferFallback(FFstrbuf* buffer) {
                     sizeof(p->Smbios30));
                 return false;
             }
-            tableLength = p->Smbios30.StructureTableMaximumSize;
-            tableAddress = (off_t) p->Smbios30.StructureTableAddress;
+                tableLength = FF_READ_LE(p->Smbios30.StructureTableMaximumSize);
+                tableAddress = (off_t) FF_READ_LE(p->Smbios30.StructureTableAddress);
             FF_DEBUG("SMBIOS 3.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,
@@ -325,8 +326,8 @@ static bool fillTableBufferFallback(FFstrbuf* buffer) {
                     sizeof(p->Smbios20));
                 return false;
             }
-            tableLength = p->Smbios20.StructureTableLength;
-            tableAddress = (off_t) p->Smbios20.StructureTableAddress;
+                tableLength = FF_READ_LE(p->Smbios20.StructureTableLength);
+                tableAddress = (off_t) FF_READ_LE(p->Smbios20.StructureTableAddress);
             FF_DEBUG("SMBIOS 2.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,
@@ -369,9 +370,9 @@ static bool detectSmbiosTableLength(const uint8_t* data, uint32_t bufferLength, 
             return false;
         }
 
-        if (header->Handle >= 0xFF00) {
+        if (FF_READ_LE(header->Handle) >= 0xFF00) {
             FF_DEBUG("Invalid SMBIOS structure handle 0x%04x at offset 0x%lx",
-                header->Handle,
+            FF_READ_LE(header->Handle),
                 (unsigned long) (p - data));
             return false;
         }
@@ -614,8 +615,8 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
                     sizeof(entryPoint.Smbios20));
                 return false;
             }
-            tableLength = entryPoint.Smbios20.StructureTableLength;
-            tableAddress = (off_t) entryPoint.Smbios20.StructureTableAddress;
+            tableLength = FF_READ_LE(entryPoint.Smbios20.StructureTableLength);
+            tableAddress = (off_t) FF_READ_LE(entryPoint.Smbios20.StructureTableAddress);
             FF_DEBUG("SMBIOS 2.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,
@@ -629,8 +630,8 @@ static bool fillTableBufferPlatform(FFstrbuf* buffer) {
                     sizeof(entryPoint.Smbios30));
                 return false;
             }
-            tableLength = entryPoint.Smbios30.StructureTableMaximumSize;
-            tableAddress = (off_t) entryPoint.Smbios30.StructureTableAddress;
+            tableLength = FF_READ_LE(entryPoint.Smbios30.StructureTableMaximumSize);
+            tableAddress = (off_t) FF_READ_LE(entryPoint.Smbios30.StructureTableAddress);
             FF_DEBUG("SMBIOS 3.0: tableLength=0x%x, tableAddress=0x%lx, version=%u.%u.%u",
                 tableLength,
                 (unsigned long) tableAddress,

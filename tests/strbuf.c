@@ -23,6 +23,8 @@ int shouldNotBeCalled(int c) {
     exit(1);
 }
 
+const FFstrbuf testCreateStatic = FF_STRBUF_STATIC("TEST");
+
 int main(void) {
     FFstrbuf strbuf;
 

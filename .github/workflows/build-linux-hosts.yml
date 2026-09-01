@@ -43,7 +43,7 @@ jobs:
         run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y gcc-13 libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev libefl-all-dev libunwind-dev liblua5.4-dev libvdpau-dev libva-dev rpm ninja-build
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 jq libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev libefl-all-dev libunwind-dev liblua5.4-dev libvdpau-dev libva-dev rpm ninja-build
 
       - name: install linuxbrew packages
         run: |
@@ -52,7 +52,7 @@ jobs:
 
       - name: Initialize CodeQL
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           languages: c
 
@@ -64,7 +64,7 @@ jobs:
 
       - name: perform CodeQL analysis
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
 
       - name: list features
         run: ./fastfetch --list-features
@@ -73,7 +73,29 @@ jobs:
         run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
+        run: |
+          { time -p ./fastfetch -c presets/ci.jsonc --format json > fastfetch.raw.json 2> fastfetch.error; } 2> fastfetch.time
+          sed -n '/^[[:space:]]*\[/,$p' fastfetch.raw.json > fastfetch.json
+          cat fastfetch.json
+          cat fastfetch.error >&2
+          cat fastfetch.time >&2
+
+      - name: prepare benchmark data
+        run: |
+          real_seconds=$(awk '$1 == "real" { print $2 }' fastfetch.time)
+          jq -e 'type == "array"' fastfetch.json > /dev/null
+          jq --arg platform "linux" --arg arch "${{ inputs.arch }}" --argjson real_seconds "$real_seconds" '
+            map(select(.stat | type == "number") | {
+              name: ("fastfetch " + $platform + " " + $arch + " module " + .type),
+              unit: "ms",
+              value: .stat
+            }) + [{
+              name: ("fastfetch " + $platform + " " + $arch + " total process time"),
+              unit: "ms",
+              value: ($real_seconds * 1000)
+            }]
+          ' fastfetch.json > benchmark.json
+          cat benchmark.json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -105,3 +127,9 @@ jobs:
         with:
           name: fastfetch-linux-${{ inputs.arch }}
           path: ./fastfetch-*.*
+
+      - name: upload benchmark data
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-linux-${{ inputs.arch }}
+          path: benchmark.json

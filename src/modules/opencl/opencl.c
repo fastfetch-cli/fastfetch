@@ -9,15 +9,15 @@ bool ffPrintOpenCL(FFOpenCLOptions* options) {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if (result->error != nullptr) {
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result->error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OpenCL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result->error);
         return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
-        ffPrintLogoAndKey(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(OpenCL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&result->version, stdout);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(OpenCL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                            FF_ARG(result->version, "version"),
                                                                                                            FF_ARG(result->name, "name"),
                                                                                                            FF_ARG(result->vendor, "vendor"),
@@ -35,7 +35,7 @@ void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(OpenCL), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -120,8 +120,30 @@ void ffDestroyOpenCLOptions(FFOpenCLOptions* options) {
 }
 
 FFModuleBaseInfo ffOpenCLModuleInfo = {
-    .name = FF_OPENCL_MODULE_NAME,
+    .name = "OpenCL",
     .description = "Print the highest OpenCL version supported by the GPU",
+    .displayName = {
+        .en = "OpenCL",
+        .ar = "OpenCL",
+        .cs = "OpenCL",
+        .de = "OpenCL",
+        .es = "OpenCL",
+        .fr = "OpenCL",
+        .gl = "OpenCL",
+        .he = "OpenCL",
+        .id = "OpenCL",
+        .it = "OpenCL",
+        .ja = "OpenCL",
+        .ko = "OpenCL",
+        .pl = "OpenCL",
+        .pt = "OpenCL",
+        .ru = "OpenCL",
+        .tr = "OpenCL",
+        .uk = "OpenCL",
+        .vi = "OpenCL",
+        .zh_CN = "OpenCL",
+        .zh_TW = "OpenCL",
+    },
     .initOptions = (void*) ffInitOpenCLOptions,
     .destroyOptions = (void*) ffDestroyOpenCLOptions,
     .parseJsonObject = (void*) ffParseOpenCLJsonObject,

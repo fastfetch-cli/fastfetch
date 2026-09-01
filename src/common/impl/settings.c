@@ -450,12 +450,10 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
     return true;
 }
 #else  // FF_HAVE_SQLITE3
-int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
-    FF_UNUSED(dbPath, query)
+int ffSettingsGetSQLite3Int(const char*, const char*) {
     return 0;
 }
-bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result) {
-    FF_UNUSED(dbPath, query, result)
+bool ffSettingsGetSQLite3String(const char*, const char*, FFstrbuf*) {
     return false;
 }
 #endif // FF_HAVE_SQLITE3
@@ -509,8 +507,8 @@ typedef struct E_Config {
     Eina_List* font_defaults;
 } E_Config; // Must be the same name as the top level struct in e.cfg
 
-    #define FF_EET_EINA_FILE_DATA_DESCRIPTOR_CLASS_SET(clas, type) \
-        (ffeet_eina_file_data_descriptor_class_set(clas, sizeof(*(clas)), #type, sizeof(type)))
+    #define FF_EET_EINA_FILE_DATA_DESCRIPTOR_CLASS_SET(klass, type) \
+        (ffeet_eina_file_data_descriptor_class_set(klass, sizeof(*(klass)), #type, sizeof(type)))
     #define FF_EET_DATA_DESCRIPTOR_ADD_BASIC(edd, struct_type, member, type)                                                                                 \
         do {                                                                                                                                                 \
             struct_type ___ett;                                                                                                                              \

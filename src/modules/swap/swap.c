@@ -11,9 +11,9 @@ void printSwap(FFSwapOptions* options, uint8_t index, uint32_t totalCount, FFSwa
 
     if (options->moduleArgs.key.length == 0) {
         if (storage->name.length > 0) {
-            ffStrbufSetF(&key, "%s (%s)", FF_SWAP_MODULE_NAME, storage->name.chars);
+            ffStrbufSetF(&key, "%s (%s)", FF_MODULE_GET_DISPLAY_NAME(Swap), storage->name.chars);
         } else {
-            ffStrbufSetS(&key, FF_SWAP_MODULE_NAME);
+            ffStrbufSetS(&key, FF_MODULE_GET_DISPLAY_NAME(Swap));
         }
     } else {
         ffStrbufClear(&key);
@@ -90,7 +90,7 @@ bool ffPrintSwap(FFSwapOptions* options) {
     const char* error = ffDetectSwap(&result);
 
     if (error) {
-        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Swap), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
@@ -136,7 +136,7 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module) {
             continue;
         }
 
-        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Swap), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -182,8 +182,30 @@ void ffDestroySwapOptions(FFSwapOptions* options) {
 }
 
 FFModuleBaseInfo ffSwapModuleInfo = {
-    .name = FF_SWAP_MODULE_NAME,
+    .name = "Swap",
     .description = "Print swap (paging file) space usage",
+    .displayName = {
+        .en = "Swap",
+        .ar = "الذاكرة التبادلية",
+        .cs = "Odkládací prostor",
+        .de = "Swap",
+        .es = "Swap",
+        .fr = "Swap",
+        .gl = "Swap",
+        .he = "זיכרון החלפה",
+        .id = "Swap",
+        .it = "Swap",
+        .ja = "スワップ",
+        .ko = "스왑",
+        .pl = "Swap",
+        .pt = "Swap",
+        .ru = "Подкачка",
+        .tr = "Takas",
+        .uk = "Своп",
+        .vi = "Swap",
+        .zh_CN = "交换空间",
+        .zh_TW = "交換空間",
+    },
     .initOptions = (void*) ffInitSwapOptions,
     .destroyOptions = (void*) ffDestroySwapOptions,
     .parseJsonObject = (void*) ffParseSwapJsonObject,
