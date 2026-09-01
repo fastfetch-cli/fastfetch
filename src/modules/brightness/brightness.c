@@ -51,6 +51,7 @@ bool ffPrintBrightness(FFBrightnessOptions* options) {
                                                                                FF_ARG(moduleIndex, "index"),
                                                                                FF_ARG(item->name, "name"),
                                                                                FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                               FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Brightness), "module-name"),
                                                                            }));
         }
 

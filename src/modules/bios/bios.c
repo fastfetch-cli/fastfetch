@@ -40,6 +40,7 @@ bool ffPrintBios(FFBiosOptions* options) {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                                                                            FF_ARG(bios.type, "type"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Bios), "module-name"),
                                                                        }));
     }
 

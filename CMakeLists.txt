@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.21.0) # C_STANDARD
+cmake_minimum_required(VERSION 3.12.0) # Don't change before we investigate why #2553 happens
 
 project(fastfetch
-    VERSION 2.68.0
+    VERSION 2.68.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"

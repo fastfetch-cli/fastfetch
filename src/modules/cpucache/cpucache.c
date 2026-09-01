@@ -21,6 +21,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
                                                                                FF_ARG(index, "index"),
                                                                                FF_ARG(levelStr, "level"),
                                                                                FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                               FF_ARG(FF_MODULE_GET_DISPLAY_NAME(CPUCache), "module-name"),
                                                                            }));
         }
 

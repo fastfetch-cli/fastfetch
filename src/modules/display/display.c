@@ -83,6 +83,7 @@ bool ffPrintDisplay(FFDisplayOptions* options) {
                                                                                FF_ARG(result->name, "name"),
                                                                                FF_ARG(displayType, "type"),
                                                                                FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                               FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Display), "module-name"),
                                                                            }));
         }
 

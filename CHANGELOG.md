@@ -1,4 +1,4 @@
-# 2.68.0
+# 2.68.1
 
 Changes:
 * The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
@@ -11,6 +11,7 @@ Features:
 * Added module key localization support. (General)
     * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
     * See `fastfetch -h key-language` for all supported languages.
+    * Exposed in custom key format as `{module-name}`.
 * Improved Wi-Fi module
     * Added Wifi channel width detection, exposed via `{channel-width}` in custom format (reports 0 when not supported).
     * Improved Wifi channel frequency accuracy and fortified detection on Windows, macOS.
@@ -29,6 +30,8 @@ Bugfixes:
 * Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
     * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
 * Some internal cleanups and optimizations.
+* Attempted to fix potential issues on big-endian systems
+    * Not tested due to lack of access to big-endian hardware.
 
 Logos:
 * Added macOS_old

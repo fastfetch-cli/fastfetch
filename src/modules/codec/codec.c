@@ -61,6 +61,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
                                                                            FF_ARG(*gpu, "gpu"),
                                                                            FF_ARG(direction, "direction"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Codec), "module-name"),
                                                                        }));
     }
 

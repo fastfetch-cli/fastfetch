@@ -22,6 +22,7 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
                                                                           FF_ARG(index, "index"),
                                                                           FF_ARG(inf->name, "name"),
                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                          FF_ARG(FF_MODULE_GET_DISPLAY_NAME(NetIO), "module-name"),
                                                                       }));
     }
 }

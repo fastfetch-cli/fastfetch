@@ -19,6 +19,7 @@ static void formatKey(const FFPhysicalDiskOptions* options, FFPhysicalDiskResult
                                                                           FF_ARG(dev->name, "name"),
                                                                           FF_ARG(dev->devPath, "dev-path"),
                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                          FF_ARG(FF_MODULE_GET_DISPLAY_NAME(PhysicalDisk), "module-name"),
                                                                       }));
     }
 }

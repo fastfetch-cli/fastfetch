@@ -24,6 +24,7 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
                                                                           FF_ARG(ip->name, "ifname"),
                                                                           FF_ARG(ip->mac, "mac"),
                                                                           FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                          FF_ARG(FF_MODULE_GET_DISPLAY_NAME(LocalIP), "module-name"),
                                                                       }));
     }
 }
