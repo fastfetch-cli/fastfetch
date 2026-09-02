@@ -3,10 +3,17 @@
 #include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
 #import <AppKit/AppKit.h>
 
 const char* ffDetectWallpaper(FFstrbuf* result)
 {
+    CFDictionaryRef session = CGSessionCopyCurrentDictionary();
+    bool hasGuiSession = session != NULL;
+    if (session)
+        CFRelease(session);
+
+    if (hasGuiSession)
     {
         // Reliable for user-picked static images.
         NSURL* url = [NSWorkspace.sharedWorkspace desktopImageURLForScreen:NSScreen.mainScreen];
@@ -75,6 +82,9 @@ const char* ffDetectWallpaper(FFstrbuf* result)
     }
 
     #endif
+
+    if (!hasGuiSession)
+        return "No active graphical session";
 
     if (ffOsascript("tell application \"Finder\" to get POSIX path of (get desktop picture as alias)", result))
         return nullptr;
