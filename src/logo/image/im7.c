@@ -20,7 +20,8 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData) {
     #else
     FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
         "libMagickCore-7.Q16HDRI" FF_LIBRARY_EXTENSION, 11,
-        "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11
+        "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11,
+        "libMagickCore-7" FF_LIBRARY_EXTENSION, 11
     )
     #endif
     // clang-format on
