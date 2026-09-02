@@ -128,12 +128,23 @@ if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
 endif()
 
-file(GLOB FF_MODULE_DIRS CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/")
-foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
-        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        option(MODULE_DISABLE_${FF_MODULE_UPPER} "Disable module ${FF_MODULE_DIR}" OFF)
+# A module is a directory `src/modules/<module>/` that contains `<module>.c`.
+# Globbing the sources rather than the directories skips empty directories and
+# other leftovers, and makes `CONFIGURE_DEPENDS` react to added or removed sources.
+file(GLOB FF_MODULE_SRCS CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/*.c")
+set(FF_MODULE_DIRS "")
+foreach(FF_MODULE_SRC ${FF_MODULE_SRCS})
+    get_filename_component(FF_MODULE_DIR "${FF_MODULE_SRC}" DIRECTORY)
+    get_filename_component(FF_MODULE_NAME "${FF_MODULE_SRC}" NAME_WE)
+    if("${FF_MODULE_DIR}" STREQUAL "${FF_MODULE_NAME}")
+        list(APPEND FF_MODULE_DIRS "${FF_MODULE_DIR}")
     endif()
+endforeach()
+unset(FF_MODULE_SRCS)
+
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+    option(MODULE_DISABLE_${FF_MODULE_UPPER} "Disable module ${FF_MODULE_DIR}" OFF)
 endforeach()
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
@@ -496,87 +507,17 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
-    src/modules/battery/battery.c
-    src/modules/bios/bios.c
-    src/modules/bluetooth/bluetooth.c
-    src/modules/bluetoothradio/bluetoothradio.c
-    src/modules/board/board.c
-    src/modules/bootmgr/bootmgr.c
-    src/modules/brightness/brightness.c
-    src/modules/break/break.c
-    src/modules/btrfs/btrfs.c
-    src/modules/camera/camera.c
-    src/modules/chassis/chassis.c
-    src/modules/codec/codec.c
-    src/modules/colors/colors.c
-    src/modules/cpu/cpu.c
-    src/modules/cpucache/cpucache.c
-    src/modules/cpuusage/cpuusage.c
-    src/modules/cursor/cursor.c
-    src/modules/custom/custom.c
-    src/modules/command/command.c
-    src/modules/datetime/datetime.c
-    src/modules/de/de.c
-    src/modules/disk/disk.c
-    src/modules/diskio/diskio.c
-    src/modules/dns/dns.c
-    src/modules/editor/editor.c
-    src/modules/font/font.c
-    src/modules/gpu/gpu.c
-    src/modules/host/host.c
-    src/modules/icons/icons.c
-    src/modules/initsystem/initsystem.c
-    src/modules/gamepad/gamepad.c
-    src/modules/kernel/kernel.c
-    src/modules/keyboard/keyboard.c
-    src/modules/lm/lm.c
-    src/modules/loadavg/loadavg.c
-    src/modules/locale/locale.c
-    src/modules/localip/localip.c
-    src/modules/logo/logo.c
-    src/modules/memory/memory.c
-    src/modules/monitor/monitor.c
-    src/modules/netio/netio.c
-    src/modules/opencl/opencl.c
-    src/modules/opengl/opengl.c
-    src/modules/os/os.c
-    src/modules/packages/packages.c
-    src/modules/physicaldisk/physicaldisk.c
-    src/modules/physicalmemory/physicalmemory.c
-    src/modules/processes/processes.c
-    src/modules/player/player.c
-    src/modules/poweradapter/poweradapter.c
-    src/modules/publicip/publicip.c
-    src/modules/display/display.c
-    src/modules/separator/separator.c
-    src/modules/shell/shell.c
-    src/modules/sound/sound.c
-    src/modules/swap/swap.c
-    src/modules/media/media.c
-    src/modules/mouse/mouse.c
-    src/modules/terminal/terminal.c
-    src/modules/terminaltheme/terminaltheme.c
-    src/modules/terminalfont/terminalfont.c
-    src/modules/terminalsize/terminalsize.c
-    src/modules/theme/theme.c
-    src/modules/title/title.c
-    src/modules/top/top.c
-    src/modules/tpm/tpm.c
-    src/modules/uptime/uptime.c
-    src/modules/users/users.c
-    src/modules/version/version.c
-    src/modules/vulkan/vulkan.c
-    src/modules/wallpaper/wallpaper.c
-    src/modules/weather/weather.c
-    src/modules/wifi/wifi.c
-    src/modules/wm/wm.c
-    src/modules/wmtheme/wmtheme.c
-    src/modules/zpool/zpool.c
     src/modules/modules.c
     src/options/display.c
     src/options/logo.c
     src/options/general.c
 )
+
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    list(APPEND LIBFASTFETCH_SRC
+        src/modules/${FF_MODULE_DIR}/${FF_MODULE_DIR}.c
+    )
+endforeach()
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
@@ -1485,11 +1426,9 @@ add_library(libfastfetch OBJECT
 )
 
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
-        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        if(MODULE_DISABLE_${FF_MODULE_UPPER})
-            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_DISABLE_${FF_MODULE_UPPER}=1)
-        endif()
+    string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+    if(MODULE_DISABLE_${FF_MODULE_UPPER})
+        target_compile_definitions(libfastfetch PUBLIC FF_MODULE_DISABLE_${FF_MODULE_UPPER}=1)
     endif()
 endforeach()
 
