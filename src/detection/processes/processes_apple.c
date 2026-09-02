@@ -34,7 +34,7 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
         if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, sizeof(taskInfo)) != sizeof(taskInfo)) {
             continue;
         }
-        result->threads += taskInfo.pti_threadnum;
+        result->threads += (uint32_t) taskInfo.pti_threadnum;
     }
 
     return nullptr;
