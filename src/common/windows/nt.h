@@ -13,6 +13,8 @@ enum {
     SystemLogicalProcessorAndGroupInformation = 107,
     SystemBasicPerformanceInformation = 123,
     SystemSecureBootInformation = 146,
+    SystemBasicProcessInformation = 252,
+    SystemHandleCountInformation = 253,
 };
 
 typedef struct _PROCESSOR_POWER_INFORMATION {
@@ -205,6 +207,20 @@ typedef struct _SYSTEM_BASIC_PERFORMANCE_INFORMATION {
     SIZE_T CommitLimit;
     SIZE_T PeakCommitment;
 } SYSTEM_BASIC_PERFORMANCE_INFORMATION, *PSYSTEM_BASIC_PERFORMANCE_INFORMATION;
+
+typedef struct _SYSTEM_BASICPROCESS_INFORMATION {
+    ULONG NextEntryOffset;
+    HANDLE UniqueProcessId;
+    HANDLE InheritedFromUniqueProcessId;
+    ULONG64 SequenceNumber;
+    UNICODE_STRING ImageName;
+} SYSTEM_BASICPROCESS_INFORMATION, *PSYSTEM_BASICPROCESS_INFORMATION;
+
+typedef struct _SYSTEM_HANDLECOUNT_INFORMATION {
+    ULONG ProcessCount;
+    ULONG ThreadCount;
+    ULONG HandleCount;
+} SYSTEM_HANDLECOUNT_INFORMATION, *PSYSTEM_HANDLECOUNT_INFORMATION;
 
 NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
@@ -691,15 +707,19 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 
 static inline bool ffIsWindows10OrGreater() {
 #if FF_WIN81_COMPAT
-    return SharedUserData->NtMajorVersion >= 10;
+    return SharedUserData->NtBuildNumber >= 10240;
 #else
     return true;
 #endif
 }
 
 static inline bool ffIsWindows11OrGreater() {
-    return SharedUserData->NtMajorVersion > 10 ||
-        (SharedUserData->NtMajorVersion == 10 && SharedUserData->NtBuildNumber >= 22000);
+    return SharedUserData->NtBuildNumber >= 22000;
+}
+
+static inline bool ffIsSystemBasicProcessInfoAvailable() { // Includes HandleCountInformation, which was added together
+    // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation#systembasicprocessinformation
+    return SharedUserData->NtBuildNumber >= 26200; // MSDN says it was added in 26100.4770; ntdoc says 25H2
 }
 
 NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
