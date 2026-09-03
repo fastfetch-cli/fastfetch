@@ -64,6 +64,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(cards)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(dpkg)
+        FF_PRINT_PACKAGE(dram)
         FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(eopkg)
         if (options->combined) {
@@ -155,6 +156,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.cards, "cards"),
                 FF_ARG(counts.choco, "choco"),
                 FF_ARG(counts.dpkg, "dpkg"),
+                FF_ARG(counts.dram, "dram"),
                 FF_ARG(counts.emerge, "emerge"),
                 FF_ARG(counts.eopkg, "eopkg"),
                 FF_ARG(counts.flatpakSystem, "flatpak-system"),
@@ -262,6 +264,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(DPKG)
+                            FF_TEST_PACKAGE_NAME(DRAM)
                             break;
                         case 'E':
                             if (false)
@@ -391,6 +394,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(CARDS)
     FF_TEST_PACKAGE_NAME(CHOCO)
     FF_TEST_PACKAGE_NAME(DPKG)
+    FF_TEST_PACKAGE_NAME(DRAM)
     FF_TEST_PACKAGE_NAME(EMERGE)
     FF_TEST_PACKAGE_NAME(EOPKG)
     FF_TEST_PACKAGE_NAME(FLATPAK)
@@ -452,6 +456,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(cards)
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(dpkg)
+    FF_APPEND_PACKAGE_COUNT(dram)
     FF_APPEND_PACKAGE_COUNT(emerge)
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
@@ -550,6 +555,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of cards packages", "cards" },
         { "Number of choco packages", "choco" },
         { "Number of dpkg packages", "dpkg" },
+        { "Number of dram packages", "dram" },
         { "Number of emerge packages", "emerge" },
         { "Number of eopkg packages", "eopkg" },
         { "Number of flatpak-system app packages", "flatpak-system" },
