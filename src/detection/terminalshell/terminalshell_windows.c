@@ -95,6 +95,8 @@ static void setShellInfoDetails(FFShellResult* result) {
         ffStrbufSetS(&result->prettyName, "Windows Explorer");
     } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "busybox")) {
         ffStrbufInitStatic(&result->prettyName, "ash");
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "tidalshell")) {
+        ffStrbufSetS(&result->prettyName, "TidalShell");
     }
 }
 
