@@ -63,6 +63,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         }
         FF_PRINT_PACKAGE(cards)
         FF_PRINT_PACKAGE(choco)
+        FF_PRINT_PACKAGE(crux)
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(eopkg)
@@ -154,6 +155,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.brewCask, "brew-cask"),
                 FF_ARG(counts.cards, "cards"),
                 FF_ARG(counts.choco, "choco"),
+                FF_ARG(counts.choco, "crux"),
                 FF_ARG(counts.dpkg, "dpkg"),
                 FF_ARG(counts.emerge, "emerge"),
                 FF_ARG(counts.eopkg, "eopkg"),
@@ -257,6 +259,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                                 ;
                             FF_TEST_PACKAGE_NAME(CARDS)
                             FF_TEST_PACKAGE_NAME(CHOCO)
+                            FF_TEST_PACKAGE_NAME(CRUX)
                             break;
                         case 'D':
                             if (false)
@@ -390,6 +393,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(BREW)
     FF_TEST_PACKAGE_NAME(CARDS)
     FF_TEST_PACKAGE_NAME(CHOCO)
+    FF_TEST_PACKAGE_NAME(CRUX)
     FF_TEST_PACKAGE_NAME(DPKG)
     FF_TEST_PACKAGE_NAME(EMERGE)
     FF_TEST_PACKAGE_NAME(EOPKG)
@@ -451,6 +455,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(brewCask)
     FF_APPEND_PACKAGE_COUNT(cards)
     FF_APPEND_PACKAGE_COUNT(choco)
+    FF_APPEND_PACKAGE_COUNT(crux)
     FF_APPEND_PACKAGE_COUNT(dpkg)
     FF_APPEND_PACKAGE_COUNT(emerge)
     FF_APPEND_PACKAGE_COUNT(eopkg)
@@ -549,6 +554,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of brew-cask packages", "brew-cask" },
         { "Number of cards packages", "cards" },
         { "Number of choco packages", "choco" },
+        { "Number of crux packages", "crux" },
         { "Number of dpkg packages", "dpkg" },
         { "Number of emerge packages", "emerge" },
         { "Number of eopkg packages", "eopkg" },
