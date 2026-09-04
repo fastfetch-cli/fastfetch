@@ -62,6 +62,10 @@ const char* ffCPUAppleCodeToName(uint32_t code) {
             return "Apple M4 Pro";
         case 6041:
             return "Apple M4 Max";
+        case 8142:
+            return "Apple M5";
+        case 6050:
+            return "Apple M5 Pro / Max";
         default:
             return nullptr;
     }
