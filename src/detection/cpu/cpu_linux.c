@@ -712,7 +712,7 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:")))) {
         p += strlen("\nphysical id\t:");
         char* pend;
-        unsigned long long id = strtoul(p, &pend, 10);
+        unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
             high |= 1ULL << (id - 64);
         } else {

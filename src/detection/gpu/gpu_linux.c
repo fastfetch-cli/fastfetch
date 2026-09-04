@@ -426,7 +426,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         ffStrbufAppendS(deviceDir, "/revision");
         if (ffReadFileBuffer(deviceDir->chars, buffer)) {
             char* pend;
-            uint64_t revision = strtoul(buffer->chars, &pend, 16);
+            uint32_t revision = (uint32_t) strtoul(buffer->chars, &pend, 16);
             if (pend != buffer->chars) {
                 ffGPUQueryAmdGpuName((uint16_t) deviceId, (uint8_t) revision, gpu);
             }
