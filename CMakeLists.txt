@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12.0) # Don't change before we investigate why #2553 happens
+cmake_minimum_required(VERSION 3.21.0) # C_STANDARD C17 and C23
 
 project(fastfetch
     VERSION 2.68.1
@@ -9,9 +9,6 @@ project(fastfetch
 
 set(PROJECT_LICENSE "MIT license")
 
-if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
-    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
-endif()
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     set(CMAKE_SYSTEM_PROCESSOR "amd64")
