@@ -560,7 +560,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     }
     if (FF_PACKAGES_IS_ENABLED(options, PKGSRC)) {
-        packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
+        packageCounts->pkgsrc += ffPackagesGetPkgsrc(baseDir);
     }
     if (FF_PACKAGES_IS_ENABLED(options, MOSS)) {
         packageCounts->moss += getSQLite3Int(baseDir, "/.moss/db/state", "SELECT COUNT(*) FROM state_selections WHERE state_id = (SELECT MAX(id) FROM state)", "moss");
