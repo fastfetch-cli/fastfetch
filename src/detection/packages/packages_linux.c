@@ -487,6 +487,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (FF_PACKAGES_IS_ENABLED(options, APK)) {
         packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, CRUX)) {
+        packageCounts->crux += getNumStrings(baseDir, "/var/lib/pkg/db", "\n\n", "crux");
+    }
     if (FF_PACKAGES_IS_ENABLED(options, DPKG)) {
         packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     }
