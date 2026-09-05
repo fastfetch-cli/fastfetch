@@ -14,6 +14,10 @@
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
 
+#if __riscv__ || __riscv
+    #include "cpu_riscv.h"
+#endif
+
 static double readTempFile(int dfd, const char* filename, FFstrbuf* buffer) {
     if (filename ? !ffReadFileBufferRelative(dfd, filename, buffer) : !ffReadFDBuffer(dfd, buffer)) {
         return FF_CPU_TEMP_UNSET;
@@ -1046,6 +1050,17 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     #endif
 
     detectFrequency(cpu, options);
+
+    #if __riscv__ || __riscv
+    // A detected SoC name must not hide a heterogeneous core topology.
+    // Frequency-based core counts can merge distinct uarchs on RISC-V.
+    {
+        FF_STRBUF_AUTO_DESTROY cpuinfo = ffStrbufCreateA(PROC_FILE_BUFFSIZ);
+        if (ffReadFileBuffer(FF_CPUINFO_PATH, &cpuinfo)) {
+            ffCPUDetectRiscvUarch(&cpuinfo, cpu->coresOnline, &cpu->name);
+        }
+    }
+    #endif
 
     if (cpu->name.length == 0) {
         FF_STRBUF_AUTO_DESTROY cpuinfo = ffStrbufCreateA(PROC_FILE_BUFFSIZ);
