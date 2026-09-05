@@ -70,15 +70,15 @@ void ffPrepareCommandOption(FFdata* data) {
 #define FF_IF_MODULE_MATCH(moduleNameConstant) if (ffStrEqualsIgnCase(moduleType, moduleNameConstant) && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
         switch (moduleType[0]) {
-            #if !FF_MODULE_DISABLE_CPUUSAGE
+#if !FF_MODULE_DISABLE_CPUUSAGE
             case 'C':
             case 'c':
                 FF_IF_MODULE_MATCH(ffCPUUsageModuleInfo.name)
                 ffPrepareCPUUsage();
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_DISKIO
+#if !FF_MODULE_DISABLE_DISKIO
             case 'D':
             case 'd':
                 FF_IF_MODULE_MATCH(ffDiskIOModuleInfo.name) {
@@ -87,9 +87,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareDiskIO(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_NETIO
+#if !FF_MODULE_DISABLE_NETIO
             case 'N':
             case 'n':
                 FF_IF_MODULE_MATCH(ffNetIOModuleInfo.name) {
@@ -98,9 +98,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareNetIO(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_PUBLICIP
+#if !FF_MODULE_DISABLE_PUBLICIP
             case 'P':
             case 'p':
                 FF_IF_MODULE_MATCH(ffPublicIPModuleInfo.name) {
@@ -109,9 +109,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPreparePublicIp(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_TOP
+#if !FF_MODULE_DISABLE_TOP
             case 'T':
             case 't':
                 FF_IF_MODULE_MATCH(ffTopModuleInfo.name) {
@@ -120,9 +120,9 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareTopProcesses(options.showTypes);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_WEATHER
+#if !FF_MODULE_DISABLE_WEATHER
             case 'W':
             case 'w':
                 FF_IF_MODULE_MATCH(ffWeatherModuleInfo.name) {
@@ -131,7 +131,7 @@ void ffPrepareCommandOption(FFdata* data) {
                     ffPrepareWeather(&options);
                 }
                 break;
-            #endif
+#endif
         }
 
 #undef FF_IF_MODULE_MATCH
@@ -178,6 +178,34 @@ static void genJsonResult(FFdata* data, FFModuleBaseInfo* baseInfo, void* option
     }
 }
 
+static yyjson_val* findStructureModuleConfig(FFdata* data, const char* moduleType) {
+    if (data->configDoc == nullptr) {
+        return nullptr;
+    }
+
+    yyjson_val* root = yyjson_doc_get_root(data->configDoc);
+    if (root == nullptr) {
+        return nullptr;
+    }
+
+    yyjson_val* modules = yyjson_obj_get(root, "modules");
+    if (!yyjson_is_arr(modules)) {
+        return nullptr;
+    }
+
+    yyjson_val* item;
+    size_t idx, max;
+    yyjson_arr_foreach (modules, idx, max, item) {
+        if (yyjson_is_obj(item)) {
+            const char* type = yyjson_get_str(yyjson_obj_get(item, "type"));
+            if (type != nullptr && ffStrEqualsIgnCase(type, moduleType)) {
+                return item;
+            }
+        }
+    }
+    return nullptr;
+}
+
 static bool parseStructureCommand(
     FFdata* data,
     const char* line,
@@ -191,7 +219,13 @@ static bool parseStructureCommand(
                 if (data->resultDoc != nullptr) {
                     fn(data, baseInfo, optionBuf);
                 } else {
-                    baseInfo->printModule(optionBuf);
+                    yyjson_val* configModule = findStructureModuleConfig(data, baseInfo->name);
+                    if (configModule != nullptr) {
+                        baseInfo->parseJsonObject(optionBuf, configModule);
+                        baseInfo->printModule(optionBuf);
+                    } else {
+                        baseInfo->printModule(optionBuf);
+                    }
                 }
                 baseInfo->destroyOptions(optionBuf);
                 return true;
