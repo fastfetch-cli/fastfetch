@@ -3,6 +3,20 @@
 #include "common/color.h"
 
 static const FFlogo H[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_HELIADE
+    // Heliade
+    {
+        .names = { "Heliade" },
+        .lines = FASTFETCH_DATATEXT_LOGO_HELIADE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
+
+static const FFlogo H[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_HAIKU
     // Haiku
     {
