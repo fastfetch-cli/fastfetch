@@ -15,8 +15,6 @@ static const FFlogo H[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
-
-static const FFlogo H[] = {
     #ifdef FASTFETCH_DATATEXT_LOGO_HAIKU
     // Haiku
     {
