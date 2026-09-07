@@ -3,11 +3,11 @@
 #include "common/color.h"
 
 static const FFlogo H[] = {
-    #ifdef FASTFETCH_DATATEXT_LOGO_HELIADE
+    #ifdef FASTFETCH_DATATEXT_LOGO_HALIADE
     // Heliade
     {
-        .names = { "Heliade" },
-        .lines = FASTFETCH_DATATEXT_LOGO_HELIADE,
+        .names = { "Haliade" },
+        .lines = FASTFETCH_DATATEXT_LOGO_HALIADE,
         .colors = {
             FF_COLOR_FG_BLUE,
         },
