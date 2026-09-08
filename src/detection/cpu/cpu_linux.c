@@ -619,6 +619,9 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
 #elif __sh__
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
+#elif __sparc__ || __sparc
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "Cpu0ClkTck :", cpuMHz)) ||
 #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -1101,6 +1104,10 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         if (cpu->name.length) {
             ffStrbufPrependS(&cpu->name, "Machine ");
         }
+    #elif __sparc__ || __sparc
+        // Cpu0ClkTck is in Hz, printed as "%016lx" by sparc64 and "%ld" by sparc32. A 32-bit userland can run
+        // on a 64-bit kernel, so take the base from the width of the value rather than from our own bitness.
+        cpu->frequencyBase = (uint32_t) (strtoull(cpuMHz.chars, nullptr, cpuMHz.length == 16 ? 16 : 10) / 1000000);
     #endif
     }
 
