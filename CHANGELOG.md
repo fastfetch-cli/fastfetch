@@ -25,6 +25,7 @@ Features:
 * Added new ARM SoCs (CPU, Linux / Android)
 
 Bugfixes:
+* Fixed the default GPU output prefixing the Microsoft Basic Display Adapter label with the hardware vendor. (#2339, GPU, Windows)
 * Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
 * Fixed the fast path of ash version detection. (Shell)
 * Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
