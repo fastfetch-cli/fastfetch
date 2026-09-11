@@ -2130,6 +2130,8 @@ endif()
 ###################
 
 if (BUILD_TESTS)
+    add_executable(fastfetch-test-cpu-riscv tests/cpu-riscv.c)
+    target_link_libraries(fastfetch-test-cpu-riscv PRIVATE libfastfetch)
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2173,6 +2175,7 @@ if (BUILD_TESTS)
     )
 
     enable_testing()
+    add_test(NAME test-cpu-riscv COMMAND fastfetch-test-cpu-riscv)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)
