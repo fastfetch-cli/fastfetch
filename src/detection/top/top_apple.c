@@ -6,59 +6,46 @@
 #include <libproc.h>
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
-    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
-    size_t length;
-
-    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL, nullptr}) failed";
+    int npids = proc_listallpids(nullptr, 0);
+    if (npids <= 0) {
+        return "proc_listallpids(nullptr, 0) failed";
+    }
+    FF_AUTO_FREE pid_t* pids = malloc((uint32_t) (npids + npids / 8 + 1) * sizeof(pid_t));
+    npids = proc_listallpids(pids, npids);
+    if (npids <= 0) {
+        return "proc_listallpids(pids, bufferSize) failed";
     }
 
-    // The process table may change between the two sysctl calls; retry with a larger buffer.
-    length += length / 8 + sizeof(struct kinfo_proc);
-    FF_AUTO_FREE struct kinfo_proc* processes = malloc(length);
-
-    if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL, processes}) failed";
-    }
-
-    uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
+    uint32_t count = (uint32_t) npids;
 
     for (uint32_t i = 0; i < count; ++i) {
-        const struct kinfo_proc* proc = &processes[i];
-        if (proc->kp_proc.p_flag & P_SYSTEM) {
+        pid_t pid = pids[i];
+
+        struct proc_taskallinfo proc;
+        if (proc_pidinfo(pid, PROC_PIDTASKALLINFO, 0, &proc, sizeof(proc)) != sizeof(proc)) {
             continue;
         }
-        pid_t pid = proc->kp_proc.p_pid;
 
-        struct rusage_info_v2 rusage;
-        if (proc_pid_rusage(pid, RUSAGE_INFO_V2, (rusage_info_t*) &rusage) != 0) {
-            continue; // The process may have exited
+        if (proc.pbsd.pbi_flags & PROC_FLAG_SYSTEM) {
+            continue;
         }
 
         FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
-        ffStrbufInitS(&item->name, proc->kp_proc.p_comm);
+        ffStrbufInitS(&item->name, proc.pbsd.pbi_name);
+        if (item->name.length == 0) {
+            ffStrbufInitS(&item->name, proc.pbsd.pbi_comm);
+        }
         item->pid = (uint32_t) pid;
-        // Note: Do NOT use proc->kp_proc.p_pctcpu for CPU usage. p_pctcpu is a
-        // decaying average (fixpt_t with FSCALE=2048) updated roughly once per
-        // second by the kernel. It is heavily smoothed, lags short bursts, has
-        // low resolution, and its multicore scaling (>100%) is inconsistent
-        // across XNU versions. It also breaks the unified model where
-        // FFTopProcessSnapshot.cpuTime is cumulative time and top.c computes
-        // (new - old) / elapsed * 100 for all platforms. proc_pid_rusage with
-        // RUSAGE_INFO_V2 provides precise cumulative ri_user_time +
-        // ri_system_time in nanoseconds and is the modern recommended API on
-        // Darwin, consistent with Linux/BSD differential sampling and accurate
-        // for the short waitTime interval (e.g. 100ms).
-        item->cpuTime = (rusage.ri_user_time + rusage.ri_system_time) / 1000000u; // ns -> ms
-        item->memBytes = rusage.ri_resident_size;
-        item->bytesRead = rusage.ri_diskio_bytesread;
-        item->bytesWritten = rusage.ri_diskio_byteswritten;
-        item->startTime = rusage.ri_proc_start_abstime;
-        item->threads = 0;
-        if (showTypes & FF_TOP_TYPE_THREADS) {
-            struct proc_taskinfo taskInfo;
-            if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, sizeof(taskInfo)) == sizeof(taskInfo)) {
-                item->threads = (uint32_t) taskInfo.pti_threadnum;
+        item->cpuTime = (proc.ptinfo.pti_total_user + proc.ptinfo.pti_total_system) / 1000000u; // ns -> ms
+        item->memBytes = proc.ptinfo.pti_resident_size;
+        item->startTime = proc.pbsd.pbi_start_tvsec * 1000u + proc.pbsd.pbi_start_tvusec / 1000u; // convert to ms
+        item->threads = (uint32_t) proc.ptinfo.pti_threadnum;
+
+        if (showTypes & FF_TOP_TYPE_DISK) {
+            struct rusage_info_v2 rusage;
+            if (proc_pid_rusage(pid, RUSAGE_INFO_V2, (rusage_info_t*) &rusage) == 0) {
+                item->bytesRead = rusage.ri_diskio_bytesread;
+                item->bytesWritten = rusage.ri_diskio_byteswritten;
             }
         }
     }
