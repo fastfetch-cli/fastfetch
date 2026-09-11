@@ -4,25 +4,22 @@
 
 #include <sys/param.h>
 #include <sys/sysctl.h>
-#include <kvm.h>
 
 const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    if (!kd) {
-        return "kvm_open() failed";
+    int request[] = { CTL_KERN, KERN_PROC, (options->countKprocs ? KERN_PROC_KTHREAD : KERN_PROC_ALL) | KERN_PROC_SHOW_THREADS, 0, (int) sizeof(struct kinfo_proc), 0 };
+    size_t length = 0;
+
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed";
     }
 
-    int count = 0;
-    // KERN_PROC_ALL returns all user-level processes
-    // KERN_PROC_KTHREAD returns all processes, including user-level processes (despite the name)
-    const struct kinfo_proc* procs = kvm_getprocs(kd,
-        (options->countKprocs ? KERN_PROC_KTHREAD : KERN_PROC_ALL) | KERN_PROC_SHOW_THREADS,
-        0, sizeof(struct kinfo_proc), &count);
-    if (!procs) {
-        kvm_close(kd);
-        return "kvm_getprocs() failed";
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, procs) failed";
     }
 
+    int count = (int) (length / sizeof(struct kinfo_proc));
     for (int i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &procs[i];
 
@@ -32,6 +29,5 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
         }
     }
 
-    kvm_close(kd);
     return nullptr;
 }

@@ -31,10 +31,10 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
 
         pid_t pid = proc->kp_proc.p_pid;
         struct proc_taskinfo taskInfo;
-        if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, sizeof(taskInfo)) != sizeof(taskInfo)) {
-            continue;
+        if (proc_pidinfo(pid, PROC_PIDTASKINFO, 0, &taskInfo, sizeof(taskInfo)) == sizeof(taskInfo)) {
+            // NOTE: This fails for system processes
+            result->threads += (uint32_t) taskInfo.pti_threadnum;
         }
-        result->threads += (uint32_t) taskInfo.pti_threadnum;
     }
 
     return nullptr;
