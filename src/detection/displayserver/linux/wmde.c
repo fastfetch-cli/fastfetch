@@ -16,7 +16,6 @@
 #elif __OpenBSD__
     #include <sys/param.h>
     #include <sys/sysctl.h>
-    #include <kvm.h>
 #elif __sun
     #include <procfs.h>
 #elif __NetBSD__
@@ -311,25 +310,33 @@ static const char* getFromProcesses(FFDisplayServerResult* result) {
         }
     }
 #elif __OpenBSD__
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, (int) userId, sizeof(*proc), &count);
-    if (proc) {
-        for (int i = 0; i < count; ++i) {
-            if (result->dePrettyName.length == 0) {
-                applyPrettyNameIfDE(result, proc[i].p_comm);
-            }
+    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId, (int) sizeof(struct kinfo_proc), 0 };
+    size_t length = 0;
 
-            if (result->wmPrettyName.length == 0) {
-                applyNameIfWM(result, proc[i].p_comm);
-            }
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
+    }
 
-            if (result->dePrettyName.length > 0 && result->wmPrettyName.length > 0) {
-                break;
-            }
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
+    }
+
+    int count = (int) (length / sizeof(struct kinfo_proc));
+    for (int i = 0; i < count; ++i) {
+        if (result->dePrettyName.length == 0) {
+            applyPrettyNameIfDE(result, procs[i].p_comm);
+        }
+
+        if (result->wmPrettyName.length == 0) {
+            applyNameIfWM(result, procs[i].p_comm);
+        }
+
+        if (result->dePrettyName.length > 0 && result->wmPrettyName.length > 0) {
+            break;
         }
     }
-    kvm_close(kd);
 #elif __sun
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if (procdir == nullptr) {

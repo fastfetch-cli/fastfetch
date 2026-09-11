@@ -4,6 +4,7 @@
 #include "common/strutil.h"
 #include "common/io.h"
 #include "common/path.h"
+#include "common/mallocHelper.h"
 
 #include <unistd.h>
 #include <pwd.h>
@@ -19,7 +20,6 @@
 #elif defined(__OpenBSD__)
     #include <sys/sysctl.h>
     #include <sys/stat.h>
-    #include <kvm.h>
     #include "common/path.h"
 #elif defined(__HAIKU__)
     #include <image.h>
@@ -68,13 +68,14 @@ static void getExePath(FFPlatform* platform) {
     // Current implementation uses argv[0], which can be easily spoofed.
     // See #2195
     size_t exePathLen = 0;
-    kvm_t* kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    if (kd) {
-        int kpCount;
-        struct kinfo_proc* kp = kvm_getprocs(kd, KERN_PROC_PID, (pid_t) platform->pid, sizeof(*kp), &kpCount);
-        if (kp && kpCount == 1) {
-            char** argv = kvm_getargv(kd, kp, 0);
-            if (argv && argv[0]) {
+    {
+        char argvBuf[ARG_MAX];
+        size_t argvSize = sizeof(argvBuf);
+        int argvMib[] = { CTL_KERN, KERN_PROC_ARGS, (pid_t) platform->pid, KERN_PROC_ARGV };
+        if (sysctl(argvMib, ARRAY_SIZE(argvMib), argvBuf, &argvSize, nullptr, 0) == 0) {
+            // The buffer is filled with an array of char pointers followed by the strings themselves
+            char** argv = (char**) argvBuf;
+            if (argv[0] && (char*) argv[0] >= argvBuf && (char*) argv[0] < argvBuf + argvSize) {
                 char* arg0 = argv[0];
                 if (arg0[0]) {
                     if (strchr(arg0, '/') != nullptr) // likely a path (absolute or relative)
@@ -97,25 +98,38 @@ static void getExePath(FFPlatform* platform) {
                     if (exePathLen > 0) {
                         struct stat st;
                         if (stat(exePath, &st) == 0 && S_ISREG(st.st_mode)) {
-                            int cntp;
-                            struct kinfo_file* kf = kvm_getfiles(kd, KERN_FILE_BYPID, (pid_t) platform->pid, sizeof(*kf), &cntp);
-                            if (kf) {
-                                int i;
-                                for (i = 0; i < cntp; i++) {
-                                    if (kf[i].fd_fd == KERN_FILE_TEXT) {
-                                        // KERN_FILE_TEXT is the executable file, not a shared library, and should be unique in the list.
-                                        if (st.st_dev != (dev_t) kf[i].va_fsid || st.st_ino != (ino_t) kf[i].va_fileid) {
-                                            i = -1;
+                            // Replicate kvm_getfiles()'s live path: {CTL_KERN, KERN_FILE, KERN_FILE_BYPID, pid, esize, count}
+                            int fileMib[6] = { CTL_KERN, KERN_FILE, KERN_FILE_BYPID, (pid_t) platform->pid, (int) sizeof(struct kinfo_file), 0 };
+                            size_t fileSize = 0;
+                            if (sysctl(fileMib, ARRAY_SIZE(fileMib), nullptr, &fileSize, nullptr, 0) == 0) {
+                                fileSize += fileSize / 8; // add ~10%
+                                FF_AUTO_FREE struct kinfo_file* kf = (struct kinfo_file*) malloc(fileSize);
+                                if (kf) {
+                                    int rv;
+                                    do {
+                                        fileMib[5] = (int) (fileSize / sizeof(struct kinfo_file));
+                                        rv = sysctl(fileMib, ARRAY_SIZE(fileMib), kf, &fileSize, nullptr, 0);
+                                    } while (rv == -1 && errno == ENOMEM);
+
+                                    if (rv == 0) {
+                                        int cntp = (int) (fileSize / sizeof(struct kinfo_file));
+                                        int i;
+                                        for (i = 0; i < cntp; i++) {
+                                            if (kf[i].fd_fd == KERN_FILE_TEXT) {
+                                                // KERN_FILE_TEXT is the executable file, not a shared library, and should be unique in the list.
+                                                if (st.st_dev != (dev_t) kf[i].va_fsid || st.st_ino != (ino_t) kf[i].va_fileid) {
+                                                    i = -1;
+                                                }
+                                                break;
+                                            }
                                         }
-                                        break;
+                                        if (i < 0) {
+                                            exePathLen = 0;
+                                        }
                                     }
+                                    // If we can't get the list of open files, we can't verify that the file is actually the executable
+                                    // Assume it is
                                 }
-                                if (i < 0) {
-                                    exePathLen = 0;
-                                }
-                            } else {
-                                // If we can't get the list of open files, we can't verify that the file is actually the executable
-                                // Assume it is
                             }
                         } else {
                             exePathLen = 0;
@@ -124,7 +138,6 @@ static void getExePath(FFPlatform* platform) {
                 }
             }
         }
-        kvm_close(kd);
     }
 #elif defined(__sun)
     ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);

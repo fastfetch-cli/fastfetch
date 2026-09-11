@@ -1930,7 +1930,6 @@ elseif(FreeBSD)
 elseif(OpenBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
-        PRIVATE "kvm"
         PRIVATE "sndio"
         PRIVATE "util"
     )
