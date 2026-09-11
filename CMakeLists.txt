@@ -2172,6 +2172,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-gpu
+        tests/gpu.c
+    )
+    target_link_libraries(fastfetch-test-gpu
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
@@ -2179,6 +2186,7 @@ if (BUILD_TESTS)
     add_test(NAME test-color COMMAND fastfetch-test-color)
     add_test(NAME test-duration COMMAND fastfetch-test-duration)
     add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
+    add_test(NAME test-gpu COMMAND fastfetch-test-gpu)
 endif()
 
 ##################
