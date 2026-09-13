@@ -48,7 +48,8 @@ typedef struct FFPackagesResult {
     uint32_t scoopGlobal;
     uint32_t scoopUser;
     uint32_t snap;
-    uint32_t soar;
+    uint32_t soarSystem;
+    uint32_t soarUser;
     uint32_t sorcery;
     uint32_t winget;
     uint32_t xbps;

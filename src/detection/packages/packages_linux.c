@@ -483,6 +483,29 @@ static uint32_t getEmergePackages(FFstrbuf* baseDir, const char* dirname) {
     return result;
 }
 
+static uint32_t getSoarUser(void) {
+    FF_STRBUF_AUTO_DESTROY dbDir = ffStrbufCreate();
+
+    const char* dbPath = getenv("SOAR_DB");
+    if (ffStrSet(dbPath)) {
+        ffStrbufSetS(&dbDir, dbPath);
+    } else {
+        const char* rootPath = getenv("SOAR_ROOT");
+        if (ffStrSet(rootPath)) {
+            ffStrbufSetS(&dbDir, rootPath);
+            ffStrbufEnsureEndsWithC(&dbDir, '/');
+        } else if (instance.state.platform.dataDirs.length > 0) {
+            ffStrbufSet(&dbDir, FF_LIST_FIRST(FFstrbuf, instance.state.platform.dataDirs));
+            ffStrbufAppendS(&dbDir, "soar/");
+        } else {
+            return 0;
+        }
+        ffStrbufAppendS(&dbDir, "db");
+    }
+
+    return getSQLite3Int(&dbDir, "/soar.db", "SELECT COUNT(*) FROM packages", "soar");
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options) {
     if (FF_PACKAGES_IS_ENABLED(options, APK)) {
         packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
@@ -549,6 +572,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (FF_PACKAGES_IS_ENABLED(options, AM)) {
         packageCounts->amSystem = getAMSystem(baseDir);
+    }
+    if (FF_PACKAGES_IS_ENABLED(options, SOAR)) {
+        packageCounts->soarSystem += getSQLite3Int(baseDir, "/opt/soar/db/soar.db", "SELECT COUNT(*) FROM packages", "soar-system");
     }
     if (FF_PACKAGES_IS_ENABLED(options, SORCERY)) {
         packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");
@@ -694,7 +720,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
     }
 
     if (FF_PACKAGES_IS_ENABLED(options, SOAR)) {
-        result->soar += getSQLite3Int(&baseDir, ".local/share/soar/db/soar.db", "SELECT COUNT(DISTINCT pkg_id || pkg_name) FROM packages WHERE is_installed = true", "soar");
+        result->soarUser = getSoarUser();
     }
 
     if (FF_PACKAGES_IS_ENABLED(options, APPIMAGE)) {

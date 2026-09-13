@@ -27,6 +27,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
     uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
     uint32_t amAll = counts.amSystem + counts.amUser;
     uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
+    uint32_t soarAll = counts.soarSystem + counts.soarUser;
 
     if (options->moduleArgs.outputFormat.length == 0) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Packages), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -133,7 +134,14 @@ bool ffPrintPackages(FFPackagesOptions* options) {
             FF_PRINT_PACKAGE_NAME(scoopUser, "scoop")
         }
         FF_PRINT_PACKAGE(snap)
-        FF_PRINT_PACKAGE(soar)
+        if (options->combined) {
+            FF_PRINT_PACKAGE_ALL(soar);
+        } else if (counts.soarSystem > 0) {
+            FF_PRINT_PACKAGE_NAME(soarUser, "soar-user")
+            FF_PRINT_PACKAGE_NAME(soarSystem, "soar-system")
+        } else {
+            FF_PRINT_PACKAGE_NAME(soarUser, "soar")
+        }
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(xbps)
@@ -193,7 +201,8 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.scoopGlobal, "scoop-global"),
                 FF_ARG(counts.scoopUser, "scoop-user"),
                 FF_ARG(counts.snap, "snap"),
-                FF_ARG(counts.soar, "soar"),
+                FF_ARG(counts.soarSystem, "soar-system"),
+                FF_ARG(counts.soarUser, "soar-user"),
                 FF_ARG(counts.sorcery, "sorcery"),
                 FF_ARG(counts.winget, "winget"),
                 FF_ARG(counts.xbps, "xbps"),
@@ -203,6 +212,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(guixAll, "guix-all"),
                 FF_ARG(hpkgAll, "hpkg-all"),
                 FF_ARG(nixAll, "nix-all"),
+                FF_ARG(soarAll, "soar-all"),
                 FF_ARG(counts.all, "all"),
             }));
     }
@@ -496,7 +506,8 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
     FF_APPEND_PACKAGE_COUNT(snap)
-    FF_APPEND_PACKAGE_COUNT(soar)
+    FF_APPEND_PACKAGE_COUNT(soarSystem)
+    FF_APPEND_PACKAGE_COUNT(soarUser)
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
@@ -598,7 +609,8 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of scoop-global packages", "scoop-global" },
         { "Number of scoop-user packages", "scoop-user" },
         { "Number of snap packages", "snap" },
-        { "Number of soar packages", "soar" },
+        { "Number of soar-system packages", "soar-system" },
+        { "Number of soar-user packages", "soar-user" },
         { "Number of sorcery packages", "sorcery" },
         { "Number of winget packages", "winget" },
         { "Number of xbps packages", "xbps" },
@@ -608,6 +620,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all guix packages", "guix-all" },
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Total number of all nix packages", "nix-all" },
+        { "Total number of all soar packages", "soar-all" },
         { "Number of all packages", "all" },
     })),
     .defaultOrder = 14,
