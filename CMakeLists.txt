@@ -101,6 +101,7 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
+option(ENABLE_SIXEL "Enable sixel image logo output (vendored libsixel encoder)" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_TRACER "Build fastfetch with function tracing" OFF)
@@ -1418,6 +1419,21 @@ else()
     )
 endif()
 
+if(ENABLE_SIXEL)
+    set(FF_SIXEL_SRC
+        src/3rdparty/sixel/allocator.c
+        src/3rdparty/sixel/dither.c
+        src/3rdparty/sixel/output.c
+        src/3rdparty/sixel/pixelformat.c
+        src/3rdparty/sixel/quant.c
+        src/3rdparty/sixel/status.c
+        src/3rdparty/sixel/tosixel.c
+    )
+    list(APPEND LIBFASTFETCH_SRC ${FF_SIXEL_SRC})
+
+    set_source_files_properties(${FF_SIXEL_SRC} PROPERTIES COMPILE_OPTIONS "-Wno-conversion")
+endif()
+
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
@@ -1992,6 +2008,12 @@ target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
 )
+
+if(ENABLE_SIXEL)
+    # src/3rdparty/sixel/*.c include <sixel.h> (angle brackets, so the directory itself
+    # has to be on the include path)
+    target_include_directories(libfastfetch PRIVATE ${PROJECT_SOURCE_DIR}/src/3rdparty/sixel)
+endif()
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
