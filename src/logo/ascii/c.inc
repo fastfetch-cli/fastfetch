@@ -179,6 +179,33 @@ static const FFlogo C[] = {
         .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_WHITE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CGOS
+    // CGOS
+    {
+        .names = { "CGOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_CGOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_CGOS_SMALL
+    // CGOSSmall
+    {
+        .names = { "cgos_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_CGOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CHAKRA
     // Chakra
     {
