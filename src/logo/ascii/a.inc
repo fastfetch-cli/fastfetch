@@ -833,6 +833,25 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ASTROS
+    // AstrOS
+    {
+        .names = { "AstrOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ASTROS,
+        .colors = {
+            FF_COLOR_FG_RGB "54;19;170",
+            FF_COLOR_FG_RGB "73;32;182",
+            FF_COLOR_FG_RGB "91;46;193",
+            FF_COLOR_FG_RGB "110;59;205",
+            FF_COLOR_FG_RGB "129;73;216",
+            FF_COLOR_FG_RGB "148;86;228",
+            FF_COLOR_FG_RGB "166;100;239",
+            FF_COLOR_FG_RGB "185;113;251",
+        },
+        .colorKeys = FF_COLOR_FG_RGB "148;86;228",
+        .colorTitle = FF_COLOR_FG_RGB "185;113;251",
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_JANUSLINUX
     // Ataraxia
     {
