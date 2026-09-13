@@ -287,11 +287,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement) {
 
 static void logoApplyColors(const FFlogo* logo, bool replacement) {
     if (instance.config.display.colorTitle.length == 0) {
-        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
+        ffStrbufSetStatic(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
     }
 
     if (instance.config.display.colorKeys.length == 0) {
-        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ?: logo->colors[1]);
+        ffStrbufSetStatic(&instance.config.display.colorKeys, logo->colorKeys ?: logo->colors[1]);
     }
 
     if (replacement) {
@@ -300,7 +300,7 @@ static void logoApplyColors(const FFlogo* logo, bool replacement) {
         const char* const* colors = logo->colors;
         for (int i = 0; *colors != nullptr && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++) {
             if (options->colors[i].length == 0) {
-                ffStrbufAppendS(&options->colors[i], *colors);
+                ffStrbufSetStatic(&options->colors[i], *colors);
             }
         }
     }
