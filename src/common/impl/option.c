@@ -122,8 +122,9 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer) {
         value += strlen(#prefix);                 \
         continue;                                 \
     }
-#define FF_APPEND_COLOR_PROP_COND(prefix, prop)                                                         \
+#define FF_APPEND_COLOR_PROP_COND(prefix, prop, honorBrightColor)                                       \
     if (ffStrStartsWithIgnCase(value, #prefix)) {                                                       \
+        if (honorBrightColor && instance.config.display.brightColor) ffStrbufAppendS(buffer, "1;");     \
         if (instance.config.display.prop.length) ffStrbufAppend(buffer, &instance.config.display.prop); \
         else ffStrbufAppendS(buffer, FF_COLOR_FG_DEFAULT);                                              \
         value += strlen(#prefix);                                                                       \
@@ -159,10 +160,10 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer) {
             else FF_APPEND_COLOR_CODE_COND(light_magenta, FF_COLOR_FG_LIGHT_MAGENTA)
             else FF_APPEND_COLOR_CODE_COND(light_cyan, FF_COLOR_FG_LIGHT_CYAN)
             else FF_APPEND_COLOR_CODE_COND(light_white, FF_COLOR_FG_LIGHT_WHITE)
-            else FF_APPEND_COLOR_PROP_COND(keys, colorKeys)
-            else FF_APPEND_COLOR_PROP_COND(title, colorTitle)
-            else FF_APPEND_COLOR_PROP_COND(output, colorOutput)
-            else FF_APPEND_COLOR_PROP_COND(separator, colorSeparator)
+            else FF_APPEND_COLOR_PROP_COND(keys, colorKeys, true)
+            else FF_APPEND_COLOR_PROP_COND(title, colorTitle, true)
+            else FF_APPEND_COLOR_PROP_COND(output, colorOutput, false)
+            else FF_APPEND_COLOR_PROP_COND(separator, colorSeparator, false)
             else {
                 fprintf(stderr, "Error: invalid color code found: %s\n", value);
                 exit(479);
