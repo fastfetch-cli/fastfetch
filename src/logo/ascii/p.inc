@@ -273,6 +273,18 @@ static const FFlogo P[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_PONDEROSA
+// Ponderosa
+{
+    .names = { "Ponderosa", "ponderosa" },
+    .lines = FASTFETCH_DATATEXT_LOGO_PONDEROSA,
+    .colors = {
+        FF_COLOR_FG_GREEN,
+    },
+    .colorKeys = FF_COLOR_FG_GREEN,
+    .colorTitle = FF_COLOR_FG_GREEN,
+},
+#endif
     #ifdef FASTFETCH_DATATEXT_LOGO_POSTMARKETOS
     // PostMarketOS
     {
