@@ -184,6 +184,12 @@ static const char* getTrinity(FFstrbuf* result, [[maybe_unused]] FFDEOptions* op
 }
 
 static const char* getCosmic(FFstrbuf* result, [[maybe_unused]] FFDEOptions* options) {
+    const char* env = getenv("COSMIC_VERSION");
+    if (env) {
+        ffStrbufSetS(result, env);
+        return nullptr;
+    }
+
     if (ffProcessAppendStdOut(result, (char* const[]) { "cosmic-comp", "--version", nullptr }) == nullptr) {
         // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
         ffStrbufSubstrAfterFirstC(result, ' ');
@@ -256,7 +262,7 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getUnity(result, options);
     } else if (ffStrbufEqualS(deName, "trinity")) {
         getTrinity(result, options);
-    } else if (ffStrbufEqualS(deName, "COSMIC")) {
+    } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_COSMIC)) {
         getCosmic(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_ENLIGHTENMENT)) {
         getEnlightenment(result, options);
