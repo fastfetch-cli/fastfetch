@@ -2,7 +2,7 @@
 
 #include "../logo.h"
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(FF_HAVE_SIXEL)
 
 typedef enum FFLogoImageResult: uint8_t {
     FF_LOGO_IMAGE_RESULT_SUCCESS,    // Logo printed
@@ -24,20 +24,42 @@ typedef struct FFLogoRequestData {
     uint32_t logoCharacterWidth;
 } FFLogoRequestData;
 
-typedef struct FFIMData {
-    void* library;
-    void* (*resizeFunc)(const void* image, size_t width, size_t height, void* exceptionInfo);
-} FFIMData;
+// Decoded and resized image: RGBA8, straight (unassociated) alpha, no row padding
+typedef struct FFImageBuffer {
+    uint8_t* data;
+    uint32_t width;
+    uint32_t height;
+} FFImageBuffer;
 
-FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFIMData* imData);
+// Backend contract. Both functions update requestData->logoPixelWidth / logoPixelHeight
+// with the real dimensions of the produced image, so the caller can derive the character
+// dimensions afterwards.
+
+// Decode the image source and resize it to the requested pixel size
+bool ffImageCreate(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+void ffImageDestroy(FFImageBuffer* buffer);
+
+// Encode the image source as a sixel byte stream (including the DCS envelope).
+// The encoder belongs to the backend: ImageMagick's SIXEL coder off Windows,
+// the embedded libsixel on Windows.
+bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const char** error);
 
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK7
-FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData);
+bool ffImageCreateIM7(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+bool ffImageSixelEncodeIM7(FFLogoRequestData* requestData, FFstrbuf* out, const char** error);
 #endif
 
 #ifdef FF_HAVE_IMAGEMAGICK6
-    #include <math.h>
-FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData);
+bool ffImageCreateIM6(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+bool ffImageSixelEncodeIM6(FFLogoRequestData* requestData, FFstrbuf* out, const char** error);
+#endif
+
+#ifdef _WIN32
+bool ffImageCreateWIC(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+#endif
+
+#ifdef FF_HAVE_SIXEL
+bool ffSixelEncode(const FFImageBuffer* buffer, FFstrbuf* result, const char** error);
 #endif

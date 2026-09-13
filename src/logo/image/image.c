@@ -1,5 +1,6 @@
 #include "image.h"
 #include "common/io.h"
+#include "common/mallocHelper.h"
 #include "common/printing.h"
 #include "common/processing.h"
 #include "common/strutil.h"
@@ -340,7 +341,7 @@ static bool printImageKittyDirect(bool printError) {
     return true;
 }
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(FF_HAVE_SIXEL)
 
     #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
@@ -351,6 +352,7 @@ static bool printImageKittyDirect(bool printError) {
     #define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
     #define FF_CACHE_FILE_CHAFA "chafa"
 
+    #include <stdlib.h>
     #include <string.h>
     #include <unistd.h>
     #include <fcntl.h>
@@ -364,7 +366,6 @@ static bool printImageKittyDirect(bool printError) {
 
     #ifdef FF_HAVE_ZLIB
         #include "common/library.h"
-        #include <stdlib.h>
         #include <zlib.h>
 
 static bool compressBlob(void** blob, size_t* length) {
@@ -372,13 +373,21 @@ static bool compressBlob(void** blob, size_t* length) {
     FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
 
-    uLong compressedLength = ffcompressBound(*length);
+        #if _WIN32
+    // zlib's uLong is 32-bit on Windows (LLP64), so a >4 GiB source can't be
+    // compressed through this API; reject it instead of silently truncating
+    if (*length > (size_t) ULONG_MAX) {
+        return false;
+    }
+        #endif
+
+    uLong compressedLength = ffcompressBound((uLong) *length);
     void* compressed = malloc(compressedLength);
     if (compressed == nullptr) {
         return false;
     }
 
-    if (ffcompress2(compressed, &compressedLength, *blob, *length, Z_BEST_COMPRESSION) != Z_OK) {
+    if (ffcompress2(compressed, &compressedLength, *blob, (uLong) *length, Z_BEST_COMPRESSION) != Z_OK) {
         free(compressed);
         return false;
     }
@@ -391,36 +400,6 @@ static bool compressBlob(void** blob, size_t* length) {
 }
 
     #endif // FF_HAVE_ZLIB
-
-    // We use only the defines from here, that are exactly the same in both versions
-    #ifdef FF_HAVE_IMAGEMAGICK7
-        #include <MagickCore/MagickCore.h>
-    #else
-        #include <magick/MagickCore.h>
-    #endif
-
-typedef struct ImageData {
-    FF_LIBRARY_SYMBOL(CopyMagickString)
-    FF_LIBRARY_SYMBOL(ImageToBlob)
-    FF_LIBRARY_SYMBOL(Base64Encode)
-
-    ImageInfo* imageInfo;
-    Image* image;
-    ExceptionInfo* exceptionInfo;
-} ImageData;
-
-static inline bool checkAllocationResult(void* data, size_t length) {
-    if (data == nullptr) {
-        return false;
-    }
-
-    if (length == 0) {
-        free(data);
-        return false;
-    }
-
-    return true;
-}
 
 static void writeCacheStrbuf(FFLogoRequestData* requestData, const FFstrbuf* value, const char* cacheFileName) {
     uint32_t cacheDirLength = requestData->cacheDir.length;
@@ -473,22 +452,18 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     }
 }
 
-static bool printImageSixel(FFLogoRequestData* requestData, const ImageData* imageData) {
-    imageData->ffCopyMagickString(imageData->imageInfo->magick, "SIXEL", 6);
+// The backends report the real pixel dimensions; the character dimensions are derived here
+static void fillCharacterDimensions(FFLogoRequestData* requestData) {
+    requestData->logoCharacterWidth = (uint32_t) ceil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
+    requestData->logoCharacterHeight = (uint32_t) ceil((double) requestData->logoPixelHeight / requestData->characterPixelHeight);
+}
 
-    size_t length;
-    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
-    if (!checkAllocationResult(blob, length)) {
+static bool printImageSixel(FFLogoRequestData* requestData, const FFstrbuf* result) {
+    if (result->length == 0) {
         return false;
     }
 
-    FFstrbuf result;
-    result.chars = (char*) blob;
-    result.length = (uint32_t) length;
-
-    printImagePixels(requestData, &result, FF_CACHE_FILE_SIXEL);
-
-    free(blob);
+    printImagePixels(requestData, result, FF_CACHE_FILE_SIXEL);
     return true;
 }
 
@@ -509,14 +484,13 @@ static void appendKittyChunk(FFstrbuf* result, const char** blob, size_t* length
     *blob += chunkSize;
 }
 
-static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* imageData) {
-    imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
-
-    size_t length;
-    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
-    if (!checkAllocationResult(blob, length)) {
+static bool printImageKitty(FFLogoRequestData* requestData, const FFImageBuffer* buffer) {
+    size_t length = (size_t) buffer->width * buffer->height * 4;
+    FF_AUTO_FREE void* blob = malloc(length);
+    if (blob == nullptr) {
         return false;
     }
+    memcpy(blob, buffer->data, length);
 
     #ifdef FF_HAVE_ZLIB
     bool isCompressed = compressBlob(&blob, &length);
@@ -524,18 +498,16 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
     bool isCompressed = false;
     #endif
 
-    char* chars = imageData->ffBase64Encode(blob, length, &length);
-    free(blob);
-    if (!checkAllocationResult(chars, length)) {
-        return false;
-    }
+    // base64 output is 4 * ceil(length / 3) bytes, plus the terminating null byte
+    FF_STRBUF_AUTO_DESTROY base64 = ffStrbufCreateA((uint32_t) (10 + length * 4 / 3));
+    ffBase64EncodeRaw((uint32_t) length, (const char*) blob, &base64.length, base64.chars);
 
-    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA((uint32_t) (length + 1024));
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(base64.length + 1024);
 
-    const char* currentPos = chars;
-    size_t remainingLength = length;
+    const char* currentPos = base64.chars;
+    size_t remainingLength = base64.length;
 
-    ffStrbufAppendF(&result, "\033_Ga=T,f=32,s=%u,v=%u", requestData->logoPixelWidth, requestData->logoPixelHeight);
+    ffStrbufAppendF(&result, "\033_Ga=T,f=32,s=%u,v=%u", buffer->width, buffer->height);
     if (isCompressed) {
         ffStrbufAppendS(&result, ",o=z");
     }
@@ -545,19 +517,17 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
     }
 
     printImagePixels(requestData, &result, isCompressed ? FF_CACHE_FILE_KITTY_COMPRESSED : FF_CACHE_FILE_KITTY_UNCOMPRESSED);
-
-    free(chars);
     return true;
 }
 
     #ifdef FF_HAVE_CHAFA
         #include <chafa.h>
-static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* imageData) {
-    #if _WIN32
+static bool printImageChafa(FFLogoRequestData* requestData, const FFImageBuffer* buffer) {
+        #if _WIN32
     FF_LIBRARY_LOAD(chafa, false, "libchafa-0" FF_LIBRARY_EXTENSION, 0)
-    #else
+        #else
     FF_LIBRARY_LOAD(chafa, false, "libchafa" FF_LIBRARY_EXTENSION, 1)
-    #endif
+        #endif
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_new, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_apply_selectors, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_new, false)
@@ -569,13 +539,6 @@ static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* ima
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_canvas_config_unref, false)
     FF_LIBRARY_LOAD_SYMBOL(chafa, chafa_symbol_map_unref, false)
-
-    imageData->ffCopyMagickString(imageData->imageInfo->magick, "RGBA", 5);
-    size_t length;
-    void* blob = imageData->ffImageToBlob(imageData->imageInfo, imageData->image, &length, imageData->exceptionInfo);
-    if (!checkAllocationResult(blob, length)) {
-        return false;
-    }
 
     ChafaSymbolMap* symbolMap = ffchafa_symbol_map_new();
     GError* error = nullptr;
@@ -616,10 +579,10 @@ static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* ima
     ffchafa_canvas_draw_all_pixels(
         canvas,
         CHAFA_PIXEL_RGBA8_UNASSOCIATED,
-        blob,
-        (gint) imageData->image->columns,
-        (gint) imageData->image->rows,
-        (gint) imageData->image->columns * 4);
+        buffer->data,
+        (gint) buffer->width,
+        (gint) buffer->height,
+        (gint) buffer->width * 4);
 
     GString* str = ffchafa_canvas_print(canvas, nullptr);
     FFstrbuf result;
@@ -650,101 +613,62 @@ static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* ima
 }
     #endif
 
-FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFIMData* imData) {
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreGenesis, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, MagickCoreTerminus, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, DestroyExceptionInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, AcquireImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, DestroyImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, ReadImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imData->library, DestroyImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-
-    ImageData imageData;
-
-    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, CopyMagickString, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(imData->library, imageData, Base64Encode, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-
-    ffMagickCoreGenesis(nullptr, MagickFalse);
-
-    imageData.exceptionInfo = ffAcquireExceptionInfo();
-    if (imageData.exceptionInfo == nullptr) {
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+bool ffImageCreate(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error) {
+    #ifdef _WIN32
+    return ffImageCreateWIC(requestData, out, error);
+    #else
+        #ifdef FF_HAVE_IMAGEMAGICK7
+    if (ffImageCreateIM7(requestData, out, error)) {
+        return true;
     }
-
-    ImageInfo* imageInfoIn = ffAcquireImageInfo();
-    if (imageInfoIn == nullptr) {
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+        #endif
+        #ifdef FF_HAVE_IMAGEMAGICK6
+    if (ffImageCreateIM6(requestData, out, error)) {
+        return true;
     }
-
-    //+1, because we need to copy the null byte too
-    imageData.ffCopyMagickString(imageInfoIn->filename, instance.config.logo.source.chars, instance.config.logo.source.length + 1);
-
-    imageData.image = ffReadImage(imageInfoIn, imageData.exceptionInfo);
-    ffDestroyImageInfo(imageInfoIn);
-    if (imageData.image == nullptr) {
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-    }
-
-    if (requestData->logoPixelWidth == 0 && requestData->logoPixelHeight == 0) {
-        requestData->logoPixelWidth = (uint32_t) imageData.image->columns;
-        requestData->logoPixelHeight = (uint32_t) imageData.image->rows;
-    } else if (requestData->logoPixelWidth == 0) {
-        requestData->logoPixelWidth = (uint32_t) ((double) imageData.image->columns / (double) imageData.image->rows * requestData->logoPixelHeight);
-    } else if (requestData->logoPixelHeight == 0) {
-        requestData->logoPixelHeight = (uint32_t) ((double) imageData.image->rows / (double) imageData.image->columns * requestData->logoPixelWidth);
-    }
-
-    requestData->logoCharacterWidth = (uint32_t) ceil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
-    requestData->logoCharacterHeight = (uint32_t) ceil((double) requestData->logoPixelHeight / requestData->characterPixelHeight);
-
-    if (requestData->logoPixelWidth == 0 || requestData->logoPixelHeight == 0 || requestData->logoCharacterWidth == 0 || requestData->logoCharacterHeight == 0) {
-        ffDestroyImage(imageData.image);
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-    }
-
-    Image* resized = imData->resizeFunc(imageData.image, requestData->logoPixelWidth, requestData->logoPixelHeight, imageData.exceptionInfo);
-    ffDestroyImage(imageData.image);
-    if (resized == nullptr) {
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-    }
-    imageData.image = resized;
-
-    imageData.imageInfo = ffAcquireImageInfo();
-    if (imageData.imageInfo == nullptr) {
-        ffDestroyImage(imageData.image);
-        ffDestroyExceptionInfo(imageData.exceptionInfo);
-        ffMagickCoreTerminus();
-        return FF_LOGO_IMAGE_RESULT_RUN_ERROR;
-    }
-
-    bool printSuccessful = false;
-    if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
-    #if FF_HAVE_CHAFA
-        printSuccessful = printImageChafa(requestData, &imageData);
+        #endif
+    return false;
     #endif
-    } else if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY) {
-        printSuccessful = printImageKitty(requestData, &imageData);
-    } else if (requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL) {
-        printSuccessful = printImageSixel(requestData, &imageData);
+}
+
+void ffImageDestroy(FFImageBuffer* buffer) {
+    free(buffer->data);
+    buffer->data = nullptr;
+    buffer->width = 0;
+    buffer->height = 0;
+}
+
+bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const char** error) {
+    #ifdef _WIN32
+        // Windows: WIC decodes and resizes to RGBA, then the embedded libsixel encoder takes over
+        #ifdef FF_HAVE_SIXEL
+    FFImageBuffer buffer = {};
+    if (!ffImageCreate(requestData, &buffer, error)) {
+        return false;
     }
-
-    ffDestroyImageInfo(imageData.imageInfo);
-    ffDestroyImage(imageData.image);
-    ffDestroyExceptionInfo(imageData.exceptionInfo);
-    ffMagickCoreTerminus();
-
-    return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
+    bool ok = ffSixelEncode(&buffer, out, error);
+    ffImageDestroy(&buffer);
+    return ok;
+        #else
+    if (error) {
+        *error = "sixel support is not compiled in";
+    }
+    return false;
+        #endif
+    #else
+        // Off Windows: ImageMagick encodes straight from the decoded image, without an RGBA round trip
+        #ifdef FF_HAVE_IMAGEMAGICK7
+    if (ffImageSixelEncodeIM7(requestData, out, error)) {
+        return true;
+    }
+        #endif
+        #ifdef FF_HAVE_IMAGEMAGICK6
+    if (ffImageSixelEncodeIM6(requestData, out, error)) {
+        return true;
+    }
+        #endif
+    return false;
+    #endif
 }
 
 static FFNativeFD getCacheFD(FFLogoRequestData* requestData, const char* fileName) {
@@ -937,6 +861,17 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
 
     ffStrbufRecalculateLength(&requestData.cacheDir);
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
+
+    // The cache is indexed by source path and pixel size only, so it has to be namespaced
+    // by backend: different backends (and different sixel encoders) produce different bytes
+    #ifdef _WIN32
+    ffStrbufAppendS(&requestData.cacheDir, "wic/");
+    #elif defined(FF_HAVE_IMAGEMAGICK7)
+    ffStrbufAppendS(&requestData.cacheDir, "im7/");
+    #elif defined(FF_HAVE_IMAGEMAGICK6)
+    ffStrbufAppendS(&requestData.cacheDir, "im6/");
+    #endif
+
     ffStrbufAppendF(&requestData.cacheDir, "%u*%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);
 
     if (!instance.config.logo.recache) {
@@ -949,30 +884,40 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
         }
     }
 
-    FFLogoImageResult result = FF_LOGO_IMAGE_RESULT_INIT_ERROR;
+    const char* error = nullptr;
+    bool printSuccessful = false;
 
-    #ifdef FF_HAVE_IMAGEMAGICK7
-    result = ffLogoPrintImageIM7(&requestData);
+    if (requestData.type == FF_LOGO_TYPE_IMAGE_SIXEL) {
+        // The sixel encoder belongs to the backend, so it is not fed through ffImageCreate
+        FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+        if (ffImageSixelEncode(&requestData, &result, &error)) {
+            fillCharacterDimensions(&requestData);
+            printSuccessful = printImageSixel(&requestData, &result);
+        }
+    } else {
+        FFImageBuffer buffer = {};
+        if (ffImageCreate(&requestData, &buffer, &error)) {
+            fillCharacterDimensions(&requestData);
+            if (requestData.type == FF_LOGO_TYPE_IMAGE_KITTY) {
+                printSuccessful = printImageKitty(&requestData, &buffer);
+            }
+    #if FF_HAVE_CHAFA
+            else if (requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA) {
+                printSuccessful = printImageChafa(&requestData, &buffer);
+            }
     #endif
-
-    #ifdef FF_HAVE_IMAGEMAGICK6
-    if (result == FF_LOGO_IMAGE_RESULT_INIT_ERROR) {
-        result = ffLogoPrintImageIM6(&requestData);
+            ffImageDestroy(&buffer);
+        }
     }
-    #endif
 
     ffStrbufDestroy(&requestData.cacheDir);
 
-    if (result == FF_LOGO_IMAGE_RESULT_SUCCESS) {
+    if (printSuccessful) {
         return true;
     }
 
     if (printError) {
-        if (result == FF_LOGO_IMAGE_RESULT_INIT_ERROR) {
-            fputs("Logo: Image Magick library not found\n", stderr);
-        } else {
-            fputs("Logo: Failed to load / convert the image source\n", stderr);
-        }
+        fprintf(stderr, "Logo: %s\n", error ? error : "Failed to load / convert the image source");
     }
 
     return false;
@@ -1024,7 +969,7 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
     }
 #endif
 
-#if !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
+#if !defined(_WIN32) && !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
     if (printError) {
         fputs("Logo: Image Magick support is not compiled in\n", stderr);
     }

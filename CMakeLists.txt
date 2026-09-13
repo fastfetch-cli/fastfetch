@@ -88,9 +88,10 @@ cmake_dependent_option(ENABLE_EET "Enable eet" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
+cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows only; replaces ImageMagick's SIXEL coder)" ON "WIN32" OFF)
+cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
@@ -101,7 +102,6 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
-option(ENABLE_SIXEL "Enable sixel image logo output (vendored libsixel encoder)" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_TRACER "Build fastfetch with function tracing" OFF)
@@ -504,6 +504,7 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im6.c
     src/logo/image/im7.c
     src/logo/image/image.c
+    src/logo/image/sixel.c
     src/logo/logo.c
     src/modules/modules.c
     src/options/display.c
@@ -1115,6 +1116,7 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
+        src/logo/image/wic.cpp
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
@@ -1913,6 +1915,7 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "secur32"
+        PRIVATE "windowscodecs"
     )
     if(NOT ENABLE_WIN81_COMPAT)
         target_link_libraries(libfastfetch
@@ -2013,6 +2016,10 @@ if(ENABLE_SIXEL)
     # src/3rdparty/sixel/*.c include <sixel.h> (angle brackets, so the directory itself
     # has to be on the include path)
     target_include_directories(libfastfetch PRIVATE ${PROJECT_SOURCE_DIR}/src/3rdparty/sixel)
+
+    # The vendored subset is not a library to be detected, so FF_HAVE_SIXEL can't come
+    # from ff_lib_enable() and has to be defined here
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SIXEL=1)
 endif()
 
 target_link_libraries(libfastfetch
