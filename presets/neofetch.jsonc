@@ -38,14 +38,24 @@
             "compactType": "original",
             "key": "Resolution"
         },
-        "de",
-        "wm",
-        "wmtheme",
+        {
+            "type": "de",
+            "key": "DE"
+        },
+        {
+            "type": "wm",
+            "key": "WM"
+        },
+        {
+            "type": "wmtheme",
+            "key": "WM Theme"
+        },
         "theme",
         "icons",
         "terminal",
         {
             "type": "terminalfont",
+            "key": "Terminal Font",
             "format": "{/name}{-}{/}{name}{?size} {size}{?}"
         },
         "cpu",
