@@ -351,6 +351,9 @@ static bool printImageKittyDirect(bool printError) {
     #define FF_CACHE_FILE_KITTY_COMPRESSED "kittyc"
     #define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
     #define FF_CACHE_FILE_CHAFA "chafa"
+    // Modification time of the image source the entry was produced from. Written last, so an
+    // entry that was interrupted mid-write is never mistaken for a complete one.
+    #define FF_CACHE_FILE_MTIME "mtime"
 
     #include <stdlib.h>
     #include <string.h>
@@ -401,18 +404,11 @@ static bool compressBlob(void** blob, size_t* length) {
 
     #endif // FF_HAVE_ZLIB
 
-static void writeCacheStrbuf(FFLogoRequestData* requestData, const FFstrbuf* value, const char* cacheFileName) {
+static void writeCacheData(FFLogoRequestData* requestData, const void* value, size_t len, const char* cacheFileName) {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffWriteFileBuffer(requestData->cacheDir.chars, value);
+    ffWriteFileData(requestData->cacheDir.chars, len, value);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
-}
-
-static void writeCacheUint32(FFLogoRequestData* requestData, uint32_t value, const char* cacheFileName) {
-    FFstrbuf content;
-    content.chars = (char*) &value;
-    content.length = sizeof(value);
-    writeCacheStrbuf(requestData, &content, cacheFileName);
 }
 
 static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName) {
@@ -422,14 +418,14 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
 
     // Write cache files
-    writeCacheStrbuf(requestData, result, cacheFileName);
+    writeCacheData(requestData, result->chars, result->length, cacheFileName);
 
     if (options->width == 0) {
-        writeCacheUint32(requestData, requestData->logoCharacterWidth, FF_CACHE_FILE_WIDTH);
+        writeCacheData(requestData, &requestData->logoCharacterWidth, sizeof(requestData->logoCharacterWidth), FF_CACHE_FILE_WIDTH);
     }
 
     if (options->height == 0) {
-        writeCacheUint32(requestData, requestData->logoCharacterHeight, FF_CACHE_FILE_HEIGHT);
+        writeCacheData(requestData, &requestData->logoCharacterHeight, sizeof(requestData->logoCharacterHeight), FF_CACHE_FILE_HEIGHT);
     }
 
     // Write result to stdout
@@ -591,7 +587,7 @@ static bool printImageChafa(FFLogoRequestData* requestData, const FFImageBuffer*
     result.chars = str->str;
 
     ffLogoPrintChars(result.chars, false);
-    writeCacheStrbuf(requestData, &result, FF_CACHE_FILE_CHAFA);
+    writeCacheData(requestData, &result.chars, result.length, FF_CACHE_FILE_CHAFA);
 
     // FIXME: These functions must be imported from `libglib` dlls on Windows
     FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_string_free);
@@ -691,26 +687,60 @@ static FFNativeFD getCacheFD(FFLogoRequestData* requestData, const char* fileNam
     return fd;
 }
 
-static void readCachedStrbuf(FFLogoRequestData* requestData, FFstrbuf* result, const char* cacheFileName) {
+static bool readCachedStrbuf(FFLogoRequestData* requestData, FFstrbuf* result, const char* cacheFileName) {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
-    ffAppendFileBuffer(requestData->cacheDir.chars, result);
+    bool res = ffAppendFileBuffer(requestData->cacheDir.chars, result);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    return res;
+}
+
+static bool readCachedData(FFLogoRequestData* requestData, void* buffer, size_t bufferSize, const char* cacheFileName) {
+    uint32_t cacheDirLength = requestData->cacheDir.length;
+    ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
+    bool res = ffReadFileData(requestData->cacheDir.chars, bufferSize, buffer) == (ssize_t) bufferSize;
+    ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    return res;
 }
 
 static uint32_t readCachedUint32(FFLogoRequestData* requestData, const char* cacheFileName) {
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-    readCachedStrbuf(requestData, &content, cacheFileName);
-
     uint32_t result = 0;
-
-    if (content.length != sizeof(result)) {
+    if (!readCachedData(requestData, &result, sizeof(result), cacheFileName)) {
         return 0;
     }
 
-    memcpy(&result, content.chars, sizeof(result));
+    return result;
+}
+
+static uint64_t readCachedUint64(FFLogoRequestData* requestData, const char* cacheFileName) {
+    uint64_t result = 0;
+    if (!readCachedData(requestData, &result, sizeof(result), cacheFileName)) {
+        return 0;
+    }
 
     return result;
+}
+
+// Drops everything a previous version of the source left in the entry directory.
+// The directory is keyed on the source path and the pixel size only, so it is reused across
+// edits; without this, a payload written for another logo type would be read back.
+static void removeCachedFiles(FFLogoRequestData* requestData) {
+    static const char* const files[] = {
+        FF_CACHE_FILE_MTIME,
+        FF_CACHE_FILE_WIDTH,
+        FF_CACHE_FILE_HEIGHT,
+        FF_CACHE_FILE_SIXEL,
+        FF_CACHE_FILE_KITTY_COMPRESSED,
+        FF_CACHE_FILE_KITTY_UNCOMPRESSED,
+        FF_CACHE_FILE_CHAFA,
+    };
+
+    uint32_t cacheDirLength = requestData->cacheDir.length;
+    for (uint32_t i = 0; i < ARRAY_SIZE(files); ++i) {
+        ffStrbufAppendS(&requestData->cacheDir, files[i]);
+        ffRemoveFile(requestData->cacheDir.chars);
+        ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
+    }
 }
 
 static bool printCachedChars(FFLogoRequestData* requestData, const char* cacheFileName) {
@@ -866,21 +896,18 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     ffStrbufRecalculateLength(&requestData.cacheDir);
     ffStrbufEnsureEndsWithC(&requestData.cacheDir, '/');
 
-    // The cache is indexed by source path and pixel size only, so it has to be namespaced
-    // by backend: different backends (and different sixel encoders) produce different bytes
-    #ifdef _WIN32
-    ffStrbufAppendS(&requestData.cacheDir, "wic/");
-    #elif defined(__APPLE__)
-    ffStrbufAppendS(&requestData.cacheDir, "imageio/");
-    #elif defined(FF_HAVE_IMAGEMAGICK7)
-    ffStrbufAppendS(&requestData.cacheDir, "im7/");
-    #elif defined(FF_HAVE_IMAGEMAGICK6)
-    ffStrbufAppendS(&requestData.cacheDir, "im6/");
-    #endif
+    ffStrbufAppendF(&requestData.cacheDir, "%ux%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);
 
-    ffStrbufAppendF(&requestData.cacheDir, "%u*%u/", requestData.logoPixelWidth, requestData.logoPixelHeight);
+    // The cached payload is a rendering, not a bit-exact artefact: every backend produces a
+    // valid one for the same source and pixel size, so the backend is deliberately not part of
+    // the key. What the key does have to capture is the content of the source, which the path
+    // can not: the same file can be replaced in place. Hence the recorded mtime.
+    // 0 means the mtime could not be read, in which case the entry is never trusted.
+    const uint64_t sourceMtime = ffPathGetMtime(instance.config.logo.source.chars);
 
-    if (!instance.config.logo.recache) {
+    if (!instance.config.logo.recache &&
+        sourceMtime != 0 &&
+        readCachedUint64(&requestData, FF_CACHE_FILE_MTIME) == sourceMtime) {
         bool cacheValid = requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA
             ? printCachedChars(&requestData, FF_CACHE_FILE_CHAFA)
             : printCachedPixel(&requestData);
@@ -889,6 +916,10 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
             return true;
         }
     }
+
+    // Cache miss. The entry directory is keyed on the source path and the pixel size only, so
+    // it is reused when the source is edited; drop what the previous version left behind.
+    removeCachedFiles(&requestData);
 
     const char* error = nullptr;
     bool printSuccessful = false;
@@ -914,6 +945,11 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     #endif
             ffImageDestroy(&buffer);
         }
+    }
+
+    if (printSuccessful) {
+        // Written last: an entry only becomes usable once its payload is complete
+        writeCacheData(&requestData, &sourceMtime, sizeof(sourceMtime), FF_CACHE_FILE_MTIME);
     }
 
     ffStrbufDestroy(&requestData.cacheDir);
