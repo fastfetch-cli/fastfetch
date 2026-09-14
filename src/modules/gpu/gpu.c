@@ -11,6 +11,15 @@
 
 #include <stdlib.h>
 
+void ffGPUAppendName(const FFGPUResult* gpu, FFstrbuf* output) {
+    // This is a generic driver label rather than a GPU model name.
+    if (gpu->vendor.length > 0 && !ffStrbufStartsWithIgnCase(&gpu->name, &gpu->vendor) && !ffStrbufEqualS(&gpu->name, "Microsoft Basic Display Adapter")) {
+        ffStrbufAppend(output, &gpu->vendor);
+        ffStrbufAppendC(output, ' ');
+    }
+    ffStrbufAppend(output, &gpu->name);
+}
+
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu) {
     const char* type;
     switch (gpu->type) {
@@ -32,12 +41,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if (gpu->vendor.length > 0 && !ffStrbufStartsWithIgnCase(&gpu->name, &gpu->vendor)) {
-            ffStrbufAppend(&output, &gpu->vendor);
-            ffStrbufAppendC(&output, ' ');
-        }
-
-        ffStrbufAppend(&output, &gpu->name);
+        ffGPUAppendName(gpu, &output);
 
         if (gpu->coreCount != FF_GPU_CORE_COUNT_UNSET) {
             ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
