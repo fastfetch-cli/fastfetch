@@ -122,6 +122,100 @@ static bool printImageIterm(bool printError) {
     return true;
 }
 
+// `kitten icat` parses a cursor positioning sequence it may have written: `\e[<n>C` (relative) or
+// `\e[<row>;<col>H` (absolute). Returns 1 for the first form, 2 for the second one, 0 for anything
+// else, in which case nothing is written back.
+static int parseIcatCsi(const char* data, uint32_t length, uint32_t pos, uint32_t* end, uint32_t* first, uint32_t* second) {
+    if (pos + 2 >= length || data[pos] != '\e' || data[pos + 1] != '[') {
+        return 0;
+    }
+
+    uint32_t values[2] = { 0, 0 };
+    uint32_t count = 0;
+    uint32_t i = pos + 2;
+    while (i < length) {
+        char c = data[i];
+        if (c >= '0' && c <= '9') {
+            if (count == 0) {
+                count = 1;
+            }
+            values[count - 1] = values[count - 1] * 10 + (uint32_t) (c - '0');
+            ++i;
+        } else if (c == ';' && count == 1) {
+            count = 2;
+            ++i;
+        } else {
+            break;
+        }
+    }
+
+    if (i >= length) {
+        return 0;
+    }
+
+    if (data[i] == 'C' && count == 1) {
+        *end = i + 1;
+        *first = values[0];
+        *second = 0;
+        return 1;
+    }
+
+    if (data[i] == 'H' && count == 2) {
+        *end = i + 1;
+        *first = values[0];
+        *second = values[1];
+        return 2;
+    }
+
+    return 0;
+}
+
+// `kitten icat` positions the image itself: it always writes a carriage return, followed by at most
+// one positioning sequence, and then the graphics escape. The carriage return alone would pull the
+// cursor back to column 1 and undo the padding, and the absolute cursor move `kitten` writes when
+// `--place` is used points at screen coordinates it picked itself, which are not necessarily the ones
+// the padding asks for. Both are dropped here and the position is left to the caller, which has
+// already moved the cursor to where the padding asks for. The horizontal centering `kitten` applied
+// inside the requested rectangle is kept, but re-applied relatively, so it still follows the caller's
+// padding.
+static void appendIcatOutput(FFstrbuf* buf, const FFstrbuf* output, const FFOptionsLogo* options) {
+    const char* data = output->chars;
+    uint32_t pos = 0;    // Start of the graphics escape; 0 means "layout not recognised"
+    uint32_t offset = 0; // Column offset `kitten` applied inside the requested rectangle
+
+    if (output->length > 0 && data[0] == '\r') {
+        uint32_t cursor = 1;
+        uint32_t end = 0, first = 0, second = 0;
+        int kind = parseIcatCsi(data, output->length, cursor, &end, &first, &second);
+        if (kind == 1) { // Relative move, written instead of the absolute one when `--place` is not used
+            offset = first;
+            cursor = end;
+        } else if (kind == 2 && second >= options->paddingLeft + 1) { // Absolute move, produced by `--place`
+            // The row is dropped along with the move, so it does not matter which one `kitten` picked.
+            // The column is where the padding put it, plus the centering, which is all that is kept.
+            offset = second - options->paddingLeft - 1;
+            cursor = end;
+        }
+
+        // The graphics escape has to follow once the positioning is gone
+        if (cursor + 1 < output->length && data[cursor] == '\e' && data[cursor + 1] == '_') {
+            pos = cursor;
+        }
+    }
+
+    if (pos == 0) {
+        // Unrecognised layout: keep it as is, positioning included
+        ffStrbufAppend(buf, output);
+        return;
+    }
+
+    if (offset > 0) {
+        // The cursor is already at the position the padding asks for
+        ffStrbufAppendF(buf, "\e[%uC", (unsigned) offset);
+    }
+    ffStrbufAppendNS(buf, output->length - pos, data + pos);
+}
+
 static bool printImageKittyIcat(bool printError) {
     const FFOptionsLogo* options = &instance.config.logo;
 
@@ -155,21 +249,29 @@ static bool printImageKittyIcat(bool printError) {
         return false;
     }
 
-    uint32_t prevLength = buf.length;
+    // `kitten icat` writes its own positioning, so its output is collected separately and only
+    // appended once that positioning has been dropped (see appendIcatOutput)
+    FF_STRBUF_AUTO_DESTROY icatOutput = ffStrbufCreate();
 
     const char* error = nullptr;
 
     if (options->width) {
+        // `--place` measures `left` and `top` from the top left corner of the screen, so the padding is
+        // passed through unchanged. The move `kitten` writes for it is dropped again in appendIcatOutput,
+        // which leaves the position to the caller, so this is not what puts the image at the padding in
+        // the normal case. It is what keeps the fallback there working: when the output layout is not
+        // recognised - as under tmux, where `kitten` switches to unicode placeholders - its own
+        // positioning is kept, and this is what then places the image at the padding.
         char place[64];
         snprintf(place,
             ARRAY_SIZE(place),
             "--place=%ux%u@%ux%u",
             options->width,
             options->height == 0 ? 9999 : options->height,
-            options->paddingLeft + 1,
-            options->paddingTop + 1);
+            options->paddingLeft,
+            options->paddingTop);
 
-        error = ffProcessAppendStdOut(&buf, (char*[]) {
+        error = ffProcessAppendStdOut(&icatOutput, (char*[]) {
                                                 "kitten",
                                                 "icat",
                                                 "-n",
@@ -181,7 +283,7 @@ static bool printImageKittyIcat(bool printError) {
                                                 nullptr,
                                             });
     } else {
-        error = ffProcessAppendStdOut(&buf, (char*[]) {
+        error = ffProcessAppendStdOut(&icatOutput, (char*[]) {
                                                 "kitten",
                                                 "icat",
                                                 "-n",
@@ -198,12 +300,14 @@ static bool printImageKittyIcat(bool printError) {
         return false;
     }
 
-    if (buf.length == prevLength) {
+    if (icatOutput.length == 0) {
         if (printError) {
             fputs("Logo (kitty-icat): `kitten icat` returned empty output\n", stderr);
         }
         return false;
     }
+
+    appendIcatOutput(&buf, &icatOutput, options);
 
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
