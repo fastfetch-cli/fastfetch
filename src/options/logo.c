@@ -17,7 +17,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->paddingRight = 4;
     options->printRemaining = true;
     options->preserveAspectRatio = false;
-    options->recache = false;
+    options->cache = FF_LOGO_CACHE_ON;
     options->position = FF_LOGO_POSITION_LEFT;
 
 #if FF_HAVE_CHAFA
@@ -105,8 +105,15 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             options->printRemaining = ffOptionParseBoolean(value);
         } else if (ffStrEqualsIgnCase(subKey, "preserve-aspect-ratio")) {
             options->preserveAspectRatio = ffOptionParseBoolean(value);
+        } else if (ffStrEqualsIgnCase(subKey, "cache")) {
+            if (value && ffStrEqualsIgnCase(value, "regen")) {
+                options->cache = FF_LOGO_CACHE_REGEN;
+            } else {
+                options->cache = ffOptionParseBoolean(value) ? FF_LOGO_CACHE_ON : FF_LOGO_CACHE_OFF;
+            }
         } else if (ffStrEqualsIgnCase(subKey, "recache")) {
-            options->recache = ffOptionParseBoolean(value);
+            fputs("--logo-recache has been replaced by --logo-cache regen\n", stderr);
+            exit(477);
         } else if (ffStrEqualsIgnCase(subKey, "separate")) {
             fputs("--logo-separate has been renamed to --logo-position\n", stderr);
             exit(477);
@@ -335,8 +342,14 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         } else if (unsafe_yyjson_equals_str(key, "preserveAspectRatio")) {
             options->preserveAspectRatio = yyjson_get_bool(val);
             continue;
-        } else if (unsafe_yyjson_equals_str(key, "recache")) {
-            options->recache = yyjson_get_bool(val);
+        } else if (unsafe_yyjson_equals_str(key, "cache")) {
+            if (yyjson_is_bool(val)) {
+                options->cache = yyjson_get_bool(val) ? FF_LOGO_CACHE_ON : FF_LOGO_CACHE_OFF;
+            } else if (yyjson_is_str(val) && ffStrEqualsIgnCase(yyjson_get_str(val), "regen")) {
+                options->cache = FF_LOGO_CACHE_REGEN;
+            } else {
+                return "Property 'logo.cache' must be a boolean or the string \"regen\"";
+            }
             continue;
         } else if (unsafe_yyjson_equals_str(key, "position")) {
             int value;
@@ -521,7 +534,18 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
 
     yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRatio", options->preserveAspectRatio);
 
-    yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);
+    // Written the way the parser accepts it back: a boolean for on / off, the string for regen
+    switch (options->cache) {
+        case FF_LOGO_CACHE_OFF:
+            yyjson_mut_obj_add_bool(doc, obj, "cache", false);
+            break;
+        case FF_LOGO_CACHE_REGEN:
+            yyjson_mut_obj_add_str(doc, obj, "cache", "regen");
+            break;
+        case FF_LOGO_CACHE_ON:
+            yyjson_mut_obj_add_bool(doc, obj, "cache", true);
+            break;
+    }
 
     yyjson_mut_obj_add_str(doc, obj, "position", ((const char*[]) {
                                                      "left",

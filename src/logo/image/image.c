@@ -405,6 +405,12 @@ static bool compressBlob(void** blob, size_t* length) {
     #endif // FF_HAVE_ZLIB
 
 static void writeCacheData(FFLogoRequestData* requestData, const void* value, size_t len, const char* cacheFileName) {
+    // Every payload file goes through here, including the ones written from the printing helpers,
+    // so this is the single place that keeps `--logo-cache false` from writing anything at all.
+    if (instance.config.logo.cache == FF_LOGO_CACHE_OFF) {
+        return;
+    }
+
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, cacheFileName);
     ffWriteFileData(requestData->cacheDir.chars, len, value);
@@ -905,7 +911,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     // 0 means the mtime could not be read, in which case the entry is never trusted.
     const uint64_t sourceMtime = ffPathGetMtime(instance.config.logo.source.chars);
 
-    if (!instance.config.logo.recache &&
+    if (instance.config.logo.cache == FF_LOGO_CACHE_ON &&
         sourceMtime != 0 &&
         readCachedUint64(&requestData, FF_CACHE_FILE_MTIME) == sourceMtime) {
         bool cacheValid = requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA
@@ -919,7 +925,10 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
 
     // Cache miss. The entry directory is keyed on the source path and the pixel size only, so
     // it is reused when the source is edited; drop what the previous version left behind.
-    removeCachedFiles(&requestData);
+    // With the cache turned off the directory is left alone entirely.
+    if (instance.config.logo.cache != FF_LOGO_CACHE_OFF) {
+        removeCachedFiles(&requestData);
+    }
 
     const char* error = nullptr;
     bool printSuccessful = false;

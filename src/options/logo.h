@@ -30,6 +30,12 @@ typedef enum FFLogoPosition: uint8_t {
     FF_LOGO_POSITION_RIGHT,
 } FFLogoPosition;
 
+typedef enum FFLogoCacheStrategy: uint8_t {
+    FF_LOGO_CACHE_ON,    // reuse a cached rendering when it is valid, and write it back on a cache miss
+    FF_LOGO_CACHE_OFF,   // ignore the image logo cache completely: neither read nor write it
+    FF_LOGO_CACHE_REGEN, // ignore any existing cached rendering and regenerate it
+} FFLogoCacheStrategy;
+
 typedef struct FFOptionsLogo {
     FFstrbuf source;
     FFLogoType type;
@@ -43,7 +49,7 @@ typedef struct FFOptionsLogo {
     uint32_t paddingBottom;
     bool printRemaining;
     bool preserveAspectRatio;
-    bool recache;
+    FFLogoCacheStrategy cache;
 
 #if FF_HAVE_CHAFA
     bool chafaFgOnly;

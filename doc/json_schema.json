@@ -766,10 +766,19 @@
                             "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol only",
                             "default": false
                         },
-                        "recache": {
-                            "type": "boolean",
-                            "description": "If true, regenerate image logo cache",
-                            "default": false
+                        "cache": {
+                            "description": "How the image logo cache is used. true reuses a cached rendering when it is valid and writes it back on a cache miss; false ignores the cache completely, neither reading nor writing it; \"regen\" ignores any existing cached rendering and regenerates it",
+                            "oneOf": [
+                                {
+                                    "type": "boolean",
+                                    "description": "Whether to use the image logo cache"
+                                },
+                                {
+                                    "const": "regen",
+                                    "description": "Regenerate the image logo cache, ignoring any existing cached rendering"
+                                }
+                            ],
+                            "default": true
                         },
                         "position": {
                             "type": "string",

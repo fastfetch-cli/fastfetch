@@ -291,12 +291,17 @@
             }
         },
         {
-            "long": "logo-recache",
-            "desc": "If true, regenerate the image logo cache",
+            "long": "logo-cache",
+            "desc": "Specify how the image logo cache is used",
             "arg": {
-                "type": "bool",
+                "type": "enum",
                 "optional": true,
-                "default": false
+                "default": "true",
+                "enum": {
+                    "true": "Reuse a cached rendering when it is valid, and write it back on a cache miss",
+                    "false": "Ignore the image logo cache completely: neither read nor write it",
+                    "regen": "Ignore any existing cached rendering and regenerate it"
+                }
             }
         },
         {
