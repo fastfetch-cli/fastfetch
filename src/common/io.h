@@ -291,3 +291,7 @@ static inline void wrapClosedir(HANDLE* pdir) {
 
 FFNativeFD ffGetNullFD(void);
 bool ffRemoveFile(const char* fileName);
+// Modification time of a file, in milliseconds since the Unix epoch, or 0 if it can not be read.
+// The representation is uniform across platforms so that a value derived from it means the
+// same thing everywhere, which matters for callers that store it as a cache key.
+[[gnu::nonnull(1)]] uint64_t ffPathGetMtime(const char* path);

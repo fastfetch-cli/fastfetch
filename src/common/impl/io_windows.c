@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/io.h"
 #include "common/strutil.h"
+#include "common/time.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 
@@ -498,4 +499,20 @@ FFNativeFD ffGetNullFD(void) {
 
 bool ffRemoveFile(const char* fileName) {
     return DeleteFileA(fileName) != FALSE;
+}
+
+uint64_t ffPathGetMtime(const char* path) {
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+    if (handle == INVALID_HANDLE_VALUE) { // file doesn't exist or isn't accessible
+        return 0;
+    }
+
+    FILE_BASIC_INFORMATION fileInfo;
+    IO_STATUS_BLOCK iosb;
+    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation))) {
+        return 0;
+    }
+
+    return ffFileTimeToUnixMs((uint64_t) fileInfo.LastWriteTime.QuadPart);
 }
