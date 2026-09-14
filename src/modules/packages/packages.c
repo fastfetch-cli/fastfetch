@@ -155,7 +155,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.brewCask, "brew-cask"),
                 FF_ARG(counts.cards, "cards"),
                 FF_ARG(counts.choco, "choco"),
-                FF_ARG(counts.choco, "crux"),
+                FF_ARG(counts.crux, "crux"),
                 FF_ARG(counts.dpkg, "dpkg"),
                 FF_ARG(counts.emerge, "emerge"),
                 FF_ARG(counts.eopkg, "eopkg"),
