@@ -341,7 +341,7 @@ static bool printImageKittyDirect(bool printError) {
     return true;
 }
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(FF_HAVE_SIXEL)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(FF_HAVE_SIXEL)
 
     #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
@@ -616,6 +616,8 @@ static bool printImageChafa(FFLogoRequestData* requestData, const FFImageBuffer*
 bool ffImageCreate(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error) {
     #ifdef _WIN32
     return ffImageCreateWIC(requestData, out, error);
+    #elif defined(__APPLE__)
+    return ffImageCreateImageIO(requestData, out, error);
     #else
         #ifdef FF_HAVE_IMAGEMAGICK7
     if (ffImageCreateIM7(requestData, out, error)) {
@@ -639,8 +641,10 @@ void ffImageDestroy(FFImageBuffer* buffer) {
 }
 
 bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const char** error) {
-    #ifdef _WIN32
-        // Windows: WIC decodes and resizes to RGBA, then the embedded libsixel encoder takes over
+    // Windows (WIC) and macOS (ImageIO) decode and resize to RGBA first, then the embedded
+    // libsixel encoder takes over. Other platforms let ImageMagick encode straight from the
+    // decoded image without an RGBA round trip.
+    #if defined(_WIN32) || defined(__APPLE__)
         #ifdef FF_HAVE_SIXEL
     FFImageBuffer buffer = {};
     if (!ffImageCreate(requestData, &buffer, error)) {
@@ -650,13 +654,13 @@ bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const cha
     ffImageDestroy(&buffer);
     return ok;
         #else
+    FF_UNUSED(requestData, out);
     if (error) {
         *error = "sixel support is not compiled in";
     }
     return false;
         #endif
     #else
-        // Off Windows: ImageMagick encodes straight from the decoded image, without an RGBA round trip
         #ifdef FF_HAVE_IMAGEMAGICK7
     if (ffImageSixelEncodeIM7(requestData, out, error)) {
         return true;
@@ -866,6 +870,8 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     // by backend: different backends (and different sixel encoders) produce different bytes
     #ifdef _WIN32
     ffStrbufAppendS(&requestData.cacheDir, "wic/");
+    #elif defined(__APPLE__)
+    ffStrbufAppendS(&requestData.cacheDir, "imageio/");
     #elif defined(FF_HAVE_IMAGEMAGICK7)
     ffStrbufAppendS(&requestData.cacheDir, "im7/");
     #elif defined(FF_HAVE_IMAGEMAGICK6)
@@ -969,7 +975,7 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
     }
 #endif
 
-#if !defined(_WIN32) && !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
     if (printError) {
         fputs("Logo: Image Magick support is not compiled in\n", stderr);
     }

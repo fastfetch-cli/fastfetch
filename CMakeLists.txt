@@ -88,10 +88,10 @@ cmake_dependent_option(ENABLE_EET "Enable eet" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows only; replaces ImageMagick's SIXEL coder)" ON "WIN32" OFF)
-cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows and macOS; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE" OFF)
+cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
@@ -1023,6 +1023,7 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.c
         src/detection/camera/camera_apple.m
+        src/logo/image/imageio.c
     )
     # CMAKE_SYSTEM_PROCESSOR has been normalized before
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
@@ -1887,6 +1888,8 @@ elseif(APPLE)
         PRIVATE "-framework CoreAudio"
         PRIVATE "-framework CoreMedia"
         PRIVATE "-framework CoreVideo"
+        PRIVATE "-framework ImageIO"
+        PRIVATE "-framework Accelerate"
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"

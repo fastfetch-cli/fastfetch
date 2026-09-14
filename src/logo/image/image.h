@@ -2,7 +2,7 @@
 
 #include "../logo.h"
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(FF_HAVE_SIXEL)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(FF_HAVE_SIXEL)
 
 typedef enum FFLogoImageResult: uint8_t {
     FF_LOGO_IMAGE_RESULT_SUCCESS,    // Logo printed
@@ -58,6 +58,10 @@ bool ffImageSixelEncodeIM6(FFLogoRequestData* requestData, FFstrbuf* out, const 
 
 #ifdef _WIN32
 bool ffImageCreateWIC(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+#endif
+
+#ifdef __APPLE__
+bool ffImageCreateImageIO(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
 #endif
 
 #ifdef FF_HAVE_SIXEL
