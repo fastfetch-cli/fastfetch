@@ -682,6 +682,26 @@ int main(void) {
     }
 
     {
+        // ffStrbufMatchSeparatedNS with explicit compLength: the length-bounded
+        // contract is load-bearing for the Linux keyboard handler, which passes
+        // a fixed-size buffer length rather than a NUL-terminated string.
+        ffStrbufSetStatic(&strbuf, "abc");
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 11, "abc:def:ghi", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 3, "abc:def:ghi", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 7, "abc:def:ghi", ':') == true); // "abc:def"
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 4, "abc:def:ghi", ':') == true); // "abc:"
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 5, "abc:def:ghi", ':') == false); // "abc:d"
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 3, "abd:def:ghi", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 0, "abc:def:ghi", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 0, "", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 11, "abc:def:ghi", ' ') == false); // no separator in bounds
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 12, "abc:def:ghi\0j", ':') == true); // embedded NUL inside bounds
+        ffStrbufSetStatic(&strbuf, "");
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 11, "abc:def:ghi", ':') == true); // empty substring matches
+        VERIFY(ffStrbufMatchSeparatedNS(&strbuf, 0, "abc", ':') == false);
+    }
+
+    {
         ffStrbufSetStatic(&strbuf, "ABC");
         VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc:def:ghi", ' ') == false);
         VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc:def:ghi", ':') == true);
