@@ -38,8 +38,14 @@
             "compactType": "original",
             "key": "Resolution"
         },
-        "de",
-        "wm",
+        {
+            "type": "de",
+            "key": "DE"
+        },
+        {
+            "type": "wm",
+            "key": "WM"
+        },
         "wmtheme",
         "theme",
         "icons",
@@ -48,7 +54,10 @@
             "type": "terminalfont",
             "format": "{/name}{-}{/}{name}{?size} {size}{?}"
         },
-        "cpu",
+        {
+            "type": "cpu",
+            "showPeCoreCount": false
+        },
         {
             "type": "gpu",
             "key": "GPU",
