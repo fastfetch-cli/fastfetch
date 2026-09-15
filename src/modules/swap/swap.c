@@ -218,7 +218,7 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         { "Total size", "total" },
         { "Percentage used (num)", "percentage" },
         { "Percentage used (bar)", "percentage-bar" },
-        { "Name", "name" },
+        { "Name *", "name" },
     })),
     .defaultOrder = 40,
 };

@@ -70,6 +70,7 @@ static void printCommandFormatHelp(const char* command) {
                 printf("-- In config file: { \"type\": \"%s\", \"format\": \"{<format-variable>}\" }\n", type.chars);
                 printf("Sets the format string for %s output.\n", baseInfo->name);
                 puts("To see how a format string is constructed, take a look at https://github.com/fastfetch-cli/fastfetch/wiki/Format-String-Guide.");
+                puts("Descriptions which end with a '*' are available in key format too.");
                 puts("The following variables are passed:");
 
                 uint32_t maxWidth = 20;

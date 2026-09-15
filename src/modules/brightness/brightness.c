@@ -223,7 +223,7 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateBrightnessJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Screen brightness (percentage num)", "percentage" },
-        { "Screen name", "name" },
+        { "Screen name *", "name" },
         { "Maximum brightness value", "max" },
         { "Minimum brightness value", "min" },
         { "Current brightness value", "current" },

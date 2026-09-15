@@ -161,12 +161,12 @@ FFModuleBaseInfo ffBiosModuleInfo = {
     .printModule = (void*) ffPrintBios,
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,
     .generateJsonConfig = (void*) ffGenerateBiosJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "BIOS date", "date" },
         { "BIOS release", "release" },
         { "BIOS vendor", "vendor" },
         { "BIOS version", "version" },
-        { "Firmware type", "type" },
+        { "Firmware type *", "type" },
     })),
     .defaultOrder = 5,
 };
