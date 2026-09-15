@@ -3,6 +3,9 @@
 Features:
 * Added CPU name and frequency detection support on SPARC. (CPU, Linux)
 
+Logos:
+* Added LeonOS4
+
 # 2.68.1
 
 Changes:
