@@ -5,6 +5,20 @@
 static FFNetworkingState states[2];
 static const char* statuses[2] = { FF_UNINITIALIZED, FF_UNINITIALIZED };
 
+// Reads the port that follows the colon at `colonIndex`. The port has to be the last thing in
+// `host`, so this must run before any part of the host is trimmed off.
+static uint16_t ffPublicIpParseUrlPort(const FFstrbuf* host, uint32_t colonIndex) {
+    const char* portStr = host->chars + colonIndex + 1;
+    char* portEnd = nullptr;
+    unsigned long portValue = strtoul(portStr, &portEnd, 10);
+    if (portEnd == portStr || *portEnd != '\0' || portValue == 0 || portValue > 65535) {
+        fputs("Error: invalid port in the PublicIp module URL\n", stderr);
+        exit(1);
+    }
+
+    return (uint16_t) portValue;
+}
+
 void ffPreparePublicIp(FFPublicIPOptions* options) {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
@@ -19,7 +33,7 @@ void ffPreparePublicIp(FFPublicIPOptions* options) {
     if (options->url.length == 0) {
         state->compression = true;
         state->tfo = true;
-        *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", "/json", nullptr);
+        *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", 80, "/json", nullptr);
     } else {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
         uint32_t hostStartIndex = ffStrbufFirstIndexS(&host, "://");
@@ -38,7 +52,39 @@ void ffPreparePublicIp(FFPublicIPOptions* options) {
             ffStrbufSubstrBefore(&host, pathStartIndex);
         }
 
-        *status = ffNetworkingSendHttpRequest(state, host.chars, path.length == 0 ? "/" : path.chars, nullptr);
+        // An optional `:port` must be split off the host, otherwise getaddrinfo() is asked to
+        // resolve a host name that still carries the port. Only a single colon can separate a
+        // port: a bare IPv6 literal (`::1`) holds several of them and has no port at all,
+        // which is why a bracketed literal (`[::1]:8080`) is the only unambiguous spelling.
+        uint16_t port = 0;
+        if (ffStrbufStartsWithC(&host, '[')) {
+            uint32_t bracketEnd = ffStrbufFirstIndexC(&host, ']');
+            if (bracketEnd == host.length) {
+                fputs("Error: unmatched '[' in the PublicIp module URL\n", stderr);
+                exit(1);
+            }
+
+            if (bracketEnd + 1 < host.length) {
+                if (host.chars[bracketEnd + 1] != ':') {
+                    fputs("Error: unexpected characters after the IPv6 literal in the PublicIp module URL\n", stderr);
+                    exit(1);
+                }
+                // Read the port while the string is still intact: trimming the brackets first
+                // would invalidate the index it was found at.
+                port = ffPublicIpParseUrlPort(&host, bracketEnd + 1);
+            }
+
+            ffStrbufSubstrBefore(&host, bracketEnd);
+            ffStrbufSubstrAfter(&host, 0); // drop the leading '['
+        } else {
+            uint32_t firstColon = ffStrbufFirstIndexC(&host, ':');
+            if (firstColon < host.length && firstColon == ffStrbufLastIndexC(&host, ':')) {
+                port = ffPublicIpParseUrlPort(&host, firstColon);
+                ffStrbufSubstrBefore(&host, firstColon);
+            }
+        }
+
+        *status = ffNetworkingSendHttpRequest(state, host.chars, port ?: 80, path.length == 0 ? "/" : path.chars, nullptr);
     }
 }
 

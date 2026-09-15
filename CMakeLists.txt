@@ -2204,6 +2204,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-networking
+        tests/networking.c
+    )
+    target_link_libraries(fastfetch-test-networking
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
@@ -2211,6 +2218,7 @@ if (BUILD_TESTS)
     add_test(NAME test-color COMMAND fastfetch-test-color)
     add_test(NAME test-duration COMMAND fastfetch-test-duration)
     add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
+    add_test(NAME test-networking COMMAND fastfetch-test-networking)
 endif()
 
 ##################
