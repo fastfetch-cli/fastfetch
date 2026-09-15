@@ -33,7 +33,7 @@ static FFLogoImageResult im6EncodeImage(FFLogoRequestData* requestData, const ch
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, AcquireImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImageInfo, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, ReadImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
-    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
+    FF_LIBRARY_LOAD_SYMBOL(imageMagick, DestroyImageList, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, CopyMagickString, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
     FF_LIBRARY_LOAD_SYMBOL(imageMagick, ImageToBlob, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
@@ -82,7 +82,9 @@ static FFLogoImageResult im6EncodeImage(FFLogoRequestData* requestData, const ch
 
     {
         Image* resized = logoResize(image, requestData->logoPixelWidth, requestData->logoPixelHeight, exceptionInfo);
-        ffDestroyImage(image);
+        // ReadImage may return a list of images (e.g. for multi-frame formats like GIF).
+        // We only need the first frame, so destroy the whole list to avoid leaking the rest.
+        ffDestroyImageList(image);
         image = resized;
         if (image == nullptr) {
             goto cleanup;
@@ -111,7 +113,7 @@ cleanup:
         ffDestroyImageInfo(imageInfoOut);
     }
     if (image) {
-        ffDestroyImage(image);
+        ffDestroyImageList(image);
     }
     if (exceptionInfo) {
         ffDestroyExceptionInfo(exceptionInfo);
