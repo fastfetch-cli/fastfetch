@@ -699,7 +699,7 @@ static bool printImageChafa(FFLogoRequestData* requestData, const FFImageBuffer*
     result.chars = str->str;
 
     ffLogoPrintChars(result.chars, false);
-    writeCacheData(requestData, &result.chars, result.length, FF_CACHE_FILE_CHAFA);
+    writeCacheData(requestData, result.chars, result.length, FF_CACHE_FILE_CHAFA);
 
     // FIXME: These functions must be imported from `libglib` dlls on Windows
     FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_string_free);
