@@ -723,16 +723,17 @@ bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf) {
 /// @param compLength The length of the separated string to check.
 /// @param comp The separated string to check.
 /// @param separator The separator character.
+///
+/// Empty-string handling:
+/// - If `strbuf` is empty, it matches only if `comp` contains an empty segment
+///   (e.g. "abc::def", "abc:", ":abc") or `comp` itself is empty.
+/// - If `comp` is empty (compLength == 0), it matches only if `strbuf` is also empty.
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
-    if (strbuf->length == 0) {
-        return true;
+    if (__builtin_expect(compLength == 0, false)) {
+        return strbuf->length == 0;
     }
 
-    if (compLength == 0) {
-        return false;
-    }
-
-    for (const char* p = comp; p < comp + compLength;) {
+    for (const char* p = comp; p <= comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
         if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
@@ -752,15 +753,11 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
 
 /// @brief Case insensitive version of ffStrbufMatchSeparatedNS.
 bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
-    if (strbuf->length == 0) {
-        return true;
+    if (__builtin_expect(compLength == 0, false)) {
+        return strbuf->length == 0;
     }
 
-    if (compLength == 0) {
-        return false;
-    }
-
-    for (const char* p = comp; p < comp + compLength;) {
+    for (const char* p = comp; p <= comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
         if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
@@ -802,9 +799,15 @@ int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint) {
 /// @param compLength The length of the separated string to check.
 /// @param comp The substring to check.
 /// @param separator The separator character.
+///
+/// Empty-string handling is symmetric to ffStrbufMatchSeparatedNS
 bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
+    if (__builtin_expect(strbuf->length == 0, false)) {
+        return compLength == 0; // An empty list contains only the empty segment
+    }
+
     uint32_t startIndex = 0;
-    while (startIndex < strbuf->length) {
+    while (startIndex <= strbuf->length) { // `<=` so a trailing empty segment (e.g. "abc:") is checked
         uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
 
         uint32_t folderLength = colonIndex - startIndex;
@@ -819,8 +822,12 @@ bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, con
 }
 
 bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
+    if (__builtin_expect(strbuf->length == 0, false)) {
+        return compLength == 0; // An empty list contains only the empty segment
+    }
+
     uint32_t startIndex = 0;
-    while (startIndex < strbuf->length) {
+    while (startIndex <= strbuf->length) { // `<=` so a trailing empty segment (e.g. "abc:") is checked
         uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
 
         uint32_t folderLength = colonIndex - startIndex;
