@@ -4,28 +4,22 @@
 
 static FFlist first;
 static double startTick;
-static FFTopTypes preparedShowTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
 
 void ffPrepareTopProcesses(FFTopTypes showTypes) {
     if ((showTypes & (FF_TOP_TYPE_CPU | FF_TOP_TYPE_DISK)) == 0) {
         return; // Memory usage is instantaneous; no baseline snapshot is needed
     }
 
-    if (startTick != 0 && preparedShowTypes == showTypes) {
+    if (startTick != 0) {
         return; // Already prepared
     }
 
-    if (startTick != 0) {
-        // The set of requested types changed; discard the stale baseline
-        FF_LIST_FOR_EACH (FFTopProcessSnapshot, item, first) {
-            ffStrbufDestroy(&item->name);
-        }
-        ffListDestroy(&first);
-    }
-
+    // `showTypes` cannot change between this call and `ffDetectTopProcesses`: `ffPrepareCommandOption`
+    // and `parseStructureCommand` both build the options through `initStructureModuleOptions`, which
+    // merges the module object from the JSON config. So the baseline always matches what the second
+    // snapshot collects and needs no re-validation.
     ffListInit(&first);
     startTick = ffTimeGetTick();
-    preparedShowTypes = showTypes;
     ffTopGetProcessSnapshot(&first, showTypes);
 }
 
@@ -102,7 +96,7 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
             ffStrbufInitMove(&item->name, &snap->name);
         }
     } else {
-        if (startTick == 0 || preparedShowTypes != options->showTypes) {
+        if (startTick == 0) {
             ffPrepareTopProcesses(options->showTypes);
         }
 

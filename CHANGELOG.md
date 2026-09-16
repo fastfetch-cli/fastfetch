@@ -2,13 +2,16 @@
 
 Changes:
 * ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo, Windows / macOS)
-    * Image logos on Windows and macOS no longer depend on ImageMagick being installed. 
+    * Image logos on Windows and macOS no longer depend on ImageMagick being installed.
     * Image sources that only ImageMagick could decode, such as SVG, PDF and PostScript, are no longer supported on Windows: neither WIC nor the embedded sixel encoder can decode them.
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss.
     * `--logo-cache false` ignores the image logo cache completely: nothing is read from it and nothing is written to it.
     * `--logo-cache regen` does what `--logo-recache true` used to do.
     * `logo.cache` accepts a boolean, or the string `"regen"`.
+* The `waitTime` option of `DiskIO` and `NetIO` now defaults to `250` ms instead of `500`. (DiskIO / NetIO)
+    * The byte counters are maintained by the kernel as I/O happens, so a shorter sampling window still yields an accurate rate, and both modules now finish about 250 ms sooner.
+    * Note that the two modules wait concurrently, so enabling both does not cost twice the wait time.
 
 Features:
 * Improved image logo support
@@ -37,7 +40,7 @@ Features:
 * Improved Wallpaper detection on macOS Sonoma and later (#2559, Wallpaper, macOS)
     * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is tried last.
 * Removed the `kvm` dependency on OpenBSD by using `sysctl` directly. (General, OpenBSD)
-* Modules that were selected on the command line via `--structure` / `-s` now honors module options configured in the JSON config. (CommandOption)
+* Modules that were selected on the command line via `--structure` / `-s` now honor module options configured in the JSON config. (CommandOption)
 
 Bugfixes:
 * Fixed Base64 encoding producing wrong output for some inputs. (General)

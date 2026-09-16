@@ -192,7 +192,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options) {
 #endif
         ;
     options->detectTotal = false;
-    options->waitTime = 500;
+    options->waitTime = 250;
 }
 
 void ffDestroyNetIOOptions(FFNetIOOptions* options) {

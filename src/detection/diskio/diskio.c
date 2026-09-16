@@ -5,7 +5,7 @@
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options);
 
 static FFlist ioCounters1;
-static uint64_t time1;
+static double time1;
 
 void ffPrepareDiskIO(FFDiskIOOptions* options) {
     if (options->detectTotal) {
@@ -16,9 +16,13 @@ void ffPrepareDiskIO(FFDiskIOOptions* options) {
         return; // Already prepared
     }
 
+    // The options cannot change between this call and `ffDetectDiskIO`: `ffPrepareCommandOption`
+    // and `parseStructureCommand` both build them through `initStructureModuleOptions`, which
+    // merges the module object from the JSON config. So the baseline always matches the second
+    // snapshot and needs no re-validation.
     ffListInit(&ioCounters1);
     ffDiskIOGetIoCounters(&ioCounters1, options);
-    time1 = ffTimeGetNow();
+    time1 = ffTimeGetTick();
 }
 
 const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
@@ -33,22 +37,17 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
     }
 
     if (time1 == 0) {
-        ffListInit(&ioCounters1);
-        error = ffDiskIOGetIoCounters(&ioCounters1, options);
-        if (error) {
-            return error;
-        }
-        time1 = ffTimeGetNow();
+        ffPrepareDiskIO(options);
     }
 
     if (ioCounters1.length == 0) {
         return "No physical disk found";
     }
 
-    uint64_t time2 = ffTimeGetNow();
-    while (time2 - time1 < options->waitTime) {
+    double time2 = ffTimeGetTick();
+    while (time2 - time1 < (double) options->waitTime) {
         ffTimeSleep((uint32_t) (options->waitTime - (time2 - time1)));
-        time2 = ffTimeGetNow();
+        time2 = ffTimeGetTick();
     }
 
     error = ffDiskIOGetIoCounters(result, options);
@@ -72,7 +71,7 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options) {
             uint64_t* prevValue = (uint64_t*) ((uint8_t*) icPrev + off);
             uint64_t* currValue = (uint64_t*) ((uint8_t*) icCurr + off);
             uint64_t temp = *currValue;
-            *currValue = (*currValue - *prevValue) * 1000 / (time2 - time1); // Calculate per second
+            *currValue = (uint64_t) ((double) (*currValue - *prevValue) * 1000.0 / (time2 - time1)); // Calculate per second
 
             // For next function call
             *prevValue = temp;

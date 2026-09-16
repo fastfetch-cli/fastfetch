@@ -2710,7 +2710,7 @@
                                     "waitTime": {
                                         "type": "integer",
                                         "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
-                                        "default": 500,
+                                        "default": 250,
                                         "minimum": 1
                                     },
                                     "key": {
@@ -3611,7 +3611,7 @@
                                     "waitTime": {
                                         "type": "integer",
                                         "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
-                                        "default": 500,
+                                        "default": 250,
                                         "minimum": 1
                                     },
                                     "key": {
