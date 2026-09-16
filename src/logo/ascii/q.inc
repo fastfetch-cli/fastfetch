@@ -96,6 +96,17 @@ static const FFlogo Q[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_QUASARLINUX
+    // QuasarLinux
+    {
+        .names = { "QuasarLinux" },
+        .lines = FASTFETCH_DATATEXT_LOGO_QUASARLINUX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    #endif
     // LAST
     {},
 };
