@@ -456,7 +456,21 @@ static bool printImageKittyDirect(bool printError) {
     #define FF_CACHE_FILE_SIXEL "sixel"
     #define FF_CACHE_FILE_KITTY_COMPRESSED "kittyc"
     #define FF_CACHE_FILE_KITTY_UNCOMPRESSED "kittyu"
+    // Animation payload. The envelope can not be cached because it carries the image id, and that
+    // id has to differ on every run; this entry holds only what is id-independent (see §7.2).
+    #define FF_CACHE_FILE_KITTY_ANIMATION "kittyanim"
     #define FF_CACHE_FILE_CHAFA "chafa"
+    // The frame the payloads in the same directory were rendered from. A selected frame is stored
+    // exactly like the first frame is -- same entries, same payload format -- so this sidecar is
+    // what tells the two apart, and what makes a change of --logo-animation-frame refresh the entry
+    // instead of being served the frame that was asked for last time. It can not be part of the
+    // entry name: the frame number ranges over the whole int32, and removeCachedFiles works from a
+    // fixed list that could never enumerate it.
+    // The entry sits next to every payload of the directory, so it describes whichever of them was
+    // written last. Switching --logo-protocol between two protocols that both have a payload here,
+    // and asking for different frames, can therefore pair one protocol's payload with the other's
+    // frame number; the cache has to be refreshed after such a switch (`--logo-cache regen`).
+    #define FF_CACHE_FILE_FRAME "frame"
     // Modification time of the image source the entry was produced from. Written last, so an
     // entry that was interrupted mid-write is never mistaken for a complete one.
     #define FF_CACHE_FILE_MTIME "mtime"
@@ -465,6 +479,8 @@ static bool printImageKittyDirect(bool printError) {
     #include <string.h>
     #include <unistd.h>
     #include <fcntl.h>
+
+    #include "common/time.h"
 
     #ifndef _WIN32
         #include <sys/ioctl.h>
@@ -478,7 +494,14 @@ static bool printImageKittyDirect(bool printError) {
         #include <zlib.h>
 
 static bool compressBlob(void** blob, size_t* length) {
-    FF_LIBRARY_LOAD(zlib, false, "libz" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(zlib, false,
+        #ifdef _WIN32
+        "zlib1"
+        #else
+        "libz"
+        #endif
+        FF_LIBRARY_EXTENSION,
+        2)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
 
@@ -496,7 +519,15 @@ static bool compressBlob(void** blob, size_t* length) {
         return false;
     }
 
-    if (ffcompress2(compressed, &compressedLength, *blob, (uLong) *length, Z_BEST_COMPRESSION) != Z_OK) {
+    // Level 6, not 9. Measured on a 44 frame 400x400 GIF (2026-09-16): the level 9 encode is 573 ms
+    // of the 720 ms the whole kitty animation path takes, i.e. it dwarfs decoding and the per frame
+    // export combined. Level 6 does the same job in a fifth of the time for 4.9% more bytes, which is
+    // also the level kitten icat uses. Level 1 would halve it again but doubles the payload, and past
+    // that point the terminal is the slow one, not us.
+    // The gap is far wider on Windows, where the same frames cost 37.7 ms each at level 9 against
+    // 6.4 at level 6: raising this back to 9 now that the DLL name above actually loads is a 4.2x
+    // slowdown there (398 ms -> 1692 ms). Re-measure both platforms before touching it.
+    if (ffcompress2(compressed, &compressedLength, *blob, (uLong) *length, Z_DEFAULT_COMPRESSION) != Z_OK) {
         free(compressed);
         return false;
     }
@@ -523,15 +554,10 @@ static void writeCacheData(FFLogoRequestData* requestData, const void* value, si
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
 }
 
-static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName) {
+// The character dimensions describe the source, not one particular rendering of it, so they live
+// in their own entries. The animation path reuses them without writing a payload of its own.
+static void writeImageSizeCache(FFLogoRequestData* requestData) {
     const FFOptionsLogo* options = &instance.config.logo;
-    // Calculate character dimensions
-    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
-
-    // Write cache files
-    writeCacheData(requestData, result->chars, result->length, cacheFileName);
-
     if (options->width == 0) {
         writeCacheData(requestData, &requestData->logoCharacterWidth, sizeof(requestData->logoCharacterWidth), FF_CACHE_FILE_WIDTH);
     }
@@ -539,7 +565,20 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     if (options->height == 0) {
         writeCacheData(requestData, &requestData->logoCharacterHeight, sizeof(requestData->logoCharacterHeight), FF_CACHE_FILE_HEIGHT);
     }
+}
 
+// Records which frame the payload written alongside it came from. Every payload write is followed
+// by this one, so asking for another frame refreshes the entry instead of being served the frame
+// that was asked for last time. What goes in is the *requested* selector, not the index it resolves
+// to: on a single-frame source every selector resolves to frame 0, and storing that would make
+// every selector but one miss on every run.
+static void writeFrameCache(FFLogoRequestData* requestData) {
+    const int32_t frame = instance.config.logo.animationFrame;
+    writeCacheData(requestData, &frame, sizeof(frame), FF_CACHE_FILE_FRAME);
+}
+
+static void printImageResult(FFLogoRequestData* requestData, const FFstrbuf* result) {
+    const FFOptionsLogo* options = &instance.config.logo;
     // Write result to stdout
     ffPrintCharTimes('\n', options->paddingTop);
     if (options->position == FF_LOGO_POSITION_RIGHT) {
@@ -560,6 +599,34 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     }
 }
 
+static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName) {
+    const FFOptionsLogo* options = &instance.config.logo;
+    // Calculate character dimensions
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
+
+    // Write cache files
+    writeCacheData(requestData, result->chars, result->length, cacheFileName);
+    writeImageSizeCache(requestData);
+
+    printImageResult(requestData, result);
+}
+
+// Same as printImagePixels, but the payload is not written to the cache: the bytes handed to the
+// terminal are not the cached ones. Used by the animation path, whose envelope carries the image
+// id and therefore differs on every run, and which stores its frames in the `kittyanim` entry
+// instead.
+static void printImagePixelsNoCache(FFLogoRequestData* requestData, const FFstrbuf* result) {
+    const FFOptionsLogo* options = &instance.config.logo;
+    // Calculate character dimensions
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
+
+    writeImageSizeCache(requestData);
+
+    printImageResult(requestData, result);
+}
+
 // The backends report the real pixel dimensions; the character dimensions are derived here
 static void fillCharacterDimensions(FFLogoRequestData* requestData) {
     requestData->logoCharacterWidth = (uint32_t) ceil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
@@ -572,15 +639,26 @@ static bool printImageSixel(FFLogoRequestData* requestData, const FFstrbuf* resu
     }
 
     printImagePixels(requestData, result, FF_CACHE_FILE_SIXEL);
+    writeFrameCache(requestData);
     return true;
 }
 
-static void appendKittyChunk(FFstrbuf* result, const char** blob, size_t* length, bool printEscapeCode) {
+// Appends one chunk of a chunked graphics command. `printEscapeCode` is false for the first chunk
+// only, because the caller has already written the escape introducer and the control data.
+// `controlPrefix` adds keys in front of `m`; animation frame data needs it on continuation chunks
+// ("When sending animation frame data, subsequent chunks must also specify the a=f key"), the
+// static path passes nullptr and is therefore unchanged.
+static void appendKittyChunk(FFstrbuf* result, const char** blob, size_t* length, bool printEscapeCode, const char* controlPrefix) {
     uint32_t chunkSize = *length > FF_KITTY_MAX_CHUNK_SIZE ? FF_KITTY_MAX_CHUNK_SIZE : (uint32_t) *length;
 
     if (printEscapeCode) {
         ffStrbufAppendS(result, "\033_G");
     } else {
+        ffStrbufAppendC(result, ',');
+    }
+
+    if (controlPrefix) {
+        ffStrbufAppendS(result, controlPrefix);
         ffStrbufAppendC(result, ',');
     }
 
@@ -592,6 +670,7 @@ static void appendKittyChunk(FFstrbuf* result, const char** blob, size_t* length
     *blob += chunkSize;
 }
 
+// The compressed and the uncompressed entry hold the same rendering and share one frame sidecar.
 static bool printImageKitty(FFLogoRequestData* requestData, const FFImageBuffer* buffer) {
     size_t length = (size_t) buffer->width * buffer->height * 4;
     FF_AUTO_FREE void* blob = malloc(length);
@@ -619,12 +698,13 @@ static bool printImageKitty(FFLogoRequestData* requestData, const FFImageBuffer*
     if (isCompressed) {
         ffStrbufAppendS(&result, ",o=z");
     }
-    appendKittyChunk(&result, &currentPos, &remainingLength, false);
+    appendKittyChunk(&result, &currentPos, &remainingLength, false, nullptr);
     while (remainingLength > 0) {
-        appendKittyChunk(&result, &currentPos, &remainingLength, true);
+        appendKittyChunk(&result, &currentPos, &remainingLength, true, nullptr);
     }
 
     printImagePixels(requestData, &result, isCompressed ? FF_CACHE_FILE_KITTY_COMPRESSED : FF_CACHE_FILE_KITTY_UNCOMPRESSED);
+    writeFrameCache(requestData);
     return true;
 }
 
@@ -700,6 +780,7 @@ static bool printImageChafa(FFLogoRequestData* requestData, const FFImageBuffer*
 
     ffLogoPrintChars(result.chars, false);
     writeCacheData(requestData, result.chars, result.length, FF_CACHE_FILE_CHAFA);
+    writeFrameCache(requestData);
 
     // FIXME: These functions must be imported from `libglib` dlls on Windows
     FF_LIBRARY_LOAD_SYMBOL_LAZY(chafa, g_string_free);
@@ -748,6 +829,91 @@ void ffImageDestroy(FFImageBuffer* buffer) {
     buffer->height = 0;
 }
 
+void ffImageFrameDestroy(FFImageFrame* frame) {
+    free(frame->data);
+    frame->data = nullptr;
+    frame->delayMs = 0;
+}
+
+// The session itself is platform independent; a backend only has to fill it in through
+// ffImageAnimationCreate and implement the two callbacks.
+struct FFImageAnimation {
+    uint32_t frameCount;
+    int32_t loopCount;
+    void* impl;
+    bool (*getFrame)(FFImageAnimation* animation, uint32_t index, FFImageFrame* out, const char** error);
+    void (*destroy)(FFImageAnimation* animation);
+};
+
+FFImageAnimation* ffImageAnimationCreate(uint32_t frameCount, int32_t loopCount, void* impl,
+    bool (*getFrame)(FFImageAnimation* animation, uint32_t index, FFImageFrame* out, const char** error),
+    void (*destroy)(FFImageAnimation* animation)) {
+    FFImageAnimation* animation = malloc(sizeof(*animation));
+    if (animation == nullptr) {
+        return nullptr;
+    }
+
+    *animation = (FFImageAnimation) {
+        .frameCount = frameCount,
+        .loopCount = loopCount,
+        .impl = impl,
+        .getFrame = getFrame,
+        .destroy = destroy,
+    };
+    return animation;
+}
+
+void* ffImageAnimationGetImpl(const FFImageAnimation* animation) {
+    return animation->impl;
+}
+
+bool ffImageAnimationOpen(FFLogoRequestData* requestData, FFImageAnimation** out, const char** error) {
+    // The sessions belong to the backends: ImageIO composes frames internally, WIC does not and
+    // has to keep a canvas, ImageMagick needs CoalesceImages. Windows, macOS and ImageMagick 7 are
+    // wired up; ImageMagick 6 is deliberately left out (see image.h), and a build with none of them
+    // keeps failing loudly rather than falling back to a still image.
+    //
+    // The order mirrors ffImageCreate: on macOS ImageIO is the decoder even when ImageMagick is
+    // available too, so the animation has to come from the same place the stills do.
+    #ifdef _WIN32
+    return ffImageAnimationOpenWIC(requestData, out, error);
+    #elif defined(__APPLE__)
+    return ffImageAnimationOpenImageIO(requestData, out, error);
+    #elif defined(FF_HAVE_IMAGEMAGICK7)
+    return ffImageAnimationOpenIM7(requestData, out, error);
+    #else
+    FF_UNUSED(requestData, out);
+    *error = "the image source can not be animated by this build";
+    return false;
+    #endif
+}
+
+uint32_t ffImageAnimationFrameCount(const FFImageAnimation* animation) {
+    return animation->frameCount;
+}
+
+int32_t ffImageAnimationLoopCount(const FFImageAnimation* animation) {
+    return animation->loopCount;
+}
+
+bool ffImageAnimationGetFrame(FFImageAnimation* animation, uint32_t index, FFImageFrame* out, const char** error) {
+    if (index >= animation->frameCount) {
+        *error = "the requested frame is out of range";
+        return false;
+    }
+
+    return animation->getFrame(animation, index, out, error);
+}
+
+void ffImageAnimationClose(FFImageAnimation* animation) {
+    if (animation == nullptr) {
+        return;
+    }
+
+    animation->destroy(animation);
+    free(animation);
+}
+
 bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const char** error) {
     // Windows (WIC) and macOS (ImageIO) decode and resize to RGBA first, then the embedded
     // libsixel encoder takes over. Other platforms let ImageMagick encode straight from the
@@ -780,6 +946,35 @@ bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const cha
     }
         #endif
     return false;
+    #endif
+}
+
+bool ffImageSixelEncodeBuffer(const FFImageBuffer* buffer, FFstrbuf* out, const char** error) {
+    // Windows and macOS hand the pixels to the embedded encoder. ImageMagick has no way to encode
+    // pixels it was not given an Image for, so its SIXEL coder is reached through a ConstituteImage
+    // round trip instead.
+    #if defined(_WIN32) || defined(__APPLE__)
+        #ifdef FF_HAVE_SIXEL
+    return ffSixelEncode(buffer, out, error);
+        #else
+    FF_UNUSED(buffer, out);
+    if (error) {
+        *error = "sixel support is not compiled in";
+    }
+    return false;
+        #endif
+    #else
+        #ifdef FF_HAVE_IMAGEMAGICK7
+    return ffImageSixelEncodeBufferIM7(buffer, out, error);
+        #else
+    // Only the animation path calls this, and only ImageMagick 7 has an animation backend, so a
+    // build without it never gets here with something to encode.
+    FF_UNUSED(buffer, out);
+    if (error) {
+        *error = "sixel support is not compiled in";
+    }
+    return false;
+        #endif
     #endif
 }
 
@@ -833,6 +1028,15 @@ static uint64_t readCachedUint64(FFLogoRequestData* requestData, const char* cac
     return result;
 }
 
+// The frame the payload in the same directory was rendered from. A payload with no sidecar predates
+// the sidecar and holds the first frame, which is exactly what the default selector asks for, so
+// treating it as such keeps the caches of older builds usable.
+static int32_t readCachedFrame(FFLogoRequestData* requestData, const char* frameFileName) {
+    int32_t frame = FF_LOGO_ANIMATION_FRAME_FIRST;
+    readCachedData(requestData, &frame, sizeof(frame), frameFileName);
+    return frame;
+}
+
 // Drops everything a previous version of the source left in the entry directory.
 // The directory is keyed on the source path and the pixel size only, so it is reused across
 // edits; without this, a payload written for another logo type would be read back.
@@ -844,9 +1048,13 @@ static void removeCachedFiles(FFLogoRequestData* requestData) {
         FF_CACHE_FILE_SIXEL,
         FF_CACHE_FILE_KITTY_COMPRESSED,
         FF_CACHE_FILE_KITTY_UNCOMPRESSED,
+        FF_CACHE_FILE_KITTY_ANIMATION,
         FF_CACHE_FILE_CHAFA,
+        FF_CACHE_FILE_FRAME,
     };
 
+    // Every entry that is ever written is listed here; an entry left out would survive a source
+    // change and be read back for the new source.
     uint32_t cacheDirLength = requestData->cacheDir.length;
     for (uint32_t i = 0; i < ARRAY_SIZE(files); ++i) {
         ffStrbufAppendS(&requestData->cacheDir, files[i]);
@@ -856,6 +1064,13 @@ static void removeCachedFiles(FFLogoRequestData* requestData) {
 }
 
 static bool printCachedChars(FFLogoRequestData* requestData, const char* cacheFileName) {
+    if (instance.config.logo.animationFrame != readCachedFrame(requestData, FF_CACHE_FILE_FRAME)) {
+        // The entry holds the rendering of another frame, or -- for the animation selector -- of
+        // no single frame at all. Reporting a miss here is what sends the slow path off to render
+        // the one that was asked for.
+        return false;
+    }
+
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     readCachedStrbuf(requestData, &content, cacheFileName);
 
@@ -865,6 +1080,411 @@ static bool printCachedChars(FFLogoRequestData* requestData, const char* cacheFi
 
     ffLogoPrintChars(content.chars, false);
     return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// kitty animations
+//
+// A `kittyanim` entry holds only what is independent of the image id: the pixel size, the frame
+// count, each frame's gap, the loop count, and the frames' base64 payloads. The envelope is
+// rebuilt on every run, because it carries the id and that id has to differ between runs.
+// ---------------------------------------------------------------------------------------------
+
+static const char FF_KITTY_ANIMATION_MAGIC[4] = { 'F', 'K', 'A', '1' };
+
+typedef struct FFKittyAnimationFrame {
+    int32_t delayMs;
+    uint32_t payloadLength; // base64 bytes this frame occupies inside the payload block
+    bool compressed;        // the frame's base64 decodes to a zlib stream, so it needs `o=z`
+} FFKittyAnimationFrame;
+
+typedef struct FFKittyAnimation {
+    uint32_t width;
+    uint32_t height;
+    uint32_t frameCount;
+    int32_t loopCount; // 0 = infinite; -1 = the source declares none
+    FFKittyAnimationFrame* frames;
+    char* payload; // base64 of every frame, concatenated in frame order
+    uint32_t payloadLength;
+} FFKittyAnimation;
+
+static void destroyKittyAnimation(FFKittyAnimation* animation) {
+    free(animation->frames);
+    free(animation->payload);
+    animation->frames = nullptr;
+    animation->payload = nullptr;
+}
+
+// The entry is written and read by the same machine, so the host's own representation is used.
+static void appendRaw(FFstrbuf* result, const void* value, uint32_t size) {
+    ffStrbufAppendNS(result, size, (const char*) value);
+}
+
+static void appendUint32(FFstrbuf* result, uint32_t value) {
+    appendRaw(result, &value, sizeof(value));
+}
+
+static void appendInt32(FFstrbuf* result, int32_t value) {
+    appendRaw(result, &value, sizeof(value));
+}
+
+typedef struct FFKittyAnimationReader {
+    const char* data;
+    uint32_t length;
+    uint32_t offset;
+} FFKittyAnimationReader;
+
+static bool readRaw(FFKittyAnimationReader* reader, void* out, uint32_t size) {
+    if (size > reader->length - reader->offset) {
+        return false;
+    }
+
+    memcpy(out, reader->data + reader->offset, size);
+    reader->offset += size;
+    return true;
+}
+
+static bool readUint32(FFKittyAnimationReader* reader, uint32_t* out) {
+    return readRaw(reader, out, sizeof(*out));
+}
+
+static bool readInt32(FFKittyAnimationReader* reader, int32_t* out) {
+    return readRaw(reader, out, sizeof(*out));
+}
+
+static void serializeKittyAnimation(FFstrbuf* result, const FFKittyAnimation* animation) {
+    appendRaw(result, FF_KITTY_ANIMATION_MAGIC, sizeof(FF_KITTY_ANIMATION_MAGIC));
+    appendUint32(result, animation->width);
+    appendUint32(result, animation->height);
+    appendUint32(result, animation->frameCount);
+    appendInt32(result, animation->loopCount);
+
+    for (uint32_t i = 0; i < animation->frameCount; ++i) {
+        const FFKittyAnimationFrame* frame = &animation->frames[i];
+        uint8_t flags = frame->compressed ? 1 : 0;
+        appendInt32(result, frame->delayMs);
+        appendUint32(result, frame->payloadLength);
+        appendRaw(result, &flags, sizeof(flags));
+    }
+
+    appendRaw(result, animation->payload, animation->payloadLength);
+}
+
+static bool parseKittyAnimation(const char* data, uint32_t length, FFKittyAnimation* out, const char** error) {
+    FFKittyAnimationReader reader = { .data = data, .length = length, .offset = 0 };
+
+    char magic[sizeof(FF_KITTY_ANIMATION_MAGIC)];
+    if (!readRaw(&reader, magic, sizeof(magic)) || memcmp(magic, FF_KITTY_ANIMATION_MAGIC, sizeof(magic)) != 0) {
+        *error = "the cached animation has an unknown format";
+        return false;
+    }
+
+    if (!readUint32(&reader, &out->width) || !readUint32(&reader, &out->height) ||
+        !readUint32(&reader, &out->frameCount) || !readInt32(&reader, &out->loopCount)) {
+        *error = "the cached animation is truncated";
+        return false;
+    }
+
+    if (out->frameCount == 0) {
+        *error = "the cached animation has no frames";
+        return false;
+    }
+
+    out->frames = calloc(out->frameCount, sizeof(*out->frames));
+    if (out->frames == nullptr) {
+        *error = "out of memory";
+        return false;
+    }
+
+    uint32_t totalPayloadLength = 0;
+    for (uint32_t i = 0; i < out->frameCount; ++i) {
+        FFKittyAnimationFrame* frame = &out->frames[i];
+        uint8_t flags = 0;
+        if (!readInt32(&reader, &frame->delayMs) || !readUint32(&reader, &frame->payloadLength) ||
+            !readRaw(&reader, &flags, sizeof(flags))) {
+            *error = "the cached animation is truncated";
+            return false;
+        }
+
+        frame->compressed = flags != 0;
+
+        if (totalPayloadLength > UINT32_MAX - frame->payloadLength) {
+            *error = "the cached animation is too large";
+            return false;
+        }
+        totalPayloadLength += frame->payloadLength;
+    }
+
+    if (totalPayloadLength > reader.length - reader.offset) {
+        *error = "the cached animation is truncated";
+        return false;
+    }
+
+    out->payloadLength = totalPayloadLength;
+    out->payload = malloc((size_t) totalPayloadLength + 1);
+    if (out->payload == nullptr) {
+        *error = "out of memory";
+        return false;
+    }
+
+    memcpy(out->payload, reader.data + reader.offset, totalPayloadLength);
+    out->payload[totalPayloadLength] = '\0';
+    return true;
+}
+
+// The id has to differ on every run: reusing one makes the terminal append the new frames to the
+// image the previous run left in its storage, which doubles the frame count. The low 24 bits take
+// part in the colour / decoration encoding, so they are kept non-zero (kitten icat does the same
+// in next_random()). The entropy comes from the clock, the pid and a stack address, which is
+// plenty for a process that runs once.
+static uint32_t getKittyImageId(void) {
+    uint32_t id = (uint32_t) ffTimeGetNow();
+    id ^= (uint32_t) getpid() * 2654435761u;
+    id ^= (uint32_t) ((uintptr_t) &id >> 4);
+    id &= 0xFFFFFF;
+    return id != 0 ? id : 1;
+}
+
+// The envelope, per the kitty protocol: the root frame is transmitted with `a=T` and has no gap
+// of its own, so its gap is set with a separate `a=a` command; every further frame is an `a=f`
+// command that replaces the pixels (`X=1`) because the backend already composed a full canvas.
+// Every command carries the image id and `q=2`, so nothing is ever written back to the tty.
+static void emitKittyAnimation(FFstrbuf* result, const FFKittyAnimation* animation, uint32_t imageId) {
+    const char* currentPos = animation->payload;
+
+    for (uint32_t i = 0; i < animation->frameCount; ++i) {
+        const FFKittyAnimationFrame* frame = &animation->frames[i];
+        size_t frameLength = frame->payloadLength;
+
+        if (i == 0) {
+            // Here s / v are the source rectangle, not the animation state
+            ffStrbufAppendF(result, "\033_Ga=T,f=32,s=%u,v=%u,i=%u,q=2", animation->width, animation->height, imageId);
+        } else {
+            // A frame that covers the whole image is transmitted exactly like image data, plus the
+            // frame keys. s / v are not optional here even though they always repeat the image size:
+            // the terminal sizes the frame's canvas from them and rejects the command outright when
+            // they are missing.
+            ffStrbufAppendF(result, "\033_Ga=f,f=32,s=%u,v=%u,i=%u,z=%d,X=1,q=2",
+                animation->width, animation->height, imageId, (int) frame->delayMs);
+        }
+
+        if (frame->compressed) {
+            ffStrbufAppendS(result, ",o=z");
+        }
+
+        appendKittyChunk(result, &currentPos, &frameLength, false, nullptr);
+        while (frameLength > 0) {
+            // "When sending animation frame data, subsequent chunks must also specify the a=f key"
+            appendKittyChunk(result, &currentPos, &frameLength, true, i == 0 ? "q=2" : "a=f,q=2");
+        }
+
+        if (i == 0) {
+            // "the first frame or root frame is created with the base image data and has no gap,
+            // so its gap must be set using this control code"
+            ffStrbufAppendF(result, "\033_Ga=a,i=%u,r=1,z=%d,q=2\033\\", imageId, (int) frame->delayMs);
+        }
+    }
+
+    // v is the loop count here: 1 loops forever, N loops N-1 times
+    int32_t loops = 1;
+    if (animation->loopCount > 0) {
+        loops = animation->loopCount < INT32_MAX ? animation->loopCount + 1 : INT32_MAX;
+    }
+    ffStrbufAppendF(result, "\033_Ga=a,i=%u,v=%d,q=2\033\\", imageId, (int) loops);
+    ffStrbufAppendF(result, "\033_Ga=a,i=%u,s=3,q=2\033\\", imageId);
+}
+
+static bool printCachedKittyAnimation(FFLogoRequestData* requestData) {
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!readCachedStrbuf(requestData, &content, FF_CACHE_FILE_KITTY_ANIMATION) || content.length == 0) {
+        return false;
+    }
+
+    FFKittyAnimation animation = {};
+    const char* error = "the cached animation is corrupt";
+    if (!parseKittyAnimation(content.chars, content.length, &animation, &error)) {
+        return false;
+    }
+
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(animation.payloadLength + animation.frameCount * 128 + 512);
+    emitKittyAnimation(&result, &animation, getKittyImageId());
+
+    const FFOptionsLogo* options = &instance.config.logo;
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
+    printImageResult(requestData, &result);
+
+    destroyKittyAnimation(&animation);
+    return true;
+}
+
+// Decodes the source frame by frame, encodes every frame, and stores the result as a `kittyanim`
+// entry. Frames are taken, encoded and released one at a time: keeping them all would cost
+// frames * W * H * 4 bytes, which a tool that prints a logo once can not afford.
+static bool encodeKittyAnimation(FFLogoRequestData* requestData, const char** error) {
+    FFImageAnimation* animation = nullptr;
+    if (!ffImageAnimationOpen(requestData, &animation, error)) {
+        return false;
+    }
+
+    fillCharacterDimensions(requestData);
+
+    const uint32_t frameCount = ffImageAnimationFrameCount(animation);
+    const int32_t loopCount = ffImageAnimationLoopCount(animation);
+
+    if (frameCount == 1) {
+        // Nothing to animate. Rendering it through the static path keeps the cache entry, and
+        // therefore the bytes written to the terminal, identical to the default rendering.
+        FFImageFrame frame = {};
+        bool ok = ffImageAnimationGetFrame(animation, 0, &frame, error);
+        ffImageAnimationClose(animation);
+        if (!ok) {
+            return false;
+        }
+
+        FFImageBuffer buffer = {
+            .data = frame.data,
+            .width = requestData->logoPixelWidth,
+            .height = requestData->logoPixelHeight,
+        };
+        ok = printImageKitty(requestData, &buffer);
+        ffImageDestroy(&buffer);
+        return ok;
+    }
+
+    FFKittyAnimationFrame* frames = calloc(frameCount, sizeof(*frames));
+    if (frames == nullptr) {
+        ffImageAnimationClose(animation);
+        *error = "out of memory";
+        return false;
+    }
+
+    const size_t frameSize = (size_t) requestData->logoPixelWidth * requestData->logoPixelHeight * 4;
+    FF_STRBUF_AUTO_DESTROY payload = ffStrbufCreate();
+    bool ok = true;
+
+    for (uint32_t i = 0; i < frameCount && ok; ++i) {
+        FFImageFrame frame = {};
+        if (!ffImageAnimationGetFrame(animation, i, &frame, error)) {
+            ok = false;
+            break;
+        }
+
+        frames[i].delayMs = frame.delayMs;
+
+        FF_AUTO_FREE void* blob = malloc(frameSize);
+        if (blob == nullptr) {
+            ffImageFrameDestroy(&frame);
+            *error = "out of memory";
+            ok = false;
+            break;
+        }
+        memcpy(blob, frame.data, frameSize);
+        ffImageFrameDestroy(&frame);
+
+        size_t blobLength = frameSize;
+        #ifdef FF_HAVE_ZLIB
+        frames[i].compressed = compressBlob(&blob, &blobLength);
+        #else
+        frames[i].compressed = false;
+        #endif
+
+        FF_STRBUF_AUTO_DESTROY base64 = ffStrbufCreateA((uint32_t) (10 + blobLength * 4 / 3));
+        ffBase64EncodeRaw((uint32_t) blobLength, (const char*) blob, &base64.length, base64.chars);
+        frames[i].payloadLength = base64.length;
+        ffStrbufAppend(&payload, &base64);
+    }
+
+    if (ok) {
+        FFKittyAnimation built = {
+            .width = requestData->logoPixelWidth,
+            .height = requestData->logoPixelHeight,
+            .frameCount = frameCount,
+            .loopCount = loopCount,
+            .frames = frames,
+            .payload = payload.chars,
+            .payloadLength = payload.length,
+        };
+
+        FF_STRBUF_AUTO_DESTROY serialized = ffStrbufCreate();
+        serializeKittyAnimation(&serialized, &built);
+        writeCacheData(requestData, serialized.chars, serialized.length, FF_CACHE_FILE_KITTY_ANIMATION);
+
+        FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(serialized.length + frameCount * 128 + 512);
+        emitKittyAnimation(&result, &built, getKittyImageId());
+        printImagePixelsNoCache(requestData, &result);
+    }
+
+    free(frames);
+    ffImageAnimationClose(animation);
+    return ok;
+}
+
+// Maps --logo-animation-frame to a 0-based frame index. Negative values count back from the end,
+// so -1 is the last frame. Anything out of range clamps instead of failing: the frame count of the
+// source is only known once it has been opened, and a typo in a logo option is not worth aborting
+// the run over (see §10.2).
+static uint32_t getAnimationFrameIndex(int32_t requested, uint32_t frameCount) {
+    if (frameCount == 0) {
+        return 0;
+    }
+
+    if (requested < 0) {
+        uint32_t back = (uint32_t) (-(int64_t) requested);
+        return back <= frameCount ? frameCount - back : 0;
+    }
+
+    uint32_t index = (uint32_t) (requested - 1);
+    return index < frameCount ? index : frameCount - 1;
+}
+
+// Renders one frame of an animated source as a still image. `N` is 1-based and negative values
+// count from the end, matching --logo-animation-frame. Every protocol that goes through this slow
+// path is served: the decoded frame is handed to the same renderers the static path uses, and the
+// result is cached exactly like the first frame is (see FF_CACHE_FILE_FRAME).
+static bool printAnimationFrame(FFLogoRequestData* requestData, const char** error) {
+    FFImageAnimation* animation = nullptr;
+    if (!ffImageAnimationOpen(requestData, &animation, error)) {
+        return false;
+    }
+
+    fillCharacterDimensions(requestData);
+
+    const uint32_t frameCount = ffImageAnimationFrameCount(animation);
+    FFImageFrame frame = {};
+    bool ok = ffImageAnimationGetFrame(animation, getAnimationFrameIndex(instance.config.logo.animationFrame, frameCount), &frame, error);
+    ffImageAnimationClose(animation);
+    if (!ok) {
+        return false;
+    }
+
+    FFImageBuffer buffer = {
+        .data = frame.data,
+        .width = requestData->logoPixelWidth,
+        .height = requestData->logoPixelHeight,
+    };
+
+    if (requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL) {
+        // The sixel encoder belongs to the backend, so it does not go through ffImageCreate -- but
+        // it does have to be handed the frame that was just composed. ffImageSixelEncode would
+        // re-read the source and encode the first frame instead of the selected one.
+        FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+        ok = ffImageSixelEncodeBuffer(&buffer, &result, error) && printImageSixel(requestData, &result);
+    } else if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY) {
+        ok = printImageKitty(requestData, &buffer);
+    }
+#if FF_HAVE_CHAFA
+    else if (requestData->type == FF_LOGO_TYPE_IMAGE_CHAFA) {
+        ok = printImageChafa(requestData, &buffer);
+    }
+#endif
+    else {
+        *error = "this image protocol can not render a selected frame";
+        ok = false;
+    }
+
+    ffImageDestroy(&buffer);
+    return ok;
 }
 
 static bool printCachedPixel(FFLogoRequestData* requestData) {
@@ -886,10 +1506,26 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
         }
     }
 
+    if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY &&
+        options->animationFrame == FF_LOGO_ANIMATION_FRAME_ANIMATE) {
+        // An animation entry holds payloads, not an envelope, so it can not be streamed out like
+        // the static ones. It is also never allowed to fall back to a static entry: doing so would
+        // silently show a still logo to a user who asked for an animation.
+        return printCachedKittyAnimation(requestData);
+    }
+
+    // A selected frame shares the entry with the first frame; the sidecar is what tells the two
+    // apart. This also covers the animation selector: no still rendering may answer it.
+    if (options->animationFrame != readCachedFrame(requestData, FF_CACHE_FILE_FRAME)) {
+        return false;
+    }
+
     FF_AUTO_CLOSE_FD FFNativeFD fd = FF_INVALID_FD;
     if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY) {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
         if (!ffIsValidNativeFD(fd)) {
+            // The pre-existing pair. Falling back between them is fine, they hold the same
+            // rendering; falling back to anything else is not (see §7.1).
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
         }
     } else if (requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL) {
@@ -1017,29 +1653,47 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError) {
     // 0 means the mtime could not be read, in which case the entry is never trusted.
     const uint64_t sourceMtime = ffPathGetMtime(instance.config.logo.source.chars);
 
-    if (instance.config.logo.cache == FF_LOGO_CACHE_ON &&
-        sourceMtime != 0 &&
-        readCachedUint64(&requestData, FF_CACHE_FILE_MTIME) == sourceMtime) {
-        bool cacheValid = requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA
-            ? printCachedChars(&requestData, FF_CACHE_FILE_CHAFA)
-            : printCachedPixel(&requestData);
-        if (cacheValid) {
-            ffStrbufDestroy(&requestData.cacheDir);
-            return true;
+    bool sourceUnchanged = false;
+    if (instance.config.logo.cache == FF_LOGO_CACHE_ON && sourceMtime != 0) {
+        sourceUnchanged = readCachedUint64(&requestData, FF_CACHE_FILE_MTIME) == sourceMtime;
+        if (sourceUnchanged) {
+            bool cacheValid = requestData.type == FF_LOGO_TYPE_IMAGE_CHAFA
+                ? printCachedChars(&requestData, FF_CACHE_FILE_CHAFA)
+                : printCachedPixel(&requestData);
+            if (cacheValid) {
+                ffStrbufDestroy(&requestData.cacheDir);
+                return true;
+            }
         }
     }
 
-    // Cache miss. The entry directory is keyed on the source path and the pixel size only, so
-    // it is reused when the source is edited; drop what the previous version left behind.
+    // Cache miss. The entry directory is keyed on the source path and the pixel size only, so it
+    // is reused when the source is edited; drop what the previous version left behind. This only
+    // happens when the source actually changed: a miss on one entry of an unchanged source just
+    // means that rendering was never asked for before, and clearing the directory would throw
+    // away the sibling entries every time the requested rendering changes.
     // With the cache turned off the directory is left alone entirely.
-    if (instance.config.logo.cache != FF_LOGO_CACHE_OFF) {
+    if (instance.config.logo.cache != FF_LOGO_CACHE_OFF && !sourceUnchanged) {
         removeCachedFiles(&requestData);
     }
 
     const char* error = nullptr;
     bool printSuccessful = false;
 
-    if (requestData.type == FF_LOGO_TYPE_IMAGE_SIXEL) {
+    if (instance.config.logo.animationFrame == FF_LOGO_ANIMATION_FRAME_ANIMATE &&
+        requestData.type != FF_LOGO_TYPE_IMAGE_KITTY) {
+        // Only the kitty graphics protocol can play an animation. Falling through to the static
+        // path would silently show a still logo to a user who asked for an animation.
+        error = "the kitty graphics protocol is the only one that can play an animation";
+    } else if (instance.config.logo.animationFrame == FF_LOGO_ANIMATION_FRAME_ANIMATE) {
+        // Decided before anything is decoded: the static path never enters a loop over frames,
+        // and this path never goes through ffImageCreate.
+        printSuccessful = encodeKittyAnimation(&requestData, &error);
+    } else if (instance.config.logo.animationFrame != FF_LOGO_ANIMATION_FRAME_FIRST) {
+        // A frame other than the first. This must not fall through to the static path: that one
+        // only ever produces the first frame, so it would silently hand back the wrong image.
+        printSuccessful = printAnimationFrame(&requestData, &error);
+    } else if (requestData.type == FF_LOGO_TYPE_IMAGE_SIXEL) {
         // The sixel encoder belongs to the backend, so it is not fed through ffImageCreate
         FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
         if (ffImageSixelEncode(&requestData, &result, &error)) {

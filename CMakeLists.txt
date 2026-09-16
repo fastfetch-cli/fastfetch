@@ -2211,6 +2211,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-base64
+        tests/base64.c
+    )
+    target_link_libraries(fastfetch-test-base64
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
@@ -2219,6 +2226,7 @@ if (BUILD_TESTS)
     add_test(NAME test-duration COMMAND fastfetch-test-duration)
     add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
     add_test(NAME test-networking COMMAND fastfetch-test-networking)
+    add_test(NAME test-base64 COMMAND fastfetch-test-base64)
 endif()
 
 ##################

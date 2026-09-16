@@ -19,6 +19,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->preserveAspectRatio = false;
     options->cache = FF_LOGO_CACHE_ON;
     options->position = FF_LOGO_POSITION_LEFT;
+    options->animationFrame = FF_LOGO_ANIMATION_FRAME_FIRST;
 
 #if FF_HAVE_CHAFA
     options->chafaFgOnly = false;
@@ -124,6 +125,8 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                                    { "top", FF_LOGO_POSITION_TOP },
                                                                                    {},
                                                                                });
+        } else if (ffStrEqualsIgnCase(subKey, "animation-frame")) {
+            options->animationFrame = ffOptionParseInt32(key, value);
         } else {
             return false;
         }
@@ -365,6 +368,12 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             options->position = (FFLogoPosition) value;
             continue;
+        } else if (unsafe_yyjson_equals_str(key, "animationFrame")) {
+            if (!yyjson_is_int(val)) {
+                return "Property 'logo.animationFrame' must be an integer";
+            }
+            options->animationFrame = (int32_t) yyjson_get_sint(val);
+            continue;
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
 #if FF_HAVE_CHAFA
             if (!yyjson_is_obj(val)) {
@@ -552,6 +561,8 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
                                                      "top",
                                                      "right",
                                                  })[options->position]);
+
+    yyjson_mut_obj_add_int(doc, obj, "animationFrame", options->animationFrame);
 
 #if FF_HAVE_CHAFA
     {
