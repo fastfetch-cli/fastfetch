@@ -116,6 +116,18 @@ static const FFlogo E[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ENDEROS
+    // EnderOS
+    {
+        .names = { "EnderOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ENDEROS,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ENDLESS
     // Endless
     {
