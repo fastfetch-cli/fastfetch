@@ -1,7 +1,7 @@
 # 2.69.0
 
 Changes:
-* ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo)
+* ImageMagick is no longer used for image logos on Windows, macOS and Android, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS, AImageDecoder on Android). (Logo)
 * ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available.
     * It is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
 
@@ -17,9 +17,9 @@ Changes:
 Features:
 * Improved image logo support
     * Backend rewritten
-        * Added a native image decoding backend on Windows (WIC) and macOS (ImageIO).
-        * Added an embedded libsixel encoder, used to produce sixel output on Windows and macOS. It is reported by `fastfetch --list-features` as "Embedded sixel".
-        * Enabled chafa image output on Windows and macOS independently of ImageMagick.
+        * Added a native image decoding backend on Windows (WIC), macOS (ImageIO) and Android (AImageDecoder).
+        * Added an embedded libsixel encoder, used to produce sixel output on Windows, macOS and Android. It is reported by `fastfetch --list-features` as "Embedded sixel".
+        * Enabled chafa image output on Windows, macOS and Android independently of ImageMagick.
         * As a result, `fastfetch --sixel X:\path\to\image` now works out of the box on Windows Terminal.
     * Image logo cache entries are now validated against the modification time of the source image. (Logo)
         * Editing an image logo in place now invalidates its cached rendering.
@@ -28,7 +28,8 @@ Features:
         * `--logo-animation-frame <0>` (`logo.animationFrame: 0` in the JSON config) plays a GIF or APNG. Only the `kitty` image protocol can play an animation; the frames are decoded and composed by fastfetch, so no external program is involved.
         * `--logo-animation-frame <N>` renders the Nth frame as a still image, and negative values count back from the end, so `-1` is the last frame. This works for the `sixel`, `kitty` and `chafa` logo types. Note that negative values can only be given in the JSON config, as the command line parser reads a leading `-` as another option.
         * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in.
-        * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, ImageMagick 7 on Linux). A single-frame GIF falls back to a still image. A build with none of those, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
+        * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, AImageDecoder on Android, ImageMagick 7 on Linux). A single-frame GIF falls back to a still image.
+        * On Android an animation needs Android 12 (API 31), which is where AImageDecoder gained the ability to decode past the first frame. AImageDecoder composes the frames itself; its API does not expose a repeat count, so an animation is reported as looping forever. A build with none of those, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
         * A terminal that supports the kitty graphics protocol but not its animation frames, such as Konsole, shows the first frame.
     * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support. (Logo)
         * Image logos are the only consumer of ImageMagick, chafa, and the embedded libsixel encoder, so none of the three is searched for at configure time, and no image decoding sources are compiled in.

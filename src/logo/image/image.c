@@ -447,7 +447,7 @@ static bool printImageKittyDirect(bool printError) {
     return true;
 }
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(FF_HAVE_SIXEL)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(FF_HAVE_SIXEL)
 
     #define FF_KITTY_MAX_CHUNK_SIZE 4096
 
@@ -807,6 +807,8 @@ bool ffImageCreate(FFLogoRequestData* requestData, FFImageBuffer* out, const cha
     return ffImageCreateWIC(requestData, out, error);
     #elif defined(__APPLE__)
     return ffImageCreateImageIO(requestData, out, error);
+    #elif defined(__ANDROID__)
+    return ffImageCreateAID(requestData, out, error);
     #else
         #ifdef FF_HAVE_IMAGEMAGICK7
     if (ffImageCreateIM7(requestData, out, error)) {
@@ -879,6 +881,8 @@ bool ffImageAnimationOpen(FFLogoRequestData* requestData, FFImageAnimation** out
     return ffImageAnimationOpenWIC(requestData, out, error);
     #elif defined(__APPLE__)
     return ffImageAnimationOpenImageIO(requestData, out, error);
+    #elif defined(__ANDROID__)
+    return ffImageAnimationOpenAID(requestData, out, error);
     #elif defined(FF_HAVE_IMAGEMAGICK7)
     return ffImageAnimationOpenIM7(requestData, out, error);
     #else
@@ -915,10 +919,10 @@ void ffImageAnimationClose(FFImageAnimation* animation) {
 }
 
 bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const char** error) {
-    // Windows (WIC) and macOS (ImageIO) decode and resize to RGBA first, then the embedded
-    // libsixel encoder takes over. Other platforms let ImageMagick encode straight from the
-    // decoded image without an RGBA round trip.
-    #if defined(_WIN32) || defined(__APPLE__)
+    // Windows (WIC), macOS (ImageIO) and Android (AImageDecoder) decode and resize to RGBA first,
+    // then the embedded libsixel encoder takes over. Other platforms let ImageMagick encode
+    // straight from the decoded image without an RGBA round trip.
+    #if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__)
         #ifdef FF_HAVE_SIXEL
     FFImageBuffer buffer = {};
     if (!ffImageCreate(requestData, &buffer, error)) {
@@ -950,10 +954,10 @@ bool ffImageSixelEncode(FFLogoRequestData* requestData, FFstrbuf* out, const cha
 }
 
 bool ffImageSixelEncodeBuffer(const FFImageBuffer* buffer, FFstrbuf* out, const char** error) {
-    // Windows and macOS hand the pixels to the embedded encoder. ImageMagick has no way to encode
-    // pixels it was not given an Image for, so its SIXEL coder is reached through a ConstituteImage
-    // round trip instead.
-    #if defined(_WIN32) || defined(__APPLE__)
+    // Windows, macOS and Android hand the pixels to the embedded encoder. ImageMagick has no way to
+    // encode pixels it was not given an Image for, so its SIXEL coder is reached through a
+    // ConstituteImage round trip instead.
+    #if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__)
         #ifdef FF_HAVE_SIXEL
     return ffSixelEncode(buffer, out, error);
         #else
@@ -1780,7 +1784,7 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
     }
 #endif
 
-#if !defined(_WIN32) && !defined(__APPLE__) && !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && !defined(FF_HAVE_IMAGEMAGICK7) && !defined(FF_HAVE_IMAGEMAGICK6)
     if (printError) {
         fputs("Logo: Image Magick support is not compiled in\n", stderr);
     }

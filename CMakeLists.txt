@@ -99,10 +99,10 @@ cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND"
 
 option(ENABLE_IMAGE_LOGO "Enable image logos (sixel / kitty / iTerm / chafa)" ON)
 if(ENABLE_IMAGE_LOGO)
-    cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+    cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku OR GNU" OFF)
     cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
-    cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows and macOS; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE" OFF)
-    cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE" OFF)
+    cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows, macOS and Android; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE OR ANDROID" OFF)
+    cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE OR ANDROID" OFF)
 endif()
 
 option(ENABLE_ZLIB "Enable zlib" ON)
@@ -695,6 +695,7 @@ elseif(ANDROID)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
+        src/logo/image/aid.c
     )
 elseif(FreeBSD)
     list(APPEND LIBFASTFETCH_SRC
@@ -2000,6 +2001,8 @@ elseif(GNU)
 elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE jnigraphics
+        PRIVATE mediandk
     )
     if(ENABLE_WORDEXP)
         # https://github.com/termux/termux-packages/pull/7056
@@ -2017,6 +2020,17 @@ elseif(ANDROID)
             endif()
         endif()
     endif()
+
+    # Both APIs (AImageDecoder, AMediaCodec) are newer than the API level this build targets --
+    # AImageDecoder is 30, and AMediaCodec_getName / AMediaCodec_releaseName are 28 -- while fastfetch
+    # keeps running on devices below those levels. The NDK headers mark the entry points unavailable, so
+    # they have to be weak references: otherwise the executable would fail to load on an older device.
+    # Guarding every use with __builtin_available() is what makes that safe, and turning the guard
+    # diagnostic into an error is what keeps a use from slipping past it.
+    set_source_files_properties(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/logo/image/aid.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/detection/codec/codec_android.c
+        PROPERTIES COMPILE_OPTIONS "-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__;-Werror=unguarded-availability")
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"

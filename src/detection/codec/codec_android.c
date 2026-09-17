@@ -1,9 +1,7 @@
 #include "codec.h"
 
-#include "common/library.h"
+#include "common/androidApi.h"
 #include "common/strutil.h"
-#undef __INTRODUCED_IN
-#define __INTRODUCED_IN(...)
 #include <media/NdkMediaCodec.h>
 
 static const struct {
@@ -35,33 +33,25 @@ static bool ffCodecIsLikelySoftware(const char* codecName) {
         ffStrStartsWith(codecName, "OMX.PV.");
 }
 
-static bool ffCodecIsHardwareAccelerated(
-    AMediaCodec* codec,
-    typeof(&AMediaCodec_getName) ffAMediaCodec_getName,
-    typeof(&AMediaCodec_releaseName) ffAMediaCodec_releaseName) {
+// Only the name query is newer than the API level this build targets: AMediaCodec_getName and
+// AMediaCodec_releaseName are API 28, while creating and deleting a codec is API 21.
+FF_REQUIRES_API(28) static bool ffCodecIsHardwareAccelerated(AMediaCodec* codec) {
     if (!codec) {
         return false;
     }
 
     char* codecName = nullptr;
-    media_status_t status = ffAMediaCodec_getName(codec, &codecName);
+    media_status_t status = AMediaCodec_getName(codec, &codecName);
     if (status != AMEDIA_OK || !codecName) {
         return false;
     }
 
     bool isHardware = !ffCodecIsLikelySoftware(codecName);
-    ffAMediaCodec_releaseName(codec, codecName);
+    AMediaCodec_releaseName(codec, codecName);
     return isHardware;
 }
 
-const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
-    FF_LIBRARY_LOAD_MESSAGE(mediandk, "libmediandk.so", 0)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createDecoderByType)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_createEncoderByType)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_delete)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_getName)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mediandk, AMediaCodec_releaseName)
-
+FF_REQUIRES_API(28) static const char* ffDetectCodecNativeImpl(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FFCodecType decoders = FF_CODEC_TYPE_NONE;
     FFCodecType encoders = FF_CODEC_TYPE_NONE;
 
@@ -70,22 +60,22 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list o
         FFCodecType type = FF_CODEC_MIME_TO_TYPE[i].type;
 
         if ((options->showType & FF_CODEC_SHOW_TYPE_DECODER) && !(decoders & type)) {
-            AMediaCodec* decoder = ffAMediaCodec_createDecoderByType(mime);
+            AMediaCodec* decoder = AMediaCodec_createDecoderByType(mime);
             if (decoder) {
-                if (ffCodecIsHardwareAccelerated(decoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
+                if (ffCodecIsHardwareAccelerated(decoder)) {
                     decoders |= type;
                 }
-                ffAMediaCodec_delete(decoder);
+                AMediaCodec_delete(decoder);
             }
         }
 
         if ((options->showType & FF_CODEC_SHOW_TYPE_ENCODER) && !(encoders & type)) {
-            AMediaCodec* encoder = ffAMediaCodec_createEncoderByType(mime);
+            AMediaCodec* encoder = AMediaCodec_createEncoderByType(mime);
             if (encoder) {
-                if (ffCodecIsHardwareAccelerated(encoder, ffAMediaCodec_getName, ffAMediaCodec_releaseName)) {
+                if (ffCodecIsHardwareAccelerated(encoder)) {
                     encoders |= type;
                 }
-                ffAMediaCodec_delete(encoder);
+                AMediaCodec_delete(encoder);
             }
         }
     }
@@ -99,4 +89,15 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list o
     }
 
     return nullptr;
+}
+
+const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+    if (FF_API_AT_LEAST(28)) {
+        return ffDetectCodecNativeImpl(options, result);
+    }
+
+    // Reading the codec name is the only way to tell a hardware codec from a software one. Without
+    // it there is nothing to report, and listing the codecs as if they were accelerated would be a
+    // guess, so say why instead.
+    return "AMediaCodec_getName() requires Android 9 (API 28)";
 }
