@@ -102,14 +102,40 @@ static void getExePath(FFPlatform* platform) {
                             int fileMib[6] = { CTL_KERN, KERN_FILE, KERN_FILE_BYPID, (pid_t) platform->pid, (int) sizeof(struct kinfo_file), 0 };
                             size_t fileSize = 0;
                             if (sysctl(fileMib, ARRAY_SIZE(fileMib), nullptr, &fileSize, nullptr, 0) == 0) {
-                                fileSize += fileSize / 8; // add ~10%
-                                FF_AUTO_FREE struct kinfo_file* kf = (struct kinfo_file*) malloc(fileSize);
+                                fileSize += fileSize / 8; // add 12.5% for the table growing between the two calls
+                                size_t fileCapacity = fileSize;
+                                FF_AUTO_FREE struct kinfo_file* kf = (struct kinfo_file*) malloc(fileCapacity);
                                 if (kf) {
                                     int rv;
-                                    do {
-                                        fileMib[5] = (int) (fileSize / sizeof(struct kinfo_file));
+                                    // The table only grows, so the loop terminates as long as it grows by less
+                                    // than 12.5% per retry. Cap it anyway: spinning on a pathological growth
+                                    // rate would hang fastfetch, and giving up only costs the executable check
+                                    // below, which already assumes the path is correct when the list is missing.
+                                    int retries = 5;
+                                    while (true) {
+                                        fileMib[5] = (int) (fileCapacity / sizeof(struct kinfo_file));
+                                        fileSize = fileCapacity; // sysctl takes the size of the buffer as input
                                         rv = sysctl(fileMib, ARRAY_SIZE(fileMib), kf, &fileSize, nullptr, 0);
-                                    } while (rv == -1 && errno == ENOMEM);
+                                        if (rv == 0 || errno != ENOMEM || retries-- == 0) {
+                                            break;
+                                        }
+                                        // The file table grew between the two calls. The buffer has to grow
+                                        // before the retry: the next call advertises fileCapacity as the size
+                                        // of kf, and the kernel would copy that many bytes into the old
+                                        // allocation.
+                                        // OpenBSD writes back the size it needs, FreeBSD only the number of
+                                        // bytes it managed to copy, so take the larger one and add ~10% on
+                                        // top -- the growth libprocstat uses for this very sysctl.
+                                        size_t newCapacity = fileSize > fileCapacity ? fileSize : fileCapacity;
+                                        newCapacity += newCapacity / 8;
+                                        struct kinfo_file* newKf = (struct kinfo_file*) realloc(kf, newCapacity);
+                                        if (newKf == nullptr) {
+                                            rv = -1;
+                                            break;
+                                        }
+                                        kf = newKf;
+                                        fileCapacity = newCapacity;
+                                    }
 
                                     if (rv == 0) {
                                         int cntp = (int) (fileSize / sizeof(struct kinfo_file));

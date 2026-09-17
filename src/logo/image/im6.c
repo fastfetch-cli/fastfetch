@@ -3,6 +3,7 @@
     #include "image.h"
     #include "common/library.h"
     #include "common/mallocHelper.h"
+    #include "common/strutil.h"
 
     #include <magick/MagickCore.h>
     #include <stdlib.h>
@@ -98,6 +99,17 @@ static FFLogoImageResult im6EncodeImage(FFLogoRequestData* requestData, const ch
 
     ffCopyMagickString(imageInfoOut->magick, magick, magickLength);
 
+    // The raw pixel coders write image->depth bits per sample, not 8: a 1-bit grayscale source comes
+    // back as columns*4/8 bytes per row and a 16-bit one as columns*8, while the RGBA caller hands
+    // the blob on as RGBA8 and derives its length from width*height*4. Pin the depth for the raw
+    // formats only -- the SIXEL coder quantises on its own, so it keeps the source depth and its
+    // output stays byte identical.
+    // ImageMagick 6 leaves no choice about where to pin it: AcquireQuantumInfo takes the depth from
+    // image->depth and never looks at image_info->depth.
+    if (ffStrEquals(magick, "RGBA")) {
+        image->depth = 8;
+    }
+
     blob = ffImageToBlob(imageInfoOut, image, &length, exceptionInfo);
     if (blob == nullptr || length == 0) {
         goto cleanup;
@@ -139,6 +151,17 @@ bool ffImageCreateIM6(FFLogoRequestData* requestData, FFImageBuffer* out, const 
     FFLogoImageResult result = im6EncodeImage(requestData, "RGBA", 5, &blob, &length);
     if (result != FF_LOGO_IMAGE_RESULT_SUCCESS) {
         setError(result, error);
+        return false;
+    }
+
+    // FFImageBuffer carries no length, so every consumer derives it from width*height*4. Refuse any
+    // other size rather than let them read past the blob -- the raw coder's depth scaling used to
+    // produce one (see the depth pin in im6EncodeImage).
+    if (length != (size_t) requestData->logoPixelWidth * requestData->logoPixelHeight * 4) {
+        if (error) {
+            *error = "Image Magick did not return an RGBA8 buffer";
+        }
+        free(blob);
         return false;
     }
 

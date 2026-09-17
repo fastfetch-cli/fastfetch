@@ -790,6 +790,11 @@
                             ],
                             "default": "left"
                         },
+                        "animationFrame": {
+                            "type": "integer",
+                            "description": "Frame of an animated image to render:\n0 plays the animation (kitty image protocol only), a positive value is the 1-based frame number, and a negative value counts back from the end, so -1 is the last frame.\nOnly the JSON config can express a negative value, as the command line parser reads a leading `-` as another option",
+                            "default": 1
+                        },
                         "chafa": {
                             "type": "object",
                             "additionalProperties": false,
