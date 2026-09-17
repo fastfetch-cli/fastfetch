@@ -2239,6 +2239,62 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-parsing
+        tests/parsing.c
+    )
+    target_link_libraries(fastfetch-test-parsing
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-properties
+        tests/properties.c
+    )
+    target_link_libraries(fastfetch-test-properties
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-size
+        tests/size.c
+    )
+    target_link_libraries(fastfetch-test-size
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-frequency
+        tests/frequency.c
+    )
+    target_link_libraries(fastfetch-test-frequency
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-percent
+        tests/percent.c
+    )
+    target_link_libraries(fastfetch-test-percent
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-temps
+        tests/temps.c
+    )
+    target_link_libraries(fastfetch-test-temps
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-endian
+        tests/endian.c
+    )
+    target_link_libraries(fastfetch-test-endian
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-endian-bigendian
+        tests/endian-bigendian.c
+    )
+    target_link_libraries(fastfetch-test-endian-bigendian
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
@@ -2248,6 +2304,14 @@ if (BUILD_TESTS)
     add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
     add_test(NAME test-networking COMMAND fastfetch-test-networking)
     add_test(NAME test-base64 COMMAND fastfetch-test-base64)
+    add_test(NAME test-parsing COMMAND fastfetch-test-parsing)
+    add_test(NAME test-properties COMMAND fastfetch-test-properties)
+    add_test(NAME test-size COMMAND fastfetch-test-size)
+    add_test(NAME test-frequency COMMAND fastfetch-test-frequency)
+    add_test(NAME test-percent COMMAND fastfetch-test-percent)
+    add_test(NAME test-temps COMMAND fastfetch-test-temps)
+    add_test(NAME test-endian COMMAND fastfetch-test-endian)
+    add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
 endif()
 
 ##################
