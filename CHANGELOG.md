@@ -51,6 +51,7 @@ Features:
 * Improved reliability of fastfetch's built-in HTTP client. (PublicIP, Weather)
     * It now supports custom ports and can properly handle chunked transfer encoding.
     * It is designed for minimal resource usage and fast performance. It does not support full HTTP features like HTTPS. Users can always use the `Command` module with `curl` to achieve similar functionality.
+* Added Umbriel wayland compositor version detection (WM, Linux)
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)
