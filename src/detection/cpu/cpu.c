@@ -31,7 +31,7 @@ const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu) {
 }
 
 const char* ffCPUAppleCodeToName(uint32_t code) {
-    // https://github.com/AsahiLinux/docs/wiki/Codenames
+    // https://github.com/AsahiLinux/docs/blob/main/docs/hw/soc/soc-codenames.md
     switch (code) {
         case 8103:
             return "Apple M1";
@@ -62,6 +62,8 @@ const char* ffCPUAppleCodeToName(uint32_t code) {
             return "Apple M4 Pro";
         case 6041:
             return "Apple M4 Max";
+        case 8140:
+            return "Apple A18 Pro";
         case 8142:
             return "Apple M5";
         case 6050:
