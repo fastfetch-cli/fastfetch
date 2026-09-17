@@ -1,9 +1,9 @@
-# Unreleased
+# 2.69.0
 
 Changes:
 * ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo)
-* ImageMagick 6 support is deprecated. It's only kept for old Debian & Ubuntu releases which have no ImageMagick 7 available.
-    * Intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
+* ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available.
+    * It is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
 
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss.
@@ -24,17 +24,17 @@ Features:
     * Image logo cache entries are now validated against the modification time of the source image. (Logo)
         * Editing an image logo in place now invalidates its cached rendering.
         * Cache entries written by older versions are not reused, as they carry no modification time.
-    * Image logos can now be animated, when the terminal and the image protocol support it. (Logo)
+    * Image logos can now be animated when the terminal and the image protocol support it. (Logo)
         * `--logo-animation-frame <0>` (`logo.animationFrame: 0` in the JSON config) plays a GIF or APNG. Only the `kitty` image protocol can play an animation; the frames are decoded and composed by fastfetch, so no external program is involved.
         * `--logo-animation-frame <N>` renders the Nth frame as a still image, and negative values count back from the end, so `-1` is the last frame. This works for the `sixel`, `kitty` and `chafa` logo types. Note that negative values can only be given in the JSON config, as the command line parser reads a leading `-` as another option.
         * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in.
-        * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, ImageMagick 7 on Linux). A single frame GIF falls back to a still image. A build with none of those, or with ImageMagick 6, reports an error instead of quietly showing a still image.
-        * A terminal that supports the kitty graphics protocol but not its animation frames, as Konsole does not, shows the first frame.
+        * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, ImageMagick 7 on Linux). A single-frame GIF falls back to a still image. A build with none of those, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
+        * A terminal that supports the kitty graphics protocol but not its animation frames, such as Konsole, shows the first frame.
     * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support. (Logo)
-        * Image logos are the only consumer of ImageMagick, of chafa and of the embedded libsixel encoder, so none of the three is looked for at configure time, and no image decoding source is compiled in.
-        * The `sixel`, `kitty`, `kitty-direct`, `kitty-icat`, `iterm` and `chafa` logo types are rejected with an error, on the command line and in the JSON config alike, and the `auto` logo type never tries an image.
-        * `--logo-type raw` keeps working: it writes a pre-rendered byte stream through unchanged and needs no decoder, so a logo can still be displayed by converting the image externally.
-        * This is intended to be used to reduce binary size on embedded systems (such as OpenWrt) only.
+        * Image logos are the only consumer of ImageMagick, chafa, and the embedded libsixel encoder, so none of the three is searched for at configure time, and no image decoding sources are compiled in.
+        * The `sixel`, `kitty`, `kitty-direct`, `kitty-icat`, `iterm` and `chafa` logo types are rejected with an error, both on the command line and in the JSON config, and the `auto` logo type never tries an image.
+        * `--logo-type raw` keeps working: it passes a pre-rendered byte stream through unchanged and needs no decoder, so a logo can still be displayed by converting the image externally.
+        * This is intended only to reduce binary size on embedded systems (such as OpenWrt).
 * Added CPU name and frequency detection support on SPARC. (CPU, Linux)
 * Added package detection support for CRUX. (Packages, Linux)
     * Exposed in custom format as `{crux}`.
@@ -44,17 +44,20 @@ Features:
 * Improved Packages detection on Windows (Packages, Windows)
     * `winget list` is now invoked with `--source winget`, so only packages installed by winget itself are counted, and the slow msstore HTTP round trips are skipped.
 * Improved Wallpaper detection on macOS Sonoma and later (#2559, Wallpaper, macOS)
-    * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is tried last.
+    * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is used only as a last resort.
 * Removed the `kvm` dependency on OpenBSD by using `sysctl` directly. (General, OpenBSD)
 * Modules that were selected on the command line via `--structure` / `-s` now honor module options configured in the JSON config. (CommandOption)
+* Improved reliability of fastfetch's built-in HTTP client. (PublicIP, Weather)
+    * It now supports custom ports and can properly handle chunked transfer encoding.
+    * It is designed for minimal resource usage and fast performance. It does not support full HTTP features like HTTPS. Users can always use the `Command` module with `curl` to achieve similar functionality.
 
 Bugfixes:
-* Fixed Base64 encoding producing wrong output for some inputs. (General)
-* Fixed image logos not working when ImageMagick is built without a quantum depth suffix in its library name, as on FreeBSD. (Logo, FreeBSD)
+* Fixed Base64 encoding producing incorrect output for some inputs. (General)
+* Fixed image logos not working when ImageMagick is built without a quantum depth suffix in its library name, as is the case on FreeBSD. (Logo, FreeBSD)
 * Fixed TerminalFont detection on Windows ignoring Windows Terminal JSON fragment files. (#2573, TerminalFont, Windows)
 * Fixed 64-bit values being truncated by `strtoul` on platforms where `unsigned long` is 32-bit. (Swap / PhysicalDisk / PhysicalMemory / GPU)
 * Fixed read-only SQLite databases failing with `SQLITE_READONLY` when the database directory is not writable. (Packages)
-    * This fixes PKG package count detection on FreeBSD
+    * This fixes PKG package count detection on FreeBSD.
 * Fixed `{#keys}` and `{#title}` in module format strings not honoring the `brightColor` display option. (Format)
 * Fixed `paddingTop` and `paddingLeft` being ignored by the `kitty-icat` image logo type. (Logo)
 * Some internal cleanups and optimizations.
