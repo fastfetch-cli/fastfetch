@@ -88,10 +88,6 @@ cmake_dependent_option(ENABLE_EET "Enable eet" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows and macOS; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE" OFF)
-cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
@@ -100,6 +96,14 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" 
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+
+option(ENABLE_IMAGE_LOGO "Enable image logos (sixel / kitty / iTerm / chafa)" ON)
+if(ENABLE_IMAGE_LOGO)
+    cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+    cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+    cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows and macOS; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE" OFF)
+    cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE" OFF)
+endif()
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -501,16 +505,21 @@ set(LIBFASTFETCH_SRC
     src/detection/weather/weather.c
     src/detection/zpool/zpool.c
     src/logo/builtin.c
-    src/logo/image/im6.c
-    src/logo/image/im7.c
-    src/logo/image/image.c
-    src/logo/image/sixel.c
     src/logo/logo.c
     src/modules/modules.c
     src/options/display.c
     src/options/logo.c
     src/options/general.c
 )
+
+if(ENABLE_IMAGE_LOGO)
+    list(APPEND LIBFASTFETCH_SRC
+        src/logo/image/image.c
+        src/logo/image/im6.c
+        src/logo/image/im7.c
+        src/logo/image/sixel.c
+    )
+endif()
 
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
     list(APPEND LIBFASTFETCH_SRC
@@ -1023,8 +1032,12 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.c
         src/detection/camera/camera_apple.m
-        src/logo/image/imageio.c
     )
+    if(ENABLE_IMAGE_LOGO)
+        list(APPEND LIBFASTFETCH_SRC
+            src/logo/image/imageio.c
+        )
+    endif()
     # CMAKE_SYSTEM_PROCESSOR has been normalized before
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
         list(APPEND LIBFASTFETCH_SRC
@@ -1117,8 +1130,12 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/logo/image/wic.cpp
     )
+    if(ENABLE_IMAGE_LOGO)
+        list(APPEND LIBFASTFETCH_SRC
+            src/logo/image/wic.cpp
+        )
+    endif()
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
         src/common/impl/dbus.c
@@ -1844,6 +1861,10 @@ if(ENABLE_THREADS)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
+endif()
+
+if(ENABLE_IMAGE_LOGO)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_IMAGE_LOGO=1)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS)

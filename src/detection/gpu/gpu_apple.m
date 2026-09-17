@@ -46,6 +46,7 @@ const char* ffGpuDetectMetal(FFlist* gpus) {
             continue;
         }
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #ifndef MAC_OS_X_VERSION_10_15
         if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
             ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 2");
@@ -53,14 +54,11 @@ const char* ffGpuDetectMetal(FFlist* gpus) {
             ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 1");
         }
 #else // MAC_OS_X_VERSION_10_15
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wunguarded-availability-new"
         if ([device supportsFamily:MTLGPUFamilyMetal4]) {
             ffStrbufSetStatic(&gpu->platformApi, "Metal 4");
         } else if ([device supportsFamily:MTLGPUFamilyMetal3]) {
             ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
         }
-    #pragma clang diagnostic pop
         else if ([device supportsFamily:MTLGPUFamilyCommon3]) {
             ffStrbufSetStatic(&gpu->platformApi, "Metal Common 3");
         } else if ([device supportsFamily:MTLGPUFamilyCommon2]) {

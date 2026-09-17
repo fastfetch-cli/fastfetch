@@ -1,9 +1,10 @@
 # Unreleased
 
 Changes:
-* ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo, Windows / macOS)
-    * Image logos on Windows and macOS no longer depend on ImageMagick being installed.
-    * Image sources that only ImageMagick could decode, such as SVG, PDF and PostScript, are no longer supported on Windows: neither WIC nor the embedded sixel encoder can decode them.
+* ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo)
+* ImageMagick 6 support is deprecated. It's only kept for old Debian & Ubuntu releases which have no ImageMagick 7 available.
+    * Intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
+
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss.
     * `--logo-cache false` ignores the image logo cache completely: nothing is read from it and nothing is written to it.
@@ -29,6 +30,11 @@ Features:
         * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in.
         * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, ImageMagick 7 on Linux). A single frame GIF falls back to a still image. A build with none of those, or with ImageMagick 6, reports an error instead of quietly showing a still image.
         * A terminal that supports the kitty graphics protocol but not its animation frames, as Konsole does not, shows the first frame.
+    * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support. (Logo)
+        * Image logos are the only consumer of ImageMagick, of chafa and of the embedded libsixel encoder, so none of the three is looked for at configure time, and no image decoding source is compiled in.
+        * The `sixel`, `kitty`, `kitty-direct`, `kitty-icat`, `iterm` and `chafa` logo types are rejected with an error, on the command line and in the JSON config alike, and the `auto` logo type never tries an image.
+        * `--logo-type raw` keeps working: it writes a pre-rendered byte stream through unchanged and needs no decoder, so a logo can still be displayed by converting the image externally.
+        * This is intended to be used to reduce binary size on embedded systems (such as OpenWrt) only.
 * Added CPU name and frequency detection support on SPARC. (CPU, Linux)
 * Added package detection support for CRUX. (Packages, Linux)
     * Exposed in custom format as `{crux}`.
