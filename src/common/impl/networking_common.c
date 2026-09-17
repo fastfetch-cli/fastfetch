@@ -64,7 +64,8 @@ static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize) {
 
 // Decompress gzip content
 bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd) {
-    assert(headerEnd != nullptr && *headerEnd == '\r');
+    // `headerEnd` itself is non-null per the `nonnull(2)` contract; what it points to is not expressible as an attribute
+    assert(*headerEnd == '\r');
 
     // Calculate header size
     uint32_t headerSize = (uint32_t) (headerEnd - buffer->chars);
@@ -192,8 +193,6 @@ bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd) {
 #endif // FF_HAVE_ZLIB
 
 const char* ffNetworkingFindHeader(const char* headers, uint32_t headerEnd, const char* name, uint32_t* valueLen) {
-    assert(headers != nullptr && valueLen != nullptr);
-
     uint32_t nameLen = (uint32_t) strlen(name);
     uint32_t pos = 0;
 
@@ -225,8 +224,6 @@ const char* ffNetworkingFindHeader(const char* headers, uint32_t headerEnd, cons
 }
 
 FFNetworkingTransferEncoding ffNetworkingParseTransferEncoding(const char* value, uint32_t valueLen) {
-    assert(value != nullptr);
-
     // The value is a comma-separated list of transfer codings (RFC 9112 6.1)
     uint32_t codingCount = 0;
     const char* coding = nullptr;
@@ -267,8 +264,6 @@ FFNetworkingTransferEncoding ffNetworkingParseTransferEncoding(const char* value
 }
 
 int ffNetworkingChunkedComplete(const char* body, uint32_t bodyLen, uint32_t* consumed) {
-    assert(body != nullptr && consumed != nullptr);
-
     uint32_t pos = 0;
 
     for (;;) {

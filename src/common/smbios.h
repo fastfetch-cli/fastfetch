@@ -2,8 +2,9 @@
 
 #include "common/FFstrbuf.h"
 
-bool ffIsSmbiosValueSet(FFstrbuf* value);
-static inline void ffCleanUpSmbiosValue(FFstrbuf* value) {
+// Not `pure`: it trims the trailing spaces of `value` before reporting whether it is set
+[[gnu::nonnull(1), nodiscard]] bool ffIsSmbiosValueSet(FFstrbuf* value);
+[[gnu::nonnull(1)]] static inline void ffCleanUpSmbiosValue(FFstrbuf* value) {
     if (!ffIsSmbiosValueSet(value)) {
         ffStrbufClear(value);
     }
@@ -82,7 +83,8 @@ typedef struct [[gnu::packed]] FFSmbiosHeader {
 } FFSmbiosHeader;
 static_assert(sizeof(FFSmbiosHeader) == 4, "FFSmbiosHeader should be 4 bytes");
 
-static inline const char* ffSmbiosLocateString(const char* start, uint8_t index /* start from 1 */) {
+// `start` points into the unformatted string section and is walked with `strlen`, so it may not be null
+[[gnu::nonnull(1), gnu::pure, nodiscard]] static inline const char* ffSmbiosLocateString(const char* start, uint8_t index /* start from 1 */) {
     if (index == 0 || *start == '\0') {
         return nullptr;
     }
@@ -94,9 +96,9 @@ static inline const char* ffSmbiosLocateString(const char* start, uint8_t index 
 
 typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE__MAX];
 
-const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header);
-const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable(void);
+[[gnu::nonnull(1), gnu::pure, nodiscard]] const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header);
+[[nodiscard]] const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable(void);
 
 #ifdef __linux__
-bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
+[[gnu::nonnull(1, 2, 3), nodiscard]] bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
 #endif

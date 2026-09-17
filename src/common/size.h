@@ -2,4 +2,4 @@
 
 #include "fastfetch.h"
 
-void ffSizeAppendNum(uint64_t bytes, FFstrbuf* result);
+[[gnu::nonnull(2)]] void ffSizeAppendNum(uint64_t bytes, FFstrbuf* result);

@@ -89,19 +89,25 @@ typedef struct FFKeyValuePair {
     int value;
 } FFKeyValuePair;
 
-const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName);
-void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer);
-[[nodiscard]] uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
-[[nodiscard]] int32_t ffOptionParseInt32(const char* argumentKey, const char* value);
-[[nodiscard]] int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]);
-[[nodiscard]] bool ffOptionParseBoolean(const char* str);
-void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer);
-static inline void ffOptionParseColor(const char* value, FFstrbuf* buffer) {
+// `moduleName` and `argumentKey` are both dereferenced unconditionally; reads no global state, so `pure`
+[[gnu::nonnull(1, 2), gnu::pure, nodiscard]] const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName);
+// `value` is optional (null exits with a usage error), `argumentKey` and `buffer` are not
+[[gnu::nonnull(1, 3)]] void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer);
+[[gnu::nonnull(1), nodiscard]] uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
+[[gnu::nonnull(1), nodiscard]] int32_t ffOptionParseInt32(const char* argumentKey, const char* value);
+// `requestedKey` is optional (null exits with a usage error); `pairs` is walked until its null key
+[[gnu::nonnull(1, 3), nodiscard]] int ffOptionParseEnum(const char* argumentKey, const char* requestedKey, FFKeyValuePair pairs[]);
+// `str` is optional: a null or empty value is reported as `true`
+[[gnu::pure, nodiscard]] bool ffOptionParseBoolean(const char* str);
+// `value` is optional (a null or empty value is a no-op); `buffer` is not
+[[gnu::nonnull(2)]] void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer);
+[[gnu::nonnull(2)]] static inline void ffOptionParseColor(const char* value, FFstrbuf* buffer) {
     ffStrbufClear(buffer);
     ffOptionParseColorNoClear(value, buffer);
 }
 
-static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon) {
+// `icon` is optional, `args` is not
+[[gnu::nonnull(1)]] static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon) {
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->keyColor);
     ffStrbufInitStatic(&args->keyIcon, icon);
@@ -110,7 +116,7 @@ static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon) {
     args->keyWidth = 0;
 }
 
-static inline void ffOptionDestroyModuleArg(FFModuleArgs* args) {
+[[gnu::nonnull(1)]] static inline void ffOptionDestroyModuleArg(FFModuleArgs* args) {
     ffStrbufDestroy(&args->key);
     ffStrbufDestroy(&args->keyColor);
     ffStrbufDestroy(&args->keyIcon);
