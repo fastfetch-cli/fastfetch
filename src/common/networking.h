@@ -38,7 +38,7 @@ typedef struct FFNetworkingState {
 // Restricting the range matters because the body may already share the same buffer.
 // Returns a pointer to the first character of the value; `valueLen` receives its
 // length excluding the terminating CRLF. Returns nullptr when the header is absent.
-[[gnu::nonnull(1, 3, 4), gnu::pure, nodiscard]] const char* ffNetworkingFindHeader(const char* headers, uint32_t headerEnd, const char* name, uint32_t* valueLen);
+[[gnu::nonnull(1, 3, 4), nodiscard]] const char* ffNetworkingFindHeader(const char* headers, uint32_t headerEnd, const char* name, uint32_t* valueLen);
 
 // Checks whether a `Transfer-Encoding: chunked` body has been received in full, so that
 // framing does not have to rely on the server closing the connection.
