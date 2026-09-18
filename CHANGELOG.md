@@ -57,6 +57,10 @@ Features:
     * The displays are now read from the display service instead of a vendor property that only some Xiaomi devices set. The preferred mode, the physical size, the rotation, the manufacture date and the display id are now reported as well.
     * This needs Android 13 (API 33). On Android 12 and older only that vendor property is available to an app, and a device that does not set it reports no display.
     * The refresh rate is now the rate of the active display mode, and the HDR capability is read from the display itself, for every display rather than only for the built-in one.
+* Improved WiFi detection on Android (Wifi, Android)
+    * The connection details are now read from the WiFi service over `/dev/binder` instead of `termux-api WifiConnectionInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * The interface name and its state, the connection state and the Wi-Fi standard are now reported as well.
+    * This needs Android 11 (API 30), the release that moved the Wi-Fi framework into an APEX. There is no fallback, so Android 10 and older report an error instead.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)
