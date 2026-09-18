@@ -46,6 +46,8 @@ Features:
     * This is mostly untested due to lack of available devices running these ROMs. Please report any issues you encounter.
 * Improved Camera detection on Android (Camera, Android)
     * The camera list is now read from the camera2 NDK instead of `termux-api CameraInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
+* Improved Display detection on Android when fastfetch runs as an app rather than from `adb shell`, where `dumpsys display` is not permitted. (Display, Android)
+    * The displays are now read through the shell command interface of the display service, which needs no permission.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)

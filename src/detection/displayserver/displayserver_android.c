@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "common/arrutil.h"
 #include "common/settings.h"
+#include "common/strutil.h"
 #include "common/processing.h"
 #include "linux/displayserver_linux.h"
 
@@ -29,111 +30,126 @@ static bool checkHdrStatus(FFDisplayResult* display) {
     return false;
 }
 
-static void detectWithDumpsys(FFDisplayServerResult* ds) {
+static void detectWithCmd(FFDisplayServerResult* ds) {
+    // Unlike `dumpsys`, the shell command interface of the same service is not permission gated
+
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if (ffProcessAppendStdOut(&buf, (char*[]) {
-                                        "/system/bin/dumpsys",
-                                        "display",
-                                        nullptr,
-                                    }) != nullptr ||
-        buf.length == 0) {
-        return; // Only works in `adb shell`, or when rooted
+    FFProcessHandle handle;
+    // `cmd` forwards its stdin to the service over binder, and the kernel rejects the whole
+    // transaction when that fd is a terminal, which it is whenever fastfetch runs in a terminal.
+    // Detaching the child from our stdin is only needed here, so the low level API is called
+    // instead of `ffProcessAppendStdOut`.
+    if (ffProcessSpawn((char*[]) {
+                           "/system/bin/cmd",
+                           "display",
+                           "get-displays",
+                           nullptr,
+                       },
+            false,
+            ffGetNullFD(),
+            &handle) != nullptr) {
+        return; // The shell command interface is not available on every Android version
     }
 
+    if (ffProcessReadOutput(&handle, &buf) != nullptr || buf.length == 0) {
+        return;
+    }
+    ffStrbufTrimRightSpace(&buf);
+
     uint32_t index = 0;
-    while ((index = ffStrbufNextIndexS(&buf, index, "DisplayDeviceInfo")) < buf.length) {
-        index += strlen("DisplayDeviceInfo");
+    while ((index = ffStrbufNextIndexS(&buf, index, "Display id ")) < buf.length) {
+        index += strlen("Display id ");
+
         uint32_t nextIndex = ffStrbufNextIndexC(&buf, index, '\n');
         buf.chars[nextIndex] = '\0';
         const char* info = buf.chars + index;
 
-        // {"Builtin display": uniqueId="local:4630947134992368259", 1440 x 3200, modeId 2, defaultModeId 1, supportedModes [{id=1, width=1440, height=3200, fps=60.000004, alternativeRefreshRates=[24.000002, 30.000002, 40.0, 120.00001, 120.00001, 120.00001, 120.00001, 120.00001]},
+        // 0: DisplayInfo{"Builtin display", displayId 0, ..., real 1440 x 3168, ..., mode 2,
+        //    renderFrameRate 60.000004, ..., supportedModes [{id=2, width=1440, height=3168,
+        //    fps=60.000004, ...}], ..., type INTERNAL, ..., density 560 (560.0 x 560.0) dpi, ...}
+        const char* field = strstr(info, "DisplayInfo{\"");
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateA(64);
-        unsigned width = 0, height = 0, modeId = 0;
-        double refreshRate = 0;
-        // {"Builtin display": uniqueId="local:4630947134992368259", 1440 x 3200, modeId 2
-        int res = sscanf(info, "{\"%63[^\"]\":%*s%u x %u, modeId%u", name.chars, &width, &height, &modeId);
-        if (res >= 3) {
-            if (res == 4) {
-                ++info; // skip first '{'
-                while ((info = strchr(info, '{'))) {
-                    ++info;
+        if (field) {
+            field += strlen("DisplayInfo{\"");
+            const char* nameEnd = strchr(field, '"');
+            if (nameEnd) {
+                ffStrbufAppendNS(&name, (uint32_t) (nameEnd - field), field);
+            }
+        }
 
-                    unsigned id;
-                    double fps;
-                    // id=1, width=1440, height=3200, fps=60.000004,
-                    if (sscanf(info, "id=%u, %*s%*s fps=%lf", &id, &fps) >= 2) {
-                        if (id == modeId) {
-                            refreshRate = fps;
-                            break;
-                        }
-                    } else {
+        unsigned width = 0, height = 0;
+        if ((field = strstr(info, ", real ")) && sscanf(field, ", real %u x %u", &width, &height) < 2) {
+            width = height = 0;
+        }
+
+        double refreshRate = 0;
+        if ((field = strstr(info, ", renderFrameRate ")) && sscanf(field, ", renderFrameRate %lf", &refreshRate) < 1) {
+            refreshRate = 0;
+        }
+        if (refreshRate <= 0) {
+            // `renderFrameRate` is only printed since Android 11. Older builds expose the active mode
+            // only, so its refresh rate has to be looked up in the list of supported modes.
+            unsigned activeMode = 0;
+            field = strstr(info, ", mode ");
+            if (field && sscanf(field, ", mode %u", &activeMode) >= 1) {
+                field = strstr(info, "supportedModes [");
+                while (field && (field = strstr(field, "{id="))) {
+                    // {id=2, width=1440, height=3168, fps=60.000004, ...
+                    unsigned id = 0;
+                    double fps = 0;
+                    if (sscanf(field, "{id=%u, width=%*u, height=%*u, fps=%lf", &id, &fps) < 2) {
                         break;
                     }
+                    if (id == activeMode) {
+                        refreshRate = fps;
+                        break;
+                    }
+                    ++field;
                 }
             }
+        }
 
-            ffStrbufRecalculateLength(&name);
-            FFDisplayResult* display = ffdsAppendDisplay(ds,
-                (uint32_t) width,
-                (uint32_t) height,
-                refreshRate,
-                0,
-                0,
-                0,
-                0,
-                0,
-                &name,
-                FF_DISPLAY_TYPE_UNKNOWN,
-                false,
-                0,
-                0,
-                0,
-                "dumpsys");
-            if (display) {
-                display->hdrStatus = checkHdrStatus(display);
+        FFDisplayType type = FF_DISPLAY_TYPE_UNKNOWN;
+        if ((field = strstr(info, ", type "))) {
+            field += strlen(", type ");
+            if (ffStrStartsWith(field, "INTERNAL")) {
+                type = FF_DISPLAY_TYPE_BUILTIN;
+            } else if (ffStrStartsWith(field, "EXTERNAL")) {
+                type = FF_DISPLAY_TYPE_EXTERNAL;
             }
+        }
+
+        unsigned density = 0;
+        if ((field = strstr(info, ", density ")) && sscanf(field, ", density %u", &density) < 1) {
+            density = 0;
+        }
+
+        unsigned displayId = 0;
+        bool primary = sscanf(info, "%u", &displayId) >= 1 && displayId == 0; // Display 0 is the default one
+
+        // Android counts density in dpi with 160 as the 1x baseline, fastfetch uses 96
+        FFDisplayResult* display = ffdsAppendDisplay(ds,
+            width,
+            height,
+            refreshRate,
+            density * 96 / 160,
+            0,
+            0,
+            0,
+            0,
+            &name,
+            type,
+            primary,
+            0,
+            0,
+            0,
+            "cmd");
+        if (display) {
+            display->hdrStatus = checkHdrStatus(display);
         }
 
         index = nextIndex + 1;
     }
-}
-
-static bool detectWithGetprop(FFDisplayServerResult* ds) {
-    // Only for MiUI
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-
-    if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
-        ffStrbufContainC(&buffer, ',')) {
-        // 1440,3200,560 => width,height,densityDpi
-        uint32_t width = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrAfterFirstC(&buffer, ',');
-        uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrAfterFirstC(&buffer, ',');
-        uint32_t dpi = (uint32_t) ffStrbufToUInt(&buffer, 0) * 96 / 160;
-        FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width,
-            height,
-            0,
-            dpi,
-            0,
-            0,
-            0,
-            0,
-            nullptr,
-            FF_DISPLAY_TYPE_BUILTIN,
-            false,
-            0,
-            0,
-            0,
-            "getprop");
-        if (display) {
-            display->hdrStatus = checkHdrStatus(display);
-        }
-        return !!display;
-    }
-
-    return false;
 }
 
 // Several vendors embed the UI name and its version in `ro.build.display.id` without any
@@ -477,9 +493,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
     ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
     ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
-    if (!detectWithGetprop(ds)) {
-        detectWithDumpsys(ds);
-    }
+    detectWithCmd(ds);
 
     detectDE(ds);
 }
