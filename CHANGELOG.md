@@ -77,6 +77,9 @@ Logos:
 * Added ALT Atomic
 * Removed Zerene
 
+Logos:
+* Added LeonOS4
+
 # 2.68.1
 
 Changes:
