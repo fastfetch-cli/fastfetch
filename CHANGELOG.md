@@ -46,6 +46,9 @@ Features:
     * This is mostly untested due to lack of available devices running these ROMs. Please report any issues you encounter.
 * Improved Camera detection on Android (Camera, Android)
     * The camera list is now read from the camera2 NDK instead of `termux-api CameraInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
+* Improved Battery detection on Android (Battery, Android)
+    * The charge level and charging state are now read from the battery properties service over `/dev/binder` instead of `termux-api BatteryStatus`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * Battery temperature, cycle count, manufacturer, model name, serial number and manufacture date need the `BATTERY_STATS` permission, which an app cannot obtain, so they are no longer reported.
 * Improved Display detection on Android when fastfetch runs as an app rather than from `adb shell`, where `dumpsys display` is not permitted. (Display, Android)
     * The displays are now read through the shell command interface of the display service, which needs no permission.
 * Improved COSMIC detection (DE / WM, Linux)
