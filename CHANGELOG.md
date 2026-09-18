@@ -44,6 +44,8 @@ Features:
     * Added support for MagicUI 3.x, which stores a bare version number instead of a `MagicUI_x.y.z` string.
     * Added Samsung OneUI support (#2541)
     * This is mostly untested due to lack of available devices running these ROMs. Please report any issues you encounter.
+* Improved Camera detection on Android (Camera, Android)
+    * The camera list is now read from the camera2 NDK instead of `termux-api CameraInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)

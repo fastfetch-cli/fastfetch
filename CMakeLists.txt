@@ -2003,6 +2003,7 @@ elseif(ANDROID)
         PRIVATE "m"
         PRIVATE jnigraphics
         PRIVATE mediandk
+        PRIVATE camera2ndk
     )
     if(ENABLE_WORDEXP)
         # https://github.com/termux/termux-packages/pull/7056
