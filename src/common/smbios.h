@@ -100,5 +100,5 @@ typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE__MAX];
 [[nodiscard]] const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable(void);
 
 #ifdef __linux__
-[[gnu::nonnull(1, 2, 3), nodiscard]] bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
+[[gnu::nonnull(1, 2, 3)]] bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
 #endif

@@ -30,12 +30,12 @@
 // reading a big endian value is a no-op ...
 _Static_assert(FF_READ_BE((uint16_t) 0x1122) == (uint16_t) 0x1122, "FF_READ_BE must be the identity on a big endian host");
 _Static_assert(FF_READ_BE(0x11223344u) == 0x11223344u, "FF_READ_BE must be the identity on a big endian host");
-_Static_assert(FF_READ_BE(0x1122334455667788ull) == 0x1122334455667788ull, "FF_READ_BE must be the identity on a big endian host");
+_Static_assert(FF_READ_BE((uint64_t) 0x1122334455667788ull) == (uint64_t) 0x1122334455667788ull, "FF_READ_BE must be the identity on a big endian host");
 
 // ... and reading a little endian one swaps.
 _Static_assert(FF_READ_LE((uint16_t) 0x1122) == (uint16_t) 0x2211, "FF_READ_LE must swap on a big endian host");
 _Static_assert(FF_READ_LE(0x11223344u) == 0x44332211u, "FF_READ_LE must swap on a big endian host");
-_Static_assert(FF_READ_LE(0x1122334455667788ull) == 0x8877665544332211ull, "FF_READ_LE must swap on a big endian host");
+_Static_assert(FF_READ_LE((uint64_t) 0x1122334455667788ull) == (uint64_t) 0x8877665544332211ull, "FF_READ_LE must swap on a big endian host");
 
 int main(void) {
     // Everything this test asserts is checked at compile time, so reaching this line is the result.
