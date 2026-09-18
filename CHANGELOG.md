@@ -2,6 +2,7 @@
 
 Changes:
 * ImageMagick is no longer used for image logos on Windows, macOS and Android, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS, AImageDecoder on Android). (Logo)
+    * An image logo needs Android 11 (API 30), the release that introduced the platform image decoder, and is reported as an error on Android 10 and older.
 * ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available.
     * It is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
 
@@ -29,7 +30,7 @@ Features:
         * `--logo-animation-frame <N>` renders the Nth frame as a still image, and negative values count back from the end, so `-1` is the last frame. This works for the `sixel`, `kitty` and `chafa` logo types. Note that negative values can only be given in the JSON config, as the command line parser reads a leading `-` as another option.
         * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in.
         * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, AImageDecoder on Android, ImageMagick 7 on Linux). A single-frame GIF falls back to a still image.
-        * On Android an animation needs Android 12 (API 31), which is where AImageDecoder gained the ability to decode past the first frame. AImageDecoder composes the frames itself; its API does not expose a repeat count, so an animation is reported as looping forever. A build with none of those, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
+        * On Android an animation needs Android 12 (API 31). The repeat count is not available there, so an animation is reported as looping forever. A build with no image decoder, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
         * A terminal that supports the kitty graphics protocol but not its animation frames, such as Konsole, shows the first frame.
     * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support. (Logo)
         * Image logos are the only consumer of ImageMagick, chafa, and the embedded libsixel encoder, so none of the three is searched for at configure time, and no image decoding sources are compiled in.
@@ -43,14 +44,19 @@ Features:
     * Added support for HarmonyOS, HarmonyOS NEXT, Flyme, JOYUI, SmartisanOS, realme UI, HydrogenOS, ZUI, ZUXOS, MyOS, NebulaAIOS, ObricUI, MiFavor, LineageOS, PixelExperience, EUI and 360 UI.
     * Added support for MagicUI 3.x, which stores a bare version number instead of a `MagicUI_x.y.z` string.
     * Added Samsung OneUI support (#2541)
+    * It is read from system properties, so no particular Android version is required.
     * This is mostly untested due to lack of available devices running these ROMs. Please report any issues you encounter.
 * Improved Camera detection on Android (Camera, Android)
     * The camera list is now read from the camera2 NDK instead of `termux-api CameraInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * This needs Android 7.0 (API 24), which is where the camera2 NDK was introduced.
 * Improved Battery detection on Android (Battery, Android)
     * The charge level and charging state are now read from the battery properties service over `/dev/binder` instead of `termux-api BatteryStatus`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * The service interface changed in Android 10, and the right request is picked at run time, so every Android release is covered.
     * Battery temperature, cycle count, manufacturer, model name, serial number and manufacture date need the `BATTERY_STATS` permission, which an app cannot obtain, so they are no longer reported.
-* Improved Display detection on Android when fastfetch runs as an app rather than from `adb shell`, where `dumpsys display` is not permitted. (Display, Android)
-    * The displays are now read through the shell command interface of the display service, which needs no permission.
+* Improved Display detection on Android (Display, Android)
+    * The displays are now read from the display service instead of a vendor property that only some Xiaomi devices set. The preferred mode, the physical size, the rotation, the manufacture date and the display id are now reported as well.
+    * This needs Android 13 (API 33). On Android 12 and older only that vendor property is available to an app, and a device that does not set it reports no display.
+    * The refresh rate is now the rate of the active display mode, and the HDR capability is read from the display itself, for every display rather than only for the built-in one.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)
