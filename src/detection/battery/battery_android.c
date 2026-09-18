@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "battery.h"
-#include "common/androidApi.h"
+#include "common/android/api.h"
 #include "common/android/binder.h"
 #include "common/processing.h"
 #include "common/properties.h"

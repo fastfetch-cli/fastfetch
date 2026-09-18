@@ -42,7 +42,7 @@ static void ffCameraMaxStreamSize(const ACameraMetadata* metadata, int32_t forma
 const char* ffDetectCamera(FFlist* result) {
     // The camera2 NDK and every entry point below were introduced in API 24, which is the API level
     // this build targets, so nothing here is newer than the minimum supported version and
-    // common/androidApi.h has nothing to guard. That header covers the opposite case: entry points
+    // common/android/api.h has nothing to guard. That header covers the opposite case: entry points
     // the NDK marks unavailable because they postdate the target, such as AImageDecoder (30) or
     // AMediaCodec_getName (28). It also only ever makes *symbols* weak -- libcamera2ndk.so itself is
     // API 24, so linking it unconditionally in CMakeLists.txt is fine on every supported device.

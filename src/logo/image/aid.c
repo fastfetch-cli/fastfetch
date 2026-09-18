@@ -1,6 +1,6 @@
 
 #include "image.h"
-#include "common/androidApi.h"
+#include "common/android/api.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 
@@ -122,7 +122,7 @@ FF_REQUIRES_API(30) static bool androidResolveDecoder(AImageDecoder* decoder, FF
 
 bool ffImageCreateAID(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error) {
     // AImageDecoder is API 30, and fastfetch still runs on devices below that, so this is a real
-    // run-time check and not a compile-time constant. See common/androidApi.h for why.
+    // run-time check and not a compile-time constant. See common/android/api.h for why.
     if (FF_API_AT_LEAST(30)) {
         FF_AUTO_CLOSE_FD int fd = open(instance.config.logo.source.chars, O_RDONLY | O_CLOEXEC);
         if (fd < 0) {

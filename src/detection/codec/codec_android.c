@@ -1,6 +1,6 @@
 #include "codec.h"
 
-#include "common/androidApi.h"
+#include "common/android/api.h"
 #include "common/strutil.h"
 #include <media/NdkMediaCodec.h>
 
