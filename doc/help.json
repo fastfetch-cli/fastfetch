@@ -291,12 +291,33 @@
             }
         },
         {
-            "long": "logo-recache",
-            "desc": "If true, regenerate the image logo cache",
+            "long": "logo-cache",
+            "desc": "Specify how the image logo cache is used",
+            "remark": "See \"--help logo-animation-frame\" for the one case where a cached rendering can outlive the image type that produced it",
             "arg": {
-                "type": "bool",
+                "type": "enum",
                 "optional": true,
-                "default": false
+                "default": "true",
+                "enum": {
+                    "true": "Reuse a cached rendering when it is valid, and write it back on a cache miss",
+                    "false": "Ignore the image logo cache completely: neither read nor write it",
+                    "regen": "Ignore any existing cached rendering and regenerate it"
+                }
+            }
+        },
+        {
+            "long": "logo-animation-frame",
+            "desc": "Select which frame of an animated image logo to render",
+            "remark": [
+                "Animated kitty graphics only, and only if the image source is animated; 1 or higher renders that frame as a still image, 0 plays the animation",
+                "A selected frame is cached exactly like the first frame is, sharing its entries; the frame number is recorded next to them, so changing this option re-renders",
+                "That record is per cache directory, not per image type: switching --logo-type between two types that both have a cached rendering here, and asking for a different frame, can pair one type's rendering with the other's frame number",
+                "Run \"--logo-cache regen\" after such a switch"
+            ],
+            "arg": {
+                "type": "num",
+                "optional": true,
+                "default": 1
             }
         },
         {

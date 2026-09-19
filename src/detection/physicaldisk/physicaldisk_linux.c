@@ -34,7 +34,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
         if (fileSize > 0) {
             blkSize[fileSize] = 0;
-            size = (uint64_t) strtoul(blkSize, nullptr, 10) * 512;
+            size = (uint64_t) strtoull(blkSize, nullptr, 10) * 512;
         }
     }
 

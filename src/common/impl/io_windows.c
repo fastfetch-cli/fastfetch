@@ -1,6 +1,8 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
+#include "common/time.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 
@@ -159,7 +161,9 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
 
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
-        if (GetLastError() == ERROR_PATH_NOT_FOUND) {
+        DWORD errorCode = GetLastError();
+        FF_DEBUG("Failed to open file: %s - %s", fileName, ffDebugWin32Error(errorCode));
+        if (errorCode == ERROR_PATH_NOT_FOUND) {
             if (!createSubfolders(fileNameW)) {
                 return false;
             }
@@ -497,5 +501,35 @@ FFNativeFD ffGetNullFD(void) {
 }
 
 bool ffRemoveFile(const char* fileName) {
-    return DeleteFileA(fileName) != FALSE;
+    wchar_t fileNameW[MAX_PATH];
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG) strlen(fileName) + 1))) {
+        return false;
+    }
+
+    bool ret = DeleteFileW(fileNameW) != FALSE;
+    FF_DEBUG("Deleting file: %s - %s", fileName, ret ? "Success" : ffDebugWin32Error(GetLastError()));
+    return ret;
+}
+
+uint64_t ffPathGetMtime(const char* path) {
+    wchar_t fileNameW[MAX_PATH];
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, path, (ULONG) strlen(path) + 1))) {
+        return 0;
+    }
+
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(fileNameW, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+    if (handle == INVALID_HANDLE_VALUE) { // file doesn't exist or isn't accessible
+        return 0;
+    }
+
+    FILE_BASIC_INFORMATION fileInfo;
+    IO_STATUS_BLOCK iosb;
+    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation))) {
+        return 0;
+    }
+
+    return ffFileTimeToUnixMs((uint64_t) fileInfo.LastWriteTime.QuadPart);
 }

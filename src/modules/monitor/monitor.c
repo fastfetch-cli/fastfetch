@@ -136,7 +136,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMonitorJsonResult,
     .generateJsonConfig = (void*) ffGenerateMonitorJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Display name", "name" },
+        { "Display name *", "name" },
         { "Native resolution width in pixels", "width" },
         { "Native resolution height in pixels", "height" },
         { "Physical width in millimeters", "physical-width" },

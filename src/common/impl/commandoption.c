@@ -63,6 +63,21 @@ bool ffParseModuleOptions(const char* key, const char* value) {
     return false;
 }
 
+static yyjson_val* findStructureModuleConfig(FFdata* data, const char* moduleType);
+
+// The module options live in the JSON config only. They must be merged here as well as in
+// `parseStructureCommand`, because `ffPrepareXxx` takes the first snapshot while `ffDetectXxx`
+// takes the second one. If the two disagree, they list different entries and the deltas are
+// meaningless. Keeping both call sites on this single helper is what makes them agree.
+static void initStructureModuleOptions(FFdata* data, FFModuleBaseInfo* baseInfo, void* options) {
+    baseInfo->initOptions(options);
+
+    yyjson_val* configModule = findStructureModuleConfig(data, baseInfo->name);
+    if (configModule != nullptr) {
+        baseInfo->parseJsonObject(options, configModule);
+    }
+}
+
 void ffPrepareCommandOption(FFdata* data) {
     char* moduleType = nullptr;
     size_t moduleLen = 0;
@@ -70,68 +85,68 @@ void ffPrepareCommandOption(FFdata* data) {
 #define FF_IF_MODULE_MATCH(moduleNameConstant) if (ffStrEqualsIgnCase(moduleType, moduleNameConstant) && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
         switch (moduleType[0]) {
-            #if !FF_MODULE_DISABLE_CPUUSAGE
+#if !FF_MODULE_DISABLE_CPUUSAGE
             case 'C':
             case 'c':
                 FF_IF_MODULE_MATCH(ffCPUUsageModuleInfo.name)
-                ffPrepareCPUUsage();
+                ffPrepareCPUUsage(); // The rate is derived from the CPU's own counters; no options are involved
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_DISKIO
+#if !FF_MODULE_DISABLE_DISKIO
             case 'D':
             case 'd':
                 FF_IF_MODULE_MATCH(ffDiskIOModuleInfo.name) {
                     [[gnu::cleanup(ffDestroyDiskIOOptions)]] FFDiskIOOptions options;
-                    ffInitDiskIOOptions(&options);
+                    initStructureModuleOptions(data, &ffDiskIOModuleInfo, &options);
                     ffPrepareDiskIO(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_NETIO
+#if !FF_MODULE_DISABLE_NETIO
             case 'N':
             case 'n':
                 FF_IF_MODULE_MATCH(ffNetIOModuleInfo.name) {
                     [[gnu::cleanup(ffDestroyNetIOOptions)]] FFNetIOOptions options;
-                    ffInitNetIOOptions(&options);
+                    initStructureModuleOptions(data, &ffNetIOModuleInfo, &options);
                     ffPrepareNetIO(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_PUBLICIP
+#if !FF_MODULE_DISABLE_PUBLICIP
             case 'P':
             case 'p':
                 FF_IF_MODULE_MATCH(ffPublicIPModuleInfo.name) {
                     [[gnu::cleanup(ffDestroyPublicIpOptions)]] FFPublicIPOptions options;
-                    ffInitPublicIpOptions(&options);
+                    initStructureModuleOptions(data, &ffPublicIPModuleInfo, &options);
                     ffPreparePublicIp(&options);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_TOP
+#if !FF_MODULE_DISABLE_TOP
             case 'T':
             case 't':
                 FF_IF_MODULE_MATCH(ffTopModuleInfo.name) {
                     [[gnu::cleanup(ffDestroyTopOptions)]] FFTopOptions options;
-                    ffInitTopOptions(&options);
+                    initStructureModuleOptions(data, &ffTopModuleInfo, &options);
                     ffPrepareTopProcesses(options.showTypes);
                 }
                 break;
-            #endif
+#endif
 
-            #if !FF_MODULE_DISABLE_WEATHER
+#if !FF_MODULE_DISABLE_WEATHER
             case 'W':
             case 'w':
                 FF_IF_MODULE_MATCH(ffWeatherModuleInfo.name) {
                     [[gnu::cleanup(ffDestroyWeatherOptions)]] FFWeatherOptions options;
-                    ffInitWeatherOptions(&options);
+                    initStructureModuleOptions(data, &ffWeatherModuleInfo, &options);
                     ffPrepareWeather(&options);
                 }
                 break;
-            #endif
+#endif
         }
 
 #undef FF_IF_MODULE_MATCH
@@ -178,6 +193,34 @@ static void genJsonResult(FFdata* data, FFModuleBaseInfo* baseInfo, void* option
     }
 }
 
+static yyjson_val* findStructureModuleConfig(FFdata* data, const char* moduleType) {
+    if (data->configDoc == nullptr) {
+        return nullptr;
+    }
+
+    yyjson_val* root = yyjson_doc_get_root(data->configDoc);
+    if (root == nullptr) {
+        return nullptr;
+    }
+
+    yyjson_val* modules = yyjson_obj_get(root, "modules");
+    if (!yyjson_is_arr(modules)) {
+        return nullptr;
+    }
+
+    yyjson_val* item;
+    size_t idx, max;
+    yyjson_arr_foreach (modules, idx, max, item) {
+        if (yyjson_is_obj(item)) {
+            const char* type = yyjson_get_str(yyjson_obj_get(item, "type"));
+            if (type != nullptr && ffStrEqualsIgnCase(type, moduleType)) {
+                return item;
+            }
+        }
+    }
+    return nullptr;
+}
+
 static bool parseStructureCommand(
     FFdata* data,
     const char* line,
@@ -187,7 +230,7 @@ static bool parseStructureCommand(
             FFModuleBaseInfo* baseInfo = *modules;
             if (ffStrEqualsIgnCase(line, baseInfo->name)) {
                 alignas(uint64_t) uint8_t optionBuf[FF_OPTION_MAX_SIZE];
-                baseInfo->initOptions(optionBuf);
+                initStructureModuleOptions(data, baseInfo, optionBuf);
                 if (data->resultDoc != nullptr) {
                     fn(data, baseInfo, optionBuf);
                 } else {

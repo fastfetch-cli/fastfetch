@@ -321,7 +321,7 @@ static void detectMediaTek(FFCPUResult* cpu) {
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
         case 6995:
-            name = "9600";
+            name = "9600 Pro";
             break;
         case 6993:
             name = "9500";
@@ -619,6 +619,9 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
 #elif __sh__
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
+#elif __sparc__ || __sparc
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "Cpu0ClkTck :", cpuMHz)) ||
 #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -712,7 +715,7 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:")))) {
         p += strlen("\nphysical id\t:");
         char* pend;
-        unsigned long long id = strtoul(p, &pend, 10);
+        unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
             high |= 1ULL << (id - 64);
         } else {
@@ -1101,6 +1104,10 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         if (cpu->name.length) {
             ffStrbufPrependS(&cpu->name, "Machine ");
         }
+    #elif __sparc__ || __sparc
+        // Cpu0ClkTck is in Hz, printed as "%016lx" by sparc64 and "%ld" by sparc32. A 32-bit userland can run
+        // on a 64-bit kernel, so take the base from the width of the value rather than from our own bitness.
+        cpu->frequencyBase = (uint32_t) (strtoull(cpuMHz.chars, nullptr, cpuMHz.length == 16 ? 16 : 10) / 1000000);
     #endif
     }
 

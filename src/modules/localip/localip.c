@@ -455,8 +455,8 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "IPv4 address", "ipv4" },
         { "IPv6 address", "ipv6" },
-        { "MAC address", "mac" },
-        { "Interface name", "ifname" },
+        { "MAC address *", "mac" },
+        { "Interface name *", "ifname" },
         { "Is default route", "is-default-route" },
         { "MTU size in bytes", "mtu" },
         { "Link speed (formatted)", "speed" },

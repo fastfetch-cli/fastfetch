@@ -29,7 +29,7 @@ void ffPrepareWeather(FFWeatherOptions* options) {
         default:
             break;
     }
-    status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
+    status = ffNetworkingSendHttpRequest(&state, "wttr.in", 80, path.chars, "User-Agent: curl/0.0.0\r\n");
 }
 
 const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result) {

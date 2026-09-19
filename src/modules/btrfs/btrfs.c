@@ -230,7 +230,7 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,
     .generateJsonConfig = (void*) ffGenerateBtrfsJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Name / Label", "name" },
+        { "Name / Label *", "name" },
         { "UUID", "uuid" },
         { "Associated devices", "devices" },
         { "Enabled features", "features" },

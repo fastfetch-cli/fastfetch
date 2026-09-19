@@ -13,26 +13,90 @@
 #include <windows.h>
 #include <stdlib.h>
 
-static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size) {
+// Windows Terminal resolves every setting through an inheritance chain. A single property,
+// such as the font face or the font size, is resolved from the most to the least important
+// source:
+//   4. the active profile itself (settings.json -> profiles.list)
+//   3. profiles.defaults (settings.json)
+//   2. a JSON fragment updating the profile with "updates"
+//   1. a JSON fragment defining the profile with "guid"
+//   0. not set -> the builtin default reported below
+// https://github.com/microsoft/terminal/blob/main/src/cascadia/TerminalSettingsModel/IInheritable.h
+// https://github.com/microsoft/terminal/blob/main/src/cascadia/TerminalSettingsModel/CascadiaSettingsSerialization.cpp
+enum {
+    WT_FONT_PRIORITY_FRAGMENT = 1,
+    WT_FONT_PRIORITY_FRAGMENT_UPDATES = 2,
+    WT_FONT_PRIORITY_DEFAULTS = 3,
+    WT_FONT_PRIORITY_PROFILE = 4,
+};
+
+typedef struct FFTerminalFontWT {
+    FFstrbuf name;
+    double size;
+    uint8_t namePriority; // 0 if unset
+    uint8_t sizePriority; // 0 if unset
+} FFTerminalFontWT;
+
+static inline void wrapWTFontFree(FFTerminalFontWT* result) {
+    assert(result);
+    ffStrbufDestroy(&result->name);
+}
+
+static FFTerminalFontWT ffTerminalFontWTCreate(void) {
+    FFTerminalFontWT result = {
+        .name = ffStrbufCreate(),
+        .size = -1,
+    };
+    return result;
+}
+
+static void applyWTProfile(yyjson_val* profile, uint8_t priority, FFTerminalFontWT* result) {
     yyjson_val* font = yyjson_obj_get(profile, "font");
-    if (!font) {
-        return "yyjson_obj_get(profile, \"font\"); failed";
-    }
-
     if (!yyjson_is_obj(font)) {
-        return "yyjson_is_obj(font) returns false";
+        return;
     }
 
-    if (name->length == 0) {
-        ffStrbufAppendJsonVal(name, yyjson_obj_get(font, "face"));
-    }
-
-    if (*size < 0) {
-        yyjson_val* psize = yyjson_obj_get(font, "size");
-        if (yyjson_is_num(psize)) {
-            *size = unsafe_yyjson_get_num(psize);
+    if (result->namePriority < priority) {
+        yyjson_val* face = yyjson_obj_get(font, "face");
+        if (yyjson_is_str(face)) {
+            ffStrbufClear(&result->name);
+            ffStrbufAppendJsonVal(&result->name, face);
+            if (result->name.length > 0) { // an empty face is treated as unset
+                result->namePriority = priority;
+            }
         }
     }
+
+    if (result->sizePriority < priority) {
+        yyjson_val* size = yyjson_obj_get(font, "size");
+        if (yyjson_is_num(size)) {
+            result->size = unsafe_yyjson_get_num(size);
+            result->sizePriority = priority;
+        }
+    }
+}
+
+// Finds the profile matching `wtProfileId` in a `profiles` array.
+// A fragment either defines a profile with "guid" or updates an existing one with "updates",
+// the latter being more important, so it is looked up first.
+// Note that "guid" and "updates" may be missing: yyjson_get_str() returns nullptr then.
+static yyjson_val* findWTProfileInArray(yyjson_val* profiles, const FFstrbuf* wtProfileId, bool* fromUpdates) {
+    if (!yyjson_is_arr(profiles)) {
+        return nullptr;
+    }
+
+    for (uint8_t pass = 0; pass < 2; ++pass) {
+        yyjson_val* profile;
+        size_t idx, max;
+        yyjson_arr_foreach (profiles, idx, max, profile) {
+            const char* id = yyjson_get_str(yyjson_obj_get(profile, pass == 0 ? "updates" : "guid"));
+            if (id && ffStrbufEqualS(wtProfileId, id)) {
+                *fromUpdates = pass == 0;
+                return profile;
+            }
+        }
+    }
+
     return nullptr;
 }
 
@@ -43,7 +107,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
     }
 }
 
-static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size) {
+static const char* detectFromWTSettings(FFstrbuf* content, const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
     [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, nullptr, nullptr);
     if (!doc) {
         return "Failed to parse WT JSON config file";
@@ -57,36 +121,104 @@ static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* s
         return "yyjson_obj_get(root, \"profiles\") failed";
     }
 
-    FF_STRBUF_AUTO_DESTROY wtProfileId = ffStrbufCreateS(getenv("WT_PROFILE_ID"));
-    ffStrbufTrim(&wtProfileId, '\'');
-    if (wtProfileId.length > 0) {
-        yyjson_val* list = yyjson_obj_get(profiles, "list");
-        if (yyjson_is_arr(list)) {
-            yyjson_val* profile;
-            size_t idx, max;
-            yyjson_arr_foreach (list, idx, max, profile) {
-                yyjson_val* guid = yyjson_obj_get(profile, "guid");
-
-                if (ffStrbufEqualS(&wtProfileId, yyjson_get_str(guid))) {
-                    detectWTProfile(profile, name, size);
-                    break;
-                }
-            }
+    if (wtProfileId->length > 0) {
+        bool fromUpdates = false;
+        yyjson_val* profile = findWTProfileInArray(yyjson_obj_get(profiles, "list"), wtProfileId, &fromUpdates);
+        if (profile) {
+            applyWTProfile(profile, WT_FONT_PRIORITY_PROFILE, result);
         }
     }
 
     yyjson_val* defaults = yyjson_obj_get(profiles, "defaults");
     if (defaults) {
-        detectWTProfile(defaults, name, size);
+        applyWTProfile(defaults, WT_FONT_PRIORITY_DEFAULTS, result);
     }
 
-    if (name->length == 0) {
-        ffStrbufSetS(name, "Cascadia Mono");
-    }
-    if (*size < 0) {
-        *size = 12;
-    }
     return nullptr;
+}
+
+// Windows Terminal reads fragment files from a two level directory layout and doesn't recurse:
+//   <known folder>\Microsoft\Windows Terminal\Fragments\<app-name>\<file-name>.json
+// https://learn.microsoft.com/en-us/windows/terminal/json-fragment-extensions#where-to-place-the-json-fragment-files
+static void applyWTFragmentFile(const char* path, const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffReadFileBuffer(path, &content)) {
+        return;
+    }
+
+    // Fragments are optional: an unreadable or malformed one must not fail font detection
+    [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(content.chars, content.length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, nullptr, nullptr);
+    if (!doc) {
+        return;
+    }
+
+    yyjson_val* const root = yyjson_doc_get_root(doc);
+    assert(root);
+
+    bool fromUpdates = false;
+    yyjson_val* profile = findWTProfileInArray(yyjson_obj_get(root, "profiles"), wtProfileId, &fromUpdates);
+    if (profile) {
+        applyWTProfile(profile, fromUpdates ? WT_FONT_PRIORITY_FRAGMENT_UPDATES : WT_FONT_PRIORITY_FRAGMENT, result);
+    }
+}
+
+static void detectWTProfileFromFragmentsIn(const FFstrbuf* fragmentDir, const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(fragmentDir);
+    const uint32_t baseLength = path.length;
+
+    ffStrbufAppendC(&path, '*');
+    WIN32_FIND_DATAA entry;
+    FF_AUTO_CLOSE_DIR HANDLE hFind = FindFirstFileA(path.chars, &entry);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return;
+    }
+
+    do {
+        if (!(entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || entry.cFileName[0] == '.') {
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&path, baseLength);
+        ffStrbufAppendS(&path, entry.cFileName);
+        ffStrbufAppendC(&path, '\\');
+        const uint32_t appLength = path.length;
+
+        ffStrbufAppendS(&path, "*.json");
+        WIN32_FIND_DATAA fileEntry;
+        FF_AUTO_CLOSE_DIR HANDLE hFile = FindFirstFileA(path.chars, &fileEntry);
+        if (hFile != INVALID_HANDLE_VALUE) {
+            do {
+                if (fileEntry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                    continue;
+                }
+
+                ffStrbufSubstrBefore(&path, appLength);
+                ffStrbufAppendS(&path, fileEntry.cFileName);
+                applyWTFragmentFile(path.chars, wtProfileId, result);
+            } while (FindNextFileA(hFile, &fileEntry));
+        }
+
+        ffStrbufSubstrBefore(&path, baseLength);
+    } while (FindNextFileA(hFind, &entry));
+}
+
+static void detectFromWTFragments(const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
+    // Windows Terminal merges the user scoped fragments before the machine scoped ones,
+    // so the user scoped fragments are more important
+    static const KNOWNFOLDERID* const fragmentFolderIds[] = { &FOLDERID_LocalAppData, &FOLDERID_ProgramData };
+
+    for (uint32_t i = 0; i < ARRAY_SIZE(fragmentFolderIds); ++i) {
+        PWSTR folderW = nullptr;
+        if (SUCCEEDED(SHGetKnownFolderPath(fragmentFolderIds[i], KF_FLAG_DEFAULT, nullptr, &folderW))) {
+            FF_STRBUF_AUTO_DESTROY fragmentDir = ffStrbufCreateWS(folderW);
+            CoTaskMemFree(folderW);
+            ffStrbufAppendS(&fragmentDir, "\\Microsoft\\Windows Terminal\\Fragments\\");
+
+            if (ffPathExists(fragmentDir.chars, FF_PATHTYPE_DIRECTORY)) {
+                detectWTProfileFromFragmentsIn(&fragmentDir, wtProfileId, result);
+            }
+        }
+    }
 }
 
 static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont) {
@@ -159,17 +291,32 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
         return;
     }
 
-    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-    double size = -1;
-    error = detectFromWTImpl(&json, &name, &size);
+    FF_STRBUF_AUTO_DESTROY wtProfileId = ffStrbufCreateS(getenv("WT_PROFILE_ID"));
+    ffStrbufTrim(&wtProfileId, '\'');
 
+    [[gnu::cleanup(wrapWTFontFree)]] FFTerminalFontWT result = ffTerminalFontWTCreate();
+
+    error = detectFromWTSettings(&json, &wtProfileId, &result);
     if (error) {
         ffStrbufAppendS(&terminalFont->error, error);
-    } else {
-        char sizeStr[16];
-        snprintf(sizeStr, ARRAY_SIZE(sizeStr), "%g", size);
-        ffFontInitValues(&terminalFont->font, name.chars, sizeStr);
+        return;
     }
+
+    // JSON fragments are only read when settings.json doesn't fully specify the font
+    if (wtProfileId.length > 0 && (result.name.length == 0 || result.size < 0)) {
+        detectFromWTFragments(&wtProfileId, &result);
+    }
+
+    if (result.name.length == 0) {
+        ffStrbufAppendS(&result.name, "Cascadia Mono");
+    }
+    if (result.size < 0) {
+        result.size = 12;
+    }
+
+    char sizeStr[16];
+    snprintf(sizeStr, ARRAY_SIZE(sizeStr), "%g", result.size);
+    ffFontInitValues(&terminalFont->font, result.name.chars, sizeStr);
 }
 
 static void detectMintty(FFTerminalFontResult* terminalFont) {

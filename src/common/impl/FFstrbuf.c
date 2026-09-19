@@ -21,8 +21,6 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate) {
 }
 
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != nullptr);
-
     char* buffer = nullptr;
     int len = vasprintf(&buffer, format, arguments);
     assert(len >= 0);
@@ -33,8 +31,6 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
 // Takes ownership of `heapStr`. The caller must not free `heapStr` after calling this
 // function; the memory will be managed and freed via the associated FFstrbuf.
 void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr) {
-    assert(heapStr != nullptr);
-
     strbuf->length = length;
     size_t allocSize = ffMallocUsableSize(heapStr);
     if (allocSize == 0) {
@@ -157,8 +153,6 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transfo
 }
 
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != nullptr);
-
     va_list copy;
     va_copy(copy, arguments);
 
@@ -192,8 +186,6 @@ const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char unti
 }
 
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != nullptr);
-
     va_list arguments;
     va_start(arguments, format);
 
@@ -209,8 +201,6 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
 }
 
 void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != nullptr);
-
     va_list arguments;
     va_start(arguments, format);
     ffStrbufAppendVF(strbuf, format, arguments);
@@ -236,14 +226,10 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c) {
 }
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
-    assert(strbuf != nullptr);
-
     if (length == 0) {
         ffStrbufClear(strbuf);
         return;
     }
-
-    assert(value != nullptr);
 
     if (strbuf->allocated <= length) {
         char* newBuf = malloc(sizeof(char) * (length + 1));
@@ -262,7 +248,8 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
 }
 
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value) {
-    assert(value && value != strbuf);
+    // `value` is non-null per the `nonnull(2)` contract; the aliasing check cannot be expressed by an attribute
+    assert(value != strbuf);
 
     if (value->length == 0) {
         ffStrbufClear(strbuf);
@@ -647,7 +634,6 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c) {
 }
 
 bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer) {
-    assert(lineptr && n && buffer);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
     assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
 
@@ -678,7 +664,6 @@ bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffe
 }
 
 void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer) {
-    assert(buffer && lineptr && n);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
     assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
 
@@ -723,16 +708,17 @@ bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf) {
 /// @param compLength The length of the separated string to check.
 /// @param comp The separated string to check.
 /// @param separator The separator character.
+///
+/// Empty-string handling:
+/// - If `strbuf` is empty, it matches only if `comp` contains an empty segment
+///   (e.g. "abc::def", "abc:", ":abc") or `comp` itself is empty.
+/// - If `comp` is empty (compLength == 0), it matches only if `strbuf` is also empty.
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
-    if (strbuf->length == 0) {
-        return true;
+    if (__builtin_expect(compLength == 0, false)) {
+        return strbuf->length == 0;
     }
 
-    if (compLength == 0) {
-        return false;
-    }
-
-    for (const char* p = comp; p < comp + compLength;) {
+    for (const char* p = comp; p <= comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
         if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
@@ -752,15 +738,11 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
 
 /// @brief Case insensitive version of ffStrbufMatchSeparatedNS.
 bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
-    if (strbuf->length == 0) {
-        return true;
+    if (__builtin_expect(compLength == 0, false)) {
+        return strbuf->length == 0;
     }
 
-    if (compLength == 0) {
-        return false;
-    }
-
-    for (const char* p = comp; p < comp + compLength;) {
+    for (const char* p = comp; p <= comp + compLength;) {
         const char* colon = memchr(p, separator, (size_t) (comp + compLength - p));
         if (colon == nullptr) {
             uint32_t remainingLen = (uint32_t) (comp + compLength - p);
@@ -802,9 +784,15 @@ int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint) {
 /// @param compLength The length of the separated string to check.
 /// @param comp The substring to check.
 /// @param separator The separator character.
+///
+/// Empty-string handling is symmetric to ffStrbufMatchSeparatedNS
 bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
+    if (__builtin_expect(strbuf->length == 0, false)) {
+        return compLength == 0; // An empty list contains only the empty segment
+    }
+
     uint32_t startIndex = 0;
-    while (startIndex < strbuf->length) {
+    while (startIndex <= strbuf->length) { // `<=` so a trailing empty segment (e.g. "abc:") is checked
         uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
 
         uint32_t folderLength = colonIndex - startIndex;
@@ -819,8 +807,12 @@ bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, con
 }
 
 bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator) {
+    if (__builtin_expect(strbuf->length == 0, false)) {
+        return compLength == 0; // An empty list contains only the empty segment
+    }
+
     uint32_t startIndex = 0;
-    while (startIndex < strbuf->length) {
+    while (startIndex <= strbuf->length) { // `<=` so a trailing empty segment (e.g. "abc:") is checked
         uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
 
         uint32_t folderLength = colonIndex - startIndex;
@@ -835,8 +827,6 @@ bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLeng
 }
 
 bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf) {
-    assert(strbuf);
-
     if (strbuf->length < 4) {
         return false;
     }

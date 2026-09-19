@@ -287,11 +287,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement) {
 
 static void logoApplyColors(const FFlogo* logo, bool replacement) {
     if (instance.config.display.colorTitle.length == 0) {
-        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
+        ffStrbufSetStatic(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
     }
 
     if (instance.config.display.colorKeys.length == 0) {
-        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ?: logo->colors[1]);
+        ffStrbufSetStatic(&instance.config.display.colorKeys, logo->colorKeys ?: logo->colors[1]);
     }
 
     if (replacement) {
@@ -300,7 +300,7 @@ static void logoApplyColors(const FFlogo* logo, bool replacement) {
         const char* const* colors = logo->colors;
         for (int i = 0; *colors != nullptr && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++) {
             if (options->colors[i].length == 0) {
-                ffStrbufAppendS(&options->colors[i], *colors);
+                ffStrbufSetStatic(&options->colors[i], *colors);
             }
         }
     }
@@ -518,6 +518,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw) {
     return true;
 }
 
+#if FF_HAVE_IMAGE_LOGO
 static bool logoPrintImageIfExists(FFLogoType logo, bool printError) {
     if (!ffLogoPrintImageIfExists(logo, printError)) {
         return false;
@@ -526,6 +527,7 @@ static bool logoPrintImageIfExists(FFLogoType logo, bool printError) {
     logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     return true;
 }
+#endif
 
 static bool logoTryKnownType(void) {
     FFOptionsLogo* options = &instance.config.logo;
@@ -593,7 +595,16 @@ static bool logoTryKnownType(void) {
         return logoPrintFileIfExists(false, true);
     }
 
+#if FF_HAVE_IMAGE_LOGO
     return logoPrintImageIfExists(options->type, instance.config.display.showErrors);
+#else
+    // No image logo type can be selected in this build (see ffOptionsParseLogoCommandLine), and
+    // FF_LOGO_TYPE_IMAGE_RAW was handled above, so nothing printable is left for this source.
+    if (instance.config.display.showErrors) {
+        fprintf(stderr, "Logo: Unsupported logo type for source: %s\n", options->source.chars);
+    }
+    return false;
+#endif
 }
 
 void ffLogoPrint(void) {
@@ -638,8 +649,10 @@ void ffLogoPrint(void) {
             }
         }
 
+#if FF_HAVE_IMAGE_LOGO
+        // Try to load the logo as an image.
         if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt")) {
-#if !FF_MODULE_DISABLE_TERMINAL
+    #if !FF_MODULE_DISABLE_TERMINAL
             const FFTerminalResult* terminal = ffDetectTerminal();
 
             bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
@@ -655,21 +668,22 @@ void ffLogoPrint(void) {
                 ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
                 ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
                 ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
-    #ifdef __APPLE__
+        #ifdef __APPLE__
                 ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
-    #else
+        #else
                 ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
-    #endif
+        #endif
                 false;
-#else
+    #else
             bool supportsKitty = false;
-#endif
+    #endif
 
             // Try to load the logo as an image. If it succeeds, print it and return.
             if (logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false)) {
                 return;
             }
         }
+#endif
 
         // Try to load the logo as a file. If it succeeds, print it and return.
         if (logoPrintFileIfExists(true, false)) {

@@ -3,7 +3,7 @@
 #include "fastfetch.h"
 #include "common/time.h"
 
-static inline const char* ffFindFileName(const char* file) {
+[[gnu::nonnull(1), gnu::pure, nodiscard]] static inline const char* ffFindFileName(const char* file) {
     const char* lastSlash = __builtin_strrchr(file, '/');
 #ifdef _WIN32
     if (lastSlash == nullptr) {

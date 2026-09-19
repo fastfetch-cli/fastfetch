@@ -224,8 +224,8 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,
     .generateJsonConfig = (void*) ffGenerateZpoolJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Zpool name", "name" },
-        { "Zpool guid", "guid" },
+        { "Zpool name *", "name" },
+        { "Zpool guid *", "guid" },
         { "Zpool state", "state" },
         { "Size used", "size-used" },
         { "Size allocated", "size-allocated" },

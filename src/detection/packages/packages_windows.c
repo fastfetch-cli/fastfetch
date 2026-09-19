@@ -157,10 +157,25 @@ static void detectPacman(FFPackagesResult* result) {
 }
 
 static void detectWinget(FFPackagesResult* result) {
+    // Why not read winget's own database instead of shelling out?
+    // `%LOCALAPPDATA%\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\<source>\installed.db`
+    // is a `PackageTrackingCatalog`: it records the install / uninstall actions winget performed for that
+    // source, not a snapshot of what is currently installed. Uninstalling with anything but winget leaves
+    // the record behind forever, so counting it also counts packages that are long gone. Its schema is
+    // private and versioned (1.3, while the source index is 2.0), winget opens it ReadWrite while running,
+    // and reading it would drag in a SQLite dependency.
+    // The authoritative set of installed packages comes from the ARP registry and MSIX, which is exactly
+    // what `winget list` enumerates before correlating it against the read-only source index.
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buffer, (char*[]) {
                                            "winget.exe",
                                            "list",
+                                           // Without `--source winget`, winget also lists every package installed by
+                                           // other means (ARP / MSIX), which are not winget packages at all.
+                                           // It also skips the msstore HTTP round-trips, which are the main reason
+                                           // why `winget list` is slow and its latency unpredictable.
+                                           "--source",
+                                           "winget",
                                            "--disable-interactivity",
                                            nullptr,
                                        })) {

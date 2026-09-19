@@ -65,6 +65,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                          FF_ARG(buffer, "result"),
                                                                                                          FF_ARG(buffer2, "sum"),
+                                                                                                         FF_ARG(levelStr, "level"),
                                                                                                      }));
         }
     }
@@ -255,6 +256,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Separate result", "result" },
         { "Sum result", "sum" },
+        { "Cache level *", "level" },
     })),
     .defaultOrder = 34,
 };

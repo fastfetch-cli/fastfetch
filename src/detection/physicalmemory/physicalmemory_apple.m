@@ -38,7 +38,7 @@ static void appendDevice(
     if (size)
     {
         char* unit = nullptr;
-        device->size = strtoul(size.UTF8String, &unit, 10);
+        device->size = (uint64_t) strtoull(size.UTF8String, &unit, 10);
         if (*unit == ' ') ++unit;
 
         switch (*unit)

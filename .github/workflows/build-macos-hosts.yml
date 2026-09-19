@@ -26,13 +26,30 @@ jobs:
       - name: uname -a
         run: uname -a
 
-      - name: install required packages
+      - name: install required packages with MacPorts # Homebrew dropped Intel support
+        if: inputs.arch == 'amd64'
+        run: |
+          curl -fsSL https://github.com/macports/macports-base/releases/download/v2.12.6/MacPorts-2.12.6-15-Sequoia.pkg -o "$RUNNER_TEMP/MacPorts.pkg"
+          sudo installer -pkg "$RUNNER_TEMP/MacPorts.pkg" -target /
+          echo /opt/local/bin >> "$GITHUB_PATH"
+          echo /opt/local/sbin >> "$GITHUB_PATH"
+          export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+          sudo port selfupdate
+          sudo port install vulkan-loader vulkan-headers MoltenVK ImageMagick7 chafa lua quickjs-ng jq
+
+      - name: install required packages with Homebrew
+        if: inputs.arch == 'aarch64'
         run: |
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew update
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa lua quickjs-ng jq
 
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: |
+          if [ "${{ inputs.arch }}" = "amd64" ]; then
+            export CMAKE_PREFIX_PATH=/opt/local
+            export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+          fi
+          cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4

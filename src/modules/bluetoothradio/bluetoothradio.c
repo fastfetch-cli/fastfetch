@@ -220,7 +220,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,
     .generateJsonConfig = (void*) ffGenerateBluetoothRadioJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Radio name for discovering", "name" },
+        { "Radio name for discovering *", "name" },
         { "Address", "address" },
         { "LMP version", "lmp-version" },
         { "LMP subversion", "lmp-subversion" },

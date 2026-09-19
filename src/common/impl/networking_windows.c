@@ -9,6 +9,9 @@
 
 static LPFN_CONNECTEX ConnectEx;
 
+// Upper bound of a single HTTP response, guarding against excessive memory allocation
+#define FF_NETWORKING_MAX_RESPONSE_SIZE (1024u * 1024u)
+
 static const char* initWsaData(WSADATA* wsaData) {
     FF_DEBUG("Initializing WinSock");
     if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
@@ -45,8 +48,8 @@ static const char* initWsaData(WSADATA* wsaData) {
     return nullptr;
 }
 
-const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers) {
-    FF_DEBUG("Preparing to send HTTP request: host=%s, path=%s", host, path);
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, uint16_t port, const char* path, const char* headers) {
+    FF_DEBUG("Preparing to send HTTP request: host=%s, port=%u, path=%s", host, port, path);
 
     if (state->compression) {
 #ifdef FF_HAVE_ZLIB
@@ -92,8 +95,11 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         return "Failed to convert host to wide string";
     }
 
-    FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
-    if (GetAddrInfoW(hostW, L"80", &hints, &addr) != 0) {
+    wchar_t portW[6];
+    _itow(port, portW, 10);
+
+    FF_DEBUG("Resolving address: %s:%u (%s)", host, port, state->ipv6 ? "IPv6" : "IPv4");
+    if (GetAddrInfoW(hostW, portW, &hints, &addr) != 0) {
         FF_DEBUG("GetAddrInfoW() failed");
         return "GetAddrInfoW() failed";
     }
@@ -156,7 +162,19 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
     ffStrbufAppendS(&state->command, " HTTP/1.0\r\nHost: ");
-    ffStrbufAppendS(&state->command, host);
+    if (strchr(host, ':') != nullptr) {
+        // An IPv6 literal has to be bracketed in the Host header (RFC 9110 7.2), while
+        // GetAddrInfoW() wants it bare
+        ffStrbufAppendC(&state->command, '[');
+        ffStrbufAppendS(&state->command, host);
+        ffStrbufAppendC(&state->command, ']');
+    } else {
+        ffStrbufAppendS(&state->command, host);
+    }
+    // The Host header carries the port whenever it is not the default one (RFC 9110 7.2)
+    if (port != 80) {
+        ffStrbufAppendF(&state->command, ":%u", port);
+    }
     ffStrbufAppendS(&state->command, "\r\nConnection: close\r\n"); // Explicitly request connection closure
 
     // Add compression support if enabled
@@ -266,8 +284,23 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     [[maybe_unused]] int recvCount = 0;
     uint32_t contentLength = 0;
     uint32_t headerEnd = 0;
+    bool chunked = false;
 
-    do {
+    // Runs until the response is framed; the buffer is grown on demand at the top
+    for (;;) {
+        if (ffStrbufGetFree(buffer) == 0) {
+            // `Content-Length` may be absent (e.g. chunked responses). Grow the buffer
+            // on demand instead of silently truncating the response.
+            if (buffer->allocated >= FF_NETWORKING_MAX_RESPONSE_SIZE) {
+                FF_DEBUG("Response is too large: %u bytes, aborting", buffer->allocated);
+                closesocket(state->sockfd);
+                state->sockfd = INVALID_SOCKET;
+                return "Response too large";
+            }
+            FF_DEBUG("Receive buffer is full, extending it");
+            ffStrbufEnsureFreeNoCheck(buffer, buffer->allocated);
+        }
+
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
             ++recvCount,
             buffer->length,
@@ -306,11 +339,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 FF_DEBUG("Found HTTP header end marker, position: %u", headerEnd);
 
                 // Check for Content-Length header to pre-allocate enough memory
-                const char* clHeader = strcasestr(buffer->chars, "Content-Length:");
+                uint32_t valueLen = 0;
+                const char* clHeader = ffNetworkingFindHeader(buffer->chars, headerEnd, "Content-Length:", &valueLen);
                 if (clHeader) {
-                    contentLength = (uint32_t) strtoul(clHeader + 15, nullptr, 10);
+                    contentLength = (uint32_t) strtoul(clHeader, nullptr, 10);
                     if (contentLength > 0) {
-                        if (contentLength > 1024 * 1024) { // 1MB limit to prevent excessive memory allocation and potential attacks
+                        if (contentLength > FF_NETWORKING_MAX_RESPONSE_SIZE) { // 1MB limit to prevent excessive memory allocation and potential attacks
                             FF_DEBUG("Content-Length is too large: %u bytes, aborting", contentLength);
                             closesocket(state->sockfd);
                             state->sockfd = INVALID_SOCKET;
@@ -323,9 +357,47 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                         FF_DEBUG("Extended receive buffer to %u bytes", buffer->allocated);
                     }
                 }
+
+                // A chunked response has no Content-Length; it is framed by a last-chunk
+                const char* teHeader = ffNetworkingFindHeader(buffer->chars, headerEnd, "Transfer-Encoding:", &valueLen);
+                if (teHeader != nullptr) {
+                    switch (ffNetworkingParseTransferEncoding(teHeader, valueLen)) {
+                        case FF_NETWORKING_TE_CHUNKED:
+                            FF_DEBUG("Detected chunked transfer encoding");
+                            chunked = true;
+                            break;
+                        case FF_NETWORKING_TE_UNSUPPORTED:
+                            // The framing of e.g. `gzip, chunked` is unreadable and the payload
+                            // would stay encoded, so fail instead of returning garbage
+                            FF_DEBUG("Unsupported Transfer-Encoding: %.*s", (int) valueLen, teHeader);
+                            closesocket(state->sockfd);
+                            state->sockfd = INVALID_SOCKET;
+                            return "Unsupported Transfer-Encoding";
+                        default:
+                            break;
+                    }
+                }
             }
         }
-    } while (ffStrbufGetFree(buffer) > 0);
+
+        // Stop as soon as the response is framed, rather than waiting for the FIN
+        if (chunked) {
+            uint32_t consumed = 0;
+            int complete = ffNetworkingChunkedComplete(buffer->chars + headerEnd + 4, buffer->length - headerEnd - 4, &consumed);
+            if (complete < 0) {
+                FF_DEBUG("Malformed chunked body");
+                closesocket(state->sockfd);
+                state->sockfd = INVALID_SOCKET;
+                return "Malformed chunked body";
+            }
+            if (complete > 0) {
+                FF_DEBUG("Chunked body complete, %u bytes of encoded body", consumed);
+                break;
+            }
+        } else if (contentLength > 0 && buffer->length >= headerEnd + 4 + contentLength) {
+            break;
+        }
+    }
 
     FF_DEBUG("Closing socket: fd=%u", (unsigned) state->sockfd);
     closesocket(state->sockfd);
@@ -339,6 +411,10 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     if (headerEnd == 0) {
         FF_DEBUG("No HTTP header end marker found");
         return "No HTTP header end found";
+    }
+
+    if (chunked && !ffNetworkingDecodeChunked(buffer, headerEnd)) {
+        return "Failed to decode chunked response";
     }
 
     if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n") && !ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
