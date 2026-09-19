@@ -84,6 +84,7 @@ Bugfixes:
     * This fixes PKG package count detection on FreeBSD.
 * Fixed `{#keys}` and `{#title}` in module format strings not honoring the `brightColor` display option. (Format)
 * Fixed `paddingTop` and `paddingLeft` being ignored by the `kitty-icat` image logo type. (Logo)
+* Fixed issues when running on big-endian platforms.
 * Some internal cleanups and optimizations.
 
 Logos:
