@@ -90,7 +90,7 @@
         {
             "type": "disk",
             "key": "║{#cyan}│ {icon}  Disk      │{$4}│{#keys}║{$2}",
-            "format": "{size-used} \/ {size-total} ({size-percentage}) - {filesystem}",
+            "format": "{mountpoint} {size-used} \/ {size-total} ({size-percentage}) - {filesystem}",
         },
         {
             "type": "battery",
@@ -195,7 +195,7 @@
             "keyIcon": "",
             "key": "║{#red}│ {icon}  Clang     │{$4}│{#keys}║{$2}",
             "text": "clang --version | findstr version",      // Finds the line with "version"
-            "format": "clang {~-6}"                           // Prints the last 6 characters (version number)
+            "format": "clang {~14,20}"                        // Prints 14~20 characters (version number)
         },
         {
             "type": "command",
@@ -204,6 +204,13 @@
             "text": "node --version",
             "format": "node {~1}"                             // {~1} removes first character (v)
         },
+		{
+			"type": "command",
+			"keyIcon": "",
+			"key": "║{#red}│ {icon}  Python    │{$4}│{#keys}║{$2}",
+			"text": "python --version",
+			"format": "python {~7}"                           // {~7} removes first 7 characters ("Python" with extra space)
+		},
         {
             "type": "command",
             "keyIcon": "",
