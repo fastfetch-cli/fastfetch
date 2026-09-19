@@ -1942,6 +1942,7 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "secur32"
+        PRIVATE "shlwapi"
         PRIVATE "windowscodecs"
     )
     if(NOT ENABLE_WIN81_COMPAT)

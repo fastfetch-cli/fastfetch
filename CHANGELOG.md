@@ -74,6 +74,8 @@ Features:
     * It now supports custom ports and can properly handle chunked transfer encoding.
     * It is designed for minimal resource usage and fast performance. It does not support full HTTP features like HTTPS. Users can always use the `Command` module with `curl` to achieve similar functionality.
 * Added Umbriel wayland compositor version detection (WM, Linux)
+* Improved the player name detection on Windows to show the name Windows shows for it. (Player, Windows)
+    * An unpackaged player such as Chrome is now reported as `Google Chrome` instead of `Chrome`.
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)

@@ -11,6 +11,11 @@ extern "C" {
     #include <winstring.h>
     #include <asyncinfo.h>
 
+    #include <shobjidl.h>
+    #include <shlobj.h>
+    #include <knownfolders.h>
+    #include <shlwapi.h>
+
     #include <winrt/Windows.ApplicationModel.h>
     #include <winrt/Windows.Foundation.h>
     #include <winrt/Windows.Media.Control.h>
@@ -210,6 +215,99 @@ static HRESULT ffSaveThumbnailToTempPath(
     return S_OK;
 }
 
+// Path 1: `Windows.ApplicationModel.AppInfo`, which answers straight from the package manifest.
+// It only knows packaged (MSIX) apps, but for those it is the cheap source: resolving a
+// `PackageFamilyName!AppId` AppUserModelId costs about half of what the shell needs, because the
+// shell has to look the application up in the package graph. A *failed* lookup still costs a
+// couple of milliseconds of WinRT class activation, so this is only worth trying on names that
+// are actually packaged -- the caller gates it, see `resolveAppUserModelId`.
+static bool resolvePackagedAppUserModelId(const wchar_t* aumid, FFstrbuf* result) {
+    FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppInfoStatics>* statics = nullptr;
+    if (FAILED(ffGetActivationFactory(L"Windows.ApplicationModel.AppInfo", winrt::guid_of<winrt::Windows::ApplicationModel::IAppInfoStatics>(), &statics)) || !statics) {
+        return false;
+    }
+
+    HSTRING_HEADER header;
+    HSTRING aumidString;
+    if (FAILED(WindowsCreateStringReference(aumid, (UINT32) wcslen(aumid), &header, &aumidString))) {
+        return false;
+    }
+
+    FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppInfo>* appInfo = nullptr;
+    if (FAILED(statics->GetFromAppUserModelId(reinterpret_cast<void*>(aumidString), reinterpret_cast<void**>(&appInfo))) || !appInfo) {
+        return false;
+    }
+
+    FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppDisplayInfo>* displayInfo = nullptr;
+    if (FAILED(appInfo->get_DisplayInfo(reinterpret_cast<void**>(&displayInfo))) || !displayInfo) {
+        return false;
+    }
+
+    [[gnu::cleanup(deleteHstring)]] HSTRING displayName = nullptr;
+    if (FAILED(displayInfo->get_DisplayName(reinterpret_cast<void**>(&displayName))) || !displayName) {
+        return false;
+    }
+
+    ffStrbufSetHstring(result, displayName);
+    return result->length > 0;
+}
+
+// Path 2: the Start menu's `AppsFolder` namespace, i.e. the (display name, AppUserModelId) table
+// Windows itself displays. It covers packaged and unpackaged apps alike, and inside that namespace
+// an item's parsing name *is* its AppUserModelId, so `ParseDisplayName` finds a child directly --
+// going through `SHCreateItemFromParsingName(L"shell:AppsFolder\\" + aumid)` costs several times
+// more, because the `shell:` protocol has to be activated first.
+static bool resolveAppsFolderAppUserModelId(const wchar_t* aumid, FFstrbuf* result) {
+    const size_t aumidLength = wcslen(aumid);
+    wchar_t name[512];
+    if (aumidLength == 0 || aumidLength >= ARRAY_SIZE(name)) {
+        return false;
+    }
+    wmemcpy(name, aumid, aumidLength + 1); // `ParseDisplayName` wants a mutable string
+
+    FF_AUTO_RELEASE_COM_OBJECT IShellItem* folder = nullptr;
+    if (FAILED(SHGetKnownFolderItem(FOLDERID_AppsFolder, KF_FLAG_DEFAULT, nullptr, IID_PPV_ARGS(&folder))) || !folder) {
+        return false;
+    }
+
+    FF_AUTO_RELEASE_COM_OBJECT IShellFolder* shellFolder = nullptr;
+    if (FAILED(folder->BindToHandler(nullptr, BHID_SFObject, IID_PPV_ARGS(&shellFolder))) || !shellFolder) {
+        return false;
+    }
+
+    LPITEMIDLIST child = nullptr;
+    ULONG attributes = 0;
+    if (FAILED(shellFolder->ParseDisplayName(nullptr, nullptr, name, &attributes, &child, nullptr)) || !child) {
+        return false;
+    }
+
+    bool success = false;
+    STRRET strret = {};
+    if (SUCCEEDED(shellFolder->GetDisplayNameOf(child, SHGDN_INFOLDER, &strret))) {
+        wchar_t displayName[ARRAY_SIZE(name)];
+        if (SUCCEEDED(StrRetToBufW(&strret, child, displayName, ARRAY_SIZE(displayName)))) {
+            ffStrbufSetWS(result, displayName);
+            success = result->length > 0;
+        }
+    }
+
+    CoTaskMemFree(child);
+    return success;
+}
+
+// The two sources above agree on every packaged app, and the shell alone covers everything else,
+// so picking between them is purely a matter of cost. `PackageFamilyName!AppId` is the shape
+// `AppInfo` can serve, and the `!` is what distinguishes it from an unpackaged AppUserModelId
+// (`Chrome`, `PotPlayerMini64.exe`, a derived path). The shell stays the fallback either way, so a
+// packaged-looking name that `AppInfo` rejects is still resolved.
+static bool resolveAppUserModelId(const wchar_t* aumid, FFstrbuf* result) {
+    if (wcschr(aumid, L'!') && resolvePackagedAppUserModelId(aumid, result)) {
+        return true;
+    }
+
+    return resolveAppsFolderAppUserModelId(aumid, result);
+}
+
 static const char* getMedia(FFMediaResult* result, bool saveCover) {
     const char* error = ffInitCom();
     if (error) {
@@ -373,19 +471,9 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
             }
         }
 
-        FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppInfoStatics>* appInfoStatics = nullptr;
-        hr = ffGetActivationFactory(L"Windows.ApplicationModel.AppInfo", winrt::guid_of<winrt::Windows::ApplicationModel::IAppInfoStatics>(), &appInfoStatics);
-        if (SUCCEEDED(hr) && appInfoStatics) {
-            FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppInfo>* appInfo = nullptr;
-            if (SUCCEEDED(appInfoStatics->GetFromAppUserModelId(reinterpret_cast<void*>(playerId), reinterpret_cast<void**>(&appInfo))) && appInfo) {
-                FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::ApplicationModel::IAppDisplayInfo>* displayInfo = nullptr;
-                if (SUCCEEDED(appInfo->get_DisplayInfo(reinterpret_cast<void**>(&displayInfo))) && displayInfo) {
-                    [[gnu::cleanup(deleteHstring)]] HSTRING displayName = nullptr;
-                    if (SUCCEEDED(displayInfo->get_DisplayName(reinterpret_cast<void**>(&displayName)))) {
-                        ffStrbufSetHstring(&result->player, displayName);
-                    }
-                }
-            }
+        if (playerId) {
+            uint32_t aumidLength = 0;
+            resolveAppUserModelId(WindowsGetStringRawBuffer(playerId, &aumidLength), &result->player);
         }
 
         if (result->player.length == 0) {
