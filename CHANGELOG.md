@@ -8,6 +8,8 @@ Changes:
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss; `false` ignores the image logo cache completely, reading nothing from it and writing nothing to it; `regen` does what `--logo-recache true` used to do. `logo.cache` accepts a boolean, or the string `"regen"`.
 * The `waitTime` option of `DiskIO` and `NetIO` now defaults to `250` ms instead of `500`. (DiskIO / NetIO)
     * The byte counters are maintained by the kernel as I/O happens, so a shorter sampling window still yields an accurate rate, and both modules now finish about 250 ms sooner. The two modules wait concurrently, so enabling both does not cost twice the wait time.
+* The `waitTime` option of `Top` now defaults to `250` ms instead of `500`. (Top)
+    * The operating system accounts process CPU time in fixed steps, so a window longer than roughly 150 ms does not visibly improve the reported percentages. The module now finishes about 250 ms sooner.
 
 Features:
 * Improved image logo support
