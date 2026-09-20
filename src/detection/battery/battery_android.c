@@ -6,6 +6,8 @@
 #include "common/processing.h"
 #include "common/properties.h"
 
+#include <inttypes.h>
+
 // Android exposes the battery through BatteryManager, which the NDK does not wrap and whose sysfs
 // backing is unreadable from an app UID. What does work without any permission is
 // android.os.IBatteryPropertiesRegistrar in system_server, reachable either over /dev/binder (see
@@ -60,6 +62,11 @@ typedef enum FFBatteryAndroidCapacityLevel : int32_t {
 #define FF_BATTERY_ANDROID_VALUE_OFFSET 12
 #define FF_BATTERY_ANDROID_VALUE_UNSET 0x8000000000000000ULL // Long.MIN_VALUE, i.e. never filled in
 
+// One `getProperty` reply is [exception code][return value][value present][int64 mValueLong], and it
+// measures 24 bytes on the device: API 35 appended [string8 mValueString] to `BatteryProperty`, and a
+// reply carries a word for it even when it is empty. A dump of the first 32 covers every word.
+#define FF_BATTERY_ANDROID_DEBUG_DUMP_SIZE 32
+
 static void initResult(FFBatteryResult* battery) {
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
@@ -73,6 +80,29 @@ static void initResult(FFBatteryResult* battery) {
     ffStrbufInit(&battery->manufactureDate);
 }
 
+#ifndef NDEBUG
+// Every word of the reply is read at a fixed offset, so a reply whose fields do not line up is
+// otherwise undiagnosable: the bytes are the only evidence. Each line carries the words next to their
+// bytes, because what the reader is looking for -- the exception code, the return value, the long --
+// is an int, and the long straddles the last word of the first line and the first of the second.
+static void debugDumpReply(const uint8_t* data, size_t size) {
+    const size_t limit = size < FF_BATTERY_ANDROID_DEBUG_DUMP_SIZE ? size : FF_BATTERY_ANDROID_DEBUG_DUMP_SIZE;
+    for (size_t offset = 0; offset < limit; offset += 16) {
+        char hex[16 * 3 + 1];
+        size_t used = 0;
+        for (size_t i = 0; i < 16 && offset + i < limit; ++i) {
+            used += (size_t) snprintf(hex + used, sizeof(hex) - used, "%02x ", data[offset + i]);
+        }
+        FF_DEBUG("  +0x%02zx  %-47s | %d %d %d %d", offset, hex,
+            ffBinderReadI32(data, size, offset), ffBinderReadI32(data, size, offset + 4),
+            ffBinderReadI32(data, size, offset + 8), ffBinderReadI32(data, size, offset + 12));
+    }
+}
+    #define FF_BATTERY_ANDROID_DEBUG_DUMP(data, size) debugDumpReply(data, size)
+#else
+    #define FF_BATTERY_ANDROID_DEBUG_DUMP(data, size) ((void) 0)
+#endif
+
 static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t property, uint64_t* value) {
     // `getProperty` is the third method declared in `IBatteryPropertiesRegistrar` up to Android 9 and
     // the first one from Android 10 on. Written as an `if` because clang rejects `__builtin_available`
@@ -81,6 +111,7 @@ static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t prope
     if (FF_ANDROID_API_AT_LEAST(29)) {
         transaction = 1u;
     }
+    FF_DEBUG("Property %u goes out as transaction %u (3 up to Android 9, 1 from Android 10)", property, transaction);
 
     uint8_t parcelBuffer[128];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
@@ -91,20 +122,41 @@ static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t prope
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
     const char* error = ffBinderTransact(binder, handle, transaction, &parcel, &reply);
     if (error != nullptr) {
+        FF_DEBUG("Property %u could not be transacted: %s", property, error);
         return error;
     }
     if (ffBinderReplyIsStatus(&reply)) {
+        FF_DEBUG("Property %u came back as a status reply of %d instead of a parcel",
+            property, (int) ffBinderReadI32(reply.data, reply.size, 0));
         return "Battery service rejected the request";
     }
-    if (ffBinderReadI32(reply.data, reply.size, 0) != 0) {
+
+    // The three words AIDL writes in front of the value, named here rather than read inline so that
+    // the trace below can print them: the exception code, the method's own `int` return value (which
+    // is what the service sets when it does not know the property) and the non-null marker of the out
+    // parameter. A marker of 0 means the value behind it was never written.
+    const int32_t exception = ffBinderReadI32(reply.data, reply.size, 0);
+    const int32_t returnValue = ffBinderReadI32(reply.data, reply.size, 4);
+    FF_DEBUG("Property %u: reply is %zu bytes, exception %d, return value %d, value present %d",
+        property, reply.size, exception, returnValue, ffBinderReadI32(reply.data, reply.size, 8));
+    if (exception != 0) {
         return "Battery service raised an exception";
     }
-    if (ffBinderReadI32(reply.data, reply.size, 4) != 0) {
+    if (returnValue != 0) {
+        FF_DEBUG("Property %u is not one this HAL implements, so the words below are not a value:",
+            property);
+        FF_BATTERY_ANDROID_DEBUG_DUMP(reply.data, reply.size);
         return "Battery service does not report this property";
     }
 
     const uint64_t result = ffBinderReadU64(reply.data, reply.size, FF_BATTERY_ANDROID_VALUE_OFFSET);
+    FF_DEBUG("Property %u is %" PRIu64 " (0x%" PRIx64 ") at +0x%02x",
+        property, result, result, FF_BATTERY_ANDROID_VALUE_OFFSET);
     if (result == FF_BATTERY_ANDROID_VALUE_UNSET) {
+        FF_DEBUG("Property %u is Long.MIN_VALUE, which is what the service leaves behind when it never "
+                 "fills the field in, so there is nothing to report:",
+            property);
+        FF_BATTERY_ANDROID_DEBUG_DUMP(reply.data, reply.size);
         return "Battery service left this property empty";
     }
 
@@ -116,24 +168,29 @@ static const char* parseBinder(FFlist* results) {
     [[gnu::cleanup(ffBinderClose)]] FFBinder binder = { .fd = -1 };
     const char* error = ffBinderOpen(&binder);
     if (error != nullptr) {
+        FF_DEBUG("Opening /dev/binder failed: %s", error);
         return error;
     }
 
     uint32_t handle = 0;
     error = ffBinderLookupService(&binder, FF_BATTERY_ANDROID_SERVICE, FF_BINDER_SM_GET_SERVICE, &handle);
     if (error != nullptr) {
+        FF_DEBUG("Looking up the \"%s\" service failed: %s", FF_BATTERY_ANDROID_SERVICE, error);
         return error;
     }
+    FF_DEBUG("The \"%s\" service is handle %u", FF_BATTERY_ANDROID_SERVICE, handle);
 
     uint64_t capacity = 0;
     error = getProperty(&binder, handle, FF_BATTERY_ANDROID_PROPERTY_CAPACITY, &capacity);
     if (error != nullptr) {
+        FF_DEBUG("The capacity is what failed, so no battery is reported at all");
         return error;
     }
 
     uint64_t status = 0;
     error = getProperty(&binder, handle, FF_BATTERY_ANDROID_PROPERTY_STATUS, &status);
     if (error != nullptr) {
+        FF_DEBUG("The status is what failed, so no battery is reported at all");
         return error;
     }
 
@@ -145,6 +202,13 @@ static const char* parseBinder(FFlist* results) {
     } else if (status == FF_BATTERY_ANDROID_STATUS_DISCHARGING) {
         battery->status |= FF_BATTERY_STATUS_DISCHARGING;
     }
+    // `BatteryStatus` has five values and only two of them say something the powered bits do not, so
+    // the trace spells the mapping out: anything that is not 2 or 3 leaves the bits clear, which is
+    // what UNKNOWN (1), NOT_CHARGING (4) and FULL (5) all come to.
+    FF_DEBUG("Reporting one battery: capacity %.0f%%, status %" PRIu64 " -> bits 0x%x "
+             "(2 charging, 3 discharging; 1/4/5 leave them clear). The registrar answers no "
+             "temperature and no technology, so both stay unset",
+        battery->capacity, status, (unsigned) battery->status);
     return nullptr;
 }
 
