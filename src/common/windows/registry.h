@@ -3,6 +3,7 @@
 #include "fastfetch.h"
 #include "common/argType.h"
 #include "common/io.h"
+#include "common/windows/nt.h"
 
 #ifndef HKEY_CURRENT_USER
     #define HKEY_CLASSES_ROOT ((HKEY) (ULONG_PTR) ((LONG) 0x80000000))
@@ -26,7 +27,9 @@ bool ffRegOpenSubkeyForRead(HANDLE hKey, const wchar_t* subKeyW, HANDLE* result,
 bool ffRegReadValue(HANDLE hKey, const FFRegValueArg* arg, FFstrbuf* error);
 bool ffRegReadValues(HANDLE hKey, uint32_t argc, const FFRegValueArg argv[], FFstrbuf* error);
 bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error);
-bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error);
+// Fills `result` with the counters the key object caches, including LastWriteTime: the number of
+// 100-nanosecond intervals since this key or any of its values was last changed (FILETIME epoch).
+bool ffRegQueryKey(HANDLE hKey, KEY_CACHED_INFORMATION* result, FFstrbuf* error);
 
 static inline bool ffRegOpenKeyForRead(HKEY hRootKey, const wchar_t* subKeyW, HANDLE* result, FFstrbuf* error) {
     return ffRegOpenSubkeyForRead(ffRegGetRootKeyHandle(hRootKey), subKeyW, result, error);

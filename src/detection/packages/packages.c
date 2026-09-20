@@ -16,6 +16,33 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
     return nullptr;
 }
 
+bool ffPackagesReadCacheKey(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint64_t cacheKey, const char* packageId, uint32_t* result) {
+    if (__builtin_expect(cacheKey == 0, false)) {
+        // The caller could not compute a cache key (its data source is unreadable). Nothing may be
+        // cached under an unknown key, and reporting 0 would be a lie. Leaving `cacheContent` empty
+        // makes the matching ffPackagesWriteCache() call a no-op.
+        return false;
+    }
+
+    ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);
+    ffStrbufEnsureEndsWithC(cacheDir, '/');
+    ffStrbufAppendF(cacheDir, "fastfetch/packages/%s.txt", packageId);
+
+    if (ffReadFileBuffer(cacheDir->chars, cacheContent)) {
+        uint64_t key_cached;
+        uint32_t num_cached;
+        if (sscanf(cacheContent->chars, "%" SCNu64 " %" SCNu32, &key_cached, &num_cached) == 2 &&
+            key_cached == cacheKey && num_cached > 0) {
+            *result = num_cached;
+            return true;
+        }
+    }
+
+    ffStrbufSetF(cacheContent, "%" PRIu64 " ", cacheKey);
+
+    return false;
+}
+
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result) {
     const uint64_t mtime_current = ffPathGetMtime(filePath);
     if (__builtin_expect(mtime_current == 0, false)) {
@@ -31,23 +58,7 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
         return true;
     }
 
-    ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);
-    ffStrbufEnsureEndsWithC(cacheDir, '/');
-    ffStrbufAppendF(cacheDir, "fastfetch/packages/%s.txt", packageId);
-
-    if (ffReadFileBuffer(cacheDir->chars, cacheContent)) {
-        uint64_t mtime_cached;
-        uint32_t num_cached;
-        if (sscanf(cacheContent->chars, "%" SCNu64 " %" SCNu32, &mtime_cached, &num_cached) == 2 &&
-            mtime_cached == mtime_current && num_cached > 0) {
-            *result = num_cached;
-            return true;
-        }
-    }
-
-    ffStrbufSetF(cacheContent, "%" PRIu64 " ", mtime_current);
-
-    return false;
+    return ffPackagesReadCacheKey(cacheDir, cacheContent, mtime_current, packageId, result);
 }
 
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements) {

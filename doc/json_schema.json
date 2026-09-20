@@ -3812,7 +3812,7 @@
                                                 "type": "null"
                                             }
                                         ],
-                                        "default": ["winget"]
+                                        "default": []
                                     },
                                     "combined": {
                                         "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
