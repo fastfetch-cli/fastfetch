@@ -2,6 +2,7 @@
 #include "battery.h"
 #include "common/android/api.h"
 #include "common/android/binder.h"
+#include "common/debug.h"
 #include "common/processing.h"
 #include "common/properties.h"
 
@@ -28,13 +29,24 @@
 #define FF_BATTERY_ANDROID_SERVICE "batteryproperties"
 #define FF_BATTERY_ANDROID_DESCRIPTOR "android.os.IBatteryPropertiesRegistrar"
 
+// android.os.Process.ROOT_UID and SHELL_UID. These two are the only UIDs that hold
+// android.permission.DUMP, which `dumpsys` checks before it prints anything. See ffDetectBattery.
+#define FF_BATTERY_ANDROID_ROOT_UID 0
+#define FF_BATTERY_ANDROID_SHELL_UID 2000
+
 // BatteryManager.BATTERY_PROPERTY_*
 #define FF_BATTERY_ANDROID_PROPERTY_CAPACITY 4u
 #define FF_BATTERY_ANDROID_PROPERTY_STATUS 6u
 
-// BatteryManager.BATTERY_STATUS_*
+// BatteryManager.BATTERY_STATUS_*, which the health HAL's `BatteryStatus` mirrors value for value.
+#define FF_BATTERY_ANDROID_STATUS_UNKNOWN 1u
 #define FF_BATTERY_ANDROID_STATUS_CHARGING 2u
 #define FF_BATTERY_ANDROID_STATUS_DISCHARGING 3u
+
+// BatteryCapacityLevel.BATTERY_CAPACITY_LEVEL_CRITICAL, the level the framework itself shuts the
+// device down on. This is the health HAL's numbering, not the one the older
+// `BatteryManager.BATTERY_CAPACITY_LEVEL_*` constants used, which had CRITICAL at 4.
+#define FF_BATTERY_ANDROID_CAPACITY_LEVEL_CRITICAL 1
 
 // BatteryProperty starts with [int64 mValueLong], behind the usual [exception code][return value]
 // [out-param non-null marker] prefix of an AIDL reply. API 35 appended [string8 mValueString] after
@@ -131,6 +143,57 @@ static const char* parseBinder(FFlist* results) {
     return nullptr;
 }
 
+// `dumpsys battery` prints what `BatteryService.dumpInternal()` prints: the whole of the health HAL's
+// `HealthInfo`, plus the timestamps the service keeps for its own broadcast rate limiter. It is a flat
+// `key: value` list read by name, which is what makes it the sturdier of the two routes -- a vendor
+// that prints extra keys (vivo does: `engine`, `soc decimal`, `adapter power`, `board temp status`,
+// `low bat status`, `reverse wl chg status`, `reverse wl chg exception`, `chg shut vbat`,
+// `last mode flag` and `last mode keep time`, in the middle of the list) only adds keys nobody asks
+// for, and a release that appends a field costs nothing. The binder reply is positional and breaks
+// silently instead.
+//
+// What each key carries, per `android.hardware.health.HealthInfo`:
+//
+//   AC / USB / Wireless / Dock powered -- `charger*Online`, the `plugged` bits of the
+//     ACTION_BATTERY_CHANGED broadcast. Only the first three have a `FF_BATTERY_STATUS_*`
+//     counterpart; `Dock powered` (`BATTERY_PLUGGED_DOCK`) has none and is not read.
+//   Max charging current / Max charging voltage -- `maxChargingCurrentMicroamps` (µA) and
+//     `maxChargingVoltageMicrovolts` (µV): what the charger offers, not what the battery is drawing.
+//   Charge counter -- `batteryChargeCounterUah` (µAh), what is left in the pack. The unit is not
+//     honoured everywhere: MIUI reports the same number as its own dump and three orders of
+//     magnitude below what the registrar answers for the same battery.
+//   status -- `batteryStatus`, i.e. `BatteryStatus`: 1 UNKNOWN, 2 CHARGING, 3 DISCHARGING,
+//     4 NOT_CHARGING (a charger is attached and the battery is deliberately not taking current),
+//     5 FULL.
+//   health -- `batteryHealth`, i.e. `BatteryHealth`: 1 UNKNOWN, 2 GOOD, 3 OVERHEAT, 4 DEAD,
+//     5 OVER_VOLTAGE, 6 UNSPECIFIED_FAILURE, 7 COLD, and, in newer releases, 8 FAIR, 11 NOT_AVAILABLE
+//     and 12 INCONSISTENT.
+//   present -- `batteryPresent`, whether the pack is in the device at all.
+//   level / scale -- `batteryLevel`, the remaining capacity in percent, and `BATTERY_SCALE`, the value
+//     100% is expressed in. The scale has been 100 on every release, but it is printed rather than
+//     assumed, so it is read.
+//   voltage -- `batteryVoltageMillivolts`. The unit in the name is the recent one: the HAL 1.0 field
+//     was `batteryVoltage` in microvolts, and the AIDL notes that implementations had always filled it
+//     in millivolts, so the rename only wrote down the de-facto unit.
+//   temperature -- `batteryTemperatureTenthsCelsius`, tenths of a degree Celsius.
+//   technology -- `batteryTechnology`, e.g. "Li-poly". The registrar answers no such property, so
+//     together with the temperature this is what the route is here for.
+//   Charging state -- `chargingState`, i.e. `BatteryChargingState`: 0 INVALID, 1 NORMAL, 2 TOO_COLD,
+//     3 TOO_HOT, 4 LONG_LIFE, 5 ADAPTIVE.
+//   Charging policy -- `chargingPolicy`, i.e. `BatteryChargingPolicy`: 0 INVALID, 1 DEFAULT,
+//     2 LONG_LIFE, 3 ADAPTIVE. 0 in either means the HAL did not report it.
+//   Capacity level -- `batteryCapacityLevel`, i.e. `BatteryCapacityLevel`: -1 UNSUPPORTED,
+//     0 UNKNOWN, 1 CRITICAL, 2 LOW, 3 NORMAL, 4 HIGH, 5 FULL.
+//
+// Three keys are not battery readings at all and are skipped: the two `Time when the latest updated
+// value of the ... was sent via battery changed broadcast` lines and `The last voltage value sent via
+// the battery changed broadcast` are what `BatteryService` keeps to rate limit the broadcast.
+//
+// `FFBatteryResult` has a place for the status enum, the level pair, the temperature and the
+// technology, and for the three powered booleans and the capacity level in the form of status bits.
+// `voltage`, `health`, `Charge counter` and the two maximums are read by nothing -- there is no field
+// to put them in -- and are described above so that the next reader does not have to go back to the
+// service to find out what they are.
 static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buf, (char*[]) {
@@ -139,10 +202,12 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
                                         nullptr,
                                     }) != nullptr ||
         buf.length == 0) {
-        return "Executing `/system/bin/dumpsys battery` failed"; // Only works in `adb shell`, or when rooted
+        return "Executing `/system/bin/dumpsys battery` failed";
     }
 
     if (!ffStrbufStartsWithS(&buf, "Current Battery Service state:\n")) {
+        // The only other thing the command prints is `Permission Denial: can't dump Battery service`,
+        // which ffDetectBattery has already ruled out by looking at the UID.
         return "Invalid `/system/bin/dumpsys battery` result";
     }
 
@@ -169,6 +234,35 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
 
     if (ffParsePropLines(start, "Wireless powered: ", &temp) && ffStrbufEqualS(&temp, "true")) {
         battery->status |= FF_BATTERY_STATUS_WIRELESS_CONNECTED;
+    }
+    ffStrbufClear(&temp);
+
+    // NOT_CHARGING and FULL both mean a charger is attached, which the powered bits already say, and
+    // neither is charging or discharging in the sense `FF_BATTERY_STATUS` means. UNKNOWN is mapped
+    // because it is a different statement from the service not answering at all.
+    if (ffParsePropLines(start, "status: ", &temp)) {
+        switch (ffStrbufToUInt(&temp, 0)) {
+            case FF_BATTERY_ANDROID_STATUS_CHARGING:
+                battery->status |= FF_BATTERY_STATUS_CHARGING;
+                break;
+            case FF_BATTERY_ANDROID_STATUS_DISCHARGING:
+                battery->status |= FF_BATTERY_STATUS_DISCHARGING;
+                break;
+            case FF_BATTERY_ANDROID_STATUS_UNKNOWN:
+                battery->status |= FF_BATTERY_STATUS_UNKNOWN;
+                break;
+            default:
+                break;
+        }
+    }
+    ffStrbufClear(&temp);
+
+    // CRITICAL is the one capacity level that says something the percentage does not. -1 (UNSUPPORTED)
+    // and 0 (UNKNOWN) are what a HAL that does not implement the property reports, and 2 to 5 only
+    // restate the level.
+    if (ffParsePropLines(start, "Capacity level: ", &temp) &&
+        ffStrbufToSInt(&temp, -1) == FF_BATTERY_ANDROID_CAPACITY_LEVEL_CRITICAL) {
+        battery->status |= FF_BATTERY_STATUS_CRITICAL;
     }
     ffStrbufClear(&temp);
 
@@ -205,13 +299,21 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
-    // The binder route needs no permission and costs ~0.3 ms. `dumpsys battery` is kept as a
-    // fallback for `adb shell` and rooted environments, where the binder route also works but the
-    // extra fields it reports are worth having. termux-api was dropped: it returns nothing on this
-    // device and can hang for minutes, the same reason its camera path was removed.
-    const char* error = parseBinder(results);
-    if (error != nullptr && parseDumpsys(options, results) == nullptr) {
-        return nullptr;
+    // `dumpsys battery` is gated behind android.permission.DUMP, which only the shell UID and root
+    // hold: any other UID is answered with `Permission Denial: can't dump Battery service` on stdout
+    // and a zero exit status, so forking it there costs a child process and cannot succeed. It is also
+    // the richer of the two routes -- the registrar answers neither temperature nor technology, and
+    // the dump is what spells out the status enum -- so it is tried first wherever it is allowed to
+    // run, and the binder route covers everything else at ~0.3 ms. termux-api was dropped: it returns
+    // nothing on this device and can hang for minutes, the same reason its camera path was removed.
+    const uint32_t uid = instance.state.platform.uid;
+    if (uid == FF_BATTERY_ANDROID_ROOT_UID || uid == FF_BATTERY_ANDROID_SHELL_UID) {
+        const char* error = parseDumpsys(options, results);
+        if (error == nullptr) {
+            return nullptr;
+        }
+        FF_DEBUG("`/system/bin/dumpsys battery` failed: %s. Using the binder route instead", error);
     }
-    return error;
+
+    return parseBinder(results);
 }

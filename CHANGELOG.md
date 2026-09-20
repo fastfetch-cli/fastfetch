@@ -52,7 +52,8 @@ Features:
 * Improved Battery detection on Android (Battery, Android)
     * The charge level and charging state are now read from the battery properties service over `/dev/binder` instead of `termux-api BatteryStatus`, so the Termux:API app is no longer required and no subprocess is spawned.
     * The service interface changed in Android 10, and the right request is picked at run time, so every Android release is covered.
-    * Battery temperature, cycle count, manufacturer, model name, serial number and manufacture date need the `BATTERY_STATS` permission, which an app cannot obtain, so they are no longer reported.
+    * Battery temperature, cycle count, manufacturer, model name, serial number and manufacture date need the `BATTERY_STATS` permission, which an app cannot obtain, so an app no longer reports them.
+    * Running as `adb shell` or as root, `dumpsys battery` is used. The battery temperature and the battery technology are reported as well, and a battery that has reached the critical level is reported as such. An app can read none of the three.
 * Improved Display detection on Android (Display, Android)
     * The displays are now read from the display service instead of a vendor property that only some Xiaomi devices set. The preferred mode, the physical size, the rotation, the manufacture date and the display id are now reported as well.
     * This needs Android 13 (API 33). On Android 12 and older only that vendor property is available to an app, and a device that does not set it reports no display.
