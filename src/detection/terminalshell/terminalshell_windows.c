@@ -124,7 +124,7 @@ static bool getTerminalFromEnv(FFTerminalResult* result) {
 
     // SSH
     if (getenv("SSH_CONNECTION") != nullptr) {
-        term = "sshd"; // No SSH_TTY on Windows
+        term = getenv("SSH_TTY") ?: "sshd"; // OpenSSH on Windows may not set SSH_TTY
     }
 
     // Windows Terminal
