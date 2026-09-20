@@ -52,9 +52,13 @@ Features:
     * Running as `adb shell` or as root, `dumpsys display` is used as well, which is what covers Android 12 and older.
     * The refresh rate is now the rate of the active display mode, and the HDR capability is read from the display itself, for every display rather than only for the built-in one.
 * Improved WiFi detection on Android (Wifi, Android)
-    * The connection details are now read from the WiFi service over `/dev/binder` instead of `termux-api WifiConnectionInfo`, so no subprocess is spawned. The Termux:API app is still required, though: it is what carries the WiFi permission that the Termux app does not request itself, and uninstalling it turns this module off.
-    * The interface name and its state, the connection state and the Wi-Fi standard are now reported as well.
+    * The connection details are now read from the WiFi service over `/dev/binder` instead of `termux-api WifiConnectionInfo`, so no subprocess is spawned.
+    * The Termux:API app is still required, though. It is what carries the WiFi permission that the Termux app does not request itself, so uninstalling it turns this module off.
+    * A location permission is required as well, and Termux:API is what carries that one too. The WiFi service withholds the SSID and the BSSID from an app that does not hold one, and hands both over once it is granted; until then the signal, the rates, the frequency, the Wi-Fi standard and the security type are reported as usual, and the two names are reported as `<redacted>`. The grant has to be for all the time rather than only while the app is in use, as the service withholds the two names from an app that is not in the foreground either -- which is the state a run over `ssh` is in.
+    * The interface name and its state, the connection state, the Wi-Fi standard and the security type are now reported as well.
+    * The security type is reported from Android 12 on. The reply Android 11 sends ends before that field, so the `security` field stays empty there.
     * This needs Android 11 (API 30), the release that moved the Wi-Fi framework into an APEX. There is no fallback, so Android 10 and older report an error instead.
+    * WiFi detection on Android is experimental. The reply the WiFi service hands an app drifts between Android releases and between vendors, and what it contains also depends on the permissions the calling app holds, so a device can report less than its connection has. Please report anything that looks wrong or missing.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)

@@ -51,6 +51,27 @@
 // no route left in this file at all, and the error the caller sees is raised by the first call, before
 // the second one could have answered anything.
 //
+// Holding the Wi-Fi permission is not the same as being told everything, though, and a reply that
+// comes back without the SSID is not a reply this module fails on. The service hands out a copy with
+// the fields the caller may not see removed -- `WifiInfo.makeCopy` drops the SSID, writes
+// `02:00:00:00:00:00` in place of the BSSID and the MAC address, and rewrites the network id to -1,
+// while the signal, the rates, the frequency, the IPv4 address and the supplicant state are carried
+// over untouched. It makes that copy for every caller that `enforceCanAccessScanResults` refuses,
+// which was measured here as a caller whose location permission had lapsed, next to the shell, which
+// holds one and reads the SSID. Nothing else about the reply moves, so the head is understood the
+// same way and everything the reply still says is reported: a connection that cannot be named is
+// still a connection, and the name is the only thing missing. The two names are reported as
+// `<redacted>` -- the same word the macOS backend uses for the same situation -- rather than as
+// nothing, because an empty SSID is what the module prints the interface state in place of, and the
+// reply did carry a signal, a channel and a rate worth showing. The placeholders the service writes
+// in their place are never reported as values. See parseConnectionInfo().
+//
+// The network id goes with them, and that one matters to this file: -1 is what it reads as "there is
+// no connection", so a redacted reply would otherwise be reported as a disconnected one. What
+// separates the two is the frequency -- a `WifiInfo` with no connection has none to write, so a
+// frequency that passes the shape checks below is a connection -- and the supplicant state, which is
+// not redacted and answers directly when it is there.
+//
 // The transaction code is read out of the device's own jar rather than carried as a table, so the
 // module is not tied to a list of releases. It does need the jar to exist, and Android 11 is the
 // release that moved the Wi-Fi framework into an APEX -- before that the class sat in framework.jar,
@@ -93,16 +114,21 @@
 //
 // What is deliberately left empty:
 //
-//   * `security`. `WifiInfo` carries no security type on Android 11 at all, and on Android 16 the
-//     value the shell command prints is not in the parcel either -- `cmd wifi status` shows it only
-//     because it reads the object in system_server. No other call an app can make returns it, so
-//     the field stays empty rather than being guessed.
+//   * `security` on a release whose parcel carries no such field. Android 11 ends its parcel at the
+//     passpoint id, so there is nothing to read and nothing is reported; Android 13 and later write
+//     one, and it is read. Where it sits is behind the information element list, which is
+//     variable-length and changes with the access point -- 27 elements on the Android 16 device --
+//     so reaching it means walking that list in full. The walk is exact and its result is checked
+//     before it is believed. See findSecurityType().
 //   * The IPv4 address. It is in the parcel, but FFWifiConnection has no field for it and
 //     `inf.description` is the interface name, as on every other platform. The LocalIP module
 //     reports addresses.
 //   * `inf.description` while the interface is not in the address list. Its name is not knowable
 //     from anywhere else -- sysfs and /proc/net are EACCES -- so the field stays empty rather than
 //     naming an interface that was guessed at. `inf.status` is still reported, from the radio.
+//   * `conn.ssid` and `conn.bssid` on a connection whose names the service withheld are reported as
+//     `<redacted>` instead, which is not empty: see the note above. They are left empty when there
+//     is no connection at all, where an absent name is the truth rather than a redaction.
 
 #define FF_WIFI_ANDROID_SERVICE "wifi"
 #define FF_WIFI_ANDROID_DESCRIPTOR "android.net.wifi.IWifiManager"
@@ -118,8 +144,14 @@
 // the two states are told apart by asking the service directly. The method takes no arguments and
 // answers with a `WifiManager.WIFI_STATE_*`.
 #define FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE "TRANSACTION_getWifiEnabledState"
-#define FF_WIFI_ANDROID_WIFI_STATE_DISABLED 1
-#define FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN 4
+
+// `WifiManager.WIFI_STATE_*`. Only two of the five are acted on: everything else -- the enabled
+// state and the two transitional ones -- means the radio is on.
+typedef enum FFWifiAndroidRadioState : int32_t
+{
+    FF_WIFI_ANDROID_WIFI_STATE_DISABLED = 1,
+    FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN = 4,
+} FFWifiAndroidRadioState;
 
 // The other argument is the caller's package name. The shell UID owns exactly one package and the
 // service accepts that name, which is what `cmd` and `dumpsys` pass. The UID itself is
@@ -172,19 +204,77 @@
 #define FF_WIFI_ANDROID_SSID_LEGACY 0x0c // Android 11 and older
 #define FF_WIFI_ANDROID_SSID_MAX_LENGTH 32
 
+// `WifiInfo.DEFAULT_MAC_ADDRESS`: what the service writes in place of the BSSID and of the MAC
+// address when the caller may not be told them, and also what it writes when it has neither to give.
+// Neither reading is an address, so it is never reported as one -- the field stays empty instead.
+#define FF_WIFI_ANDROID_DEFAULT_MAC_ADDRESS "02:00:00:00:00:00"
+
+// A BSSID is written as a string of `hh:hh:hh:hh:hh:hh`, so it is this many characters long -- the
+// placeholder above included. Its length word is what stands in for the SSID octets as the check
+// that a reply carrying no SSID is still laid out the way this file reads it.
+#define FF_WIFI_ANDROID_MAC_STRING_LENGTH 17
+
+// What the two names are reported as when the service withheld them. The macOS backend spells the
+// same situation with the same word, and it is a word rather than an empty string so that the module
+// keeps printing the signal and the rate it did get instead of the interface state.
+#define FF_WIFI_ANDROID_REDACTED "<redacted>"
+
+// `WifiInfo` writes the Wi-Fi standard and then the two maximum-supported link speeds it can reach,
+// so the standard is the first word of a run of three. What follows the run is the passpoint id.
+#define FF_WIFI_ANDROID_STANDARD_RUN 12
+
+// The longest a string16 this file is willing to step over can be. Only the passpoint id and the
+// network key are stepped over by length, and neither is ever long; the bound is what keeps a
+// misread length from walking the parser off the end of the reply.
+#define FF_WIFI_ANDROID_STRING_MAX_LENGTH 64
+
+// The bounds the information element list is walked under. A reply carries tens of elements, each
+// tens of bytes, so these are far above anything real and only ever catch a misread.
+#define FF_WIFI_ANDROID_IE_MAX_COUNT 256
+#define FF_WIFI_ANDROID_IE_MAX_LENGTH 1024
+
+// `WifiInfo.SecurityType`, which is what `writeToParcel` writes -- and NOT the same numbering as
+// `WifiConfiguration.SecurityType`, which the two only share up to SAE. `Unknown` is what the field
+// holds before the service sets it, and is reported as no security rather than as an open network.
+typedef enum FFWifiAndroidSecurity : int32_t
+{
+    FF_WIFI_ANDROID_SECURITY_UNKNOWN = -1,
+    FF_WIFI_ANDROID_SECURITY_OPEN = 0,
+    FF_WIFI_ANDROID_SECURITY_WEP = 1,
+    FF_WIFI_ANDROID_SECURITY_PSK = 2,
+    FF_WIFI_ANDROID_SECURITY_EAP = 3,
+    FF_WIFI_ANDROID_SECURITY_SAE = 4,
+    FF_WIFI_ANDROID_SECURITY_EAP_WPA3_ENTERPRISE_192_BIT = 5,
+    FF_WIFI_ANDROID_SECURITY_OWE = 6,
+    FF_WIFI_ANDROID_SECURITY_WAPI_PSK = 7,
+    FF_WIFI_ANDROID_SECURITY_WAPI_CERT = 8,
+    FF_WIFI_ANDROID_SECURITY_EAP_WPA3_ENTERPRISE = 9,
+    FF_WIFI_ANDROID_SECURITY_OSEN = 10,
+    FF_WIFI_ANDROID_SECURITY_PASSPOINT_R1_R2 = 11,
+    FF_WIFI_ANDROID_SECURITY_PASSPOINT_R3 = 12,
+    FF_WIFI_ANDROID_SECURITY_DPP = 13,
+    // The largest value this file knows of, which is what bounds the read below. AOSP has no such
+    // constant; a release that adds a security type past DPP is refused rather than reported.
+    FF_WIFI_ANDROID_SECURITY_MAX = FF_WIFI_ANDROID_SECURITY_DPP,
+} FFWifiAndroidSecurity;
+
 // `WifiInfo` writes the Wi-Fi standard as one of the `ScanResult.WIFI_STANDARD_*` values. It is
 // followed by the two maximum-supported link speeds, which is what makes it recognisable: an int
 // naming a standard, then two plausible rates. The band is checked against it as well, so a value
 // that only fits another band is rejected. A layout that is not recognised leaves `protocol` empty
 // instead of reporting the wrong standard.
-#define FF_WIFI_ANDROID_STANDARD_LEGACY 1
-#define FF_WIFI_ANDROID_STANDARD_11A 2
-#define FF_WIFI_ANDROID_STANDARD_11B 3
-#define FF_WIFI_ANDROID_STANDARD_11N 4
-#define FF_WIFI_ANDROID_STANDARD_11AC 5
-#define FF_WIFI_ANDROID_STANDARD_11AX 6
-#define FF_WIFI_ANDROID_STANDARD_11AD 7
-#define FF_WIFI_ANDROID_STANDARD_11BE 8
+typedef enum FFWifiAndroidStandard : int32_t
+{
+    FF_WIFI_ANDROID_STANDARD_LEGACY = 1,
+    FF_WIFI_ANDROID_STANDARD_11A = 2,
+    FF_WIFI_ANDROID_STANDARD_11B = 3,
+    FF_WIFI_ANDROID_STANDARD_11N = 4,
+    FF_WIFI_ANDROID_STANDARD_11AC = 5,
+    FF_WIFI_ANDROID_STANDARD_11AX = 6,
+    FF_WIFI_ANDROID_STANDARD_11AD = 7,
+    FF_WIFI_ANDROID_STANDARD_11BE = 8,
+} FFWifiAndroidStandard;
+
 #define FF_WIFI_ANDROID_RATE_MAX 20000
 
 // The whole WifiInfo parcel measured 1340 bytes on Android 16, most of it the MLO and ANQP tail.
@@ -260,7 +350,7 @@ static bool getOwnPackage(char* buffer, size_t capacity) {
 }
 
 static bool isMacAddress(const char* value, uint32_t length) {
-    if (length != 17) {
+    if (length != FF_WIFI_ANDROID_MAC_STRING_LENGTH) {
         return false;
     }
     for (uint32_t i = 0; i < length; ++i) {
@@ -300,12 +390,16 @@ typedef struct FFWifiAndroidConnection {
     int32_t linkSpeed;
     int32_t txLinkSpeed;
     int32_t rxLinkSpeed;
-    int32_t standard;
+    FFWifiAndroidStandard standard;
+    FFWifiAndroidSecurity security;
     size_t stateEnd;
+    size_t standardOffset; // where the Wi-Fi standard was found, which is the anchor for `security`
     uint16_t frequency;
     bool up;
-    bool upKnown; // whether the state of the interface was established at all
+    bool upKnown;       // whether the state of the interface was established at all
     bool connected;
+    bool ssidAbsent;    // whether the reply carried no SSID at all, rather than one that was read
+    bool bssidSeen;     // whether the BSSID slot was passed already, placeholder or not
 } FFWifiAndroidConnection;
 
 // The Wi-Fi interface is the one the HAL names `wlan*`, and it is looked up rather than assumed so
@@ -339,7 +433,7 @@ static void detectInterface(FFWifiAndroidConnection* connection) {
     }
 }
 
-static const char* wifiStandardName(int32_t standard) {
+static const char* wifiStandardName(FFWifiAndroidStandard standard) {
     switch (standard) {
         case FF_WIFI_ANDROID_STANDARD_LEGACY: return "802.11";
         case FF_WIFI_ANDROID_STANDARD_11A: return "802.11a";
@@ -355,7 +449,7 @@ static const char* wifiStandardName(int32_t standard) {
 
 // 11ac and 11ad live in bands the connection is not in when it reports a 2.4 GHz frequency, so a
 // candidate that disagrees with the band is a misread rather than a standard.
-static bool isStandardPlausible(int32_t standard, uint16_t frequency) {
+static bool isStandardPlausible(FFWifiAndroidStandard standard, uint16_t frequency) {
     if (frequency < 3000 && (standard == FF_WIFI_ANDROID_STANDARD_11AC || standard == FF_WIFI_ANDROID_STANDARD_11AD)) {
         return false;
     }
@@ -369,7 +463,10 @@ static bool isStandardPlausible(int32_t standard, uint16_t frequency) {
 // their distance from the head depends on how long the SSID is and on which release wrote the
 // parcel. They are recognised by shape instead of by offset: a 17 character `hh:hh:hh:hh:hh:hh`, and
 // one of the thirteen state names. The BSSID is written before the MAC, so the first match is the
-// one wanted. `from` is the end of the SSID octets, which is where the BSSID follows.
+// one wanted -- and that slot is settled by the first match even when it turns out to hold the
+// placeholder rather than an address, since a second MAC-shaped string further down is the MAC
+// address or a vendor's own copy of either, never the BSSID. `from` is the end of the SSID octets,
+// or the word after the marker when the reply carried no SSID, which is where the BSSID follows.
 static void findStrings(const uint8_t* data, size_t size, size_t from, FFWifiAndroidConnection* connection) {
     for (size_t offset = from; offset + 4 <= size; ++offset) {
         const uint32_t length = ffBinderReadU32(data, size, offset);
@@ -392,15 +489,20 @@ static void findStrings(const uint8_t* data, size_t size, size_t from, FFWifiAnd
         }
         buffer[length] = '\0';
 
-        if (connection->bssid[0] == '\0' && isMacAddress(buffer, length)) {
-            memcpy(connection->bssid, buffer, length + 1);
+        if (!connection->bssidSeen && isMacAddress(buffer, length)) {
+            connection->bssidSeen = true;
+            // The placeholder means there is no address to report: it is what the service writes
+            // both for a caller it may not tell and for a connection that has none.
+            if (strcmp(buffer, FF_WIFI_ANDROID_DEFAULT_MAC_ADDRESS) != 0) {
+                memcpy(connection->bssid, buffer, length + 1);
+            }
         } else if (connection->state[0] == '\0' && isSupplicantState(buffer, length)) {
             memcpy(connection->state, buffer, length + 1);
             // The state is the last string before the tail, so where it ends is where the tail
             // starts. A Parcel pads a string to the next word, terminator included.
             connection->stateEnd = offset + 4 + ((length * 2 + 2 + 3) & ~3u);
         }
-        if (connection->bssid[0] != '\0' && connection->state[0] != '\0') {
+        if (connection->bssidSeen && connection->state[0] != '\0') {
             return;
         }
     }
@@ -427,11 +529,137 @@ static void findWifiStandard(const uint8_t* data, size_t size, FFWifiAndroidConn
         if (maxTx < 0 || maxTx > FF_WIFI_ANDROID_RATE_MAX || maxRx < 0 || maxRx > FF_WIFI_ANDROID_RATE_MAX) {
             continue;
         }
-        connection->standard = standard;
+        connection->standard = (FFWifiAndroidStandard) standard;
+        connection->standardOffset = offset;
         FF_DEBUG("Wi-Fi standard %d at +0x%zx, maximum speeds %d/%d", standard, offset, maxTx, maxRx);
         return;
     }
     FF_DEBUG("No Wi-Fi standard matched after the supplicant state at +0x%zx", connection->stateEnd);
+}
+
+// The name the module prints for a `WifiInfo.SecurityType`. The spellings follow the Windows backend
+// where the two overlap, except that Android collapses WPA-PSK and WPA2-PSK into one value, which is
+// reported under the WPA2 name because that is what a value of this kind almost always describes.
+// An open network is `Insecure`, as on every other backend.
+static const char* wifiSecurityName(FFWifiAndroidSecurity security) {
+    switch (security) {
+        case FF_WIFI_ANDROID_SECURITY_OPEN: return "Insecure";
+        case FF_WIFI_ANDROID_SECURITY_WEP: return "WEP";
+        case FF_WIFI_ANDROID_SECURITY_PSK: return "WPA2-PSK";
+        case FF_WIFI_ANDROID_SECURITY_EAP: return "WPA2-ENT";
+        case FF_WIFI_ANDROID_SECURITY_SAE: return "WPA3-SAE";
+        case FF_WIFI_ANDROID_SECURITY_EAP_WPA3_ENTERPRISE_192_BIT: return "WPA3-ENT-192";
+        case FF_WIFI_ANDROID_SECURITY_OWE: return "OWE";
+        case FF_WIFI_ANDROID_SECURITY_WAPI_PSK: return "WAPI-PSK";
+        case FF_WIFI_ANDROID_SECURITY_WAPI_CERT: return "WAPI-CERT";
+        case FF_WIFI_ANDROID_SECURITY_EAP_WPA3_ENTERPRISE: return "WPA3-ENT";
+        case FF_WIFI_ANDROID_SECURITY_OSEN: return "OSEN";
+        case FF_WIFI_ANDROID_SECURITY_PASSPOINT_R1_R2: return "Passpoint R1/R2";
+        case FF_WIFI_ANDROID_SECURITY_PASSPOINT_R3: return "Passpoint R3";
+        case FF_WIFI_ANDROID_SECURITY_DPP: return "DPP";
+        default: return nullptr;
+    }
+}
+
+// The security type is three words behind the information element list, and that list is the one
+// part of the tail whose length is not fixed: `writeTypedList` writes a count and then a presence
+// word in front of every element, and an element writes its id, its extension id and its body as a
+// length-prefixed byte array padded to a word. There is no way to step over it without reading it,
+// so the walk is exact -- every length it passes is bounds-checked -- and what it lands on has to
+// look like the run of three that AOSP writes there: an `isPrimary` marker, the security type, and a
+// `restricted` flag, with the network key behind them. A reply that does not is one this file cannot
+// place the field in, and the field is then left empty rather than read from a word that only
+// happens to fit.
+//
+// Android 11 is the case that matters: its parcel ends at the passpoint id, so the walk runs off the
+// end and is refused, which is the right answer -- there is no security type in that reply to report.
+// The walk is also the reason the field cannot be found by searching: the list is full of words that
+// would pass for a security type on their own (the Android 16 device carries 27 elements).
+static bool findSecurityType(const uint8_t* data, size_t size, FFWifiAndroidConnection* connection) {
+    if (connection->standardOffset == 0) {
+        return false; // without the standard there is no anchor to walk from
+    }
+
+    // The two maximum-supported link speeds, then the passpoint id, which is null or a string16.
+    size_t offset = connection->standardOffset + FF_WIFI_ANDROID_STANDARD_RUN;
+    const int32_t passpoint = ffBinderReadI32(data, size, offset);
+    if (passpoint < 0) {
+        offset += 4; // a null string is a length of -1 and nothing behind it
+    } else if (passpoint <= FF_WIFI_ANDROID_STRING_MAX_LENGTH) {
+        offset += 4 + ((((size_t) passpoint * 2 + 2 + 3) & ~(size_t) 3));
+    } else {
+        return false;
+    }
+    offset += 4; // the subscription id, which takes no part in locating anything
+
+    const int32_t elements = ffBinderReadI32(data, size, offset);
+    offset += 4;
+    if (elements > 0) {
+        if (elements > FF_WIFI_ANDROID_IE_MAX_COUNT) {
+            return false;
+        }
+        for (int32_t i = 0; i < elements; ++i) {
+            if (offset + 16 > size) {
+                return false;
+            }
+            const int32_t present = ffBinderReadI32(data, size, offset);
+            offset += 4;
+            if (present == 0) {
+                continue; // a null element takes its presence word and nothing else
+            }
+            if (present != 1) {
+                return false;
+            }
+            // The element id, the extension id, then the body as a length-prefixed array.
+            const int32_t length = ffBinderReadI32(data, size, offset + 8);
+            offset += 12;
+            if (length < 0 || length > FF_WIFI_ANDROID_IE_MAX_LENGTH) {
+                return false;
+            }
+            offset += ((size_t) length + 3) & ~(size_t) 3;
+        }
+    }
+
+    // `isPrimary` is written from Android 12 on -- it is gated on `SdkLevel.isAtLeastS()`, which is
+    // what FF_ANDROID_API_AT_LEAST(31) answers -- and that is also the release that introduced the
+    // list above, so the two arrived together and neither is written before it.
+    if (FF_ANDROID_API_AT_LEAST(31)) {
+        if (offset + 4 > size) {
+            return false;
+        }
+        const int32_t isPrimary = ffBinderReadI32(data, size, offset);
+        if (isPrimary < -1 || isPrimary > 1) {
+            return false;
+        }
+        offset += 4;
+    }
+    if (offset + 4 > size) {
+        return false;
+    }
+    const int32_t security = ffBinderReadI32(data, size, offset);
+    if (security < FF_WIFI_ANDROID_SECURITY_UNKNOWN || security > FF_WIFI_ANDROID_SECURITY_MAX) {
+        return false;
+    }
+    // Android 13 put a `restricted` flag and the network key behind the security type, and Android
+    // 12 ends the parcel with the security type itself. Where the two are there they are checked,
+    // because they are the last thing that says the word above is the field it is taken for; where
+    // the reply ends first, the check has nothing to check and the word stands on its own.
+    if (offset + 12 <= size) {
+        const int32_t restricted = ffBinderReadI32(data, size, offset + 4);
+        const int32_t networkKey = ffBinderReadI32(data, size, offset + 8);
+        if (restricted < 0 || restricted > 1) {
+            return false;
+        }
+        if (networkKey < -1 || networkKey > FF_WIFI_ANDROID_STRING_MAX_LENGTH) {
+            return false;
+        }
+    }
+    if (security == FF_WIFI_ANDROID_SECURITY_UNKNOWN) {
+        return true; // the field is there and the service has not set it: nothing to report
+    }
+    connection->security = (FFWifiAndroidSecurity) security;
+    FF_DEBUG("Security type %d (%s) at +0x%zx", security, wifiSecurityName(security), offset);
+    return true;
 }
 
 #ifndef NDEBUG
@@ -509,51 +737,86 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
         }
         const uint32_t ssidBase = base + (hasIp == 1 ? FF_WIFI_ANDROID_FREQ_SSID_BASE : FF_WIFI_ANDROID_FREQ_SSID_BASE_NO_IP);
         const int32_t ssidPresent = ffBinderReadI32(data, size, ssidBase);
-        if (ssidPresent != 1) {
-            FF_DEBUG("  rejected: the SSID at +0x%02x is marked %d, not present", ssidBase, ssidPresent);
-            continue; // the SSID of a reported connection is never null
-        }
-
-        const uint32_t ssidLength = ffBinderReadU32(data, size, ssidBase + FF_WIFI_ANDROID_SSID_LENGTH);
-        if (ssidLength == 0 || ssidLength > FF_WIFI_ANDROID_SSID_MAX_LENGTH) {
-            FF_DEBUG("  rejected: the SSID length at +0x%02x is %u", ssidBase + FF_WIFI_ANDROID_SSID_LENGTH, ssidLength);
+        if (ssidPresent != 0 && ssidPresent != 1) {
+            FF_DEBUG("  rejected: the SSID at +0x%02x is marked %d, which is neither present nor absent", ssidBase, ssidPresent);
             continue;
         }
 
-        for (uint32_t i = 0; i < ARRAY_SIZE(ssidOffsets); ++i) {
-            const size_t ssidOffset = ssidBase + ssidOffsets[i];
-            if (ssidOffset + ssidLength > size) {
+        // Where the BSSID follows: after the octets when there is an SSID, and directly after the
+        // marker when there is not. A marker of 0 is not a layout to reject -- it is the service
+        // saying it wrote no SSID, which it does both for a caller it may not name the network to and
+        // for a connection that has no name to give. The rest of the reply is unaffected, so it is
+        // read and reported without the two names rather than as a reply that could not be read.
+        size_t stringsFrom = ssidBase + FF_WIFI_ANDROID_SSID_LENGTH;
+        if (ssidPresent == 0) {
+            // The BSSID is written directly after the marker, and it is always a 17 character
+            // address, the placeholder included, so its length word is what keeps this branch a
+            // shape check rather than an accept-anything: without it the marker alone would be the
+            // whole evidence that this candidate is the head of a connection.
+            if (ffBinderReadU32(data, size, stringsFrom) != FF_WIFI_ANDROID_MAC_STRING_LENGTH) {
+                FF_DEBUG("  rejected: the SSID at +0x%02x is marked absent and no BSSID follows it", ssidBase);
+                continue;
+            }
+            connection->ssidAbsent = true;
+            FF_DEBUG("The service wrote no SSID at +0x%02x: this caller may not be told it, or there is none", ssidBase);
+        } else {
+            const uint32_t ssidLength = ffBinderReadU32(data, size, ssidBase + FF_WIFI_ANDROID_SSID_LENGTH);
+            if (ssidLength == 0 || ssidLength > FF_WIFI_ANDROID_SSID_MAX_LENGTH) {
+                FF_DEBUG("  rejected: the SSID length at +0x%02x is %u", ssidBase + FF_WIFI_ANDROID_SSID_LENGTH, ssidLength);
                 continue;
             }
 
-            // The SSID is a raw byte string, so a NUL in it means this was not the SSID after all.
-            if (memchr(data + ssidOffset, '\0', ssidLength) != nullptr) {
-                FF_DEBUG("  rejected: the %u SSID bytes at +0x%zx hold a NUL", ssidLength, ssidOffset);
+            bool ssidFound = false;
+            for (uint32_t i = 0; i < ARRAY_SIZE(ssidOffsets) && !ssidFound; ++i) {
+                const size_t ssidOffset = ssidBase + ssidOffsets[i];
+                if (ssidOffset + ssidLength > size) {
+                    continue;
+                }
+
+                // The SSID is a raw byte string, so a NUL in it means this was not the SSID after all.
+                if (memchr(data + ssidOffset, '\0', ssidLength) != nullptr) {
+                    FF_DEBUG("  rejected: the %u SSID bytes at +0x%zx hold a NUL", ssidLength, ssidOffset);
+                    continue;
+                }
+                memcpy(connection->ssid, data + ssidOffset, ssidLength);
+                connection->ssid[ssidLength] = '\0';
+                stringsFrom = ssidOffset + ssidLength;
+                ssidFound = true;
+            }
+            if (!ssidFound) {
                 continue;
             }
-            memcpy(connection->ssid, data + ssidOffset, ssidLength);
-            connection->ssid[ssidLength] = '\0';
-
-            connection->frequency = frequency;
-            connection->rssi = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_RSSI);
-            connection->linkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_LINK_SPEED);
-            connection->txLinkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_TX_LINK_SPEED);
-            connection->rxLinkSpeed = ffBinderReadI32(data, size, base - FF_WIFI_ANDROID_FREQ_RX_LINK_SPEED);
-
-            findStrings(data, size, ssidOffset + ssidLength, connection);
-            FF_DEBUG("SSID \"%s\" at +0x%zx, BSSID \"%s\", supplicant state \"%s\"",
-                connection->ssid, ssidOffset, connection->bssid, connection->state);
-            // The supplicant state is the authoritative signal; the network id is the fallback for a
-            // parcel whose state string was not recognised.
-            connection->connected = connection->state[0] != '\0'
-                ? strcmp(connection->state, "COMPLETED") == 0
-                : ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_NET_ID) >= 0;
-            findWifiStandard(data, size, connection);
-            FF_DEBUG("Standard %d (%s), rx link speed %d, connected %s",
-                connection->standard, wifiStandardName(connection->standard) ?: "unknown", connection->rxLinkSpeed,
-                connection->connected ? "yes" : "no");
-            return nullptr;
         }
+
+        connection->frequency = frequency;
+        connection->rssi = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_RSSI);
+        connection->linkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_LINK_SPEED);
+        connection->txLinkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_TX_LINK_SPEED);
+        connection->rxLinkSpeed = ffBinderReadI32(data, size, base - FF_WIFI_ANDROID_FREQ_RX_LINK_SPEED);
+
+        findStrings(data, size, stringsFrom, connection);
+        FF_DEBUG("SSID \"%s\", BSSID \"%s\", supplicant state \"%s\" (the strings start at +0x%zx)",
+            connection->ssid, connection->bssid, connection->state, stringsFrom);
+        // The supplicant state is the authoritative signal. The network id is the fallback for a
+        // parcel whose state string was not recognised -- but not when the service wrote no SSID,
+        // because it withholds the network id from that caller as well and the -1 it writes there
+        // would be read as "there is no connection". The head answers instead: a `WifiInfo` with no
+        // connection has no frequency to write, so one that is here and passed the checks above is a
+        // connection.
+        if (connection->state[0] != '\0') {
+            connection->connected = strcmp(connection->state, "COMPLETED") == 0;
+        } else {
+            connection->connected = connection->ssidAbsent
+                || ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_NET_ID) >= 0;
+        }
+        findWifiStandard(data, size, connection);
+        if (!findSecurityType(data, size, connection)) {
+            FF_DEBUG("No security type could be located in this reply, so the field stays empty");
+        }
+        FF_DEBUG("Standard %d (%s), rx link speed %d, connected %s",
+            connection->standard, wifiStandardName(connection->standard) ?: "unknown", connection->rxLinkSpeed,
+            connection->connected ? "yes" : "no");
+        return nullptr;
     }
 
     // Nothing in the head matched, but an unassociated connection has nothing in the head to match:
@@ -582,6 +845,19 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
 static double wifiAndroidRate(int32_t specific, int32_t generic) {
     const int32_t rate = specific > 0 ? specific : generic;
     return rate > 0 && rate <= FF_WIFI_ANDROID_RATE_MAX ? (double) rate : -DBL_MAX;
+}
+
+// The SSID and the BSSID as the module reports them: the value when the reply carried one, and
+// `<redacted>` when the service withheld it. A withheld name is not reported as nothing, because an
+// empty SSID is what the module prints the interface state in place of -- and the reply did carry a
+// signal, a channel and a rate that are worth showing. `withheld` is only ever true for a connection:
+// the placeholder the service writes in place of an address is also what an empty `WifiInfo` carries,
+// but a reply with no connection never reaches the point where the names are set.
+static const char* wifiName(const char* value, bool withheld) {
+    if (value[0] != '\0') {
+        return value;
+    }
+    return withheld ? FF_WIFI_ANDROID_REDACTED : "";
 }
 
 // Calls a method of the service that takes no arguments and answers with an int. The transaction
@@ -663,7 +939,11 @@ static const char* detectWithBinder(FFlist* result) {
         return "Wifi service rejected the request";
     }
 
-    FFWifiAndroidConnection connection = {};
+    FFWifiAndroidConnection connection = {
+        // Zero is a real security type -- an open network -- so the field is not left at what the
+        // zero initialisation would otherwise make of it.
+        .security = FF_WIFI_ANDROID_SECURITY_UNKNOWN,
+    };
     detectInterface(&connection);
     error = parseConnectionInfo(reply.data, reply.size, &connection);
     if (error != nullptr) {
@@ -730,15 +1010,20 @@ static const char* detectWithBinder(FFlist* result) {
     }
     item->conn.signalQuality = connection.rssi >= -50 ? 100 : connection.rssi <= -100 ? 0
                                                                                      : (connection.rssi + 100) * 2;
-    ffStrbufSetS(&item->conn.bssid, connection.bssid);
-    ffStrbufSetS(&item->conn.ssid, connection.ssid);
+    ffStrbufSetS(&item->conn.bssid, wifiName(connection.bssid, connection.bssidSeen));
+    ffStrbufSetS(&item->conn.ssid, wifiName(connection.ssid, connection.ssidAbsent));
+    const char* security = wifiSecurityName(connection.security);
+    if (security != nullptr) {
+        ffStrbufSetStatic(&item->conn.security, security);
+    }
     item->conn.frequency = connection.frequency;
     item->conn.txRate = wifiAndroidRate(connection.txLinkSpeed, connection.linkSpeed);
     item->conn.rxRate = wifiAndroidRate(connection.rxLinkSpeed, 0);
     item->conn.channel = ffWifiFreqToChannel(connection.frequency);
-    FF_DEBUG("\"%s\" %s: \"%s\", \"%s\", %s, %u MHz (channel %u), signal %.0f, tx %d, rx %d",
+    FF_DEBUG("\"%s\" %s: \"%s\", \"%s\", %s, %s, %u MHz (channel %u), signal %.0f, tx %d, rx %d",
         connection.interface, item->inf.status.chars, item->conn.ssid.chars, item->conn.bssid.chars,
-        item->conn.protocol.length ? item->conn.protocol.chars : "(no standard)", connection.frequency,
+        item->conn.protocol.length ? item->conn.protocol.chars : "(no standard)",
+        item->conn.security.length ? item->conn.security.chars : "(no security)", connection.frequency,
         item->conn.channel, item->conn.signalQuality, connection.txLinkSpeed, connection.rxLinkSpeed);
     return nullptr;
 }
