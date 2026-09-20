@@ -123,8 +123,8 @@ static bool getTerminalFromEnv(FFTerminalResult* result) {
     }
 
     // SSH
-    if (getenv("SSH_TTY") != nullptr) {
-        term = getenv("SSH_TTY");
+    if (getenv("SSH_CONNECTION") != nullptr) {
+        term = "sshd"; // No SSH_TTY on Windows
     }
 
     // Windows Terminal
@@ -253,7 +253,8 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid) {
 
         if (ffStrbufIgnCaseEqualS(&result->prettyName, "sihost") ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "explorer") ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "wininit")) {
+            ffStrbufIgnCaseEqualS(&result->prettyName, "wininit") ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "services")) {
             // A CUI program created by Windows Explorer will spawn a conhost as its child.
             // However the conhost process is just a placeholder;
             // The true terminal can be Windows Terminal or others.
