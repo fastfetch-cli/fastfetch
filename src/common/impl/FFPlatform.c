@@ -38,6 +38,13 @@ void ffPlatformInit(FFPlatform* platform) {
     if (info->architecture.length == 0) {
         ffStrbufSetStatic(&info->architecture, ffVersionResult.architecture);
     }
+
+    // Per-platform init may leave pageSize at 0 if sysconf(_SC_PAGESIZE) returns
+    // -1 (Linux, then cast to uint32 was 0xFFFFFFFF) or if sysctl(HW_PAGESIZE)
+    // fails (BSD/macOS, the field would otherwise stay 0). Normalise to 4 KiB
+    // here so memory/swap/SMBIOS byte counts never divide by 0 or wrap.
+    if (info->pageSize == 0)
+        info->pageSize = 4096;
 }
 
 void ffPlatformDestroy(FFPlatform* platform) {

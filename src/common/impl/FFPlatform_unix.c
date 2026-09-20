@@ -321,9 +321,11 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts) {
 
 #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);
-    sysctl((int[]) { CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, nullptr, 0);
+    if (sysctl((int[]) { CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, nullptr, 0) != 0)
+        info->pageSize = 0; // leave the field zero on failure; ffPlatformInit applies the fallback below
 #else
-    info->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
+    long ps = sysconf(_SC_PAGESIZE);
+    info->pageSize = ps > 0 ? (uint32_t) ps : 0; // sysconf returns -1 on failure; previously the -1 cast to uint32 produced 0xFFFFFFFF and corrupted memory/swap/SMBIOS byte counts
 #endif
 }
 
