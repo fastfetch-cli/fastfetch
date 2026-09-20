@@ -229,9 +229,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info) {
 static void getSystemPageSize(FFPlatformSysinfo* info) {
     SYSTEM_BASIC_INFORMATION sbi;
     if (NT_SUCCESS(NtQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), nullptr))) {
-        info->pageSize = sbi.PhysicalPageSize;
-    } else {
-        info->pageSize = 4096;
+        info->pageSizeShift = (uint32_t) __builtin_ctzl(sbi.PhysicalPageSize);
     }
 }
 

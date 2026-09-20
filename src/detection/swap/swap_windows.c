@@ -18,15 +18,15 @@ const char* ffDetectSwap(FFlist* result) {
         return nullptr;
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
     for (SYSTEM_PAGEFILE_INFORMATION* current = pstart;; current = (SYSTEM_PAGEFILE_INFORMATION*) ((uint8_t*) current + current->NextEntryOffset)) {
         FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
         ffStrbufInitNWS(&swap->name, current->FileName.Length / sizeof(wchar_t), current->FileName.Buffer);
         if (ffStrbufStartsWithS(&swap->name, "\\??\\")) {
             ffStrbufSubstrAfter(&swap->name, strlen("\\??\\") - 1);
         }
-        swap->bytesUsed = (uint64_t) current->TotalUsed * pageSize;
-        swap->bytesTotal = (uint64_t) current->CurrentSize * pageSize;
+        swap->bytesUsed = (uint64_t) current->TotalUsed << pageSizeShift;
+        swap->bytesTotal = (uint64_t) current->CurrentSize << pageSizeShift;
         if (current->NextEntryOffset == 0) {
             break;
         }

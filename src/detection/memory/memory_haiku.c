@@ -8,9 +8,9 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
         return "Error getting system info";
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
-    ram->bytesTotal = pageSize * info.max_pages;
-    ram->bytesUsed = pageSize * info.used_pages;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
+    ram->bytesTotal = (uint64_t) info.max_pages << pageSizeShift;
+    ram->bytesUsed = (uint64_t) info.used_pages << pageSizeShift;
 
     return nullptr;
 }

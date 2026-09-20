@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-static void addSwapEntry(FFlist* result, struct xswdev* xsw, uint32_t pageSize) {
+static void addSwapEntry(FFlist* result, struct xswdev* xsw, uint32_t pageSizeShift) {
     if (xsw->xsw_nblks == 0) { // DFBSD reports some /dev/wdog devices with nblks == 0
         return;
     }
@@ -16,8 +16,8 @@ static void addSwapEntry(FFlist* result, struct xswdev* xsw, uint32_t pageSize) 
     } else {
         ffStrbufInitF(&swap->name, "/dev/%s", devname(xsw->xsw_dev, S_IFCHR));
     }
-    swap->bytesUsed = (uint64_t) xsw->xsw_used * pageSize;
-    swap->bytesTotal = (uint64_t) xsw->xsw_nblks * pageSize;
+    swap->bytesUsed = (uint64_t) xsw->xsw_used << pageSizeShift;
+    swap->bytesTotal = (uint64_t) xsw->xsw_nblks << pageSizeShift;
 }
 
 #if __DragonFly__
@@ -29,7 +29,7 @@ const char* ffDetectSwap(FFlist* result) {
         return "sysctlbyname(\"vm.swap_info_array\") failed";
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     size_t count = size / sizeof(struct xswdev);
     if (count == 0) {
@@ -41,7 +41,7 @@ const char* ffDetectSwap(FFlist* result) {
     }
 
     for (uint32_t i = 0; i < count; ++i) {
-        addSwapEntry(result, &xsws[i], pageSize);
+        addSwapEntry(result, &xsws[i], pageSizeShift);
     }
 
     return nullptr;
@@ -56,7 +56,7 @@ const char* ffDetectSwap(FFlist* result) {
         return "sysctlnametomib(\"vm.swap_info\") failed";
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (int n = 0;; ++n) {
         mib[mibsize] = n;
@@ -69,7 +69,7 @@ const char* ffDetectSwap(FFlist* result) {
             return "xswdev version mismatch";
         }
 
-        addSwapEntry(result, &xsw, pageSize);
+        addSwapEntry(result, &xsw, pageSizeShift);
     }
 
     return nullptr;

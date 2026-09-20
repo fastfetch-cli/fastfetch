@@ -319,12 +319,10 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts) {
 #endif
         ffStrbufAppendS(&info->architecture, uts->machine);
 
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
-    size_t length = sizeof(info->pageSize);
-    sysctl((int[]) { CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, nullptr, 0);
-#else
-    info->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
-#endif
+    // _SC_PAGESIZE is one of the sysconf names <unistd.h> requires every implementation to define,
+    // and the only failure POSIX defines for sysconf is an invalid name, so this does not fail.
+    // It replaces the former sysctl(CTL_HW, HW_PAGESIZE) call on FreeBSD / macOS / OpenBSD / NetBSD.
+    info->pageSizeShift = (uint32_t) __builtin_ctzl((unsigned long) sysconf(_SC_PAGESIZE));
 }
 
 static void getCwd(FFPlatform* platform) {

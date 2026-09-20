@@ -211,7 +211,7 @@ static bool readPhysicalMemory(int fd, off_t address, size_t length, void* buffe
     }
     #endif
 
-    off_t alignedAddress = address & ~((off_t) instance.state.platform.sysinfo.pageSize - 1);
+    off_t alignedAddress = address & ~(((off_t) 1 << instance.state.platform.sysinfo.pageSizeShift) - 1);
     size_t pageOffset = (size_t) (address - alignedAddress);
     size_t mapLength = pageOffset + length;
 

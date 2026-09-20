@@ -29,7 +29,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
 
     uint64_t pagesFree = vmstat.free_count - vmstat.speculative_count;
     uint64_t pagesFileBacked = vmstat.external_page_count; // Cached files
-    ram->bytesUsed = ram->bytesTotal - (pagesFree + pagesFileBacked) * instance.state.platform.sysinfo.pageSize;
+    ram->bytesUsed = ram->bytesTotal - ((pagesFree + pagesFileBacked) << instance.state.platform.sysinfo.pageSizeShift);
 
     return nullptr;
 }
