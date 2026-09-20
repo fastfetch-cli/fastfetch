@@ -12,6 +12,7 @@ Changes:
     * The operating system accounts process CPU time in fixed steps, so a window longer than roughly 150 ms does not visibly improve the reported percentages. The module now finishes about 250 ms sooner.
 
 Features:
+* Added rum overlay package counting on RakuOS, exposed as `{rum}`. (Packages, Linux)
 * Improved image logo support
     * Backend rewritten
         * Added a native image decoding backend on Windows (WIC), macOS (ImageIO) and Android (AImageDecoder).

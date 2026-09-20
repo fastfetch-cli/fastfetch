@@ -123,6 +123,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(porg)
         FF_PRINT_PACKAGE(rpm)
+        FF_PRINT_PACKAGE(rum)
         if (options->combined) {
             FF_PRINT_PACKAGE_ALL(scoop);
         } else if (counts.scoopGlobal > 0) {
@@ -202,6 +203,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(hpkgAll, "hpkg-all"),
                 FF_ARG(nixAll, "nix-all"),
                 FF_ARG(counts.all, "all"),
+                FF_ARG(counts.rum, "rum"),
             }));
     }
 
@@ -337,6 +339,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(RPM)
+                            FF_TEST_PACKAGE_NAME(RUM)
                             break;
                         case 'S':
                             if (false)
@@ -418,6 +421,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(PKGTOOL)
     FF_TEST_PACKAGE_NAME(PORG)
     FF_TEST_PACKAGE_NAME(RPM)
+    FF_TEST_PACKAGE_NAME(RUM)
     FF_TEST_PACKAGE_NAME(SCOOP)
     FF_TEST_PACKAGE_NAME(SNAP)
     FF_TEST_PACKAGE_NAME(SOAR)
@@ -487,6 +491,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(pkgtool)
     FF_APPEND_PACKAGE_COUNT(porg)
     FF_APPEND_PACKAGE_COUNT(rpm)
+    FF_APPEND_PACKAGE_COUNT(rum)
     FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(scoopUser)
     FF_APPEND_PACKAGE_COUNT(snap)
@@ -601,6 +606,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Total number of all nix packages", "nix-all" },
         { "Number of all packages", "all" },
+        { "Number of rum overlay packages", "rum" },
     })),
     .defaultOrder = 14,
 };

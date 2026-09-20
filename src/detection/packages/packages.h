@@ -44,6 +44,7 @@ typedef struct FFPackagesResult {
     uint32_t pkgtool;
     uint32_t porg;
     uint32_t rpm;
+    uint32_t rum;
     uint32_t scoopGlobal;
     uint32_t scoopUser;
     uint32_t snap;
