@@ -16,9 +16,40 @@
 // it -- the call comes back as a silent exit status 255 with nothing on either stream, which is
 // what makes it look like it worked. `dumpsys wifi` needs android.permission.DUMP, and
 // /proc/net/wireless, /proc/net/dev and /sys/class/net/wlan0 are all EACCES. That leaves
-// `IWifiManager.getConnectionInfo`, which needs only ACCESS_WIFI_STATE -- a normal permission,
-// granted without asking. There is no Termux:API fallback: it returned less than this does, and
-// needed a separate app installed.
+// `IWifiManager.getConnectionInfo`, which needs ACCESS_WIFI_STATE.
+//
+// ACCESS_WIFI_STATE is a normal permission, so the user is never asked, but it is granted to a UID
+// rather than to a package: the service checks the caller's UID, and a UID holds the permission as
+// soon as any one of the packages sharing it requests it. The question is therefore not whether the
+// host app declares it, but whether its UID ends up with it.
+//
+// Under Termux it does, and only because of a second app. `com.termux` requests no Wi-Fi permission at
+// all, while `com.termux.api` -- Termux:API -- requests ACCESS_WIFI_STATE and shares `sharedUserId
+// com.termux`, so it lands on the app's own UID. Uninstalling Termux:API takes the permission off
+// the UID with it, and this module then reports "The Wifi service raised an exception" where it had
+// reported the connection; reinstalling it brings the connection back. Both states were measured on
+// the test device with Android 16 and the same binary. So Termux:API is still needed for this module -- as
+// the thing that carries the permission, not as the `termux-api` command that used to be spawned. That
+// command is gone from here because it could not do better than this does: whenever it was available,
+// so is the permission, and whenever the permission is missing the command is missing too.
+//
+// What a UID that does not hold the permission is told, for both calls below. The service names the
+// reason itself, and the message is 93 characters:
+//
+//     WifiService: Neither user <uid> nor current process has android.permission.ACCESS_WIFI_STATE.
+//         at com.android.server.wifi.WifiServiceImpl.enforceAccessPermission(WifiServiceImpl.java:1541)
+//         at com.android.server.wifi.WifiServiceImpl.getConnectionInfo(WifiServiceImpl.java:5537)
+//
+// It is the calling UID that is checked, not the package name in the request: the same call made as
+// the shell, asking about a package it does not own, is refused with `Package com.termux does not
+// belong to <shell uid>` instead. Nothing in this file can work around the permission, since the calling UID
+// is the process itself.
+//
+// The second call sits behind the same check, which is what makes the permission a gate on the module
+// rather than on one field: `getWifiEnabledState` from a UID that lacks it comes back with the
+// identical exception and the same message, where a UID that holds it reads the state. Such a host has
+// no route left in this file at all, and the error the caller sees is raised by the first call, before
+// the second one could have answered anything.
 //
 // The transaction code is read out of the device's own jar rather than carried as a table, so the
 // module is not tied to a list of releases. It does need the jar to exist, and Android 11 is the
@@ -41,24 +72,24 @@
 // more accurate -- pays nothing for it.
 //
 // Three things about the call are positional rather than negotiated, and all three were measured
-// on a vivo V2505A (Android 16) and a Redmi 9A (Android 11):
+// on an Android 16 device and an Android 11 device:
 //
 //   * The transaction code is a build-time constant of the `.aidl` (`getConnectionInfo` is 29 on
 //     Android 11 and 41 on Android 16) -- see common/android/dex.h.
 //   * The reply layout drifts, and not only by release. Android 12 dropped the duplicate length word
-//     that Android 11 and 10 wrote in front of the SSID octets, and the vivo's Android 16 build
-//     fills an int between the transmit and the receive speed that the Redmi's Android 11 build
-//     leaves out -- while AOSP's own Android 16 writes the head exactly the Android 11 way, so that
-//     one int is a vendor addition rather than a release difference. Frequency is the only channel
-//     centre in the head, so it is located by value, with the whole result validated before it is
-//     used. A wrong guess shows up as a rejected layout, not as a plausible wrong number.
+//     that Android 11 and 10 wrote in front of the SSID octets, and the Android 16 device fills an
+//     int between the transmit and the receive speed that the Android 11 device leaves out -- while
+//     AOSP's own Android 16 writes the head exactly the Android 11 way, so that one int is a vendor
+//     addition rather than a release difference. Frequency is the only channel centre in the head, so
+//     it is located by value, with the whole result validated before it is used. A wrong guess shows
+//     up as a rejected layout, not as a plausible wrong number.
 //   * The tail of the parcel, which holds the Wi-Fi standard, is not laid out the same way by every
-//     vendor: the Android 11 build on the Redmi carries three words there that AOSP's own Android 11
+//     vendor: the Android 11 device carries three words there that AOSP's own Android 11
 //     does not. It is located by shape for that reason.
 //
 // BSSID and MAC are the one place the binder route beats `cmd wifi status`: MAC addresses are
 // redacted for a caller targeting a recent SDK, and the shell targets the current one, so `cmd wifi
-// status` prints 24:**:**:**:70:2c where this reads 24:a4:87:3c:70:2c.
+// status` prints an address with its middle octets redacted where this reads the whole one.
 //
 // What is deliberately left empty:
 //
@@ -91,8 +122,8 @@
 #define FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN 4
 
 // The other argument is the caller's package name. The shell UID owns exactly one package and the
-// service accepts that name, which is what `cmd` and `dumpsys` pass. See getOwnPackage().
-#define FF_WIFI_ANDROID_SHELL_UID 2000
+// service accepts that name, which is what `cmd` and `dumpsys` pass. The UID itself is
+// FF_ANDROID_PRIVILEGED_UID_SHELL, see common/android/api.h. See getOwnPackage().
 #define FF_WIFI_ANDROID_SHELL_PACKAGE "com.android.shell"
 
 // An AIDL reply opens with the exception code and, for a Parcelable return, a non-null marker;
@@ -106,7 +137,7 @@
 
 // A `WifiInfo` with no connection to describe carries the sentinels for the two fields that are
 // always at a fixed offset: -1 for a network id it does not have and -127 for a signal it cannot
-// measure. Both were measured on the vivo's Android 16 reply, which is what the service answers
+// measure. Both were measured on the Android 16 device's reply, which is what the service answers
 // while Wi-Fi is on with nothing associated -- the head holds no frequency and no SSID at all, only
 // the "02:00:00:00:00:00" placeholder that `WifiInfo` writes in place of a BSSID.
 #define FF_WIFI_ANDROID_NET_ID_NONE (-1)
@@ -132,10 +163,10 @@
 #define FF_WIFI_ANDROID_SSID_LENGTH 0x04
 
 // The receive speed is the word in front of Frequency; the transmit speed is the word after the link
-// speed. The vivo writes one extra word between those two that AOSP does not -- it repeats the
+// speed. The Android 16 device writes one extra word between those two that AOSP does not -- it repeats the
 // transmit speed -- so the receive speed can only be reached from Frequency, and Frequency cannot be
 // reached by stepping over the two link speeds. Both were checked against `cmd wifi status` at the
-// same moment: 131/219 on the vivo, 86/-1 on the Redmi.
+// same moment: 131/219 on the Android 16 device, 86/-1 on the Android 11 device.
 #define FF_WIFI_ANDROID_FREQ_RX_LINK_SPEED 0x04
 #define FF_WIFI_ANDROID_SSID 0x08        // Android 12 and later
 #define FF_WIFI_ANDROID_SSID_LEGACY 0x0c // Android 11 and older
@@ -170,15 +201,16 @@
 // ---------------------------------------------------------------------------------------------
 
 // `getConnectionInfo` takes the caller's package name, and whether it is checked depends on the
-// release: the vivo answered "Package com.termux does not belong to 2000" for a name the shell does
-// not own, while the Redmi accepted the same name. Passing the real one is what works on both. There
-// is no way for a process to ask for its own package name -- it is not in /proc/self/status, and an
-// app cannot list /data/data -- but the executable path carries it: an app's binaries live under
-// /data/data/<package>/ or /data/user/<user>/<package>/, and /proc/self/exe resolves there.
+// release: the Android 16 device answered "Package com.termux does not belong to <shell uid>" for a name
+// the shell does not own, while the Android 11 device accepted the same name. Passing the real one is
+// what works on both. There is no way for a process to ask for its own package name -- it is not in
+// /proc/self/status, and an app cannot list /data/data -- but the executable path carries it: an app's
+// binaries live under /data/data/<package>/ or /data/user/<user>/<package>/, and /proc/self/exe
+// resolves there.
 //
 // A binary outside those directories has no package of its own, and that is not an edge case: a
-// static build pushed to /data/local/tmp is how this runs on a device without Termux, and the Redmi
-// reported "Cannot determine the package name of this process" for exactly that. The shell UID can
+// static build pushed to /data/local/tmp is how this runs on a device without Termux, and the Android
+// 11 device reported "Cannot determine the package name of this process" for exactly that. The shell UID can
 // be answered instead, because it has one name the service accepts. No other UID reaches here: an
 // app's own binaries are always under its data directory, so a failure there is a real failure.
 static bool getOwnPackage(char* buffer, size_t capacity) {
@@ -202,8 +234,9 @@ static bool getOwnPackage(char* buffer, size_t capacity) {
         }
     }
     if (rest == nullptr) {
-        FF_DEBUG("The executable is not in an app data directory (\"%s\"), uid %u", path, (unsigned) getuid());
-        if (getuid() != FF_WIFI_ANDROID_SHELL_UID) {
+        const uint32_t uid = instance.state.platform.uid;
+        FF_DEBUG("The executable is not in an app data directory (\"%s\"), uid %u", path, uid);
+        if (uid != FF_ANDROID_PRIVILEGED_UID_SHELL) {
             return false;
         }
         static const char shellPackage[] = FF_WIFI_ANDROID_SHELL_PACKAGE;
@@ -281,7 +314,7 @@ typedef struct FFWifiAndroidConnection {
 //
 // What bionic's `getifaddrs` will not do is list an interface that has no address: the list is
 // built out of the addresses, so `wlan0` leaves it as soon as nothing is associated -- measured on
-// the vivo, and the Redmi behaves the same. That is exactly the state its flags are wanted in, so
+// the Android 16 device, and the Android 11 device behaves the same. That is exactly the state its flags are wanted in, so
 // when the name is missing the radio state stands in for them. See detectWithBinder().
 static void detectInterface(FFWifiAndroidConnection* connection) {
     struct ifaddrs* addrs = nullptr;
@@ -374,8 +407,8 @@ static void findStrings(const uint8_t* data, size_t size, size_t from, FFWifiAnd
 }
 
 // AOSP writes the Wi-Fi standard between three nullable strings and the two maximum-supported link
-// speeds, all of them ints. Vendors insert fields around that run -- the Android 11 build on the
-// Redmi carries three words before the standard that AOSP's own Android 11 does not -- so a fixed
+// speeds, all of them ints. Vendors insert fields around that run -- the Android 11 device carries
+// three words before the standard that AOSP's own Android 11 does not -- so a fixed
 // offset would be a guess. The run is recognised by shape instead, searching forward from the end of
 // the supplicant state: an int naming a standard, followed by two rates, in a band the standard can
 // live in.
@@ -452,7 +485,7 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
     // older, not at all on Android 12 and later, which leaves the octets one word earlier. The one
     // that matches this release is tried first.
     uint32_t ssidOffsets[2] = { FF_WIFI_ANDROID_SSID_LEGACY, FF_WIFI_ANDROID_SSID };
-    if (FF_API_AT_LEAST(31)) {
+    if (FF_ANDROID_API_AT_LEAST(31)) {
         ssidOffsets[0] = FF_WIFI_ANDROID_SSID;
         ssidOffsets[1] = FF_WIFI_ANDROID_SSID_LEGACY;
     }
@@ -540,10 +573,11 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
 }
 
 // Which of the speeds the service wrote becomes a rate. It writes a negative one when it does not
-// know, which is what the Redmi does for the receive side, and a link speed of 0 when the link is
-// down. `generic` is the fallback for a direction the service left unset: the transmit side has one
-// -- the generic link speed is a real negotiated rate, just not direction-specific -- the way the
-// Linux backend falls back to SIOCGIWRATE when the station info carries no bitrate. There is no
+// know, which is what the Android 11 device does for the receive side, and a link speed of 0 when
+// the link is down. `generic` is the fallback for a direction the service left unset: the transmit
+// side has one -- the generic link speed is a real negotiated rate, just not direction-specific --
+// the way the Linux backend falls back to SIOCGIWRATE when the station info carries no bitrate.
+// There is no
 // generic receive speed, so 0 is passed there.
 static double wifiAndroidRate(int32_t specific, int32_t generic) {
     const int32_t rate = specific > 0 ? specific : generic;

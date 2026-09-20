@@ -1,4 +1,5 @@
 #include "displayserver.h"
+#include "common/android/api.h"
 #include "common/arrutil.h"
 #include "common/settings.h"
 #include "common/strutil.h"
@@ -314,6 +315,16 @@ static bool detectWithCmd(FFDisplayServerResult* ds) {
 }
 
 static bool detectWithDumpsys(FFDisplayServerResult* ds) {
+    // `dumpsys` needs android.permission.DUMP, which only the shell UID and root hold. Every other UID
+    // is answered with `Permission Denial: can't dump DisplayManagerService from from pid=..., uid=...
+    // due to missing android.permission.DUMP permission` on stdout and a zero exit status, so the fork
+    // buys a child process and the record loop then finds no `DisplayInfo` -- the same "no display" the
+    // caller reads as "try the next route". Not forking is the only difference this makes, but it is
+    // the difference between the fallback chain describing what is available and it guessing.
+    if (!ffAndroidIsRootOrShell(instance.state.platform.uid)) {
+        return false;
+    }
+
     return detectWithCommand(ds,
         (char*[]) { "/system/bin/dumpsys", "display", nullptr },
         "mBaseDisplayInfo=",
@@ -356,7 +367,7 @@ static bool detectDE(FFDisplayServerResult* ds) {
 
     // vivo reports the marketing name and version in `ro.vivo.os.build.display.id`,
     // separated by an underscore (`Funtouch OS_10`, `OriginOS 5`), and the build number
-    // in `ro.vivo.product.version` (`PD2505D_A_9.16.42`).
+    // in `ro.vivo.product.version`.
     if (ffSettingsGetAndroidProperty("ro.vivo.os.build.display.id", &ds->dePrettyName)) {
         ffStrbufReplaceAllC(&ds->dePrettyName, '_', ' ');
         if (ffSettingsGetAndroidProperty("ro.vivo.product.version", &buffer)) {
@@ -663,7 +674,8 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
 
     // `cmd` comes first because it needs no permission and therefore also works for an app UID.
     // `dumpsys` is the only route that answers on Android 12 and older, and only for `adb shell` and
-    // root, and `getprop` is MiUI specific and the last resort.
+    // root -- it is skipped without a fork for every other UID, see detectWithDumpsys -- and `getprop`
+    // is MiUI specific and the last resort.
     if (!detectWithCmd(ds) && !detectWithDumpsys(ds)) {
         detectWithGetprop(ds);
     }

@@ -35,7 +35,7 @@ static bool ffCodecIsLikelySoftware(const char* codecName) {
 
 // Only the name query is newer than the API level this build targets: AMediaCodec_getName and
 // AMediaCodec_releaseName are API 28, while creating and deleting a codec is API 21.
-FF_REQUIRES_API(28) static bool ffCodecIsHardwareAccelerated(AMediaCodec* codec) {
+FF_ANDROID_REQUIRES_API(28) static bool ffCodecIsHardwareAccelerated(AMediaCodec* codec) {
     if (!codec) {
         return false;
     }
@@ -51,7 +51,7 @@ FF_REQUIRES_API(28) static bool ffCodecIsHardwareAccelerated(AMediaCodec* codec)
     return isHardware;
 }
 
-FF_REQUIRES_API(28) static const char* ffDetectCodecNativeImpl(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
+FF_ANDROID_REQUIRES_API(28) static const char* ffDetectCodecNativeImpl(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
     FFCodecType decoders = FF_CODEC_TYPE_NONE;
     FFCodecType encoders = FF_CODEC_TYPE_NONE;
 
@@ -92,7 +92,7 @@ FF_REQUIRES_API(28) static const char* ffDetectCodecNativeImpl(FFCodecOptions* o
 }
 
 const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list of FFCodecResult*/) {
-    if (FF_API_AT_LEAST(28)) {
+    if (FF_ANDROID_API_AT_LEAST(28)) {
         return ffDetectCodecNativeImpl(options, result);
     }
 

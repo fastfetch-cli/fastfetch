@@ -29,24 +29,29 @@
 #define FF_BATTERY_ANDROID_SERVICE "batteryproperties"
 #define FF_BATTERY_ANDROID_DESCRIPTOR "android.os.IBatteryPropertiesRegistrar"
 
-// android.os.Process.ROOT_UID and SHELL_UID. These two are the only UIDs that hold
-// android.permission.DUMP, which `dumpsys` checks before it prints anything. See ffDetectBattery.
-#define FF_BATTERY_ANDROID_ROOT_UID 0
-#define FF_BATTERY_ANDROID_SHELL_UID 2000
-
 // BatteryManager.BATTERY_PROPERTY_*
-#define FF_BATTERY_ANDROID_PROPERTY_CAPACITY 4u
-#define FF_BATTERY_ANDROID_PROPERTY_STATUS 6u
+typedef enum FFBatteryAndroidProperty : uint32_t {
+    FF_BATTERY_ANDROID_PROPERTY_CAPACITY = 4,
+    FF_BATTERY_ANDROID_PROPERTY_STATUS = 6,
+} FFBatteryAndroidProperty;
 
 // BatteryManager.BATTERY_STATUS_*, which the health HAL's `BatteryStatus` mirrors value for value.
-#define FF_BATTERY_ANDROID_STATUS_UNKNOWN 1u
-#define FF_BATTERY_ANDROID_STATUS_CHARGING 2u
-#define FF_BATTERY_ANDROID_STATUS_DISCHARGING 3u
+// Only the three the module has something to say about are carried: NOT_CHARGING (4) and FULL (5)
+// both mean a charger is attached, which the powered bits already say.
+typedef enum FFBatteryAndroidStatus : uint32_t {
+    FF_BATTERY_ANDROID_STATUS_UNKNOWN = 1,
+    FF_BATTERY_ANDROID_STATUS_CHARGING = 2,
+    FF_BATTERY_ANDROID_STATUS_DISCHARGING = 3,
+} FFBatteryAndroidStatus;
 
 // BatteryCapacityLevel.BATTERY_CAPACITY_LEVEL_CRITICAL, the level the framework itself shuts the
 // device down on. This is the health HAL's numbering, not the one the older
-// `BatteryManager.BATTERY_CAPACITY_LEVEL_*` constants used, which had CRITICAL at 4.
-#define FF_BATTERY_ANDROID_CAPACITY_LEVEL_CRITICAL 1
+// `BatteryManager.BATTERY_CAPACITY_LEVEL_*` constants used, which had CRITICAL at 4. The rest of the
+// enum -- -1 UNSUPPORTED, 0 UNKNOWN, 2 LOW, 3 NORMAL, 4 HIGH, 5 FULL -- only restates the
+// percentage, so only this value is carried.
+typedef enum FFBatteryAndroidCapacityLevel : int32_t {
+    FF_BATTERY_ANDROID_CAPACITY_LEVEL_CRITICAL = 1,
+} FFBatteryAndroidCapacityLevel;
 
 // BatteryProperty starts with [int64 mValueLong], behind the usual [exception code][return value]
 // [out-param non-null marker] prefix of an AIDL reply. API 35 appended [string8 mValueString] after
@@ -71,9 +76,9 @@ static void initResult(FFBatteryResult* battery) {
 static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t property, uint64_t* value) {
     // `getProperty` is the third method declared in `IBatteryPropertiesRegistrar` up to Android 9 and
     // the first one from Android 10 on. Written as an `if` because clang rejects `__builtin_available`
-    // -- which is what FF_API_AT_LEAST expands to -- in any other position.
+    // -- which is what FF_ANDROID_API_AT_LEAST expands to -- in any other position.
     uint32_t transaction = 3u;
-    if (FF_API_AT_LEAST(29)) {
+    if (FF_ANDROID_API_AT_LEAST(29)) {
         transaction = 1u;
     }
 
@@ -146,7 +151,7 @@ static const char* parseBinder(FFlist* results) {
 // `dumpsys battery` prints what `BatteryService.dumpInternal()` prints: the whole of the health HAL's
 // `HealthInfo`, plus the timestamps the service keeps for its own broadcast rate limiter. It is a flat
 // `key: value` list read by name, which is what makes it the sturdier of the two routes -- a vendor
-// that prints extra keys (vivo does: `engine`, `soc decimal`, `adapter power`, `board temp status`,
+// that prints extra keys (some vendors do: `engine`, `soc decimal`, `adapter power`, `board temp status`,
 // `low bat status`, `reverse wl chg status`, `reverse wl chg exception`, `chg shut vbat`,
 // `last mode flag` and `last mode keep time`, in the middle of the list) only adds keys nobody asks
 // for, and a release that appends a field costs nothing. The binder reply is positional and breaks
@@ -206,8 +211,9 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
     }
 
     if (!ffStrbufStartsWithS(&buf, "Current Battery Service state:\n")) {
-        // The only other thing the command prints is `Permission Denial: can't dump Battery service`,
-        // which ffDetectBattery has already ruled out by looking at the UID.
+        // A refusal, which ffDetectBattery has already ruled out by looking at the UID: an app UID gets
+        // `Can't find service: battery` on Android 16, and the permission denial some other
+        // release would print lands here too. Both exit 0, so this is the only place that notices.
         return "Invalid `/system/bin/dumpsys battery` result";
     }
 
@@ -299,15 +305,14 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results) {
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
-    // `dumpsys battery` is gated behind android.permission.DUMP, which only the shell UID and root
-    // hold: any other UID is answered with `Permission Denial: can't dump Battery service` on stdout
-    // and a zero exit status, so forking it there costs a child process and cannot succeed. It is also
-    // the richer of the two routes -- the registrar answers neither temperature nor technology, and
-    // the dump is what spells out the status enum -- so it is tried first wherever it is allowed to
-    // run, and the binder route covers everything else at ~0.3 ms. termux-api was dropped: it returns
-    // nothing on this device and can hang for minutes, the same reason its camera path was removed.
-    const uint32_t uid = instance.state.platform.uid;
-    if (uid == FF_BATTERY_ANDROID_ROOT_UID || uid == FF_BATTERY_ANDROID_SHELL_UID) {
+    // `dumpsys battery` needs android.permission.DUMP, which only the shell UID and root hold: an app
+    // UID is answered with `Can't find service: battery` on stdout and a zero exit status, so forking
+    // it there costs a child process and cannot succeed. It is also the richer of the two routes --
+    // the registrar answers neither temperature nor technology, and the dump is what spells out the
+    // status enum -- so it is tried first wherever it is allowed to run, and the binder route covers
+    // everything else at ~0.3 ms. termux-api was dropped: it returns nothing on this device and can
+    // hang for minutes, the same reason its camera path was removed.
+    if (ffAndroidIsRootOrShell(instance.state.platform.uid)) {
         const char* error = parseDumpsys(options, results);
         if (error == nullptr) {
             return nullptr;
