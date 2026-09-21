@@ -274,11 +274,11 @@
 
 
         "batteryFormat": {
-            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
+            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {name}: Battery model name *\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
-            "description": "Output format for the `BIOS` module. See Wiki for formatting syntax\n    1. {date}: BIOS date\n    2. {release}: BIOS release\n    3. {vendor}: BIOS vendor\n    4. {version}: BIOS version\n    5. {type}: Firmware type",
+            "description": "Output format for the `BIOS` module. See Wiki for formatting syntax\n    1. {date}: BIOS date\n    2. {release}: BIOS release\n    3. {vendor}: BIOS vendor\n    4. {version}: BIOS version\n    5. {type}: Firmware type *",
             "type": "string"
         },
         "bluetoothFormat": {
@@ -286,7 +286,7 @@
             "type": "string"
         },
         "bluetoothradioFormat": {
-            "description": "Output format for the `BluetoothRadio` module. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
+            "description": "Output format for the `BluetoothRadio` module. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering *\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
             "type": "string"
         },
         "boardFormat": {
@@ -298,11 +298,11 @@
             "type": "string"
         },
         "brightnessFormat": {
-            "description": "Output format for the `Brightness` module. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
+            "description": "Output format for the `Brightness` module. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name *\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
             "type": "string"
         },
         "btrfsFormat": {
-            "description": "Output format for the `Btrfs` module. See Wiki for formatting syntax\n    1. {name}: Name / Label\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
+            "description": "Output format for the `Btrfs` module. See Wiki for formatting syntax\n    1. {name}: Name / Label *\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
             "type": "string"
         },
         "cameraFormat": {
@@ -314,7 +314,7 @@
             "type": "string"
         },
         "codecFormat": {
-            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name\n    2. {direction}: Decoder / Encoder\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
+            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name *\n    2. {direction}: Decoder / Encoder *\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
             "type": "string"
         },
         "commandFormat": {
@@ -322,11 +322,11 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name\n    14. {technology}: CPU technology",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
             "type": "string"
         },
         "cpucacheFormat": {
-            "description": "Output format for the `CPUCache` module. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result",
+            "description": "Output format for the `CPUCache` module. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result\n    3. {level}: Cache level *",
             "type": "string"
         },
         "cpuusageFormat": {
@@ -346,15 +346,15 @@
             "type": "string"
         },
         "displayFormat": {
-            "description": "Output format for the `Display` module. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name\n    7. {type}: Screen type (Built-in or External)\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
+            "description": "Output format for the `Display` module. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name *\n    7. {type}: Screen type (Built-in or External) *\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
+            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem *\n    10. {name}: Label / name *\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter *\n    21. {mount-from}: Mount from (device path) *\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
             "type": "string"
         },
         "diskioFormat": {
-            "description": "Output format for the `DiskIO` module. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
+            "description": "Output format for the `DiskIO` module. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name *\n    4. {dev-path}: Device raw file path *\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
             "type": "string"
         },
         "dnsFormat": {
@@ -410,7 +410,7 @@
             "type": "string"
         },
         "localipFormat": {
-            "description": "Output format for the `LocalIp` module. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address\n    4. {ifname}: Interface name\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
+            "description": "Output format for the `LocalIp` module. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address *\n    4. {ifname}: Interface name *\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
             "type": "string"
         },
         "mediaFormat": {
@@ -422,7 +422,7 @@
             "type": "string"
         },
         "monitorFormat": {
-            "description": "Output format for the `Monitor` module. See Wiki for formatting syntax\n    1. {name}: Display name\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
+            "description": "Output format for the `Monitor` module. See Wiki for formatting syntax\n    1. {name}: Display name *\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
             "type": "string"
         },
         "mouseFormat": {
@@ -430,7 +430,7 @@
             "type": "string"
         },
         "netioFormat": {
-            "description": "Output format for the `NetIO` module. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
+            "description": "Output format for the `NetIO` module. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name *\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
             "type": "string"
         },
         "openclFormat": {
@@ -442,7 +442,7 @@
             "type": "string"
         },
         "osFormat": {
-            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel\n    2. {name}: Name of the OS\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
+            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel *\n    2. {name}: Name of the OS *\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
             "type": "string"
         },
         "packagesFormat": {
@@ -450,7 +450,7 @@
             "type": "string"
         },
         "physicaldiskFormat": {
-            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
+            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name *\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path *\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
             "type": "string"
         },
         "physicalmemoryFormat": {
@@ -482,7 +482,7 @@
             "type": "string"
         },
         "swapFormat": {
-            "description": "Output format for the `Swap` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
+            "description": "Output format for the `Swap` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name *",
             "type": "string"
         },
         "terminalFormat": {
@@ -554,7 +554,7 @@
             "type": "string"
         },
         "zpoolFormat": {
-            "description": "Output format for the `Zpool` module. See Wiki for formatting syntax\n    1. {name}: Zpool name\n    2. {guid}: Zpool guid\n    3. {state}: Zpool state\n    4. {size-used}: Size used\n    5. {size-allocated}: Size allocated\n    6. {size-total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {frag-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {frag-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
+            "description": "Output format for the `Zpool` module. See Wiki for formatting syntax\n    1. {name}: Zpool name *\n    2. {guid}: Zpool guid *\n    3. {state}: Zpool state\n    4. {size-used}: Size used\n    5. {size-allocated}: Size allocated\n    6. {size-total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {frag-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {frag-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
             "type": "string"
         }
     },
