@@ -528,6 +528,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         // `Sigmd5` is the only table that doesn't contain the virtual `gpg-pubkey` package
         packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Sigmd5", "rpm");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, RUM)) {
+        packageCounts->rum += getSQLite3Int(baseDir, "/var/lib/rakuos/rum-rpmdb/rpmdb.sqlite", "SELECT count(*) FROM Sigmd5", "rum");
+    }
     if (FF_PACKAGES_IS_ENABLED(options, SNAP)) {
         packageCounts->snap += getSnap(baseDir);
     }
