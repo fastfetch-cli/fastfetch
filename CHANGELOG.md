@@ -84,6 +84,7 @@ Bugfixes:
     * This fixes PKG package count detection on FreeBSD.
 * Fixed `{#keys}` and `{#title}` in module format strings not honoring the `brightColor` display option. (Format)
 * Fixed `paddingTop` and `paddingLeft` being ignored by the `kitty-icat` image logo type. (Logo)
+* Fixed module format strings mishandling a value that carries more than one leading ANSI escape sequence: the second escape was taken for the start of the trailing reset, so `:`, `<`, `>` and `|` left the value untruncated instead of truncating it.
 * Fixed issues when running on big-endian platforms.
 * Fixed building on FreeBSD 16.0-CURRENT, where `<string.h>` defines `memrchr` as a qualifier-preserving function-like macro. (General, FreeBSD)
 * Some internal cleanups and optimizations.
