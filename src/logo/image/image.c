@@ -1246,7 +1246,7 @@ static uint32_t getKittyImageId(void) {
     id ^= (uint32_t) getpid() * 2654435761u;
     id ^= (uint32_t) ((uintptr_t) &id >> 4);
     id &= 0xFFFFFF;
-    return id != 0 ? id : 1;
+    return id ?: 1;
 }
 
 // The envelope, per the kitty protocol: the root frame is transmitted with `a=T` and has no gap
