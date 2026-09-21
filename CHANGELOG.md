@@ -6,10 +6,6 @@ Changes:
 * ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available, and is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss; `false` ignores the image logo cache completely, reading nothing from it and writing nothing to it; `regen` does what `--logo-recache true` used to do. `logo.cache` accepts a boolean, or the string `"regen"`.
-* The `waitTime` option of `DiskIO` and `NetIO` now defaults to `250` ms instead of `500`. (DiskIO / NetIO)
-    * The byte counters are maintained by the kernel as I/O happens, so a shorter sampling window still yields an accurate rate, and both modules now finish about 250 ms sooner. The two modules wait concurrently, so enabling both does not cost twice the wait time.
-* The `waitTime` option of `Top` now defaults to `250` ms instead of `500`. (Top)
-    * The operating system accounts process CPU time in fixed steps, so a window longer than roughly 150 ms does not visibly improve the reported percentages. The module now finishes about 250 ms sooner.
 
 Features:
 * Improved image logo support
@@ -26,7 +22,7 @@ Features:
         * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in. The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, AImageDecoder on Android, ImageMagick 7 on Linux); a single-frame GIF falls back to a still image.
         * On Android an animation needs Android 12 (API 31), and the repeat count is not available there, so an animation is reported as looping forever. A build with no image decoder, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
         * A terminal that supports the kitty graphics protocol but not its animation frames, such as Konsole, shows the first frame.
-    * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support. (Logo)
+    * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support to reduce binary size. (Logo)
         * Image logos are the only consumer of ImageMagick, chafa, and the embedded libsixel encoder, so none of the three is searched for at configure time, and no image decoding sources are compiled in. This is intended only to reduce binary size on embedded systems (such as OpenWrt).
         * The `sixel`, `kitty`, `kitty-direct`, `kitty-icat`, `iterm` and `chafa` logo types are rejected with an error, both on the command line and in the JSON config, and the `auto` logo type never tries an image.
         * `--logo-type raw` keeps working: it passes a pre-rendered byte stream through unchanged and needs no decoder, so a logo can still be displayed by converting the image externally.
@@ -75,6 +71,8 @@ Features:
 * Added Umbriel wayland compositor version detection (WM, Linux)
 * Improved the player name detection on Windows to show the name Windows shows for it. (Player, Windows)
     * An unpackaged player such as Chrome is now reported as `Google Chrome` instead of `Chrome`.
+* The `waitTime` option of `DiskIO`, `NetIO` and `Top` now defaults to `250` ms instead of `500`. (DiskIO / NetIO / Top)
+    * This change improves the responsiveness while maintaining reasonably accurate measurements.
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)
