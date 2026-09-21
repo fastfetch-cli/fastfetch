@@ -103,7 +103,7 @@ static const FFlogo R[] = {
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_RHEL_SMALL
-    // RedHatEnterpriseLinux
+    // RedHatEnterpriseLinux_small
     {
         .names = { "rhel_small", "redhat_small" },
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
