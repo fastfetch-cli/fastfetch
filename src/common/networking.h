@@ -34,6 +34,15 @@ typedef struct FFNetworkingState {
 [[gnu::nonnull(1, 2, 4), nodiscard]] const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, uint16_t port, const char* path, const char* headers);
 [[gnu::nonnull(1, 2), nodiscard]] const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer);
 
+// Releases what a finished request holds and returns `state` to the idle state, so that the next
+// `ffNetworkingSendHttpRequest` starts from scratch. A request that never reached the wire can
+// still own the request buffer, so a plain zeroing of the struct is not enough.
+// The caller stays responsible for its own bookkeeping, such as clearing a "request sent" latch.
+[[gnu::nonnull(1)]] static inline void ffNetworkingResetState(FFNetworkingState* state) {
+    ffStrbufDestroy(&state->command);
+    *state = (FFNetworkingState) {};
+}
+
 // Case-insensitive header lookup restricted to the header block [0, headerEnd).
 // Restricting the range matters because the body may already share the same buffer.
 // Returns a pointer to the first character of the value; `valueLen` receives its

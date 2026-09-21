@@ -103,13 +103,16 @@ const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* resul
     }
 
     if (*status != nullptr) {
-        return *status;
+        const char* error = *status;
+        ffNetworkingResetState(state);
+        *status = FF_UNINITIALIZED;
+        return error;
     }
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
     const char* error = ffNetworkingRecvHttpResponse(state, &response);
 
-    *state = (FFNetworkingState) {};
+    ffNetworkingResetState(state);
     *status = FF_UNINITIALIZED;
 
     if (error == nullptr) {

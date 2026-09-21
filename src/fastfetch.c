@@ -690,7 +690,7 @@ static void parseCommand(FFdata* data, char* key, char* value) {
             enableJsonOutput(data);
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
-        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // ms
     } else if (ffStrEqualsIgnCase(key, "-w") || ffStrEqualsIgnCase(key, "--watch")) {
         if (value == nullptr) {
             instance.state.dynamicInterval = 1000; // default to 1 second if no value is provided

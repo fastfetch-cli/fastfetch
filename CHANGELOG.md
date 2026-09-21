@@ -89,6 +89,7 @@ Bugfixes:
 * Fixed building on FreeBSD 16.0-CURRENT, where `<string.h>` defines `memrchr` as a qualifier-preserving function-like macro. (General, FreeBSD)
 * Worked around an iTerm bug where the image logo may be moved out of view. (Logo)
 * Increased the terminal response wait time to 1s to improve compatibility with slower terminals. (General)
+* Fixed the `PublicIp` and `Weather` modules exiting with "can only be used once due to internal limitations" on the round after a failed request when `--dynamic-interval` is used, instead of retrying. (PublicIp / Weather)
 * Some internal cleanups and optimizations.
 
 Logos:
