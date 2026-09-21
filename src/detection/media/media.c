@@ -1,19 +1,53 @@
 #include "media.h"
+#include "common/FFcache.h"
 #include "common/io.h"
 
 void ffDetectMediaImpl(FFMediaResult* media, bool saveCover);
 
 static FFMediaResult result;
 
+// The cover file of this run, if there is one. It is tracked here rather than in `result` because
+// the cached result is dropped between `--dynamic-interval` rounds, while the file has to stay on
+// disk for the whole run: the `kitty-direct` logo type lets the terminal open it by path, and the
+// logo is replayed from the line cache on every round.
+static FFstrbuf coverFile;
+static bool coverFileRegistered = false;
+
 static void removeMediaCoverFile(void) {
-    if (result.cover.length > 0) {
-        ffRemoveFile(result.cover.chars);
-        ffStrbufDestroy(&result.cover);
+    if (coverFile.length > 0) {
+        ffRemoveFile(coverFile.chars);
+        ffStrbufDestroy(&coverFile);
     }
 }
 
+static void destroyMediaResult(void* storage) {
+    FFMediaResult* media = storage;
+
+    ffStrbufDestroy(&media->error);
+    ffStrbufDestroy(&media->playerId);
+    ffStrbufDestroy(&media->player);
+    ffStrbufDestroy(&media->song);
+    ffStrbufDestroy(&media->artist);
+    ffStrbufDestroy(&media->album);
+    ffStrbufDestroy(&media->url);
+    ffStrbufDestroy(&media->status);
+    ffStrbufDestroy(&media->cover);
+    media->length = 0;
+    media->position = 0;
+    media->removeCoverAfterUse = false;
+}
+
+// `saveCover` asks for a side effect and is not part of the cache identity, so the entry cannot be
+// initialized through `init(void*)`: the first caller of a generation decides, and the callers that
+// follow reuse its result, as they did when the result was cached for the whole run.
+static FFcacheEntry ffCacheEntryMedia = {
+    .name = "media",
+    .storage = &result,
+    .destroy = destroyMediaResult,
+};
+
 const FFMediaResult* ffDetectMedia(bool saveCover) {
-    if (result.error.chars == nullptr) {
+    if (ffCacheBeginInit(&ffCacheEntryMedia)) {
         ffStrbufInit(&result.error);
         ffStrbufInit(&result.playerId);
         ffStrbufInit(&result.player);
@@ -37,7 +71,11 @@ const FFMediaResult* ffDetectMedia(bool saveCover) {
         ffStrbufTrimRightSpace(&result.player);
 
         if (saveCover && result.removeCoverAfterUse) {
-            atexit(removeMediaCoverFile);
+            ffStrbufSet(&coverFile, &result.cover);
+            if (!coverFileRegistered) {
+                coverFileRegistered = true;
+                atexit(removeMediaCoverFile);
+            }
         }
     }
 

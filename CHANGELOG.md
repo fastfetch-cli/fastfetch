@@ -90,6 +90,7 @@ Bugfixes:
 * Worked around an iTerm bug where the image logo may be moved out of view. (Logo)
 * Increased the terminal response wait time to 1s to improve compatibility with slower terminals. (General)
 * Fixed the `PublicIp` and `Weather` modules exiting with "can only be used once due to internal limitations" on the round after a failed request when `--dynamic-interval` is used, instead of retrying. (PublicIp / Weather)
+* Fixed the `Display`, `Monitor`, `WM`, `DE`, `Media`, `Player`, `Shell` and `Terminal` modules replaying the first round's result when `--dynamic-interval` is used. The detection results that are cached for the whole run are now dropped between rounds, so these modules detect again on every round. (Display / Monitor / WM / DE / Media / Player / Shell / Terminal)
 * Some internal cleanups and optimizations.
 
 Logos:

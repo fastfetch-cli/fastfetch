@@ -1,4 +1,5 @@
 #include "terminalshell.h"
+#include "common/FFcache.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
@@ -376,22 +377,43 @@ static void setTerminalInfoDetails(FFTerminalResult* result) {
     #define FF_EXE_PATH_LEN 260
 #endif
 
-const FFShellResult* ffDetectShell() {
-    static FFShellResult result;
-    static bool init = false;
-    if (init) {
-        return &result;
-    }
-    init = true;
+static FFShellResult shellResult;
 
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
-    result.exeName = result.exe.chars;
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.version);
-    result.pid = 0;
-    result.ppid = 0;
-    result.tty = -1;
+static void destroyShellResult(void* storage) {
+    FFShellResult* result = storage;
+
+    ffStrbufDestroy(&result->processName);
+    ffStrbufDestroy(&result->exe);
+    result->exeName = result->exe.chars; // `exeName` points into `exe`, which is empty again
+    ffStrbufDestroy(&result->exePath);
+    ffStrbufDestroy(&result->prettyName);
+    ffStrbufDestroy(&result->version);
+    result->pid = 0;
+    result->ppid = 0;
+    result->tty = -1;
+}
+
+static FFcacheEntry ffCacheEntryShell = {
+    .name = "shell",
+    .storage = &shellResult,
+    .destroy = destroyShellResult,
+};
+
+const FFShellResult* ffDetectShell() {
+    FFShellResult* result = &shellResult;
+
+    if (!ffCacheBeginInit(&ffCacheEntryShell)) {
+        return result;
+    }
+
+    ffStrbufInit(&result->processName);
+    ffStrbufInitA(&result->exe, FF_EXE_PATH_LEN);
+    result->exeName = result->exe.chars;
+    ffStrbufInit(&result->exePath);
+    ffStrbufInit(&result->version);
+    result->pid = 0;
+    result->ppid = 0;
+    result->tty = -1;
 
     pid_t ppid = getppid();
 
@@ -401,49 +423,70 @@ const FFShellResult* ffDetectShell() {
         ffProcessGetBasicInfoLinux(ppid, &_, &ppid, nullptr);
     }
 
-    ppid = getShellInfo(&result, ppid);
-    getUserShellFromEnv(&result);
+    ppid = getShellInfo(result, ppid);
+    getUserShellFromEnv(result);
 
-    if (result.processName.length > 0) {
-        setShellInfoDetails(&result);
+    if (result->processName.length > 0) {
+        setShellInfoDetails(result);
         if (instance.config.general.detectVersion) {
-            fftsGetShellVersion(result.exePath.length > 0 ? &result.exePath : &result.exe, result.exeName, &result.version);
+            fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
         }
     }
 
-    return &result;
+    return result;
 }
 
-const FFTerminalResult* ffDetectTerminal() {
-    static FFTerminalResult result;
-    static bool init = false;
-    if (init) {
-        return &result;
-    }
-    init = true;
+static FFTerminalResult terminalResult;
 
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
-    result.exeName = result.exe.chars;
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.version);
-    ffStrbufInitS(&result.tty, ttyname(STDOUT_FILENO));
-    result.pid = 0;
-    result.ppid = 0;
+static void destroyTerminalResult(void* storage) {
+    FFTerminalResult* result = storage;
+
+    ffStrbufDestroy(&result->processName);
+    ffStrbufDestroy(&result->exe);
+    result->exeName = result->exe.chars; // `exeName` points into `exe`, which is empty again
+    ffStrbufDestroy(&result->exePath);
+    ffStrbufDestroy(&result->prettyName);
+    ffStrbufDestroy(&result->version);
+    ffStrbufDestroy(&result->tty);
+    result->pid = 0;
+    result->ppid = 0;
+}
+
+static FFcacheEntry ffCacheEntryTerminal = {
+    .name = "terminal",
+    .storage = &terminalResult,
+    .destroy = destroyTerminalResult,
+};
+
+const FFTerminalResult* ffDetectTerminal() {
+    FFTerminalResult* result = &terminalResult;
+
+    if (!ffCacheBeginInit(&ffCacheEntryTerminal)) {
+        return result;
+    }
+
+    ffStrbufInit(&result->processName);
+    ffStrbufInitA(&result->exe, FF_EXE_PATH_LEN);
+    result->exeName = result->exe.chars;
+    ffStrbufInit(&result->exePath);
+    ffStrbufInit(&result->version);
+    ffStrbufInitS(&result->tty, ttyname(STDOUT_FILENO));
+    result->pid = 0;
+    result->ppid = 0;
 
     pid_t ppid = (pid_t) ffDetectShell()->ppid;
 
     if (ppid) {
-        ppid = getTerminalInfo(&result, ppid);
+        ppid = getTerminalInfo(result, ppid);
     }
-    getTerminalFromEnv(&result);
+    getTerminalFromEnv(result);
 
-    if (result.processName.length > 0) {
-        setTerminalInfoDetails(&result);
+    if (result->processName.length > 0) {
+        setTerminalInfoDetails(result);
         if (instance.config.general.detectVersion) {
-            fftsGetTerminalVersion(&result.processName, result.exePath.length > 0 ? &result.exePath : &result.exe, &result.version);
+            fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
         }
     }
 
-    return &result;
+    return result;
 }

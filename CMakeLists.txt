@@ -462,6 +462,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/time.c
     src/common/impl/edidHelper.c
     src/common/impl/base64.c
+    src/common/impl/FFcache.c
     src/common/impl/FFlist.c
     src/common/impl/FFstrbuf.c
     src/common/impl/path.c
@@ -2197,6 +2198,13 @@ endif()
 ###################
 
 if (BUILD_TESTS)
+    add_executable(fastfetch-test-cache
+        tests/cache.c
+    )
+    target_link_libraries(fastfetch-test-cache
+        PRIVATE libfastfetch
+    )
+
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
