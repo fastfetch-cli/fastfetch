@@ -189,6 +189,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.pkgtool, "pkgtool"),
                 FF_ARG(counts.porg, "porg"),
                 FF_ARG(counts.rpm, "rpm"),
+                FF_ARG(counts.rum, "rum"),
                 FF_ARG(counts.scoopGlobal, "scoop-global"),
                 FF_ARG(counts.scoopUser, "scoop-user"),
                 FF_ARG(counts.snap, "snap"),
@@ -203,7 +204,6 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(hpkgAll, "hpkg-all"),
                 FF_ARG(nixAll, "nix-all"),
                 FF_ARG(counts.all, "all"),
-                FF_ARG(counts.rum, "rum"),
             }));
     }
 
@@ -592,6 +592,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of pkgtool packages", "pkgtool" },
         { "Number of porg packages", "porg" },
         { "Number of rpm packages", "rpm" },
+        { "Number of rum overlay packages", "rum" },
         { "Number of scoop-global packages", "scoop-global" },
         { "Number of scoop-user packages", "scoop-user" },
         { "Number of snap packages", "snap" },
@@ -606,7 +607,6 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Total number of all hpkg packages", "hpkg-all" },
         { "Total number of all nix packages", "nix-all" },
         { "Number of all packages", "all" },
-        { "Number of rum overlay packages", "rum" },
     })),
     .defaultOrder = 14,
 };
