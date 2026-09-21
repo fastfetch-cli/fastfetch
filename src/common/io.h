@@ -228,7 +228,7 @@ typedef enum FFPathType: uint8_t {
 
 [[gnu::nonnull(1, 2)]] bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
-#define FF_IO_TERM_RESP_WAIT_MS 200 // #554
+#define FF_IO_TERM_RESP_WAIT_MS 1000 // Terminal may respond slowly, especially when printing large image/gif logos. Found on iTerm
 
 [[gnu::format(scanf, 3, 4), gnu::nonnull(1, 3)]] const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...);
 

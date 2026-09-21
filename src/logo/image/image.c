@@ -84,7 +84,9 @@ static bool printImageIterm(bool printError) {
                 instance.state.logoWidth = X + options->paddingRight - 1;
             }
             instance.state.logoHeight = Y;
-            fputs("\e[H", stdout);
+            // Work around an iTerm bug. Without the leading whitespace the image logo may be moved out of view
+            // Found in iTerm 3.7.2
+            fputs(" \e[H", stdout);
         } else if (options->position == FF_LOGO_POSITION_TOP) {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
