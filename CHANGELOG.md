@@ -8,6 +8,7 @@ Changes:
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss; `false` ignores the image logo cache completely, reading nothing from it and writing nothing to it; `regen` does what `--logo-recache true` used to do. `logo.cache` accepts a boolean, or the string `"regen"`.
 
 Features:
+* Added SatellaOS logo. (Logo)
 * Added rum overlay package counting on RakuOS, exposed as `{rum}`. (Packages, Linux)
 * Improved image logo support
     * Backend rewritten

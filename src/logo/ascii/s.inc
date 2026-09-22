@@ -94,6 +94,16 @@ static const FFlogo S[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SATELLAOS
+    // SatellaOS
+    {
+        .names = { "SatellaOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SATELLAOS,
+        .colors = {
+            FF_COLOR_FG_RGB "127;63;191",
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_SCIENTIFIC
     // Scientific
     {
