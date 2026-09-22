@@ -20,6 +20,14 @@ typedef struct FFPercentageModuleConfig {
     FFPercentageTypeFlags type;
 } FFPercentageModuleConfig;
 
+// Maps a received signal strength in dBm onto the 0-100 scale the percentage formatters want.
+// -50 dBm and above counts as a perfect link, -100 dBm and below as no link at all, and the range in
+// between is linear. Both ends are clamped rather than extrapolated, so the result is always a
+// percentage -- which also keeps it usable with `{?x}` guards, unlike a raw negative RSSI.
+[[gnu::const]] static inline double ffRssiToSignalQuality(int32_t rssi) {
+    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2);
+}
+
 // if (green <= yellow)
 // [0, green]: print green
 // (green, yellow]: print yellow
