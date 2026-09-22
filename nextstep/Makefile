@@ -5,9 +5,13 @@
 # path here, build natively on the target machine or under emulation
 # (Previous for m68k, QEMU for x86).
 
+# -posix is required, not optional: this system keeps uname() and friends
+# in /usr/lib/libposix.a, but linking that library by hand doesn't work -
+# you have to compile *and* link via `cc -posix`, which selects the right
+# startup files together with the library.
 CC = cc
-CFLAGS = -O -Wall
-LDFLAGS =
+CFLAGS = -O -Wall -posix
+LDFLAGS = -posix
 LIBS =
 PREFIX = /usr/local
 

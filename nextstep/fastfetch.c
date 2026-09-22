@@ -23,6 +23,17 @@
  * printing "unknown" rather than being load-bearing for the rest.
  */
 
+/*
+ * This system's headers only expose ANSI-C declarations by default; POSIX
+ * declarations (isatty(), getuid(), open()/lseek()/read()/close(), ...)
+ * are gated behind _POSIX_SOURCE and must be requested before any header
+ * is included. The Makefile also builds with `cc -posix` so these actually
+ * link (see Makefile) - except uname(), which this system declares but
+ * doesn't provide a linkable implementation of even so; see the NOTE above
+ * printOS() below for how that's worked around.
+ */
+#define _POSIX_SOURCE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,11 +43,21 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/utsname.h>
 
 #include <nlist.h>
 
 #include <mach/mach.h>
+#include <mach/mach_init.h>
+#include <mach/mach_host.h>
+#include <mach/vm_statistics.h>
+
+/*
+ * gethostname() is a BSD extension, not POSIX.1, so _POSIX_SOURCE above
+ * hides its declaration even though the symbol is still in libc. Declare
+ * it ourselves with the classic BSD (int namelen) signature this system
+ * uses.
+ */
+extern int gethostname(char *name, int namelen);
 
 #define FF_LINE_MAX 256
 
@@ -87,27 +108,40 @@ static void printTitle(void)
     putchar('\n');
 }
 
-/* ---- os: NeXTSTEP vs OPENSTEP is a branding split at major version 4 - */
+/* ---- os / kernel: uname()'s prototype is declared by this system's     */
+/* headers, but the symbol isn't in the linkable libposix.a - confirmed by */
+/* a real build: `_uname` is the *only* undefined symbol at link time even */
+/* with `cc -posix`, while every other call in this file (including the   */
+/* other POSIX ones - isatty, getuid, open/lseek/read/close) resolves      */
+/* fine. So there's no runtime way here to read an exact release number;  */
+/* this reports architecture via the same Mach host_info() call used      */
+/* elsewhere in this file instead. -------------------------------------- */
 
-static void printOS(const struct utsname *uts)
+static void printOS(void)
 {
-    int major = atoi(uts->release);
-    const char *brand;
+    kern_return_t kr;
+    struct host_basic_info info;
+    mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
+    const char *arch = "unknown architecture";
 
-    if (major <= 3) brand = "NeXTSTEP";
-    else brand = "OPENSTEP";
+    kr = host_info(mach_host_self(), HOST_BASIC_INFO, (host_info_t) &info, &count);
+    if (kr == KERN_SUCCESS) {
+#ifdef CPU_TYPE_MC680X0
+        if (info.cpu_type == CPU_TYPE_MC680X0) arch = "m68k";
+#endif
+#ifdef CPU_TYPE_I386
+        if (info.cpu_type == CPU_TYPE_I386) arch = "i386";
+#endif
+    }
 
-    printf("OS: %s %s (%s)\n", brand, uts->release, uts->machine);
+    printf("OS: NeXTSTEP/OPENSTEP (%s)\n", arch);
 }
 
 /* ---- kernel ------------------------------------------------------------ */
 
-static void printKernel(const struct utsname *uts)
+static void printKernel(void)
 {
-    if (uts->version[0] != '\0')
-        printf("Kernel: %s\n", uts->version);
-    else
-        printf("Kernel: %s %s\n", uts->sysname, uts->release);
+    printf("Kernel: Mach\n");
 }
 
 /* ---- host: best-effort, exact NeXT hardware model (Cube/Slab/Turbo/   */
@@ -172,9 +206,12 @@ static void printCPU(void)
     printf("CPU: %s (%d)\n", name, (int) info.avail_cpus);
 }
 
-/* ---- memory: same Mach host_statistics() API this project's own macOS */
-/* backend uses (src/detection/memory/memory_apple.c), just the original */
-/* 32-bit HOST_VM_INFO call instead of Darwin's HOST_VM_INFO64 addition. */
+/* ---- memory: this Mach vintage predates Darwin's HOST_VM_INFO flavor of */
+/* host_statistics() (confirmed against a period host_info.h: it only     */
+/* defines HOST_BASIC_INFO/HOST_PROCESSOR_SLOTS/HOST_SCHED_INFO/           */
+/* HOST_LOAD_INFO, no VM flavor at all). VM stats instead come from their  */
+/* own dedicated RPC, vm_statistics(task, &stats), whose struct carries    */
+/* pagesize directly - no separate host_page_size() call needed. */
 
 static void printMemory(void)
 {
@@ -182,9 +219,7 @@ static void printMemory(void)
     struct host_basic_info info;
     mach_msg_type_number_t basicCount = HOST_BASIC_INFO_COUNT;
     vm_statistics_data_t vmstat;
-    mach_msg_type_number_t vmCount = HOST_VM_INFO_COUNT;
-    vm_size_t pageSize = 4096; /* fallback: both m68k and i386 NeXT hardware use 4K pages */
-    unsigned long totalBytes, freeBytes, usedBytes;
+    unsigned long totalBytes, freeBytes, usedBytes, pageSize;
 
     kr = host_info(mach_host_self(), HOST_BASIC_INFO, (host_info_t) &info, &basicCount);
     if (kr != KERN_SUCCESS) {
@@ -193,15 +228,16 @@ static void printMemory(void)
     }
     totalBytes = (unsigned long) info.memory_size;
 
-    host_page_size(mach_host_self(), &pageSize);
-
-    kr = host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t) &vmstat, &vmCount);
+    kr = vm_statistics(mach_task_self(), &vmstat);
     if (kr != KERN_SUCCESS) {
         printf("Memory: %luMiB total (used/free unknown)\n", totalBytes / 1024 / 1024);
         return;
     }
 
-    freeBytes = (unsigned long) vmstat.free_count * (unsigned long) pageSize;
+    pageSize = (unsigned long) vmstat.pagesize;
+    if (pageSize == 0) pageSize = 4096; /* fallback: both m68k and i386 NeXT hardware use 4K pages */
+
+    freeBytes = (unsigned long) vmstat.free_count * pageSize;
     usedBytes = totalBytes > freeBytes ? totalBytes - freeBytes : 0;
 
     printf("Memory: %luMiB / %luMiB\n", usedBytes / 1024 / 1024, totalBytes / 1024 / 1024);
@@ -226,8 +262,10 @@ static int readBoottime(time_t *outSec)
             int fd;
 
             memset(nl, 0, sizeof(nl));
-            nl[0].n_name = (char *) symbolNames[s];
-            nl[1].n_name = "";
+            /* This system's struct nlist nests the name behind a union
+             * (n_un.n_name) rather than exposing it directly. */
+            nl[0].n_un.n_name = (char *) symbolNames[s];
+            nl[1].n_un.n_name = "";
 
             if (nlist(kernels[k], nl) != 0) continue;
             if (nl[0].n_value == 0) continue;
@@ -328,22 +366,16 @@ static const char *logo[] = {
 
 int main(void)
 {
-    struct utsname uts;
     int i;
-
-    if (uname(&uts) != 0) {
-        fprintf(stderr, "fastfetch: uname() failed\n");
-        return 1;
-    }
 
     for (i = 0; logo[i] != NULL; ++i) {
         printf("%s\n", logo[i]);
     }
 
     printTitle();
-    printOS(&uts);
+    printOS();
     printHost();
-    printKernel(&uts);
+    printKernel();
     printCPU();
     printMemory();
     printUptime();
