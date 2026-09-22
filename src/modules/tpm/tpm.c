@@ -117,5 +117,5 @@ FFModuleBaseInfo ffTPMModuleInfo = {
         { "TPM device version", "version" },
         { "TPM general description", "description" },
     })),
-    .defaultOrder = 69,
+    .defaultOrder = 70,
 };

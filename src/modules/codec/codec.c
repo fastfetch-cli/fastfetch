@@ -288,5 +288,5 @@ FFModuleBaseInfo ffCodecModuleInfo = {
         { "Compatibility alias of codec types", "types" },
         { "Platform API used for detection", "platform-api" },
     })),
-    .defaultOrder = 37,
+    .defaultOrder = 38,
 };

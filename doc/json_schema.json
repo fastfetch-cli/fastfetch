@@ -19,15 +19,14 @@
         },
         "key": {
             "description": "Module key\nUse a single space (` `) to hide the key",
-            "type": "string",
-            "minLength": 1
+            "type": "string"
         },
         "keyColor": {
-            "description": "Color of the module key. Overrides `display.color.key`",
+            "description": "Color of the module key. Overrides `display.color.keys`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key. Overrides `display.keyWidth`",
+            "description": "Width of the module key. Overrides `display.key.width`",
             "type": "integer",
             "minimum": 1
         },
@@ -131,7 +130,9 @@
                 "SunOS",
                 "OpenBSD",
                 "NetBSD",
-                "Haiku"
+                "Haiku",
+                "GNU",
+                "Unknown"
             ]
         },
         "architectures": {
@@ -150,7 +151,9 @@
                 "sparc",
                 "alpha",
                 "hppa",
-                "m68k"
+                "sh",
+                "m68k",
+                "Unknown"
             ]
         },
         "conditions": {
@@ -322,7 +325,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name (x86 only)\n    14. {technology}: CPU technology (x86 only)",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -390,7 +393,7 @@
             "type": "string"
         },
         "kernelFormat": {
-            "description": "Output format for the `Kernel` module. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {display-version}: Display version\n    6. {page-size}: Page size",
+            "description": "Output format for the `Kernel` module. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {page-size}: Page size",
             "type": "string"
         },
         "keyboardFormat": {
@@ -442,7 +445,7 @@
             "type": "string"
         },
         "osFormat": {
-            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel *\n    2. {name}: Name of the OS *\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
+            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel *\n    2. {name}: Name of the OS *\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS\n    13. {kernel-release}: Release of the kernel",
             "type": "string"
         },
         "packagesFormat": {
@@ -462,11 +465,11 @@
             "type": "string"
         },
         "poweradapterFormat": {
-            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
+            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model-name}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
             "type": "string"
         },
         "processesFormat": {
-            "description": "Output format for the `Processes` module. See Wiki for formatting syntax\n    1. {result}: Process count",
+            "description": "Output format for the `Processes` module. See Wiki for formatting syntax\n    1. {result}: Process count\n    2. {threads}: Thread count",
             "type": "string"
         },
         "publicipFormat": {
@@ -1576,6 +1579,7 @@
                             "command",
                             "colors",
                             "cursor",
+                            "custom",
                             "datetime",
                             "display",
                             "disk",
@@ -1595,6 +1599,7 @@
                             "loadavg",
                             "locale",
                             "localip",
+                            "logo",
                             "media",
                             "memory",
                             "monitor",
@@ -2100,7 +2105,7 @@
                                     "showPeCoreCount": {
                                         "description": "Whether to detect and display CPU frequencies for different core types (for example, P-cores and E-cores), if supported",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2134,8 +2139,10 @@
                                         "const": "cpucache",
                                         "description": "Print CPU cache sizes"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Print one line with a total per cache level instead of one line per level",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2254,6 +2261,7 @@
                                         "description": "Set the number of white spaces to print before the symbol",
                                         "type": "integer",
                                         "minimum": 0,
+                                        "maximum": 4294967295,
                                         "default": 0
                                     },
                                     "block": {
@@ -2265,6 +2273,7 @@
                                                 "description": "Set the block width in spaces",
                                                 "type": "integer",
                                                 "minimum": 1,
+                                                "maximum": 9,
                                                 "default": 3
                                             },
                                             "range": {
@@ -2322,7 +2331,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Run a custom shell command",
+                                        "description": "Run custom shell scripts",
                                         "const": "command"
                                     },
                                     "shell": {
@@ -2384,9 +2393,6 @@
                                         "const": "cursor",
                                         "description": "Print cursor style name"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
-                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2420,8 +2426,7 @@
                                         "const": "custom"
                                     },
                                     "key": {
-                                        "description": "Leave empty to hide the key",
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
@@ -2452,9 +2457,6 @@
                                     "type": {
                                         "const": "datetime",
                                         "description": "Print the current date and time"
-                                    },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2832,9 +2834,6 @@
                                         "const": "editor",
                                         "description": "Print information about the default editor (`$VISUAL` or `$EDITOR`)"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
-                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2866,9 +2865,6 @@
                                     "type": {
                                         "const": "font",
                                         "description": "Print system font names"
-                                    },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3775,7 +3771,9 @@
                                                     "enum": [
                                                         "am",
                                                         "apk",
+                                                        "appimage",
                                                         "brew",
+                                                        "cards",
                                                         "choco",
                                                         "crux",
                                                         "dpkg",
@@ -3784,10 +3782,13 @@
                                                         "flatpak",
                                                         "guix",
                                                         "hpkg",
+                                                        "installrelease",
+                                                        "kiss",
                                                         "linglong",
                                                         "lpkg",
                                                         "lpkgbuild",
                                                         "macports",
+                                                        "moss",
                                                         "mport",
                                                         "nix",
                                                         "opkg",
@@ -3796,11 +3797,14 @@
                                                         "paludis",
                                                         "pisi",
                                                         "pkg",
+                                                        "pkgsrc",
                                                         "pkgtool",
+                                                        "porg",
                                                         "rpm",
                                                         "rum",
                                                         "scoop",
                                                         "snap",
+                                                        "soar",
                                                         "sorcery",
                                                         "winget",
                                                         "xbps"
@@ -3812,8 +3816,7 @@
                                                 "description": "Enable all package managers",
                                                 "type": "null"
                                             }
-                                        ],
-                                        "default": []
+                                        ]
                                     },
                                     "combined": {
                                         "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
@@ -4101,6 +4104,7 @@
                                         "description": "Number of times to repeat the separator string, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
+                                        "maximum": 4294967295,
                                         "default": 0
                                     },
                                     "condition": {
@@ -4804,6 +4808,9 @@
                                     "type": {
                                         "const": "wifi",
                                         "description": "Print connected Wi-Fi info (SSID, connection and security protocol)"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

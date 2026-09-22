@@ -84,7 +84,7 @@ bool ffGenerateOpenCLJsonResult([[maybe_unused]] FFOpenCLOptions* options, yyjso
             }
 
             if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) {
-                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", gpu->dedicated.total);
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", gpu->dedicated.used);
             } else {
                 yyjson_mut_obj_add_null(doc, dedicatedMemory, "used");
             }
@@ -155,5 +155,5 @@ FFModuleBaseInfo ffOpenCLModuleInfo = {
         { "Platform name", "name" },
         { "Platform vendor", "vendor" },
     })),
-    .defaultOrder = 56,
+    .defaultOrder = 57,
 };

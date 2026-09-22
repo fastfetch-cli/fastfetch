@@ -248,6 +248,9 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getKDE(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME)) {
         getGnome(result, options);
+    } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME_CLASSIC)) {
+        // GNOME Classic is GNOME Shell in classic mode, so gnome-shell reports the same version
+        getGnome(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_CINNAMON)) {
         getCinnamon(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_XFCE4)) {
@@ -260,7 +263,7 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getBudgie(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_UNITY)) {
         getUnity(result, options);
-    } else if (ffStrbufEqualS(deName, "trinity")) {
+    } else if (ffStrbufIgnCaseEqualS(deName, "trinity") || ffStrbufIgnCaseEqualS(deName, "tde")) {
         getTrinity(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_COSMIC)) {
         getCosmic(result, options);

@@ -286,6 +286,13 @@ static inline void wrapClosedir(HANDLE* pdir) {
 }
 
 FFNativeFD ffGetNullFD(void);
+// Whether a descriptor is attached to a real terminal, i.e. whether a human is looking at it.
+//
+// Do not use `isatty()` for this on Windows. It is `_isatty()`, which answers "is this a character
+// device" rather than "is this a console", and `NUL` -- as well as MSYS2's `/dev/null` -- is a
+// character device. A redirected run therefore looks interactive, which is how
+// `fastfetch --gen-config <path> > /dev/null` ends up on the interactive path and blocks forever.
+bool ffIsTerminal(int fd);
 // Returns whether the file was removed; callers that only want it gone discard that, so not `nodiscard`
 [[gnu::nonnull(1)]] bool ffRemoveFile(const char* fileName);
 // Modification time of a file, in milliseconds since the Unix epoch, or 0 if it can not be read.

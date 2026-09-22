@@ -329,6 +329,10 @@ FFNativeFD ffGetNullFD(void) {
     return hNullFile;
 }
 
+bool ffIsTerminal(int fd) {
+    return isatty(fd) != 0;
+}
+
 bool ffRemoveFile(const char* fileName) {
     return unlink(fileName) == 0;
 }

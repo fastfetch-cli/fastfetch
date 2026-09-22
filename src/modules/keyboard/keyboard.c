@@ -54,11 +54,15 @@ bool ffPrintKeyboard(FFKeyboardOptions* options) {
     } else {
         uint8_t index = 0;
         FF_LIST_FOR_EACH (FFKeyboardDevice*, pdevice, filtered) {
-            FFKeyboardDevice* device = *pdevice;
-            printDevice(options, device, filtered.length > 1 ? ++index : 0);
-            ffStrbufDestroy(&device->serial);
-            ffStrbufDestroy(&device->name);
+            printDevice(options, *pdevice, filtered.length > 1 ? ++index : 0);
         }
+    }
+
+    // `filtered` only holds borrowed pointers, so the strings of every device — including the
+    // ignored ones and the ones skipped when every device is ignored — have to be released here
+    FF_LIST_FOR_EACH (FFKeyboardDevice, device, result) {
+        ffStrbufDestroy(&device->serial);
+        ffStrbufDestroy(&device->name);
     }
 
     return ret;
@@ -183,5 +187,5 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
         { "Name", "name" },
         { "Serial number", "serial" },
     })),
-    .defaultOrder = 64,
+    .defaultOrder = 65,
 };

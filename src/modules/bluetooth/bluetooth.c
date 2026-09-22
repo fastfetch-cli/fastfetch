@@ -71,7 +71,7 @@ bool ffPrintBluetooth(FFBluetoothOptions* options) {
 
     uint8_t i = 1;
     FF_LIST_FOR_EACH (FFBluetoothResult, device, devices) {
-        printDevice(options, device, devices.length == 0 ? 0 : i);
+        printDevice(options, device, devices.length == 1 ? 0 : i);
         ++i;
     }
 
@@ -189,5 +189,5 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         { "Is connected", "connected" },
         { "Battery percentage bar", "battery-percentage-bar" },
     })),
-    .defaultOrder = 58,
+    .defaultOrder = 59,
 };

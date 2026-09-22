@@ -42,7 +42,13 @@ const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result) {
     if (!options->parallel) {
         bundle.error = spawnProcess(options, &bundle.handle);
     } else if (!FF_LIST_SHIFT(commandQueue, &bundle)) {
-        return "[BUG] command queue is empty";
+        // The module was printed without having been prepared first, so there is no process to collect.
+        // That is the expected outcome for a module gated on `condition.succeeded`: whether it is
+        // printed at all is only known in the print pass, so the prepare pass skips it (see
+        // `printJsonConfig`). In every other case the queue and the printed modules must line up.
+        return "Module was not prepared, so it cannot run in parallel. Modules gated on "
+               "`condition.succeeded` are never prepared, which is the expected cause; "
+               "anything else is a bug in fastfetch, please report it";
     }
 
     if (bundle.error) {

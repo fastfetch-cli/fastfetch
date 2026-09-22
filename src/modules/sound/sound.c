@@ -67,7 +67,6 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
 }
 
 bool ffPrintSound(FFSoundOptions* options) {
-    bool success = false;
     FF_LIST_AUTO_DESTROY result = ffListCreate();
 
     const char* error = ffDetectSound(options, &result);
@@ -93,7 +92,7 @@ bool ffPrintSound(FFSoundOptions* options) {
         ffStrbufDestroy(&device->platformApi);
     }
 
-    return success;
+    return true;
 }
 
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module) {
@@ -238,5 +237,5 @@ FFModuleBaseInfo ffSoundModuleInfo = {
         { "Volume (in percentage bar)", "volume-percentage-bar" },
         { "Platform API used", "platform-api" },
     })),
-    .defaultOrder = 60,
+    .defaultOrder = 61,
 };

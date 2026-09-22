@@ -510,5 +510,5 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         { "Size free", "size-free" },
         { "Size available", "size-available" },
     })),
-    .defaultOrder = 41,
+    .defaultOrder = 42,
 };

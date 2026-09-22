@@ -164,5 +164,5 @@ FFModuleBaseInfo ffOpenGLModuleInfo = {
         { "OpenGL shading language version", "slv" },
         { "OpenGL library used", "library" },
     })),
-    .defaultOrder = 55,
+    .defaultOrder = 56,
 };

@@ -143,5 +143,5 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         { "Player Identifier", "id" },
         { "URL name", "url" },
     })),
-    .defaultOrder = 46,
+    .defaultOrder = 47,
 };

@@ -6,10 +6,11 @@ void ffDetectMediaImpl(FFMediaResult* media, bool saveCover);
 
 static FFMediaResult result;
 
-// The cover file of this run, if there is one. It is tracked here rather than in `result` because
-// the cached result is dropped between `--dynamic-interval` rounds, while the file has to stay on
-// disk for the whole run: the `kitty-direct` logo type lets the terminal open it by path, and the
-// logo is replayed from the line cache on every round.
+// The cover file of this run, if there is one. It is tracked here rather than in `result` because the
+// cached result is dropped between `--dynamic-interval` rounds, and `result.cover` — the only other
+// copy of the path — is destroyed with it. The file itself has to outlive that, since the
+// `kitty-direct` logo type hands its path to the terminal, so it is kept for the whole run and
+// removed at exit.
 static FFstrbuf coverFile;
 static bool coverFileRegistered = false;
 
@@ -71,6 +72,12 @@ const FFMediaResult* ffDetectMedia(bool saveCover) {
         ffStrbufTrimRightSpace(&result.player);
 
         if (saveCover && result.removeCoverAfterUse) {
+            // A new round can produce a new cover while the previous file is still on disk, and
+            // `coverFile` is about to forget its path. Remove it here, otherwise only the last one
+            // would ever be cleaned up by `atexit`.
+            if (coverFile.length > 0 && !ffStrbufEqual(&coverFile, &result.cover)) {
+                ffRemoveFile(coverFile.chars);
+            }
             ffStrbufSet(&coverFile, &result.cover);
             if (!coverFileRegistered) {
                 coverFileRegistered = true;

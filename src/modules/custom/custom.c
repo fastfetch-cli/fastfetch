@@ -13,6 +13,25 @@ void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
+bool ffGenerateCustomJsonResult(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+
+    // This module's output *is* its format string, so the JSON result is that string rendered —
+    // for a `qjs:`/`lua:` format that means the script's output, not the script. `ffPrintCustom()`
+    // gets the same value through `ffPrintFormat()`. Without this the module had no JSON result at
+    // all, so a script consuming `--format json` could not read a custom line's value.
+    if (!ffParseFormatString(&result, &options->moduleArgs.outputFormat, 0, (FFformatarg[]) {})) {
+        // `yyjson_mut_obj_add_str()` only copies strings that need escaping; for anything else it
+        // stores the pointer as-is. `result` is freed when this function returns, long before the
+        // document is serialised, so the error has to be copied into the document explicitly.
+        yyjson_mut_obj_add_strcpy(doc, module, "error", result.chars);
+        return false;
+    }
+
+    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
+    return true;
+}
+
 void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module) {
     yyjson_val *key, *val;
     size_t idx, max;
@@ -63,5 +82,6 @@ FFModuleBaseInfo ffCustomModuleInfo = {
     .destroyOptions = (void*) ffDestroyCustomOptions,
     .parseJsonObject = (void*) ffParseCustomJsonObject,
     .printModule = (void*) ffPrintCustom,
+    .generateJsonResult = (void*) ffGenerateCustomJsonResult,
     .generateJsonConfig = (void*) ffGenerateCustomJsonConfig,
 };

@@ -60,6 +60,22 @@ void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* m
     }
 }
 
+bool ffJsonConfigParseUInt32(yyjson_val* val, uint32_t* result, uint32_t max) {
+    if (!yyjson_is_int(val)) {
+        return false;
+    }
+
+    // `yyjson_get_sint()` is exact for every value that fits into `int64_t`, and is negative for the
+    // `uint64_t` values above `INT64_MAX`, which no caller accepts anyway.
+    int64_t num = unsafe_yyjson_get_sint(val);
+    if (num < 0 || (uint64_t) num > max) {
+        return false;
+    }
+
+    *result = (uint32_t) num;
+    return true;
+}
+
 const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[]) {
     if (yyjson_is_int(val)) {
         int intVal = yyjson_get_int(val);
@@ -310,6 +326,16 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                 if (previousSucceeded && !unsafe_yyjson_is_null(previousSucceeded)) {
                     if (!unsafe_yyjson_is_bool(previousSucceeded)) {
                         return "Property 'succeeded' in 'condition' must be a boolean";
+                    }
+                    if (prepare) {
+                        // Whether this module is printed at all depends on the result of the previous
+                        // one, which is only known in the print pass. Preparing it here would leave a
+                        // result behind that no print pass ever consumes, and since the modules are
+                        // paired by position (see `ffPrepareCommand` / `ffDetectCommand`), that
+                        // would silently shift every later module onto the wrong result.
+                        // Skip it, and let the module report the missing preparation if it turns out
+                        // to be printed after all.
+                        continue;
                     }
                     if (succeeded != unsafe_yyjson_get_bool(previousSucceeded)) {
                         continue;

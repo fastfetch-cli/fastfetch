@@ -1343,7 +1343,7 @@ elseif(GNU)
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
-        src/detection/loadavg/loadavg_linux.c
+        src/detection/loadavg/loadavg_sunos.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c

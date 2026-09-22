@@ -46,13 +46,17 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
         }
 
         for (IP_ADAPTER_DNS_SERVER_ADDRESS_XP* ifa = adapter->FirstDnsServerAddress; ifa; ifa = ifa->Next) {
-            FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
+            // The element must only be added once it can be filled: `FF_LIST_ADD` does not zero the
+            // new element, so an unrecognized address family used to leave an uninitialized FFstrbuf
+            // in the list, which the callers then read and free
             if (ifa->Address.lpSockaddr->sa_family == AF_INET) {
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
+                FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
                 ffStrbufInitA(item, INET_ADDRSTRLEN);
                 item->length = (uint32_t) (RtlIpv4AddressToStringA(&ipv4->sin_addr, item->chars) - item->chars);
             } else if (ifa->Address.lpSockaddr->sa_family == AF_INET6) {
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
+                FFstrbuf* item = FF_LIST_ADD(FFstrbuf, *results);
                 ffStrbufInitA(item, INET6_ADDRSTRLEN);
                 item->length = (uint32_t) (RtlIpv6AddressToStringA(&ipv6->sin6_addr, item->chars) - item->chars);
             }

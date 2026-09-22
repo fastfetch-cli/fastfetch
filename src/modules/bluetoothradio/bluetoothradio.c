@@ -71,6 +71,18 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
         case 13:
             version = "5.4";
             break;
+        case 14:
+            version = "6.0";
+            break;
+        case 15:
+            version = "6.1";
+            break;
+        case 16:
+            version = "6.2";
+            break;
+        case 17:
+            version = "6.3";
+            break;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
@@ -229,5 +241,5 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         { "Discoverable", "discoverable" },
         { "Connectable / Pairable", "connectable" },
     })),
-    .defaultOrder = 59,
+    .defaultOrder = 60,
 };

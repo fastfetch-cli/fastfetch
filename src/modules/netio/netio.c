@@ -126,7 +126,10 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "waitTime")) {
-            options->waitTime = (uint32_t) yyjson_get_uint(val);
+            if (!ffJsonConfigParseUInt32(val, &options->waitTime, UINT32_MAX)) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(NetIO), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Property 'waitTime' must be a non-negative integer no greater than 4294967295");
+                continue;
+            }
             if (options->waitTime == 0) {
                 options->waitTime = 1;
             }
@@ -245,5 +248,5 @@ FFModuleBaseInfo ffNetIOModuleInfo = {
         { "Number of packets dropped when receiving [per second]", "rx-drops" },
         { "Number of packets dropped when sending [per second]", "tx-drops" },
     })),
-    .defaultOrder = 66,
+    .defaultOrder = 67,
 };

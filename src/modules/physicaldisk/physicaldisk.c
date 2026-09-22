@@ -306,5 +306,5 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         { "Product revision", "revision" },
         { "Device temperature (formatted)", "temperature" },
     })),
-    .defaultOrder = 68,
+    .defaultOrder = 69,
 };

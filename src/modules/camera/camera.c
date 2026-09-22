@@ -153,5 +153,5 @@ FFModuleBaseInfo ffCameraModuleInfo = {
         { "Width (in px)", "width" },
         { "Height (in px)", "height" },
     })),
-    .defaultOrder = 61,
+    .defaultOrder = 62,
 };

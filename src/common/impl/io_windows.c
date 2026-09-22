@@ -500,6 +500,17 @@ FFNativeFD ffGetNullFD(void) {
     return hNullFile;
 }
 
+bool ffIsTerminal(int fd) {
+    intptr_t handle = _get_osfhandle(fd);
+    if (handle == -1 || handle == -2) {
+        // -1: an invalid fd; -2: a valid fd with no file behind it (`_get_osfhandle`'s way of
+        // saying FF_INVALID_FD). Neither is a terminal.
+        return false;
+    }
+    DWORD mode;
+    return GetConsoleMode((HANDLE) handle, &mode) != 0;
+}
+
 bool ffRemoveFile(const char* fileName) {
     wchar_t fileNameW[MAX_PATH];
     ULONG len;

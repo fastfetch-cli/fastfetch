@@ -92,7 +92,14 @@ void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "ndigits")) {
-            options->ndigits = (uint8_t) yyjson_get_uint(val);
+            // The schema documents 0..9 and the value ends up as the precision of `printf("%.*f")`,
+            // so a wider value is not truncated to fit `uint8_t` silently any more.
+            uint32_t ndigits = 0;
+            if (!ffJsonConfigParseUInt32(val, &ndigits, 9)) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Loadavg), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Property 'ndigits' must be an integer between 0 and 9");
+                continue;
+            }
+            options->ndigits = (uint8_t) ndigits;
             continue;
         }
 

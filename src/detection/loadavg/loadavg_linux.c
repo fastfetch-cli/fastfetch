@@ -18,16 +18,15 @@ const char* ffDetectLoadavg(double result[3]) {
     }
 
 #endif
-#ifndef __GNU__
+
     // getloadavg requires higher ANDROID_API version
     struct sysinfo si;
     if (sysinfo(&si) < 0) {
-        return "sysinfo() failed";
+        return "both /proc/loadavg and sysinfo() failed";
     }
 
     for (int i = 0; i < 3; i++) {
         result[i] = (double) si.loads[i] / (1 << SI_LOAD_SHIFT);
     }
-#endif
     return nullptr;
 }

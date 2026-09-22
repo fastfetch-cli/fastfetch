@@ -201,5 +201,5 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         { "True if ECC enabled", "is-ecc-enabled" },
         { "True if a memory module is installed in the slot", "is-installed" },
     })),
-    .defaultOrder = 39,
+    .defaultOrder = 40,
 };

@@ -154,5 +154,5 @@ FFModuleBaseInfo ffMemoryModuleInfo = {
         { "Percentage used (num)", "percentage" },
         { "Percentage used (bar)", "percentage-bar" },
     })),
-    .defaultOrder = 38,
+    .defaultOrder = 39,
 };

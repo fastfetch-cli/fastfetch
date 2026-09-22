@@ -345,5 +345,5 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         { "Battery time remaining seconds", "time-seconds" },
         { "Battery time remaining (formatted)", "time-formatted" },
     })),
-    .defaultOrder = 44,
+    .defaultOrder = 45,
 };

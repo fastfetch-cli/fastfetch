@@ -238,5 +238,5 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         { "Fragmentation percentage bar", "frag-percentage-bar" },
         { "Is read-only", "is-readonly" },
     })),
-    .defaultOrder = 43,
+    .defaultOrder = 44,
 };

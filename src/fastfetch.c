@@ -602,7 +602,7 @@ static void enableJsonOutput(FFdata* data) {
 }
 
 static void genConfigCommon(FFdata* data, const char* value) {
-    if (!getenv("NO_COLOR") && isatty(STDOUT_FILENO) && isatty(STDIN_FILENO)
+    if (!getenv("NO_COLOR") && ffIsTerminal(STDOUT_FILENO) && ffIsTerminal(STDIN_FILENO)
         #ifdef _WIN32
             && ffIsWindows10OrGreater()
         #endif

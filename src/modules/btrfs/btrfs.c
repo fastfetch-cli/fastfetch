@@ -168,6 +168,9 @@ bool ffGenerateBtrfsJsonResult([[maybe_unused]] FFBtrfsOptions* options, yyjson_
         yyjson_mut_obj_add_uint(doc, obj, "nodeSize", btrfs->nodeSize);
         yyjson_mut_obj_add_uint(doc, obj, "sectorSize", btrfs->sectorSize);
         yyjson_mut_obj_add_uint(doc, obj, "totalSize", btrfs->totalSize);
+        yyjson_mut_val* globalReservation = yyjson_mut_obj_add_obj(doc, obj, "globalReservation");
+        yyjson_mut_obj_add_uint(doc, globalReservation, "used", btrfs->globalReservationUsed);
+        yyjson_mut_obj_add_uint(doc, globalReservation, "total", btrfs->globalReservationTotal);
         yyjson_mut_val* allocation = yyjson_mut_obj_add_arr(doc, obj, "allocation");
         for (uint32_t i = 0; i < ARRAY_SIZE(btrfs->allocation); ++i) {
             yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, allocation);
@@ -244,5 +247,5 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
         { "Node size", "node-size" },
         { "Sector size", "sector-size" },
     })),
-    .defaultOrder = 42,
+    .defaultOrder = 43,
 };

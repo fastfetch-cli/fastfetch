@@ -142,5 +142,5 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
         { "Public IP address", "ip" },
         { "Location", "location" },
     })),
-    .defaultOrder = 48,
+    .defaultOrder = 49,
 };

@@ -77,9 +77,9 @@ static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buff
     }
 
     if (ffReadFileBufferRelative(subfd, "global_rsv_reserved", buffer)) {
+        // global_rsv_reserved is already the used part of the reservation, global_rsv_size its total
         item->globalReservationUsed = ffStrbufToUInt(buffer, 0);
     }
-    item->globalReservationUsed = item->globalReservationTotal - item->globalReservationUsed;
 
 #define FF_BTRFS_DETECT_PROFILE(_index, _type, _profile, _copies)      \
     else if (faccessat(subfd, _type "/" _profile "/", F_OK, 0) == 0) { \

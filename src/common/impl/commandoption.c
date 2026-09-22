@@ -85,11 +85,29 @@ void ffPrepareCommandOption(FFdata* data) {
 #define FF_IF_MODULE_MATCH(moduleNameConstant) if (ffStrEqualsIgnCase(moduleType, moduleNameConstant) && !ffStrbufSeparatedContainIgnCaseS(&data->structureDisabled, moduleNameConstant, ':'))
 
         switch (moduleType[0]) {
-#if !FF_MODULE_DISABLE_CPUUSAGE
+#if !FF_MODULE_DISABLE_CPUUSAGE || !FF_MODULE_DISABLE_COMMAND
             case 'C':
             case 'c':
+#endif
+#if !FF_MODULE_DISABLE_CPUUSAGE
                 FF_IF_MODULE_MATCH(ffCPUUsageModuleInfo.name)
                 ffPrepareCPUUsage(); // The rate is derived from the CPU's own counters; no options are involved
+#endif
+
+#if !FF_MODULE_DISABLE_COMMAND
+                FF_IF_MODULE_MATCH(ffCommandModuleInfo.name) {
+                    // `command` runs its shell commands in parallel: `ffPrepareCommand` spawns them here,
+                    // in the prepare pass, and `ffDetectCommand` collects them in the print pass. The
+                    // command line itself can only be read from the JSON config, and this code path does
+                    // not consult it, so nothing would ever be queued and the module would report an
+                    // internal error marker. Refuse it up front instead of letting it get that far.
+                    fputs("Error: module `command` is not supported with `--structure`\n", stderr);
+                    fputs("       Its options can only be read from the JSON config, which `--structure` bypasses.\n", stderr);
+                    fputs("       Add it to the config instead, e.g. `{ \"modules\": [ { \"type\": \"command\", \"text\": \"uname -r\" } ] }`\n", stderr);
+                    exit(481);
+                }
+#endif
+#if !FF_MODULE_DISABLE_CPUUSAGE || !FF_MODULE_DISABLE_COMMAND
                 break;
 #endif
 
