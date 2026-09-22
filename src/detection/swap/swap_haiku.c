@@ -9,7 +9,7 @@ const char* ffDetectSwap(FFlist* result) {
         return "Error getting system info";
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
     FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
     ffStrbufInitStatic(&swap->name, "System");
     void* kvms = load_driver_settings("virtual_memory"); // /boot/home/config/settings/kernel/drivers/virtual_memory
@@ -20,8 +20,8 @@ const char* ffDetectSwap(FFlist* result) {
         }
         unload_driver_settings(kvms);
     }
-    swap->bytesTotal = pageSize * (uint64_t) info.max_swap_pages;
-    swap->bytesUsed = pageSize * (uint64_t) (info.max_swap_pages - info.free_swap_pages);
+    swap->bytesTotal = (uint64_t) info.max_swap_pages << pageSizeShift;
+    swap->bytesUsed = (uint64_t) (info.max_swap_pages - info.free_swap_pages) << pageSizeShift;
 
     return nullptr;
 }

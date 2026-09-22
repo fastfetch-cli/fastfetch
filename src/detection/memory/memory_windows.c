@@ -19,8 +19,8 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
         SharedUserData->NumberOfPhysicalPages;
     #endif
 
-    uint64_t pageSize = instance.state.platform.sysinfo.pageSize;
-    ram->bytesTotal = phyPages * pageSize;
-    ram->bytesUsed = (phyPages - sbpi.AvailablePages) * pageSize;
+    uint64_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
+    ram->bytesTotal = phyPages << pageSizeShift;
+    ram->bytesUsed = (phyPages - sbpi.AvailablePages) << pageSizeShift;
     return nullptr;
 }

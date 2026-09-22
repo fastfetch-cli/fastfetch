@@ -2,6 +2,7 @@
 #include "common/ffdata.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
+#include "common/FFcache.h"
 #include "common/commandoption.h"
 #include "common/genconfig.h"
 #include "common/init.h"
@@ -690,7 +691,7 @@ static void parseCommand(FFdata* data, char* key, char* value) {
             enableJsonOutput(data);
         }
     } else if (ffStrEqualsIgnCase(key, "--dynamic-interval")) {
-        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
+        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // ms
     } else if (ffStrEqualsIgnCase(key, "-w") || ffStrEqualsIgnCase(key, "--watch")) {
         if (value == nullptr) {
             instance.state.dynamicInterval = 1000; // default to 1 second if no value is provided
@@ -815,6 +816,7 @@ static void run(FFdata* data) {
             ffTimeSleep(instance.state.dynamicInterval);
             fputs("\e[H", stdout); // Move cursor to the top left corner to overwrite the previous output
             instance.state.keysHeight = 0; // Reset keysHeight so `ffLogoPrintRemaining` will recalculate it
+            ffCacheInvalidateAll(); // Drop the detection results cached for the previous round, so that this round re-detects them
         } else {
             break;
         }

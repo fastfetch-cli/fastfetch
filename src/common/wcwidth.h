@@ -3,9 +3,10 @@
 #include <stdint.h>
 
 #if FF_ENABLE_WCWIDTH
-int mk_wcwidth(uint32_t wc);
+// A pure table lookup: the width depends only on the code point
+[[gnu::pure, nodiscard]] int mk_wcwidth(uint32_t wc);
 #else
-static inline int mk_wcwidth(uint32_t wc) {
+[[gnu::pure, nodiscard]] static inline int mk_wcwidth(uint32_t wc) {
     (void) wc;
     return 1;
 }

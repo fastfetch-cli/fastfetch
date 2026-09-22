@@ -252,7 +252,7 @@ void ffInitTopOptions(FFTopOptions* options) {
 #endif
         ;
     options->nProcesses = 5;
-    options->waitTime = 500;
+    options->waitTime = 250;
     options->compact = false;
     options->percent = (FFPercentageModuleConfig){ 50, 80, 0 };
 }

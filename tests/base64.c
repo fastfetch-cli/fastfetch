@@ -135,7 +135,7 @@ static void verifyRoundTrip(void) {
 
         uint32_t decodedLength = 0;
         memset(decoded, 0, sizeof(decoded));
-        VERIFY(ffBase64DecodeRaw(encodedLength, encoded, &decodedLength, decoded));
+        ffBase64DecodeRaw(encodedLength, encoded, &decodedLength, decoded);
         VERIFY(decodedLength == length);
         VERIFY(memcmp(decoded, source, length) == 0);
     }

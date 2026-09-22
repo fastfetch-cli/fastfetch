@@ -4,8 +4,8 @@
 #include "common/strutil.h"
 #include "fastfetch_config.h"
 
-const char* ffFindExecutableInPath(const char* name, FFstrbuf* result);
-static inline bool ffIsAbsolutePath(const char* path) {
+[[gnu::nonnull(1, 2), nodiscard]] const char* ffFindExecutableInPath(const char* name, FFstrbuf* result);
+[[gnu::nonnull(1), gnu::pure, nodiscard]] static inline bool ffIsAbsolutePath(const char* path) {
 #ifdef _WIN32
     return (ffCharIsEnglishAlphabet(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) // drive letter path
         || (path[0] == '\\' && path[1] == '\\');                                                       // UNC path

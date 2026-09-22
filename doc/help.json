@@ -195,6 +195,7 @@
                     "file-raw": "Text file, printed as is",
                     "data": "Text data, printed with color code replacement",
                     "data-raw": "Text data, printed as is",
+                    "command-raw": "Command to run, whose output is printed as is",
                     "sixel": "Image file, rendered as sixel",
                     "kitty": "Image file, rendered using the Kitty graphics protocol",
                     "kitty-direct": "Image file, tells the terminal emulator to read image data from the specified file",
@@ -265,6 +266,14 @@
         {
             "long": "logo-padding-top",
             "desc": "Set the padding at the top of the logo",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-padding-bottom",
+            "desc": "Set the padding at the bottom of the logo",
+            "remark": "Only used with \"--logo-position top\"",
             "arg": {
                 "type": "num"
             }

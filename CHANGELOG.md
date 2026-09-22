@@ -1,56 +1,96 @@
-# Unreleased
+# 2.69.0
 
 Changes:
-* ImageMagick is no longer used for image logos on Windows and macOS, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS). (Logo, Windows / macOS)
-    * Image logos on Windows and macOS no longer depend on ImageMagick being installed.
-    * Image sources that only ImageMagick could decode, such as SVG, PDF and PostScript, are no longer supported on Windows: neither WIC nor the embedded sixel encoder can decode them.
+* ImageMagick is no longer used for image logos on Windows, macOS and Android, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS, AImageDecoder on Android). (Logo)
+    * An image logo needs Android 11 (API 30), the release that introduced the platform image decoder, and is reported as an error on Android 10 and older.
+* ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available, and is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
-    * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss.
-    * `--logo-cache false` ignores the image logo cache completely: nothing is read from it and nothing is written to it.
-    * `--logo-cache regen` does what `--logo-recache true` used to do.
-    * `logo.cache` accepts a boolean, or the string `"regen"`.
-* The `waitTime` option of `DiskIO` and `NetIO` now defaults to `250` ms instead of `500`. (DiskIO / NetIO)
-    * The byte counters are maintained by the kernel as I/O happens, so a shorter sampling window still yields an accurate rate, and both modules now finish about 250 ms sooner.
-    * Note that the two modules wait concurrently, so enabling both does not cost twice the wait time.
+    * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss; `false` ignores the image logo cache completely, reading nothing from it and writing nothing to it; `regen` does what `--logo-recache true` used to do. `logo.cache` accepts a boolean, or the string `"regen"`.
 
 Features:
+* Added rum overlay package counting on RakuOS, exposed as `{rum}`. (Packages, Linux)
 * Improved image logo support
     * Backend rewritten
-        * Added a native image decoding backend on Windows (WIC) and macOS (ImageIO).
-        * Added an embedded libsixel encoder, used to produce sixel output on Windows and macOS. It is reported by `fastfetch --list-features` as "Embedded sixel".
-        * Enabled chafa image output on Windows and macOS independently of ImageMagick.
+        * Added a native image decoding backend on Windows (WIC), macOS (ImageIO) and Android (AImageDecoder).
+        * Added an embedded libsixel encoder, used to produce sixel output on Windows, macOS and Android. It is reported by `fastfetch --list-features` as "Embedded sixel".
+        * Enabled chafa image output on Windows, macOS and Android independently of ImageMagick.
         * As a result, `fastfetch --sixel X:\path\to\image` now works out of the box on Windows Terminal.
-    * Image logo cache entries are now validated against the modification time of the source image. (Logo)
-        * Editing an image logo in place now invalidates its cached rendering.
+    * Image logo cache entries are now validated against the modification time of the source image, so editing an image logo in place invalidates its cached rendering. (Logo)
         * Cache entries written by older versions are not reused, as they carry no modification time.
-    * Image logos can now be animated, when the terminal and the image protocol support it. (Logo)
+    * Image logos can now be animated when the terminal and the image protocol support it. (Logo)
         * `--logo-animation-frame <0>` (`logo.animationFrame: 0` in the JSON config) plays a GIF or APNG. Only the `kitty` image protocol can play an animation; the frames are decoded and composed by fastfetch, so no external program is involved.
         * `--logo-animation-frame <N>` renders the Nth frame as a still image, and negative values count back from the end, so `-1` is the last frame. This works for the `sixel`, `kitty` and `chafa` logo types. Note that negative values can only be given in the JSON config, as the command line parser reads a leading `-` as another option.
-        * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in.
-        * The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, ImageMagick 7 on Linux). A single frame GIF falls back to a still image. A build with none of those, or with ImageMagick 6, reports an error instead of quietly showing a still image.
-        * A terminal that supports the kitty graphics protocol but not its animation frames, as Konsole does not, shows the first frame.
+        * The default is `1`, which renders a still image, so nothing changes for anyone who does not opt in. The frames come from the platform image framework (WIC on Windows, ImageIO on macOS, AImageDecoder on Android, ImageMagick 7 on Linux); a single-frame GIF falls back to a still image.
+        * On Android an animation needs Android 12 (API 31), and the repeat count is not available there, so an animation is reported as looping forever. A build with no image decoder, or one built with ImageMagick 6, reports an error instead of silently showing a still image.
+        * A terminal that supports the kitty graphics protocol but not its animation frames, such as Konsole, shows the first frame.
+    * Added the CMake option `ENABLE_IMAGE_LOGO`, which defaults to `ON`. Configure with `-DENABLE_IMAGE_LOGO=OFF` to build fastfetch without any image logo support to reduce binary size. (Logo)
+        * Image logos are the only consumer of ImageMagick, chafa, and the embedded libsixel encoder, so none of the three is searched for at configure time, and no image decoding sources are compiled in. This is intended only to reduce binary size on embedded systems (such as OpenWrt).
+        * The `sixel`, `kitty`, `kitty-direct`, `kitty-icat`, `iterm` and `chafa` logo types are rejected with an error, both on the command line and in the JSON config, and the `auto` logo type never tries an image.
+        * `--logo-type raw` keeps working: it passes a pre-rendered byte stream through unchanged and needs no decoder, so a logo can still be displayed by converting the image externally.
 * Added CPU name and frequency detection support on SPARC. (CPU, Linux)
 * Added package detection support for CRUX. (Packages, Linux)
     * Exposed in custom format as `{crux}`.
+* Improved Android ROM detection (DE, Android)
+    * Added support for HarmonyOS, HarmonyOS NEXT, Flyme, JOYUI, SmartisanOS, realme UI, HydrogenOS, ZUI, ZUXOS, MyOS, NebulaAIOS, ObricUI, MiFavor, LineageOS, PixelExperience, EUI and 360 UI.
+    * Added support for MagicUI 3.x, which stores a bare version number instead of a `MagicUI_x.y.z` string.
+    * Added Samsung OneUI support (#2541)
+    * It is read from system properties, so no particular Android version is required. This is mostly untested due to lack of available devices running these ROMs. Please report any issues you encounter.
+* Improved Camera detection on Android (Camera, Android)
+    * The camera list is now read from the camera2 NDK instead of `termux-api CameraInfo`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * This needs Android 7.0 (API 24), which is where the camera2 NDK was introduced.
+* Improved Battery detection on Android (Battery, Android)
+    * The charge level and charging state are now read from the battery properties service over `/dev/binder` instead of `termux-api BatteryStatus`, so the Termux:API app is no longer required and no subprocess is spawned.
+    * The service interface changed in Android 10, and the right request is picked at run time, so every Android release is covered.
+    * Battery temperature, cycle count, manufacturer, model name, serial number and manufacture date need the `BATTERY_STATS` permission, which an app cannot obtain, so an app no longer reports them.
+    * Running as `adb shell` or as root, `dumpsys battery` is used, which also reports the battery temperature and technology, and reports a battery that has reached the critical level as such. An app can read none of the three.
+* Improved Display detection on Android (Display, Android)
+    * The displays are now read from the display service instead of a vendor property that only some Xiaomi devices set. The preferred mode, the physical size, the rotation, the manufacture date and the display id are now reported as well.
+    * This needs Android 13 (API 33). On Android 12 and older only that vendor property is available to an app, and a device that does not set it reports no display.
+    * Running as `adb shell` or as root, `dumpsys display` is used as well, which is what covers Android 12 and older.
+    * The refresh rate is now the rate of the active display mode, and the HDR capability is read from the display itself, for every display rather than only for the built-in one.
+* Improved WiFi detection on Android (Wifi, Android)
+    * The connection details are now read from the WiFi service over `/dev/binder` instead of `termux-api WifiConnectionInfo`, so no subprocess is spawned.
+    * The Termux:API app is still required, though. It is what carries the WiFi permission that the Termux app does not request itself, so uninstalling it turns this module off.
+    * A location permission is required as well, and Termux:API is what carries that one too. The WiFi service withholds the SSID and the BSSID from an app that does not hold one, and hands both over once it is granted; until then the signal, the rates, the frequency, the Wi-Fi standard and the security type are reported as usual, and the two names are reported as `<redacted>`. The grant has to be for all the time rather than only while the app is in use, as the service withholds the two names from an app that is not in the foreground either -- which is the state a run over `ssh` is in.
+    * The interface name and its state, the connection state, the Wi-Fi standard and the security type are now reported as well.
+    * The security type is reported from Android 12 on. The reply Android 11 sends ends before that field, so the `security` field stays empty there.
+    * This needs Android 11 (API 30), the release that moved the Wi-Fi framework into an APEX. There is no fallback, so Android 10 and older report an error instead.
+    * WiFi detection on Android is experimental. The reply the WiFi service hands an app drifts between Android releases and between vendors, and what it contains also depends on the permissions the calling app holds, so a device can report less than its connection has. Please report anything that looks wrong or missing.
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)
 * Improved Packages detection on Windows (Packages, Windows)
-    * `winget list` is now invoked with `--source winget`, so only packages installed by winget itself are counted, and the slow msstore HTTP round trips are skipped.
+    * `winget` is now detected by default, instead of requiring a build-time opt-in, and the source agreements are accepted non-interactively on a machine that has never accepted them. Opt out by setting `packages.disabled` to `["winget"]`, or by configuring with `cmake -DPACKAGES_DISABLE_WINGET=ON`.
+    * The count reports the packages the `winget` source knows about, which is not limited to the packages `winget` itself installed. Microsoft Store apps are no longer counted.
+    * `winget list` takes about 1.5 seconds, so its result is cached. The cache is refreshed when a program is installed or removed, not on a timer, so only the first run after such a change is slow.
 * Improved Wallpaper detection on macOS Sonoma and later (#2559, Wallpaper, macOS)
-    * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is tried last.
+    * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is used only as a last resort.
 * Removed the `kvm` dependency on OpenBSD by using `sysctl` directly. (General, OpenBSD)
 * Modules that were selected on the command line via `--structure` / `-s` now honor module options configured in the JSON config. (CommandOption)
+* Improved reliability of fastfetch's built-in HTTP client. (PublicIP, Weather)
+    * It now supports custom ports and can properly handle chunked transfer encoding. It is designed for minimal resource usage and fast performance, and does not support full HTTP features like HTTPS; the `Command` module with `curl` can be used for those.
+* Added Umbriel wayland compositor version detection (WM, Linux)
+* Improved the player name detection on Windows to show the name Windows shows for it. (Player, Windows)
+    * An unpackaged player such as Chrome is now reported as `Google Chrome` instead of `Chrome`.
+* The `waitTime` option of `DiskIO`, `NetIO` and `Top` now defaults to `250` ms instead of `500`. (DiskIO / NetIO / Top)
+    * This change improves the responsiveness while maintaining reasonably accurate measurements.
 
 Bugfixes:
-* Fixed Base64 encoding producing wrong output for some inputs. (General)
-* Fixed image logos not working when ImageMagick is built without a quantum depth suffix in its library name, as on FreeBSD. (Logo, FreeBSD)
+* Fixed Base64 encoding producing incorrect output for some inputs. (General)
+* Fixed image logos not working when ImageMagick is built without a quantum depth suffix in its library name, as is the case on FreeBSD. (Logo, FreeBSD)
 * Fixed TerminalFont detection on Windows ignoring Windows Terminal JSON fragment files. (#2573, TerminalFont, Windows)
 * Fixed 64-bit values being truncated by `strtoul` on platforms where `unsigned long` is 32-bit. (Swap / PhysicalDisk / PhysicalMemory / GPU)
 * Fixed read-only SQLite databases failing with `SQLITE_READONLY` when the database directory is not writable. (Packages)
-    * This fixes PKG package count detection on FreeBSD
+    * This fixes PKG package count detection on FreeBSD.
 * Fixed `{#keys}` and `{#title}` in module format strings not honoring the `brightColor` display option. (Format)
 * Fixed `paddingTop` and `paddingLeft` being ignored by the `kitty-icat` image logo type. (Logo)
+* Fixed module format strings mishandling a value that carries more than one leading ANSI escape sequence: the second escape was taken for the start of the trailing reset, so `:`, `<`, `>` and `|` left the value untruncated instead of truncating it.
+* Fixed issues when running on big-endian platforms.
+* Fixed building on FreeBSD 16.0-CURRENT, where `<string.h>` defines `memrchr` as a qualifier-preserving function-like macro. (General, FreeBSD)
+* Worked around an iTerm bug where the image logo may be moved out of view. (Logo)
+* Increased the terminal response wait time to 1s to improve compatibility with slower terminals. (General)
+* Fixed the `PublicIp` and `Weather` modules exiting with "can only be used once due to internal limitations" on the round after a failed request when `--dynamic-interval` is used, instead of retrying. (PublicIp / Weather)
+* Fixed the `Display`, `Monitor`, `WM`, `DE`, `Media`, `Player`, `Shell` and `Terminal` modules replaying the first round's result when `--dynamic-interval` is used. The detection results that are cached for the whole run are now dropped between rounds, so these modules detect again on every round. (Display / Monitor / WM / DE / Media / Player / Shell / Terminal)
 * Some internal cleanups and optimizations.
 
 Logos:

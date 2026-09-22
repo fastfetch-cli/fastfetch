@@ -118,6 +118,11 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
 
     if (@available(macOS 14.0, *)) {
         error = detectFromPlist(result);
+        if (error) {
+            // The plist is the authoritative source on Sonoma and later, but when it can not be read
+            // at all, NSWorkspace can still resolve a user-picked static image.
+            error = detectFromNSWorkspace(result);
+        }
     } else {
 #ifdef FF_HAVE_SQLITE3
         error = detectFromSQLite(result);

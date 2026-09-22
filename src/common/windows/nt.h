@@ -1307,19 +1307,23 @@ typedef struct _KEY_BASIC_INFORMATION {
     _Field_size_bytes_(NameLength) WCHAR Name[]; // The name of the registry key. This string is not null-terminated.
 } KEY_BASIC_INFORMATION, *PKEY_BASIC_INFORMATION;
 
-typedef struct _KEY_FULL_INFORMATION {
-    LARGE_INTEGER LastWriteTime;
-    ULONG TitleIndex;
-    ULONG ClassOffset;
-    ULONG ClassLength;
-    ULONG SubKeys;
-    ULONG MaxNameLength;
-    ULONG MaxClassLength;
-    ULONG Values;
-    ULONG MaxValueNameLength;
-    ULONG MaxValueDataLength;
-    WCHAR Class[];
-} KEY_FULL_INFORMATION, *PKEY_FULL_INFORMATION;
+typedef struct _KEY_CACHED_INFORMATION {
+    LARGE_INTEGER LastWriteTime; // Number of 100-nanosecond intervals since this key or any of its values changed.
+    ULONG TitleIndex;            // Reserved // A legacy field originally intended for use with localization such as an index of a resource table.
+    ULONG SubKeys;               // The number of subkeys for a key.
+    ULONG MaxNameLen;            // The maximum length, in bytes, of a subkey name.
+    ULONG Values;                // The number of value entries.
+    ULONG MaxValueNameLen;       // The maximum length, in bytes, of a value entry name.
+    ULONG MaxValueDataLen;       // The maximum length, in bytes, of a value entry data field.
+    ULONG NameLength;            // Size, in bytes, of the key's own (leaf) name, without the terminator. The name itself is not stored.
+} KEY_CACHED_INFORMATION, *PKEY_CACHED_INFORMATION;
+// 36 bytes of members, but LARGE_INTEGER makes the struct 8-byte aligned, and that is exactly what
+// the kernel demands: a 36-byte buffer is rejected with STATUS_BUFFER_TOO_SMALL (measured).
+// The kernel writes all 40 bytes -- the 4 padding bytes included, zeroed -- and reports
+// ResultLength = 40 whatever size you pass, so a larger buffer buys nothing (measured 40..4096).
+// This is the only information class that never appends a string: NameLength is the length of the
+// key's own (leaf) name in bytes without the terminator, and the name itself is not returned.
+static_assert(sizeof(KEY_CACHED_INFORMATION) == 40, "KEY_CACHED_INFORMATION should be 40 bytes");
 
 NTSYSAPI NTSTATUS NTAPI NtQueryKey(
     _In_ HANDLE KeyHandle,

@@ -36,8 +36,8 @@ typedef int FFNativeFD;
     #endif
 
 // Only O_RDONLY is supported
-HANDLE openat(HANDLE dfd, const char* fileName, int oflag);
-HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
+[[gnu::nonnull(2)]] HANDLE openat(HANDLE dfd, const char* fileName, int oflag);
+[[gnu::nonnull(2)]] HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif
 
 static inline bool ffIsValidNativeFD(FFNativeFD fd) {
@@ -51,8 +51,6 @@ static inline bool ffIsValidNativeFD(FFNativeFD fd) {
 
 [[gnu::always_inline, gnu::nonnull(1)]]
 static inline void wrapClose(FFNativeFD* pfd) {
-    assert(pfd);
-
     if (ffIsValidNativeFD(*pfd)) {
 #ifndef _WIN32
         close(*pfd);
@@ -230,11 +228,12 @@ typedef enum FFPathType: uint8_t {
 
 [[gnu::nonnull(1, 2)]] bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
-#define FF_IO_TERM_RESP_WAIT_MS 200 // #554
+#define FF_IO_TERM_RESP_WAIT_MS 1000 // Terminal may respond slowly, especially when printing large image/gif logos. Found on iTerm
 
 [[gnu::format(scanf, 3, 4), gnu::nonnull(1, 3)]] const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...);
 
 // Not thread safe!
+// Returns the previous state, which callers routinely discard (see ffUnsuppressIO), so not `nodiscard`
 bool ffSuppressIO(bool suppress);
 
 static inline void ffUnsuppressIO(bool* suppressed) {
@@ -247,10 +246,9 @@ static inline void ffUnsuppressIO(bool* suppressed) {
 
 #define FF_SUPPRESS_IO() [[maybe_unused, gnu::cleanup(ffUnsuppressIO)]] bool io_suppressed__ = ffSuppressIO(true)
 
-void ffListFilesRecursively(const char* path, bool pretty);
+[[gnu::nonnull(1)]] void ffListFilesRecursively(const char* path, bool pretty);
 
 [[gnu::nonnull(1), gnu::always_inline]] static inline void wrapFclose(FILE** pfile) {
-    assert(pfile);
     if (*pfile) {
         fclose(*pfile);
     }
@@ -260,14 +258,12 @@ void ffListFilesRecursively(const char* path, bool pretty);
 [[gnu::nonnull(1), gnu::always_inline]]
 #ifndef _WIN32
 static inline void wrapClosedir(DIR** pdir) {
-    assert(pdir);
     if (*pdir) {
         closedir(*pdir);
     }
 }
 #else
 static inline void wrapClosedir(HANDLE* pdir) {
-    assert(pdir);
     if (*pdir) {
         FindClose(*pdir);
     }
@@ -290,7 +286,8 @@ static inline void wrapClosedir(HANDLE* pdir) {
 }
 
 FFNativeFD ffGetNullFD(void);
-bool ffRemoveFile(const char* fileName);
+// Returns whether the file was removed; callers that only want it gone discard that, so not `nodiscard`
+[[gnu::nonnull(1)]] bool ffRemoveFile(const char* fileName);
 // Modification time of a file, in milliseconds since the Unix epoch, or 0 if it can not be read.
 // The representation is uniform across platforms so that a value derived from it means the
 // same thing everywhere, which matters for callers that store it as a cache key.

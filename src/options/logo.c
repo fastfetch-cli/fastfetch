@@ -3,6 +3,42 @@
 #include "common/jsonconfig.h"
 #include "common/strutil.h"
 
+#if !FF_HAVE_IMAGE_LOGO
+// The image logo types are still accepted by the parsers below in a build that can not render them,
+// so that the user is told which type is unavailable instead of being told the type does not exist.
+// The one that is deliberately left out is `raw`: it writes a pre-rendered byte stream through
+// untouched and needs no decoder, so a build without image logos can still display one.
+static bool logoTypeIsImage(FFLogoType type) {
+    switch (type) {
+        case FF_LOGO_TYPE_IMAGE_SIXEL:
+        case FF_LOGO_TYPE_IMAGE_KITTY:
+        case FF_LOGO_TYPE_IMAGE_KITTY_DIRECT:
+        case FF_LOGO_TYPE_IMAGE_KITTY_ICAT:
+        case FF_LOGO_TYPE_IMAGE_ITERM:
+        case FF_LOGO_TYPE_IMAGE_CHAFA:
+            return true;
+        default:
+            return false;
+    }
+}
+#endif
+
+// --sixel, --kitty, --kitty-direct, --kitty-icat and --iterm. They keep a branch of their own in
+// every build so that the error a build without image logos gives names the flag that was used,
+// rather than it being rejected as an unknown option. --chafa is not among them: it is gated on
+// FF_HAVE_CHAFA, which a build without image logos turns off as well, and it keeps the message it
+// has always given in that case.
+static void logoParseImageFlag(FFOptionsLogo* options, const char* key, const char* value, FFLogoType type) {
+#if FF_HAVE_IMAGE_LOGO
+    ffOptionParseString(key, value, &options->source);
+    options->type = type;
+#else
+    FF_UNUSED(options, key, value, type);
+    fputs("Error: Fastfetch was built without image logo support\n", stderr);
+    exit(477);
+#endif
+}
+
 void ffOptionsInitLogo(FFOptionsLogo* options) {
     ffStrbufInit(&options->source);
     options->type = FF_LOGO_TYPE_AUTO;
@@ -71,6 +107,12 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                            { "none", FF_LOGO_TYPE_NONE },
                                                                            {},
                                                                        });
+#if !FF_HAVE_IMAGE_LOGO
+            if (logoTypeIsImage(options->type)) {
+                fputs("Error: Fastfetch was built without image logo support\n", stderr);
+                exit(477);
+            }
+#endif
         } else if (ffStrStartsWithIgnCase(subKey, "color-") && subKey[6] != '\0' && subKey[7] == '\0') // matches "--logo-color-*"
         {
             // Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
@@ -151,20 +193,15 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             return false;
         }
     } else if (ffStrEqualsIgnCase(key, "--sixel")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_SIXEL;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_SIXEL);
     } else if (ffStrEqualsIgnCase(key, "--kitty")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY);
     } else if (ffStrEqualsIgnCase(key, "--kitty-direct")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY_DIRECT;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY_DIRECT);
     } else if (ffStrEqualsIgnCase(key, "--kitty-icat")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY_ICAT;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY_ICAT);
     } else if (ffStrEqualsIgnCase(key, "--iterm")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_ITERM;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_ITERM);
     } else if (ffStrEqualsIgnCase(key, "--raw")) {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_RAW;
@@ -278,6 +315,11 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             if (error) {
                 return error;
             }
+#if !FF_HAVE_IMAGE_LOGO
+            if (logoTypeIsImage((FFLogoType) value)) {
+                return "Image logo types are not supported because Fastfetch was built without image logo support";
+            }
+#endif
             options->type = (FFLogoType) value;
             continue;
         } else if (unsafe_yyjson_equals_str(key, "source")) {
@@ -482,6 +524,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_COMMAND_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
             break;
+#if FF_HAVE_IMAGE_LOGO
         case FF_LOGO_TYPE_IMAGE_SIXEL:
             yyjson_mut_obj_add_str(doc, obj, "type", "sixel");
             break;
@@ -500,6 +543,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_IMAGE_CHAFA:
             yyjson_mut_obj_add_str(doc, obj, "type", "chafa");
             break;
+#endif
         case FF_LOGO_TYPE_IMAGE_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "raw");
             break;

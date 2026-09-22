@@ -307,7 +307,15 @@ sixel_encode_header(int width, int height, sixel_output_t *output)
 {
     SIXELSTATUS status = SIXEL_FALSE;
     int nwrite;
-    int p[3] = {0, 0, 0};
+
+    /* fastfetch: P2 = 1 asks for a transparent background, so a pixel we leave unset keeps
+     * whatever the terminal already had there. Upstream leaves it at 0, which tells the terminal
+     * to fill unset pixels with colour-table entry 0 instead -- and that entry is defined by the
+     * image's own palette, so a keycolor image comes out with a solid rectangle behind it rather
+     * than transparency. Measured on Windows Terminal, which implements the VT340 semantics;
+     * ImageMagick's SIXEL coder emits "0;1;0" here and chafa emits the same.
+     * The trimming below drops the trailing zero, so the envelope is "0;1" -- P3 defaults to 0. */
+    int p[3] = {0, 1, 0};
     int pcount = 3;
     int use_raster_attributes = 1;
 

@@ -7,8 +7,6 @@
 
 // Return start position of the inner key if the argument key belongs to the module specified, nullptr otherwise
 const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName) {
-    assert(argumentKey && moduleName);
-
     const char* subKey = argumentKey;
     if (!(subKey[0] == '-' && subKey[1] == '-')) {
         return nullptr;

@@ -21,8 +21,6 @@ void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate) {
 }
 
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != nullptr);
-
     char* buffer = nullptr;
     int len = vasprintf(&buffer, format, arguments);
     assert(len >= 0);
@@ -33,8 +31,6 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
 // Takes ownership of `heapStr`. The caller must not free `heapStr` after calling this
 // function; the memory will be managed and freed via the associated FFstrbuf.
 void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr) {
-    assert(heapStr != nullptr);
-
     strbuf->length = length;
     size_t allocSize = ffMallocUsableSize(heapStr);
     if (allocSize == 0) {
@@ -157,8 +153,6 @@ void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int (*transfo
 }
 
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments) {
-    assert(format != nullptr);
-
     va_list copy;
     va_copy(copy, arguments);
 
@@ -192,8 +186,6 @@ const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char unti
 }
 
 void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != nullptr);
-
     va_list arguments;
     va_start(arguments, format);
 
@@ -209,8 +201,6 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...) {
 }
 
 void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...) {
-    assert(format != nullptr);
-
     va_list arguments;
     va_start(arguments, format);
     ffStrbufAppendVF(strbuf, format, arguments);
@@ -236,14 +226,10 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c) {
 }
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
-    assert(strbuf != nullptr);
-
     if (length == 0) {
         ffStrbufClear(strbuf);
         return;
     }
-
-    assert(value != nullptr);
 
     if (strbuf->allocated <= length) {
         char* newBuf = malloc(sizeof(char) * (length + 1));
@@ -262,7 +248,8 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value) {
 }
 
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value) {
-    assert(value && value != strbuf);
+    // `value` is non-null per the `nonnull(2)` contract; the aliasing check cannot be expressed by an attribute
+    assert(value != strbuf);
 
     if (value->length == 0) {
         ffStrbufClear(strbuf);
@@ -647,7 +634,6 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c) {
 }
 
 bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer) {
-    assert(lineptr && n && buffer);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
     assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
 
@@ -678,7 +664,6 @@ bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffe
 }
 
 void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer) {
-    assert(buffer && lineptr && n);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
     assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
 
@@ -842,8 +827,6 @@ bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLeng
 }
 
 bool ffStrbufDecodeHexEscapeSequences(FFstrbuf* strbuf) {
-    assert(strbuf);
-
     if (strbuf->length < 4) {
         return false;
     }

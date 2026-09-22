@@ -2,7 +2,7 @@
 
 #include "../logo.h"
 
-#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(FF_HAVE_SIXEL)
+#if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6) || defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__) || defined(FF_HAVE_SIXEL)
 
 typedef enum FFLogoImageResult: uint8_t {
     FF_LOGO_IMAGE_RESULT_SUCCESS,    // Logo printed
@@ -117,6 +117,11 @@ bool ffImageAnimationOpenWIC(FFLogoRequestData* requestData, FFImageAnimation** 
 #ifdef __APPLE__
 bool ffImageCreateImageIO(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
 bool ffImageAnimationOpenImageIO(FFLogoRequestData* requestData, FFImageAnimation** out, const char** error);
+#endif
+
+#ifdef __ANDROID__
+bool ffImageCreateAID(FFLogoRequestData* requestData, FFImageBuffer* out, const char** error);
+bool ffImageAnimationOpenAID(FFLogoRequestData* requestData, FFImageAnimation** out, const char** error);
 #endif
 
 #ifdef FF_HAVE_SIXEL

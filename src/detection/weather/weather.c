@@ -38,13 +38,16 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result) {
     }
 
     if (status != nullptr) {
-        return status;
+        const char* error = status;
+        ffNetworkingResetState(&state);
+        status = FF_UNITIALIZED;
+        return error;
     }
 
     ffStrbufEnsureFree(result, 4095);
     const char* error = ffNetworkingRecvHttpResponse(&state, result);
 
-    state = (FFNetworkingState) {};
+    ffNetworkingResetState(&state);
     status = FF_UNITIALIZED;
 
     if (error == nullptr) {

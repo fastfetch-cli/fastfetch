@@ -15,3 +15,5 @@ fastfetch.kdev4
 *.log
 /*.zh.md
 /.work*
+/doc/*.md
+/fastfetch.wiki

@@ -3,6 +3,7 @@
 #include "common/strutil.h"
 #include "common/path.h"
 #include "common/windows/unicode.h"
+#include "common/windows/registry.h"
 #include "common/mallocHelper.h"
 #include "common/io.h"
 
@@ -156,6 +157,61 @@ static void detectPacman(FFPackagesResult* result) {
     result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, nullptr);
 }
 
+// The newest last-write time among the registry keys that hold the set of installed programs.
+//
+// winget is the only package manager on Windows whose count cannot be read from a local index:
+// `winget list` has to spawn a process (~1.5 s), so its result is cached. The obvious cache key --
+// the modification time of winget's own database -- does not work. `installed.db` is a
+// `PackageTrackingCatalog`: it only records the installs winget performed itself. Measured on a
+// machine with 101 listed packages: it holds 46 ids, and 33 of the listed ones are absent from it.
+// Uninstalling a package through Settings > Apps leaves the file completely untouched (same mtime,
+// same size, same row count) while `winget list` loses a row.
+//
+// The sources `winget list` correlates against are the ARP registry and the MSIX package registry.
+// Adding or removing a program bumps the last-write time of the parent key it lives under, so the
+// newest of these four changes exactly when the count may have changed.
+// All four must be read: a program may register in either ARP view, or be an MSIX package.
+//
+// The keys are read through registry.h, like every other Windows detection module does. There the
+// 32-bit view has to be addressed as a path: NtOpenKey ignores KEY_WOW64_32KEY -- it hands back the
+// 64-bit key with the flag set just as with it cleared (measured), the redirect is done by the Win32
+// Reg* wrappers. What the redirector resolves to is the physical `SOFTWARE\WOW6432Node\...`, so
+// opening that path is equivalent to asking for KEY_WOW64_32KEY.
+static uint64_t getInstalledProgramsFingerprint(void) {
+    static const struct {
+        HKEY root;
+        const wchar_t* path;
+    } locations[] = {
+        { HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" },
+#ifdef _WIN64
+        // A 64-bit program may still register in the 32-bit view -- the installer decides. Geekbench 6
+        // does, and reading only the 64-bit view misses its uninstall entirely.
+        //
+        // A 32-bit fastfetch is supported on 32-bit Windows only (a 32-bit process on 64-bit Windows
+        // would need KEY_WOW64_64KEY, which this API cannot express): there the key above is the one
+        // and only ARP view, and this one does not exist.
+        { HKEY_LOCAL_MACHINE, L"SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall" },
+#endif
+        { HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" },
+        { HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModel\\StateRepository\\Cache\\Package\\Data" },
+    };
+
+    uint64_t newest = 0;
+    for (size_t i = 0; i < ARRAY_SIZE(locations); ++i) {
+        FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+        if (!ffRegOpenKeyForRead(locations[i].root, locations[i].path, &hKey, nullptr)) {
+            continue;
+        }
+
+        KEY_CACHED_INFORMATION info = {};
+        if (ffRegQueryKey(hKey, &info, nullptr) && (uint64_t) info.LastWriteTime.QuadPart > newest) {
+            newest = (uint64_t) info.LastWriteTime.QuadPart;
+        }
+    }
+
+    return newest;
+}
+
 static void detectWinget(FFPackagesResult* result) {
     // Why not read winget's own database instead of shelling out?
     // `%LOCALAPPDATA%\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState\<source>\installed.db`
@@ -166,6 +222,20 @@ static void detectWinget(FFPackagesResult* result) {
     // and reading it would drag in a SQLite dependency.
     // The authoritative set of installed packages comes from the ARP registry and MSIX, which is exactly
     // what `winget list` enumerates before correlating it against the read-only source index.
+
+    // The fingerprint is read once, before the process runs, and reused as the cache key on a miss.
+    // `winget list` writes to none of those keys, so a stored key stays valid until a program changes.
+    const uint64_t cacheKey = getInstalledProgramsFingerprint();
+
+    FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
+
+    uint32_t count;
+    if (ffPackagesReadCacheKey(&cacheDir, &cacheContent, cacheKey, "winget", &count)) {
+        result->winget = count;
+        return;
+    }
+
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buffer, (char*[]) {
                                            "winget.exe",
@@ -177,8 +247,13 @@ static void detectWinget(FFPackagesResult* result) {
                                            "--source",
                                            "winget",
                                            "--disable-interactivity",
+                                           // Accepting is a no-op once it has been done. Without it, `winget list`
+                                           // exits with code 1 on a machine that has never accepted the source
+                                           // agreements, and this module would report no packages at all.
+                                           "--accept-source-agreements",
                                            nullptr,
                                        })) {
+        // A failed detection is not cached: only ffPackagesWriteCache() writes, and it is not reached.
         return;
     }
 
@@ -187,7 +262,7 @@ static void detectWinget(FFPackagesResult* result) {
         return;
     }
 
-    uint32_t count = 0;
+    count = 0;
     for (
         index += strlen("--\r\n");
         (index = ffStrbufNextIndexC(&buffer, index, '\n')) < buffer.length;
@@ -200,6 +275,8 @@ static void detectWinget(FFPackagesResult* result) {
     }
 
     result->winget = count;
+
+    ffPackagesWriteCache(&cacheDir, &cacheContent, count);
 }
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) {

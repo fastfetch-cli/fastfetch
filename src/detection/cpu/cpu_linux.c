@@ -321,7 +321,7 @@ static void detectMediaTek(FFCPUResult* cpu) {
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
         case 6995:
-            name = "9600";
+            name = "9600 Pro";
             break;
         case 6993:
             name = "9500";

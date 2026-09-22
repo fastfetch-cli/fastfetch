@@ -322,6 +322,8 @@ error:
         close(state->sockfd);
         state->sockfd = -1;
     }
+
+    ffStrbufClear(&state->command);
     return ret;
 }
 
