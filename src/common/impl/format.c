@@ -205,7 +205,11 @@ static bool parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
                     lua_pushboolean(L, *(bool*) arg->value);
                     break;
                 case FF_ARG_TYPE_STRING:
-                    lua_pushlstring(L, (const char*) arg->value, strlen((const char*) arg->value));
+                    if (!arg->value) {
+                        lua_pushlstring(L, "", 0);
+                    } else {
+                        lua_pushlstring(L, (const char*) arg->value, strlen((const char*) arg->value));
+                    }
                     break;
                 case FF_ARG_TYPE_STRBUF: {
                     const FFstrbuf* sb = (const FFstrbuf*) arg->value;
