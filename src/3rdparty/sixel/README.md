@@ -114,7 +114,7 @@ that 11.3 MB was `images/` fixtures, so the meaningful comparison is code:
 
 ## Local modifications
 
-Three deliberate divergences from upstream. Re-apply all three when re-syncing.
+Four deliberate divergences from upstream. Re-apply all four when re-syncing.
 
 1. **`sixel.h` — `SIXELAPI` is empty.** Upstream defines it as
    `__declspec(dllexport)` on Windows. This subset is compiled into `libfastfetch`
@@ -152,6 +152,14 @@ Three deliberate divergences from upstream. Re-apply all three when re-syncing.
    not fill, so the identical bytes look correct there. It is also why Linux never showed
    the problem: that path goes through ImageMagick, which already sends `P2 = 1`.
 
+4. **`output.c` — release the allocator reference if output allocation fails.**
+  `sixel_output_new()` creates an allocator or takes an additional reference before
+  allocating the output context. If that allocation fails, the reference is not owned by
+  an output object and must be released before returning `SIXEL_BAD_ALLOCATION`.
+  Fastfetch passes a null allocator, so without this cleanup the newly created allocator
+  becomes unreachable on this error path. The successful path and returned error code are
+  unchanged.
+
 The vendored sources are also exempted from `-Wconversion` in `CMakeLists.txt`:
 upstream has ~160 implicit int→`unsigned char` narrowing warnings. Everything else
 (`-Wall -Wextra` and fastfetch's `-Werror=` set) applies unchanged, and the subset
@@ -171,7 +179,7 @@ done
 cp /tmp/libsixel/include/sixel.h .
 cp /tmp/libsixel/LICENSE /tmp/libsixel/LICENSE.sixel /tmp/libsixel/LICENSE.pnmcolormap .
 
-# 2. re-apply the three local modifications listed above
+# 2. re-apply the four local modifications listed above
 # 3. verify
 ```
 

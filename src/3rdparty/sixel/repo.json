@@ -6,6 +6,7 @@
     "modifications": [
         "sixel.h: SIXELAPI is empty, so the statically linked subset exports nothing",
         "config.h: hand-written, because only the vendored files read it",
-        "tosixel.c: DCS P2 initialised to 1, so unset pixels are not filled with colour-table entry 0"
+        "tosixel.c: DCS P2 initialised to 1, so unset pixels are not filled with colour-table entry 0",
+        "output.c: release the allocator reference if output-context allocation fails"
     ]
 }
