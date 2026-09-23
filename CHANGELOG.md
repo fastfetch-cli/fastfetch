@@ -81,6 +81,8 @@ Features:
     * An unpackaged player such as Chrome is now reported as `Google Chrome` instead of `Chrome`.
 * The `waitTime` option of `DiskIO`, `NetIO` and `Top` now defaults to `250` ms instead of `500`. (DiskIO / NetIO / Top)
     * This change improves the responsiveness while maintaining reasonably accurate measurements.
+* Added battery level detection for the DualSense, the DualSense Edge and the Access Controller, and for the Nintendo Switch Joy-Con, to the `gamepad` module on Windows. (Gamepad, Windows)
+    * The module also names the Sony Access Controller and the Nintendo Switch 2 controllers, which it previously left to Windows' own naming.
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)
@@ -157,6 +159,8 @@ Bugfixes:
 * Fixed the `display.temp` validation errors naming the long-removed `display.temperature` key, which the config parser rejects. (General)
 * Fixed a memory leak in the `wifi` module on Windows when the BSS list comes back empty. (Wifi, Windows)
 * Fixed `--gen-config` hanging forever when stdout is redirected to `NUL` or MSYS2's `/dev/null`. On Windows `isatty()` reports a character device rather than a console, so a redirected run was mistaken for an interactive one. (General, Windows)
+* Fixed the `gamepad` module reading the DualShock 4 battery level on Windows out of a report layout it guessed from the buffer length. A controller that has not been switched to its extended report mode sends the plain HID gamepad report, which carries no battery level, so the guess read a zeroed region and reported 0%. The layout now follows the report id, and the level is scaled the way SDL scales it, so a level of 8 is 85% rather than 100%. (Gamepad, Windows)
+* Fixed the `gamepad` module on Windows giving up on a Switch controller's battery after a single read. A Switch controller interleaves its full state report with the replies it sends to subcommands, and on the Pro Controller these made up four fifths of the traffic, so the one report the module read almost never carried a battery and the controller always reported 0%. It now keeps reading until a full state report arrives, within the same one-second budget. (Gamepad, Windows)
 * Some internal cleanups and optimizations.
 
 Logos:
