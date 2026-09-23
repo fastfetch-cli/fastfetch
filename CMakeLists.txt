@@ -1071,6 +1071,7 @@ elseif(WIN32)
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
+        src/common/windows/winrt.cpp
         src/common/windows/version.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
