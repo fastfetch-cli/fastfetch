@@ -1749,6 +1749,24 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "devType": {
+                                        "description": "Which Bluetooth stacks to look for",
+                                        "oneOf": [
+                                            {
+                                                "const": "classic",
+                                                "description": "Look for BR/EDR devices only"
+                                            },
+                                            {
+                                                "const": "le",
+                                                "description": "Look for Bluetooth Low Energy devices only"
+                                            },
+                                            {
+                                                "const": "both",
+                                                "description": "Look for devices on either stack"
+                                            }
+                                        ],
+                                        "default": "both"
+                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },

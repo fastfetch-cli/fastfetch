@@ -10,6 +10,7 @@ Changes:
 
 Features:
 * Added Bluetooth Low Energy detection on Windows and macOS, through WinRT and Core Bluetooth. (Bluetooth, Windows / macOS)
+* Added the `showType` option to the `Bluetooth` module, which selects which stacks are looked for. (Bluetooth)
 * Added `{device-type}`, `{signal-quality}` and `{signal-quality-bar}` to the `Bluetooth` module, and `deviceType` and `signalQuality` to its JSON output. (Bluetooth)
     * `deviceType` names the stacks a device answers on, `Classic` and/or `Low Energy`, and `signalQuality` is the signal strength of the LE link, converted from dBm on the same scale the `Wifi` module uses.
     * Linux fills both from the BlueZ `Class`, `Appearance` and `RSSI` properties, and macOS from Core Bluetooth. The remaining platforms report `Classic` and no signal quality, which is what their backends can tell.

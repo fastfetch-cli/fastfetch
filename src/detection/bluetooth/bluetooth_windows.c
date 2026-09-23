@@ -40,7 +40,7 @@ const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devices /* 
 // The device tree spells an address without separators, while the list holds the printed form. The
 // case has to be folded because it depends on the enumerator: the BTHENUM nodes are upper case and
 // the BTHLE / BTHLEDevice ones lower case, and the list is always upper case.
-static bool ffBluetoothAddressEquals(const wchar_t* plain, const FFstrbuf* address) {
+static bool addressEquals(const wchar_t* plain, const FFstrbuf* address) {
     if (address->length != 17) {
         return false;
     }
@@ -55,7 +55,7 @@ static bool ffBluetoothAddressEquals(const wchar_t* plain, const FFstrbuf* addre
     return true;
 }
 
-static const char* ffBluetoothDetectBattery(FFlist* devices) {
+static const char* detectBattery(FFlist* devices) {
     ULONG idListLength = 0;
     // The class filter is a no-op here, and deliberately so: CM_Get_Device_ID_ListW() only honours the
     // filter string together with CM_GETIDLIST_FILTER_CLASS, so this walks every present node of the
@@ -107,7 +107,7 @@ static const char* ffBluetoothDetectBattery(FFlist* devices) {
         }
 
         FF_LIST_FOR_EACH (FFBluetoothResult, bt, *devices) {
-            if (ffBluetoothAddressEquals(deviceAddress, &bt->address)) {
+            if (addressEquals(deviceAddress, &bt->address)) {
                 bt->battery = battery;
                 break;
             }
@@ -117,7 +117,10 @@ static const char* ffBluetoothDetectBattery(FFlist* devices) {
     return nullptr;
 }
 
-const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
+// The classic (BR/EDR) half. `BluetoothFindFirstDevice` only ever answers with BR/EDR devices; the
+// Low Energy stack is a separate walk, in bluetooth_windows.cpp, which folds what it finds into the
+// list this function builds.
+static const char* detectClassic(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
     FF_LIBRARY_LOAD_MESSAGE(bluetoothapis, "bluetoothapis.dll", 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
@@ -239,10 +242,28 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         ffBluetoothFindDeviceClose(hFind);
     }
 
-    ffBluetoothDetectLe(options, devices);
+    return nullptr;
+}
+
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
+    // `showType` selects which stacks are walked, not merely which entries are printed. The classic
+    // and the Low Energy stack are two different APIs here, so a stack the user switched off is not
+    // called at all.
+    if (options->showType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT) {
+        const char* error = detectClassic(options, devices);
+        if (error) {
+            return error;
+        }
+    }
+
+    if (options->showType & FF_BLUETOOTH_DEVICE_TYPE_LE_BIT) {
+        // A failure here is not fatal: the LE half only adds to the classic list, which stands on
+        // its own, and "no LE link on this machine" is the ordinary case rather than an error.
+        ffBluetoothDetectLe(options, devices);
+    }
 
     if (devices->length > 0) {
-        ffBluetoothDetectBattery(devices);
+        detectBattery(devices);
     }
 
     return nullptr;

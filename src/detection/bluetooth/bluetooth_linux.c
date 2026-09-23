@@ -196,11 +196,20 @@ static void detectBluetoothRoot(FFBluetoothOptions* options, FFlist* devices, FF
         FFBluetoothResult* device = detectBluetoothObject(devices, dbus, &arrayIter);
 
         if (device) {
-            if (!options->showDisconnected && !device->connected) {
+            // `showType` selects which stacks are reported. Unlike the other backends there is no
+            // per-stack call to skip here: BlueZ publishes the class of device and the GATT appearance
+            // as two properties of the same `org.bluez.Device1` object, so both stacks arrive on this
+            // one walk and the filter lands on the result instead. A device whose stack could not be
+            // determined is kept -- BlueZ does not promise that a Device1 object carries either
+            // property, and dropping those would lose devices the default configuration reports.
+            bool deviceTypeWanted = device->deviceType == FF_BLUETOOTH_DEVICE_TYPE_NONE || (device->deviceType & options->showType);
+
+            if (!deviceTypeWanted || (!options->showDisconnected && !device->connected)) {
                 ffStrbufDestroy(&device->name);
                 ffStrbufDestroy(&device->address);
                 ffStrbufDestroy(&device->type);
                 --devices->length;
+                continue;
             }
 
             if (device->name.length == 0) {

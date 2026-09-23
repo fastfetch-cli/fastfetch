@@ -5,7 +5,13 @@ extern "C" {
 
 #include <bluetooth/LocalDevice.h>
 
-const char* ffDetectBluetooth([[maybe_unused]] FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */) {
+    // The local adapter's device class is a BR/EDR concept and the adapter is the only device this
+    // backend has, so a Low Energy-only configuration leaves the list empty.
+    if (!(options->showType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT)) {
+        return nullptr;
+    }
+
     using namespace Bluetooth;
     FF_SUPPRESS_IO();
 

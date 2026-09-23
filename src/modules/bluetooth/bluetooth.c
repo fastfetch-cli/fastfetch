@@ -1,7 +1,6 @@
 #include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/strutil.h"
 #include "detection/bluetooth/bluetooth.h"
 #include "modules/bluetooth/bluetooth.h"
 
@@ -120,6 +119,22 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "showType")) {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                                                                       { "classic", FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT },
+                                                                       { "le", FF_BLUETOOTH_DEVICE_TYPE_LE_BIT },
+                                                                       { "both", FF_BLUETOOTH_DEVICE_TYPE_BOTH },
+                                                                       {},
+                                                                   });
+            if (error) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            } else {
+                options->showType = (FFBluetoothDeviceType) value;
+            }
+            continue;
+        }
+
         if (ffPercentParseJsonObject(key, val, &options->percent)) {
             continue;
         }
@@ -132,6 +147,21 @@ void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
     yyjson_mut_obj_add_bool(doc, module, "showDisconnected", options->showDisconnected);
+
+    switch (options->showType) {
+        case FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "classic");
+            break;
+        case FF_BLUETOOTH_DEVICE_TYPE_LE_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "le");
+            break;
+        case FF_BLUETOOTH_DEVICE_TYPE_BOTH:
+            yyjson_mut_obj_add_str(doc, module, "showType", "both");
+            break;
+        case FF_BLUETOOTH_DEVICE_TYPE_NONE:
+        default:
+            break;
+    }
 
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
@@ -181,6 +211,8 @@ bool ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
 void ffInitBluetoothOptions(FFBluetoothOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->showDisconnected = false;
+    // Both stacks are walked by default; `showType` exists to switch one off, not to switch one on.
+    options->showType = FF_BLUETOOTH_DEVICE_TYPE_BOTH;
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 

@@ -100,6 +100,11 @@
 //   link is up, and the callbacks are waited for as a group, so a machine with no LE link pays
 //   nothing.
 //
+// * `showType` is honoured here rather than in the module, because the two stacks are two separate
+//   walks with two separate permission surfaces: a stack the user switched off is not asked about
+//   at all. The LE pass keeps working without the classic one, it only loses the address join and
+//   falls back to matching by name.
+//
 // Note on the permission model, which is what the first bullet above cannot show: any process that
 // touches Bluetooth is subject to the `kTCCServiceBluetoothAlways` service, and the request is
 // attributed to the *responsible* process. A host application that does not declare
@@ -148,7 +153,7 @@
 // The assigned 16-bit UUIDs, plus the 0xFEE0-0xFEFF block, which is where the vendor-specific ones
 // live. `retrieveConnectedPeripheralsWithServices:` filters on this list, so anything exposing only
 // a 128-bit custom service is out of reach -- that is a limit of the API, not of this list.
-static NSArray<CBUUID*>* ffBluetoothLeServiceUuids(void) {
+static NSArray<CBUUID*>* leServiceUuids(void) {
     static NSArray<CBUUID*>* uuids;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -166,7 +171,7 @@ static NSArray<CBUUID*>* ffBluetoothLeServiceUuids(void) {
 
 // See the note on `CBPeripheral.isConnectedToSystem` at the top of the file. The fallback keeps the
 // module working on a system that does not answer the private property.
-static bool ffBluetoothLeIsConnected(CBPeripheral* peripheral) {
+static bool leIsConnected(CBPeripheral* peripheral) {
     if ([peripheral respondsToSelector: @selector(isConnectedToSystem)]) {
         return peripheral.isConnectedToSystem;
     }
@@ -175,7 +180,7 @@ static bool ffBluetoothLeIsConnected(CBPeripheral* peripheral) {
 
 // The address is what a device is looked up by, both while the classic list is walked and by the LE
 // pass, and it is the only field the two copies of a dual-mode device are guaranteed to agree on.
-static FFBluetoothResult* ffBluetoothFindByAddress(FFlist* devices, const char* address) {
+static FFBluetoothResult* findByAddress(FFlist* devices, const char* address) {
     FF_LIST_FOR_EACH (FFBluetoothResult, device, *devices) {
         if (ffStrbufEqualS(&device->address, address)) {
             return device;
@@ -187,7 +192,7 @@ static FFBluetoothResult* ffBluetoothFindByAddress(FFlist* devices, const char* 
 // The class of device, as the classic stack reports it. It is built into a scratch buffer rather than
 // straight into the entry because the entry may already exist: see the merge in `ffDetectBluetooth`,
 // where the second copy of a dual-mode device only fills what the first copy left empty.
-static void ffBluetoothSetClassOfDevice(FFstrbuf* type, IOBluetoothDevice* ioDevice) {
+static void setClassOfDevice(FFstrbuf* type, IOBluetoothDevice* ioDevice) {
     if(ioDevice.serviceClassMajor & kBluetoothServiceClassMajorLimitedDiscoverableMode)
         ffStrbufAppendS(type, "Limited Discoverable Mode, ");
     if(ioDevice.serviceClassMajor & kBluetoothServiceClassMajorReserved1)
@@ -263,7 +268,7 @@ static void ffBluetoothSetClassOfDevice(FFstrbuf* type, IOBluetoothDevice* ioDev
 // The fallback for a system whose `IOBluetoothDevice` does not answer `identifier`. A name that is
 // carried by more than one classic entry cannot identify anything, so an ambiguous name joins
 // nothing and the peripheral is reported as its own device instead of being merged.
-static FFBluetoothResult* ffBluetoothFindByName(FFlist* devices, const char* name) {
+static FFBluetoothResult* findByName(FFlist* devices, const char* name) {
     FFBluetoothResult* found = nullptr;
     FF_LIST_FOR_EACH (FFBluetoothResult, device, *devices) {
         if (!ffStrEqualsIgnCase(device->name.chars, name)) {
@@ -277,7 +282,7 @@ static FFBluetoothResult* ffBluetoothFindByName(FFlist* devices, const char* nam
     return found;
 }
 
-static const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */, NSDictionary<NSString*, NSString*>* classicAddressByIdentifier) {
+static const char* detectLe(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */, NSDictionary<NSString*, NSString*>* classicAddressByIdentifier) {
     CBManagerAuthorization authorization = CBCentralManager.authorization;
     if (authorization == CBManagerAuthorizationDenied || authorization == CBManagerAuthorizationRestricted) {
         return nullptr; // The user said no. `NotDetermined` is left to the manager below, which asks.
@@ -297,13 +302,13 @@ static const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devi
         return nullptr; // Powered off, unauthorized or no radio: the classic list stands on its own
     }
 
-    NSArray<CBPeripheral*>* peripherals = [delegate.central retrieveConnectedPeripheralsWithServices: ffBluetoothLeServiceUuids()];
+    NSArray<CBPeripheral*>* peripherals = [delegate.central retrieveConnectedPeripheralsWithServices: leServiceUuids()];
     if (peripherals.count == 0) {
         return nullptr;
     }
 
     for (CBPeripheral* peripheral in peripherals) {
-        if (ffBluetoothLeIsConnected(peripheral)) {
+        if (leIsConnected(peripheral)) {
             peripheral.delegate = delegate;
             ++delegate.signalStrengthAsked;
             [peripheral readRSSI];
@@ -319,7 +324,7 @@ static const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devi
 
     for (CBPeripheral* peripheral in peripherals) {
         const char* name = peripheral.name.length > 0 ? peripheral.name.UTF8String : nullptr;
-        bool connected = ffBluetoothLeIsConnected(peripheral);
+        bool connected = leIsConnected(peripheral);
 
         // The classic half wins wherever it has an answer: its name, address and type come from the
         // class of device rather than from a name the two stacks may spell differently. The
@@ -327,10 +332,10 @@ static const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devi
         FFBluetoothResult* target = nullptr;
         NSString* address = classicAddressByIdentifier[peripheral.identifier.UUIDString];
         if (address) {
-            target = ffBluetoothFindByAddress(devices, address.UTF8String);
+            target = findByAddress(devices, address.UTF8String);
         }
         if (!target && name) {
-            target = ffBluetoothFindByName(devices, name);
+            target = findByName(devices, name);
         }
 
         if (!target && !connected && !options->showDisconnected) {
@@ -370,15 +375,14 @@ static const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* devi
     return nullptr;
 }
 
-const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
+// The classic (BR/EDR) half. `classicAddressByIdentifier` is an output rather than an input: the
+// classic list is the only place a device address can be had from, and the LE pass needs those
+// addresses to recognise a peripheral that has already been listed.
+static const char* detectClassic(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */, NSMutableDictionary<NSString*, NSString*>* classicAddressByIdentifier)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)
         return "IOBluetoothDevice.pairedDevices failed";
-
-    // The identifier the LE pass matches on, mapped to the address rather than to a position in
-    // `devices`: the list is the caller's, and a position in it is not this module's to promise.
-    NSMutableDictionary<NSString*, NSString*>* classicAddressByIdentifier = [NSMutableDictionary dictionary];
 
     for(IOBluetoothDevice* ioDevice in ioDevices)
     {
@@ -404,7 +408,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         }
 
         FF_STRBUF_AUTO_DESTROY type = ffStrbufCreate();
-        ffBluetoothSetClassOfDevice(&type, ioDevice);
+        setClassOfDevice(&type, ioDevice);
 
         uint8_t battery = 0;
         if (ioDevice.batteryPercentSingle)
@@ -415,7 +419,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
             battery = ioDevice.batteryPercentCase;
 
         // A device with no address cannot be recognised as a repeat, so it is always its own entry.
-        FFBluetoothResult* device = address.length > 0 ? ffBluetoothFindByAddress(devices, address.chars) : nullptr;
+        FFBluetoothResult* device = address.length > 0 ? findByAddress(devices, address.chars) : nullptr;
         if (!device)
         {
             device = FF_LIST_ADD(FFBluetoothResult, *devices);
@@ -442,9 +446,31 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
         device->connected |= !!ioDevice.isConnected;
     }
 
+    return nullptr;
+}
+
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
+{
+    // `showType` selects which stacks are walked, not merely which entries are printed: a stack the
+    // user switched off is not asked about at all. The classic pass is the one that produces the
+    // identifier map the LE pass joins on, so it is nil when that pass does not run -- the LE pass
+    // then has nothing to match against and reports every peripheral as a device of its own.
+    NSMutableDictionary<NSString*, NSString*>* classicAddressByIdentifier = nil;
+
+    if (options->showType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT) {
+        classicAddressByIdentifier = [NSMutableDictionary dictionary];
+
+        const char* error = detectClassic(options, devices, classicAddressByIdentifier);
+        if (error) {
+            return error;
+        }
+    }
+
     // Last, so that a peripheral answering on both stacks is matched against the classic list and
     // ends up as one entry rather than two.
-    ffBluetoothDetectLe(options, devices, classicAddressByIdentifier);
+    if (options->showType & FF_BLUETOOTH_DEVICE_TYPE_LE_BIT) {
+        detectLe(options, devices, classicAddressByIdentifier);
+    }
 
     return nullptr;
 }
