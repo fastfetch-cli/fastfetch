@@ -35,22 +35,46 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
 
         ffStrbufPutTo(&buffer, stdout);
     } else {
-        FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
+        // The battery is `uint8_t` with 0 meaning "unknown", so the format string can only be filled
+        // unconditionally; the signal quality has a sentinel of its own and is left empty instead.
+        FF_STRBUF_AUTO_DESTROY batteryNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
-            ffPercentAppendNum(&percentageNum, device->battery, options->percent, false, &options->moduleArgs);
+            ffPercentAppendNum(&batteryNum, device->battery, options->percent, false, &options->moduleArgs);
         }
-        FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY batteryBar = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
-            ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
+            ffPercentAppendBar(&batteryBar, device->battery, options->percent, &options->moduleArgs);
+        }
+
+        FF_STRBUF_AUTO_DESTROY signalNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY signalBar = ffStrbufCreate();
+        if (device->signalQuality != -DBL_MAX) {
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT) {
+                ffPercentAppendNum(&signalNum, device->signalQuality, options->percent, false, &options->moduleArgs);
+            }
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT) {
+                ffPercentAppendBar(&signalBar, device->signalQuality, options->percent, &options->moduleArgs);
+            }
+        }
+
+        FF_LIST_AUTO_DESTROY deviceTypes = ffListCreate();
+        if (device->deviceType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT) {
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, deviceTypes), "Classic");
+        }
+        if (device->deviceType & FF_BLUETOOTH_DEVICE_TYPE_LE_BIT) {
+            ffStrbufInitStatic(FF_LIST_ADD(FFstrbuf, deviceTypes), "Low Energy");
         }
 
         FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Bluetooth), index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                                                                                                                   FF_ARG(device->name, "name"),
                                                                                                                   FF_ARG(device->address, "address"),
                                                                                                                   FF_ARG(device->type, "type"),
-                                                                                                                  FF_ARG(percentageNum, "battery-percentage"),
+                                                                                                                  FF_ARG(deviceTypes, "device-type"),
+                                                                                                                  FF_ARG(batteryNum, "battery-percentage"),
+                                                                                                                  FF_ARG(batteryBar, "battery-percentage-bar"),
+                                                                                                                  FF_ARG(signalNum, "signal-quality"),
+                                                                                                                  FF_ARG(signalBar, "signal-quality-bar"),
                                                                                                                   FF_ARG(device->connected, "connected"),
-                                                                                                                  FF_ARG(percentageBar, "battery-percentage-bar"),
                                                                                                               }));
     }
 }
@@ -128,7 +152,21 @@ bool ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
         yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
         yyjson_mut_obj_add_uint(doc, obj, "battery", item->battery);
         yyjson_mut_obj_add_bool(doc, obj, "connected", item->connected);
+
+        yyjson_mut_val* deviceTypes = yyjson_mut_obj_add_arr(doc, obj, "deviceType");
+        if (item->deviceType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT) {
+            yyjson_mut_arr_add_str(doc, deviceTypes, "Classic");
+        }
+        if (item->deviceType & FF_BLUETOOTH_DEVICE_TYPE_LE_BIT) {
+            yyjson_mut_arr_add_str(doc, deviceTypes, "Low Energy");
+        }
+
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        if (item->signalQuality != -DBL_MAX) {
+            yyjson_mut_obj_add_real(doc, obj, "signalQuality", item->signalQuality);
+        } else {
+            yyjson_mut_obj_add_null(doc, obj, "signalQuality");
+        }
         yyjson_mut_obj_add_strbuf(doc, obj, "type", &item->type);
     }
 
@@ -185,9 +223,12 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         { "Name", "name" },
         { "Address", "address" },
         { "Type", "type" },
+        { "Bluetooth stacks the device answers on", "device-type" },
         { "Battery percentage number", "battery-percentage" },
-        { "Is connected", "connected" },
         { "Battery percentage bar", "battery-percentage-bar" },
+        { "Signal quality number", "signal-quality" },
+        { "Signal quality bar", "signal-quality-bar" },
+        { "Is connected", "connected" },
     })),
     .defaultOrder = 59,
 };

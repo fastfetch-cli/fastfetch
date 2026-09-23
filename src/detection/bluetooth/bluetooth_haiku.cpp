@@ -21,7 +21,9 @@ const char* ffDetectBluetooth([[maybe_unused]] FFBluetoothOptions* options, FFli
     ffStrbufInitS(&device->name, dev->GetFriendlyName());
     ffStrbufInitS(&device->address, bdaddrUtils::ToString(dev->GetBluetoothAddress()).String());
     ffStrbufInitS(&device->type, devClass.String());
+    device->deviceType = FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT; // The local adapter's device class is a BR/EDR concept
     device->battery = 0;
+    device->signalQuality = -DBL_MAX;
     device->connected = true;
 
     // TODO: more devices?

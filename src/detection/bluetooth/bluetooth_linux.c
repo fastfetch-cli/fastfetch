@@ -1,4 +1,5 @@
 #include "bluetooth.h"
+#include "common/percent.h"
 #include "common/strutil.h"
 
 #ifdef FF_HAVE_DBUS
@@ -28,6 +29,10 @@ array [                                                     //root
                  dict entry(                                //value
                     string "Connected"
                     variant boolean true
+                 )
+                 dict entry(                                //value
+                    string "RSSI"
+                    variant int16 -63
                  )
               ]
            )
@@ -68,6 +73,12 @@ static bool detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         ffDBusGetString(dbus, &dictIter, &device->name);
     } else if (ffStrEquals(deviceProperty, "Icon")) {
         ffDBusGetString(dbus, &dictIter, &device->type);
+    } else if (ffStrEquals(deviceProperty, "Class")) {
+        // Class of Device is a BR/EDR concept; BlueZ only publishes it for devices seen over classic.
+        device->deviceType |= FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT;
+    } else if (ffStrEquals(deviceProperty, "Appearance")) {
+        // The GATT Appearance characteristic is LE-only, and BlueZ mirrors it here for LE devices.
+        device->deviceType |= FF_BLUETOOTH_DEVICE_TYPE_LE_BIT;
     } else if (ffStrEquals(deviceProperty, "Percentage")) {
         uint64_t percentage;
         if (ffDBusGetUint(dbus, &dictIter, &percentage)) {
@@ -75,6 +86,12 @@ static bool detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         }
     } else if (ffStrEquals(deviceProperty, "Connected")) {
         ffDBusGetBool(dbus, &dictIter, &device->connected);
+    } else if (ffStrEquals(deviceProperty, "RSSI")) {
+        // `int16` on the wire, in dBm. Only present while the device is connected.
+        int64_t rssi;
+        if (ffDBusGetInt(dbus, &dictIter, &rssi)) {
+            device->signalQuality = ffRssiToSignalQuality((int) rssi);
+        }
     } else if (ffStrEquals(deviceProperty, "Paired")) {
         bool paired = true;
         ffDBusGetBool(dbus, &dictIter, &paired);
@@ -155,7 +172,9 @@ static FFBluetoothResult* detectBluetoothObject(FFlist* devices, FFDBusData* dbu
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
     ffStrbufInit(&device->type);
+    device->deviceType = FF_BLUETOOTH_DEVICE_TYPE_NONE;
     device->battery = 0;
+    device->signalQuality = -DBL_MAX;
     device->connected = false;
 
     do {

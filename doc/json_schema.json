@@ -285,7 +285,7 @@
             "type": "string"
         },
         "bluetoothFormat": {
-            "description": "Output format for the `Bluetooth` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {battery-percentage}: Battery percentage number\n    5. {connected}: Is connected\n    6. {battery-percentage-bar}: Battery percentage bar",
+            "description": "Output format for the `Bluetooth` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {device-type}: Bluetooth stacks the device answers on\n    5. {battery-percentage}: Battery percentage number\n    6. {battery-percentage-bar}: Battery percentage bar\n    7. {signal-quality}: Signal quality number\n    8. {signal-quality-bar}: Signal quality bar\n    9. {connected}: Is connected",
             "type": "string"
         },
         "bluetoothradioFormat": {
@@ -4043,10 +4043,9 @@
                                         "const": "publicip"
                                     },
                                     "url": {
-                                        "description": "URL of the public IP detection server to use. Only HTTP is supported",
+                                        "description": "URL of the public IP detection server to use. Only HTTP is supported\nIf empty, `http://ipinfo.io/json` is requested (`http://v6.ipinfo.io/json` when `ipv6` is set), with HTTP compression and TCP Fast Open enabled. A non-empty URL disables both and makes `ipv6` have no effect",
                                         "type": "string",
-                                        "format": "url",
-                                        "default": "http://ipinfo.io/ip"
+                                        "format": "url"
                                     },
                                     "timeout": {
                                         "description": "Time in milliseconds to wait for the public IP server to respond\nSet to 0 to disable the timeout",

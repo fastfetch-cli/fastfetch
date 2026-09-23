@@ -9,6 +9,10 @@ Changes:
 * Load average detection on GNU/Hurd now uses `getloadavg()` instead of reading `/proc/loadavg`, sharing the Solaris implementation. (Loadavg, GNU/Hurd)
 
 Features:
+* Added Bluetooth Low Energy detection on Windows and macOS, through WinRT and Core Bluetooth. (Bluetooth, Windows / macOS)
+* Added `{device-type}`, `{signal-quality}` and `{signal-quality-bar}` to the `Bluetooth` module, and `deviceType` and `signalQuality` to its JSON output. (Bluetooth)
+    * `deviceType` names the stacks a device answers on, `Classic` and/or `Low Energy`, and `signalQuality` is the signal strength of the LE link, converted from dBm on the same scale the `Wifi` module uses.
+    * Linux fills both from the BlueZ `Class`, `Appearance` and `RSSI` properties, and macOS from Core Bluetooth. The remaining platforms report `Classic` and no signal quality, which is what their backends can tell.
 * Added Bluetooth Core 6.0, 6.1, 6.2 and 6.3 to the `BluetoothRadio` version table, so an adapter reporting LMP version 14, 15, 16 or 17 now prints its version instead of the vendor name alone. (BluetoothRadio)
 * Added rum overlay package counting on RakuOS, exposed as `{rum}`. (Packages, Linux)
 * Improved image logo support

@@ -15,7 +15,9 @@ static int enumDev([[maybe_unused]] int sockfd, struct bt_devinfo const* dev, FF
     ffStrbufInitS(&device->address, bt_ntoa(&dev->bdaddr, nullptr));
     ffStrbufUpperCase(&device->address);
     ffStrbufInit(&device->type);
+    device->deviceType = FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT; // Netgraph only carries the BR/EDR stack
     device->battery = 0;
+    device->signalQuality = -DBL_MAX;
     device->connected = true;
     return 0;
 }
