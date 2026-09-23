@@ -59,6 +59,7 @@ sixel_output_new(
         sixel_helper_set_additional_message(
             "sixel_output_new: sixel_allocator_malloc() failed.");
         status = SIXEL_BAD_ALLOCATION;
+        sixel_allocator_unref(allocator);
         goto end;
     }
 
