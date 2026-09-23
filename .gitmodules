@@ -1,0 +1,4 @@
+[submodule "doc/wiki"]
+	path = doc/wiki
+	url = ../fastfetch.wiki.git
+	branch = master
