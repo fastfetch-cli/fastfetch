@@ -1005,7 +1005,7 @@ elseif(APPLE)
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_apple.c
+        src/detection/gamepad/gamepad_apple.m
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/mouse/mouse_apple.c
@@ -1915,6 +1915,7 @@ elseif(APPLE)
         PRIVATE "-framework ImageIO"
         PRIVATE "-framework Accelerate"
         PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework GameController"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
         PRIVATE "-framework Metal"

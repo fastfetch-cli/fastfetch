@@ -83,6 +83,12 @@ Features:
     * This change improves the responsiveness while maintaining reasonably accurate measurements.
 * Added battery level detection for the DualSense, the DualSense Edge and the Access Controller, and for the Nintendo Switch Joy-Con, to the `gamepad` module on Windows. (Gamepad, Windows)
     * The module also names the Sony Access Controller and the Nintendo Switch 2 controllers, which it previously left to Windows' own naming.
+* Added battery level detection for the controllers the GameController framework knows, in the `gamepad` module on macOS. (Gamepad, macOS)
+    * The framework is the only source of a battery level on macOS, so a controller on Apple's allow list -- the official Sony, Microsoft and Nintendo ones, plus MFi pads -- now reports a percentage where it previously reported none. A controller outside that list is still listed from IOKit as before, with no battery, so nothing is lost.
+    * Those controllers are also named the way the system names them now, taken from the framework instead of from the HID strings. A Switch Pro Controller, for example, is reported as `Switch Pro Controller` rather than `Pro Controller`. The name of a controller the framework does not claim is unchanged. Because `ignores` matches on a name prefix, a config that hides controllers by manufacturer name may need to be adjusted.
+    * The serial number is unchanged: the framework has no serial of its own, so it is borrowed from the IOKit entry for the same controller.
+    * Needs macOS 11.0, the release that introduced `GCDeviceBattery`.
+    * `[GCController controllers]` is filled by a system daemon, and only while the run loop is pumped, so the module pumps it for at most 50 ms -- but only after confirming that the framework claims a connected controller. The wait is therefore not paid on a machine with no controller, or with one Apple does not claim.
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)
