@@ -28,7 +28,8 @@ Features:
     * Battery level and charging state are now available to apps; detailed battery information requires root or ADB. (Battery)
     * Added display mode, physical size, rotation, and HDR information. App-based detection requires Android 13 (API 33); root or ADB can also detect displays on older versions. (Display)
     * Added Wi-Fi interface, connection, standard, and security information. Android 11 (API 30) or later is required. Termux:API and location permission are needed to reveal SSID and BSSID; otherwise, they appear as `<redacted>`. (Wifi)
-    * Added Wallpaper detection on Android, which effectively reports `/data/system/users/0/wallpaper`. (Wallpaper)
+    * Added Wallpaper detection, which effectively reports `/data/system/users/0/wallpaper`. (Wallpaper)
+    * Added Media detection, root/ADB only. (Media / Player)
 * Improved macOS support:
     * Improved process-name detection in Top. (Top)
     * Improved wallpaper detection on macOS Sonoma and later. (#2559, Wallpaper)
