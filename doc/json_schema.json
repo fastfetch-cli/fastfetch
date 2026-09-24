@@ -937,6 +937,17 @@
                     "type": "boolean",
                     "description": "Whether to detect and display component versions. Mainly for benchmarking",
                     "default": true
+                },
+                "preload": {
+                    "description": "Scripts to run while the config is read, before any module runs",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "lua": {
+                            "type": "string",
+                            "description": "Lua script to run once, as soon as the config is read, for example `dofile('/path/to/helpers.lua')`"
+                        }
+                    }
                 }
             }
         },

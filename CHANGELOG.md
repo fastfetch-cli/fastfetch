@@ -93,6 +93,11 @@ Features:
     * The serial number is unchanged: the framework has no serial of its own, so it is borrowed from the IOKit entry for the same controller.
     * Needs macOS 11.0, the release that introduced `GCDeviceBattery`.
     * `[GCController controllers]` is filled by a system daemon, and only while the run loop is pumped, so the module pumps it for at most 50 ms -- but only after confirming that the framework claims a connected controller. The wait is therefore not paid on a machine with no controller, or with one Apple does not claim.
+* Added the `general.preload.lua` option, which runs a Lua script as the config is read, so a file of helpers can be shared by several modules instead of being repeated in every one. (General)
+    * It runs before any module does, so a script that raises is reported as a config error and stops the run, instead of being printed as the failure of whichever module happened to come first.
+    * A config that sets it therefore starts the Lua interpreter even when no `lua:` format string is used.
+    * The script loads its own helpers with `dofile` or `loadfile`. `require` is not available, and neither is the rest of Lua's `package` library, so a config file still cannot load a `.so` / `.dll`.
+    * A build without Lua support rejects the option instead of accepting it and doing nothing.
 
 Bugfixes:
 * Fixed Base64 encoding producing incorrect output for some inputs. (General)
