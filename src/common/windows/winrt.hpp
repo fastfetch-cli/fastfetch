@@ -23,10 +23,19 @@ extern "C" {
 using winrt::impl::abi_t;
 
 // Frees an HSTRING and clears the pointer, so it can be used with [[gnu::cleanup]].
-void ffDeleteHstring(HSTRING* value);
+static inline void ffDeleteHstring(HSTRING* value) {
+    if (*value) {
+        WindowsDeleteString(*value);
+        *value = nullptr;
+    }
+}
 
 // Copies an HSTRING into an FFstrbuf, transcoding from UTF-16 to UTF-8.
-void ffStrbufSetHstring(FFstrbuf* destination, HSTRING value);
+static inline void ffStrbufSetHstring(FFstrbuf* destination, HSTRING value) {
+    uint32_t length = 0;
+    const wchar_t* raw = WindowsGetStringRawBuffer(value, &length);
+    ffStrbufSetNWS(destination, length, raw);
+}
 
 // Wraps `items` in an IVector<hstring> and hands out its IIterable<hstring> view, which is the
 // parameter shape the FindAllAsync overloads taking additional properties expect. The caller owns
