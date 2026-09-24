@@ -1905,29 +1905,37 @@ if(LINUX)
     endif()
 elseif(APPLE)
     target_link_libraries(libfastfetch
-        PRIVATE "-framework AVFoundation"
+        # reachable from the default structure
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
-        PRIVATE "-framework CoreAudio"
-        PRIVATE "-framework CoreBluetooth"
-        PRIVATE "-framework CoreMedia"
-        PRIVATE "-framework CoreVideo"
-        PRIVATE "-framework ImageIO"
-        PRIVATE "-framework Accelerate"
-        PRIVATE "-framework CoreWLAN"
-        PRIVATE "-framework GameController"
-        PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
         PRIVATE "-framework Metal"
-        PRIVATE "-framework OpenGL"
-        PRIVATE "-framework OpenCL"
-        PRIVATE "-framework SystemConfiguration"
-        PRIVATE "-framework VideoToolbox"
-        PRIVATE "-weak_framework CoreDisplay"
 
+        # referenced as ObjC classes, so they cannot be lazy loaded
+        PRIVATE "-framework AVFoundation" # Camera
+        PRIVATE "-framework CoreBluetooth" # Bluetooth
+        PRIVATE "-framework IOBluetooth" # Bluetooth, BluetoothRadio
+        PRIVATE "-framework CoreWLAN" # Wifi
+        PRIVATE "-framework GameController" # Gamepad
+
+        # only reachable from non-default modules, and referenced as plain C
+        PRIVATE "-Wl,-lazy_framework,CoreAudio" # Sound
+        PRIVATE "-Wl,-lazy_framework,CoreMedia" # Camera
+        PRIVATE "-Wl,-lazy_framework,CoreVideo" # Display, fallback for older macOS versions
+        PRIVATE "-Wl,-lazy_framework,OpenGL" # OpenGL
+        PRIVATE "-Wl,-lazy_framework,OpenCL" # OpenCL
+        PRIVATE "-Wl,-lazy_framework,SystemConfiguration" # DNS
+        PRIVATE "-Wl,-lazy_framework,VideoToolbox" # Codec
+        PRIVATE "-Wl,-lazy_framework,ImageIO" # image logos
+        PRIVATE "-Wl,-lazy_framework,Accelerate" # image logos
+
+        # private frameworks, and only reachable from non-default modules.
+        # `-weak_framework` already keeps a missing framework from aborting the
+        # launch, which lazy loading on its own would not do.
+        PRIVATE "-weak_framework CoreDisplay" # Brightness
         PRIVATE "-F /System/Library/PrivateFrameworks"
-        PRIVATE "-weak_framework DisplayServices"
-        PRIVATE "-weak_framework MediaRemote"
+        PRIVATE "-weak_framework DisplayServices" # Brightness
+        PRIVATE "-weak_framework MediaRemote" # Media
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
