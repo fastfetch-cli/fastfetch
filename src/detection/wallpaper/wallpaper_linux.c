@@ -72,7 +72,16 @@ static const char* detectCosmicComp(FFstrbuf* result) {
     return nullptr;
 }
 
-const char* ffDetectWallpaper(FFstrbuf* result) {
+// Android compiles this file next to wallpaper_android.c, which owns ffDetectWallpaper and calls
+// this one only while the display server is not SurfaceFlinger -- so the entry point has to step
+// aside there. Same arrangement as terminalfont_linux.c and terminalfont_android.c.
+const char*
+#ifdef __ANDROID__
+ffDetectWallpaperLinux
+#else
+ffDetectWallpaper
+#endif
+    (FFstrbuf* result) {
     const FFDisplayServerResult* wm = ffConnectDisplayServer();
     if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_COSMIC_COMP)) {
         return detectCosmicComp(result);

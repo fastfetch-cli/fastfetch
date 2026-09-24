@@ -120,7 +120,7 @@ static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t prope
 
     uint8_t replyBuffer[128];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    const char* error = ffBinderTransact(binder, handle, transaction, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, transaction, 0, &parcel, &reply);
     if (error != nullptr) {
         FF_DEBUG("Property %u could not be transacted: %s", property, error);
         return error;

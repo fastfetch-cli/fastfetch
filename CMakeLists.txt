@@ -638,6 +638,7 @@ elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/android/binder.c
         src/common/android/dex.c
+        src/common/android/package.c
         src/common/impl/dbus.c
         src/common/impl/io_unix.c
         src/common/impl/netif_linux.c
@@ -712,6 +713,7 @@ elseif(ANDROID)
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_android.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_android.c
         src/detection/wm/wm_linux.c

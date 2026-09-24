@@ -47,11 +47,12 @@ void ffBinderClose(FFBinder* binder) {
     binder->sharedSize = 0;
 }
 
-const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, const FFBinderParcel* parcel, FFBinderReply* reply) {
+const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, uint32_t flags, const FFBinderParcel* parcel, FFBinderReply* reply) {
     reply->size = 0;
     reply->code = 0;
     reply->flags = 0;
     reply->handleCount = 0;
+    reply->fdCount = 0;
 
     if (parcel->truncated) {
         return "Binder parcel does not fit the caller buffer";
@@ -62,7 +63,7 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, c
         .target = { .handle = handle },
         .cookie = 0,
         .code = code,
-        .flags = 0, // a synchronous call; TF_ONE_WAY is the only flag the kernel acts on here
+        .flags = flags,
         .sender_pid = 0,
         .sender_euid = 0,
         .data_size = parcel->size,
@@ -146,8 +147,10 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, c
                     }
                 }
 
-                // Walk the offset table for the flat objects the service sent us and keep the
-                // strong handles: those are the ones a later transaction can address.
+                // Walk the offset table for the flat objects the service sent us. A reply may carry
+                // both kinds at once and they are not interchangeable: a handle is a reference that
+                // has to be acquired (see below) to outlive the reply buffer, while a file
+                // descriptor was installed in our own fd table by the kernel and is simply ours.
                 for (size_t offset = 0; offset + sizeof(binder_size_t) <= offsetsSize; offset += sizeof(binder_size_t)) {
                     binder_size_t objectOffset = 0;
                     memcpy(&objectOffset, offsets + offset, sizeof(objectOffset));
@@ -156,11 +159,17 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, c
                     }
                     struct flat_binder_object object;
                     memcpy(&object, payload + objectOffset, sizeof(object));
-                    if (object.hdr.type != BINDER_TYPE_HANDLE) {
-                        continue;
-                    }
-                    if (reply->handleCount < FF_BINDER_MAX_HANDLES) {
-                        reply->handles[reply->handleCount++] = object.handle;
+                    if (object.hdr.type == BINDER_TYPE_HANDLE) {
+                        if (reply->handleCount < FF_BINDER_MAX_HANDLES) {
+                            reply->handles[reply->handleCount++] = object.handle;
+                        }
+                    } else if (object.hdr.type == BINDER_TYPE_FD) {
+                        if (reply->fdCount < FF_BINDER_MAX_FDS) {
+                            reply->fds[reply->fdCount++] = (int32_t) object.handle;
+                        } else {
+                            // Nothing is going to hold this one and nothing is going to close it.
+                            close((int) object.handle);
+                        }
                     }
                 }
 
@@ -224,7 +233,7 @@ const char* ffBinderLookupService(FFBinder* binder, const char* name, uint32_t t
 
     uint8_t replyBuffer[256];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    const char* error = ffBinderTransact(binder, FF_BINDER_SERVICE_MANAGER_HANDLE, transactionCode, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, FF_BINDER_SERVICE_MANAGER_HANDLE, transactionCode, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
