@@ -161,7 +161,11 @@ string(REGEX MATCHALL "FF_PACKAGES_FLAG_[A-Z]+_BIT" PACKAGE_MANAGERS "${PACKAGE_
 string(REGEX REPLACE "FF_PACKAGES_FLAG_([A-Z]+)_BIT" "\\1" PACKAGE_MANAGERS "${PACKAGE_MANAGERS}")
 list(SORT PACKAGE_MANAGERS)
 foreach(package_manager ${PACKAGE_MANAGERS})
+    if(package_manager STREQUAL "WINGET")
+        option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
+    else()
     option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" OFF)
+    endif()
 endforeach()
 option(PACKAGES_REMOVE_DISABLED "Remove disabled package managers from the build entirely, instead of just skipping them at runtime" OFF)
 

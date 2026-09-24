@@ -66,10 +66,11 @@ Features:
 * Improved COSMIC detection (DE / WM, Linux)
     * The version is now read from the `COSMIC_VERSION` environment variable when it is set.
 * Improved accuracy and performance of process name detection in the Top module. (Top, macOS)
-* Improved Packages detection on Windows (Packages, Windows)
-    * `winget` is now detected by default, instead of requiring a build-time opt-in, and the source agreements are accepted non-interactively on a machine that has never accepted them. Opt out by setting `packages.disabled` to `["winget"]`, or by configuring with `cmake -DPACKAGES_DISABLE_WINGET=ON`.
+* Improved `winget` Packages detection on Windows (Packages, Windows)
+    * The source agreements are accepted non-interactively on a machine that has never accepted them, so no user interaction is required for the first run.
     * The count reports the packages the `winget` source knows about, which is not limited to the packages `winget` itself installed. Microsoft Store apps are no longer counted.
     * `winget list` takes about 1.5 seconds, so its result is cached. The cache is refreshed when a program is installed or removed, not on a timer, so only the first run after such a change is slow.
+    * Note that `winget` is still disabled by default. It can be enabled by setting `packages.disabled` to an empty array or by configuring with `cmake -DPACKAGES_DISABLE_WINGET=OFF`.
 * Improved Wallpaper detection on macOS Sonoma and later (#2559, Wallpaper, macOS)
     * The image path is now also extracted from the `Configuration` field of the wallpaper plist, and the `NSWorkspace` fallback is used only as a last resort.
 * Removed the `kvm` dependency on OpenBSD by using `sysctl` directly. (General, OpenBSD)
