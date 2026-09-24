@@ -88,7 +88,7 @@
 //   fills its peer map (0 entries after two seconds, `retrievePairedPeersWithOptions:` answers nil),
 //   and `CBCentralManager.sharedPairingAgent.retrievePairedPeers` answers with 7 of the 11 devices
 //   as bare `CBPeripheral` objects carrying no address, no battery and no class of device.
-//   `.workbuddy-ai/probes/ble/cb_only_probe.m` is the probe; the numbers are in `bug.md`.
+//   `.workbuddy-ai/probes/ble/cb_only_probe.m` is the probe that measured this.
 //
 // * `CBPeripheral.state` is not the connection state the caller means. It answers `Disconnected` for
 //   every peripheral the retrieval above returns, and so does `isConnected`; only the private

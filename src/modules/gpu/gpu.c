@@ -13,7 +13,7 @@
 
 // `hideType` is a filter, and FF_GPU_TYPE_NONE means "hide nothing" -- no detected GPU ever has
 // that type. Both the text and the JSON path must apply it, or the two disagree about which GPUs
-// exist (see bug.md B29).
+// exist.
 static bool gpuIsHidden(const FFGPUOptions* options, const FFGPUResult* gpu) {
     return options->hideType != FF_GPU_TYPE_NONE && gpu->type == options->hideType;
 }
