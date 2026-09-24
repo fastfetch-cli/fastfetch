@@ -147,11 +147,26 @@ static inline bool formatArgSet(const FFformatarg* arg) {
 static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
     const char* err = lua_tolstring(L, -1, nullptr);
     if (err) {
-        const char* tmp = strchr(err, ':');
-        if (tmp) {
-            err = tmp + 1;
-            while (*err == ' ') {
-                ++err;
+        // Drop the position Lua puts in front of an error and keep the message only. Both places
+        // that build one -- `luaG_addinfo` and `luaL_where` -- format it as `%s:%d: %s`, so a
+        // position is a colon, a line number, a colon and a space:
+        //   general.preload.lua:1: <name> expected near '='   -> <name> expected near '='
+        //   [string ""]:1: x                                  -> x
+        // Not every error has one, and cutting at the first colon mangled those. `luaL_loadfilex`
+        // reports `cannot open <path>: <strerror>`, where that colon is the one after the path, so
+        // the path -- the only part naming the problem -- was dropped and `No such file or
+        // directory` was left on its own. A colon followed by a line number does not identify a
+        // position either, because a path can contain one: `cannot open /tmp/x:12:y/nope.lua: ...`
+        // has to survive whole. The trailing space is what separates the two, and a real position
+        // always has it.
+        for (const char* colon = strchr(err, ':'); colon; colon = strchr(colon + 1, ':')) {
+            const char* line = colon + 1;
+            while (*line >= '0' && *line <= '9') {
+                ++line;
+            }
+            if (line > colon + 1 && line[0] == ':' && line[1] == ' ') {
+                err = line + 2;
+                break;
             }
         }
     }
