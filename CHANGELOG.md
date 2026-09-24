@@ -4,9 +4,12 @@ Changes:
 * ImageMagick is no longer used for image logos on Windows, macOS and Android, and has been replaced by the platform image frameworks (WIC on Windows, ImageIO on macOS, AImageDecoder on Android). (Logo)
     * An image logo needs Android 11 (API 30), the release that introduced the platform image decoder, and is reported as an error on Android 10 and older.
 * ImageMagick 6 support is deprecated. It is kept only for old Debian and Ubuntu releases that don't have ImageMagick 7 available, and is intended to be removed in a future release. Users are encouraged to upgrade to ImageMagick 7 when possible.
+* `quickjs` scripting for format strings is deprecated and now disabled by default. It's expected to be removed in the next release.
+    * It's introduced in 2.64.0 as an experimental feature. People relies on it should migrate their scripts to lua script instead.
+    * For now, it can be enabled by configuring with `cmake -DENABLE_QUICKJS=ON`.
+* `lua` scripting for format strings is now considered stable.
 * The `--logo-recache` option has been replaced by `--logo-cache <bool|regen>`, and the `logo.recache` JSON property has been renamed to `logo.cache`. (Logo)
     * `--logo-cache true` (the default) reuses a cached rendering when it is valid, and writes it back on a cache miss; `false` ignores the image logo cache completely, reading nothing from it and writing nothing to it; `regen` does what `--logo-recache true` used to do. `logo.cache` accepts a boolean, or the string `"regen"`.
-* Load average detection on GNU/Hurd now uses `getloadavg()` instead of reading `/proc/loadavg`, sharing the Solaris implementation. (Loadavg, GNU/Hurd)
 
 Features:
 * Added Bluetooth Low Energy detection on Windows and macOS, through WinRT and Core Bluetooth. (Bluetooth, Windows / macOS)
