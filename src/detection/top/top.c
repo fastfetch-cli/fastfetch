@@ -4,6 +4,7 @@
 
 static FFlist first;
 static double startTick;
+static FFTopTypes preparedTypes;
 
 void ffPrepareTopProcesses(FFTopTypes showTypes) {
     if ((showTypes & (FF_TOP_TYPE_CPU | FF_TOP_TYPE_DISK)) == 0) {
@@ -11,13 +12,26 @@ void ffPrepareTopProcesses(FFTopTypes showTypes) {
     }
 
     if (startTick != 0) {
-        return; // Already prepared
+        // Already prepared. The baseline above is one snapshot shared by every `top` module in the
+        // run, so a second module asking for a different set of counters would be measured against a
+        // snapshot that never collected them: its difference comes out as the process lifetime
+        // average rather than a rate, and the `newItem->... < oldItem->...` checks in
+        // `ffDetectTopProcesses` cannot tell, because the missing counters read as 0 there. This is
+        // a configuration fastfetch cannot serve, so it is refused rather than printed wrong.
+        if (showTypes != preparedTypes) {
+            fputs("Error: `top` modules with different `showTypes` cannot share a run\n", stderr);
+            fputs("       The baseline snapshot is collected once and reused, so it only holds the counters the first module asked for.\n", stderr);
+            fputs("       Give the modules the same `showTypes`, or run them in separate invocations.\n", stderr);
+            exit(1);
+        }
+        return;
     }
 
-    // `showTypes` cannot change between this call and `ffDetectTopProcesses`: `ffPrepareCommandOption`
-    // and `parseStructureCommand` both build the options through `initStructureModuleOptions`, which
-    // merges the module object from the JSON config. So the baseline always matches what the second
-    // snapshot collects and needs no re-validation.
+    // Within one module `showTypes` cannot change between this call and `ffDetectTopProcesses`:
+    // `ffPrepareCommandOption` and `parseStructureCommand` both build the options through
+    // `initStructureModuleOptions`, which merges the module object from the JSON config, so the
+    // baseline always matches what the second snapshot collects.
+    preparedTypes = showTypes;
     ffListInit(&first);
     startTick = ffTimeGetTick();
     ffTopGetProcessSnapshot(&first, showTypes);

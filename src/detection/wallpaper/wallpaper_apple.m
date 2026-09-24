@@ -1,6 +1,5 @@
 #include "wallpaper.h"
 #include "common/settings.h"
-#include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
@@ -8,7 +7,9 @@
 const char* detectFromPlist(FFstrbuf* result) {
     // For Sonoma and later (macOS 14.0+)
     // https://github.com/JohnCoates/Aerial/issues/1332
-    NSError* error;
+    // Initialised because the check below reads it: the method is documented to assign it, but an
+    // uninitialised read decides between two sources of the wallpaper, so it is not worth relying on.
+    NSError* error = nil;
     NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Application Support/com.apple.wallpaper/Store/Index.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                                              error:&error];

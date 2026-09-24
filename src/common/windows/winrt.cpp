@@ -230,7 +230,15 @@ std::int32_t STDMETHODCALLTYPE FFWinrtHstringIterator::GetMany(std::uint32_t cap
     HSTRING* hstrings = reinterpret_cast<HSTRING*>(values);
 
     for (std::uint32_t i = 0; i < taken; ++i) {
-        WindowsDuplicateString(*(HSTRING*) ffListGet(&owner->strings, sizeof(HSTRING), index + i), &hstrings[i]);
+        HRESULT hr = WindowsDuplicateString(*(HSTRING*) ffListGet(&owner->strings, sizeof(HSTRING), index + i), &hstrings[i]);
+        if (FAILED(hr)) {
+            // Whatever was handed out already belongs to the caller, so a half filled array has to
+            // be taken back before the error goes out: the caller has no way to free a partial one.
+            for (std::uint32_t j = 0; j < i; ++j) {
+                WindowsDeleteString(hstrings[j]);
+            }
+            return hr;
+        }
     }
 
     index += taken;
@@ -259,6 +267,9 @@ HRESULT ffWinrtCreateHstringIterable(const wchar_t* const* items, uint32_t count
 
     for (uint32_t i = 0; i < count; ++i) {
         HSTRING* slot = (HSTRING*) ffListAdd(&iterable->strings, sizeof(HSTRING));
+        // ffListAdd does not zero the slot it hands out, and Release() walks every one of them, so
+        // the slot has to hold a usable HSTRING before WindowsCreateString gets a chance to fail.
+        *slot = nullptr;
         HRESULT hr = WindowsCreateString(items[i], (UINT32) ::wcslen(items[i]), slot);
         if (FAILED(hr)) {
             iterable->Release();

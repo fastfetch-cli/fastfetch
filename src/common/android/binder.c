@@ -197,7 +197,13 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, c
                     .read_consumed = 0,
                     .read_buffer = 0,
                 };
-                ioctl(binder->fd, BINDER_WRITE_READ, &release);
+                // This one ioctl carries the whole tail, so its failure is not cosmetic: without
+                // BC_ACQUIRE the handles handed to the caller are only weakly referenced and every
+                // later transaction on them fails with BR_FAILED_REPLY, which says nothing about the
+                // real cause. Reported, but only when nothing more specific is already at hand.
+                if (ioctl(binder->fd, BINDER_WRITE_READ, &release) != 0 && error == nullptr) {
+                    error = "Releasing the binder reply failed";
+                }
 
                 return error;
             }
@@ -234,4 +240,38 @@ const char* ffBinderLookupService(FFBinder* binder, const char* name, uint32_t t
 
     *handle = reply.handles[0];
     return nullptr;
+}
+
+void ffBinderServiceHandleRelease(FFBinderServiceHandle* service) {
+    if (service->binder == nullptr || service->handle == 0) {
+        return;
+    }
+
+    // The mirror of the acquire at the end of ffBinderTransact(): one strong and one weak reference
+    // each, dropped in the same order they were taken. The kernel keeps the service node alive until
+    // the last one goes, so this is what stops a short-lived fastfetch from holding one for the whole
+    // of its life.
+    const uint32_t commands[] = { BC_RELEASE, BC_DECREFS };
+    uint8_t tail[2 * 2 * sizeof(uint32_t)];
+    size_t tailSize = 0;
+    for (size_t i = 0; i < 2; i++) {
+        memcpy(tail + tailSize, &commands[i], sizeof(uint32_t));
+        tailSize += sizeof(uint32_t);
+        memcpy(tail + tailSize, &service->handle, sizeof(uint32_t));
+        tailSize += sizeof(uint32_t);
+    }
+
+    struct binder_write_read release = {
+        .write_size = tailSize,
+        .write_consumed = 0,
+        .write_buffer = (binder_uintptr_t) (uintptr_t) tail,
+        .read_size = 0,
+        .read_consumed = 0,
+        .read_buffer = 0,
+    };
+    // Not reported: this runs from a cleanup attribute, where there is no caller left to report to,
+    // and the only way for it to fail is a binder that is already dead -- which every earlier call on
+    // the same binder would have said already.
+    ioctl(service->binder->fd, BINDER_WRITE_READ, &release);
+    service->handle = 0;
 }

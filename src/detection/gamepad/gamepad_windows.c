@@ -105,7 +105,14 @@ static bool readHidReport(HANDLE hHidFile, uint8_t* buffer, uint32_t length, DWO
         *nBytes = read;
         return true;
     }
-    CancelIo(hHidFile);
+
+    // A timeout leaves the read pending, and the driver writes into `buffer` and `overlapped` when
+    // it eventually completes -- both of which are gone by then: the buffer belongs to the caller
+    // and the OVERLAPPED sits on this frame. So the read is cancelled by its own OVERLAPPED rather
+    // than by handle (CancelIo would take every other read on the same handle with it), and the
+    // cancellation is waited for before returning.
+    CancelIoEx(hHidFile, &overlapped);
+    GetOverlappedResult(hHidFile, &overlapped, &read, TRUE);
     return false;
 }
 
@@ -299,6 +306,13 @@ static FFGamepadBatteryKind detectBatteryKind(uint32_t vendorId, uint32_t produc
                     return FF_GAMEPAD_BATTERY_NONE;
             }
 
+        // The Nintendo list is deliberately shorter than the name table above. The Charging Grip
+        // (0x200E) is a rail that charges Joy-Con and has no battery of its own, and the SNES
+        // online controller (0x2017) and the Switch 2 controllers (0x2066-0x2069) are ones SDL --
+        // which is what this parsing follows -- reports no battery for: `SDL_hidapi_switch2.c` has
+        // no power reporting at all, and the SNES entry is commented out of `controller_list.h`.
+        // Reading the Switch state report from them would be a guess, so they keep the module's
+        // "unknown".
         case 0x057E: // Nintendo
             switch (productId) {
                 case 0x2006: // Joy-Con L

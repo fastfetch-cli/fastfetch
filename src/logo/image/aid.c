@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 static inline bool androidImageDecoderError(const char** error, const char* message) {
     if (error) {
@@ -206,6 +207,7 @@ bool ffImageCreateAID(FFLogoRequestData* requestData, FFImageBuffer* out, const 
 
 typedef struct FFAndroidAnimation {
     AImageDecoder* decoder;
+    int fd; // the source the decoder keeps reading from while frames are decoded
     uint8_t* canvas; // the decoder's buffer; every frame is blended into what is already in it
     size_t stride;
     size_t size;
@@ -272,6 +274,9 @@ FF_ANDROID_REQUIRES_API(31) static void androidAnimationDestroy(FFImageAnimation
     }
 
     AImageDecoder_delete(session->decoder);
+    // The decoder reads from the source, so the fd has to outlive every decode, which is why the
+    // session holds it rather than the function that opened it.
+    close(session->fd);
     free(session->canvas);
     free(session->delaysCs);
     free(session);
@@ -388,6 +393,13 @@ bool ffImageAnimationOpenAID(FFLogoRequestData* requestData, FFImageAnimation** 
             AImageDecoder_delete(decoder);
             return androidImageDecoderError(error, "out of memory");
         }
+
+        // Frames are decoded after this function returns, and the decoder reads from the source every
+        // time it does. The fd therefore has to outlive the function: it is handed to the session,
+        // which closes it in androidAnimationDestroy. Clearing the local is what keeps the cleanup
+        // attribute from closing it here -- every path above this line still relies on that attribute.
+        session->fd = fd;
+        fd = -1;
 
         *out = animation;
         return true;

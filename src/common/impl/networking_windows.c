@@ -298,7 +298,10 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 return "Response too large";
             }
             FF_DEBUG("Receive buffer is full, extending it");
-            ffStrbufEnsureFreeNoCheck(buffer, buffer->allocated);
+            // Asking for exactly the room that is left under the cap, rather than for as much as
+            // the buffer holds again: the allocation is rounded up to a power of two, so a doubling
+            // from a size that is not one of those lands past the cap the check above just cleared.
+            ffStrbufEnsureFreeNoCheck(buffer, FF_NETWORKING_MAX_RESPONSE_SIZE - buffer->length - 1);
         }
 
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
@@ -413,7 +416,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "No HTTP header end found";
     }
 
-    if (chunked && !ffNetworkingDecodeChunked(buffer, headerEnd)) {
+    if (chunked && !ffNetworkingDecodeChunked(buffer, &headerEnd)) {
         return "Failed to decode chunked response";
     }
 
@@ -425,7 +428,10 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         contentLength,
         buffer->length);
 
-    if (contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
+    // A chunked response was framed by its last-chunk and has been rewritten around it, so any
+    // `Content-Length` the server also sent describes a body that no longer exists. RFC 9112 6.3
+    // says not to send both; when one does, the chunked framing is the one that was acted on.
+    if (!chunked && contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
         FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
         return "Content length mismatch";
     }

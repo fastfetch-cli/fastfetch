@@ -149,7 +149,10 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
-        #if !FF_MODULE_DISABLE_CPUUSAGE
+        // Both `cpuusage` and `command` start with a c, and they are disabled by separate options,
+        // so the block has to survive either one being off -- otherwise a build with only the other
+        // one enabled would never prepare this module (see the same guard in `commandoption.c`).
+        #if !FF_MODULE_DISABLE_CPUUSAGE || !FF_MODULE_DISABLE_COMMAND
         case 'c':
         case 'C': {
             if (ffStrEqualsIgnCase(type, ffCPUUsageModuleInfo.name)) {
@@ -292,6 +295,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
         }
 
         yyjson_val* module = item;
+        bool gatedOnSucceeded = false;
         const char* type = yyjson_get_str(module);
         if (type) {
             module = nullptr;
@@ -327,6 +331,8 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                     if (!unsafe_yyjson_is_bool(previousSucceeded)) {
                         return "Property 'succeeded' in 'condition' must be a boolean";
                     }
+                    gatedOnSucceeded = true;
+
                     if (prepare) {
                         // Whether this module is printed at all depends on the result of the previous
                         // one, which is only known in the print pass. Preparing it here would leave a
@@ -337,6 +343,26 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                         // to be printed after all.
                         continue;
                     }
+
+                    #if !FF_MODULE_DISABLE_COMMAND
+                    // A `command` module that runs in parallel is exactly the pairing above, so this
+                    // combination cannot be left to the print pass: the module would be handed the
+                    // result prepared for the next `command` module and print that instead of its
+                    // own output. Refused here rather than in the prepare pass, because returning
+                    // from there would leave every later module unprepared -- which the print pass
+                    // would then report as a failure of theirs.
+                    // `parallel` is on by default, so leaving the key out is the parallel case too.
+                    if (gatedOnSucceeded && ffStrEqualsIgnCase(yyjson_get_str(yyjson_obj_get(module, "type")), ffCommandModuleInfo.name)) {
+                        yyjson_val* parallel = yyjson_obj_get(module, "parallel");
+                        if (parallel == nullptr || yyjson_get_bool(parallel)) {
+                            return "Module \"command\" cannot be combined with \"condition.succeeded\" while it runs in "
+                                   "parallel: whether it is printed is only known in the print pass, so it cannot be "
+                                   "prepared, and the prepared results are matched to modules by position. Set "
+                                   "\"parallel\": false on it, or drop the condition.";
+                        }
+                    }
+                    #endif
+
                     if (succeeded != unsafe_yyjson_get_bool(previousSucceeded)) {
                         continue;
                     }

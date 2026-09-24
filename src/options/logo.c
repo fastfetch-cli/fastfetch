@@ -396,6 +396,10 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 return "Property 'logo.cache' must be a boolean or the string \"regen\"";
             }
             continue;
+        } else if (unsafe_yyjson_equals_str(key, "recache")) {
+            // Kept as a named rejection so the message points at the replacement, which the generic
+            // "Unknown logo key" below can not do.
+            return "Property 'logo.recache' has been replaced by 'logo.cache' with the value \"regen\"";
         } else if (unsafe_yyjson_equals_str(key, "position")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {

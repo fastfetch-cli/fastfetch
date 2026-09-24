@@ -325,7 +325,12 @@ int ffNetworkingChunkedComplete(const char* body, uint32_t bodyLen, uint32_t* co
 // Keeps the status line and every header except `dropHeader` and `Content-Length`,
 // then emits a `Content-Length` matching the (already decoded) body.
 // `body` may point into `buffer->chars`; it is copied before `buffer` is released.
-static void rebuildResponse(FFstrbuf* buffer, uint32_t headerEnd, const char* body, uint32_t bodyLen, const char* dropHeader) {
+//
+// Returns the offset of the `\r` that opens the terminating CRLF CRLF of the new response. The
+// rebuild drops a header line and rewrites another, so the header it produces is shorter than the
+// one that went in: the offset the caller held before is no longer the one that describes this
+// buffer, and handing it on would point into the middle of the body.
+static uint32_t rebuildResponse(FFstrbuf* buffer, uint32_t headerEnd, const char* body, uint32_t bodyLen, const char* dropHeader) {
     FF_STRBUF_AUTO_DESTROY newBuffer = ffStrbufCreateA(headerEnd + bodyLen + 64);
 
     uint32_t pos = 0;
@@ -349,18 +354,24 @@ static void rebuildResponse(FFstrbuf* buffer, uint32_t headerEnd, const char* bo
 
     ffStrbufDestroy(buffer);
     ffStrbufInitMove(buffer, &newBuffer);
+
+    // The terminating CRLF CRLF is the four bytes in front of the body
+    return buffer->length - bodyLen - 4;
 }
 
-bool ffNetworkingDecodeChunked(FFstrbuf* buffer, uint32_t headerEnd) {
+bool ffNetworkingDecodeChunked(FFstrbuf* buffer, uint32_t* headerEnd) {
     assert(buffer->allocated > 0);
 
+    // Held in a local because the rebuild below hands a different value back
+    const uint32_t headerLength = *headerEnd;
+
     // The header block is terminated by CR LF CR LF
-    if (headerEnd + 4 > buffer->length) {
+    if (headerLength + 4 > buffer->length) {
         return false;
     }
 
-    char* body = buffer->chars + headerEnd + 4;
-    uint32_t bodyLen = buffer->length - headerEnd - 4;
+    char* body = buffer->chars + headerLength + 4;
+    uint32_t bodyLen = buffer->length - headerLength - 4;
 
     uint32_t consumed = 0;
     if (ffNetworkingChunkedComplete(body, bodyLen, &consumed) != 1) {
@@ -391,6 +402,6 @@ bool ffNetworkingDecodeChunked(FFstrbuf* buffer, uint32_t headerEnd) {
     }
 
     FF_DEBUG("Decoded chunked body: %u bytes encoded, %u bytes decoded", bodyLen, outLen);
-    rebuildResponse(buffer, headerEnd, out, outLen, "Transfer-Encoding:");
+    *headerEnd = rebuildResponse(buffer, headerLength, out, outLen, "Transfer-Encoding:");
     return true;
 }

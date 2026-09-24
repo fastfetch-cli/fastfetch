@@ -1309,6 +1309,9 @@ static bool printCachedKittyAnimation(FFLogoRequestData* requestData) {
     FFKittyAnimation animation = {};
     const char* error = "the cached animation is corrupt";
     if (!parseKittyAnimation(content.chars, content.length, &animation, &error)) {
+        // The parser allocates the frame table before it can still fail, so what it got to allocate
+        // belongs to the caller either way.
+        destroyKittyAnimation(&animation);
         return false;
     }
 
@@ -1317,7 +1320,7 @@ static bool printCachedKittyAnimation(FFLogoRequestData* requestData) {
 
     const FFOptionsLogo* options = &instance.config.logo;
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
     printImageResult(requestData, &result);
 
     destroyKittyAnimation(&animation);
@@ -1574,8 +1577,12 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
         }
     }
 
+    // The `- 1` matches printImagePixels and printImagePixelsNoCache, which print the image
+    // themselves: the cursor ends on the last row of the image rather than past it. A cached run and
+    // the run that filled the cache have to report the same height, or the logo shifts by one line
+    // between the first and every later run.
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
 
     if (options->position != FF_LOGO_POSITION_TOP) {
         // Go to upper left corner

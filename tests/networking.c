@@ -73,7 +73,8 @@ int main(void) {
         FFstrbuf response = ffStrbufCreateS("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nhello\r\n0\r\n\r\n");
         uint32_t headerEnd = (uint32_t) (strstr(response.chars, "\r\n\r\n") - response.chars);
 
-        VERIFY(ffNetworkingDecodeChunked(&response, headerEnd));
+        VERIFY(ffNetworkingDecodeChunked(&response, &headerEnd));
+        VERIFY(headerEnd == (uint32_t) (strstr(response.chars, "\r\n\r\n") - response.chars));
         VERIFY(ffStrbufContainS(&response, "Content-Length: 5"));
         VERIFY(!ffStrbufContainS(&response, "Transfer-Encoding"));
         VERIFY(ffStrbufEndsWithS(&response, "hello"));

@@ -80,6 +80,10 @@ static void applyWTProfile(yyjson_val* profile, uint8_t priority, FFTerminalFont
 // A fragment either defines a profile with "guid" or updates an existing one with "updates",
 // the latter being more important, so it is looked up first.
 // Note that "guid" and "updates" may be missing: yyjson_get_str() returns nullptr then.
+// `fromUpdates` may be null: it is only useful to a caller that ranks the two apart, which a
+// fragment does. settings.json does not -- an "updates" entry and a "guid" entry in profiles.list
+// both sit at the same point of the inheritance chain, and the two passes above are what pick the
+// right one between them.
 static yyjson_val* findWTProfileInArray(yyjson_val* profiles, const FFstrbuf* wtProfileId, bool* fromUpdates) {
     if (!yyjson_is_arr(profiles)) {
         return nullptr;
@@ -91,7 +95,9 @@ static yyjson_val* findWTProfileInArray(yyjson_val* profiles, const FFstrbuf* wt
         yyjson_arr_foreach (profiles, idx, max, profile) {
             const char* id = yyjson_get_str(yyjson_obj_get(profile, pass == 0 ? "updates" : "guid"));
             if (id && ffStrbufEqualS(wtProfileId, id)) {
-                *fromUpdates = pass == 0;
+                if (fromUpdates) {
+                    *fromUpdates = pass == 0;
+                }
                 return profile;
             }
         }
@@ -122,8 +128,7 @@ static const char* detectFromWTSettings(FFstrbuf* content, const FFstrbuf* wtPro
     }
 
     if (wtProfileId->length > 0) {
-        bool fromUpdates = false;
-        yyjson_val* profile = findWTProfileInArray(yyjson_obj_get(profiles, "list"), wtProfileId, &fromUpdates);
+        yyjson_val* profile = findWTProfileInArray(yyjson_obj_get(profiles, "list"), wtProfileId, nullptr);
         if (profile) {
             applyWTProfile(profile, WT_FONT_PRIORITY_PROFILE, result);
         }
@@ -167,25 +172,40 @@ static void detectWTProfileFromFragmentsIn(const FFstrbuf* fragmentDir, const FF
     const uint32_t baseLength = path.length;
 
     ffStrbufAppendC(&path, '*');
-    WIN32_FIND_DATAA entry;
-    FF_AUTO_CLOSE_DIR HANDLE hFind = FindFirstFileA(path.chars, &entry);
+    // The wide enumeration, because the directory above came from SHGetKnownFolderPath(): a profile
+    // whose name is not ASCII would otherwise hand FindFirstFileA a UTF-8 path that it reads as ANSI,
+    // and no fragment would be found at all.
+    wchar_t pathW[MAX_PATH];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(pathW, (ULONG) sizeof(pathW), nullptr, path.chars, (ULONG) path.length + 1))) {
+        return;
+    }
+
+    WIN32_FIND_DATAW entry;
+    FF_AUTO_CLOSE_DIR HANDLE hFind = FindFirstFileW(pathW, &entry);
     if (hFind == INVALID_HANDLE_VALUE) {
         return;
     }
 
     do {
-        if (!(entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || entry.cFileName[0] == '.') {
+        if (!(entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || entry.cFileName[0] == L'.') {
             continue;
         }
 
         ffStrbufSubstrBefore(&path, baseLength);
-        ffStrbufAppendS(&path, entry.cFileName);
+        ffStrbufAppendWS(&path, entry.cFileName);
         ffStrbufAppendC(&path, '\\');
         const uint32_t appLength = path.length;
 
         ffStrbufAppendS(&path, "*.json");
-        WIN32_FIND_DATAA fileEntry;
-        FF_AUTO_CLOSE_DIR HANDLE hFile = FindFirstFileA(path.chars, &fileEntry);
+        // The path changed, so the pattern has to be converted again. A name that cannot be converted
+        // is skipped rather than failing the whole scan: the next iteration rebuilds `path` from
+        // `baseLength` anyway.
+        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(pathW, (ULONG) sizeof(pathW), nullptr, path.chars, (ULONG) path.length + 1))) {
+            continue;
+        }
+
+        WIN32_FIND_DATAW fileEntry;
+        FF_AUTO_CLOSE_DIR HANDLE hFile = FindFirstFileW(pathW, &fileEntry);
         if (hFile != INVALID_HANDLE_VALUE) {
             do {
                 if (fileEntry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
@@ -193,13 +213,13 @@ static void detectWTProfileFromFragmentsIn(const FFstrbuf* fragmentDir, const FF
                 }
 
                 ffStrbufSubstrBefore(&path, appLength);
-                ffStrbufAppendS(&path, fileEntry.cFileName);
+                ffStrbufAppendWS(&path, fileEntry.cFileName);
                 applyWTFragmentFile(path.chars, wtProfileId, result);
-            } while (FindNextFileA(hFile, &fileEntry));
+            } while (FindNextFileW(hFile, &fileEntry));
         }
 
         ffStrbufSubstrBefore(&path, baseLength);
-    } while (FindNextFileA(hFind, &entry));
+    } while (FindNextFileW(hFind, &entry));
 }
 
 static void detectFromWTFragments(const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {

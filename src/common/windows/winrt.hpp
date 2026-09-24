@@ -99,6 +99,8 @@ static HRESULT ffWaitForAsyncOperation(TOperationAbi* operation, TResultAbi** re
 
 template <typename TResultProjection, typename TOperation>
 static HRESULT ffRunAndWait(TOperation&& operation, abi_t<TResultProjection>** result) {
+    *result = nullptr;
+
     FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::Foundation::IAsyncOperation<TResultProjection>>* opResult = nullptr;
     HRESULT hr = operation(reinterpret_cast<void**>(&opResult));
     if (FAILED(hr) || !opResult) {

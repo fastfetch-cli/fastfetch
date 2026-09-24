@@ -8,6 +8,20 @@
 
 #include <windows.h>
 
+// TODO: long paths on Windows.
+//
+// Every path that crosses into the wide API from this file is converted into a fixed
+// `wchar_t[MAX_PATH]` buffer, and `RtlUTF8ToUnicodeN` refuses to fill it for a path of MAX_PATH
+// characters or more (STATUS_BUFFER_TOO_SMALL) -- which makes each of those call sites a silent
+// failure above that length rather than an error anyone sees. Raising a buffer on its own does not
+// help: the wide APIs accept a longer path only either with a `\\?\` prefix on every absolute path
+// (which also switches off the normalization the rest of the code relies on) or with a
+// `longPathAware` manifest plus the LongPathsEnabled registry value.
+//
+// The plan is the second route: define MAX_PATH as 32768 program-wide, add the manifest flag, and
+// size these buffers from the UTF-8 input rather than from the constant. It has to be done in one
+// pass, which is why it is recorded here instead of being applied at the call sites the review
+// happened to look at.
 static bool createSubfolders(wchar_t* fileName) {
     HANDLE hRoot = ffGetPeb()->ProcessParameters->CurrentDirectory.Handle;
     bool closeRoot = false;
@@ -512,7 +526,7 @@ bool ffIsTerminal(int fd) {
 }
 
 bool ffRemoveFile(const char* fileName) {
-    wchar_t fileNameW[MAX_PATH];
+    wchar_t fileNameW[MAX_PATH]; // see the long path TODO at the top of this file
     ULONG len;
     if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG) strlen(fileName) + 1))) {
         return false;
@@ -524,7 +538,7 @@ bool ffRemoveFile(const char* fileName) {
 }
 
 uint64_t ffPathGetMtime(const char* path) {
-    wchar_t fileNameW[MAX_PATH];
+    wchar_t fileNameW[MAX_PATH]; // see the long path TODO at the top of this file
     ULONG len;
     if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, path, (ULONG) strlen(path) + 1))) {
         return 0;

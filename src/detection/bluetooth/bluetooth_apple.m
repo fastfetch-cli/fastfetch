@@ -271,6 +271,13 @@ static void setClassOfDevice(FFstrbuf* type, IOBluetoothDevice* ioDevice) {
 static FFBluetoothResult* findByName(FFlist* devices, const char* name) {
     FFBluetoothResult* found = nullptr;
     FF_LIST_FOR_EACH (FFBluetoothResult, device, *devices) {
+        // Only the classic half counts. The LE pass runs after the classic one and appends its
+        // entries to the same list, so the peripheral an earlier iteration of this very loop created
+        // would otherwise make its own name look ambiguous -- and the rule is there to keep one name
+        // from standing for two classic devices, not to count the LE copy of one of them.
+        if (!(device->deviceType & FF_BLUETOOTH_DEVICE_TYPE_CLASSIC_BIT)) {
+            continue;
+        }
         if (!ffStrEqualsIgnCase(device->name.chars, name)) {
             continue;
         }

@@ -132,12 +132,18 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data) {
     return ffReadFDData(fd, dataSize, data);
 }
 
+// `CreateFileA` reads the path in the ANSI code page, so a UTF-8 path holding anything outside ASCII
+// names a different file, or none at all. The wide API is the one that takes what UTF-8 decodes to,
+// and the conversion is done the same way ffPathExists() below does it.
 [[gnu::nonnull(1, 2)]] static inline bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer) {
-    FF_AUTO_CLOSE_FD FFNativeFD fd =
-#ifndef _WIN32
-        open(fileName, O_RDONLY | O_CLOEXEC);
+#ifdef _WIN32
+    wchar_t fileNameW[MAX_PATH];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), nullptr, fileName, (ULONG) strlen(fileName) + 1))) {
+        return false;
+    }
+    FF_AUTO_CLOSE_FD FFNativeFD fd = CreateFileW(fileNameW, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 #else
-        CreateFileA(fileName, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    FF_AUTO_CLOSE_FD FFNativeFD fd = open(fileName, O_RDONLY | O_CLOEXEC);
 #endif
 
     if (!ffIsValidNativeFD(fd)) {

@@ -894,8 +894,21 @@ static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* 
     return nullptr;
 }
 
+// `getOwnPackage` writes at most this many bytes, terminator included.
+#define FF_WIFI_ANDROID_PACKAGE_SIZE 128
+
+// The parcel for `getConnectionInfo` is the interface token, the package name and the -1 that
+// stands for a null `callingFeatureId`. A string16 costs 4 + 2 * (length + 1) bytes padded to four,
+// and the token puts three int32 in front of the descriptor. Deriving the size from the two names
+// rather than rounding it up is what keeps the longest package name `getOwnPackage` can produce
+// from marking the parcel truncated -- that fails the whole detection, rather than degrading to a
+// call without a name.
+#define FF_WIFI_ANDROID_PARCEL_SIZE \
+    (12 + ((4 + 2 * sizeof(FF_WIFI_ANDROID_DESCRIPTOR) + 3) & ~3u) \
+        + ((4 + 2 * FF_WIFI_ANDROID_PACKAGE_SIZE + 3) & ~3u) + 4)
+
 static const char* detectWithBinder(FFlist* result) {
-    char package[128];
+    char package[FF_WIFI_ANDROID_PACKAGE_SIZE];
     if (!getOwnPackage(package, sizeof(package))) {
         return "Cannot determine the package name of this process";
     }
@@ -913,15 +926,17 @@ static const char* detectWithBinder(FFlist* result) {
         return error;
     }
 
-    uint32_t handle = 0;
-    error = ffBinderLookupService(&binder, FF_WIFI_ANDROID_SERVICE, FF_BINDER_SM_GET_SERVICE, &handle);
+    // Released on every path out of this function, including the ones below that return early: the
+    // references the lookup takes are the process's only claim on the service node.
+    [[gnu::cleanup(ffBinderServiceHandleRelease)]] FFBinderServiceHandle service = { .binder = &binder };
+    error = ffBinderLookupService(&binder, FF_WIFI_ANDROID_SERVICE, FF_BINDER_SM_GET_SERVICE, &service.handle);
     if (error != nullptr) {
         return error;
     }
     FF_DEBUG("The \"%s\" service is handle %u, %s is transaction %d",
-        FF_WIFI_ANDROID_SERVICE, handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, transaction);
+        FF_WIFI_ANDROID_SERVICE, service.handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, transaction);
 
-    uint8_t parcelBuffer[256];
+    uint8_t parcelBuffer[FF_WIFI_ANDROID_PARCEL_SIZE];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
     ffBinderParcelPutInterfaceToken(&parcel, FF_WIFI_ANDROID_DESCRIPTOR);
     ffBinderParcelPutString16(&parcel, package);
@@ -930,7 +945,7 @@ static const char* detectWithBinder(FFlist* result) {
 
     uint8_t replyBuffer[FF_WIFI_ANDROID_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(&binder, handle, (uint32_t) transaction, &parcel, &reply);
+    error = ffBinderTransact(&binder, service.handle, (uint32_t) transaction, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -957,7 +972,7 @@ static const char* detectWithBinder(FFlist* result) {
         // that is up. WIFI_STATE_DISABLING is a radio that is still up, so only the one value means
         // down, and WIFI_STATE_UNKNOWN is the service declining to say.
         int32_t state = 0;
-        const char* stateError = callIntMethod(&binder, handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &state);
+        const char* stateError = callIntMethod(&binder, service.handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &state);
         if (stateError == nullptr && state != FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN) {
             connection.up = state != FF_WIFI_ANDROID_WIFI_STATE_DISABLED;
             connection.upKnown = true;

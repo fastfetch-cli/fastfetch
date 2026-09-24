@@ -172,23 +172,24 @@ static const char* parseBinder(FFlist* results) {
         return error;
     }
 
-    uint32_t handle = 0;
-    error = ffBinderLookupService(&binder, FF_BATTERY_ANDROID_SERVICE, FF_BINDER_SM_GET_SERVICE, &handle);
+    // Released on every path out of this function, including the ones below that return early.
+    [[gnu::cleanup(ffBinderServiceHandleRelease)]] FFBinderServiceHandle service = { .binder = &binder };
+    error = ffBinderLookupService(&binder, FF_BATTERY_ANDROID_SERVICE, FF_BINDER_SM_GET_SERVICE, &service.handle);
     if (error != nullptr) {
         FF_DEBUG("Looking up the \"%s\" service failed: %s", FF_BATTERY_ANDROID_SERVICE, error);
         return error;
     }
-    FF_DEBUG("The \"%s\" service is handle %u", FF_BATTERY_ANDROID_SERVICE, handle);
+    FF_DEBUG("The \"%s\" service is handle %u", FF_BATTERY_ANDROID_SERVICE, service.handle);
 
     uint64_t capacity = 0;
-    error = getProperty(&binder, handle, FF_BATTERY_ANDROID_PROPERTY_CAPACITY, &capacity);
+    error = getProperty(&binder, service.handle, FF_BATTERY_ANDROID_PROPERTY_CAPACITY, &capacity);
     if (error != nullptr) {
         FF_DEBUG("The capacity is what failed, so no battery is reported at all");
         return error;
     }
 
     uint64_t status = 0;
-    error = getProperty(&binder, handle, FF_BATTERY_ANDROID_PROPERTY_STATUS, &status);
+    error = getProperty(&binder, service.handle, FF_BATTERY_ANDROID_PROPERTY_STATUS, &status);
     if (error != nullptr) {
         FF_DEBUG("The status is what failed, so no battery is reported at all");
         return error;

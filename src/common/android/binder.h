@@ -222,3 +222,16 @@ typedef struct FFBinderReply {
 
 // Resolves a service name to a handle through the service manager. Returns nullptr on success.
 [[gnu::nonnull(1, 2, 4), nodiscard]] const char* ffBinderLookupService(FFBinder* binder, const char* name, uint32_t transactionCode, uint32_t* handle);
+
+// A handle resolved through the service manager, held together with the binder it came from so that a
+// single cleanup attribute can give it back on every path out of the function that took it. Zeroed --
+// or left at handle 0 by a lookup that has not run or did not succeed -- it is a no-op, which is what
+// makes it safe to declare above the lookup itself.
+typedef struct FFBinderServiceHandle {
+    FFBinder* binder;
+    uint32_t handle;
+} FFBinderServiceHandle;
+
+// Returns the strong and weak references ffBinderLookupService() acquired on the handle. Usable as a
+// cleanup attribute; safe on a zeroed or already released FFBinderServiceHandle.
+[[gnu::nonnull(1)]] void ffBinderServiceHandleRelease(FFBinderServiceHandle* service);
