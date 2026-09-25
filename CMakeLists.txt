@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12.0) # Don't change before we investigate why #2553 happens
+cmake_minimum_required(VERSION 3.21.0) # C_STANDARD C17 and C23
 
 project(fastfetch
-    VERSION 2.68.1
+    VERSION 2.69.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -9,9 +9,6 @@ project(fastfetch
 
 set(PROJECT_LICENSE "MIT license")
 
-if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
-    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
-endif()
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     set(CMAKE_SYSTEM_PROCESSOR "amd64")
@@ -91,9 +88,6 @@ cmake_dependent_option(ENABLE_EET "Enable eet" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS OR GNU" OFF)
-cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
@@ -102,6 +96,18 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" 
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+
+option(ENABLE_IMAGE_LOGO "Enable image logos (sixel / kitty / iTerm / chafa)" ON)
+# The four below are declared outside the guard on purpose. `cmake_dependent_option` is a macro: when
+# the condition is false it is never expanded, so nothing rewrites the value already sitting in
+# CMakeCache.txt, and `cmake -DENABLE_IMAGE_LOGO=OFF .` in an existing build directory would leave
+# ENABLE_SIXEL=ON behind -- sixel and chafa would still be compiled and linked while image.c, the
+# only file that uses them, is not. The condition does the disabling instead: it is the fourth
+# argument's job, and it keeps the option visible and settable in cmake-gui either way.
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "ENABLE_IMAGE_LOGO;LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "ENABLE_IMAGE_LOGO;LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows, macOS and Android; replaces ImageMagick's SIXEL coder)" ON "ENABLE_IMAGE_LOGO;WIN32 OR APPLE OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGE_LOGO;ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE OR ANDROID" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -117,7 +123,7 @@ option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" 
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LUA "Enable lua scripting for format strings" ON)
-option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" ON)
+option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" OFF)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 option(ENABLE_WCWIDTH "Detect wide-width characters with wcwidth when calculating logo and separator width. Disable for a smaller and slightly faster build, but logos containing CJK/emoji may be measured too narrow and render incorrectly. Such usecases are uncommon." ON)
 set(DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Swap:Disk:LocalIp:Battery:PowerAdapter:Locale:Break:Colors" CACHE STRING "Default module structure for detection")
@@ -128,12 +134,38 @@ if(APPLE)
     option(ENABLE_APPLE_MEMSIZE_USABLE "Use usable memory size as total memory size in Memory module, to match other systems" OFF)
 endif()
 
-file(GLOB FF_MODULE_DIRS CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/")
-foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
-        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        option(MODULE_DISABLE_${FF_MODULE_UPPER} "Disable module ${FF_MODULE_DIR}" OFF)
+# A module is a directory `src/modules/<module>/` that contains `<module>.c`.
+# Globbing the sources rather than the directories skips empty directories and
+# other leftovers, and makes `CONFIGURE_DEPENDS` react to added or removed sources.
+file(GLOB FF_MODULE_SRCS CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/modules" "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*/*.c")
+set(FF_MODULE_DIRS "")
+set(FF_MODULE_SRC_DIRS "")
+foreach(FF_MODULE_SRC ${FF_MODULE_SRCS})
+    get_filename_component(FF_MODULE_DIR "${FF_MODULE_SRC}" DIRECTORY)
+    get_filename_component(FF_MODULE_NAME "${FF_MODULE_SRC}" NAME_WE)
+    if("${FF_MODULE_DIR}" STREQUAL "${FF_MODULE_NAME}")
+        list(APPEND FF_MODULE_DIRS "${FF_MODULE_DIR}")
     endif()
+    list(APPEND FF_MODULE_SRC_DIRS "${FF_MODULE_DIR}")
+endforeach()
+unset(FF_MODULE_SRCS)
+
+# A directory of sources whose name no source carries registers no module at all, and nothing else
+# in the build says so -- the module simply never appears. Reported rather than left to be noticed.
+# Directories are compared rather than sources, so that a module which keeps helper sources next to
+# its own `<module>.c` does not warn about every one of them.
+list(REMOVE_DUPLICATES FF_MODULE_SRC_DIRS)
+foreach(FF_MODULE_DIR ${FF_MODULE_SRC_DIRS})
+    if(NOT FF_MODULE_DIR IN_LIST FF_MODULE_DIRS)
+        message(WARNING "src/modules/${FF_MODULE_DIR}/ contains C sources but no ${FF_MODULE_DIR}.c, "
+            "so no module is registered for it. A module directory must hold a source file named after it.")
+    endif()
+endforeach()
+unset(FF_MODULE_SRC_DIRS)
+
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+    option(MODULE_DISABLE_${FF_MODULE_UPPER} "Disable module ${FF_MODULE_DIR}" OFF)
 endforeach()
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
@@ -453,6 +485,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/time.c
     src/common/impl/edidHelper.c
     src/common/impl/base64.c
+    src/common/impl/FFcache.c
     src/common/impl/FFlist.c
     src/common/impl/FFstrbuf.c
     src/common/impl/path.c
@@ -492,91 +525,32 @@ set(LIBFASTFETCH_SRC
     src/detection/weather/weather.c
     src/detection/zpool/zpool.c
     src/logo/builtin.c
-    src/logo/image/im6.c
-    src/logo/image/im7.c
-    src/logo/image/image.c
     src/logo/logo.c
-    src/modules/battery/battery.c
-    src/modules/bios/bios.c
-    src/modules/bluetooth/bluetooth.c
-    src/modules/bluetoothradio/bluetoothradio.c
-    src/modules/board/board.c
-    src/modules/bootmgr/bootmgr.c
-    src/modules/brightness/brightness.c
-    src/modules/break/break.c
-    src/modules/btrfs/btrfs.c
-    src/modules/camera/camera.c
-    src/modules/chassis/chassis.c
-    src/modules/codec/codec.c
-    src/modules/colors/colors.c
-    src/modules/cpu/cpu.c
-    src/modules/cpucache/cpucache.c
-    src/modules/cpuusage/cpuusage.c
-    src/modules/cursor/cursor.c
-    src/modules/custom/custom.c
-    src/modules/command/command.c
-    src/modules/datetime/datetime.c
-    src/modules/de/de.c
-    src/modules/disk/disk.c
-    src/modules/diskio/diskio.c
-    src/modules/dns/dns.c
-    src/modules/editor/editor.c
-    src/modules/font/font.c
-    src/modules/gpu/gpu.c
-    src/modules/host/host.c
-    src/modules/icons/icons.c
-    src/modules/initsystem/initsystem.c
-    src/modules/gamepad/gamepad.c
-    src/modules/kernel/kernel.c
-    src/modules/keyboard/keyboard.c
-    src/modules/lm/lm.c
-    src/modules/loadavg/loadavg.c
-    src/modules/locale/locale.c
-    src/modules/localip/localip.c
-    src/modules/logo/logo.c
-    src/modules/memory/memory.c
-    src/modules/monitor/monitor.c
-    src/modules/netio/netio.c
-    src/modules/opencl/opencl.c
-    src/modules/opengl/opengl.c
-    src/modules/os/os.c
-    src/modules/packages/packages.c
-    src/modules/physicaldisk/physicaldisk.c
-    src/modules/physicalmemory/physicalmemory.c
-    src/modules/processes/processes.c
-    src/modules/player/player.c
-    src/modules/poweradapter/poweradapter.c
-    src/modules/publicip/publicip.c
-    src/modules/display/display.c
-    src/modules/separator/separator.c
-    src/modules/shell/shell.c
-    src/modules/sound/sound.c
-    src/modules/swap/swap.c
-    src/modules/media/media.c
-    src/modules/mouse/mouse.c
-    src/modules/terminal/terminal.c
-    src/modules/terminaltheme/terminaltheme.c
-    src/modules/terminalfont/terminalfont.c
-    src/modules/terminalsize/terminalsize.c
-    src/modules/theme/theme.c
-    src/modules/title/title.c
-    src/modules/top/top.c
-    src/modules/tpm/tpm.c
-    src/modules/uptime/uptime.c
-    src/modules/users/users.c
-    src/modules/version/version.c
-    src/modules/vulkan/vulkan.c
-    src/modules/wallpaper/wallpaper.c
-    src/modules/weather/weather.c
-    src/modules/wifi/wifi.c
-    src/modules/wm/wm.c
-    src/modules/wmtheme/wmtheme.c
-    src/modules/zpool/zpool.c
     src/modules/modules.c
     src/options/display.c
     src/options/logo.c
     src/options/general.c
 )
+
+if(ENABLE_IMAGE_LOGO)
+    list(APPEND LIBFASTFETCH_SRC
+        src/logo/image/image.c
+        src/logo/image/im6.c
+        src/logo/image/im7.c
+        src/logo/image/sixel.c
+    )
+    if(ANDROID)
+        list(APPEND LIBFASTFETCH_SRC
+            src/logo/image/aid.c
+        )
+    endif()
+endif()
+
+foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
+    list(APPEND LIBFASTFETCH_SRC
+        src/modules/${FF_MODULE_DIR}/${FF_MODULE_DIR}.c
+    )
+endforeach()
 
 if(LINUX)
     list(APPEND LIBFASTFETCH_SRC
@@ -666,6 +640,9 @@ if(LINUX)
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/android/binder.c
+        src/common/android/dex.c
+        src/common/android/package.c
         src/common/impl/dbus.c
         src/common/impl/io_unix.c
         src/common/impl/netif_linux.c
@@ -719,6 +696,7 @@ elseif(ANDROID)
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_android.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/mouse/mouse_nosupport.c
@@ -740,6 +718,7 @@ elseif(ANDROID)
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_android.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_android.c
         src/detection/wm/wm_linux.c
@@ -1056,7 +1035,7 @@ elseif(APPLE)
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_apple.c
+        src/detection/gamepad/gamepad_apple.m
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/mouse/mouse_apple.c
@@ -1084,6 +1063,11 @@ elseif(APPLE)
         src/detection/wmtheme/wmtheme_apple.c
         src/detection/camera/camera_apple.m
     )
+    if(ENABLE_IMAGE_LOGO)
+        list(APPEND LIBFASTFETCH_SRC
+            src/logo/image/imageio.c
+        )
+    endif()
     # CMAKE_SYSTEM_PROCESSOR has been normalized before
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64")
         list(APPEND LIBFASTFETCH_SRC
@@ -1117,10 +1101,12 @@ elseif(WIN32)
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
+        src/common/windows/winrt.cpp
         src/common/windows/version.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
+        src/detection/bluetooth/bluetooth_windows.cpp
         src/detection/bluetoothradio/bluetoothradio_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
@@ -1177,6 +1163,11 @@ elseif(WIN32)
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
     )
+    if(ENABLE_IMAGE_LOGO)
+        list(APPEND LIBFASTFETCH_SRC
+            src/logo/image/wic.cpp
+        )
+    endif()
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
         src/common/impl/dbus.c
@@ -1384,7 +1375,7 @@ elseif(GNU)
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
-        src/detection/loadavg/loadavg_linux.c
+        src/detection/loadavg/loadavg_sunos.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -1480,16 +1471,29 @@ else()
     )
 endif()
 
+if(ENABLE_SIXEL)
+    set(FF_SIXEL_SRC
+        src/3rdparty/sixel/allocator.c
+        src/3rdparty/sixel/dither.c
+        src/3rdparty/sixel/output.c
+        src/3rdparty/sixel/pixelformat.c
+        src/3rdparty/sixel/quant.c
+        src/3rdparty/sixel/status.c
+        src/3rdparty/sixel/tosixel.c
+    )
+    list(APPEND LIBFASTFETCH_SRC ${FF_SIXEL_SRC})
+
+    set_source_files_properties(${FF_SIXEL_SRC} PROPERTIES COMPILE_OPTIONS "-Wno-conversion")
+endif()
+
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
 foreach(FF_MODULE_DIR ${FF_MODULE_DIRS})
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/${FF_MODULE_DIR}")
-        string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
-        if(MODULE_DISABLE_${FF_MODULE_UPPER})
-            target_compile_definitions(libfastfetch PUBLIC FF_MODULE_DISABLE_${FF_MODULE_UPPER}=1)
-        endif()
+    string(TOUPPER "${FF_MODULE_DIR}" FF_MODULE_UPPER)
+    if(MODULE_DISABLE_${FF_MODULE_UPPER})
+        target_compile_definitions(libfastfetch PUBLIC FF_MODULE_DISABLE_${FF_MODULE_UPPER}=1)
     endif()
 endforeach()
 
@@ -1522,10 +1526,11 @@ if(yyjson_FOUND)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
 endif()
 
-# Used for dlopen finding dylibs installed by homebrew
-# `/opt/homebrew/lib` is not on in dlopen search path by default
+# Used for dlopen finding dylibs installed by package managers
+# `/opt/homebrew/lib`, `/usr/local/lib` and `/opt/local/lib` are not on the
+# dlopen search path by default
 if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/opt/local/lib")
 endif()
 
 if(ANDROID)
@@ -1890,6 +1895,10 @@ if(ENABLE_THREADS)
     endif()
 endif()
 
+if(ENABLE_IMAGE_LOGO)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_IMAGE_LOGO=1)
+endif()
+
 if(ENABLE_EMBEDDED_PCIIDS)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_EMBEDDED_PCIIDS=1)
 endif()
@@ -1927,21 +1936,25 @@ if(LINUX)
 elseif(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework AVFoundation"
+        PRIVATE "-framework Accelerate"
         PRIVATE "-framework Cocoa"
-        PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework CoreAudio"
+        PRIVATE "-framework CoreBluetooth"
+        PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework CoreMedia"
         PRIVATE "-framework CoreVideo"
         PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework GameController"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
+        PRIVATE "-framework ImageIO"
         PRIVATE "-framework Metal"
-        PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
+        PRIVATE "-framework OpenGL"
         PRIVATE "-framework SystemConfiguration"
         PRIVATE "-framework VideoToolbox"
-        PRIVATE "-weak_framework CoreDisplay"
 
+        PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices"
         PRIVATE "-weak_framework MediaRemote"
@@ -1960,7 +1973,17 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "secur32"
+        PRIVATE "shlwapi"
     )
+    if(ENABLE_IMAGE_LOGO)
+        # Only src/logo/image/wic.cpp uses WIC, and that file is only compiled with image logos
+        # enabled (see the WIN32 source list above). Verified by building with
+        # `-DENABLE_IMAGE_LOGO=OFF` and removing the library from the link line: it links and runs
+        # without it, and nothing else in the tree references IWIC*.
+        target_link_libraries(libfastfetch
+            PRIVATE "windowscodecs"
+        )
+    endif()
     if(NOT ENABLE_WIN81_COMPAT)
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -1994,7 +2017,6 @@ elseif(FreeBSD)
 elseif(OpenBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
-        PRIVATE "kvm"
         PRIVATE "sndio"
         PRIVATE "util"
     )
@@ -2021,6 +2043,9 @@ elseif(GNU)
 elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE jnigraphics
+        PRIVATE mediandk
+        PRIVATE camera2ndk
     )
     if(ENABLE_WORDEXP)
         # https://github.com/termux/termux-packages/pull/7056
@@ -2038,6 +2063,38 @@ elseif(ANDROID)
             endif()
         endif()
     endif()
+
+    # Three APIs are newer than the API level this build targets: AImageDecoder is 30,
+    # AndroidBitmap_compress is 30, and AMediaCodec_getName / AMediaCodec_releaseName are 28.
+    # fastfetch keeps running on devices below those levels, and the NDK headers mark the entry
+    # points unavailable there, so they have to be weak references -- a strong reference would fail
+    # the load on an older device. Guarding every use with __builtin_available() is what makes that
+    # safe, and turning the guard diagnostic into an error keeps a use from slipping past it.
+    #
+    # Each one lives in the library that provides it, and that library is linked above:
+    # AImageDecoder_* and AndroidBitmap_compress are exported by libjnigraphics.so, and
+    # AMediaCodec_* by libmediandk.so. Checked on a device (Android 16, API 36) with
+    # `readelf --dyn-syms /system/lib64/libjnigraphics.so` and a dlopen/dlsym probe: every
+    # AImageDecoder_* entry point resolves there and none of them resolves in libandroid.so, which
+    # is why libandroid.so is *not* linked -- nothing fastfetch calls comes from it. Keep the
+    # provider library linked for the reason the NDK requires it: an undefined weak symbol resolves
+    # to NULL rather than failing the load, and FF_ANDROID_API_AT_LEAST() reads the platform level,
+    # not the symbol, so it would send the call straight through a NULL pointer on every device new
+    # enough to pass the guard.
+    #
+    # camera_android.c is deliberately not in this list. The camera2 NDK is a *library* that starts at
+    # API 24, and a weak reference weakens the symbol, never the library: DT_NEEDED would still name
+    # libcamera2ndk.so, and a device below API 24 would fail to load fastfetch at all. The NDK's guide
+    # is explicit that there is no such thing as a weak library reference, and that dlopen is the only
+    # way to reach a library newer than minSdkVersion. Nothing here pins ANDROID_PLATFORM, so a build
+    # aimed below 24 would need that; on the supported path -- Termux, which targets 24 -- the library
+    # is always present and the plain call is correct. libjnigraphics itself is one of them and is
+    # linked unconditionally above, so the encoder only needs its symbol weakened, not its library.
+    set_source_files_properties(
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/logo/image/aid.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/detection/media/media_android.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/detection/codec/codec_android.c
+        PROPERTIES COMPILE_OPTIONS "-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__;-Werror=unguarded-availability")
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
@@ -2056,6 +2113,16 @@ target_include_directories(libfastfetch
     PUBLIC ${PROJECT_BINARY_DIR}
     PUBLIC ${PROJECT_SOURCE_DIR}/src
 )
+
+if(ENABLE_SIXEL)
+    # src/3rdparty/sixel/*.c include <sixel.h> (angle brackets, so the directory itself
+    # has to be on the include path)
+    target_include_directories(libfastfetch PRIVATE ${PROJECT_SOURCE_DIR}/src/3rdparty/sixel)
+
+    # The vendored subset is not a library to be detected, so FF_HAVE_SIXEL can't come
+    # from ff_lib_enable() and has to be defined here
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_SIXEL=1)
+endif()
 
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
@@ -2194,6 +2261,29 @@ endif()
 ###################
 
 if (BUILD_TESTS)
+    add_executable(fastfetch-test-cache
+        tests/cache.c
+    )
+    target_link_libraries(fastfetch-test-cache
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-logo
+        tests/logo.c
+    )
+    target_link_libraries(fastfetch-test-logo
+        PRIVATE libfastfetch
+    )
+
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(fastfetch-test-cpu
+            tests/cpu.c
+        )
+        target_link_libraries(fastfetch-test-cpu
+            PRIVATE libfastfetch
+        )
+    endif()
+
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2236,13 +2326,98 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-networking
+        tests/networking.c
+    )
+    target_link_libraries(fastfetch-test-networking
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-base64
+        tests/base64.c
+    )
+    target_link_libraries(fastfetch-test-base64
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-parsing
+        tests/parsing.c
+    )
+    target_link_libraries(fastfetch-test-parsing
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-properties
+        tests/properties.c
+    )
+    target_link_libraries(fastfetch-test-properties
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-size
+        tests/size.c
+    )
+    target_link_libraries(fastfetch-test-size
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-frequency
+        tests/frequency.c
+    )
+    target_link_libraries(fastfetch-test-frequency
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-percent
+        tests/percent.c
+    )
+    target_link_libraries(fastfetch-test-percent
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-temps
+        tests/temps.c
+    )
+    target_link_libraries(fastfetch-test-temps
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-endian
+        tests/endian.c
+    )
+    target_link_libraries(fastfetch-test-endian
+        PRIVATE libfastfetch
+    )
+
+    add_executable(fastfetch-test-endian-bigendian
+        tests/endian-bigendian.c
+    )
+    target_link_libraries(fastfetch-test-endian-bigendian
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_test(NAME test-cpu COMMAND fastfetch-test-cpu)
+    endif()
+    add_test(NAME test-cache COMMAND fastfetch-test-cache)
+    add_test(NAME test-logo COMMAND fastfetch-test-logo)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)
     add_test(NAME test-color COMMAND fastfetch-test-color)
     add_test(NAME test-duration COMMAND fastfetch-test-duration)
     add_test(NAME test-strutil COMMAND fastfetch-test-strutil)
+    add_test(NAME test-networking COMMAND fastfetch-test-networking)
+    add_test(NAME test-base64 COMMAND fastfetch-test-base64)
+    add_test(NAME test-parsing COMMAND fastfetch-test-parsing)
+    add_test(NAME test-properties COMMAND fastfetch-test-properties)
+    add_test(NAME test-size COMMAND fastfetch-test-size)
+    add_test(NAME test-frequency COMMAND fastfetch-test-frequency)
+    add_test(NAME test-percent COMMAND fastfetch-test-percent)
+    add_test(NAME test-temps COMMAND fastfetch-test-temps)
+    add_test(NAME test-endian COMMAND fastfetch-test-endian)
+    add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
 endif()
 
 ##################

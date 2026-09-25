@@ -112,6 +112,9 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
     ffListSort(&results, sizeof(FFLocalIpResult), (const void*) sortIps);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    // `{is-default-route}` reports the address families the interface carries the default route for
+    // ("ipv4", "ipv6" or "ipv4,ipv6") instead of exposing the internal bit field as a number.
+    FF_STRBUF_AUTO_DESTROY defaultRoute = ffStrbufCreate();
 
     if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT) {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(LocalIP), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -138,12 +141,22 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
                 if (ip->speed > 0) {
                     appendSpeed(ip, &buffer);
                 }
+                ffStrbufClear(&defaultRoute);
+                if (ip->defaultRoute & FF_LOCALIP_TYPE_IPV4_BIT) {
+                    ffStrbufAppendS(&defaultRoute, "ipv4");
+                }
+                if (ip->defaultRoute & FF_LOCALIP_TYPE_IPV6_BIT) {
+                    if (defaultRoute.length > 0) {
+                        ffStrbufAppendC(&defaultRoute, ',');
+                    }
+                    ffStrbufAppendS(&defaultRoute, "ipv6");
+                }
                 FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                              FF_ARG(ip->ipv4, "ipv4"),
                                                                                                              FF_ARG(ip->ipv6, "ipv6"),
                                                                                                              FF_ARG(ip->mac, "mac"),
                                                                                                              FF_ARG(ip->name, "ifname"),
-                                                                                                             FF_ARG(ip->defaultRoute, "is-default-route"),
+                                                                                                             FF_ARG(defaultRoute, "is-default-route"),
                                                                                                              FF_ARG(ip->mtu, "mtu"),
                                                                                                              FF_ARG(buffer, "speed"),
                                                                                                              FF_ARG(ip->flags, "flags"),
@@ -151,6 +164,7 @@ bool ffPrintLocalIp(FFLocalIpOptions* options) {
             }
             ++index;
             ffStrbufClear(&buffer);
+            ffStrbufClear(&defaultRoute);
         }
     }
 
@@ -455,12 +469,12 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "IPv4 address", "ipv4" },
         { "IPv6 address", "ipv6" },
-        { "MAC address", "mac" },
-        { "Interface name", "ifname" },
+        { "MAC address *", "mac" },
+        { "Interface name *", "ifname" },
         { "Is default route", "is-default-route" },
         { "MTU size in bytes", "mtu" },
         { "Link speed (formatted)", "speed" },
         { "Interface flags", "flags" },
     })),
-    .defaultOrder = 49,
+    .defaultOrder = 50,
 };

@@ -111,6 +111,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
                                                                        { "disk-read", FF_TOP_TYPE_DISK_READ },
                                                                        { "disk-write", FF_TOP_TYPE_DISK_WRITE },
                                                                        { "start-time", FF_TOP_TYPE_START_TIME },
+                                                                       { "threads", FF_TOP_TYPE_THREADS },
                                                                        {},
                                                                    });
             if (error) {
@@ -252,7 +253,7 @@ void ffInitTopOptions(FFTopOptions* options) {
 #endif
         ;
     options->nProcesses = 5;
-    options->waitTime = 500;
+    options->waitTime = 250;
     options->compact = false;
     options->percent = (FFPercentageModuleConfig){ 50, 80, 0 };
 }
@@ -305,5 +306,5 @@ FFModuleBaseInfo ffTopModuleInfo = {
         { "Disk read formatted", "disk-read-formatted" },
         { "Disk write formatted", "disk-write-formatted" },
     })),
-    .defaultOrder = 36,
+    .defaultOrder = 37,
 };

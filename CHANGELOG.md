@@ -1,3 +1,70 @@
+# 2.69.0
+
+Changes:
+* ImageMagick 6 is deprecated and will be removed in a future release. It remains available for older Debian and Ubuntu releases; upgrade to ImageMagick 7 when possible.
+* The experimental QuickJS format scripting is deprecated, disabled by default, and planned for removal in the next release. Re-enable it with `cmake -DENABLE_QUICKJS=ON`, or migrate scripts to Lua. (General)
+* Replaced `--logo-recache` and `logo.recache` with `--logo-cache` and `logo.cache`. Use `true` to reuse or create valid cache entries, `false` to disable caching, or `regen` to force regeneration. (Logo)
+* Modules selected with `--structure` now honor their options from the JSON config.
+
+Features:
+* Added `logo.position: "auto"` and `--logo-position auto` to place wide logos above module output when the terminal has less than 32 columns available for text. (Logo)
+    * The position can also be selected in interactive `--gen-config`. 
+    * For now, the default position is `left` for compatibility with previous releases. This may change to `auto` in future releases.
+* Improved Bluetooth detection support:
+    * Added Bluetooth Low Energy detection on Windows and macOS.
+    * Report device type (LE or classic) and signal quality, if available.
+    * Added Bluetooth Core 6.0–6.3 version reporting. (BluetoothRadio)
+* Improved image log support:
+    * Image logos on Windows, macOS, and Android now use native image processing libraries instead of ImageMagick. 
+        * For package managers: ImageMagick dependencies can be removed on macOS, Windows and Android as they are no longer used for image logos.
+        * Windows Terminal supports sixel logos out of the box
+    * Changes to a source image now correctly invalidate its cache. (Logo)
+    * Added GIF and APNG support to `--kitty` image protocol. Set `logo.animationFrame` to `0` to play animations in compatible kitty terminals; positive or negative values select a still frame. Android animation requires Android 12 (API 31); terminals without kitty graphics protocol support report an error and fall back to the built-in logo instead. (Logo)
+    * Added cmake option `-DENABLE_IMAGE_LOGO=<BOOL>` (default `ON`) to disable image logos and reduce binary size. `raw` logos remain available. (Logo)
+* Improved Linux support:
+    * Added RakuOS rum overlay package counting (`{rum}`) and CRUX package detection (`{crux}`). (Packages)
+    * Added CPU name and frequency detection on SPARC. (CPU)
+    * Improved COSMIC version detection and added Umbriel version detection. (DE / WM)
+* Improved Android support:
+    * Expanded ROM detection to HarmonyOS, Flyme, OneUI, LineageOS, and many other ROMs. (DE)
+    * Improved camera detection; Android 7 (API 24) or later is required. (Camera)
+    * Battery level and charging state are now available to apps; detailed battery information requires root or ADB. (Battery)
+    * Added display mode, physical size, rotation, and HDR information. App-based detection requires Android 13 (API 33); root or ADB can also detect displays on older versions. (Display)
+    * Added Wi-Fi interface, connection, standard, and security information. Android 11 (API 30) or later is required. Termux:API is needed for the Wi-Fi permission, and location permission is needed to reveal SSID and BSSID; without location permission the two names appear as `<redacted>`. (Wifi)
+    * Added Wallpaper detection, which effectively reports `/data/system/users/0/wallpaper`. (Wallpaper)
+    * Added Media detection, root/ADB only. (Media / Player)
+* Improved macOS support:
+    * Improved process-name detection in Top. (Top)
+    * Improved wallpaper detection on macOS Sonoma and later. (#2559, Wallpaper)
+* Improved Windows support:
+    * `winget` now counts packages from configured sources, excludes Microsoft Store apps, and caches results. It remains disabled by default. (Packages)
+    * Player names now match the names shown by Windows (for example, Chrome is reported as Google Chrome). (Player)
+* Added battery-level detection for more controllers on Windows and macOS. (Gamepad)
+* Improved macOS controller name detection (macOS, Gamepad)
+    * macOS controller names now match the system; configs that filter by name may need updating.
+    * Requires macOS 11 or later.
+* Improved the built-in HTTP client used by PublicIP and Weather; it now supports custom ports and chunked responses. (PublicIP / Weather)
+* Reduced the default `waitTime` for DiskIO, NetIO, and Top from 500 ms to 250 ms. (DiskIO / NetIO / Top)
+* Added `general.preload.lua` for loading shared Lua helpers before modules run. It requires a Lua-enabled build and starts the Lua interpreter whenever configured. (General)
+    * Lua format scripting is now considered stable.
+
+Bugfixes:
+* Fixed Snapdragon X2 series model detection on Linux. (#2611, CPU / Linux)
+* Fixed image logo caching, padding, and positioning issues, including an iTerm display bug. (Logo)
+* Fixed several Windows issues, including Windows Terminal font detection, redirected `--gen-config` output, and gamepad battery reporting for DualShock 4 and Switch controllers. (#2573, TerminalFont; Gamepad; General)
+* Fixed formatting and display issues, including ANSI-aware truncation, date/time formatting, and bright key/title colors. (Format / DateTime / Display)
+* Fixed `--dynamic-interval` retries and stale results across multiple rounds. (PublicIP / Weather / Display / Monitor / WM / DE / Media / Player / Shell / Terminal)
+* Fixed invalid numeric and color options that could cause hangs or excessive output. (Separator / CPUUsage / NetIO / DiskIO / LoadAvg / Colors)
+* Fixed JSON output and config validation across several modules, including GPU, Btrfs, Gamepad, Packages, and Custom. (General)
+* Fixed GPU memory and device-type reporting, GNOME Classic and Trinity version detection, and default-route family names. (GPU / DE / LocalIP)
+* Fixed module output and filtering issues affecting editor failures, sound status, command selection, and ignored keyboard/gamepad devices. (Editor / Sound / Command / Keyboard / Gamepad)
+* Fixed package counting with read-only databases and corrected other package detection and JSON output issues. (Packages)
+* Fixed Base64 encoding, big-endian handling, and 64-bit value truncation on 32-bit platforms. (General)
+
+Logos:
+* Added ALT Atomic
+* Removed Zerene
+
 # 2.68.1
 
 Changes:

@@ -1,11 +1,27 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
+#include "common/time.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 
 #include <windows.h>
 
+// TODO: long paths on Windows.
+//
+// Every path that crosses into the wide API from this file is converted into a fixed
+// `wchar_t[MAX_PATH]` buffer, and `RtlUTF8ToUnicodeN` refuses to fill it for a path of MAX_PATH
+// characters or more (STATUS_BUFFER_TOO_SMALL) -- which makes each of those call sites a silent
+// failure above that length rather than an error anyone sees. Raising a buffer on its own does not
+// help: the wide APIs accept a longer path only either with a `\\?\` prefix on every absolute path
+// (which also switches off the normalization the rest of the code relies on) or with a
+// `longPathAware` manifest plus the LongPathsEnabled registry value.
+//
+// The plan is the second route: define MAX_PATH as 32768 program-wide, add the manifest flag, and
+// size these buffers from the UTF-8 input rather than from the constant. It has to be done in one
+// pass, which is why it is recorded here instead of being applied at the call sites the review
+// happened to look at.
 static bool createSubfolders(wchar_t* fileName) {
     HANDLE hRoot = ffGetPeb()->ProcessParameters->CurrentDirectory.Handle;
     bool closeRoot = false;
@@ -159,7 +175,9 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
 
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(fileNameW, GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
-        if (GetLastError() == ERROR_PATH_NOT_FOUND) {
+        DWORD errorCode = GetLastError();
+        FF_DEBUG("Failed to open file: %s - %s", fileName, ffDebugWin32Error(errorCode));
+        if (errorCode == ERROR_PATH_NOT_FOUND) {
             if (!createSubfolders(fileNameW)) {
                 return false;
             }
@@ -344,8 +362,18 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
     }
 
     ffStrbufAppendC(folder, '*');
-    WIN32_FIND_DATAA entry;
-    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
+    // The wide API on purpose: every path fastfetch holds is UTF-8, and FindFirstFileA would read
+    // it in the active code page, so a directory whose name the code page cannot represent -- a
+    // Chinese or Japanese name under an English or German locale, for one -- answers
+    // ERROR_PATH_NOT_FOUND and the whole listing disappears. The names it returns are converted
+    // back to UTF-8 below.
+    wchar_t wideFolder[PATH_MAX];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(wideFolder, sizeof(wideFolder), nullptr, folder->chars, folder->length + 1))) {
+        ffStrbufTrimRight(folder, '*');
+        return;
+    }
+    WIN32_FIND_DATAW entry;
+    HANDLE hFind = FindFirstFileW(wideFolder, &entry);
     ffStrbufTrimRight(folder, '*');
     if (hFind == INVALID_HANDLE_VALUE) {
         return;
@@ -353,14 +381,15 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     do {
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            if (ffStrEquals(entry.cFileName, ".") || ffStrEquals(entry.cFileName, "..")) {
+            if (entry.cFileName[0] == L'.') {
                 continue;
             }
 
             ffStrbufSubstrBefore(folder, folderLength);
-            ffStrbufAppendS(folder, entry.cFileName);
+            ffStrbufAppendWS(folder, entry.cFileName);
             ffStrbufAppendC(folder, '/');
-            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry.cFileName, pretty);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(entry.cFileName);
+            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), name.chars, pretty);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
@@ -373,8 +402,9 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
             fputs(folder->chars + baseLength, stdout);
         }
 
-        puts(entry.cFileName);
-    } while (FindNextFileA(hFind, &entry));
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(entry.cFileName);
+        ffStrbufPutTo(&name, stdout);
+    } while (FindNextFileW(hFind, &entry));
     FindClose(hFind);
 }
 
@@ -496,6 +526,47 @@ FFNativeFD ffGetNullFD(void) {
     return hNullFile;
 }
 
+bool ffIsTerminal(int fd) {
+    intptr_t handle = _get_osfhandle(fd);
+    if (handle == -1 || handle == -2) {
+        // -1: an invalid fd; -2: a valid fd with no file behind it (`_get_osfhandle`'s way of
+        // saying FF_INVALID_FD). Neither is a terminal.
+        return false;
+    }
+    DWORD mode;
+    return GetConsoleMode((HANDLE) handle, &mode) != 0;
+}
+
 bool ffRemoveFile(const char* fileName) {
-    return DeleteFileA(fileName) != FALSE;
+    wchar_t fileNameW[MAX_PATH]; // see the long path TODO at the top of this file
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, fileName, (ULONG) strlen(fileName) + 1))) {
+        return false;
+    }
+
+    bool ret = DeleteFileW(fileNameW) != FALSE;
+    FF_DEBUG("Deleting file: %s - %s", fileName, ret ? "Success" : ffDebugWin32Error(GetLastError()));
+    return ret;
+}
+
+uint64_t ffPathGetMtime(const char* path) {
+    wchar_t fileNameW[MAX_PATH]; // see the long path TODO at the top of this file
+    ULONG len;
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(fileNameW, (ULONG) sizeof(fileNameW), &len, path, (ULONG) strlen(path) + 1))) {
+        return 0;
+    }
+
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(fileNameW, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+    if (handle == INVALID_HANDLE_VALUE) { // file doesn't exist or isn't accessible
+        return 0;
+    }
+
+    FILE_BASIC_INFORMATION fileInfo;
+    IO_STATUS_BLOCK iosb;
+    if (!NT_SUCCESS(NtQueryInformationFile(handle, &iosb, &fileInfo, sizeof(fileInfo), FileBasicInformation))) {
+        return 0;
+    }
+
+    return ffFileTimeToUnixMs((uint64_t) fileInfo.LastWriteTime.QuadPart);
 }

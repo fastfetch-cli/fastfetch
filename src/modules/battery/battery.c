@@ -19,7 +19,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                                                                            FF_ARG(index, "index"),
-                                                                           FF_ARG(result->modelName, "name"),
+                                                                           FF_ARG(result->modelName, "model-name"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
                                                                            FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Battery), "module-name"),
                                                                        }));
@@ -330,7 +330,7 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateBatteryJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Battery manufacturer", "manufacturer" },
-        { "Battery model name", "model-name" },
+        { "Battery model name *", "model-name" },
         { "Battery technology", "technology" },
         { "Battery capacity (percentage num)", "capacity" },
         { "Battery status", "status" },
@@ -345,5 +345,5 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         { "Battery time remaining seconds", "time-seconds" },
         { "Battery time remaining (formatted)", "time-formatted" },
     })),
-    .defaultOrder = 44,
+    .defaultOrder = 45,
 };

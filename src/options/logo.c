@@ -3,6 +3,56 @@
 #include "common/jsonconfig.h"
 #include "common/strutil.h"
 
+#if !FF_HAVE_IMAGE_LOGO
+// The image logo types are still accepted by the parsers below in a build that can not render them,
+// so that the user is told which type is unavailable instead of being told the type does not exist.
+// The one that is deliberately left out is `raw`: it writes a pre-rendered byte stream through
+// untouched and needs no decoder, so a build without image logos can still display one.
+static bool logoTypeIsImage(FFLogoType type) {
+    switch (type) {
+        case FF_LOGO_TYPE_IMAGE_SIXEL:
+        case FF_LOGO_TYPE_IMAGE_KITTY:
+        case FF_LOGO_TYPE_IMAGE_KITTY_DIRECT:
+        case FF_LOGO_TYPE_IMAGE_KITTY_ICAT:
+        case FF_LOGO_TYPE_IMAGE_ITERM:
+        case FF_LOGO_TYPE_IMAGE_CHAFA:
+            return true;
+        default:
+            return false;
+    }
+}
+#endif
+
+// --sixel, --kitty, --kitty-direct, --kitty-icat and --iterm. They keep a branch of their own in
+// every build so that the error a build without image logos gives names the flag that was used,
+// rather than it being rejected as an unknown option. --chafa is not among them: it is gated on
+// FF_HAVE_CHAFA, which a build without image logos turns off as well, and it keeps the message it
+// has always given in that case.
+static void logoParseImageFlag(FFOptionsLogo* options, const char* key, const char* value, FFLogoType type) {
+#if FF_HAVE_IMAGE_LOGO
+    ffOptionParseString(key, value, &options->source);
+    options->type = type;
+#else
+    FF_UNUSED(options, key, value, type);
+    fputs("Error: Fastfetch was built without image logo support\n", stderr);
+    exit(477);
+#endif
+}
+
+const char* ffLogoPositionToString(FFLogoPosition position) {
+    switch (position) {
+        case FF_LOGO_POSITION_TOP:
+            return "top";
+        case FF_LOGO_POSITION_RIGHT:
+            return "right";
+        case FF_LOGO_POSITION_AUTO:
+            return "auto";
+        case FF_LOGO_POSITION_LEFT:
+        default:
+            return "left";
+    }
+}
+
 void ffOptionsInitLogo(FFOptionsLogo* options) {
     ffStrbufInit(&options->source);
     options->type = FF_LOGO_TYPE_AUTO;
@@ -17,8 +67,9 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->paddingRight = 4;
     options->printRemaining = true;
     options->preserveAspectRatio = false;
-    options->recache = false;
+    options->cache = FF_LOGO_CACHE_ON;
     options->position = FF_LOGO_POSITION_LEFT;
+    options->animationFrame = FF_LOGO_ANIMATION_FRAME_FIRST;
 
 #if FF_HAVE_CHAFA
     options->chafaFgOnly = false;
@@ -70,6 +121,12 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                            { "none", FF_LOGO_TYPE_NONE },
                                                                            {},
                                                                        });
+#if !FF_HAVE_IMAGE_LOGO
+            if (logoTypeIsImage(options->type)) {
+                fputs("Error: Fastfetch was built without image logo support\n", stderr);
+                exit(477);
+            }
+#endif
         } else if (ffStrStartsWithIgnCase(subKey, "color-") && subKey[6] != '\0' && subKey[7] == '\0') // matches "--logo-color-*"
         {
             // Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
@@ -105,18 +162,28 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             options->printRemaining = ffOptionParseBoolean(value);
         } else if (ffStrEqualsIgnCase(subKey, "preserve-aspect-ratio")) {
             options->preserveAspectRatio = ffOptionParseBoolean(value);
+        } else if (ffStrEqualsIgnCase(subKey, "cache")) {
+            if (value && ffStrEqualsIgnCase(value, "regen")) {
+                options->cache = FF_LOGO_CACHE_REGEN;
+            } else {
+                options->cache = ffOptionParseBoolean(value) ? FF_LOGO_CACHE_ON : FF_LOGO_CACHE_OFF;
+            }
         } else if (ffStrEqualsIgnCase(subKey, "recache")) {
-            options->recache = ffOptionParseBoolean(value);
+            fputs("--logo-recache has been replaced by --logo-cache regen\n", stderr);
+            exit(477);
         } else if (ffStrEqualsIgnCase(subKey, "separate")) {
             fputs("--logo-separate has been renamed to --logo-position\n", stderr);
             exit(477);
         } else if (ffStrEqualsIgnCase(subKey, "position")) {
             options->position = (FFLogoPosition) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                                                                                   { "auto", FF_LOGO_POSITION_AUTO },
                                                                                    { "left", FF_LOGO_POSITION_LEFT },
                                                                                    { "right", FF_LOGO_POSITION_RIGHT },
                                                                                    { "top", FF_LOGO_POSITION_TOP },
                                                                                    {},
                                                                                });
+        } else if (ffStrEqualsIgnCase(subKey, "animation-frame")) {
+            options->animationFrame = ffOptionParseInt32(key, value);
         } else {
             return false;
         }
@@ -141,20 +208,15 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             return false;
         }
     } else if (ffStrEqualsIgnCase(key, "--sixel")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_SIXEL;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_SIXEL);
     } else if (ffStrEqualsIgnCase(key, "--kitty")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY);
     } else if (ffStrEqualsIgnCase(key, "--kitty-direct")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY_DIRECT;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY_DIRECT);
     } else if (ffStrEqualsIgnCase(key, "--kitty-icat")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_KITTY_ICAT;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_KITTY_ICAT);
     } else if (ffStrEqualsIgnCase(key, "--iterm")) {
-        ffOptionParseString(key, value, &options->source);
-        options->type = FF_LOGO_TYPE_IMAGE_ITERM;
+        logoParseImageFlag(options, key, value, FF_LOGO_TYPE_IMAGE_ITERM);
     } else if (ffStrEqualsIgnCase(key, "--raw")) {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_RAW;
@@ -268,6 +330,11 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             if (error) {
                 return error;
             }
+#if !FF_HAVE_IMAGE_LOGO
+            if (logoTypeIsImage((FFLogoType) value)) {
+                return "Image logo types are not supported because Fastfetch was built without image logo support";
+            }
+#endif
             options->type = (FFLogoType) value;
             continue;
         } else if (unsafe_yyjson_equals_str(key, "source")) {
@@ -335,12 +402,23 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         } else if (unsafe_yyjson_equals_str(key, "preserveAspectRatio")) {
             options->preserveAspectRatio = yyjson_get_bool(val);
             continue;
-        } else if (unsafe_yyjson_equals_str(key, "recache")) {
-            options->recache = yyjson_get_bool(val);
+        } else if (unsafe_yyjson_equals_str(key, "cache")) {
+            if (yyjson_is_bool(val)) {
+                options->cache = yyjson_get_bool(val) ? FF_LOGO_CACHE_ON : FF_LOGO_CACHE_OFF;
+            } else if (yyjson_is_str(val) && ffStrEqualsIgnCase(yyjson_get_str(val), "regen")) {
+                options->cache = FF_LOGO_CACHE_REGEN;
+            } else {
+                return "Property 'logo.cache' must be a boolean or the string \"regen\"";
+            }
             continue;
+        } else if (unsafe_yyjson_equals_str(key, "recache")) {
+            // Kept as a named rejection so the message points at the replacement, which the generic
+            // "Unknown logo key" below can not do.
+            return "Property 'logo.recache' has been replaced by 'logo.cache' with the value \"regen\"";
         } else if (unsafe_yyjson_equals_str(key, "position")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                                                                       { "auto", FF_LOGO_POSITION_AUTO },
                                                                        { "left", FF_LOGO_POSITION_LEFT },
                                                                        { "top", FF_LOGO_POSITION_TOP },
                                                                        { "right", FF_LOGO_POSITION_RIGHT },
@@ -351,6 +429,12 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 return error;
             }
             options->position = (FFLogoPosition) value;
+            continue;
+        } else if (unsafe_yyjson_equals_str(key, "animationFrame")) {
+            if (!yyjson_is_int(val)) {
+                return "Property 'logo.animationFrame' must be an integer";
+            }
+            options->animationFrame = (int32_t) yyjson_get_sint(val);
             continue;
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
 #if FF_HAVE_CHAFA
@@ -460,6 +544,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_COMMAND_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
             break;
+#if FF_HAVE_IMAGE_LOGO
         case FF_LOGO_TYPE_IMAGE_SIXEL:
             yyjson_mut_obj_add_str(doc, obj, "type", "sixel");
             break;
@@ -478,6 +563,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_IMAGE_CHAFA:
             yyjson_mut_obj_add_str(doc, obj, "type", "chafa");
             break;
+#endif
         case FF_LOGO_TYPE_IMAGE_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "raw");
             break;
@@ -521,13 +607,22 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
 
     yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRatio", options->preserveAspectRatio);
 
-    yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);
+    // Written the way the parser accepts it back: a boolean for on / off, the string for regen
+    switch (options->cache) {
+        case FF_LOGO_CACHE_OFF:
+            yyjson_mut_obj_add_bool(doc, obj, "cache", false);
+            break;
+        case FF_LOGO_CACHE_REGEN:
+            yyjson_mut_obj_add_str(doc, obj, "cache", "regen");
+            break;
+        case FF_LOGO_CACHE_ON:
+            yyjson_mut_obj_add_bool(doc, obj, "cache", true);
+            break;
+    }
 
-    yyjson_mut_obj_add_str(doc, obj, "position", ((const char*[]) {
-                                                     "left",
-                                                     "top",
-                                                     "right",
-                                                 })[options->position]);
+    yyjson_mut_obj_add_str(doc, obj, "position", ffLogoPositionToString(options->position));
+
+    yyjson_mut_obj_add_int(doc, obj, "animationFrame", options->animationFrame);
 
 #if FF_HAVE_CHAFA
     {

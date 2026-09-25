@@ -83,7 +83,7 @@ static wchar_t* createChildEnvironment(void) {
     return result;
 }
 
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle) {
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
     const int32_t timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
@@ -130,6 +130,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     } else {
         siStartInfo.hStdOutput = hChildPipeWrite;
         siStartInfo.hStdError = ffGetNullFD();
+    }
+    if (ffIsValidNativeFD(stdinFd)) {
+        siStartInfo.hStdInput = stdinFd;
     }
 
     FF_AUTO_FREE wchar_t* cmdline = nullptr;

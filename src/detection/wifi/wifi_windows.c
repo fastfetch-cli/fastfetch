@@ -252,9 +252,10 @@ const char* ffDetectWifi(FFlist* result) {
                     connInfo->wlanAssociationAttributes.dot11BssType,
                     connInfo->wlanSecurityAttributes.bSecurityEnabled,
                     nullptr,
-                    &bssList) == ERROR_SUCCESS &&
-                bssList->dwNumberOfItems > 0) {
-                item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
+                    &bssList) == ERROR_SUCCESS) {
+                if (bssList->dwNumberOfItems > 0) {
+                    item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
+                }
                 ffWlanFreeMemory(bssList);
             }
         }

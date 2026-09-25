@@ -225,5 +225,5 @@ FFModuleBaseInfo ffUsersModuleInfo = {
         { "Days of year after login", "days-of-year" },
         { "Years fraction after login", "years-fraction" },
     })),
-    .defaultOrder = 57,
+    .defaultOrder = 58,
 };

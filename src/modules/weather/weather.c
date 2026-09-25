@@ -125,5 +125,5 @@ FFModuleBaseInfo ffWeatherModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Weather result", "result" },
     })),
-    .defaultOrder = 65,
+    .defaultOrder = 66,
 };

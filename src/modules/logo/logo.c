@@ -57,7 +57,9 @@ bool ffGenerateLogoJsonResult([[maybe_unused]] FFLogoOptions* options, yyjson_mu
     yyjson_mut_obj_add_str(doc, obj, "colorTitle", logo->colorTitle);
 
     yyjson_mut_val* typeArr = yyjson_mut_obj_add_arr(doc, obj, "type");
-    if (logo->type & FF_LOGO_LINE_TYPE_NORMAL) {
+    // `FF_LOGO_LINE_TYPE_NORMAL` is 0, so a bit test here is always false and "normal" would be dead
+    // code. `src/logo/logo.c` tests the same flag with `!=`, which is the intended semantics.
+    if (logo->type == FF_LOGO_LINE_TYPE_NORMAL) {
         yyjson_mut_arr_add_str(doc, typeArr, "normal");
     }
     if (logo->type & FF_LOGO_LINE_TYPE_SMALL_BIT) {

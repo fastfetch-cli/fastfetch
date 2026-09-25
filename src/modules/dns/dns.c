@@ -167,5 +167,5 @@ FFModuleBaseInfo ffDNSModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "DNS result", "result" },
     })),
-    .defaultOrder = 50,
+    .defaultOrder = 51,
 };

@@ -60,6 +60,22 @@ void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* m
     }
 }
 
+bool ffJsonConfigParseUInt32(yyjson_val* val, uint32_t* result, uint32_t max) {
+    if (!yyjson_is_int(val)) {
+        return false;
+    }
+
+    // `yyjson_get_sint()` is exact for every value that fits into `int64_t`, and is negative for the
+    // `uint64_t` values above `INT64_MAX`, which no caller accepts anyway.
+    int64_t num = unsafe_yyjson_get_sint(val);
+    if (num < 0 || (uint64_t) num > max) {
+        return false;
+    }
+
+    *result = (uint32_t) num;
+    return true;
+}
+
 const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[]) {
     if (yyjson_is_int(val)) {
         int intVal = yyjson_get_int(val);
@@ -133,7 +149,10 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
 
 static void prepareModuleJsonObject(const char* type, yyjson_val* module) {
     switch (type[0]) {
-        #if !FF_MODULE_DISABLE_CPUUSAGE
+        // Both `cpuusage` and `command` start with a c, and they are disabled by separate options,
+        // so the block has to survive either one being off -- otherwise a build with only the other
+        // one enabled would never prepare this module (see the same guard in `commandoption.c`).
+        #if !FF_MODULE_DISABLE_CPUUSAGE || !FF_MODULE_DISABLE_COMMAND
         case 'c':
         case 'C': {
             if (ffStrEqualsIgnCase(type, ffCPUUsageModuleInfo.name)) {
@@ -276,6 +295,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
         }
 
         yyjson_val* module = item;
+        bool gatedOnSucceeded = false;
         const char* type = yyjson_get_str(module);
         if (type) {
             module = nullptr;
@@ -311,6 +331,38 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                     if (!unsafe_yyjson_is_bool(previousSucceeded)) {
                         return "Property 'succeeded' in 'condition' must be a boolean";
                     }
+                    gatedOnSucceeded = true;
+
+                    if (prepare) {
+                        // Whether this module is printed at all depends on the result of the previous
+                        // one, which is only known in the print pass. Preparing it here would leave a
+                        // result behind that no print pass ever consumes, and since the modules are
+                        // paired by position (see `ffPrepareCommand` / `ffDetectCommand`), that
+                        // would silently shift every later module onto the wrong result.
+                        // Skip it, and let the module report the missing preparation if it turns out
+                        // to be printed after all.
+                        continue;
+                    }
+
+                    #if !FF_MODULE_DISABLE_COMMAND
+                    // A `command` module that runs in parallel is exactly the pairing above, so this
+                    // combination cannot be left to the print pass: the module would be handed the
+                    // result prepared for the next `command` module and print that instead of its
+                    // own output. Refused here rather than in the prepare pass, because returning
+                    // from there would leave every later module unprepared -- which the print pass
+                    // would then report as a failure of theirs.
+                    // `parallel` is on by default, so leaving the key out is the parallel case too.
+                    if (gatedOnSucceeded && ffStrEqualsIgnCase(yyjson_get_str(yyjson_obj_get(module, "type")), ffCommandModuleInfo.name)) {
+                        yyjson_val* parallel = yyjson_obj_get(module, "parallel");
+                        if (parallel == nullptr || yyjson_get_bool(parallel)) {
+                            return "Module \"command\" cannot be combined with \"condition.succeeded\" while it runs in "
+                                   "parallel: whether it is printed is only known in the print pass, so it cannot be "
+                                   "prepared, and the prepared results are matched to modules by position. Set "
+                                   "\"parallel\": false on it, or drop the condition.";
+                        }
+                    }
+                    #endif
+
                     if (succeeded != unsafe_yyjson_get_bool(previousSucceeded)) {
                         continue;
                     }

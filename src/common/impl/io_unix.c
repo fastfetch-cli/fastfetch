@@ -11,6 +11,7 @@
     #include <poll.h>
 #else
     #include <sys/select.h>
+    #define st_mtim st_mtimespec // `struct stat` spells it `st_mtimespec` on Apple
 #endif
 
 #if FF_HAVE_WORDEXP
@@ -328,6 +329,25 @@ FFNativeFD ffGetNullFD(void) {
     return hNullFile;
 }
 
+bool ffIsTerminal(int fd) {
+    return isatty(fd) != 0;
+}
+
 bool ffRemoveFile(const char* fileName) {
     return unlink(fileName) == 0;
+}
+
+uint64_t ffPathGetMtime(const char* path) {
+    struct stat st;
+    if (stat(path, &st) != 0) {
+        return 0;
+    }
+
+    // An mtime at or before the Unix epoch means the filesystem did not fill it in. Reporting it
+    // as-is would hand the caller a value indistinguishable from "unknown", so treat it as such.
+    if (st.st_mtim.tv_sec <= 0) {
+        return 0;
+    }
+
+    return (uint64_t) st.st_mtim.tv_sec * 1000ull + (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
 }

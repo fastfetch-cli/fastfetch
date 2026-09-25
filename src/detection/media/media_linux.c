@@ -277,7 +277,17 @@ static const char* getMedia(FFMediaResult* result) {
 
 #endif
 
-void ffDetectMediaImpl(FFMediaResult* media, bool saveCover) {
+// Android compiles this file next to media_android.c, which owns ffDetectMediaImpl and calls this one
+// when the media_session service has nothing to say -- an app UID is refused by that service, while the
+// session bus a desktop environment brings up is open to every process in it. Same arrangement as
+// wallpaper_linux.c and terminalfont_linux.c.
+void
+#ifdef __ANDROID__
+ffDetectMediaLinuxImpl
+#else
+ffDetectMediaImpl
+#endif
+    (FFMediaResult* media, bool saveCover) {
     FF_UNUSED(saveCover); // We don't save the cover to a file for Mpris implementation
 #ifdef FF_HAVE_DBUS
     const char* error = getMedia(media);

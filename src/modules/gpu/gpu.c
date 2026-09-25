@@ -11,6 +11,21 @@
 
 #include <stdlib.h>
 
+// `hideType` is a filter, and FF_GPU_TYPE_NONE means "hide nothing" -- no detected GPU ever has
+// that type. Both the text and the JSON path must apply it, or the two disagree about which GPUs
+// exist.
+static bool gpuIsHidden(const FFGPUOptions* options, const FFGPUResult* gpu) {
+    return options->hideType != FF_GPU_TYPE_NONE && gpu->type == options->hideType;
+}
+
+static void selectGPUs(const FFGPUOptions* options, const FFlist* gpus, FFlist* selectedGPUs) {
+    FF_LIST_FOR_EACH (FFGPUResult, gpu, *gpus) {
+        if (!gpuIsHidden(options, gpu)) {
+            *FF_LIST_ADD(const FFGPUResult*, *selectedGPUs) = gpu;
+        }
+    }
+}
+
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu) {
     const char* type;
     switch (gpu->type) {
@@ -182,21 +197,7 @@ bool ffPrintGPU(FFGPUOptions* options) {
 
     FF_LIST_AUTO_DESTROY selectedGPUs = ffListCreateA(sizeof(const FFGPUResult*), gpus.length);
 
-    FF_LIST_FOR_EACH (FFGPUResult, gpu, gpus) {
-        if (gpu->type == FF_GPU_TYPE_UNKNOWN && options->hideType == FF_GPU_TYPE_UNKNOWN) {
-            continue;
-        }
-
-        if (gpu->type == FF_GPU_TYPE_INTEGRATED && options->hideType == FF_GPU_TYPE_INTEGRATED) {
-            continue;
-        }
-
-        if (gpu->type == FF_GPU_TYPE_DISCRETE && options->hideType == FF_GPU_TYPE_DISCRETE) {
-            continue;
-        }
-
-        *FF_LIST_ADD(const FFGPUResult*, selectedGPUs) = gpu;
-    }
+    selectGPUs(options, &gpus, &selectedGPUs);
 
     uint32_t i = 0;
     FF_LIST_FOR_EACH (const FFGPUResult*, pgpu, selectedGPUs) {
@@ -339,8 +340,13 @@ bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         return false;
     }
 
+    FF_LIST_AUTO_DESTROY selectedGPUs = ffListCreateA(sizeof(const FFGPUResult*), gpus.length);
+
+    selectGPUs(options, &gpus, &selectedGPUs);
+
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-    FF_LIST_FOR_EACH (FFGPUResult, gpu, gpus) {
+    FF_LIST_FOR_EACH (const FFGPUResult*, pgpu, selectedGPUs) {
+        const FFGPUResult* gpu = *pgpu;
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
 
         if (gpu->index != FF_GPU_INDEX_UNSET) {

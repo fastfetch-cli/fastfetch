@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/processing.h"
 #include "common/strutil.h"
+#include "common/lua.h"
 #include "options/general.h"
 
 #include <unistd.h>
@@ -29,6 +30,38 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->detectVersion = yyjson_get_bool(val);
         } else if (unsafe_yyjson_equals_str(key, "playerName")) {
             ffStrbufSetJsonVal(&options->playerName, val);
+        } else if (unsafe_yyjson_equals_str(key, "preload")) {
+            if (!yyjson_is_obj(val)) {
+                return "Property 'general.preload' must be an object";
+            }
+
+            yyjson_val* script = yyjson_obj_get(val, "lua");
+            if (script) {
+                if (!yyjson_is_str(script)) {
+                    return "Property 'general.preload.lua' must be a string";
+                }
+
+#if FF_HAVE_LUA
+                const char* error = ffLuaLoadState();
+                if (error) {
+                    return error;
+                }
+
+                lua_State* L = luaData.L;
+                lua_settop(L, 0);
+                if (luaL_loadbuffer(L, unsafe_yyjson_get_str(script), unsafe_yyjson_get_len(script), "@general.preload.lua") != LUA_OK ||
+                    lua_pcall(L, 0, 0, 0) != LUA_OK) {
+                    // The position Lua puts in front of a message is kept here: this is printed once, so naming the
+                    // line of the preload script that raised it is useful. `lua_tolstring` only converts strings and
+                    // numbers, so an error value of any other type leaves nothing to report.
+                    return lua_tolstring(L, -1, nullptr) ?: "the script raised an error that is not a string";
+                }
+                lua_settop(L, 0);
+
+#else
+                return "Property 'general.preload.lua' requires a build with Lua support";
+#endif
+            }
         }
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
         else if (unsafe_yyjson_equals_str(key, "dsForceDrm")) {

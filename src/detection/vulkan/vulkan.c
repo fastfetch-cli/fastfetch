@@ -250,7 +250,12 @@ static const char* detectVulkan(FFVulkanResult* result) {
 
         ffStrbufInitS(&gpu->name, physicalDeviceProperties.properties.deviceName);
 
-        gpu->type = physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        switch (physicalDeviceProperties.properties.deviceType) {
+            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: gpu->type = FF_GPU_TYPE_DISCRETE; break;
+            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+            case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: gpu->type = FF_GPU_TYPE_INTEGRATED; break; // Virtual machine?
+            default: gpu->type = FF_GPU_TYPE_UNKNOWN; break;
+        }
         ffStrbufInitS(&gpu->vendor, ffGPUGetVendorString(physicalDeviceProperties.properties.vendorID));
         ffStrbufInitS(&gpu->driver, driverProperties.driverInfo);
         ffStrbufInit(&gpu->memoryType);

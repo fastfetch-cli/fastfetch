@@ -73,6 +73,7 @@ bool ffGenerateVulkanJsonResult([[maybe_unused]] FFVulkanOptions* options, yyjso
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "apiVersion", &result->apiVersion);
     yyjson_mut_obj_add_strbuf(doc, obj, "conformanceVersion", &result->conformanceVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "instanceVersion", &result->instanceVersion);
     yyjson_mut_obj_add_strbuf(doc, obj, "driver", &result->driver);
     yyjson_mut_val* gpus = yyjson_mut_obj_add_arr(doc, obj, "gpus");
     FF_LIST_FOR_EACH (FFGPUResult, vulkanGpu, result->gpus) {
@@ -96,7 +97,7 @@ bool ffGenerateVulkanJsonResult([[maybe_unused]] FFVulkanOptions* options, yyjso
             }
 
             if (vulkanGpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) {
-                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", vulkanGpu->dedicated.total);
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", vulkanGpu->dedicated.used);
             } else {
                 yyjson_mut_obj_add_null(doc, dedicatedMemory, "used");
             }
@@ -116,8 +117,6 @@ bool ffGenerateVulkanJsonResult([[maybe_unused]] FFVulkanOptions* options, yyjso
                 yyjson_mut_obj_add_null(doc, sharedMemory, "used");
             }
         }
-
-        yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->deviceId);
     }
 
     return true;
@@ -168,5 +167,5 @@ FFModuleBaseInfo ffVulkanModuleInfo = {
         { "Conformance version", "conformance-version" },
         { "Instance version", "instance-version" },
     })),
-    .defaultOrder = 54,
+    .defaultOrder = 55,
 };

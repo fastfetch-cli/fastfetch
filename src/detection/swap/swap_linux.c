@@ -19,11 +19,11 @@ static const char* detectByProcMeminfo(FFlist* result) {
 
     char* token = nullptr;
     if ((token = strstr(buf, "SwapTotal:")) != nullptr) {
-        swapTotal = strtoul(token + strlen("SwapTotal:"), nullptr, 10);
+        swapTotal = (uint64_t) strtoull(token + strlen("SwapTotal:"), nullptr, 10);
     }
 
     if ((token = strstr(buf, "SwapFree:")) != nullptr) {
-        swapFree = strtoul(token + strlen("SwapFree:"), nullptr, 10);
+        swapFree = (uint64_t) strtoull(token + strlen("SwapFree:"), nullptr, 10);
     }
 
     FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);

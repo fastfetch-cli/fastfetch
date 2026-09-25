@@ -136,5 +136,5 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         { "Compiler used when compiling", "compiler" },
         { "Libc used when compiling", "libc" },
     })),
-    .defaultOrder = 70,
+    .defaultOrder = 71,
 };

@@ -28,7 +28,6 @@
 #elif defined(__OpenBSD__)
     #include <sys/param.h>
     #include <sys/sysctl.h>
-    #include <kvm.h>
 #elif defined(__NetBSD__)
     #include <sys/types.h>
     #include <sys/sysctl.h>
@@ -57,7 +56,7 @@ static inline int ffPipe2(int* fds, int flags) {
 }
 
 // Not thread-safe
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle) {
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
     int pipes[2];
     if (ffPipe2(pipes, O_CLOEXEC) == -1) {
         return "pipe() failed";
@@ -78,6 +77,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     posix_spawn_file_actions_init(&file_actions);
     posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
     posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+    if (ffIsValidNativeFD(stdinFd)) {
+        posix_spawn_file_actions_adddup2(&file_actions, stdinFd, STDIN_FILENO);
+    }
 
     static char* oldLang = nullptr;
     static int langIndex = -1;
@@ -143,6 +145,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
         // Child process
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        if (ffIsValidNativeFD(stdinFd)) {
+            dup2(stdinFd, STDIN_FILENO);
+        }
         putenv("LANG=C.UTF-8");
         execvp(argv[0], argv);
         _exit(127);
@@ -423,12 +428,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
 #elif defined(__OpenBSD__)
 
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
-    if (proc) {
-        char** argv = kvm_getargv(kd, proc, 0);
-        if (argv) {
+    char argvBuf[ARG_MAX];
+    size_t argvSize = sizeof(argvBuf);
+    int argvMib[] = { CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_ARGV };
+    if (sysctl(argvMib, ARRAY_SIZE(argvMib), argvBuf, &argvSize, nullptr, 0) == 0) {
+        // The buffer is filled with an array of char pointers followed by the strings themselves
+        char** argv = (char**) argvBuf;
+        if (argv[0] && (char*) argv[0] >= argvBuf && (char*) argv[0] < argvBuf + argvSize) {
             const char* arg0 = argv[0];
             if (arg0[0] == '-') {
                 arg0++;
@@ -436,7 +442,6 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             ffStrbufSetS(exe, arg0);
         }
     }
-    kvm_close(kd);
 
 #elif defined(__HAIKU__)
 
@@ -633,21 +638,19 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
 #elif defined(__OpenBSD__)
 
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
-    if (proc) {
-        ffStrbufSetS(name, proc->p_comm);
+    struct kinfo_proc proc;
+    size_t size = sizeof(proc);
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid, (int) sizeof(struct kinfo_proc), 1 };
+    if (sysctl(mib, ARRAY_SIZE(mib), &proc, &size, nullptr, 0) == 0) {
+        ffStrbufSetS(name, proc.p_comm);
         if (ppid) {
-            *ppid = proc->p_ppid;
+            *ppid = proc.p_ppid;
         }
         if (tty) {
-            *tty = (int) proc->p_tdev;
+            *tty = (int) proc.p_tdev;
         }
-    }
-    kvm_close(kd);
-    if (!proc) {
-        return "kvm_getprocs() failed";
+    } else {
+        return "sysctl(KERN_PROC_PID) failed";
     }
 
 #elif defined(__HAIKU__)

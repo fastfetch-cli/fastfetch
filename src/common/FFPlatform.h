@@ -8,7 +8,10 @@ typedef struct FFPlatformSysinfo {
     FFstrbuf release;
     FFstrbuf version;
     FFstrbuf architecture;
-    uint32_t pageSize;
+    // The base-2 logarithm of the memory page size, i.e. a page is `1 << pageSizeShift` bytes.
+    // Page sizes are powers of two on every supported platform. Storing the exponent instead of
+    // the byte count keeps page count arithmetic in 64 bits and makes the invariant explicit.
+    uint32_t pageSizeShift;
 } FFPlatformSysinfo;
 
 typedef struct FFPlatform {

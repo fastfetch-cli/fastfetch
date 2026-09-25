@@ -168,6 +168,17 @@ static const char* getNiri(FFstrbuf* result) {
     return "Failed to run command `niri --version`";
 }
 
+static const char* getUmbriel(FFstrbuf* result) {
+    if (ffProcessAppendStdOut(result, (char* const[]) { "umbriel", "--version", nullptr }) == nullptr) { // umbriel 0.1.0 (7a448abe550e)
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeLastC(result, '(');
+        ffStrbufTrimRightSpace(result);
+        return nullptr;
+    }
+
+    return "Failed to run command `umbriel --version`";
+}
+
 static const char* getWeston(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("weston", &path);
@@ -325,6 +336,10 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_
 
     if (ffStrbufEqualS(wmName, "niri")) {
         return getNiri(result);
+    }
+
+    if (ffStrbufEqualS(wmName, "umbriel")) {
+        return getUmbriel(result);
     }
 
     if (ffStrbufEqualS(wmName, "weston")) {

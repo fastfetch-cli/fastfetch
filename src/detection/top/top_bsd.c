@@ -6,7 +6,7 @@
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, [[maybe_unused]] FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_PROC };
     size_t length;
 
@@ -22,7 +22,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (uint32_t i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &processes[i];
@@ -44,7 +44,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
             (uint64_t) proc->ki_rusage.ru_stime.tv_usec / 1000;
         item->cpuTime = userMs + sysMs;
 
-        item->memBytes = (uint64_t) proc->ki_rssize * (uint64_t) pageSize;
+        item->memBytes = (uint64_t) proc->ki_rssize << pageSizeShift;
 
         item->startTime = (uint64_t) proc->ki_start.tv_sec * 1000 +
             (uint64_t) proc->ki_start.tv_usec / 1000;

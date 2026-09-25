@@ -18,7 +18,6 @@
 #elif __OpenBSD__
     #include <sys/param.h>
     #include <sys/sysctl.h>
-    #include <kvm.h>
 #elif __sun
     #include <procfs.h>
 #elif __NetBSD__
@@ -55,7 +54,7 @@ static const char* getSshdVersion(FFstrbuf* version) {
 #ifdef FF_HAVE_ZLIB
     #include "common/library.h"
     #include "common/path.h"
-    
+
     #include <stdlib.h>
     #include <zlib.h>
 
@@ -274,19 +273,27 @@ const char* detectByProcesses(FFLMResult* result) {
         }
     }
 #elif __OpenBSD__
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, 0, sizeof(*proc), &count);
-    if (proc) {
-        for (int i = 0; i < count; ++i) {
-            const char* lm = testLms(proc[i].p_comm);
-            if (lm) {
-                ffStrbufSetStatic(&result->service, lm);
-                break;
-            }
+    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_UID, 0, (int) sizeof(struct kinfo_proc), 0 };
+    size_t length = 0;
+
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
+    }
+
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
+    }
+
+    int count = (int) (length / sizeof(struct kinfo_proc));
+    for (int i = 0; i < count; ++i) {
+        const char* lm = testLms(procs[i].p_comm);
+        if (lm) {
+            ffStrbufSetStatic(&result->service, lm);
+            break;
         }
     }
-    kvm_close(kd);
 #elif __sun
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if (procdir == nullptr) {

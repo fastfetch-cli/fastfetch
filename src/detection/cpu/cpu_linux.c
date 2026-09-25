@@ -321,7 +321,7 @@ static void detectMediaTek(FFCPUResult* cpu) {
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
         case 6995:
-            name = "9600";
+            name = "9600 Pro";
             break;
         case 6993:
             name = "9500";
@@ -619,6 +619,9 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
 #elif __sh__
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
+#elif __sparc__ || __sparc
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "Cpu0ClkTck :", cpuMHz)) ||
 #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -703,6 +706,68 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     return true;
 }
 
+// Also used in tests/cpu.c
+bool ffCPUQualcommSnapdragonToName(FFstrbuf* name, const char* model) {
+    // X2 device trees use platform codenames rather than exact retail part
+    // numbers. qcom,glymur is used by X2 Elite Extreme boards, qcom,mahua by
+    // X2 Elite boards, and qcom,kalambo by X2 Plus boards. Do not append a
+    // part number from /sys/bus/soc/devices/soc0/soc_id: it contains
+    // SMEM_HW_SW_BUILD_ID.id (the platform ID), 662 is unnamed in the public
+    // qcom,ids.h, and one compatible can cover multiple retail SKUs.
+    // https://github.com/fastfetch-cli/fastfetch/issues/2611
+    if (ffStrEquals(model, "glymur")) {
+        ffStrbufSetS(name, "Qualcomm Snapdragon X2 Elite Extreme");
+        return true;
+    }
+    if (ffStrEquals(model, "mahua")) {
+        ffStrbufSetS(name, "Qualcomm Snapdragon X2 Elite");
+        return true;
+    }
+    if (ffStrEquals(model, "kalambo")) {
+        ffStrbufSetS(name, "Qualcomm Snapdragon X2 Plus");
+        return true;
+    }
+
+    // SoC models are enumerated in the form of `x<gen>[e|p]<part><rev>`, e.g. `x1e80100`,
+    // which is marketed as `X1E-80-100`, where `e` stands for Elite and `p` for Plus.
+    // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips#Snapdragon_X_series
+    const char* prefix;
+    uint32_t prefixLen;
+
+    if (ffStrStartsWith(model, "x1e")) {
+        prefix = "Qualcomm Snapdragon X Elite";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x1p")) {
+        prefix = "Qualcomm Snapdragon X Plus";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x2e")) {
+        // Only X2E-94-100 and X2E-96-100 are branded as Extreme
+        bool extreme = ffStrStartsWith(model, "x2e94") || ffStrStartsWith(model, "x2e96");
+        prefix = extreme ? "Qualcomm Snapdragon X2 Elite Extreme" : "Qualcomm Snapdragon X2 Elite";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x2p")) {
+        prefix = "Qualcomm Snapdragon X2 Plus";
+        prefixLen = 3;
+    } else if (ffStrStartsWith(model, "x1")) {
+        prefix = "Qualcomm Snapdragon X";
+        prefixLen = 2;
+    } else {
+        return false;
+    }
+
+    uint32_t length = (uint32_t) strlen(model);
+    bool splitCode = length - prefixLen == 5;
+
+    ffStrbufSetF(name, "%s X", prefix);
+    for (uint32_t i = 1; i < length; ++i) {
+        if (i == prefixLen || (splitCode && i == length - 3)) {
+            ffStrbufAppendC(name, '-');
+        }
+        ffStrbufAppendC(name, (char) toupper(model[i]));
+    }
+    return true;
+}
+
 #if __i386__ || __x86_64__
 
 [[maybe_unused]] static uint16_t getPackageCount(FFstrbuf* cpuinfo) {
@@ -712,7 +777,7 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:")))) {
         p += strlen("\nphysical id\t:");
         char* pend;
-        unsigned long long id = strtoul(p, &pend, 10);
+        unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
             high |= 1ULL << (id - 64);
         } else {
@@ -837,46 +902,6 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     return nullptr;
 }
 
-[[maybe_unused]] static bool detectSnapdragonX(FFstrbuf* name, const char* model) {
-    // SoC models are enumerated in the form of `x<gen>[e|p]<part><rev>`, e.g. `x1e80100`,
-    // which is marketed as `X1E-80-100`, where `e` stands for Elite and `p` for Plus.
-    // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips#Snapdragon_X_series
-    const char* prefix;
-    uint32_t prefixLen;
-
-    if (ffStrStartsWith(model, "x1e")) {
-        prefix = "Qualcomm Snapdragon X Elite";
-        prefixLen = 3;
-    } else if (ffStrStartsWith(model, "x1p")) {
-        prefix = "Qualcomm Snapdragon X Plus";
-        prefixLen = 3;
-    } else if (ffStrStartsWith(model, "x2e")) {
-        // Only X2E-94-100 and X2E-96-100 are branded as Extreme
-        prefix = model[3] == '9' ? "Qualcomm Snapdragon X2 Elite Extreme" : "Qualcomm Snapdragon X2 Elite";
-        prefixLen = 3;
-    } else if (ffStrStartsWith(model, "x2p")) {
-        prefix = "Qualcomm Snapdragon X2 Plus";
-        prefixLen = 3;
-    } else if (ffStrStartsWith(model, "x1")) {
-        prefix = "Qualcomm Snapdragon X";
-        prefixLen = 2;
-    } else {
-        return false;
-    }
-
-    uint32_t length = (uint32_t) strlen(model);
-    bool splitCode = length - prefixLen == 5;
-
-    ffStrbufSetF(name, "%s X", prefix);
-    for (uint32_t i = 1; i < length; ++i) {
-        if (i == prefixLen || (splitCode && i == length - 3)) {
-            ffStrbufAppendC(name, '-');
-        }
-        ffStrbufAppendC(name, (char) toupper(model[i]));
-    }
-    return true;
-}
-
 [[maybe_unused]] static void parseIsa(FFstrbuf* cpuIsa) {
     // Always use the last part of the ISA string. Ref: #590 #1204
     ffStrbufSubstrAfterLastC(cpuIsa, ' ');
@@ -979,7 +1004,7 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     #endif
     else if (ffStrEquals(vendor, "qcom")) {
         // https://elixir.bootlin.com/linux/latest/source/arch/arm64/boot/dts/qcom
-        if (!detectSnapdragonX(&cpu->name, model)) {
+        if (!ffCPUQualcommSnapdragonToName(&cpu->name, model)) {
             if (ffStrStartsWith(model, "sc")) {
                 const char* code = model + 2;
                 uint32_t deviceId = (uint32_t) strtoul(code, nullptr, 10);
@@ -1101,6 +1126,10 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         if (cpu->name.length) {
             ffStrbufPrependS(&cpu->name, "Machine ");
         }
+    #elif __sparc__ || __sparc
+        // Cpu0ClkTck is in Hz, printed as "%016lx" by sparc64 and "%ld" by sparc32. A 32-bit userland can run
+        // on a 64-bit kernel, so take the base from the width of the value rather than from our own bitness.
+        cpu->frequencyBase = (uint32_t) (strtoull(cpuMHz.chars, nullptr, cpuMHz.length == 16 ? 16 : 10) / 1000000);
     #endif
     }
 

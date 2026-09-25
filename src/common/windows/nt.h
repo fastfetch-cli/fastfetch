@@ -13,6 +13,8 @@ enum {
     SystemLogicalProcessorAndGroupInformation = 107,
     SystemBasicPerformanceInformation = 123,
     SystemSecureBootInformation = 146,
+    SystemBasicProcessInformation = 252,
+    SystemHandleCountInformation = 253,
 };
 
 typedef struct _PROCESSOR_POWER_INFORMATION {
@@ -205,6 +207,20 @@ typedef struct _SYSTEM_BASIC_PERFORMANCE_INFORMATION {
     SIZE_T CommitLimit;
     SIZE_T PeakCommitment;
 } SYSTEM_BASIC_PERFORMANCE_INFORMATION, *PSYSTEM_BASIC_PERFORMANCE_INFORMATION;
+
+typedef struct _SYSTEM_BASICPROCESS_INFORMATION {
+    ULONG NextEntryOffset;
+    HANDLE UniqueProcessId;
+    HANDLE InheritedFromUniqueProcessId;
+    ULONG64 SequenceNumber;
+    UNICODE_STRING ImageName;
+} SYSTEM_BASICPROCESS_INFORMATION, *PSYSTEM_BASICPROCESS_INFORMATION;
+
+typedef struct _SYSTEM_HANDLECOUNT_INFORMATION {
+    ULONG ProcessCount;
+    ULONG ThreadCount;
+    ULONG HandleCount;
+} SYSTEM_HANDLECOUNT_INFORMATION, *PSYSTEM_HANDLECOUNT_INFORMATION;
 
 NTSYSAPI NTSTATUS NTAPI NtDelayExecution(_In_ BOOLEAN Alertable, _In_ PLARGE_INTEGER DelayInterval);
 
@@ -691,15 +707,19 @@ static inline uint64_t ffKSystemTimeToUInt64(const volatile KSYSTEM_TIME* pTime)
 
 static inline bool ffIsWindows10OrGreater() {
 #if FF_WIN81_COMPAT
-    return SharedUserData->NtMajorVersion >= 10;
+    return SharedUserData->NtBuildNumber >= 10240;
 #else
     return true;
 #endif
 }
 
 static inline bool ffIsWindows11OrGreater() {
-    return SharedUserData->NtMajorVersion > 10 ||
-        (SharedUserData->NtMajorVersion == 10 && SharedUserData->NtBuildNumber >= 22000);
+    return SharedUserData->NtBuildNumber >= 22000;
+}
+
+static inline bool ffIsSystemBasicProcessInfoAvailable() { // Includes HandleCountInformation, which was added together
+    // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation#systembasicprocessinformation
+    return SharedUserData->NtBuildNumber >= 26200; // MSDN says it was added in 26100.4770; ntdoc says 25H2
 }
 
 NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
@@ -1287,19 +1307,23 @@ typedef struct _KEY_BASIC_INFORMATION {
     _Field_size_bytes_(NameLength) WCHAR Name[]; // The name of the registry key. This string is not null-terminated.
 } KEY_BASIC_INFORMATION, *PKEY_BASIC_INFORMATION;
 
-typedef struct _KEY_FULL_INFORMATION {
-    LARGE_INTEGER LastWriteTime;
-    ULONG TitleIndex;
-    ULONG ClassOffset;
-    ULONG ClassLength;
-    ULONG SubKeys;
-    ULONG MaxNameLength;
-    ULONG MaxClassLength;
-    ULONG Values;
-    ULONG MaxValueNameLength;
-    ULONG MaxValueDataLength;
-    WCHAR Class[];
-} KEY_FULL_INFORMATION, *PKEY_FULL_INFORMATION;
+typedef struct _KEY_CACHED_INFORMATION {
+    LARGE_INTEGER LastWriteTime; // Number of 100-nanosecond intervals since this key or any of its values changed.
+    ULONG TitleIndex;            // Reserved // A legacy field originally intended for use with localization such as an index of a resource table.
+    ULONG SubKeys;               // The number of subkeys for a key.
+    ULONG MaxNameLen;            // The maximum length, in bytes, of a subkey name.
+    ULONG Values;                // The number of value entries.
+    ULONG MaxValueNameLen;       // The maximum length, in bytes, of a value entry name.
+    ULONG MaxValueDataLen;       // The maximum length, in bytes, of a value entry data field.
+    ULONG NameLength;            // Size, in bytes, of the key's own (leaf) name, without the terminator. The name itself is not stored.
+} KEY_CACHED_INFORMATION, *PKEY_CACHED_INFORMATION;
+// 36 bytes of members, but LARGE_INTEGER makes the struct 8-byte aligned, and that is exactly what
+// the kernel demands: a 36-byte buffer is rejected with STATUS_BUFFER_TOO_SMALL (measured).
+// The kernel writes all 40 bytes -- the 4 padding bytes included, zeroed -- and reports
+// ResultLength = 40 whatever size you pass, so a larger buffer buys nothing (measured 40..4096).
+// This is the only information class that never appends a string: NameLength is the length of the
+// key's own (leaf) name in bytes without the terminator, and the name itself is not returned.
+static_assert(sizeof(KEY_CACHED_INFORMATION) == 40, "KEY_CACHED_INFORMATION should be 40 bytes");
 
 NTSYSAPI NTSTATUS NTAPI NtQueryKey(
     _In_ HANDLE KeyHandle,

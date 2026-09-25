@@ -5,6 +5,17 @@
 #include "detection/editor/editor.h"
 #include "modules/editor/editor.h"
 
+// `FFEditorResult` owns four buffers and has no destructor of its own. Both entry points below
+// have to free them on the error path too — which used to be skipped, and which became the common
+// path once `ffDetectEditor()` started reporting an `$EDITOR` that does not name an executable
+// instead of quietly succeeding.
+static void destroyEditorResult(FFEditorResult* result) {
+    ffStrbufDestroy(&result->name);
+    ffStrbufDestroy(&result->path);
+    ffStrbufDestroy(&result->exe);
+    ffStrbufDestroy(&result->version);
+}
+
 bool ffPrintEditor(FFEditorOptions* options) {
     FFEditorResult result = {
         .type = "Unknown",
@@ -17,6 +28,7 @@ bool ffPrintEditor(FFEditorOptions* options) {
 
     if (error) {
         ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Editor), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        destroyEditorResult(&result);
         return false;
     }
 
@@ -41,10 +53,7 @@ bool ffPrintEditor(FFEditorOptions* options) {
                                                                                                        }));
     }
 
-    ffStrbufDestroy(&result.name);
-    ffStrbufDestroy(&result.path);
-    ffStrbufDestroy(&result.exe);
-    ffStrbufDestroy(&result.version);
+    destroyEditorResult(&result);
 
     return true;
 }
@@ -76,6 +85,7 @@ bool ffGenerateEditorJsonResult([[maybe_unused]] FFEditorOptions* options, yyjso
 
     if (error) {
         yyjson_mut_obj_add_str(doc, module, "error", error);
+        destroyEditorResult(&result);
         return false;
     }
 
@@ -86,10 +96,7 @@ bool ffGenerateEditorJsonResult([[maybe_unused]] FFEditorOptions* options, yyjso
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result.exe);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
 
-    ffStrbufDestroy(&result.name);
-    ffStrbufDestroy(&result.path);
-    ffStrbufDestroy(&result.exe);
-    ffStrbufDestroy(&result.version);
+    destroyEditorResult(&result);
 
     return true;
 }

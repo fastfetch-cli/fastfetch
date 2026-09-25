@@ -26,15 +26,16 @@
 //  0: title
 //  1: blank
 //  2: logo type row
-//  3: output mode row
-//  4: blank
-//  5: modules title row
-//  6: blank
-//  7..7+listRows-1: module grid
-//  7+listRows: description row
-//  8+listRows: help line 1
-//  9+listRows: help line 2
-#define FF_GEN_CONFIG_LIST_TOP 7
+//  3: logo position row
+//  4: output mode row
+//  5: blank
+//  6: modules title row
+//  7: blank
+//  8..8+listRows-1: module grid
+//  8+listRows: description row
+//  9+listRows: help line 1
+// 10+listRows: help line 2
+#define FF_GEN_CONFIG_LIST_TOP 8
 #define FF_GEN_CONFIG_BOTTOM_CHROME 3
 
 // Poll wait timeout (ms) while idle. A longer wait avoids frequent full-screen
@@ -66,6 +67,7 @@ typedef struct FFGenConfigUI {
     uint32_t cursor;
     uint32_t viewOffset;
     FFLogoType logoType;
+    FFLogoPosition logoPosition;
     bool fullConfig;
     bool confirmingOverwrite;
     uint16_t rows;
@@ -165,7 +167,7 @@ static void enterRawMode(void) {
 
 static void getTerminalSize(uint16_t* rows, uint16_t* cols) {
     FFTerminalSizeResult size;
-    if (ffDetectTerminalSize(&size) && size.rows > 0 && size.columns > 0) {
+    if (ffDetectTerminalSize(&size, true) && size.rows > 0 && size.columns > 0) {
         *rows = size.rows;
         *cols = size.columns;
     } else {
@@ -248,8 +250,8 @@ static void removeAllBreaksSeparators(FFGenConfigUI* ui) {
 
 static void computeLayout(FFGenConfigUI* ui) {
     FFGenConfigLayout* layout = &ui->layout;
-    if (ui->rows < 10) {
-        ui->rows = 10;
+    if (ui->rows < 11) {
+        ui->rows = 11;
     }
     int32_t listRows = (int32_t) ui->rows - FF_GEN_CONFIG_LIST_TOP - FF_GEN_CONFIG_BOTTOM_CHROME;
     layout->listRows = listRows < 0 ? 0 : (uint16_t) listRows;
@@ -365,6 +367,26 @@ static void cycleLogoType(FFGenConfigUI* ui, int delta) {
             ui->logoType = delta > 0 ? FF_LOGO_TYPE_AUTO : FF_LOGO_TYPE_SMALL;
             break;
     }
+}
+
+static void cycleLogoPosition(FFGenConfigUI* ui, int delta) {
+    static const FFLogoPosition positions[] = {
+        FF_LOGO_POSITION_AUTO,
+        FF_LOGO_POSITION_LEFT,
+        FF_LOGO_POSITION_RIGHT,
+        FF_LOGO_POSITION_TOP,
+    };
+
+    uint32_t index = 0;
+    for (uint32_t i = 0; i < ARRAY_SIZE(positions); ++i) {
+        if (positions[i] == ui->logoPosition) {
+            index = i;
+            break;
+        }
+    }
+
+    index = (index + (delta > 0 ? 1 : ARRAY_SIZE(positions) - 1)) % ARRAY_SIZE(positions);
+    ui->logoPosition = positions[index];
 }
 
 static uint32_t countSelectedModules(const FFlist* items) {
@@ -558,7 +580,46 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
-    // Row 3: output mode
+    // Row 3: logo position
+    rowInit(&row, cols);
+    rowAppendVisual(&row, "  ");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD "m");
+    rowAppendVisual(&row, "Logo ");
+    rowAppendRaw(&row, "\e[" FF_COLOR_MODE_UNDERLINE_ "m");
+    rowAppendVisual(&row, "p");
+    rowAppendRaw(&row, "\e[24m"); // Reset underline
+    rowAppendVisual(&row, "osition:");
+    rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
+    rowAppendVisual(&row, "  ");
+    drawLogoOption(&row, "auto", ui->logoPosition == FF_LOGO_POSITION_AUTO);
+    rowAppendVisual(&row, "  ");
+    drawLogoOption(&row, "left", ui->logoPosition == FF_LOGO_POSITION_LEFT);
+    rowAppendVisual(&row, "  ");
+    drawLogoOption(&row, "right", ui->logoPosition == FF_LOGO_POSITION_RIGHT);
+    rowAppendVisual(&row, "  ");
+    drawLogoOption(&row, "top", ui->logoPosition == FF_LOGO_POSITION_TOP);
+    if (cols >= 120) {
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_SOFT);
+        switch (ui->logoPosition) {
+            case FF_LOGO_POSITION_AUTO:
+                rowAppendVisual(&row, " - Choose left or top from terminal width");
+                break;
+            case FF_LOGO_POSITION_RIGHT:
+                rowAppendVisual(&row, " - Place the logo to the right");
+                break;
+            case FF_LOGO_POSITION_TOP:
+                rowAppendVisual(&row, " - Place the logo above module output");
+                break;
+            case FF_LOGO_POSITION_LEFT:
+            default:
+                rowAppendVisual(&row, " - Place the logo to the left");
+                break;
+        }
+        rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
+    }
+    finishRow(&row, out, ++rowCount == ui->rows);
+
+    // Row 4: output mode
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
     rowAppendRaw(&row, "\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE_ "m");
@@ -581,11 +642,11 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     }
     finishRow(&row, out, ++rowCount == ui->rows);
 
-    // Row 4: blank
+    // Row 5: blank
     rowInit(&row, cols);
     finishRow(&row, out, ++rowCount == ui->rows);
 
-    // Row 5: modules title
+    // Row 6: modules title
     rowInit(&row, cols);
     rowAppendVisual(&row, "  ");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_BOLT);
@@ -596,7 +657,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
 
-    // Row 6: blank
+    // Row 7: blank
     rowInit(&row, cols);
     finishRow(&row, out, ++rowCount == ui->rows);
 
@@ -618,7 +679,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
         finishRow(&row, out, ++rowCount == ui->rows);
     }
 
-    // Row after grid: description
+    // Row 9+listRows: description
     rowInit(&row, cols);
     if (ui->cursor < ui->items.length) {
         const FFGenConfigItem* item = FF_LIST_GET(FFGenConfigItem, ui->items, ui->cursor);
@@ -650,7 +711,7 @@ static void renderFrame(FFGenConfigUI* ui, FFstrbuf* out) {
 
     rowInit(&row, cols);
     rowAppendRaw(&row, "\e[" FF_COLOR_MODE_DIM_ "m");
-    rowAppendVisual(&row, "  l/L logo  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
+    rowAppendVisual(&row, "  l/L logo  p/P position  o minimal/full  s/Enter save  q/Esc quit  g/G top/bottom");
     rowAppendRaw(&row, FASTFETCH_TEXT_MODIFIER_RESET);
     finishRow(&row, out, ++rowCount == ui->rows);
 
@@ -904,6 +965,10 @@ static int handleKey(FFGenConfigUI* ui, FFGenConfigKey key, char ch, bool fileEx
                 cycleLogoType(ui, 1);
             } else if (ch == 'L') {
                 cycleLogoType(ui, -1);
+            } else if (ch == 'p') {
+                cycleLogoPosition(ui, 1);
+            } else if (ch == 'P') {
+                cycleLogoPosition(ui, -1);
             } else if (ch == '\x03' || ch == '\x04' || ch == '\x1a' || ch == '\x1c') {
                 return 0;
             }
@@ -940,6 +1005,18 @@ static FFLogoType initialLogoType(void) {
     }
 }
 
+static FFLogoPosition initialLogoPosition(void) {
+    switch (instance.config.logo.position) {
+        case FF_LOGO_POSITION_TOP:
+        case FF_LOGO_POSITION_RIGHT:
+        case FF_LOGO_POSITION_AUTO:
+            return instance.config.logo.position;
+        case FF_LOGO_POSITION_LEFT:
+        default:
+            return FF_LOGO_POSITION_LEFT;
+    }
+}
+
 static bool applyConfig(FFdata* data, const FFlist* items, bool fullConfig) {
     if (data->resultDoc) {
         fputs("Error: duplicated `--gen-config` or `--format json` flags found\n", stderr);
@@ -972,6 +1049,7 @@ bool ffGenConfigInteractive(FFdata* data) {
         .cursor = 0,
         .viewOffset = 0,
         .logoType = initialLogoType(),
+        .logoPosition = initialLogoPosition(),
         .fullConfig = false,
         .confirmingOverwrite = false,
         .rows = 24,
@@ -993,6 +1071,7 @@ bool ffGenConfigInteractive(FFdata* data) {
     if (result == 1) {
         if (applyConfig(data, &ui.items, ui.fullConfig)) {
             instance.config.logo.type = ui.logoType;
+            instance.config.logo.position = ui.logoPosition;
             success = true;
         }
     } else {

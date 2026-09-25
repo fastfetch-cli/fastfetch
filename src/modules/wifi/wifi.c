@@ -261,5 +261,5 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         { "Connection channel width in MHz", "channel-width" },
         { "Connection channel band in GHz", "band" },
     })),
-    .defaultOrder = 51,
+    .defaultOrder = 52,
 };

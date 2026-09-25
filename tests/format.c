@@ -147,6 +147,23 @@ int main(void) {
         VERIFY("output({1~2})", "\e[30;47m12345\e[m", "output(\e[30;47m345\e[m)");
     }
 
+    {
+        // All leading escape codes must be skipped, not just the first one
+        VERIFY("output({1:3})", "\e[31m\e[1m12345", "output(\e[31m\e[1m123)");
+        VERIFY("output({1:-3})", "\e[31m\e[1m12345", "output(\e[31m\e[1m123…)");
+        VERIFY("output({1<8})", "\e[31m\e[1m12345", "output(\e[31m\e[1m12345   )");
+        VERIFY("output({1~2})", "\e[31m\e[1m12345", "output(\e[31m\e[1m345)");
+
+        // ... and so must all trailing ones
+        VERIFY("output({1:3})", "\e[31m\e[1m12345\e[m\e[39m", "output(\e[31m\e[1m123\e[m\e[39m)");
+        VERIFY("output({1~2})", "\e[31m\e[1m12345\e[m\e[39m", "output(\e[31m\e[1m345\e[m\e[39m)");
+        VERIFY("output({1<8})", "\e[31m\e[1m12345\e[m\e[39m", "output(\e[31m\e[1m12345   \e[m\e[39m)");
+
+        // `\e[?25l` is a complete CSI sequence, not just `\e[?`
+        VERIFY("output({1:3})", "\e[?25l12345", "output(\e[?25l123)");
+        VERIFY("output({1~4})", "\e[?25l12345", "output(\e[?25l5)");
+    }
+
 #ifndef _WIN32 // Windows doesn't have setenv
     {
         ffListInit(&instance.config.display.constants);

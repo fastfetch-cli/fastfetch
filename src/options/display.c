@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/color.h"
+#include "common/io.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/strutil.h"
@@ -286,11 +287,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) {
                 if (!yyjson_is_uint(ndigits)) {
-                    return "display.temperature.ndigits must be an unsigned integer";
+                    return "display.temp.ndigits must be an unsigned integer";
                 }
                 uint64_t val = yyjson_get_uint(ndigits);
                 if (val > 9) {
-                    return "display.temperature.ndigits must be between 0 and 9";
+                    return "display.temp.ndigits must be between 0 and 9";
                 }
                 options->tempNdigits = (uint8_t) val;
             }
@@ -298,7 +299,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color) {
                 if (!yyjson_is_obj(color)) {
-                    return "display.temperature.color must be an object";
+                    return "display.temp.color must be an object";
                 }
 
                 yyjson_val* green = yyjson_obj_get(color, "green");
@@ -952,7 +953,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
-    options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
+    options->pipe = !ffIsTerminal(STDOUT_FILENO) || !!getenv("NO_COLOR");
     options->disableLinewrap = false;
 
 #ifndef NDEBUG

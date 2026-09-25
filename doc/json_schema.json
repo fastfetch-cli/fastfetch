@@ -19,15 +19,14 @@
         },
         "key": {
             "description": "Module key\nUse a single space (` `) to hide the key",
-            "type": "string",
-            "minLength": 1
+            "type": "string"
         },
         "keyColor": {
-            "description": "Color of the module key. Overrides `display.color.key`",
+            "description": "Color of the module key. Overrides `display.color.keys`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key. Overrides `display.keyWidth`",
+            "description": "Width of the module key. Overrides `display.key.width`",
             "type": "integer",
             "minimum": 1
         },
@@ -131,7 +130,9 @@
                 "SunOS",
                 "OpenBSD",
                 "NetBSD",
-                "Haiku"
+                "Haiku",
+                "GNU",
+                "Unknown"
             ]
         },
         "architectures": {
@@ -150,7 +151,9 @@
                 "sparc",
                 "alpha",
                 "hppa",
-                "m68k"
+                "sh",
+                "m68k",
+                "Unknown"
             ]
         },
         "conditions": {
@@ -274,19 +277,19 @@
 
 
         "batteryFormat": {
-            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
+            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {name}: Battery model name *\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
-            "description": "Output format for the `BIOS` module. See Wiki for formatting syntax\n    1. {date}: BIOS date\n    2. {release}: BIOS release\n    3. {vendor}: BIOS vendor\n    4. {version}: BIOS version\n    5. {type}: Firmware type",
+            "description": "Output format for the `BIOS` module. See Wiki for formatting syntax\n    1. {date}: BIOS date\n    2. {release}: BIOS release\n    3. {vendor}: BIOS vendor\n    4. {version}: BIOS version\n    5. {type}: Firmware type *",
             "type": "string"
         },
         "bluetoothFormat": {
-            "description": "Output format for the `Bluetooth` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {battery-percentage}: Battery percentage number\n    5. {connected}: Is connected\n    6. {battery-percentage-bar}: Battery percentage bar",
+            "description": "Output format for the `Bluetooth` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {device-type}: Bluetooth stacks the device answers on\n    5. {battery-percentage}: Battery percentage number\n    6. {battery-percentage-bar}: Battery percentage bar\n    7. {signal-quality}: Signal quality number\n    8. {signal-quality-bar}: Signal quality bar\n    9. {connected}: Is connected",
             "type": "string"
         },
         "bluetoothradioFormat": {
-            "description": "Output format for the `BluetoothRadio` module. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
+            "description": "Output format for the `BluetoothRadio` module. See Wiki for formatting syntax\n    1. {name}: Radio name for discovering *\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
             "type": "string"
         },
         "boardFormat": {
@@ -298,11 +301,11 @@
             "type": "string"
         },
         "brightnessFormat": {
-            "description": "Output format for the `Brightness` module. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
+            "description": "Output format for the `Brightness` module. See Wiki for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name *\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
             "type": "string"
         },
         "btrfsFormat": {
-            "description": "Output format for the `Btrfs` module. See Wiki for formatting syntax\n    1. {name}: Name / Label\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
+            "description": "Output format for the `Btrfs` module. See Wiki for formatting syntax\n    1. {name}: Name / Label *\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
             "type": "string"
         },
         "cameraFormat": {
@@ -314,7 +317,7 @@
             "type": "string"
         },
         "codecFormat": {
-            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name\n    2. {direction}: Decoder / Encoder\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
+            "description": "Output format for the `Codec` module. See Wiki for formatting syntax\n    1. {gpu}: GPU name *\n    2. {direction}: Decoder / Encoder *\n    3. {types}: Compatibility alias of codec types\n    4. {platform-api}: Platform API used for detection",
             "type": "string"
         },
         "commandFormat": {
@@ -322,11 +325,11 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name\n    14. {technology}: CPU technology",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name (x86 only)\n    14. {technology}: CPU technology (x86 only)",
             "type": "string"
         },
         "cpucacheFormat": {
-            "description": "Output format for the `CPUCache` module. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result",
+            "description": "Output format for the `CPUCache` module. See Wiki for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result\n    3. {level}: Cache level *",
             "type": "string"
         },
         "cpuusageFormat": {
@@ -346,15 +349,15 @@
             "type": "string"
         },
         "displayFormat": {
-            "description": "Output format for the `Display` module. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name\n    7. {type}: Screen type (Built-in or External)\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
+            "description": "Output format for the `Display` module. See Wiki for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name *\n    7. {type}: Screen type (Built-in or External) *\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)\n    25. {dpi}: DPI",
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
+            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem *\n    10. {name}: Label / name *\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter *\n    21. {mount-from}: Mount from (device path) *\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
             "type": "string"
         },
         "diskioFormat": {
-            "description": "Output format for the `DiskIO` module. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
+            "description": "Output format for the `DiskIO` module. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name *\n    4. {dev-path}: Device raw file path *\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
             "type": "string"
         },
         "dnsFormat": {
@@ -390,7 +393,7 @@
             "type": "string"
         },
         "kernelFormat": {
-            "description": "Output format for the `Kernel` module. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {display-version}: Display version\n    6. {page-size}: Page size",
+            "description": "Output format for the `Kernel` module. See Wiki for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {page-size}: Page size",
             "type": "string"
         },
         "keyboardFormat": {
@@ -410,7 +413,7 @@
             "type": "string"
         },
         "localipFormat": {
-            "description": "Output format for the `LocalIp` module. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address\n    4. {ifname}: Interface name\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
+            "description": "Output format for the `LocalIp` module. See Wiki for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address *\n    4. {ifname}: Interface name *\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
             "type": "string"
         },
         "mediaFormat": {
@@ -422,7 +425,7 @@
             "type": "string"
         },
         "monitorFormat": {
-            "description": "Output format for the `Monitor` module. See Wiki for formatting syntax\n    1. {name}: Display name\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
+            "description": "Output format for the `Monitor` module. See Wiki for formatting syntax\n    1. {name}: Display name *\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
             "type": "string"
         },
         "mouseFormat": {
@@ -430,7 +433,7 @@
             "type": "string"
         },
         "netioFormat": {
-            "description": "Output format for the `NetIO` module. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
+            "description": "Output format for the `NetIO` module. See Wiki for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name *\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
             "type": "string"
         },
         "openclFormat": {
@@ -442,15 +445,15 @@
             "type": "string"
         },
         "osFormat": {
-            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel\n    2. {name}: Name of the OS\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
+            "description": "Output format for the `OS` module. See Wiki for formatting syntax\n    1. {sysname}: Name of the kernel *\n    2. {name}: Name of the OS *\n    3. {pretty-name}: Pretty name of the OS, if available\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS\n    13. {kernel-release}: Release of the kernel",
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format for the `Packages` module. See Wiki for formatting syntax\n    1. {am-system}: Number of am-system packages\n    2. {am-user}: Number of am-user (aka appman) packages\n    3. {appimage}: Number of appimage packages\n    4. {apk}: Number of apk packages\n    5. {brew}: Number of brew packages\n    6. {brew-cask}: Number of brew-cask packages\n    7. {cards}: Number of cards packages\n    8. {choco}: Number of choco packages\n    9. {dpkg}: Number of dpkg packages\n    10. {emerge}: Number of emerge packages\n    11. {eopkg}: Number of eopkg packages\n    12. {flatpak-system}: Number of flatpak-system app packages\n    13. {flatpak-user}: Number of flatpak-user app packages\n    14. {guix-home}: Number of guix-home packages\n    15. {guix-system}: Number of guix-system packages\n    16. {guix-user}: Number of guix-user packages\n    17. {hpkg-system}: Number of hpkg-system packages\n    18. {hpkg-user}: Number of hpkg-user packages\n    19. {install-release}: Number of install-release packages\n    20. {kiss}: Number of kiss packages\n    21. {linglong}: Number of linglong packages\n    22. {lpkg}: Number of lpkg packages\n    23. {lpkgbuild}: Number of lpkgbuild packages\n    24. {macports}: Number of macports packages\n    25. {mport}: Number of mport packages\n    26. {moss}: Number of moss packages\n    27. {nix-default}: Number of nix-default packages\n    28. {nix-system}: Number of nix-system packages\n    29. {nix-user}: Number of nix-user packages\n    30. {opkg}: Number of opkg packages\n    31. {pacman}: Number of pacman packages\n    32. {pacman-branch}: Pacman branch on manjaro\n    33. {pacstall}: Number of pacstall packages\n    34. {paludis}: Number of paludis packages\n    35. {pisi}: Number of pisi packages\n    36. {pkg}: Number of pkg packages\n    37. {pkgsrc}: Number of pkgsrc packages\n    38. {pkgtool}: Number of pkgtool packages\n    39. {porg}: Number of porg packages\n    40. {rpm}: Number of rpm packages\n    41. {scoop-global}: Number of scoop-global packages\n    42. {scoop-user}: Number of scoop-user packages\n    43. {snap}: Number of snap packages\n    44. {soar}: Number of soar packages\n    45. {sorcery}: Number of sorcery packages\n    46. {winget}: Number of winget packages\n    47. {xbps}: Number of xbps packages\n    48. {brew-all}: Total number of all brew packages\n    49. {flatpak-all}: Total number of all flatpak app packages\n    50. {guix-all}: Total number of all guix packages\n    51. {hpkg-all}: Total number of all hpkg packages\n    52. {nix-all}: Total number of all nix packages\n    53. {all}: Number of all packages",
+            "description": "Output format for the `Packages` module. See Wiki for formatting syntax\n    1. {am-system}: Number of am-system packages\n    2. {am-user}: Number of am-user (aka appman) packages\n    3. {appimage}: Number of appimage packages\n    4. {apk}: Number of apk packages\n    5. {brew}: Number of brew packages\n    6. {brew-cask}: Number of brew-cask packages\n    7. {cards}: Number of cards packages\n    8. {choco}: Number of choco packages\n    9. {crux}: Number of crux packages\n    10. {dpkg}: Number of dpkg packages\n    11. {emerge}: Number of emerge packages\n    12. {eopkg}: Number of eopkg packages\n    13. {flatpak-system}: Number of flatpak-system app packages\n    14. {flatpak-user}: Number of flatpak-user app packages\n    15. {guix-home}: Number of guix-home packages\n    16. {guix-system}: Number of guix-system packages\n    17. {guix-user}: Number of guix-user packages\n    18. {hpkg-system}: Number of hpkg-system packages\n    19. {hpkg-user}: Number of hpkg-user packages\n    20. {install-release}: Number of install-release packages\n    21. {kiss}: Number of kiss packages\n    22. {linglong}: Number of linglong packages\n    23. {lpkg}: Number of lpkg packages\n    24. {lpkgbuild}: Number of lpkgbuild packages\n    25. {macports}: Number of macports packages\n    26. {mport}: Number of mport packages\n    27. {moss}: Number of moss packages\n    28. {nix-default}: Number of nix-default packages\n    29. {nix-system}: Number of nix-system packages\n    30. {nix-user}: Number of nix-user packages\n    31. {opkg}: Number of opkg packages\n    32. {pacman}: Number of pacman packages\n    33. {pacman-branch}: Pacman branch on manjaro\n    34. {pacstall}: Number of pacstall packages\n    35. {paludis}: Number of paludis packages\n    36. {pisi}: Number of pisi packages\n    37. {pkg}: Number of pkg packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {pkgtool}: Number of pkgtool packages\n    40. {porg}: Number of porg packages\n    41. {rpm}: Number of rpm packages\n    42. {rum}: Number of rum overlay packages\n    43. {scoop-global}: Number of scoop-global packages\n    44. {scoop-user}: Number of scoop-user packages\n    45. {snap}: Number of snap packages\n    46. {soar}: Number of soar packages\n    47. {sorcery}: Number of sorcery packages\n    48. {winget}: Number of winget packages\n    49. {xbps}: Number of xbps packages\n    50. {brew-all}: Total number of all brew packages\n    51. {flatpak-all}: Total number of all flatpak app packages\n    52. {guix-all}: Total number of all guix packages\n    53. {hpkg-all}: Total number of all hpkg packages\n    54. {nix-all}: Total number of all nix packages\n    55. {all}: Number of all packages",
             "type": "string"
         },
         "physicaldiskFormat": {
-            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
+            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name *\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path *\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
             "type": "string"
         },
         "physicalmemoryFormat": {
@@ -462,11 +465,11 @@
             "type": "string"
         },
         "poweradapterFormat": {
-            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
+            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model-name}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
             "type": "string"
         },
         "processesFormat": {
-            "description": "Output format for the `Processes` module. See Wiki for formatting syntax\n    1. {result}: Process count",
+            "description": "Output format for the `Processes` module. See Wiki for formatting syntax\n    1. {result}: Process count\n    2. {threads}: Thread count",
             "type": "string"
         },
         "publicipFormat": {
@@ -482,7 +485,7 @@
             "type": "string"
         },
         "swapFormat": {
-            "description": "Output format for the `Swap` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
+            "description": "Output format for the `Swap` module. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name *",
             "type": "string"
         },
         "terminalFormat": {
@@ -554,7 +557,7 @@
             "type": "string"
         },
         "zpoolFormat": {
-            "description": "Output format for the `Zpool` module. See Wiki for formatting syntax\n    1. {name}: Zpool name\n    2. {guid}: Zpool guid\n    3. {state}: Zpool state\n    4. {size-used}: Size used\n    5. {size-allocated}: Size allocated\n    6. {size-total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {frag-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {frag-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
+            "description": "Output format for the `Zpool` module. See Wiki for formatting syntax\n    1. {name}: Zpool name *\n    2. {guid}: Zpool guid *\n    3. {state}: Zpool state\n    4. {size-used}: Size used\n    5. {size-allocated}: Size allocated\n    6. {size-total}: Size total\n    7. {used-percentage}: Size used percentage num\n    8. {allocated-percentage}: Size allocated percentage num\n    9. {frag-percentage}: Fragmentation percentage num\n    10. {used-percentage-bar}: Size used percentage bar\n    11. {allocated-percentage-bar}: Size allocated percentage bar\n    12. {frag-percentage-bar}: Fragmentation percentage bar\n    13. {is-readonly}: Is read-only",
             "type": "string"
         }
     },
@@ -766,20 +769,35 @@
                             "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol only",
                             "default": false
                         },
-                        "recache": {
-                            "type": "boolean",
-                            "description": "If true, regenerate image logo cache",
-                            "default": false
+                        "cache": {
+                            "description": "How the image logo cache is used. true reuses a cached rendering when it is valid and writes it back on a cache miss; false ignores the cache completely, neither reading nor writing it; \"regen\" ignores any existing cached rendering and regenerates it",
+                            "oneOf": [
+                                {
+                                    "type": "boolean",
+                                    "description": "Whether to use the image logo cache"
+                                },
+                                {
+                                    "const": "regen",
+                                    "description": "Regenerate the image logo cache, ignoring any existing cached rendering"
+                                }
+                            ],
+                            "default": true
                         },
                         "position": {
                             "type": "string",
-                            "description": "Position of the logo",
+                            "description": "Position of the logo. Auto places a left-side logo above the output when the terminal is too narrow to reserve 32 columns for module output.",
                             "enum": [
+                                "auto",
                                 "left",
                                 "top",
                                 "right"
                             ],
                             "default": "left"
+                        },
+                        "animationFrame": {
+                            "type": "integer",
+                            "description": "Frame of an animated image to render:\n0 plays the animation (kitty image protocol only), a positive value is the 1-based frame number, and a negative value counts back from the end, so -1 is the last frame.\nOnly the JSON config can express a negative value, as the command line parser reads a leading `-` as another option",
+                            "default": 1
                         },
                         "chafa": {
                             "type": "object",
@@ -920,6 +938,17 @@
                     "type": "boolean",
                     "description": "Whether to detect and display component versions. Mainly for benchmarking",
                     "default": true
+                },
+                "preload": {
+                    "description": "Scripts to run while the config is read, before any module runs",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "lua": {
+                            "type": "string",
+                            "description": "Lua script to run once, as soon as the config is read, for example `dofile('/path/to/helpers.lua')`"
+                        }
+                    }
                 }
             }
         },
@@ -1562,6 +1591,7 @@
                             "command",
                             "colors",
                             "cursor",
+                            "custom",
                             "datetime",
                             "display",
                             "disk",
@@ -1581,6 +1611,7 @@
                             "loadavg",
                             "locale",
                             "localip",
+                            "logo",
                             "media",
                             "memory",
                             "monitor",
@@ -1729,6 +1760,24 @@
                                         "description": "Whether to show disconnected Bluetooth devices",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "showType": {
+                                        "description": "Which Bluetooth stacks to look for",
+                                        "oneOf": [
+                                            {
+                                                "const": "classic",
+                                                "description": "Look for BR/EDR devices only"
+                                            },
+                                            {
+                                                "const": "le",
+                                                "description": "Look for Bluetooth Low Energy devices only"
+                                            },
+                                            {
+                                                "const": "both",
+                                                "description": "Look for devices on either stack"
+                                            }
+                                        ],
+                                        "default": "both"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -2086,7 +2135,7 @@
                                     "showPeCoreCount": {
                                         "description": "Whether to detect and display CPU frequencies for different core types (for example, P-cores and E-cores), if supported",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2120,8 +2169,10 @@
                                         "const": "cpucache",
                                         "description": "Print CPU cache sizes"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Print one line with a total per cache level instead of one line per level",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2240,6 +2291,7 @@
                                         "description": "Set the number of white spaces to print before the symbol",
                                         "type": "integer",
                                         "minimum": 0,
+                                        "maximum": 4294967295,
                                         "default": 0
                                     },
                                     "block": {
@@ -2251,6 +2303,7 @@
                                                 "description": "Set the block width in spaces",
                                                 "type": "integer",
                                                 "minimum": 1,
+                                                "maximum": 9,
                                                 "default": 3
                                             },
                                             "range": {
@@ -2308,7 +2361,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "Run a custom shell command",
+                                        "description": "Run custom shell scripts",
                                         "const": "command"
                                     },
                                     "shell": {
@@ -2370,9 +2423,6 @@
                                         "const": "cursor",
                                         "description": "Print cursor style name"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
-                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2406,8 +2456,7 @@
                                         "const": "custom"
                                     },
                                     "key": {
-                                        "description": "Leave empty to hide the key",
-                                        "type": "string"
+                                        "$ref": "#/$defs/key"
                                     },
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
@@ -2438,9 +2487,6 @@
                                     "type": {
                                         "const": "datetime",
                                         "description": "Print the current date and time"
-                                    },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2701,7 +2747,7 @@
                                     "waitTime": {
                                         "type": "integer",
                                         "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
-                                        "default": 500,
+                                        "default": 250,
                                         "minimum": 1
                                     },
                                     "key": {
@@ -2818,9 +2864,6 @@
                                         "const": "editor",
                                         "description": "Print information about the default editor (`$VISUAL` or `$EDITOR`)"
                                     },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
-                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2852,9 +2895,6 @@
                                     "type": {
                                         "const": "font",
                                         "description": "Print system font names"
-                                    },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3602,7 +3642,7 @@
                                     "waitTime": {
                                         "type": "integer",
                                         "description": "Wait time (in ms) used to measure the I/O rate (calculated in bytes/sec).\nAvoid setting this too low, as the kernel requires time to accurately update counters.\nIgnored if 'detectTotal' is true.",
-                                        "default": 500,
+                                        "default": 250,
                                         "minimum": 1
                                     },
                                     "key": {
@@ -3761,18 +3801,24 @@
                                                     "enum": [
                                                         "am",
                                                         "apk",
+                                                        "appimage",
                                                         "brew",
+                                                        "cards",
                                                         "choco",
+                                                        "crux",
                                                         "dpkg",
                                                         "emerge",
                                                         "eopkg",
                                                         "flatpak",
                                                         "guix",
                                                         "hpkg",
+                                                        "installrelease",
+                                                        "kiss",
                                                         "linglong",
                                                         "lpkg",
                                                         "lpkgbuild",
                                                         "macports",
+                                                        "moss",
                                                         "mport",
                                                         "nix",
                                                         "opkg",
@@ -3781,10 +3827,14 @@
                                                         "paludis",
                                                         "pisi",
                                                         "pkg",
+                                                        "pkgsrc",
                                                         "pkgtool",
+                                                        "porg",
                                                         "rpm",
+                                                        "rum",
                                                         "scoop",
                                                         "snap",
+                                                        "soar",
                                                         "sorcery",
                                                         "winget",
                                                         "xbps"
@@ -3796,8 +3846,7 @@
                                                 "description": "Enable all package managers",
                                                 "type": "null"
                                             }
-                                        ],
-                                        "default": ["winget"]
+                                        ]
                                     },
                                     "combined": {
                                         "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
@@ -4024,10 +4073,9 @@
                                         "const": "publicip"
                                     },
                                     "url": {
-                                        "description": "URL of the public IP detection server to use. Only HTTP is supported",
+                                        "description": "URL of the public IP detection server to use. Only HTTP is supported\nIf empty, `http://ipinfo.io/json` is requested (`http://v6.ipinfo.io/json` when `ipv6` is set), with HTTP compression and TCP Fast Open enabled. A non-empty URL disables both and makes `ipv6` have no effect",
                                         "type": "string",
-                                        "format": "url",
-                                        "default": "http://ipinfo.io/ip"
+                                        "format": "url"
                                     },
                                     "timeout": {
                                         "description": "Time in milliseconds to wait for the public IP server to respond\nSet to 0 to disable the timeout",
@@ -4085,6 +4133,7 @@
                                         "description": "Number of times to repeat the separator string, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
+                                        "maximum": 4294967295,
                                         "default": 0
                                     },
                                     "condition": {
@@ -4498,7 +4547,7 @@
                                         "type": "integer",
                                         "description": "Wait time between process samples, in milliseconds. Ignored when showTypes contains \"memory\" only",
                                         "minimum": 1,
-                                        "default": 500
+                                        "default": 250
                                     },
                                     "compact": {
                                         "type": "boolean",
@@ -4788,6 +4837,9 @@
                                     "type": {
                                         "const": "wifi",
                                         "description": "Print connected Wi-Fi info (SSID, connection and security protocol)"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

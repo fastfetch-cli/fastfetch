@@ -147,11 +147,26 @@ static inline bool formatArgSet(const FFformatarg* arg) {
 static void appendLuaError(FFstrbuf* buffer, const char* prefix, lua_State* L) {
     const char* err = lua_tolstring(L, -1, nullptr);
     if (err) {
-        const char* tmp = strchr(err, ':');
-        if (tmp) {
-            err = tmp + 1;
-            while (*err == ' ') {
-                ++err;
+        // Drop the position Lua puts in front of an error and keep the message only. Both places
+        // that build one -- `luaG_addinfo` and `luaL_where` -- format it as `%s:%d: %s`, so a
+        // position is a colon, a line number, a colon and a space:
+        //   general.preload.lua:1: <name> expected near '='   -> <name> expected near '='
+        //   [string ""]:1: x                                  -> x
+        // Not every error has one, and cutting at the first colon mangled those. `luaL_loadfilex`
+        // reports `cannot open <path>: <strerror>`, where that colon is the one after the path, so
+        // the path -- the only part naming the problem -- was dropped and `No such file or
+        // directory` was left on its own. A colon followed by a line number does not identify a
+        // position either, because a path can contain one: `cannot open /tmp/x:12:y/nope.lua: ...`
+        // has to survive whole. The trailing space is what separates the two, and a real position
+        // always has it.
+        for (const char* colon = strchr(err, ':'); colon; colon = strchr(colon + 1, ':')) {
+            const char* line = colon + 1;
+            while (*line >= '0' && *line <= '9') {
+                ++line;
+            }
+            if (line > colon + 1 && line[0] == ':' && line[1] == ' ') {
+                err = line + 2;
+                break;
             }
         }
     }
@@ -205,7 +220,11 @@ static bool parseLuaString(FFstrbuf* buffer, const char* script, uint32_t script
                     lua_pushboolean(L, *(bool*) arg->value);
                     break;
                 case FF_ARG_TYPE_STRING:
-                    lua_pushlstring(L, (const char*) arg->value, strlen((const char*) arg->value));
+                    if (!arg->value) {
+                        lua_pushlstring(L, "", 0);
+                    } else {
+                        lua_pushlstring(L, (const char*) arg->value, strlen((const char*) arg->value));
+                    }
                     break;
                 case FF_ARG_TYPE_STRBUF: {
                     const FFstrbuf* sb = (const FFstrbuf*) arg->value;
@@ -438,31 +457,67 @@ static bool parseQuickJSString(FFstrbuf* buffer, const char* script, uint32_t sc
 }
 #endif
 
-static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape) {
-    if (__builtin_expect(in->chars[0] == '\e' && in->chars[1] == '[', false)) {
-        // skip ANSI escape codes at the start of the string for truncation
-        const char* p = in->chars + 2;
-        while (*p && (ffCharIsDigit(*p) || *p == ';')) {
-            ++p;
-        }
-        if (*p && isascii(*p)) {
-            ++p;
-        }
-        uint32_t prefixLen = (uint32_t) (p - in->chars);
-        ffStrbufAppendNS(out, prefixLen, in->chars);
-        ffStrbufSubstrAfter(in, prefixLen - 1);
-
-        if (trailingEscape) {
-            // likely have a `CSI m` reset at the end of the string
-            uint32_t iLastEscape = ffStrbufLastIndexC(in, '\e');
-            if (iLastEscape != in->length) {
-                ffStrbufSetNS(trailingEscape, in->length - iLastEscape, in->chars + iLastEscape);
-                ffStrbufSubstrBefore(in, iLastEscape);
-            }
-        }
-        return true;
+// Returns the length of the ANSI CSI sequence at `str`, or 0 if there is none.
+// A CSI sequence is `ESC [` + parameter bytes (0x30-0x3F) + intermediate bytes (0x20-0x2F) + final byte (0x40-0x7E)
+static uint32_t ansiEscapeLength(const char* str) {
+    if (str[0] != '\e' || str[1] != '[') {
+        return 0;
     }
-    return false;
+
+    const char* p = str + 2;
+    while (*p >= '0' && *p <= '?') {
+        ++p;
+    }
+    while (*p >= ' ' && *p <= '/') {
+        ++p;
+    }
+    if (*p < '@' || *p > '~') {
+        return 0; // not a complete CSI sequence
+    }
+    return (uint32_t) (p - str) + 1;
+}
+
+static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape) {
+    // Skip all ANSI escape codes at the start of the string, so that they don't count
+    // towards the truncation / padding length. A value may carry more than one of them,
+    // e.g. `\e[31m\e[1m`.
+    uint32_t prefixLen = 0;
+    while (in->length - prefixLen >= 2) {
+        uint32_t len = ansiEscapeLength(in->chars + prefixLen);
+        if (len == 0) {
+            break;
+        }
+        prefixLen += len;
+    }
+
+    if (prefixLen == 0) {
+        return false;
+    }
+
+    ffStrbufAppendNS(out, prefixLen, in->chars);
+    ffStrbufSubstrAfter(in, prefixLen - 1);
+
+    if (trailingEscape) {
+        // likely have one or more `CSI m` resets at the end of the string
+        uint32_t end = in->length;
+        while (end >= 3) {
+            uint32_t start = end - 1;
+            while (start > 0 && in->chars[start] != '\e') {
+                --start;
+            }
+            uint32_t len = ansiEscapeLength(in->chars + start);
+            if (len == 0 || start + len != end) {
+                break;
+            }
+            end = start;
+        }
+
+        if (end < in->length) {
+            ffStrbufSetNS(trailingEscape, in->length - end, in->chars + end);
+            ffStrbufSubstrBefore(in, end);
+        }
+    }
+    return true;
 }
 
 static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {

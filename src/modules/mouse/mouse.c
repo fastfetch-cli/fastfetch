@@ -186,5 +186,5 @@ FFModuleBaseInfo ffMouseModuleInfo = {
         { "Mouse name", "name" },
         { "Mouse serial number", "serial" },
     })),
-    .defaultOrder = 63,
+    .defaultOrder = 64,
 };

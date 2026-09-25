@@ -16,6 +16,9 @@
 #include <errno.h>
 #include <fcntl.h>
 
+// Upper bound of a single HTTP response, guarding against excessive memory allocation
+#define FF_NETWORKING_MAX_RESPONSE_SIZE (1024u * 1024u)
+
 static const char* tryNonThreadingFastPath(FFNetworkingState* state) {
 #if defined(TCP_FASTOPEN) || __APPLE__
 
@@ -187,7 +190,7 @@ exit:
 FF_THREAD_ENTRY_DECL_WRAPPER(connectAndSend, FFNetworkingState*);
 
 // Parallel DNS resolution and socket creation
-static const char* initNetworkingState(FFNetworkingState* state, const char* host, const char* path, const char* headers) {
+static const char* initNetworkingState(FFNetworkingState* state, const char* host, uint16_t port, const char* path, const char* headers) {
     FF_DEBUG("Initializing network connection state: host=%s, path=%s", host, path);
 
     // Initialize command and host information
@@ -195,7 +198,19 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
     ffStrbufAppendS(&state->command, " HTTP/1.0\r\nHost: ");
-    ffStrbufAppendS(&state->command, host);
+    if (strchr(host, ':') != nullptr) {
+        // An IPv6 literal has to be bracketed in the Host header (RFC 9110 7.2), while
+        // getaddrinfo() wants it bare
+        ffStrbufAppendC(&state->command, '[');
+        ffStrbufAppendS(&state->command, host);
+        ffStrbufAppendC(&state->command, ']');
+    } else {
+        ffStrbufAppendS(&state->command, host);
+    }
+    // The Host header carries the port whenever it is not the default one (RFC 9110 7.2)
+    if (port != 80) {
+        ffStrbufAppendF(&state->command, ":%u", port);
+    }
     ffStrbufAppendS(&state->command, "\r\nConnection: close\r\n"); // Explicitly tell the server we don't need to keep the connection
 
     // If compression needs to be enabled
@@ -220,10 +235,13 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
         .ai_flags = AI_NUMERICSERV
     };
 
-    FF_DEBUG("Resolving address: %s (%s)", host, state->ipv6 ? "IPv6" : "IPv4");
+    char portA[6];
+    snprintf(portA, sizeof(portA), "%u", port);
+
+    FF_DEBUG("Resolving address: %s:%u (%s)", host, port, state->ipv6 ? "IPv6" : "IPv4");
     // Use AI_NUMERICSERV flag to indicate the service is a numeric port, reducing parsing time
 
-    int gaiRes = getaddrinfo(host, "80", &hints, &state->addr);
+    int gaiRes = getaddrinfo(host, portA, &hints, &state->addr);
     if (gaiRes != 0) {
         FF_DEBUG("getaddrinfo() failed: %s (res=%d)", gai_strerror(gaiRes), gaiRes);
         ret = "getaddrinfo() failed";
@@ -256,6 +274,15 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
         FF_DEBUG("Failed to set TCP_QUICKACK: %s", strerror(errno));
     } else {
         FF_DEBUG("Successfully enabled TCP quick acknowledgment");
+    }
+#endif
+
+#ifdef SO_NOSIGPIPE
+    // Prevent SIGPIPE when the server closes the connection during write
+    if (setsockopt(state->sockfd, SOL_SOCKET, SO_NOSIGPIPE, &flag, sizeof(flag)) != 0) {
+        FF_DEBUG("Failed to set SO_NOSIGPIPE: %s", strerror(errno));
+    } else {
+        FF_DEBUG("Successfully set SO_NOSIGPIPE");
     }
 #endif
 
@@ -295,11 +322,13 @@ error:
         close(state->sockfd);
         state->sockfd = -1;
     }
+
+    ffStrbufClear(&state->command);
     return ret;
 }
 
-const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers) {
-    FF_DEBUG("Preparing to send HTTP request: host=%s, path=%s", host, path);
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, uint16_t port, const char* path, const char* headers) {
+    FF_DEBUG("Preparing to send HTTP request: host=%s, port=%u, path=%s", host, port, path);
 
     if (state->compression) {
         FF_DEBUG("Compression enabled, checking if zlib is available");
@@ -321,7 +350,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         FF_DEBUG("Compression disabled");
     }
 
-    const char* initResult = initNetworkingState(state, host, path, headers);
+    const char* initResult = initNetworkingState(state, host, port, path, headers);
     if (initResult != nullptr) {
         FF_DEBUG("Initialization failed: %s", initResult);
         return initResult;
@@ -375,8 +404,19 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
 
     // Set larger initial receive buffer instead of small repeated receives
-    int rcvbuf = 65536; // 64KB
+    int rcvbuf = 64 * 1024;
     setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+
+    // The timeout has to be enforced by the socket itself on every platform: the poll() below
+    // only reports readability once, so a server that sends a partial response and then keeps
+    // the connection open would otherwise block this loop forever.
+    if (timeout > 0) {
+        FF_DEBUG("Setting receive timeout: %u ms", timeout);
+        struct timeval timev;
+        timev.tv_sec = timeout / 1000;
+        timev.tv_usec = (typeof(timev.tv_usec)) ((timeout % 1000) * 1000); // milliseconds to microseconds
+        setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
+    }
 
 #ifdef __APPLE__
     // poll for the socket to be readable.
@@ -401,14 +441,6 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         }
     }
     FF_DEBUG("Socket is readable, proceeding to receive data");
-#else
-    if (timeout > 0) {
-        FF_DEBUG("Setting receive timeout: %u ms", timeout);
-        struct timeval timev;
-        timev.tv_sec = timeout / 1000;
-        timev.tv_usec = (typeof(timev.tv_usec)) ((timeout % 1000) * 1000); // milliseconds to microseconds
-        setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
-    }
 #endif
 
     if (shutdown(state->sockfd, SHUT_WR) == -1) {
@@ -420,16 +452,49 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     [[maybe_unused]] int recvCount = 0;
     uint32_t contentLength = 0;
     uint32_t headerEnd = 0;
+    bool chunked = false;
 
-    do {
-        FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
+    // Runs until the response is framed; the buffer is grown on demand at the top
+    for (;;) {
+        if (ffStrbufGetFree(buffer) == 0) {
+            // `Content-Length` may be absent (e.g. chunked responses). Grow the buffer
+            // on demand instead of silently truncating the response.
+            if (buffer->allocated >= FF_NETWORKING_MAX_RESPONSE_SIZE) {
+                FF_DEBUG("Response is too large: %u bytes, aborting", buffer->allocated);
+                close(state->sockfd);
+                state->sockfd = -1;
+                return "Response too large";
+            }
+            FF_DEBUG("Receive buffer is full, extending it");
+            // Asking for exactly the room that is left under the cap, rather than for as much as
+            // the buffer holds again: the allocation is rounded up to a power of two, so a doubling
+            // from a size that is not one of those lands past the cap the check above just cleared.
+            ffStrbufEnsureFreeNoCheck(buffer, FF_NETWORKING_MAX_RESPONSE_SIZE - buffer->length - 1);
+        }
+
+        // When the remaining length is known, ask for exactly that much. MSG_WAITALL then
+        // returns as soon as the response is complete, instead of waiting for the server
+        // to close the connection.
+        // Without a Content-Length the requested length is just "whatever fits", so
+        // waiting for all of it would block until the server closes -- and the framing
+        // checks below would never get a chance to run. Read whatever has arrived instead
+        // and let those checks decide when the response is complete.
+        uint32_t want = ffStrbufGetFree(buffer);
+        int recvFlags = 0;
+        if (contentLength > 0 && headerEnd > 0) {
+            uint32_t remaining = headerEnd + 4 + contentLength - buffer->length;
+            if (remaining < want) {
+                want = remaining;
+            }
+            recvFlags = MSG_WAITALL;
+        }
+
+        FF_DEBUG("Data reception loop #%d, current buffer size: %u, requesting %u bytes",
             ++recvCount,
             buffer->length,
-            ffStrbufGetFree(buffer));
+            want);
 
-        // We set `Connection: close`, so the server will close the connection when done.
-        // Thus we can use MSG_WAITALL to wait until the buffer is full or the connection is closed.
-        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), MSG_WAITALL);
+        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, want, recvFlags);
 
         if (received <= 0) {
             if (received == 0) {
@@ -453,11 +518,12 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                 FF_DEBUG("Found HTTP header end marker, position: %u", headerEnd);
 
                 // Check for Content-Length header to pre-allocate enough memory
-                const char* clHeader = strcasestr(buffer->chars, "Content-Length:");
+                uint32_t valueLen = 0;
+                const char* clHeader = ffNetworkingFindHeader(buffer->chars, headerEnd, "Content-Length:", &valueLen);
                 if (clHeader) {
-                    contentLength = (uint32_t) strtoul(clHeader + 15, nullptr, 10);
+                    contentLength = (uint32_t) strtoul(clHeader, nullptr, 10);
                     if (contentLength > 0) {
-                        if (contentLength > 1024 * 1024) { // 1MB limit to prevent excessive memory allocation and potential attacks
+                        if (contentLength > FF_NETWORKING_MAX_RESPONSE_SIZE) { // 1MB limit to prevent excessive memory allocation and potential attacks
                             FF_DEBUG("Content-Length is too large: %u bytes, aborting", contentLength);
                             close(state->sockfd);
                             state->sockfd = -1;
@@ -470,9 +536,47 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
                         FF_DEBUG("Extended receive buffer to %u bytes", buffer->allocated);
                     }
                 }
+
+                // A chunked response has no Content-Length; it is framed by a last-chunk
+                const char* teHeader = ffNetworkingFindHeader(buffer->chars, headerEnd, "Transfer-Encoding:", &valueLen);
+                if (teHeader != nullptr) {
+                    switch (ffNetworkingParseTransferEncoding(teHeader, valueLen)) {
+                        case FF_NETWORKING_TE_CHUNKED:
+                            FF_DEBUG("Detected chunked transfer encoding");
+                            chunked = true;
+                            break;
+                        case FF_NETWORKING_TE_UNSUPPORTED:
+                            // The framing of e.g. `gzip, chunked` is unreadable and the payload
+                            // would stay encoded, so fail instead of returning garbage
+                            FF_DEBUG("Unsupported Transfer-Encoding: %.*s", (int) valueLen, teHeader);
+                            close(state->sockfd);
+                            state->sockfd = -1;
+                            return "Unsupported Transfer-Encoding";
+                        default:
+                            break;
+                    }
+                }
             }
         }
-    } while (ffStrbufGetFree(buffer) > 0);
+
+        // Stop as soon as the response is framed, rather than waiting for the FIN
+        if (chunked) {
+            uint32_t consumed = 0;
+            int complete = ffNetworkingChunkedComplete(buffer->chars + headerEnd + 4, buffer->length - headerEnd - 4, &consumed);
+            if (complete < 0) {
+                FF_DEBUG("Malformed chunked body");
+                close(state->sockfd);
+                state->sockfd = -1;
+                return "Malformed chunked body";
+            }
+            if (complete > 0) {
+                FF_DEBUG("Chunked body complete, %u bytes of encoded body", consumed);
+                break;
+            }
+        } else if (contentLength > 0 && buffer->length >= headerEnd + 4 + contentLength) {
+            break;
+        }
+    }
 
     FF_DEBUG("Closing socket: fd=%d", state->sockfd);
     close(state->sockfd);
@@ -488,13 +592,20 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "No HTTP header end found";
     }
 
+    if (chunked && !ffNetworkingDecodeChunked(buffer, &headerEnd)) {
+        return "Failed to decode chunked response";
+    }
+
     if (!ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n") && !ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);
         return "Invalid response";
     }
     FF_DEBUG("Received valid HTTP 200 response, content %u bytes, total %u bytes", contentLength, buffer->length);
 
-    if (contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
+    // A chunked response was framed by its last-chunk and has been rewritten around it, so any
+    // `Content-Length` the server also sent describes a body that no longer exists. RFC 9112 6.3
+    // says not to send both; when one does, the chunked framing is the one that was acted on.
+    if (!chunked && contentLength > 0 && buffer->length != contentLength + headerEnd + 4) {
         FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
         return "Content length mismatch";
     }

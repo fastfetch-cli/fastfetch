@@ -172,7 +172,9 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "paddingLeft")) {
-            options->paddingLeft = (uint32_t) yyjson_get_uint(val);
+            if (!ffJsonConfigParseUInt32(val, &options->paddingLeft, UINT32_MAX)) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Property 'paddingLeft' must be a non-negative integer no greater than 4294967295");
+            }
             continue;
         }
 
@@ -182,7 +184,13 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
             } else {
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width) {
-                    options->block.width = (uint8_t) yyjson_get_uint(width);
+                    uint32_t value;
+                    // A width of 0 or more than 9 is not useful: it makes the block either invisible or unreadably long
+                    if (!ffJsonConfigParseUInt32(width, &value, 9) || value == 0) {
+                        ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Property 'block.width' must be an integer between 1 and 9");
+                    } else {
+                        options->block.width = (uint8_t) value;
+                    }
                 }
 
                 yyjson_val* range = yyjson_obj_get(val, "range");
@@ -190,15 +198,17 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
                     if (!yyjson_is_arr(range) || yyjson_arr_size(range) != 2) {
                         ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: must be an array of 2 elements", unsafe_yyjson_get_str(key));
                     } else {
-                        uint8_t start = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 0));
-                        uint8_t end = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 1));
-                        if (start > end) {
+                        uint32_t start, end;
+                        // Both elements must be integers in [0, 15]. `yyjson_get_uint()` used to read
+                        // anything else as 0, so `[1.5, 3]` silently printed the same as `[0, 3]`
+                        if (!ffJsonConfigParseUInt32(yyjson_arr_get(range, 0), &start, 15) ||
+                            !ffJsonConfigParseUInt32(yyjson_arr_get(range, 1), &end, 15)) {
+                            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Property '%s.range' must be an array of two integers between 0 and 15", unsafe_yyjson_get_str(key));
+                        } else if (start > end) {
                             ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[0] > range[1]", unsafe_yyjson_get_str(key));
-                        } else if (end > 15) {
-                            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Colors), 0, nullptr, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[1] > 15", unsafe_yyjson_get_str(key));
                         } else {
-                            options->block.range[0] = start;
-                            options->block.range[1] = end;
+                            options->block.range[0] = (uint8_t) start;
+                            options->block.range[1] = (uint8_t) end;
                         }
                     }
                 }
@@ -324,5 +334,5 @@ FFModuleBaseInfo ffColorsModuleInfo = {
     .parseJsonObject = (void*) ffParseColorsJsonObject,
     .printModule = (void*) ffPrintColors,
     .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
-    .defaultOrder = 72,
+    .defaultOrder = 73,
 };

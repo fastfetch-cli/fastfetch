@@ -48,13 +48,13 @@ static void printDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs) {
     result.week = (uint8_t) (tm->tm_yday / 7 + 1);
     strftime(result.weekday, sizeof(result.weekday), "%A", tm);
     strftime(result.weekdayShort, sizeof(result.weekdayShort), "%a", tm);
-    result.dayInYear = (uint8_t) (tm->tm_yday + 1);
+    result.dayInYear = (uint16_t) (tm->tm_yday + 1);
     result.dayInMonth = (uint8_t) tm->tm_mday;
     result.dayInWeek = tm->tm_wday == 0 ? 7 : (uint8_t) tm->tm_wday;
     strftime(result.dayPretty, sizeof(result.dayPretty), "%d", tm);
     result.hour = (uint8_t) tm->tm_hour;
     strftime(result.hourPretty, sizeof(result.hourPretty), "%H", tm);
-    result.hour12 = (uint8_t) (result.hour % 12);
+    result.hour12 = (uint8_t) (result.hour % 12 ?: 12);
     strftime(result.hour12Pretty, sizeof(result.hour12Pretty), "%I", tm);
     result.minute = (uint8_t) tm->tm_min;
     strftime(result.minutePretty, sizeof(result.minutePretty), "%M", tm);
@@ -206,5 +206,5 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         { "Day in month with leading zero", "day-pretty" },
         { "AM or PM", "am-pm" },
     })),
-    .defaultOrder = 52,
+    .defaultOrder = 53,
 };

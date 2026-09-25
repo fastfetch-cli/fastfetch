@@ -17,15 +17,19 @@ void ffBase64EncodeRaw(uint32_t size, const char* str, uint32_t* out_size, char*
         str += 3;
     }
 
+    // The bytes have to be widened through `uint8_t`: `char` is signed here, so widening a byte
+    // with the high bit set would sign extend it and the `& 63` below would then read the extension
+    // instead of the byte's own bits. The whole groups above are immune because they read through a
+    // `uint32_t` instead.
     if (size % 3 == 1) {
-        uint64_t n = (uint64_t) *str << 16;
+        uint64_t n = (uint64_t) (uint8_t) *str << 16;
         *out++ = chars[(n >> 18) & 63];
         *out++ = chars[(n >> 12) & 63];
         *out++ = '=';
         *out++ = '=';
     } else if (size % 3 == 2) {
-        uint64_t n = (uint64_t) *str++ << 16;
-        n |= (uint64_t) *str << 8;
+        uint64_t n = (uint64_t) (uint8_t) *str++ << 16;
+        n |= (uint64_t) (uint8_t) *str << 8;
         *out++ = chars[(n >> 18) & 63];
         *out++ = chars[(n >> 12) & 63];
         *out++ = chars[(n >> 6) & 63];
@@ -62,7 +66,7 @@ static void init_decode_table() {
 
 #define next_char(x) uint8_t x = decode_table[(uint8_t) *str++];
 
-bool ffBase64DecodeRaw(uint32_t size, const char* str, uint32_t* out_size, char* output) {
+void ffBase64DecodeRaw(uint32_t size, const char* str, uint32_t* out_size, char* output) {
     if (*(uint64_t*) decode_table == 0) {
         init_decode_table();
     }
@@ -109,5 +113,4 @@ bool ffBase64DecodeRaw(uint32_t size, const char* str, uint32_t* out_size, char*
 
     *out = '\0';
     *out_size = (uint32_t) (out - output);
-    return true;
 }

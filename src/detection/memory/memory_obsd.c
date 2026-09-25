@@ -11,8 +11,8 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
         return "sysctl(CTL_VM, VM_UVMEXP) failed";
     }
 
-    ram->bytesTotal = (uint64_t) buf.npages * instance.state.platform.sysinfo.pageSize;
-    ram->bytesUsed = ((uint64_t) buf.active + (uint64_t) buf.inactive + (uint64_t) buf.wired) * instance.state.platform.sysinfo.pageSize;
+    ram->bytesTotal = (uint64_t) buf.npages << instance.state.platform.sysinfo.pageSizeShift;
+    ram->bytesUsed = ((uint64_t) buf.active + (uint64_t) buf.inactive + (uint64_t) buf.wired) << instance.state.platform.sysinfo.pageSizeShift;
 
     return nullptr;
 }

@@ -487,6 +487,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (FF_PACKAGES_IS_ENABLED(options, APK)) {
         packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, CRUX)) {
+        packageCounts->crux += getNumStrings(baseDir, "/var/lib/pkg/db", "\n\n", "crux");
+    }
     if (FF_PACKAGES_IS_ENABLED(options, DPKG)) {
         packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     }
@@ -524,6 +527,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (FF_PACKAGES_IS_ENABLED(options, RPM)) {
         // `Sigmd5` is the only table that doesn't contain the virtual `gpg-pubkey` package
         packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Sigmd5", "rpm");
+    }
+    if (FF_PACKAGES_IS_ENABLED(options, RUM)) {
+        packageCounts->rum += getSQLite3Int(baseDir, "/var/lib/rakuos/rum-rpmdb/rpmdb.sqlite", "SELECT count(*) FROM Sigmd5", "rum");
     }
     if (FF_PACKAGES_IS_ENABLED(options, SNAP)) {
         packageCounts->snap += getSnap(baseDir);

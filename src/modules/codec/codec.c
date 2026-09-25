@@ -283,10 +283,10 @@ FFModuleBaseInfo ffCodecModuleInfo = {
     .generateJsonResult = (void*) ffGenerateCodecJsonResult,
     .generateJsonConfig = (void*) ffGenerateCodecJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
-        { "GPU name", "gpu" },
-        { "Decoder / Encoder", "direction" },
+        { "GPU name *", "gpu" },
+        { "Decoder / Encoder *", "direction" },
         { "Compatibility alias of codec types", "types" },
         { "Platform API used for detection", "platform-api" },
     })),
-    .defaultOrder = 37,
+    .defaultOrder = 38,
 };

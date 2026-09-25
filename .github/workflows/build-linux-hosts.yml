@@ -52,7 +52,7 @@ jobs:
 
       - name: Initialize CodeQL
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           languages: c
 
@@ -64,7 +64,7 @@ jobs:
 
       - name: perform CodeQL analysis
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
 
       - name: list features
         run: ./fastfetch --list-features
