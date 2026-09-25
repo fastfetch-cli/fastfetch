@@ -58,15 +58,29 @@
 // the fields the caller may not see removed -- `WifiInfo.makeCopy` drops the SSID, writes
 // `02:00:00:00:00:00` in place of the BSSID and the MAC address, and rewrites the network id to -1,
 // while the signal, the rates, the frequency, the IPv4 address and the supplicant state are carried
-// over untouched. It makes that copy for every caller that `enforceCanAccessScanResults` refuses,
-// which was measured here as a caller whose location permission had lapsed, next to the shell, which
-// holds one and reads the SSID. Nothing else about the reply moves, so the head is understood the
-// same way and everything the reply still says is reported: a connection that cannot be named is
-// still a connection, and the name is the only thing missing. The two names are reported as
-// `<redacted>` -- the same word the macOS backend uses for the same situation -- rather than as
-// nothing, because an empty SSID is what the module prints the interface state in place of, and the
-// reply did carry a signal, a channel and a rate worth showing. The placeholders the service writes
-// in their place are never reported as values. See parseConnectionInfo().
+// over untouched. It makes that copy for every caller that `enforceCanAccessScanResults` refuses.
+//
+// One route to a withheld name is a permission that can lapse. That copy is gated on location
+// permission -- `enforceCanAccessScanResults` asks for `ACCESS_FINE_LOCATION` -- which is a runtime
+// permission the user can revoke at any time, so a caller that once read the SSID keeps its Wi-Fi
+// permission and stops being told the name. Measured here as a caller whose location permission had
+// lapsed, next to the shell, which holds one and reads the SSID. Nothing else about the reply moves,
+// so the head is understood the same way and everything the reply still says is reported: a
+// connection that cannot be named is still a connection, and the name is the only thing missing.
+// The two names are reported as `<redacted>` -- the same word the macOS backend uses for the same
+// situation -- rather than as nothing, because an empty SSID is what the module prints the interface
+// state in place of, and the reply did carry a signal, a channel and a rate worth showing. The
+// placeholders the service writes in their place are never reported as values. See
+// parseConnectionInfo().
+//
+// A UID with no Wi-Fi permission at all takes a different route, and it is worth naming because it
+// is the one that looks like this one from the outside. There the first call raises EX_SECURITY (-1)
+// and the module fails outright: nothing is printed, `<redacted>` never appears, and the caller sees
+// "The Wifi service raised an exception". The reason is that the caller's UID is what the service
+// checks, so no later field of a reply that was never delivered can be recovered -- the two routes
+// are not a fallback chain. There is no degraded answer to give here and no route left in this file:
+// without the permission the service answers nothing at all, so the module cannot run rather than
+// run worse. The file header above says which UID holds the permission and why.
 //
 // The network id goes with them, and that one matters to this file: -1 is what it reads as "there is
 // no connection", so a redacted reply would otherwise be reported as a disconnected one. What
@@ -129,8 +143,9 @@
 //     from anywhere else -- sysfs and /proc/net are EACCES -- so the field stays empty rather than
 //     naming an interface that was guessed at. `inf.status` is still reported, from the radio.
 //   * `conn.ssid` and `conn.bssid` on a connection whose names the service withheld are reported as
-//     `<redacted>` instead, which is not empty: see the note above. They are left empty when there
-//     is no connection at all, where an absent name is the truth rather than a redaction.
+//     `<redacted>` instead, which is not empty: see the note above. They are the two fields a
+//     lapsed location permission takes away and nothing else. They are left empty when there is no
+//     connection at all, where an absent name is the truth rather than a redaction.
 
 #define FF_WIFI_ANDROID_SERVICE "wifi"
 #define FF_WIFI_ANDROID_DESCRIPTOR "android.net.wifi.IWifiManager"
@@ -634,7 +649,14 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
     }
     const int32_t exception = ffBinderReadI32(data, size, 0);
     if (exception != 0) {
-        FF_DEBUG("The Wifi service raised exception %d", exception);
+        // The two exceptions this call raises mean different things to a reader, and the code below
+        // can not tell them apart -- it only sees that the connection could not be read. -1 is
+        // EX_SECURITY, which is the service refusing a UID that does not hold ACCESS_WIFI_STATE, and
+        // that is the whole module failing rather than one field going missing. The reply with the
+        // names withheld is the *other* route: it is a successful reply, and it is handled below as
+        // a connection that can not be named, not as an error. Saying so here is what keeps the two
+        // from reading as one.
+        FF_DEBUG("The Wifi service raised exception %d%s", exception, exception == -1 ? " (EX_SECURITY): this UID has no ACCESS_WIFI_STATE, so no reply carries a connection" : "");
         return "The Wifi service raised an exception";
     }
     if (ffBinderReadU32(data, size, 4) == 0) {
@@ -792,9 +814,12 @@ static double wifiAndroidRate(int32_t specific, int32_t generic) {
 // The SSID and the BSSID as the module reports them: the value when the reply carried one, and
 // `<redacted>` when the service withheld it. A withheld name is not reported as nothing, because an
 // empty SSID is what the module prints the interface state in place of -- and the reply did carry a
-// signal, a channel and a rate that are worth showing. `withheld` is only ever true for a connection:
-// the placeholder the service writes in place of an address is also what an empty `WifiInfo` carries,
-// but a reply with no connection never reaches the point where the names are set.
+// signal, a channel and a rate that are worth showing. This is the whole of the degradation: what a
+// lapsed location permission costs the module is these two fields and nothing else, since the
+// service withholds them from the copy it makes and leaves the rest of the reply intact.
+// `withheld` is only ever true for a connection: the placeholder the service writes in place of an
+// address is also what an empty `WifiInfo` carries, but a reply with no connection never reaches the
+// point where the names are set.
 static const char* wifiName(const char* value, bool withheld) {
     if (value[0] != '\0') {
         return value;

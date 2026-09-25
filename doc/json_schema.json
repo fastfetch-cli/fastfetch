@@ -1761,7 +1761,7 @@
                                         "type": "boolean",
                                         "default": false
                                     },
-                                    "devType": {
+                                    "showType": {
                                         "description": "Which Bluetooth stacks to look for",
                                         "oneOf": [
                                             {

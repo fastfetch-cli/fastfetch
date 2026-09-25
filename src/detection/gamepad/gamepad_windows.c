@@ -97,23 +97,28 @@ static const char* detectKnownDeviceName(uint32_t vendorId, uint32_t productId) 
 static bool readHidReport(HANDLE hHidFile, uint8_t* buffer, uint32_t length, DWORD timeoutMs, DWORD* nBytes) {
     OVERLAPPED overlapped = {};
     DWORD read;
-    if (ReadFile(hHidFile, buffer, length, &read, &overlapped)) {
-        *nBytes = read;
-        return true;
-    }
-    if (GetOverlappedResultEx(hHidFile, &overlapped, &read, timeoutMs, TRUE)) {
-        *nBytes = read;
-        return true;
+    if (!ReadFile(hHidFile, buffer, length, &read, &overlapped)) {
+        // A synchronous failure -- the device was unplugged, the handle went stale, access was
+        // denied -- does not set up `overlapped` at all, so it still looks like `STATUS_SUCCESS`
+        // and asking for the result below would report success with zero bytes read.
+        if (GetLastError() != ERROR_IO_PENDING) {
+            return false;
+        }
+
+        if (!GetOverlappedResultEx(hHidFile, &overlapped, &read, timeoutMs, TRUE)) {
+            // A timeout leaves the read pending, and the driver writes into `buffer` and `overlapped` when
+            // it eventually completes -- both of which are gone by then: the buffer belongs to the caller
+            // and the OVERLAPPED sits on this frame. So the read is cancelled by its own OVERLAPPED rather
+            // than by handle (CancelIo would take every other read on the same handle with it), and the
+            // cancellation is waited for before returning.
+            CancelIoEx(hHidFile, &overlapped);
+            GetOverlappedResult(hHidFile, &overlapped, &read, TRUE);
+            return false;
+        }
     }
 
-    // A timeout leaves the read pending, and the driver writes into `buffer` and `overlapped` when
-    // it eventually completes -- both of which are gone by then: the buffer belongs to the caller
-    // and the OVERLAPPED sits on this frame. So the read is cancelled by its own OVERLAPPED rather
-    // than by handle (CancelIo would take every other read on the same handle with it), and the
-    // cancellation is waited for before returning.
-    CancelIoEx(hHidFile, &overlapped);
-    GetOverlappedResult(hHidFile, &overlapped, &read, TRUE);
-    return false;
+    *nBytes = read;
+    return true;
 }
 
 // The DualShock 4 sends a battery level in its state packet, but only in the extended report it
@@ -266,7 +271,8 @@ static uint8_t detectSwitchBattery(HANDLE hHidFile, uint8_t* reportBuffer, uint3
         }
 
         DWORD nBytes;
-        if (!readHidReport(hHidFile, reportBuffer, reportLength, (DWORD) remaining, &nBytes)) {
+        // A report never arrives empty, so zero bytes means the read did not deliver one
+        if (!readHidReport(hHidFile, reportBuffer, reportLength, (DWORD) remaining, &nBytes) || !nBytes) {
             break;
         }
 
@@ -420,12 +426,14 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
                 DWORD nBytes;
                 switch (batteryKind) {
                     case FF_GAMEPAD_BATTERY_DS4:
-                        if (readHidReport(hHidFile, reportBuffer, caps.InputReportByteLength, FF_IO_TERM_RESP_WAIT_MS, &nBytes)) {
+                        // `reportBuffer` is uninitialised malloc() memory, so a read that delivered
+                        // nothing must not be parsed
+                        if (readHidReport(hHidFile, reportBuffer, caps.InputReportByteLength, FF_IO_TERM_RESP_WAIT_MS, &nBytes) && nBytes) {
                             device->battery = parseDs4Battery(reportBuffer, caps.InputReportByteLength);
                         }
                         break;
                     case FF_GAMEPAD_BATTERY_DUALSENSE:
-                        if (readHidReport(hHidFile, reportBuffer, caps.InputReportByteLength, FF_IO_TERM_RESP_WAIT_MS, &nBytes)) {
+                        if (readHidReport(hHidFile, reportBuffer, caps.InputReportByteLength, FF_IO_TERM_RESP_WAIT_MS, &nBytes) && nBytes) {
                             device->battery = parseDualSenseBattery(reportBuffer, caps.InputReportByteLength);
                         }
                         break;

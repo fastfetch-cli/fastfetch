@@ -19,7 +19,7 @@ Features:
         * For package managers: ImageMagick dependencies can be removed on macOS, Windows and Android as they are no longer used for image logos.
         * Windows Terminal supports sixel logos out of the box
     * Changes to a source image now correctly invalidate its cache. (Logo)
-    * Added GIF and APNG support to `--kitty` image protocol. Set `logo.animationFrame` to `0` to play animations in compatible kitty terminals; positive or negative values select a still frame. Android animation requires Android 12 (API 31); unsupported terminals show the first frame. (Logo)
+    * Added GIF and APNG support to `--kitty` image protocol. Set `logo.animationFrame` to `0` to play animations in compatible kitty terminals; positive or negative values select a still frame. Android animation requires Android 12 (API 31); terminals without kitty graphics protocol support report an error and fall back to the built-in logo instead. (Logo)
     * Added cmake option `-DENABLE_IMAGE_LOGO=<BOOL>` (default `ON`) to disable image logos and reduce binary size. `raw` logos remain available. (Logo)
 * Improved Linux support:
     * Added RakuOS rum overlay package counting (`{rum}`) and CRUX package detection (`{crux}`). (Packages)
@@ -30,7 +30,7 @@ Features:
     * Improved camera detection; Android 7 (API 24) or later is required. (Camera)
     * Battery level and charging state are now available to apps; detailed battery information requires root or ADB. (Battery)
     * Added display mode, physical size, rotation, and HDR information. App-based detection requires Android 13 (API 33); root or ADB can also detect displays on older versions. (Display)
-    * Added Wi-Fi interface, connection, standard, and security information. Android 11 (API 30) or later is required. Termux:API and location permission are needed to reveal SSID and BSSID; otherwise, they appear as `<redacted>`. (Wifi)
+    * Added Wi-Fi interface, connection, standard, and security information. Android 11 (API 30) or later is required. Termux:API is needed for the Wi-Fi permission, and location permission is needed to reveal SSID and BSSID; without location permission the two names appear as `<redacted>`. (Wifi)
     * Added Wallpaper detection, which effectively reports `/data/system/users/0/wallpaper`. (Wallpaper)
     * Added Media detection, root/ADB only. (Media / Player)
 * Improved macOS support:

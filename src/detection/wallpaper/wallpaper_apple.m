@@ -23,9 +23,16 @@ const char* detectFromPlist(FFstrbuf* result) {
         NSDictionary* choice = choices[0];
 
         NSArray* files = choice[@"Files"];
-        if (files.count > 0) {
-            NSString* file = files[0][@"relative"];
-            ffStrbufSetS(result, [NSURL URLWithString:file].path.UTF8String);
+        if ([files isKindOfClass:NSArray.class] && files.count > 0) {
+            NSDictionary* fileEntry = files[0];
+            // `relative` is read through a dictionary, which raises an unrecognized selector rather
+            // than returning nil when the entry is not one.
+            if ([fileEntry isKindOfClass:NSDictionary.class]) {
+                NSString* relative = fileEntry[@"relative"];
+                if ([relative isKindOfClass:NSString.class]) {
+                    ffStrbufSetS(result, [NSURL URLWithString:relative].path.UTF8String);
+                }
+            }
         }
 
         if (result->length == 0) {
@@ -127,6 +134,11 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
     } else {
 #ifdef FF_HAVE_SQLITE3
         error = detectFromSQLite(result);
+        if (error) {
+            // The database only holds the user-picked picture, so it goes missing on a machine that
+            // never changed its wallpaper. NSWorkspace answers for the system default there.
+            error = detectFromNSWorkspace(result);
+        }
 #else
         error = detectFromNSWorkspace(result);
 #endif

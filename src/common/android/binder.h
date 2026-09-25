@@ -19,8 +19,6 @@
 //   * A handle arriving in a reply is owned by that reply buffer. It has to be acquired
 //     (BC_ACQUIRE + BC_INCREFS) before BC_FREE_BUFFER; otherwise only a weak reference survives and
 //     every later transaction on it fails, because the kernel looks up a strong reference.
-//
-// See .workbuddy-ai/android-binder-raw-client.md for the full write-up and the tooling.
 
 #include "fastfetch.h" // IWYU pragma: keep
 
@@ -251,3 +249,29 @@ typedef struct FFBinderServiceHandle {
 // Returns the strong and weak references ffBinderLookupService() acquired on the handle. Usable as a
 // cleanup attribute; safe on a zeroed or already released FFBinderServiceHandle.
 [[gnu::nonnull(1)]] void ffBinderServiceHandleRelease(FFBinderServiceHandle* service);
+
+// ---------------------------------------------------------------------------------------------
+// Handles a transaction acquired
+// ---------------------------------------------------------------------------------------------
+
+// Whatever ffBinderTransact() collected for the caller, released together on the way out of a
+// function -- the handles it acquired, plus the descriptors it delivered, which are owned rather
+// than borrowed and would otherwise stay open for the life of the process.
+//
+// Unlike FFBinderServiceHandle this cannot be declared before the transaction runs, because which
+// handles came back is only known afterwards. `replied` is therefore a separate flag the caller
+// raises once ffBinderTransact() has returned: it acquires the handles even when it goes on to fail
+// (a reply that did not fit the caller buffer still had its BC_ACQUIRE tail sent), so releasing
+// without it would drop a reference that was never taken.
+typedef struct FFBinderAcquired {
+    FFBinder* binder;
+    const uint32_t* handles;
+    uint32_t handleCount;
+    const int32_t* fds;
+    uint32_t fdCount;
+    const bool* replied;
+} FFBinderAcquired;
+
+// Usable as a cleanup attribute; safe on a zeroed FFBinderAcquired, and on one whose transaction did
+// not reply.
+[[gnu::nonnull(1)]] void ffBinderAcquiredRelease(FFBinderAcquired* acquired);

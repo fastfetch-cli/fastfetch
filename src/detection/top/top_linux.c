@@ -68,7 +68,7 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
 }
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
-    const long ticks = sysconf(_SC_CLK_TCK);
+    const long ticks = sysconf(_SC_CLK_TCK); // sysconf returns -1 ONLY if `_SC_CLK_TCK` is an invalid name
     const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
     FF_DEBUG("Scanning /proc: clk_tck=%ld, pageSizeShift=%u", ticks, (unsigned) pageSizeShift);
 

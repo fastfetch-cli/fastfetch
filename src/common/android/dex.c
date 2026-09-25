@@ -95,28 +95,60 @@ static uint32_t dexUleb128(const uint8_t** p, const uint8_t* end) {
     return value;
 }
 
-// encoded_value: one header byte holding ((size - 1) << 5) | type, then that many payload bytes. A
-// `static final int` constant is written as VALUE_INT, whose payload is a sign-extended
-// little-endian integer. Reading through 64 bits keeps every shift in range even if the size field
-// is nonsense; `end` is what keeps a truncated payload from running off the end of the mapping.
-static int32_t dexEncodedInt(const uint8_t** p, const uint8_t* end) {
+// The type tag a dex encoded_value carries in the low five bits of its header byte, per the
+// `encoded_value` table of the dex format (`VALUE_INT = 0x04`, sign-extended four-byte integer).
+// 0x1f is VALUE_BOOLEAN in that same table, which is the trap: naming it VALUE_INT and comparing
+// against it rejects every real int and accepts booleans.
+#define FF_DEX_VALUE_INT 0x04
+
+// encoded_value: one header byte holding ((size - 1) << 5) | type, then that many payload bytes.
+//
+// The `static_values` array is not a list of ints: `IInterface.DESCRIPTOR` is a `static final
+// String` and sits in it, and a real Stub class mixes ints, strings and booleans. So a value whose
+// tag is not VALUE_INT is skipped -- its payload is stepped over to keep the walk aligned with the
+// field list -- and only `isInt` reports whether the *wanted* field ended up being one. Failing on
+// the first non-int instead would abort on `DESCRIPTOR`, before the transaction constants that
+// follow it are ever reached. Measured on a device: `IWifiManager$Stub` carries 347 static fields
+// whose values are mostly VALUE_INT but include that string, and `getConnectionInfo` is 98 there.
+//
+// A payload wider than four bytes is not an int either, and the byte count is what keeps a size
+// field read out of a corrupt file from shifting past the end. Reading through 64 bits keeps every
+// shift in range while counting down; `end` is what keeps a truncated payload from running off the
+// end of the mapping.
+static bool dexEncodedValue(const uint8_t** p, const uint8_t* end, int32_t* result, bool* isInt) {
     if (*p >= end) {
-        return 0;
+        return false;
     }
     const uint8_t header = *(*p)++;
+    const uint32_t type = (uint32_t) (header & 0x1f);
     const uint32_t size = (uint32_t) (header >> 5) + 1;
+    if (size > 8) {
+        return false;
+    }
+
     uint64_t value = 0;
-    for (uint32_t i = 0; i < size && i < 8; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         if (*p >= end) {
-            break;
+            return false;
         }
-        value |= (uint64_t) (*(*p)++) << (i * 8);
+        if (i < sizeof(value)) {
+            value |= (uint64_t) (*(*p)++) << (i * 8);
+        } else {
+            (void) *(*p)++;
+        }
     }
-    const uint32_t bits = size * 8;
-    if (bits < 64 && (value & (1ull << (bits - 1))) != 0) {
-        value |= ~((1ull << bits) - 1);
+
+    *isInt = type == FF_DEX_VALUE_INT && size <= sizeof(uint32_t);
+    if (*isInt) {
+        // VALUE_INT is sign-extended from its own width, not from 32 bits: a one-byte -1 is written
+        // as `21 ff`, one byte of 0xff, and has to come back as -1 rather than 255.
+        const uint32_t bits = size * 8;
+        if ((value & (1ull << (bits - 1))) != 0) {
+            value |= ~((1ull << bits) - 1);
+        }
     }
-    return (int32_t) (uint32_t) value;
+    *result = (int32_t) (uint32_t) value;
+    return true;
 }
 
 // string_data_item: a uleb128 length in UTF-16 code units, then MUTF-8 bytes and a NUL terminator.
@@ -216,13 +248,23 @@ static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* cla
             }
             fieldIndex += fieldIndexDiff;
             (void) dexUleb128(&fields, end); // access_flags
-            const int32_t value = dexEncodedInt(&values, end);
+            int32_t value;
+            bool isInt;
+            if (!dexEncodedValue(&values, end, &value, &isInt)) {
+                return "The dex static value list is truncated";
+            }
 
             if (!dexTableInRange(dex, end, fieldIds, (uint64_t) fieldIndex + 1, FF_DEX_FIELD_ID_SIZE)) {
                 return "The dex field table is out of range";
             }
             const char* name = dexString(dex, end, dexU32(fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
             if (name != nullptr && strcmp(name, fieldName) == 0) {
+                if (!isInt) {
+                    // The field exists but is not an int, so its value is not the constant asked
+                    // for. Reported here rather than on the first non-int in the list, because the
+                    // list legitimately holds strings (`DESCRIPTOR`) and booleans.
+                    return "The dex static field is not an int";
+                }
                 *result = value;
                 return nullptr;
             }

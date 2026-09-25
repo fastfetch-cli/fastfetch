@@ -284,3 +284,26 @@ void ffBinderServiceHandleRelease(FFBinderServiceHandle* service) {
     ioctl(service->binder->fd, BINDER_WRITE_READ, &release);
     service->handle = 0;
 }
+
+void ffBinderAcquiredRelease(FFBinderAcquired* acquired) {
+    if (acquired->replied == nullptr || *acquired->replied == false) {
+        return; // nothing was acquired
+    }
+
+    // A descriptor is not a reference: the kernel installed it in our own fd table when it delivered
+    // the reply, and nobody else holds it, so closing it is the whole of giving it back.
+    for (uint32_t i = 0; i < acquired->fdCount; i++) {
+        close(acquired->fds[i]);
+    }
+
+    // The mirror of the acquire the transaction appended to its tail, in the same order it took them.
+    // No binder to talk through means the handles went with it when it was closed.
+    if (acquired->binder == nullptr || acquired->binder->fd < 0) {
+        return;
+    }
+
+    for (uint32_t i = 0; i < acquired->handleCount; i++) {
+        FFBinderServiceHandle handle = { .binder = acquired->binder, .handle = acquired->handles[i] };
+        ffBinderServiceHandleRelease(&handle);
+    }
+}

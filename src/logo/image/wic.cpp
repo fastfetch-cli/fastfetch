@@ -122,15 +122,28 @@ static bool convertToRGBA(IWICImagingFactory* factory, IWICBitmapSource* source,
         return false;
     }
 
-    UINT stride = outWidth * 4;
-    uint8_t* pixels = (uint8_t*) malloc((size_t) stride * outHeight);
+    // `stride` and the length WIC is told are both UINT, while the buffer is a size_t allocation, so
+    // computing either in UINT would let a large request wrap and have WIC fill a buffer it believes
+    // is smaller than it is. Not reachable today -- the scaler above rejects any dimension above
+    // 32767, which caps the stride at 131068 and the buffer at 4294705156, both inside UINT -- but
+    // the guard costs nothing and every other backend keeps its buffer size associative. Kept in
+    // size_t throughout so the check also covers the allocation overflowing size_t.
+    const size_t strideSize = (size_t) outWidth * 4;
+    const size_t bufferSize = strideSize * outHeight;
+    if (strideSize > UINT_MAX || bufferSize > UINT_MAX) {
+        if (error) *error = "the requested image dimensions are too large";
+        return false;
+    }
+    const UINT stride = (UINT) strideSize;
+
+    uint8_t* pixels = (uint8_t*) malloc(bufferSize);
     if (pixels == nullptr) {
         if (error) *error = "out of memory";
         return false;
     }
 
     // prc == nullptr means the whole image; WIC fills the buffer using the stride we pass in
-    if (FAILED(converter->CopyPixels(nullptr, stride, stride * outHeight, pixels))) {
+    if (FAILED(converter->CopyPixels(nullptr, stride, (UINT) bufferSize, pixels))) {
         free(pixels);
         if (error) *error = "pixel copy failed";
         return false;

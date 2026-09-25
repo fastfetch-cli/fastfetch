@@ -828,6 +828,16 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
     // artwork are fetched exactly once, for the winner.
     uint32_t tokens[FF_BINDER_MAX_HANDLES];
     uint32_t tokenCount = 0;
+    // Raised as soon as ffBinderTransact() has replied, because from that point on it is holding a
+    // strong reference to every handle it collected and the kernel has installed every descriptor it
+    // delivered into our own fd table. Any early return past that line has to give them back, so one
+    // cleanup attribute does it rather than a release call repeated at each exit.
+    //
+    // `replied` is what decides: ffBinderTransact() acquires the handles before it can fail -- it
+    // returns an error when the reply did not fit the caller buffer, and the tail that carries
+    // BC_ACQUIRE runs regardless -- so releasing without the flag would drop one reference too many.
+    bool replied = false;
+    [[gnu::cleanup(ffBinderAcquiredRelease)]] FFBinderAcquired acquired = { .binder = &binder, .replied = &replied };
     {
         uint8_t request[FF_MEDIA_ANDROID_REQUEST_SIZE];
         FFBinderParcel parcel = ffBinderParcelCreate(request, sizeof(request));
@@ -837,6 +847,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
 
         FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
         error = ffBinderTransact(&binder, service.handle, FF_MEDIA_ANDROID_GET_SESSIONS, 0, &parcel, &reply);
+        replied = true;
         if (error != nullptr) {
             return error;
         }
@@ -864,6 +875,13 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
         for (uint32_t i = 0; i < tokenCount; i++) {
             tokens[i] = reply.handles[i];
         }
+        acquired.handles = tokens;
+        acquired.handleCount = tokenCount;
+        // Every descriptor the reply delivered is ours to close. The art of a session is read through
+        // one of them, and reading it happens over the fd number rather than over the file, so closing
+        // it on the way out does not cut the read short.
+        acquired.fds = reply.fds;
+        acquired.fdCount = reply.fdCount;
     }
 
     if (tokenCount == 0) {
@@ -889,13 +907,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
 
     androidReadSession(&binder, tokens[best], media, saveCover);
 
-    // The tokens were acquired by ffBinderTransact() and are given back one by one; releasing them is
-    // what keeps a short-lived fastfetch from holding a session open for the life of the process.
-    for (uint32_t i = 0; i < tokenCount; i++) {
-        FFBinderServiceHandle token = { .binder = &binder, .handle = tokens[i] };
-        ffBinderServiceHandleRelease(&token);
-    }
-
+    // The tokens were acquired by ffBinderTransact() and are given back by the cleanup attribute above.
     return nullptr;
 }
 

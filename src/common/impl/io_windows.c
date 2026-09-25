@@ -362,8 +362,18 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
     }
 
     ffStrbufAppendC(folder, '*');
-    WIN32_FIND_DATAA entry;
-    HANDLE hFind = FindFirstFileA(folder->chars, &entry);
+    // The wide API on purpose: every path fastfetch holds is UTF-8, and FindFirstFileA would read
+    // it in the active code page, so a directory whose name the code page cannot represent -- a
+    // Chinese or Japanese name under an English or German locale, for one -- answers
+    // ERROR_PATH_NOT_FOUND and the whole listing disappears. The names it returns are converted
+    // back to UTF-8 below.
+    wchar_t wideFolder[PATH_MAX];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(wideFolder, sizeof(wideFolder), nullptr, folder->chars, folder->length + 1))) {
+        ffStrbufTrimRight(folder, '*');
+        return;
+    }
+    WIN32_FIND_DATAW entry;
+    HANDLE hFind = FindFirstFileW(wideFolder, &entry);
     ffStrbufTrimRight(folder, '*');
     if (hFind == INVALID_HANDLE_VALUE) {
         return;
@@ -371,14 +381,15 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     do {
         if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            if (ffStrEquals(entry.cFileName, ".") || ffStrEquals(entry.cFileName, "..")) {
+            if (entry.cFileName[0] == L'.') {
                 continue;
             }
 
             ffStrbufSubstrBefore(folder, folderLength);
-            ffStrbufAppendS(folder, entry.cFileName);
+            ffStrbufAppendWS(folder, entry.cFileName);
             ffStrbufAppendC(folder, '/');
-            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry.cFileName, pretty);
+            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(entry.cFileName);
+            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), name.chars, pretty);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
@@ -391,8 +402,9 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
             fputs(folder->chars + baseLength, stdout);
         }
 
-        puts(entry.cFileName);
-    } while (FindNextFileA(hFind, &entry));
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateWS(entry.cFileName);
+        ffStrbufPutTo(&name, stdout);
+    } while (FindNextFileW(hFind, &entry));
     FindClose(hFind);
 }
 

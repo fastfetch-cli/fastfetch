@@ -49,9 +49,17 @@ typedef enum FFWallpaperAndroidWhich : int32_t {
 // methods as it likes -- this one dropped `getName`, whose code answers UNKNOWN_TRANSACTION here.
 #define FF_WALLPAPER_ANDROID_TRANSACTION_GET_WALLPAPER 4u
 
-// The request is the interface token, the package name, `which` and `userId`. The package name is the
-// longest thing in it, and the helper will not write more than 128 bytes of it.
-#define FF_WALLPAPER_ANDROID_PARCEL_SIZE 256
+// `ffAndroidGetOwnPackage` writes at most this many bytes, terminator included.
+#define FF_WALLPAPER_ANDROID_PACKAGE_SIZE 128
+
+// The request is the interface token, the package name, `which` and `userId`. A string16 costs
+// 4 + 2 * (length + 1) bytes padded to four, and the token puts three int32 in front of the
+// descriptor. Deriving the size from the two names rather than rounding it up is what keeps the
+// longest package name `ffAndroidGetOwnPackage` can produce from marking the parcel truncated --
+// that fails the whole detection, rather than degrading to a call without a name.
+#define FF_WALLPAPER_ANDROID_PARCEL_SIZE \
+    (12 + ((4 + 2 * sizeof(FF_WALLPAPER_ANDROID_DESCRIPTOR) + 3) & ~3u) \
+        + ((4 + 2 * FF_WALLPAPER_ANDROID_PACKAGE_SIZE + 3) & ~3u) + 8)
 
 // The reply carries the descriptor object plus, for this method, a Bundle of two ints: 108 bytes on
 // the device it was measured on, 80 when the wallpaper is a live one and the Bundle comes alone. Only
@@ -134,7 +142,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
         return ffDetectWallpaperLinux(result);
     }
 
-    char package[128];
+    char package[FF_WALLPAPER_ANDROID_PACKAGE_SIZE];
     if (!ffAndroidGetOwnPackage(package, sizeof(package))) {
         return "Cannot determine the package name of this process";
     }

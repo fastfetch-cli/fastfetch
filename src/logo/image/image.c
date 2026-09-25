@@ -1000,7 +1000,11 @@ static FFNativeFD getCacheFD(FFLogoRequestData* requestData, const char* fileNam
         #endif
     );
     #else
-    HANDLE fd = CreateFileA(requestData->cacheDir.chars, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    wchar_t widePath[PATH_MAX];
+    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(widePath, sizeof(widePath), nullptr, requestData->cacheDir.chars, requestData->cacheDir.length + 1))) {
+        return nullptr;
+    }
+    HANDLE fd = CreateFileW(widePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     #endif
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
     return fd;
@@ -1261,6 +1265,15 @@ static uint32_t getKittyImageId(void) {
 // of its own, so its gap is set with a separate `a=a` command; every further frame is an `a=f`
 // command that replaces the pixels (`X=1`) because the backend already composed a full canvas.
 // Every command carries the image id and `q=2`, so nothing is ever written back to the tty.
+//
+// `z` is a non-negative millisecond gap, so the backend's -1 ("gapless", see FFImageFrame) has to
+// be clamped: emitting it verbatim is out of range, and a terminal that validates the key drops
+// the whole command rather than the one key. -1 and 0 mean the same thing to a terminal that does
+// not validate.
+static int32_t getKittyGap(int32_t delayMs) {
+    return delayMs > 0 ? delayMs : 0;
+}
+
 static void emitKittyAnimation(FFstrbuf* result, const FFKittyAnimation* animation, uint32_t imageId) {
     const char* currentPos = animation->payload;
 
@@ -1277,7 +1290,7 @@ static void emitKittyAnimation(FFstrbuf* result, const FFKittyAnimation* animati
             // the terminal sizes the frame's canvas from them and rejects the command outright when
             // they are missing.
             ffStrbufAppendF(result, "\033_Ga=f,f=32,s=%u,v=%u,i=%u,z=%d,X=1,q=2",
-                animation->width, animation->height, imageId, (int) frame->delayMs);
+                animation->width, animation->height, imageId, (int) getKittyGap(frame->delayMs));
         }
 
         if (frame->compressed) {
@@ -1293,7 +1306,7 @@ static void emitKittyAnimation(FFstrbuf* result, const FFKittyAnimation* animati
         if (i == 0) {
             // "the first frame or root frame is created with the base image data and has no gap,
             // so its gap must be set using this control code"
-            ffStrbufAppendF(result, "\033_Ga=a,i=%u,r=1,z=%d,q=2\033\\", imageId, (int) frame->delayMs);
+            ffStrbufAppendF(result, "\033_Ga=a,i=%u,r=1,z=%d,q=2\033\\", imageId, (int) getKittyGap(frame->delayMs));
         }
     }
 
@@ -1348,8 +1361,13 @@ static bool encodeKittyAnimation(FFLogoRequestData* requestData, const char** er
     const int32_t loopCount = ffImageAnimationLoopCount(animation);
 
     if (frameCount == 1) {
-        // Nothing to animate. Rendering it through the static path keeps the cache entry, and
-        // therefore the bytes written to the terminal, identical to the default rendering.
+        // Nothing to animate, but the caller asked for an animation and that is what the cache has to
+        // hold: the reader for an animation never falls back to a still entry (see §7.1), so a
+        // `kittyanim` is what it looks for whoever wrote one. Writing the still pair instead would
+        // leave the entry functionally complete -- the mtime goes down, removeCachedFiles() is
+        // skipped from then on -- while every run re-decodes and re-encodes the source, because the
+        // entry the reader wants is missing. One frame, encoded the same way an animation of one
+        // frame would be, keeps both the bytes sent and the cache honest.
         FFImageFrame frame = {};
         bool ok = ffImageAnimationGetFrame(animation, 0, &frame, error);
         ffImageAnimationClose(animation);
@@ -1362,9 +1380,47 @@ static bool encodeKittyAnimation(FFLogoRequestData* requestData, const char** er
             .width = requestData->logoPixelWidth,
             .height = requestData->logoPixelHeight,
         };
-        ok = printImageKitty(requestData, &buffer);
+
+        const size_t frameSize = (size_t) requestData->logoPixelWidth * requestData->logoPixelHeight * 4;
+        FF_AUTO_FREE void* blob = malloc(frameSize);
+        if (blob == nullptr) {
+            ffImageDestroy(&buffer);
+            *error = "out of memory";
+            return false;
+        }
+        memcpy(blob, frame.data, frameSize);
+
+        size_t blobLength = frameSize;
+        bool compressed = false;
+        #ifdef FF_HAVE_ZLIB
+        compressed = compressBlob(&blob, &blobLength);
+        #endif
+
+        FF_STRBUF_AUTO_DESTROY base64 = ffStrbufCreateA((uint32_t) (10 + blobLength * 4 / 3));
+        ffBase64EncodeRaw((uint32_t) blobLength, (const char*) blob, &base64.length, base64.chars);
+
+        FFKittyAnimationFrame single = { .delayMs = frame.delayMs, .compressed = compressed, .payloadLength = base64.length };
+        FFKittyAnimation built = {
+            .width = requestData->logoPixelWidth,
+            .height = requestData->logoPixelHeight,
+            .frameCount = 1,
+            .loopCount = loopCount,
+            .frames = &single,
+            .payload = base64.chars,
+            .payloadLength = base64.length,
+        };
+
+        FF_STRBUF_AUTO_DESTROY serialized = ffStrbufCreate();
+        serializeKittyAnimation(&serialized, &built);
+        writeCacheData(requestData, serialized.chars, serialized.length, FF_CACHE_FILE_KITTY_ANIMATION);
+
+        // The envelope carries the image id, so the bytes handed to the terminal are not the cached
+        // ones and go out without a payload write. The still pair is written by printImageKitty --
+        // it is what a still selector reads, and this frame is the frame every still selector asks
+        // for. It runs before the buffer is released for that reason.
+        printImageKitty(requestData, &buffer);
         ffImageDestroy(&buffer);
-        return ok;
+        return true;
     }
 
     FFKittyAnimationFrame* frames = calloc(frameCount, sizeof(*frames));

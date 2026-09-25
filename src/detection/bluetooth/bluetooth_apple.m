@@ -36,7 +36,7 @@
 // ---------------------------------------------------------------------------------------------
 //
 // Core Bluetooth is the only public route to a peripheral that speaks Low Energy rather than BR/EDR.
-// What it will and will not answer was measured on macOS 27 with `.workbuddy-ai/probes/ble/le_probe`
+// What it will and will not answer was measured on macOS 27 with a standalone probe program
 // (12 paired devices, one of them connected), because none of it follows from the headers:
 //
 // * `retrieveConnectedPeripheralsWithServices:@[]` answers with **nothing** -- 0 devices in 0.1 ms.
@@ -88,7 +88,6 @@
 //   fills its peer map (0 entries after two seconds, `retrievePairedPeersWithOptions:` answers nil),
 //   and `CBCentralManager.sharedPairingAgent.retrievePairedPeers` answers with 7 of the 11 devices
 //   as bare `CBPeripheral` objects carrying no address, no battery and no class of device.
-//   `.workbuddy-ai/probes/ble/cb_only_probe.m` is the probe that measured this.
 //
 // * `CBPeripheral.state` is not the connection state the caller means. It answers `Disconnected` for
 //   every peripheral the retrieval above returns, and so does `isConnected`; only the private

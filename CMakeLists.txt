@@ -98,12 +98,16 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(ENABLE_IMAGE_LOGO "Enable image logos (sixel / kitty / iTerm / chafa)" ON)
-if(ENABLE_IMAGE_LOGO)
-    cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku OR GNU" OFF)
-    cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
-    cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows, macOS and Android; replaces ImageMagick's SIXEL coder)" ON "WIN32 OR APPLE OR ANDROID" OFF)
-    cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE OR ANDROID" OFF)
-endif()
+# The four below are declared outside the guard on purpose. `cmake_dependent_option` is a macro: when
+# the condition is false it is never expanded, so nothing rewrites the value already sitting in
+# CMakeCache.txt, and `cmake -DENABLE_IMAGE_LOGO=OFF .` in an existing build directory would leave
+# ENABLE_SIXEL=ON behind -- sixel and chafa would still be compiled and linked while image.c, the
+# only file that uses them, is not. The condition does the disabling instead: it is the fourth
+# argument's job, and it keeps the option visible and settable in cmake-gui either way.
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "ENABLE_IMAGE_LOGO;LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "ENABLE_IMAGE_LOGO;LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows, macOS and Android; replaces ImageMagick's SIXEL coder)" ON "ENABLE_IMAGE_LOGO;WIN32 OR APPLE OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGE_LOGO;ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE OR ANDROID" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -1931,37 +1935,29 @@ if(LINUX)
     endif()
 elseif(APPLE)
     target_link_libraries(libfastfetch
-        # reachable from the default structure
+        PRIVATE "-framework AVFoundation"
+        PRIVATE "-framework Accelerate"
         PRIVATE "-framework Cocoa"
+        PRIVATE "-framework CoreAudio"
+        PRIVATE "-framework CoreBluetooth"
         PRIVATE "-framework CoreFoundation"
+        PRIVATE "-framework CoreMedia"
+        PRIVATE "-framework CoreVideo"
+        PRIVATE "-framework CoreWLAN"
+        PRIVATE "-framework GameController"
+        PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
+        PRIVATE "-framework ImageIO"
         PRIVATE "-framework Metal"
+        PRIVATE "-framework OpenCL"
+        PRIVATE "-framework OpenGL"
+        PRIVATE "-framework SystemConfiguration"
+        PRIVATE "-framework VideoToolbox"
 
-        # referenced as ObjC classes, so they cannot be lazy loaded
-        PRIVATE "-framework AVFoundation" # Camera
-        PRIVATE "-framework CoreBluetooth" # Bluetooth
-        PRIVATE "-framework IOBluetooth" # Bluetooth, BluetoothRadio
-        PRIVATE "-framework CoreWLAN" # Wifi
-        PRIVATE "-framework GameController" # Gamepad
-
-        # only reachable from non-default modules, and referenced as plain C
-        PRIVATE "-Wl,-lazy_framework,CoreAudio" # Sound
-        PRIVATE "-Wl,-lazy_framework,CoreMedia" # Camera
-        PRIVATE "-Wl,-lazy_framework,CoreVideo" # Display, fallback for older macOS versions
-        PRIVATE "-Wl,-lazy_framework,OpenGL" # OpenGL
-        PRIVATE "-Wl,-lazy_framework,OpenCL" # OpenCL
-        PRIVATE "-Wl,-lazy_framework,SystemConfiguration" # DNS
-        PRIVATE "-Wl,-lazy_framework,VideoToolbox" # Codec
-        PRIVATE "-Wl,-lazy_framework,ImageIO" # image logos
-        PRIVATE "-Wl,-lazy_framework,Accelerate" # image logos
-
-        # private frameworks, and only reachable from non-default modules.
-        # `-weak_framework` already keeps a missing framework from aborting the
-        # launch, which lazy loading on its own would not do.
-        PRIVATE "-weak_framework CoreDisplay" # Brightness
+        PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-F /System/Library/PrivateFrameworks"
-        PRIVATE "-weak_framework DisplayServices" # Brightness
-        PRIVATE "-weak_framework MediaRemote" # Media
+        PRIVATE "-weak_framework DisplayServices"
+        PRIVATE "-weak_framework MediaRemote"
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
@@ -1978,8 +1974,16 @@ elseif(WIN32)
         PRIVATE "winbrand"
         PRIVATE "secur32"
         PRIVATE "shlwapi"
-        PRIVATE "windowscodecs"
     )
+    if(ENABLE_IMAGE_LOGO)
+        # Only src/logo/image/wic.cpp uses WIC, and that file is only compiled with image logos
+        # enabled (see the WIN32 source list above). Verified by building with
+        # `-DENABLE_IMAGE_LOGO=OFF` and removing the library from the link line: it links and runs
+        # without it, and nothing else in the tree references IWIC*.
+        target_link_libraries(libfastfetch
+            PRIVATE "windowscodecs"
+        )
+    endif()
     if(NOT ENABLE_WIN81_COMPAT)
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -2060,12 +2064,23 @@ elseif(ANDROID)
         endif()
     endif()
 
-    # Three APIs (AImageDecoder, AndroidBitmap_compress, AMediaCodec) are newer than the API level this
-    # build targets -- the first two are 30, and AMediaCodec_getName / AMediaCodec_releaseName are 28 --
-    # while fastfetch keeps running on devices below those levels. The NDK headers mark the entry points
-    # unavailable, so they have to be weak references: otherwise the executable would fail to load on an
-    # older device. Guarding every use with __builtin_available() is what makes that safe, and turning
-    # the guard diagnostic into an error is what keeps a use from slipping past it.
+    # Three APIs are newer than the API level this build targets: AImageDecoder is 30,
+    # AndroidBitmap_compress is 30, and AMediaCodec_getName / AMediaCodec_releaseName are 28.
+    # fastfetch keeps running on devices below those levels, and the NDK headers mark the entry
+    # points unavailable there, so they have to be weak references -- a strong reference would fail
+    # the load on an older device. Guarding every use with __builtin_available() is what makes that
+    # safe, and turning the guard diagnostic into an error keeps a use from slipping past it.
+    #
+    # Each one lives in the library that provides it, and that library is linked above:
+    # AImageDecoder_* and AndroidBitmap_compress are exported by libjnigraphics.so, and
+    # AMediaCodec_* by libmediandk.so. Checked on a device (Android 16, API 36) with
+    # `readelf --dyn-syms /system/lib64/libjnigraphics.so` and a dlopen/dlsym probe: every
+    # AImageDecoder_* entry point resolves there and none of them resolves in libandroid.so, which
+    # is why libandroid.so is *not* linked -- nothing fastfetch calls comes from it. Keep the
+    # provider library linked for the reason the NDK requires it: an undefined weak symbol resolves
+    # to NULL rather than failing the load, and FF_ANDROID_API_AT_LEAST() reads the platform level,
+    # not the symbol, so it would send the call straight through a NULL pointer on every device new
+    # enough to pass the guard.
     #
     # camera_android.c is deliberately not in this list. The camera2 NDK is a *library* that starts at
     # API 24, and a weak reference weakens the symbol, never the library: DT_NEEDED would still name

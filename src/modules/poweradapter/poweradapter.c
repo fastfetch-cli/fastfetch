@@ -142,7 +142,7 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         { "Power adapter watts", "watts" },
         { "Power adapter name", "name" },
         { "Power adapter manufacturer", "manufacturer" },
-        { "Power adapter model", "model-name" },
+        { "Power adapter model name", "model-name" },
         { "Power adapter description", "description" },
         { "Power adapter serial number", "serial" },
     })),
