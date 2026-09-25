@@ -61,14 +61,31 @@ static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version) {
         return true;
     }
 
+    ffStrbufClear(version);
     if (!getExeVersionRaw(exe, version)) {
+        ffStrbufClear(version);
         return false;
     }
 
-    // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
-    ffStrbufSubstrBeforeFirstC(version, '('); // GNU bash, version 5.1.16
-    ffStrbufSubstrAfterLastC(version, ' ');   // 5.1.16
-    return true;
+    // Truncate to first line:
+    // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)...
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+
+    if (ffStrbufSubstrAfterFirstS(version, "version ")) {
+        uint32_t paren = ffStrbufFirstIndexC(version, '(');
+        if (paren < version->length) {
+            ffStrbufSubstrBefore(version, paren);
+        } else {
+            ffStrbufSubstrBeforeFirstC(version, ' ');
+        }
+        ffStrbufTrimRightSpace(version);
+        return version->length > 0;
+    }
+
+    ffStrbufSubstrBeforeFirstC(version, '(');
+    ffStrbufSubstrAfterLastC(version, ' ');
+    ffStrbufTrimRightSpace(version);
+    return version->length > 0;
 }
 
 static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version) {
@@ -265,55 +282,50 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
         return false;
     }
 
+    bool success = false;
     if (ffStrEqualsIgnCase(exeName, "bash")) {
-        return getShellVersionBash(exe, version);
+        success = getShellVersionBash(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "zsh")) {
+        success = getShellVersionZsh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "fish")) {
+        success = getShellVersionFish(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "pwsh")) {
+        success = getShellVersionPwsh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "csh") || ffStrEqualsIgnCase(exeName, "tcsh")) {
+        success = getExeVersionGeneral(exe, version); // tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
+    } else if (ffStrEqualsIgnCase(exeName, "nu")) {
+        success = getShellVersionNushell(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "mksh")) {
+        success = getShellVersionKsh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "oksh")) {
+        success = getShellVersionOksh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "oil.ovm")) {
+        success = getShellVersionOils(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "elvish")) {
+        success = getExeVersionRaw(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "ash") || ffStrEqualsIgnCase(exeName, "busybox")) {
+        success = getShellVersionAsh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "xonsh")) {
+        success = getShellVersionXonsh(exe, version);
+    } else if (ffStrEqualsIgnCase(exeName, "brush")) {
+        success = getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
     }
-    if (ffStrEqualsIgnCase(exeName, "zsh")) {
-        return getShellVersionZsh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "fish")) {
-        return getShellVersionFish(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "pwsh")) {
-        return getShellVersionPwsh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "csh") || ffStrEqualsIgnCase(exeName, "tcsh")) {
-        return getExeVersionGeneral(exe, version); // tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
-    }
-    if (ffStrEqualsIgnCase(exeName, "nu")) {
-        return getShellVersionNushell(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "mksh")) {
-        return getShellVersionKsh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "oksh")) {
-        return getShellVersionOksh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "oil.ovm")) {
-        return getShellVersionOils(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "elvish")) {
-        return getExeVersionRaw(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "ash") || ffStrEqualsIgnCase(exeName, "busybox")) {
-        return getShellVersionAsh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "xonsh")) {
-        return getShellVersionXonsh(exe, version);
-    }
-    if (ffStrEqualsIgnCase(exeName, "brush")) {
-        return getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
-    }
-
 #ifdef _WIN32
-    if (ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise")) {
-        return getShellVersionWinPowerShell(exe, version);
+    else if (ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise")) {
+        success = getShellVersionWinPowerShell(exe, version);
+    } else {
+        success = getFileVersion(exe, nullptr, version);
     }
-
-    return getFileVersion(exe, nullptr, version);
 #endif
 
-    return false;
+    if (!success) {
+        ffStrbufClear(version);
+        return false;
+    }
+
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufTrimRightSpace(version);
+    return version->length > 0;
 }
 
 [[maybe_unused]] static bool getTerminalVersionTermux(FFstrbuf* version) {

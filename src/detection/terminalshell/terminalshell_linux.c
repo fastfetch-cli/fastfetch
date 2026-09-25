@@ -429,7 +429,9 @@ const FFShellResult* ffDetectShell() {
     if (result->processName.length > 0) {
         setShellInfoDetails(result);
         if (instance.config.general.detectVersion) {
-            fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
+            if (!fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version)) {
+                ffStrbufClear(&result->version);
+            }
         }
     }
 
@@ -484,7 +486,9 @@ const FFTerminalResult* ffDetectTerminal() {
     if (result->processName.length > 0) {
         setTerminalInfoDetails(result);
         if (instance.config.general.detectVersion) {
-            fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
+            if (!fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version)) {
+                ffStrbufClear(&result->version);
+            }
         }
     }
 
