@@ -118,22 +118,162 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version) {
 }
 
 static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version) {
-    if (ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--version", nullptr }) == nullptr && ffStrbufSubstrAfterFirstS(version, " (AT&T Research) ")) {
-        // version         sh (AT&T Research) 93u+ 2012-08-01
-        ffStrbufSubstrBeforeFirstC(version, ' ');
+    ffStrbufClear(version);
+
+    // ksh93 has used both stderr and stdout for --version, and the exit
+    // status is not consistent across releases. Parse any captured output
+    // before trying the next probe.
+    for (int attempt = 0; attempt < 4; ++attempt) {
+    ffStrbufClear(version);
+        if (attempt < 2 && (ffStrbufEndsWithS(exe, "mksh") || ffStrbufEndsWithS(exe, "pdksh") || ffStrbufEndsWithS(exe, "oksh")))
+            continue;
+
+        if (attempt == 0) {
+            ffProcessAppendStdErr(version, (char* const[]) { exe->chars, "--version", nullptr });
+        } else if (attempt == 1) {
+            ffProcessAppendStdOut(version, (char* const[]) { exe->chars, "--version", nullptr });
+        } else if (attempt == 2) {
+            ffProcessAppendStdOut(version, (char* const[]) {
+                exe->chars,
+                "-c",
+                "printf '%s\\n' \"${KSH_VERSION:-${SH_VERSION:-}}\"",
+                nullptr
+            });
+        } else {
+            ffProcessAppendStdOut(version, (char* const[]) {
+                exe->chars,
+                "-c",
+                "printf '%s\\n' \"${.sh.version}\"",
+                nullptr
+            });
+        }
+
+        const char* p = version->chars;
+        while (*p && isspace((unsigned char) *p))
+            ++p;
+        if (!*p)
+            continue;
+
+        // @(#)PD KSH v5.2.14, @(#)MIRBSD KSH R59, @(#)LEGACY KSH R59
+        if (ffStrStartsWith(p, "@(#)")) {
+            const char* marker = strstr(p, " KSH ");
+            if (!marker)
+                continue;
+
+            const char* start = marker + strlen(" KSH ");
+            while (*start && isspace((unsigned char) *start))
+                ++start;
+            const char* end = start;
+            while (*end && !isspace((unsigned char) *end))
+                ++end;
+
+            uint32_t length = (uint32_t) (end - start);
+            if (length > 1 && start[0] == 'v' && ffCharIsDigit(start[1])) {
+                ++start;
+                --length;
+            }
+            if (length == 0 || (!ffCharIsDigit(start[0]) && !(start[0] == 'R' && length > 1 && ffCharIsDigit(start[1]))))
+                continue;
+
+            ffStrbufSetNS(version, length, start);
         return true;
+    }
+
+        const char* core = nullptr;
+        if (ffStrStartsWith(p, "version")) {
+            // ksh93 self-doc: version sh (AT&T [Labs] Research) ...
+            const char* selfDoc = strstr(p, " sh (");
+            const char* end = selfDoc ? strchr(selfDoc, ')') : nullptr;
+            if (!end)
+                continue;
+            core = end + 1;
+        } else if (ffStrStartsWith(p, "Version ")) {
+            // $KSH_VERSION / ${.sh.version}: Version <features> <version> <date>
+            core = p + strlen("Version ");
+        } else {
+            continue;
+        }
+
+        while (*core && isspace((unsigned char) *core))
+            ++core;
+
+        const char* token = core;
+        while (*token) {
+            while (*token && isspace((unsigned char) *token))
+                ++token;
+            if (!*token)
+                break;
+
+            const char* end = token;
+            while (*end && !isspace((unsigned char) *end))
+                ++end;
+            uint32_t length = (uint32_t) (end - token);
+
+            bool valid = false;
+            if (length >= 2 && token[0] == '9' && token[1] == '3') {
+                valid = true;
+                for (uint32_t i = 2; i < length; ++i) {
+                    char c = token[i];
+                    if (!(ffCharIsDigit(c) || ffCharIsEnglishAlphabet(c) || c == '+' || c == '.' || c == '_' || c == '/' || c == '-')) {
+                        valid = false;
+                        break;
+                    }
+                }
+            } else if (length >= 5 && token[0] == 'M' && token[1] == '-') {
+                for (uint32_t i = 2; i + 2 < length; ++i) {
+                    if (token[i] == '/' && token[i + 1] == '9' && token[i + 2] == '3') {
+                        valid = true;
+                        break;
+                    }
+                }
+            } else if (length > 0 && ffCharIsDigit(token[0]) && (memchr(token, '.', length) || memchr(token, '-', length))) {
+                valid = true;
+            } else if (length > 1 && token[0] == 'v' && ffCharIsDigit(token[1])) {
+                valid = true;
+            }
+
+            if (valid) {
+                uint32_t resultLength = length;
+                bool date = length >= 10 &&
+                             ffCharIsDigit(token[0]) && ffCharIsDigit(token[1]) &&
+                             ffCharIsDigit(token[2]) && ffCharIsDigit(token[3]) && token[4] == '-' &&
+                             ffCharIsDigit(token[5]) && ffCharIsDigit(token[6]) && token[7] == '-' &&
+                             ffCharIsDigit(token[8]) && ffCharIsDigit(token[9]);
+                if (date) {
+                    const char* next = end;
+                    while (*next && isspace((unsigned char) *next))
+                        ++next;
+                    const char* nextEnd = next;
+                    while (*nextEnd && !isspace((unsigned char) *nextEnd))
+                        ++nextEnd;
+                    uint32_t nextLength = (uint32_t) (nextEnd - next);
+                    if (nextLength > 0 && nextLength <= 2) {
+                        bool suffix = true;
+                        for (uint32_t i = 0; i < nextLength; ++i) {
+                            if (!ffCharIsEnglishAlphabet(next[i]) && next[i] != '+') {
+                                suffix = false;
+                                break;
+                            }
+                        }
+                        if (suffix)
+                            resultLength = (uint32_t) (nextEnd - token);
+                    }
+                }
+
+                const char* start = token;
+                if (resultLength > 1 && start[0] == 'v' && ffCharIsDigit(start[1])) {
+                    ++start;
+                    --resultLength;
+                }
+                ffStrbufSetNS(version, resultLength, start);
+                return version->length > 0;
+            }
+
+            token = end;
+        }
     }
 
     ffStrbufClear(version);
-    if (ffProcessAppendStdOut(version, (char* const[]) { exe->chars, "-c", "echo $KSH_VERSION", nullptr }) == nullptr && ffStrbufSubstrAfterFirstS(version, " KSH ")) {
-        // OKSH: @(#)PD KSH v5.2.14 99/07/13.2
-        // MKSH: @(#)MIRBSD KSH R59 2025/04/26 +Debian
-        // $OKSH_VERSION doesn't exist on OpenBSD
-        ffStrbufSubstrBeforeFirstC(version, ' ');
-        ffStrbufTrimLeft(version, 'v');
-        return true;
-    }
-
     return false;
 }
 
@@ -283,7 +423,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
     if (ffStrEqualsIgnCase(exeName, "nu")) {
         return getShellVersionNushell(exe, version);
     }
-    if (ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "mksh")) {
+    if (ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "ksh93") || ffStrEqualsIgnCase(exeName, "mksh") || ffStrEqualsIgnCase(exeName, "pdksh")) {
         return getShellVersionKsh(exe, version);
     }
     if (ffStrEqualsIgnCase(exeName, "oksh")) {

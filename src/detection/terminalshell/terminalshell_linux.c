@@ -91,7 +91,9 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid) {
             ffStrbufEqualS(&result->processName, "bash") ||
             ffStrbufEqualS(&result->processName, "zsh") ||
             ffStrbufEqualS(&result->processName, "ksh") ||
+            ffStrbufEqualS(&result->processName, "ksh93") ||
             ffStrbufEqualS(&result->processName, "mksh") ||
+            ffStrbufEqualS(&result->processName, "pdksh") ||
             ffStrbufEqualS(&result->processName, "oksh") ||
             ffStrbufEqualS(&result->processName, "csh") ||
             ffStrbufEqualS(&result->processName, "tcsh") ||
