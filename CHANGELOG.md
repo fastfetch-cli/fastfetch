@@ -1,3 +1,8 @@
+# Unreleased
+
+Features:
+* Improved LocalIP detection performance on Windows. (LocalIP, Windows)
+
 # 2.69.0
 
 Changes:
