@@ -39,6 +39,20 @@ static void logoParseImageFlag(FFOptionsLogo* options, const char* key, const ch
 #endif
 }
 
+const char* ffLogoPositionToString(FFLogoPosition position) {
+    switch (position) {
+        case FF_LOGO_POSITION_TOP:
+            return "top";
+        case FF_LOGO_POSITION_RIGHT:
+            return "right";
+        case FF_LOGO_POSITION_AUTO:
+            return "auto";
+        case FF_LOGO_POSITION_LEFT:
+        default:
+            return "left";
+    }
+}
+
 void ffOptionsInitLogo(FFOptionsLogo* options) {
     ffStrbufInit(&options->source);
     options->type = FF_LOGO_TYPE_AUTO;
@@ -162,6 +176,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
             exit(477);
         } else if (ffStrEqualsIgnCase(subKey, "position")) {
             options->position = (FFLogoPosition) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                                                                                   { "auto", FF_LOGO_POSITION_AUTO },
                                                                                    { "left", FF_LOGO_POSITION_LEFT },
                                                                                    { "right", FF_LOGO_POSITION_RIGHT },
                                                                                    { "top", FF_LOGO_POSITION_TOP },
@@ -403,6 +418,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         } else if (unsafe_yyjson_equals_str(key, "position")) {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                                                                       { "auto", FF_LOGO_POSITION_AUTO },
                                                                        { "left", FF_LOGO_POSITION_LEFT },
                                                                        { "top", FF_LOGO_POSITION_TOP },
                                                                        { "right", FF_LOGO_POSITION_RIGHT },
@@ -604,11 +620,7 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
             break;
     }
 
-    yyjson_mut_obj_add_str(doc, obj, "position", ((const char*[]) {
-                                                     "left",
-                                                     "top",
-                                                     "right",
-                                                 })[options->position]);
+    yyjson_mut_obj_add_str(doc, obj, "position", ffLogoPositionToString(options->position));
 
     yyjson_mut_obj_add_int(doc, obj, "animationFrame", options->animationFrame);
 

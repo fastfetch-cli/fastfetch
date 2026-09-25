@@ -785,8 +785,9 @@
                         },
                         "position": {
                             "type": "string",
-                            "description": "Position of the logo",
+                            "description": "Position of the logo. Auto places a left-side logo above the output when the terminal is too narrow to reserve 32 columns for module output.",
                             "enum": [
+                                "auto",
                                 "left",
                                 "top",
                                 "right"

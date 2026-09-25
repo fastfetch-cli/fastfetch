@@ -20,6 +20,11 @@
     #include <sys/termios.h>
 #endif
 
+static void resolveImageAutoPosition(uint32_t logoWidth) {
+    const FFOptionsLogo* options = &instance.config.logo;
+    ffLogoResolveAutoPosition(logoWidth + options->paddingLeft + options->paddingRight);
+}
+
 static bool printImageIterm(bool printError) {
     const FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
@@ -633,6 +638,7 @@ static void printImagePixelsNoCache(FFLogoRequestData* requestData, const FFstrb
 static void fillCharacterDimensions(FFLogoRequestData* requestData) {
     requestData->logoCharacterWidth = (uint32_t) ceil((double) requestData->logoPixelWidth / requestData->characterPixelWidth);
     requestData->logoCharacterHeight = (uint32_t) ceil((double) requestData->logoPixelHeight / requestData->characterPixelHeight);
+    resolveImageAutoPosition(requestData->logoCharacterWidth);
 }
 
 static bool printImageSixel(FFLogoRequestData* requestData, const FFstrbuf* result) {
@@ -1515,6 +1521,8 @@ static bool printCachedPixel(FFLogoRequestData* requestData) {
         }
     }
 
+    resolveImageAutoPosition(requestData->logoCharacterWidth);
+
     if (requestData->type == FF_LOGO_TYPE_IMAGE_KITTY &&
         options->animationFrame == FF_LOGO_ANIMATION_FRAME_ANIMATE) {
         // An animation entry holds payloads, not an envelope, so it can not be streamed out like
@@ -1610,7 +1618,7 @@ static bool getCharacterPixelDimensions(FFLogoRequestData* requestData) {
     #endif
 
     FFTerminalSizeResult termSize = {};
-    if (ffDetectTerminalSize(&termSize)) {
+    if (ffDetectTerminalSize(&termSize, false)) {
         requestData->characterPixelWidth = termSize.width / (double) termSize.columns;
         requestData->characterPixelHeight = termSize.height / (double) termSize.rows;
     }
@@ -1773,14 +1781,17 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError) {
     }
 
     if (type == FF_LOGO_TYPE_IMAGE_ITERM) {
+        resolveImageAutoPosition(instance.config.logo.width);
         return printImageIterm(printError);
     }
 
     if (type == FF_LOGO_TYPE_IMAGE_KITTY_DIRECT) {
+        resolveImageAutoPosition(instance.config.logo.width);
         return printImageKittyDirect(printError);
     }
 
     if (type == FF_LOGO_TYPE_IMAGE_KITTY_ICAT) {
+        resolveImageAutoPosition(instance.config.logo.width);
         return printImageKittyIcat(printError);
     }
 

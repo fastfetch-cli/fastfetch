@@ -28,6 +28,7 @@ typedef enum FFLogoPosition: uint8_t {
     FF_LOGO_POSITION_LEFT,
     FF_LOGO_POSITION_TOP,
     FF_LOGO_POSITION_RIGHT,
+    FF_LOGO_POSITION_AUTO,
 } FFLogoPosition;
 
 typedef enum FFLogoCacheStrategy: uint8_t {
@@ -70,6 +71,7 @@ typedef struct FFOptionsLogo {
 #endif
 } FFOptionsLogo;
 
+const char* ffLogoPositionToString(FFLogoPosition position);
 void ffOptionsInitLogo(FFOptionsLogo* options);
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
 void ffOptionsDestroyLogo(FFOptionsLogo* options);

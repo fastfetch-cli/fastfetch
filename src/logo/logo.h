@@ -24,6 +24,10 @@ typedef struct FFlogo {
 } FFlogo;
 
 // logo.c
+enum { FF_LOGO_AUTO_MIN_INFO_WIDTH = 32 };
+
+FFLogoPosition ffLogoSelectPosition(FFLogoPosition configured, uint32_t terminalColumns, uint32_t logoWidth);
+void ffLogoResolveAutoPosition(uint32_t logoWidth);
 void ffLogoPrint(void);
 void ffLogoPrintChars(const char* data, bool doColorReplacement);
 void ffLogoPrintLine(void);

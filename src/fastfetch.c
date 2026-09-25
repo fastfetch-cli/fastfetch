@@ -854,9 +854,16 @@ static void writeConfigFile(FFdata* data) {
     } else if (data->genConfigInteractive) {
         if (instance.config.logo.type == FF_LOGO_TYPE_NONE) {
             yyjson_mut_obj_add_null(doc, root, "logo");
-        } else if (instance.config.logo.type == FF_LOGO_TYPE_SMALL) {
+        } else if (instance.config.logo.type == FF_LOGO_TYPE_SMALL && instance.config.logo.position == FF_LOGO_POSITION_LEFT) {
+            yyjson_mut_obj_add_str(doc, root, "logo", "small");
+        } else if (instance.config.logo.position != FF_LOGO_POSITION_LEFT || instance.config.logo.type == FF_LOGO_TYPE_SMALL) {
             yyjson_mut_val* logo = yyjson_mut_obj(doc);
-            yyjson_mut_obj_add_str(doc, logo, "type", "small");
+            if (instance.config.logo.type == FF_LOGO_TYPE_SMALL) {
+                yyjson_mut_obj_add_str(doc, logo, "type", "small");
+            }
+            if (instance.config.logo.position != FF_LOGO_POSITION_LEFT) {
+                yyjson_mut_obj_add_str(doc, logo, "position", ffLogoPositionToString(instance.config.logo.position));
+            }
             yyjson_mut_obj_add_val(doc, root, "logo", logo);
         }
     }

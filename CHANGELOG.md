@@ -7,6 +7,9 @@ Changes:
 * Modules selected with `--structure` now honor their options from the JSON config.
 
 Features:
+* Added `logo.position: "auto"` and `--logo-position auto` to place wide logos above module output when the terminal has less than 32 columns available for text. (Logo)
+    * The position can also be selected in interactive `--gen-config`. 
+    * For now, the default position is `left` for compatibility with previous releases. This may change to `auto` in future releases.
 * Improved Bluetooth detection support:
     * Added Bluetooth Low Energy detection on Windows and macOS.
     * Report device type (LE or classic) and signal quality, if available.

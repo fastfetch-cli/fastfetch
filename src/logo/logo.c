@@ -7,6 +7,7 @@
 #include "detection/media/media.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
+#include "detection/terminalsize/terminalsize.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -16,6 +17,37 @@ typedef struct FFLogoCachedLine {
     FFstrbuf chars;
     uint32_t width;
 } FFLogoCachedLine;
+
+FFLogoPosition ffLogoSelectPosition(FFLogoPosition configured, uint32_t terminalColumns, uint32_t logoWidth) {
+    if (configured != FF_LOGO_POSITION_AUTO) {
+        return configured;
+    }
+
+    if (terminalColumns == 0) {
+        return FF_LOGO_POSITION_LEFT;
+    }
+
+    return logoWidth <= terminalColumns && terminalColumns - logoWidth >= FF_LOGO_AUTO_MIN_INFO_WIDTH
+        ? FF_LOGO_POSITION_LEFT
+        : FF_LOGO_POSITION_TOP;
+}
+
+void ffLogoResolveAutoPosition(uint32_t logoWidth) {
+    FFOptionsLogo* options = &instance.config.logo;
+    if (options->position != FF_LOGO_POSITION_AUTO) {
+        return;
+    }
+
+    uint32_t terminalColumns = 0;
+    if (ffIsTerminal(STDOUT_FILENO)) {
+        FFTerminalSizeResult size = {};
+        if (ffDetectTerminalSize(&size, true)) {
+            terminalColumns = size.columns;
+        }
+    }
+
+    options->position = ffLogoSelectPosition(FF_LOGO_POSITION_AUTO, terminalColumns, logoWidth);
+}
 
 static void logoLineCacheClear(FFLogoLineCacheState* cache) {
     FF_LIST_FOR_EACH (FFLogoCachedLine, line, cache->lines) {
@@ -175,6 +207,8 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
         parsedHeight = options->height;
     }
 
+    ffLogoResolveAutoPosition(maxLineWidth + options->paddingRight);
+
     instance.state.logoHeight = options->paddingTop + parsedHeight;
     if (options->position == FF_LOGO_POSITION_LEFT) {
         instance.state.logoWidth = maxLineWidth + options->paddingRight;
@@ -194,6 +228,8 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
 static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError) {
     FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+
+    ffLogoResolveAutoPosition(options->width + options->paddingLeft + options->paddingRight);
 
     if (!options->width || !options->height) {
         if (options->position == FF_LOGO_POSITION_LEFT) {
