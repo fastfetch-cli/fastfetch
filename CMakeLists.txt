@@ -2253,6 +2253,15 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(fastfetch-test-cpu
+            tests/cpu.c
+        )
+        target_link_libraries(fastfetch-test-cpu
+            PRIVATE libfastfetch
+        )
+    endif()
+
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2366,6 +2375,9 @@ if (BUILD_TESTS)
     )
 
     enable_testing()
+    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_test(NAME test-cpu COMMAND fastfetch-test-cpu)
+    endif()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)
