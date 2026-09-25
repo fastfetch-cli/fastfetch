@@ -348,8 +348,8 @@ const FFShellResult* ffDetectShell(void) {
     if (result->processName.length > 0) {
         setShellInfoDetails(result);
         char tmp[MAX_PATH];
-        strcpy(tmp, result->exeName);
-        char* ext = strrchr(tmp, '.');
+        char* end = ffStrCopy(tmp, result->exeName, sizeof(tmp));
+        char* ext = (char*) memrchr(tmp, '.', (size_t) (end - tmp));
         if (ext) {
             *ext = '\0';
         }
