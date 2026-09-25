@@ -98,10 +98,12 @@ static const char* detectWithDdcci([[maybe_unused]] FFBrightnessOptions* options
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
 
+    // libddcutil may print trace messages to stdout during display detection, not only in ddca_init
+    FF_SUPPRESS_IO();
+
     #ifndef FF_DISABLE_DLOPEN
     FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_init)
     if (ffddca_init) {
-        FF_SUPPRESS_IO();
         // Ref: https://github.com/rockowitz/ddcutil/issues/344
         if (ffddca_init(nullptr, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
             return "ddca_init() failed";
@@ -148,6 +150,7 @@ static const char* detectWithDdcci([[maybe_unused]] FFBrightnessOptions* options
                 brightness->max = max;
                 brightness->min = 0;
                 brightness->current = current;
+                brightness->builtin = false;
                 ffStrbufInitS(&brightness->name, display->model_name);
             }
             ffddca_close_display(handle);
