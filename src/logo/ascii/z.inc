@@ -3,6 +3,17 @@
 #include "common/color.h"
 
 static const FFlogo Z[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZINNIA
+    // Zinnia
+    {
+        .names = { "Zinnia", "zinnia" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZINNIA,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ZORIN
     // Zorin
     {
