@@ -6,6 +6,9 @@ Changes:
 Features:
 * Improved performance of LocalIP, NetIO and DNS on Windows
 
+Bugfixes:
+* Fixed the Vulkan driver name being concatenated with the driver name of a previously enumerated device on systems with more than one GPU. (#2619, Vulkan)
+
 # 2.69.0
 
 Changes:
