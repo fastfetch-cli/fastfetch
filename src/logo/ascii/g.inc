@@ -53,6 +53,19 @@ static const FFlogo G[] = {
         .colorTitle = FF_COLOR_FG_RED,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_GENIX
+        // Genix
+    {
+        .names = { "Genix", "genix" },
+        .lines = FASTFETCH_DATATEXT_LOGO_GENIX,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_GENTOO
     // Gentoo
     {
