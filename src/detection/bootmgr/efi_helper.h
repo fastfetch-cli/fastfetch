@@ -18,5 +18,3 @@ typedef struct FFEfiLoadOption {
 } FFEfiLoadOption;
 
 bool ffEfiFillLoadOption(const FFEfiLoadOption* efiOption, FFBootmgrResult* result);
-
-#define FF_EFI_GLOBAL_GUID "8be4df61-93ca-11d2-aa0d-00e098032b8c"
