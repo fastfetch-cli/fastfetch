@@ -28,6 +28,21 @@ static const FFlogo L[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_LANKEOS
+    // LankeOS
+    {
+        .names = { "LankeOS", "lankeos", "lanke" },
+        .lines = FASTFETCH_DATATEXT_LOGO_LANKEOS,
+        .colors = {
+            FF_COLOR_FG_RGB "40;198;235",
+            FF_COLOR_FG_RGB "239;28;14",
+            FF_COLOR_FG_RGB "24;198;107",
+            FF_COLOR_FG_RGB "254;228;47",
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_LAXEROS
     // Laxeros
     {
