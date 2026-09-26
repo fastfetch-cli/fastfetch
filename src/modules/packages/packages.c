@@ -65,6 +65,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(crux)
         FF_PRINT_PACKAGE(dpkg)
+        FF_PRINT_PACKAGE(emerald)
         FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(eopkg)
         if (options->combined) {
@@ -158,6 +159,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.choco, "choco"),
                 FF_ARG(counts.crux, "crux"),
                 FF_ARG(counts.dpkg, "dpkg"),
+                FF_ARG(counts.emerald, "emerald"),
                 FF_ARG(counts.emerge, "emerge"),
                 FF_ARG(counts.eopkg, "eopkg"),
                 FF_ARG(counts.flatpakSystem, "flatpak-system"),
@@ -271,6 +273,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                         case 'E':
                             if (false)
                                 ;
+                            FF_TEST_PACKAGE_NAME(EMERALD)
                             FF_TEST_PACKAGE_NAME(EMERGE)
                             FF_TEST_PACKAGE_NAME(EOPKG)
                             break;
@@ -398,6 +401,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(CHOCO)
     FF_TEST_PACKAGE_NAME(CRUX)
     FF_TEST_PACKAGE_NAME(DPKG)
+    FF_TEST_PACKAGE_NAME(EMERALD)
     FF_TEST_PACKAGE_NAME(EMERGE)
     FF_TEST_PACKAGE_NAME(EOPKG)
     FF_TEST_PACKAGE_NAME(FLATPAK)
@@ -461,6 +465,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(choco)
     FF_APPEND_PACKAGE_COUNT(crux)
     FF_APPEND_PACKAGE_COUNT(dpkg)
+    FF_APPEND_PACKAGE_COUNT(emerald)
     FF_APPEND_PACKAGE_COUNT(emerge)
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
@@ -561,6 +566,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of choco packages", "choco" },
         { "Number of crux packages", "crux" },
         { "Number of dpkg packages", "dpkg" },
+        { "Number of emerald packages", "emerald" },
         { "Number of emerge packages", "emerge" },
         { "Number of eopkg packages", "eopkg" },
         { "Number of flatpak-system app packages", "flatpak-system" },

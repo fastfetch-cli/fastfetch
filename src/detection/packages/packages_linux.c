@@ -496,6 +496,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (FF_PACKAGES_IS_ENABLED(options, LPKG)) {
         packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, EMERALD)) {
+        packageCounts->emerald += getNumElements(baseDir, "/var/lib/emerald/db", false);
+    }
     if (FF_PACKAGES_IS_ENABLED(options, EMERGE)) {
         packageCounts->emerge += getEmergePackages(baseDir, "/var/db/pkg");
     }
