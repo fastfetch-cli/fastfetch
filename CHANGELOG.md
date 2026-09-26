@@ -58,6 +58,7 @@ Features:
 
 Bugfixes:
 * Fixed Snapdragon X2 series model detection on Linux. (#2611, CPU / Linux)
+* Fixed external monitors detected via DDC/CI being randomly reported as built-in, and libddcutil trace messages occasionally leaking into the output and breaking `--format json`. (#2615, Brightness / Linux)
 * Fixed image logo caching, padding, and positioning issues, including an iTerm display bug. (Logo)
 * Fixed several Windows issues, including Windows Terminal font detection, redirected `--gen-config` output, and gamepad battery reporting for DualShock 4 and Switch controllers. (#2573, TerminalFont; Gamepad; General)
 * Fixed formatting and display issues, including ANSI-aware truncation, date/time formatting, and bright key/title colors. (Format / DateTime / Display)
