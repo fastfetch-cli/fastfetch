@@ -70,7 +70,71 @@ bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t n
     return ffWriteFileBuffer(cacheDir->chars, cacheContent);
 }
 
-#ifndef _WIN32
+#if __linux__
+#include <sys/syscall.h>
+
+struct linux_dirent64 {
+    uint64_t       d_ino;    /* 64-bit inode number */
+    int64_t        d_off;    /* Not an offset; see getdents() */
+    unsigned short d_reclen; /* Size of this dirent */
+    unsigned char  d_type;   /* File type */
+    char           d_name[]; /* Filename (null-terminated) */
+};
+
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
+    FF_AUTO_CLOSE_FD int fd = open(dirname, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (fd < 0) {
+        return 0;
+    }
+
+    alignas(struct linux_dirent64) uint8_t bytes[64 * 1024];
+
+    uint32_t num_elements = 0;
+    const size_t nameOffset = offsetof(struct linux_dirent64, d_name);
+
+    for (;;) {
+        long bytesRead = syscall(SYS_getdents64, fd, bytes, sizeof(bytes));
+        if (bytesRead < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (bytesRead == 0) {
+            break;
+        }
+
+        size_t remaining = (size_t) bytesRead;
+        struct linux_dirent64* entry = (struct linux_dirent64*) bytes;
+
+        while (remaining >= nameOffset + 1) {
+            bool ok = false;
+            if (entry->d_name[0] != '.') {
+                if (__builtin_expect(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK, true)) {
+                    ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
+                } else {
+                    struct stat stbuf;
+                    if (fstatat(fd, entry->d_name, &stbuf, 0) == 0) {
+                        ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+                    }
+                }
+            }
+
+            num_elements += ok;
+            size_t recordLength = entry->d_reclen;
+            remaining -= recordLength;
+            entry = (struct linux_dirent64*) ((uint8_t*) entry + recordLength);
+        }
+
+        if (remaining != 0) {
+            break;
+        }
+    }
+
+    return num_elements;
+}
+
+#elif !_WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
     if (dirp == nullptr) {
