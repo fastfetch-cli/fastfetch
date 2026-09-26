@@ -1,3 +1,11 @@
+# Unreleased
+
+Changes:
+* LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
+
+Features:
+* Improved performance of LocalIP, NetIO and DNS on Windows
+
 # 2.69.0
 
 Changes:
