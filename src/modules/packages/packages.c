@@ -92,6 +92,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         }
         FF_PRINT_PACKAGE_NAME(installrelease, "install-release")
         FF_PRINT_PACKAGE(kiss)
+        FF_PRINT_PACKAGE(kuzpkg)
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
@@ -299,6 +300,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(KISS)
+                            FF_TEST_PACKAGE_NAME(KUZPKG)
                             break;
                         case 'L':
                             if (false)
@@ -474,6 +476,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(hpkgUser)
     FF_APPEND_PACKAGE_COUNT(installrelease)
     FF_APPEND_PACKAGE_COUNT(kiss)
+    FF_APPEND_PACKAGE_COUNT(kuzpkg)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(lpkg)
     FF_APPEND_PACKAGE_COUNT(lpkgbuild)
