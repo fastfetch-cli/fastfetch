@@ -19,6 +19,8 @@ static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersi
 }
 
 static void applyDriverName(VkPhysicalDeviceDriverPropertiesKHR* properties, FFstrbuf* result) {
+    ffStrbufClear(result);
+
     if (!ffStrSet(properties->driverName)) {
         return;
     }
