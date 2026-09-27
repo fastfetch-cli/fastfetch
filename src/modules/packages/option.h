@@ -4,7 +4,6 @@
 
 typedef enum FFPackagesFlags: uint64_t {
     FF_PACKAGES_FLAG_NONE = 0,
-
     FF_PACKAGES_FLAG_APK_BIT = UINT64_C(1) << 0U,
     FF_PACKAGES_FLAG_BREW_BIT = UINT64_C(1) << 1U,
     FF_PACKAGES_FLAG_CHOCO_BIT = UINT64_C(1) << 2U,
