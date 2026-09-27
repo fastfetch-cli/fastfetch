@@ -29,7 +29,7 @@ jobs:
         run: cp .github/benchmark-index.html "$RUNNER_TEMP/benchmark-index.html"
 
       - name: store benchmark result
-        uses: benchmark-action/github-action-benchmark@52576c92bccf6ac60c8223ec7eb2565637cae9ba # v1.22.1
+        uses: benchmark-action/github-action-benchmark@4322e5726e6334590d251fc4f92bec0efafc45dc # v1.22.2
         with:
           name: Fastfetch
           tool: customSmallerIsBetter
