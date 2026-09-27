@@ -4,6 +4,7 @@
 
 typedef enum FFPackagesFlags: uint64_t {
     FF_PACKAGES_FLAG_NONE = 0,
+
     FF_PACKAGES_FLAG_APK_BIT = UINT64_C(1) << 0U,
     FF_PACKAGES_FLAG_BREW_BIT = UINT64_C(1) << 1U,
     FF_PACKAGES_FLAG_CHOCO_BIT = UINT64_C(1) << 2U,
@@ -36,14 +37,16 @@ typedef enum FFPackagesFlags: uint64_t {
     FF_PACKAGES_FLAG_PISI_BIT = UINT64_C(1) << 29U,
     FF_PACKAGES_FLAG_SOAR_BIT = UINT64_C(1) << 30U,
     FF_PACKAGES_FLAG_KISS_BIT = UINT64_C(1) << 31U,
-    FF_PACKAGES_FLAG_MOSS_BIT = UINT64_C(1) << 32U,
-    FF_PACKAGES_FLAG_APPIMAGE_BIT = UINT64_C(1) << 33U,
-    FF_PACKAGES_FLAG_CARDS_BIT = UINT64_C(1) << 34U,
-    FF_PACKAGES_FLAG_PORG_BIT = UINT64_C(1) << 35U,
-    FF_PACKAGES_FLAG_INSTALLRELEASE_BIT = UINT64_C(1) << 36U,
-    FF_PACKAGES_FLAG_CRUX_BIT = UINT64_C(1) << 37U,
-    FF_PACKAGES_FLAG_RUM_BIT = UINT64_C(1) << 38U,
+    FF_PACKAGES_FLAG_KUZPKG_BIT = UINT64_C(1) << 32U,
+    FF_PACKAGES_FLAG_MOSS_BIT = UINT64_C(1) << 33U,
+    FF_PACKAGES_FLAG_APPIMAGE_BIT = UINT64_C(1) << 34U,
+    FF_PACKAGES_FLAG_CARDS_BIT = UINT64_C(1) << 35U,
+    FF_PACKAGES_FLAG_PORG_BIT = UINT64_C(1) << 36U,
+    FF_PACKAGES_FLAG_INSTALLRELEASE_BIT = UINT64_C(1) << 37U,
+    FF_PACKAGES_FLAG_CRUX_BIT = UINT64_C(1) << 38U,
+    FF_PACKAGES_FLAG_RUM_BIT = UINT64_C(1) << 39U,
 } FFPackagesFlags;
+
 static_assert(sizeof(FFPackagesFlags) == sizeof(uint64_t), "");
 
 typedef struct FFPackagesOptions {
@@ -55,4 +58,7 @@ typedef struct FFPackagesOptions {
     bool combined;
 } FFPackagesOptions;
 
-static_assert(sizeof(FFPackagesOptions) <= FF_OPTION_MAX_SIZE, "FFPackagesOptions size exceeds maximum allowed size");
+static_assert(
+    sizeof(FFPackagesOptions) <= FF_OPTION_MAX_SIZE,
+    "FFPackagesOptions size exceeds maximum allowed size"
+);
