@@ -33,7 +33,9 @@ _fastfetch() {
       if type _filedir &>/dev/null; then
         _filedir
       elif type compgen &>/dev/null; then
-        COMPREPLY+=($(compgen -f -- "$cur"))
+        local -a files
+        readarray -t files < <(compgen -f -- "$cur")
+        COMPREPLY+=("${files[@]}")
       fi
       return
       ;;
