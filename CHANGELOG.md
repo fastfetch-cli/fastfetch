@@ -6,6 +6,9 @@ Changes:
 Features:
 * Improved performance of LocalIP, NetIO and DNS on Windows
 
+Bugfixes:
+* Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
+
 # 2.69.0
 
 Changes:
