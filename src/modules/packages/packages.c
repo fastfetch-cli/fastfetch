@@ -169,6 +169,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.hpkgUser, "hpkg-user"),
                 FF_ARG(counts.installrelease, "install-release"),
                 FF_ARG(counts.kiss, "kiss"),
+                FF_ARG(counts.kuzpkg, "kuzpkg"),
                 FF_ARG(counts.linglong, "linglong"),
                 FF_ARG(counts.lpkg, "lpkg"),
                 FF_ARG(counts.lpkgbuild, "lpkgbuild"),
@@ -404,6 +405,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(GUIX)
     FF_TEST_PACKAGE_NAME(HPKG)
     FF_TEST_PACKAGE_NAME(KISS)
+    FF_TEST_PACKAGE_NAME(KUZPKG)
     FF_TEST_PACKAGE_NAME(LINGLONG)
     FF_TEST_PACKAGE_NAME(LPKG)
     FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -572,6 +574,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of hpkg-user packages", "hpkg-user" },
         { "Number of install-release packages", "install-release" },
         { "Number of kiss packages", "kiss" },
+        { "Number of kuzpkg packages", "kuzpkg" },
         { "Number of linglong packages", "linglong" },
         { "Number of lpkg packages", "lpkg" },
         { "Number of lpkgbuild packages", "lpkgbuild" },
