@@ -9,8 +9,8 @@
 [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/fastfetch?logo=homebrew)](https://formulae.brew.sh/formula/fastfetch#default)
 [![GitHub all releases](https://img.shields.io/github/downloads/fastfetch-cli/fastfetch/total?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)  
 [![GitHub release (with filter)](https://img.shields.io/github/v/release/fastfetch-cli/fastfetch?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)
-[![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
-[![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
+[![latest packaged version(s)](https://repology.amdmi3.ru/badge/latest-versions/fastfetch.svg)](https://repology.amdmi3.ru/project/fastfetch/versions)
+[![Packaging status](https://repology.amdmi3.ru/badge/tiny-repos/fastfetch.svg)](https://repology.amdmi3.ru/project/fastfetch/versions)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastfetch-cli/fastfetch)
 [![中文README](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README-red)](README-cn.md)
 
@@ -36,8 +36,8 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 Some distributions package outdated versions of fastfetch. Older versions receive no support, so please always try to use the latest version.
 
-<a href="https://repology.org/project/fastfetch/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
+<a href="https://repology.amdmi3.ru/project/fastfetch/versions">
+    <img src="https://repology.amdmi3.ru/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
 </a>
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (Ubuntu 22.04 or newer; latest version)
