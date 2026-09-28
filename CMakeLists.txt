@@ -1098,6 +1098,7 @@ elseif(WIN32)
         src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.c
+        src/common/windows/folders.c
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
