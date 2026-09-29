@@ -885,6 +885,13 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
     // artwork are fetched exactly once, for the winner.
     uint32_t tokens[FF_BINDER_MAX_HANDLES];
     uint32_t tokenCount = 0;
+    // The descriptors the reply below delivers, held outside its block because the reply itself does
+    // not outlive it: pointing `acquired` into `reply.fds` leaves it reading whatever the next call
+    // puts on that stack, which closes a descriptor that is not ours and leaks the one that is.
+    // Declared above the cleanup variable for the same reason `tokens[]` is -- a local declared
+    // after one has its lifetime ended before that cleanup runs, which is what a sanitizer sees.
+    int32_t fds[FF_BINDER_MAX_FDS] = {};
+    uint32_t fdCount = 0;
     // Raised as soon as ffBinderTransact() has replied, because from that point on it is holding a
     // strong reference to every handle it collected and the kernel has installed every descriptor it
     // delivered into our own fd table. Any early return past that line has to give them back, so one
@@ -937,8 +944,10 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
         // Every descriptor the reply delivered is ours to close. The art of a session is read through
         // one of them, and reading it happens over the fd number rather than over the file, so closing
         // it on the way out does not cut the read short.
-        acquired.fds = reply.fds;
-        acquired.fdCount = reply.fdCount;
+        fdCount = reply.fdCount;
+        memcpy(fds, reply.fds, sizeof(fds));
+        acquired.fds = fds;
+        acquired.fdCount = fdCount;
     }
 
     if (tokenCount == 0) {
