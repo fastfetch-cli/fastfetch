@@ -248,9 +248,6 @@ void ffListFeatures(void) {
 #if FF_HAVE_FREETYPE
         "freetype\n"
 #endif
-#if FF_HAVE_PULSE
-        "libpulse\n"
-#endif
 #if FF_HAVE_DDCUTIL
         "libddcutil\n"
 #endif
