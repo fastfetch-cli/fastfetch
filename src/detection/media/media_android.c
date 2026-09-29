@@ -1,6 +1,7 @@
 #include "media.h"
 #include "common/android/api.h"
 #include "common/android/binder.h"
+#include "common/android/dex.h"
 #include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
@@ -70,15 +71,23 @@
 #define FF_MEDIA_ANDROID_SESSIONS_DESCRIPTOR "android.media.session.ISessionManager"
 #define FF_MEDIA_ANDROID_CONTROLLER_DESCRIPTOR "android.media.session.ISessionController"
 
-// Transaction codes as this device's own framework.jar declares them, read out of its dex rather than
-// transcribed from AOSP -- a vendor ROM adds and drops methods as it likes, and a wrong code reaches
-// a different method or none at all. getSessions is the second declared method of ISessionManager;
-// the numbers on ISessionController are sparse because most of that interface is setters this module
-// never calls.
-#define FF_MEDIA_ANDROID_GET_SESSIONS 2u
-#define FF_MEDIA_ANDROID_GET_PACKAGE_NAME 5u
-#define FF_MEDIA_ANDROID_GET_METADATA 32u
-#define FF_MEDIA_ANDROID_GET_PLAYBACK_STATE 33u
+// The jar and the stub classes the transaction codes are read out of. Both interfaces have always
+// been part of framework.jar -- neither is one of the frameworks that moved into an APEX -- so there
+// is one path and no fallback.
+#define FF_MEDIA_ANDROID_JAR "/system/framework/framework.jar"
+#define FF_MEDIA_ANDROID_SESSIONS_STUB "Landroid/media/session/ISessionManager$Stub;"
+#define FF_MEDIA_ANDROID_CONTROLLER_STUB "Landroid/media/session/ISessionController$Stub;"
+
+// The methods this module calls, by the name of the constant the dex carries for each. Spelling the
+// names out rather than the numbers is the whole point: the numbering is a property of the `.aidl`
+// the ROM was built from, and a vendor that inserts a method ahead of one shifts it, after which a
+// transcribed code reaches a different method or none. `getSessions` is 2 from Android 12 on but 3 on
+// Android 11, where `notifySession2Created` holds the second slot -- which is exactly the drift a
+// hardcoded number cannot survive. See common/android/dex.h.
+#define FF_MEDIA_ANDROID_GET_SESSIONS "TRANSACTION_getSessions"
+#define FF_MEDIA_ANDROID_GET_PACKAGE_NAME "TRANSACTION_getPackageName"
+#define FF_MEDIA_ANDROID_GET_METADATA "TRANSACTION_getMetadata"
+#define FF_MEDIA_ANDROID_GET_PLAYBACK_STATE "TRANSACTION_getPlaybackState"
 
 // The largest reply any of these getters produced is a metadata Bundle at ~1.6 KB, and the artwork
 // never lands here -- it arrives as a descriptor. 16 KB leaves room for a Bundle of unusually long
@@ -447,6 +456,43 @@ static bool androidCompressCover(FFNativeFD fd, const void* pixels, uint32_t wid
 // The session
 // ---------------------------------------------------------------------------------------------
 
+// Every transaction code this module sends, resolved from the device's own jar. They are resolved
+// together, in one walk, because that is the cheap way to get them: the walk is dominated by the
+// dex's type table, and the two stub classes sit in the same entry of every framework.jar seen so far
+// (classes2.dex on Android 11 and 13, classes3.dex on Android 16), so one pass answers all four.
+// Asking one at a time would repeat that pass four times -- see common/android/dex.h.
+typedef struct FFMediaAndroidCodes {
+    int32_t getSessions;
+    int32_t getPackageName;
+    int32_t getMetadata;
+    int32_t getPlaybackState;
+} FFMediaAndroidCodes;
+
+static const char* androidResolveCodes(FFMediaAndroidCodes* codes) {
+    const FFDexStaticIntRequest requests[] = {
+        { FF_MEDIA_ANDROID_SESSIONS_STUB, FF_MEDIA_ANDROID_GET_SESSIONS, &codes->getSessions },
+        { FF_MEDIA_ANDROID_CONTROLLER_STUB, FF_MEDIA_ANDROID_GET_PACKAGE_NAME, &codes->getPackageName },
+        { FF_MEDIA_ANDROID_CONTROLLER_STUB, FF_MEDIA_ANDROID_GET_METADATA, &codes->getMetadata },
+        { FF_MEDIA_ANDROID_CONTROLLER_STUB, FF_MEDIA_ANDROID_GET_PLAYBACK_STATE, &codes->getPlaybackState },
+    };
+
+    const char* error = ffDexStaticInts(FF_MEDIA_ANDROID_JAR, requests, ARRAY_SIZE(requests));
+    if (error != nullptr) {
+        FF_DEBUG("Reading the transaction codes from \"%s\" failed: %s", FF_MEDIA_ANDROID_JAR, error);
+        return error;
+    }
+
+    // All four are codes the module cannot answer without. The reader leaves a code it could not find
+    // at the sentinel instead of judging what that costs the caller, so the judgement is made here.
+    if (codes->getSessions == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getPackageName == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getMetadata == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getPlaybackState == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The session service does not declare every method this module calls";
+    }
+    return nullptr;
+}
+
 // Every getter on ISessionController takes no argument, so a call is the interface token and nothing
 // else; `flags` is passed through because one of them needs TF_ACCEPT_FDS.
 [[gnu::nonnull(1, 5)]] static const char* androidCall(FFBinder* binder, uint32_t handle, uint32_t code, uint32_t flags, FFBinderReply* reply) {
@@ -730,9 +776,9 @@ static int64_t androidElapsedRealtime(void) {
     return nullptr;
 }
 
-static void androidReadPackageName(FFBinder* binder, uint32_t token, FFMediaResult* result) {
+static void androidReadPackageName(FFBinder* binder, uint32_t token, uint32_t transaction, FFMediaResult* result) {
     FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
-    const char* error = androidCall(binder, token, FF_MEDIA_ANDROID_GET_PACKAGE_NAME, 0, &reply);
+    const char* error = androidCall(binder, token, transaction, 0, &reply);
     if (error != nullptr) {
         FF_DEBUG("getPackageName failed: %s", error);
         return;
@@ -751,14 +797,14 @@ static void androidReadPackageName(FFBinder* binder, uint32_t token, FFMediaResu
     ffStrbufSet(&result->player, &result->playerId);
 }
 
-static void androidReadMetadata(FFBinder* binder, uint32_t token, FFMediaResult* result, bool saveCover) {
+static void androidReadMetadata(FFBinder* binder, uint32_t token, uint32_t transaction, FFMediaResult* result, bool saveCover) {
     FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
 
     // TF_ACCEPT_FDS is not a hint and not optional here: the artwork arrives as a descriptor, and a
     // request that did not ask for one is answered with BR_FAILED_REPLY -- which reads like a service
     // that is not running rather than like a missing flag. It is passed unconditionally, because the
     // alternative is a failure that depends on whether the player happened to publish artwork.
-    const char* error = androidCall(binder, token, FF_MEDIA_ANDROID_GET_METADATA, TF_ACCEPT_FDS, &reply);
+    const char* error = androidCall(binder, token, transaction, TF_ACCEPT_FDS, &reply);
 
     FFMediaAndroidCover cover = { .fd = -1 };
     if (error != nullptr) {
@@ -782,14 +828,14 @@ static void androidReadMetadata(FFBinder* binder, uint32_t token, FFMediaResult*
     }
 }
 
-static void androidReadSession(FFBinder* binder, uint32_t token, FFMediaResult* result, bool saveCover) {
-    androidReadPackageName(binder, token, result);
+static void androidReadSession(FFBinder* binder, uint32_t token, const FFMediaAndroidCodes* codes, FFMediaResult* result, bool saveCover) {
+    androidReadPackageName(binder, token, (uint32_t) codes->getPackageName, result);
 
     // The length has to be known before the position is placed, so the metadata comes first.
-    androidReadMetadata(binder, token, result, saveCover);
+    androidReadMetadata(binder, token, (uint32_t) codes->getMetadata, result, saveCover);
 
     FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
-    const char* error = androidCall(binder, token, FF_MEDIA_ANDROID_GET_PLAYBACK_STATE, 0, &reply);
+    const char* error = androidCall(binder, token, (uint32_t) codes->getPlaybackState, 0, &reply);
     if (error == nullptr && ffBinderReadI32(reply.data, reply.size, 4) != 0) {
         FFMediaAndroidReader reader = { .data = reply.data, .size = reply.size, .position = 8 };
         error = androidReadPlaybackState(&reader, result);
@@ -810,8 +856,18 @@ static void androidReadSession(FFBinder* binder, uint32_t token, FFMediaResult* 
 // answer. That costs one transaction, and it keeps the module working wherever the check happens to
 // pass, instead of hard-coding today's policy into the client.
 static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCover) {
+    // Resolved before the binder is opened, so that a jar which does not declare the methods says so
+    // rather than the module failing later with a message about the transport. The reader's own
+    // reason is what is returned: a jar that cannot be read, a class it does not define and a field
+    // the class does not declare are three different things.
+    FFMediaAndroidCodes codes = {};
+    const char* error = androidResolveCodes(&codes);
+    if (error != nullptr) {
+        return error;
+    }
+
     [[gnu::cleanup(ffBinderClose)]] FFBinder binder = { .fd = -1 };
-    const char* error = ffBinderOpen(&binder);
+    error = ffBinderOpen(&binder);
     if (error != nullptr) {
         return error;
     }
@@ -822,6 +878,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
         FF_DEBUG("Looking up \"%s\" failed: %s", FF_MEDIA_ANDROID_SERVICE, error);
         return error;
     }
+    FF_DEBUG("The \"%s\" service is handle %u, getSessions is transaction %d", FF_MEDIA_ANDROID_SERVICE, service.handle, codes.getSessions);
 
     // A phone can have several sessions at once -- a music player and a video one, say -- and only one
     // of them is the answer. Which one is decided first, by state alone, so that the metadata and the
@@ -846,7 +903,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
         ffBinderParcelPutI32(&parcel, 0); // userId: the single user a phone has
 
         FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
-        error = ffBinderTransact(&binder, service.handle, FF_MEDIA_ANDROID_GET_SESSIONS, 0, &parcel, &reply);
+        error = ffBinderTransact(&binder, service.handle, (uint32_t) codes.getSessions, 0, &parcel, &reply);
         replied = true;
         if (error != nullptr) {
             return error;
@@ -892,7 +949,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
     uint32_t bestScore = 0;
     for (uint32_t i = 0; i < tokenCount; i++) {
         FFBinderReply reply = ffBinderReplyCreate(s_reply, sizeof(s_reply));
-        if (androidCall(&binder, tokens[i], FF_MEDIA_ANDROID_GET_PLAYBACK_STATE, 0, &reply) != nullptr) {
+        if (androidCall(&binder, tokens[i], (uint32_t) codes.getPlaybackState, 0, &reply) != nullptr) {
             continue;
         }
         // The presence marker first: a session with no state yet answers a null parcelable, and its
@@ -905,7 +962,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
         }
     }
 
-    androidReadSession(&binder, tokens[best], media, saveCover);
+    androidReadSession(&binder, tokens[best], &codes, media, saveCover);
 
     // The tokens were acquired by ffBinderTransact() and are given back by the cleanup attribute above.
     return nullptr;

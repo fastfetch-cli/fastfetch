@@ -827,14 +827,43 @@ static const char* wifiName(const char* value, bool withheld) {
     return withheld ? FF_WIFI_ANDROID_REDACTED : "";
 }
 
-// Calls a method of the service that takes no arguments and answers with an int. The transaction
-// code comes out of the jar the same way `getConnectionInfo`'s does, so a release that does not
-// declare the method answers UNKNOWN_TRANSACTION instead of a number that means something else.
-static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* transactionField, int32_t* result) {
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_WIFI_ANDROID_JAR, FF_WIFI_ANDROID_STUB, transactionField, &transaction);
+// Every transaction code this module sends, resolved from the device's own jar in one walk. They are
+// asked for together because the walk is dominated by the dex's type table and both codes sit in the
+// same class of the same entry -- see common/android/dex.h.
+typedef struct FFWifiAndroidCodes {
+    int32_t getConnectionInfo;
+    int32_t getWifiEnabledState;
+} FFWifiAndroidCodes;
+
+// Resolves both codes and reports the one outcome the module cannot work around: a jar that does not
+// declare `getConnectionInfo` has no connection to report. The radio state is a refinement -- the
+// module already carries on when the service will not answer it -- so it is allowed to come back as
+// the sentinel, and what that costs is decided where it is used rather than here.
+static const char* resolveCodes(FFWifiAndroidCodes* codes) {
+    const FFDexStaticIntRequest requests[] = {
+        { FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_CONNECTION_INFO, &codes->getConnectionInfo },
+        { FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &codes->getWifiEnabledState },
+    };
+
+    const char* error = ffDexStaticInts(FF_WIFI_ANDROID_JAR, requests, ARRAY_SIZE(requests));
     if (error != nullptr) {
+        FF_DEBUG("Reading the transaction codes from \"%s\" failed: %s", FF_WIFI_ANDROID_JAR, error);
         return error;
+    }
+    if (codes->getConnectionInfo == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The Wifi service does not declare getConnectionInfo";
+    }
+    return nullptr;
+}
+
+// Calls a method of the service that takes no arguments and answers with an int. `transaction` comes
+// out of the jar, and the sentinel the reader leaves for a code it could not find is caught here: a
+// release that does not declare the method is a message rather than a number that means something
+// else. `transactionField` is carried only to name the method in the debug output, which a release
+// build compiles out -- hence the attribute.
+static const char* callIntMethod(FFBinder* binder, uint32_t handle, [[maybe_unused]] const char* transactionField, int32_t transaction, int32_t* result) {
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The Wifi service does not declare that method";
     }
 
     uint8_t parcelBuffer[256];
@@ -843,7 +872,7 @@ static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* 
 
     uint8_t replyBuffer[64];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -880,10 +909,11 @@ static const char* detectWithBinder(FFlist* result) {
         return "Cannot determine the package name of this process";
     }
 
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_WIFI_ANDROID_JAR, FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_CONNECTION_INFO, &transaction);
+    // Resolved before the binder is opened, so that a jar which does not declare the method says so
+    // rather than the module failing later with a message about the transport.
+    FFWifiAndroidCodes codes = {};
+    const char* error = resolveCodes(&codes);
     if (error != nullptr) {
-        FF_DEBUG("Reading the transaction code from \"%s\" failed: %s", FF_WIFI_ANDROID_JAR, error);
         return error;
     }
 
@@ -901,7 +931,7 @@ static const char* detectWithBinder(FFlist* result) {
         return error;
     }
     FF_DEBUG("The \"%s\" service is handle %u, %s is transaction %d",
-        FF_WIFI_ANDROID_SERVICE, service.handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, transaction);
+        FF_WIFI_ANDROID_SERVICE, service.handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, codes.getConnectionInfo);
 
     uint8_t parcelBuffer[FF_WIFI_ANDROID_PARCEL_SIZE];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
@@ -912,7 +942,7 @@ static const char* detectWithBinder(FFlist* result) {
 
     uint8_t replyBuffer[FF_WIFI_ANDROID_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(&binder, service.handle, (uint32_t) transaction, 0, &parcel, &reply);
+    error = ffBinderTransact(&binder, service.handle, (uint32_t) codes.getConnectionInfo, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -939,7 +969,7 @@ static const char* detectWithBinder(FFlist* result) {
         // that is up. WIFI_STATE_DISABLING is a radio that is still up, so only the one value means
         // down, and WIFI_STATE_UNKNOWN is the service declining to say.
         int32_t state = 0;
-        const char* stateError = callIntMethod(&binder, service.handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &state);
+        const char* stateError = callIntMethod(&binder, service.handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, codes.getWifiEnabledState, &state);
         if (stateError == nullptr && state != FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN) {
             connection.up = state != FF_WIFI_ANDROID_WIFI_STATE_DISABLED;
             connection.upKnown = true;

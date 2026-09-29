@@ -1,4 +1,6 @@
 #include "common/android/dex.h"
+#include "common/debug.h"
+#include "common/mallocHelper.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -228,17 +230,18 @@ static const char* dexString(const uint8_t* dex, const uint8_t* end, uint32_t in
     return memchr(p, '\0', (size_t) (end - p)) != nullptr ? (const char*) p : nullptr;
 }
 
-// Walks the class's static field list and the class's static value array in step, and returns the
-// value paired with `fieldName`. Both lists are ordered by field index and cover exactly the same
-// fields -- when they do not, the pairing is not trustworthy and nothing is returned.
-//
-// `found` separates "this dex does not define the class" from a real failure, because a jar spreads
-// its classes over several dex files and the caller has to try the next one. It is set before any
-// of the walks below, so an error after it still means the class was here.
-static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* classDescriptor, const char* fieldName, bool* found, int32_t* result) {
-    *found = false;
-    const uint8_t* end = dex + size;
+// One dex entry, validated. Every offset in the header comes out of the file, so each table is range
+// checked before the walk uses it.
+typedef struct FFDexTables {
+    const uint8_t* dex;
+    const uint8_t* end;
+    const uint8_t* types;
+    uint32_t typeCount;
+    const uint8_t* classes;
+    uint32_t classCount;
+} FFDexTables;
 
+static const char* dexOpen(const uint8_t* dex, size_t size, FFDexTables* tables) {
     if (size < FF_DEX_HEADER_SIZE || dexU32(dex + FF_DEX_OFF_ENDIAN_TAG) != FF_DEX_ENDIAN_TAG) {
         return "Not a dex file";
     }
@@ -246,26 +249,13 @@ static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* cla
     if (fileSize > size || fileSize < FF_DEX_HEADER_SIZE) {
         return "The dex file size is out of range";
     }
-    end = dex + fileSize;
+    const uint8_t* end = dex + fileSize;
 
-    // The class's type index, so that the class_def_item and the field ids can be filtered by class.
     const uint8_t* types = dex + dexU32(dex + FF_DEX_OFF_TYPE_IDS);
     const uint32_t typeCount = dexU32(dex + FF_DEX_OFF_TYPE_IDS_SIZE);
     if (!dexTableInRange(dex, end, types, typeCount, 4)) {
         return "The dex type table is out of range";
     }
-    uint32_t typeIndex = UINT32_MAX;
-    for (uint32_t i = 0; i < typeCount; ++i) {
-        const char* descriptor = dexString(dex, end, dexU32(types + (size_t) i * 4));
-        if (descriptor != nullptr && strcmp(descriptor, classDescriptor) == 0) {
-            typeIndex = i;
-            break;
-        }
-    }
-    if (typeIndex == UINT32_MAX) {
-        return nullptr;
-    }
-    *found = true;
 
     const uint8_t* classes = dex + dexU32(dex + FF_DEX_OFF_CLASS_DEFS);
     const uint32_t classCount = dexU32(dex + FF_DEX_OFF_CLASS_DEFS_SIZE);
@@ -273,11 +263,75 @@ static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* cla
         return "The dex class table is out of range";
     }
 
-    for (uint32_t i = 0; i < classCount; ++i) {
-        const uint8_t* classDef = classes + (size_t) i * FF_DEX_CLASS_DEF_SIZE;
+    tables->dex = dex;
+    tables->end = end;
+    tables->types = types;
+    tables->typeCount = typeCount;
+    tables->classes = classes;
+    tables->classCount = classCount;
+    return nullptr;
+}
+
+// One pass over the type table, resolving the type index of every class that still has a request
+// open. This pass is what a lookup costs: `framework.jar`'s classes.dex lists 8428 descriptors, each
+// one a `string_data_item` read from a different part of a 51 MB mapping. Matching every request
+// against the same pass is what makes a batch cheaper than the sum of its fields -- the descriptor is
+// read once however many classes are being looked for, and the pass ends as soon as the last request
+// has an index rather than at the end of the table.
+//
+// `typeIndexes` is parallel to `requests` and rebuilt here rather than kept across entries: a type
+// index is a property of the entry's own table, and the next entry numbers its types differently.
+static void dexFindTypes(const FFDexTables* tables, const FFDexStaticIntRequest* requests, const uint8_t* settled, uint32_t* typeIndexes, uint32_t count) {
+    uint32_t remaining = 0;
+    for (uint32_t r = 0; r < count; ++r) {
+        typeIndexes[r] = UINT32_MAX;
+        if (!settled[r]) {
+            ++remaining;
+        }
+    }
+
+    for (uint32_t i = 0; i < tables->typeCount && remaining > 0; ++i) {
+        const char* descriptor = dexString(tables->dex, tables->end, dexU32(tables->types + (size_t) i * 4));
+        if (descriptor == nullptr) {
+            continue;
+        }
+        for (uint32_t r = 0; r < count; ++r) {
+            if (settled[r] || typeIndexes[r] != UINT32_MAX || strcmp(descriptor, requests[r].classDescriptor) != 0) {
+                continue;
+            }
+            typeIndexes[r] = i;
+            --remaining;
+        }
+    }
+}
+
+// Walks the static field list of the class that `typeIndex` names and the class's static value array
+// in step, writing the value of every request for that class whose field name matches. Both lists are
+// ordered by field index and cover exactly the same fields -- when they do not, the pairing is not
+// trustworthy and nothing is written.
+//
+// `defined` says whether this dex *defines* the class, which is not the same as mentioning it: a dex
+// lists every type it references in its type table, so a class that a later entry of the jar defines
+// still has a type index here, with no class_def_item behind it. Only a class_def_item makes the
+// answer this dex's; without one the caller moves on to the next entry.
+//
+// A request this class cannot answer -- a field it does not declare, or one it declares as something
+// other than an int -- is closed here rather than reported: the class is this dex's, so no later
+// entry of the jar could give it a different answer, and one field the caller can live without must
+// not hold back the rest of the batch. It is closed with the sentinel, and what this returns is only
+// ever a dex that cannot be read, which is the one thing no later entry can fix.
+static const char* dexClassStaticInts(const FFDexTables* tables, uint32_t typeIndex, const FFDexStaticIntRequest* requests, const uint32_t* typeIndexes, uint8_t* settled, uint32_t count, bool* defined) {
+    *defined = false;
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+
+    for (uint32_t i = 0; i < tables->classCount; ++i) {
+        const uint8_t* classDef = tables->classes + (size_t) i * FF_DEX_CLASS_DEF_SIZE;
         if (dexU32(classDef) != typeIndex) {
             continue;
         }
+        // Defined here, so from this point on the answer is this dex's, whatever it turns out to be.
+        *defined = true;
 
         const uint8_t* fields = dex + dexU32(classDef + FF_DEX_OFF_CLASS_DEF_DATA);
         const uint8_t* values = dex + dexU32(classDef + FF_DEX_OFF_CLASS_DEF_STATIC_VALUES);
@@ -319,20 +373,40 @@ static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* cla
                 return "The dex field table is out of range";
             }
             const char* name = dexString(dex, end, dexU32(fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
-            if (name != nullptr && strcmp(name, fieldName) == 0) {
+            if (name == nullptr) {
+                continue;
+            }
+            for (uint32_t r = 0; r < count; ++r) {
+                if (settled[r] || typeIndexes[r] != typeIndex || strcmp(name, requests[r].fieldName) != 0) {
+                    continue;
+                }
                 if (!isInt) {
                     // The field exists but is not an int, so its value is not the constant asked
-                    // for. Reported here rather than on the first non-int in the list, because the
-                    // list legitimately holds strings (`DESCRIPTOR`) and booleans.
-                    return "The dex static field is not an int";
+                    // for. Closed the way a field the class does not declare is, because it is this
+                    // dex's answer too. The check is here rather than on the first non-int in the
+                    // list because the list legitimately holds strings (`DESCRIPTOR`) and booleans.
+                    *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+                    settled[r] = 1;
+                    continue;
                 }
-                *result = value;
-                return nullptr;
+                *requests[r].result = value;
+                settled[r] = 1;
             }
         }
-        return "The field is not a static field of the class";
+
+        // The class is defined here, so a request of its own that went unanswered is one whose field
+        // the class does not declare as a static field. Closed here for the same reason as above.
+        for (uint32_t r = 0; r < count; ++r) {
+            if (!settled[r] && typeIndexes[r] == typeIndex) {
+                *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+                settled[r] = 1;
+            }
+        }
+        return nullptr;
     }
-    return "The class has no class_def_item";
+    // The descriptor is in this dex's type table but the class itself is defined by another entry of
+    // the jar. That is not a failure: `defined` stays false and the caller reads the next entry.
+    return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -340,16 +414,14 @@ static const char* dexStaticInt(const uint8_t* dex, size_t size, const char* cla
 // ---------------------------------------------------------------------------------------------
 
 typedef struct FFDexMapping {
-    uint8_t* mapped;      // the jar, as mapped; nullptr once released
+    uint8_t* mapped;     // the jar, as mapped; nullptr once released
     size_t mappedSize;
-    const uint8_t* data;  // the dex bytes: inside `mapped`, or `inflated`
+    const uint8_t* data; // the dex bytes, inside `mapped`
     size_t size;
-    uint8_t* inflated;    // owned; only set when the entry had to be decompressed
 } FFDexMapping;
 
 static void wrapDexMapping(FFDexMapping* mapping) {
     assert(mapping);
-    free(mapping->inflated);
     if (mapping->mapped != nullptr) {
         munmap(mapping->mapped, mapping->mappedSize);
     }
@@ -469,7 +541,9 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
     FF_LIBRARY_LOAD_SYMBOL(zlib, inflate, "dlsym(inflate) failed")
     FF_LIBRARY_LOAD_SYMBOL(zlib, inflateEnd, "dlsym(inflateEnd) failed")
 
-    uint8_t* buffer = malloc(uncompressedSize);
+    // Released by the cleanup on every path out below; ownership moves to the caller by clearing
+    // the pointer, which is also why no failure path has to free it by hand.
+    FF_AUTO_FREE uint8_t* buffer = malloc(uncompressedSize);
     if (buffer == nullptr) {
         return "malloc failed";
     }
@@ -484,22 +558,31 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
     stream.avail_out = (uInt) uncompressedSize;
 
     if (ffinflateInit2_(&stream, -MAX_WBITS, ZLIB_VERSION, (int) sizeof(z_stream)) != Z_OK) {
-        free(buffer);
         return "inflateInit2 failed";
     }
     const int status = ffinflate(&stream, Z_FINISH);
     ffinflateEnd(&stream);
     if (status != Z_STREAM_END || stream.total_out != (uLong) uncompressedSize) {
-        free(buffer);
-        return "Inflating classes.dex failed";
+        return "Inflating the dex failed";
     }
 
     *out = buffer;
+    buffer = nullptr; // the caller owns it from here
     return nullptr;
 }
 #endif
 
-const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, const char* fieldName, int32_t* result) {
+const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* requests, uint32_t count) {
+    // Every request is written the sentinel before anything can fail, so that a caller reads a result
+    // rather than whatever its own stack held there, however this returns. Nothing below has to
+    // remember to do it on its way out.
+    for (uint32_t r = 0; r < count; ++r) {
+        *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+    }
+    if (count == 0) {
+        return nullptr;
+    }
+
     [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
 
     const int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
@@ -521,14 +604,28 @@ const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, con
         return "mmap(jar) failed";
     }
 
+    // One byte per request saying whether it is closed -- answered, or given up on -- and the type
+    // index it was found under in the entry being walked. Both are sized from `count` rather than
+    // from a fixed bound, and both are released by their cleanup however this function returns.
+    FF_AUTO_FREE uint8_t* settled = calloc(count, 1);
+    FF_AUTO_FREE uint32_t* typeIndexes = malloc((size_t) count * sizeof(uint32_t));
+    if (settled == nullptr || typeIndexes == nullptr) {
+        return "malloc failed";
+    }
+
     // A jar spreads its classes over `classes.dex`, `classes2.dex`, `classes3.dex`, ... and the
     // class being looked for is in whichever one the build put it in: `IAudioService$Stub` is in the
     // second dex of framework.jar, while `IWifiManager$Stub` is in the first of framework-wifi.jar.
     // The entries are therefore tried in order, and the first one that defines the class answers.
     // The count is a bound on the walk, not a claim about the jar -- AOSP has never shipped more
-    // than a handful, and a class that is in none of them is reported as missing either way.
-    const char* error = "The class is not in the jar";
-    for (uint32_t index = 1; index <= FF_DEX_MAX_ENTRIES; ++index) {
+    // than a handful, and a class that is in none of them is left unanswered either way.
+    //
+    // The walk ends as soon as the last request is closed, so an entry that holds every class asked
+    // for -- which is what the modules here ask for, one class per interface -- costs one entry read
+    // and one pass over its type table.
+    uint32_t pending = count;
+    const char* error = nullptr;
+    for (uint32_t index = 1; index <= FF_DEX_MAX_ENTRIES && pending > 0; ++index) {
         char entry[sizeof("classes999.dex")];
         if (index == 1) {
             memcpy(entry, FF_DEX_ENTRY, sizeof(FF_DEX_ENTRY));
@@ -540,6 +637,10 @@ const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, con
         size_t dataSize = 0;
         uint32_t uncompressedSize = 0;
         uint16_t method = FF_ZIP_METHOD_STORED;
+        // The decompressed dex, when the entry needed one. The cleanup releases it at the end of
+        // the iteration, so every entry gets a buffer of its own and no way out of the loop -- an
+        // early return included -- can leak one.
+        FF_AUTO_FREE uint8_t* inflated = nullptr;
 
         if (findDexEntry(mapping.mapped, mapping.mappedSize, entry, &data, &dataSize, &uncompressedSize, &method) != nullptr) {
             if (index > 1) {
@@ -553,14 +654,11 @@ const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, con
             }
         } else if (method == FF_ZIP_METHOD_DEFLATED) {
             #ifdef FF_HAVE_ZLIB
-            // One buffer is reused across the walk, so the previous dex is released first.
-            free(mapping.inflated);
-            mapping.inflated = nullptr;
-            error = inflateDex(data, dataSize, uncompressedSize, &mapping.inflated);
+            error = inflateDex(data, dataSize, uncompressedSize, &inflated);
             if (error != nullptr) {
                 return error;
             }
-            data = mapping.inflated;
+            data = inflated;
             dataSize = uncompressedSize;
             #else
             return "The jar deflates its dex entries and fastfetch was built without zlib";
@@ -577,15 +675,58 @@ const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, con
         mapping.data = data;
         mapping.size = dataSize;
 
-        bool found = false;
-        error = dexStaticInt(mapping.data, mapping.size, classDescriptor, fieldName, &found, result);
+        FFDexTables tables = {};
+        error = dexOpen(mapping.data, mapping.size, &tables);
         if (error != nullptr) {
+            // The dex cannot be read at all, which no later entry can fix.
             return error;
         }
-        if (found) {
-            return nullptr;
+
+        dexFindTypes(&tables, requests, settled, typeIndexes, count);
+
+        // Every class this entry defines is walked once, however many of its fields were asked for.
+        // A request whose class is not in this entry's type table keeps `UINT32_MAX` and is left for
+        // the next entry; one whose class is only referenced here is left the same way by the walk
+        // below, which is what `defined` reports.
+        for (uint32_t r = 0; r < count; ++r) {
+            if (settled[r] || typeIndexes[r] == UINT32_MAX) {
+                continue;
+            }
+            const uint32_t typeIndex = typeIndexes[r];
+            bool defined = false;
+            error = dexClassStaticInts(&tables, typeIndex, requests, typeIndexes, settled, count, &defined);
+            if (error != nullptr) {
+                // The dex cannot be read, which no later entry can fix.
+                return error;
+            }
+            if (!defined) {
+                // Only referenced here, so the class is left for the next entry -- and the requests
+                // that share it are marked as walked, since one lookup of a class answers all of
+                // them and the class table should not be scanned once per field.
+                for (uint32_t s = r; s < count; ++s) {
+                    if (typeIndexes[s] == typeIndex) {
+                        typeIndexes[s] = UINT32_MAX;
+                    }
+                }
+            }
         }
-        error = "The class is not in the jar";
+
+        pending = 0;
+        for (uint32_t r = 0; r < count; ++r) {
+            if (!settled[r]) {
+                ++pending;
+            }
+        }
     }
-    return error;
+
+    // What is still open is a class no entry of the jar defines. That is an answer like any other --
+    // the results already hold the sentinel, written before the walk began -- so the only thing left
+    // is to say so for a debug build, where the sentinel on its own does not tell "this build has no
+    // such method" apart from "the reader went wrong".
+    for (uint32_t r = 0; r < count; ++r) {
+        if (*requests[r].result == FF_DEX_STATIC_INT_UNRESOLVED) {
+            FF_DEBUG("\"%s\" is not a static int field of \"%s\"", requests[r].fieldName, requests[r].classDescriptor);
+        }
+    }
+    return nullptr;
 }

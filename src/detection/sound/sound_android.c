@@ -8,11 +8,11 @@
 
 #include <string.h>
 
-// Android has no desktop sound stack. PulseAudio is not part of the platform -- a Termux user can
-// start one, and then the module reads that, but its sink is a virtual device of Termux's own that
-// feeds Android's OpenSL ES output with a volume that is always at full scale, so the number says
-// nothing about the phone. ALSA and OSS are not there either: /dev/snd, /proc/asound and
-// /sys/class/sound are all EACCES from an app's SELinux domain, `dumpsys audio` needs
+// Android has no desktop sound stack. PulseAudio is not part of the platform, but a Termux user can
+// run one, and that is what a session sounds through whenever the display server is a real desktop
+// rather than SurfaceFlinger -- so this file answers for SurfaceFlinger alone and hands the rest to
+// sound_linux.c, which speaks PulseAudio. ALSA and OSS are not there either: /dev/snd, /proc/asound
+// and /sys/class/sound are all EACCES from an app's SELinux domain, `dumpsys audio` needs
 // android.permission.DUMP, and `settings get system volume_music` needs INTERACT_ACROSS_USERS.
 // `cmd audio` is worse than useless: `cmd` hands the arguments to the service over binder and the
 // command body runs inside system_server, so from an app it hangs or answers ENOSYS.
@@ -214,14 +214,64 @@ static bool soundAndroidIsBluetooth(int32_t type) {
     }
 }
 
-// Calls a method that takes no argument or one int, and answers with one int. Every transaction code
-// is resolved here rather than passed in, so that the dex is the only place a number lives.
-static const char* soundAndroidCallInt(FFBinder* binder, uint32_t handle, const char* transactionField, bool hasArgument, int32_t argument, int32_t* result) {
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_SOUND_ANDROID_JAR, FF_SOUND_ANDROID_STUB, transactionField, &transaction);
+// Every transaction code this module sends, resolved from the device's own jar in one walk. They are
+// asked for together because the walk is dominated by the dex's type table and all seven sit in the
+// same class of the same entry -- see common/android/dex.h.
+typedef struct FFSoundAndroidCodes {
+    int32_t getStreamVolume;
+    int32_t getStreamMinVolume;
+    int32_t getStreamMaxVolume;
+    int32_t isStreamMute;
+    int32_t getDevicesForAttributes;
+    int32_t isMusicActive;
+    int32_t getBtActiveDeviceName;
+} FFSoundAndroidCodes;
+
+// The five codes the module cannot answer without, against the two that only refine the answer. A
+// build that does not declare one of these five has nothing to report, which is what the module did
+// when each code was resolved on its own.
+static bool soundAndroidCodesIncomplete(const FFSoundAndroidCodes* codes) {
+    return codes->getStreamVolume == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getStreamMinVolume == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getStreamMaxVolume == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->isStreamMute == FF_DEX_STATIC_INT_UNRESOLVED
+        || codes->getDevicesForAttributes == FF_DEX_STATIC_INT_UNRESOLVED;
+}
+
+// Resolves all seven in one call, and then makes the judgement the reader leaves to its caller. The
+// two that only refine the answer are allowed to come back as the sentinel, because a build may
+// declare one of them and not the other -- Mi 10 has `getDevicesForAttributesUnprotected` and no
+// `getBtActiveDeviceName` -- and a code the module can live without must not take it down with it.
+static const char* soundAndroidResolveCodes(FFSoundAndroidCodes* codes) {
+    const FFDexStaticIntRequest requests[] = {
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_STREAM_VOLUME, &codes->getStreamVolume },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_STREAM_MIN_VOLUME, &codes->getStreamMinVolume },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_STREAM_MAX_VOLUME, &codes->getStreamMaxVolume },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_IS_STREAM_MUTE, &codes->isStreamMute },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_DEVICES_FOR_ATTRIBUTES, &codes->getDevicesForAttributes },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_IS_MUSIC_ACTIVE, &codes->isMusicActive },
+        { FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_BT_ACTIVE_DEVICE_NAME, &codes->getBtActiveDeviceName },
+    };
+
+    const char* error = ffDexStaticInts(FF_SOUND_ANDROID_JAR, requests, ARRAY_SIZE(requests));
     if (error != nullptr) {
-        FF_DEBUG("Reading \"%s\" from \"%s\" failed: %s", transactionField, FF_SOUND_ANDROID_JAR, error);
+        FF_DEBUG("Reading the transaction codes from \"%s\" failed: %s", FF_SOUND_ANDROID_JAR, error);
         return error;
+    }
+    if (soundAndroidCodesIncomplete(codes)) {
+        return "The audio service does not declare every method this module calls";
+    }
+    return nullptr;
+}
+
+// Calls a method that takes no argument or one int, and answers with one int. `transaction` comes out
+// of the jar, and the sentinel the reader leaves for a code it could not find is caught here, so that
+// a build which does not declare the method is a message rather than a transaction that means
+// something else. `transactionField` is carried only to name the method in the debug output, which a
+// release build compiles out -- hence the attribute.
+static const char* soundAndroidCallInt(FFBinder* binder, uint32_t handle, [[maybe_unused]] const char* transactionField, int32_t transaction, bool hasArgument, int32_t argument, int32_t* result) {
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The audio service does not declare that method";
     }
 
     uint8_t parcelBuffer[FF_SOUND_ANDROID_SCALAR_PARCEL_SIZE];
@@ -233,7 +283,7 @@ static const char* soundAndroidCallInt(FFBinder* binder, uint32_t handle, const 
 
     uint8_t replyBuffer[FF_SOUND_ANDROID_SCALAR_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -322,12 +372,9 @@ static bool soundAndroidReadString16(const uint8_t* data, size_t size, size_t of
 // Bluetooth route as a whole and reports it even when the policy has selected the speaker, so it is
 // only ever consulted after the device list has already picked a Bluetooth sink, and only its name
 // is taken from it.
-static const char* soundAndroidCallBtName(FFBinder* binder, uint32_t handle, FFstrbuf* result) {
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_SOUND_ANDROID_JAR, FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_BT_ACTIVE_DEVICE_NAME, &transaction);
-    if (error != nullptr) {
-        FF_DEBUG("Reading \"%s\" from \"%s\" failed: %s", FF_SOUND_ANDROID_GET_BT_ACTIVE_DEVICE_NAME, FF_SOUND_ANDROID_JAR, error);
-        return error;
+static const char* soundAndroidCallBtName(FFBinder* binder, uint32_t handle, int32_t transaction, FFstrbuf* result) {
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The audio service does not declare getBtActiveDeviceName";
     }
 
     uint8_t parcelBuffer[FF_SOUND_ANDROID_SCALAR_PARCEL_SIZE];
@@ -336,7 +383,7 @@ static const char* soundAndroidCallBtName(FFBinder* binder, uint32_t handle, FFs
 
     uint8_t replyBuffer[FF_SOUND_ANDROID_NAME_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -425,13 +472,15 @@ static uint8_t soundAndroidPercent(int32_t volume, int32_t minimum, int32_t maxi
 }
 
 static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
-    // Resolved before anything else so that a build without the method says so, rather than opening
-    // binder and failing later with a message about the transport.
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_SOUND_ANDROID_JAR, FF_SOUND_ANDROID_STUB, FF_SOUND_ANDROID_GET_DEVICES_FOR_ATTRIBUTES, &transaction);
+    // Resolved before anything else so that a build without the methods says so, rather than opening
+    // binder and failing later with a message about the transport. All seven codes are asked for in
+    // one call and judged here: the five the module cannot answer without decide whether it runs at
+    // all, and the two it only uses when the build declares them are left as sentinels for their
+    // call sites to cope with.
+    FFSoundAndroidCodes codes = {};
+    const char* error = soundAndroidResolveCodes(&codes);
     if (error != nullptr) {
-        FF_DEBUG("Reading \"%s\" from \"%s\" failed: %s", FF_SOUND_ANDROID_GET_DEVICES_FOR_ATTRIBUTES, FF_SOUND_ANDROID_JAR, error);
-        return "The audio service does not declare getDevicesForAttributesUnprotected";
+        return error;
     }
 
     [[gnu::cleanup(ffBinderClose)]] FFBinder binder = { .fd = -1 };
@@ -447,7 +496,7 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
         return error;
     }
     FF_DEBUG("The \"%s\" service is handle %u, getDevicesForAttributesUnprotected is transaction %d",
-        FF_SOUND_ANDROID_SERVICE, service.handle, transaction);
+        FF_SOUND_ANDROID_SERVICE, service.handle, codes.getDevicesForAttributes);
 
     uint8_t parcelBuffer[FF_SOUND_ANDROID_DEVICE_PARCEL_SIZE];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
@@ -469,7 +518,7 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
 
     uint8_t replyBuffer[FF_SOUND_ANDROID_DEVICE_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(&binder, service.handle, (uint32_t) transaction, 0, &parcel, &reply);
+    error = ffBinderTransact(&binder, service.handle, (uint32_t) codes.getDevicesForAttributes, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -531,15 +580,15 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
     int32_t minimum = 0;
     int32_t maximum = 0;
     int32_t mute = 0;
-    error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_VOLUME, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &volume);
+    error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_VOLUME, codes.getStreamVolume, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &volume);
     if (error == nullptr) {
-        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_MIN_VOLUME, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &minimum);
+        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_MIN_VOLUME, codes.getStreamMinVolume, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &minimum);
     }
     if (error == nullptr) {
-        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_MAX_VOLUME, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &maximum);
+        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_GET_STREAM_MAX_VOLUME, codes.getStreamMaxVolume, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &maximum);
     }
     if (error == nullptr) {
-        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_IS_STREAM_MUTE, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &mute);
+        error = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_IS_STREAM_MUTE, codes.isStreamMute, true, (int32_t) FF_SOUND_ANDROID_STREAM_MUSIC, &mute);
     }
     if (error != nullptr) {
         return error;
@@ -555,7 +604,7 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
     // the ACTIVE bit to the device the policy already selected. A build that does not declare the
     // method, or a service that refuses it, leaves the bit clear rather than failing the module.
     int32_t active = 0;
-    const char* activeError = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_IS_MUSIC_ACTIVE, true, 0, &active);
+    const char* activeError = soundAndroidCallInt(&binder, service.handle, FF_SOUND_ANDROID_IS_MUSIC_ACTIVE, codes.isMusicActive, true, 0, &active);
     if (activeError != nullptr) {
         FF_DEBUG("Whether anything is playing is not known: %s", activeError);
         active = 0;
@@ -575,7 +624,7 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
     // in the type name, which is what this module printed before it asked at all.
     FF_STRBUF_AUTO_DESTROY bluetoothName = ffStrbufCreate();
     if (soundAndroidIsBluetooth(deviceType)) {
-        const char* nameError = soundAndroidCallBtName(&binder, service.handle, &bluetoothName);
+        const char* nameError = soundAndroidCallBtName(&binder, service.handle, codes.getBtActiveDeviceName, &bluetoothName);
         if (nameError != nullptr || bluetoothName.length == 0) {
             FF_DEBUG("The Bluetooth device is not named: %s",
                 nameError != nullptr ? nameError : "the service answered an empty name");
@@ -601,8 +650,17 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
 }
 
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
+    // The binder route below asks the policy about Android's own audio, which is the audio that is
+    // audible only while SurfaceFlinger is the display server. A Termux:X11 or Wayland session runs
+    // a real desktop on top of the device, and the sound there belongs to that desktop, not to
+    // Android -- so that case is handed to the Linux implementation, which speaks PulseAudio. Sound
+    // is only reported for one of the two, never merged.
     const FFDisplayServerResult* wm = ffConnectDisplayServer();
     if (!ffStrbufIgnCaseEqualS(&wm->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER)) {
-        return nullptr;
+        FF_DEBUG("The display server is \"%s\", so the Linux implementation answers", wm->wmProtocolName.chars);
+        const char* ffDetectSoundLinux(FFSoundOptions* options, FFlist* devices);
+        return ffDetectSoundLinux(options, devices);
     }
+
+    return detectNative(options, devices);
 }

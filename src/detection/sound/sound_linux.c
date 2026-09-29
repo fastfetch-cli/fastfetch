@@ -1076,7 +1076,17 @@ static const char* fetchSinkList(FFSoundPulseConn* conn, const FFSoundOptions* o
 
 // ---------------------------------------------------------------------------
 
-const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
+// Android compiles this file next to sound_android.c, which owns ffDetectSound and calls this one
+// only while the display server is not SurfaceFlinger -- a Termux:X11 or Wayland session runs a real
+// desktop on top of the device, and PulseAudio is the sound of that desktop. So the entry point has
+// to step aside there. Same arrangement as wallpaper_linux.c and terminalfont_linux.c.
+const char*
+#ifdef __ANDROID__
+ffDetectSoundLinux
+#else
+ffDetectSound
+#endif
+    (FFSoundOptions* options, FFlist* devices) {
     FF_STRBUF_AUTO_DESTROY defaultSocketPath = ffStrbufCreate();
     getDefaultSocketPath(&defaultSocketPath);
     FF_DEBUG("Default pulseaudio socket path: %s", defaultSocketPath.chars);

@@ -707,6 +707,7 @@ elseif(ANDROID)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
         src/detection/sound/sound_android.c
+        src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalfont/terminalfont_linux.c
