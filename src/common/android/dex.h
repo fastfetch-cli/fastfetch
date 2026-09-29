@@ -24,7 +24,8 @@
 
 #include "fastfetch.h"
 
-// Resolves the int value of `<classDescriptor>.<fieldName>` out of the `classes.dex` of `jarPath`.
+// Resolves the int value of `<classDescriptor>.<fieldName>` out of the dex entries of `jarPath`,
+// walking `classes.dex`, `classes2.dex`, ... in order until one of them defines the class.
 // `classDescriptor` is the dex type descriptor, e.g. "Landroid/net/wifi/IWifiManager$Stub;".
 // Returns nullptr on success, a static message otherwise.
 [[gnu::nonnull(1, 2, 3, 4), nodiscard]] const char* ffDexStaticInt(const char* jarPath, const char* classDescriptor, const char* fieldName, int32_t* result);

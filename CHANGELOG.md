@@ -5,6 +5,7 @@ Changes:
 
 Features:
 * Improved performance of LocalIP, NetIO and DNS on Windows
+* Added Sound detection on Android. (Sound, Android)
 
 Bugfixes:
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
