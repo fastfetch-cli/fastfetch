@@ -252,14 +252,9 @@
         return result->length > resultLength;
     }
 
-    static const char* detectWithDdcciNative(FFBrightnessOptions* options, FFlist* result, uint32_t expectedResultLength) {
-#ifdef FF_HAVE_DDCUTIL
-        const uint32_t resultLength = result->length;
-#else
-        (void) expectedResultLength;
-#endif
+        static const char* detectWithDdcciNative(FFBrightnessOptions* options, FFlist* result) {
         FFBrightnessDdcCache cache = {0};
-        FF_DEBUG("Brightness DDC/CI: native detection started (result count=%u, expected=%u)", result->length, expectedResultLength);
+        FF_DEBUG("Brightness DDC/CI: native detection started (result count=%u)", result->length);
         if (!loadCacheFromFile(&cache)) {
             if (!scanI2cDevices(options, &cache)) {
                 FF_DEBUG("Brightness DDC/CI: no compatible I2C device found during initial scan");
@@ -276,17 +271,6 @@
                 return "No DDC/CI compatible displays found";
             }
         }
-
-    #ifdef FF_HAVE_DDCUTIL
-        if (result->length < expectedResultLength) {
-            FF_DEBUG("Brightness DDC/CI: native result is incomplete (%u/%u); rolling back for ddcutil fallback", result->length, expectedResultLength);
-            FFBrightnessResult discarded;
-            while (result->length > resultLength && FF_LIST_POP(*result, &discarded)) {
-                ffStrbufDestroy(&discarded.name);
-            }
-            return "Native DDC/CI found only a subset of displays";
-        }
-    #endif
 
         saveCacheToFile(&cache);
         FF_DEBUG("Brightness DDC/CI: native detection finished with %u result(s)", result->length);
@@ -365,91 +349,6 @@ static const char* detectWithBacklight(FFlist* result) {
 
 #include "detection/displayserver/displayserver.h"
 
-#ifdef FF_HAVE_DDCUTIL
-    #include "common/library.h"
-    #include "common/mallocHelper.h"
-
-    #include <ddcutil_macros.h>
-    #include <ddcutil_c_api.h>
-
-    // Try to be compatible with ddcutil 2.0
-    #if DDCUTIL_VMAJOR >= 2
-double ddca_set_default_sleep_multiplier(double multiplier); // ddcutil 1.4
-    #else
-DDCA_Status ddca_init(const char* libopts, int syslog_level, int opts);
-    #endif
-
-static const char* detectWithDdcci([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
-    FF_LIBRARY_LOAD_MESSAGE(libddcutil, "libddcutil" FF_LIBRARY_EXTENSION, 5);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_display_info_list2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_open_display2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_get_any_vcp_value_using_explicit_type)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
-
-    // libddcutil may print trace messages to stdout during display detection, not only in ddca_init
-    FF_SUPPRESS_IO();
-
-    #ifndef FF_DISABLE_DLOPEN
-    FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_init)
-    if (ffddca_init) {
-        // Ref: https://github.com/rockowitz/ddcutil/issues/344
-        if (ffddca_init(nullptr, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
-            return "ddca_init() failed";
-        }
-    } else {
-        FF_LIBRARY_LOAD_SYMBOL_LAZY(libddcutil, ddca_set_default_sleep_multiplier);
-        if (ffddca_set_default_sleep_multiplier) {
-            ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
-        }
-
-        libddcutil = nullptr; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
-    }
-    #else
-        #if DDCUTIL_VMAJOR >= 2
-    if (ddca_init(nullptr, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0) {
-        return "ddca_init() failed";
-    }
-        #else
-    ddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
-        #endif
-    #endif
-
-    FF_AUTO_FREE DDCA_Display_Info_List* infoList = nullptr;
-    if (ffddca_get_display_info_list2(false, &infoList) < 0) {
-        return "ddca_get_display_info_list2(false, &infoList) failed";
-    }
-
-    if (infoList->ct == 0) {
-        return "No DDC/CI compatible displays found";
-    }
-
-    for (int index = 0; index < infoList->ct; ++index) {
-        const DDCA_Display_Info* display = &infoList->info[index];
-
-        DDCA_Display_Handle handle;
-        if (ffddca_open_display2(display->dref, false, &handle) >= 0) {
-            DDCA_Any_Vcp_Value* vcpValue = nullptr;
-            if (ffddca_get_any_vcp_value_using_explicit_type(handle, 0x10 /*brightness*/, DDCA_NON_TABLE_VCP_VALUE, &vcpValue) >= 0) {
-                assert(vcpValue->value_type == DDCA_NON_TABLE_VCP_VALUE);
-                int current = VALREC_CUR_VAL(vcpValue), max = VALREC_MAX_VAL(vcpValue);
-                ffddca_free_any_vcp_value(vcpValue);
-
-                FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
-                brightness->max = max;
-                brightness->min = 0;
-                brightness->current = current;
-                brightness->builtin = false;
-                ffStrbufInitS(&brightness->name, display->model_name);
-            }
-            ffddca_close_display(handle);
-        }
-    }
-
-    return nullptr;
-}
-#endif
-
 const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FFlist* result) {
     FF_DEBUG("Brightness: detection started (result count=%u)", result->length);
     detectWithBacklight(result);
@@ -460,18 +359,10 @@ const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FF
         if (result->length < displayServer->displays.length) {
             FF_DEBUG("Brightness: trying native DDC/CI (result count=%u, display count=%u)", result->length, displayServer->displays.length);
 #if defined(__linux__)
-            // Try native I2C first
-            const char* nativeError = detectWithDdcciNative(options, result, displayServer->displays.length);
+            const char* nativeError = detectWithDdcciNative(options, result);
             if (nativeError != nullptr) {
-#ifdef FF_HAVE_DDCUTIL
-                FF_DEBUG("Native I2C DDC/CI failed: %s, falling back to ddcutil", nativeError);
-                detectWithDdcci(options, result);
-#else
-                FF_DEBUG("Native I2C DDC/CI failed: %s; ddcutil fallback is unavailable", nativeError);
-#endif
+                FF_DEBUG("Native I2C DDC/CI failed: %s", nativeError);
             }
-#elif defined(FF_HAVE_DDCUTIL)
-            detectWithDdcci(options, result);
 #endif
         } else {
             FF_DEBUG("Brightness: skipping DDC/CI because result count=%u meets display count=%u", result->length, displayServer->displays.length);

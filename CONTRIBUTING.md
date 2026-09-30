@@ -96,7 +96,7 @@ cmake -DBUILD_TESTS=On -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_X11=OFF
 
 Required: CMake ≥ 3.21 and a C23 compiler (GCC, Clang or MSVC). Everything else is optional.
 
-Optional dependencies are auto-detected: libpci, libdrm, vulkan, wayland, xcb, xrandr, dbus, sqlite3, rpm, imagemagick{6,7}, chafa, zlib, egl, glx, opencl, freetype, ddcutil, elf, libzfs, and more.
+Optional dependencies are auto-detected: libpci, libdrm, vulkan, wayland, xcb, xrandr, dbus, sqlite3, rpm, imagemagick{6,7}, chafa, zlib, egl, glx, opencl, freetype, elf, libzfs, and more.
 
 ---
 

@@ -248,9 +248,6 @@ void ffListFeatures(void) {
 #if FF_HAVE_FREETYPE
         "freetype\n"
 #endif
-#if FF_HAVE_DDCUTIL
-        "libddcutil\n"
-#endif
 #if FF_HAVE_ELF || __sun || (__FreeBSD__ && !__DragonFly__) || __OpenBSD__ || __NetBSD__
         "libelf\n"
 #endif
