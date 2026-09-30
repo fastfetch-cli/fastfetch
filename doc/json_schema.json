@@ -1914,7 +1914,7 @@
                                         "$ref": "#/$defs/percent"
                                     },
                                     "ddcciSleep": {
-                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSet to null to skip DDC/CI detection\nSee <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
+                                        "description": "Sleep time in milliseconds between DDC/CI requests\nSet to null to skip DDC/CI detection",
                                         "oneOf": [
                                             {
                                                 "type": "null",

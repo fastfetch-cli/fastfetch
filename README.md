@@ -9,8 +9,8 @@
 [![homebrew downloads](https://img.shields.io/homebrew/installs/dm/fastfetch?logo=homebrew)](https://formulae.brew.sh/formula/fastfetch#default)
 [![GitHub all releases](https://img.shields.io/github/downloads/fastfetch-cli/fastfetch/total?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)  
 [![GitHub release (with filter)](https://img.shields.io/github/v/release/fastfetch-cli/fastfetch?logo=github)](https://github.com/fastfetch-cli/fastfetch/releases)
-[![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
-[![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
+[![latest packaged version(s)](https://repology.amdmi3.ru/badge/latest-versions/fastfetch.svg)](https://repology.amdmi3.ru/project/fastfetch/versions)
+[![Packaging status](https://repology.amdmi3.ru/badge/tiny-repos/fastfetch.svg)](https://repology.amdmi3.ru/project/fastfetch/versions)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fastfetch-cli/fastfetch)
 [![中文README](https://img.shields.io/badge/%E4%B8%AD%E6%96%87-README-red)](README-cn.md)
 
@@ -36,8 +36,8 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 Some distributions package outdated versions of fastfetch. Older versions receive no support, so please always try to use the latest version.
 
-<a href="https://repology.org/project/fastfetch/versions">
-    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
+<a href="https://repology.amdmi3.ru/project/fastfetch/versions">
+    <img src="https://repology.amdmi3.ru/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
 </a>
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (Ubuntu 22.04 or newer; latest version)
@@ -248,7 +248,20 @@ Set the key to a white space.
 
 ### Q: How can I display images on Windows?
 
-As of April 2025:
+#### Windows Terminal
+
+Windows Terminal supports the sixel image protocol only.
+
+```jsonc
+{
+  "logo": {
+    "type": "sixel", // DO NOT USE "auto"
+    "source": "C:/path/to/image.png", // ~ can be used to refer to the Windows user home directory
+    "width": <image-width-in-chars>, // Optional
+    "height": <image-height-in-chars> // Optional
+  }
+}
+```
 
 #### mintty and Wezterm
 
@@ -260,38 +273,7 @@ In `config.jsonc`:
   "logo": {
     "type": "iterm",
     "source": "C:/path/to/image.png",
-    "width": <num-in-chars>
-  }
-}
-```
-
-#### Windows Terminal
-
-Windows Terminal supports the sixel image protocol only.
-
-* If you installed fastfetch through MSYS2:
-    1. Install imagemagick: `pacman -S mingw-w64-<subsystem>-x86_64-imagemagick`
-    2. In `config.jsonc`:  
-```jsonc
-{
-  "logo": {
-    "type": "sixel", // DO NOT USE "auto"
-    "source": "C:/path/to/image.png", // Do NOT use `~` as fastfetch is a native Windows program and doesn't apply cygwin path conversion
-    "width": <image-width-in-chars>, // Optional
-    "height": <image-height-in-chars> // Optional
-  }
-}
-```
-* If you installed fastfetch via scoop or downloaded the binary directly from the GitHub Releases page:
-    1. Convert your image manually to sixel format using [any online image conversion service](https://www.google.com/search?q=convert+image+to+sixel)
-    2. In `config.jsonc`:  
-```jsonc
-{
-  "logo": {
-    "type": "raw", // DO NOT USE "auto"
-    "source": "C:/path/to/image.sixel",
-    "width": <image-width-in-chars>, // Required
-    "height": <image-height-in-chars> // Required
+    "width": <image-width-in-chars>
   }
 }
 ```

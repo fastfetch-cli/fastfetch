@@ -2,6 +2,7 @@
 #include "battery.h"
 #include "common/android/api.h"
 #include "common/android/binder.h"
+#include "common/android/dex.h"
 #include "common/debug.h"
 #include "common/processing.h"
 #include "common/properties.h"
@@ -18,18 +19,30 @@
 // everything the module would otherwise like to show. Manufacturer, model name, technology, serial
 // number, manufacture date, temperature and cycle count all sit behind that permission.
 
-// The transaction code and the reply layout are both positional, and neither is negotiated with the
-// service, so each only stays correct as long as AOSP keeps the order it already has. The code has
-// not: `IBatteryPropertiesRegistrar` still declared registerListener / unregisterListener /
-// getProperty up to Android 9, and Android 10 dropped the two listener methods, which moved
-// `getProperty` from the third position to the first. The layout has, because `BatteryProperty` has
-// only ever grown at the end -- API 35 appended [string8 mValueString] to it -- so the field read
-// below is still the first one written.
+// The reply layout is positional and is not negotiated with the service, so it only stays correct as
+// long as AOSP keeps the order it already has. It has, because `BatteryProperty` has only ever grown
+// at the end -- API 35 appended [string8 mValueString] to it -- so the field read below is still the
+// first one written.
+//
+// The transaction code is positional for the same reason, and it has *not* stayed: the interface
+// still declared registerListener / unregisterListener / getProperty up to Android 9, and Android 10
+// dropped the two listener methods, which moved `getProperty` from the third position to the first.
+// The number is therefore read out of the device's own jar rather than guessed from the API level,
+// because a vendor fork is free to insert a method ahead of it -- and a wrong code reaches a
+// different method, or none. See common/android/dex.h.
 //
 // Getting either wrong is quiet rather than loud: `ffBinderReadU64` returns 0 for a read past the
 // end of the reply, so a drift shows up as a wrong capacity, not as a failed call.
 #define FF_BATTERY_ANDROID_SERVICE "batteryproperties"
 #define FF_BATTERY_ANDROID_DESCRIPTOR "android.os.IBatteryPropertiesRegistrar"
+
+// IBatteryPropertiesRegistrar has always been part of framework.jar -- it is not one of the
+// frameworks that moved into an APEX -- so there is one path and no fallback. The method this module
+// calls is named by the constant the dex carries for it, which is what the lookup turns into whatever
+// number this build uses.
+#define FF_BATTERY_ANDROID_JAR "/system/framework/framework.jar"
+#define FF_BATTERY_ANDROID_STUB "Landroid/os/IBatteryPropertiesRegistrar$Stub;"
+#define FF_BATTERY_ANDROID_GET_PROPERTY "TRANSACTION_getProperty"
 
 // BatteryManager.BATTERY_PROPERTY_*
 typedef enum FFBatteryAndroidProperty : uint32_t {
@@ -103,15 +116,8 @@ static void debugDumpReply(const uint8_t* data, size_t size) {
     #define FF_BATTERY_ANDROID_DEBUG_DUMP(data, size) ((void) 0)
 #endif
 
-static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t property, uint64_t* value) {
-    // `getProperty` is the third method declared in `IBatteryPropertiesRegistrar` up to Android 9 and
-    // the first one from Android 10 on. Written as an `if` because clang rejects `__builtin_available`
-    // -- which is what FF_ANDROID_API_AT_LEAST expands to -- in any other position.
-    uint32_t transaction = 3u;
-    if (FF_ANDROID_API_AT_LEAST(29)) {
-        transaction = 1u;
-    }
-    FF_DEBUG("Property %u goes out as transaction %u (3 up to Android 9, 1 from Android 10)", property, transaction);
+static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t transaction, uint32_t property, uint64_t* value) {
+    FF_DEBUG("Property %u goes out as transaction %u", property, transaction);
 
     uint8_t parcelBuffer[128];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
@@ -165,8 +171,23 @@ static const char* getProperty(FFBinder* binder, uint32_t handle, uint32_t prope
 }
 
 static const char* parseBinder(FFlist* results) {
+    // Resolved before the binder is opened, so that a jar which does not declare the method says so
+    // rather than the module failing later with a message about the transport. The reader reports a
+    // code it cannot find by leaving the sentinel in the result and says nothing more -- what a
+    // missing code means for this module is decided here, not there.
+    int32_t transaction = FF_DEX_STATIC_INT_UNRESOLVED;
+    const FFDexStaticIntRequest request = { FF_BATTERY_ANDROID_STUB, FF_BATTERY_ANDROID_GET_PROPERTY, &transaction };
+    const char* error = ffDexStaticInts(FF_BATTERY_ANDROID_JAR, &request, 1);
+    if (error != nullptr) {
+        FF_DEBUG("Reading \"%s\" from \"%s\" failed: %s", FF_BATTERY_ANDROID_GET_PROPERTY, FF_BATTERY_ANDROID_JAR, error);
+        return error;
+    }
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The battery service does not declare getProperty";
+    }
+
     [[gnu::cleanup(ffBinderClose)]] FFBinder binder = { .fd = -1 };
-    const char* error = ffBinderOpen(&binder);
+    error = ffBinderOpen(&binder);
     if (error != nullptr) {
         FF_DEBUG("Opening /dev/binder failed: %s", error);
         return error;
@@ -179,17 +200,17 @@ static const char* parseBinder(FFlist* results) {
         FF_DEBUG("Looking up the \"%s\" service failed: %s", FF_BATTERY_ANDROID_SERVICE, error);
         return error;
     }
-    FF_DEBUG("The \"%s\" service is handle %u", FF_BATTERY_ANDROID_SERVICE, service.handle);
+    FF_DEBUG("The \"%s\" service is handle %u, getProperty is transaction %d", FF_BATTERY_ANDROID_SERVICE, service.handle, transaction);
 
     uint64_t capacity = 0;
-    error = getProperty(&binder, service.handle, FF_BATTERY_ANDROID_PROPERTY_CAPACITY, &capacity);
+    error = getProperty(&binder, service.handle, (uint32_t) transaction, FF_BATTERY_ANDROID_PROPERTY_CAPACITY, &capacity);
     if (error != nullptr) {
         FF_DEBUG("The capacity is what failed, so no battery is reported at all");
         return error;
     }
 
     uint64_t status = 0;
-    error = getProperty(&binder, service.handle, FF_BATTERY_ANDROID_PROPERTY_STATUS, &status);
+    error = getProperty(&binder, service.handle, (uint32_t) transaction, FF_BATTERY_ANDROID_PROPERTY_STATUS, &status);
     if (error != nullptr) {
         FF_DEBUG("The status is what failed, so no battery is reported at all");
         return error;

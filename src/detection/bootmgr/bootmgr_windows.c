@@ -39,10 +39,12 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
         return err;
     }
 
-    GUID efiGlobalGuid;
-    if (!NT_SUCCESS(RtlGUIDFromString(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"{" FF_EFI_GLOBAL_GUID L"}"), &efiGlobalGuid))) {
-        return "RtlGUIDFromString() failed";
-    }
+    GUID efiGlobalGuid = {
+        .Data1 = 0x8be4df61,
+        .Data2 = 0x93ca,
+        .Data3 = 0x11d2,
+        .Data4 = { 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c },
+    };
 
     ULONG size = sizeof(result->order);
     if (!NT_SUCCESS(NtQuerySystemEnvironmentValueEx(&(UNICODE_STRING) RTL_CONSTANT_STRING(L"BootCurrent"), &efiGlobalGuid, &result->order, &size, nullptr))) {

@@ -1,5 +1,6 @@
 #include "wallpaper.h"
 #include "common/android/binder.h"
+#include "common/android/dex.h"
 #include "common/android/package.h"
 #include "common/debug.h"
 #include "common/io.h"
@@ -44,10 +45,20 @@ typedef enum FFWallpaperAndroidWhich : int32_t {
     FF_WALLPAPER_ANDROID_WHICH_LOCK = 2,
 } FFWallpaperAndroidWhich;
 
-// `getWallpaper` is the fourth method of IWallpaperManager$Stub, and the number is read from the
-// device's own framework.jar rather than transcribed from AOSP, because a vendor ROM adds and drops
-// methods as it likes -- this one dropped `getName`, whose code answers UNKNOWN_TRANSACTION here.
-#define FF_WALLPAPER_ANDROID_TRANSACTION_GET_WALLPAPER 4u
+// The jar and the stub class the transaction code is read out of. framework.jar answered on every
+// device measured (Android 11, 13 and 16), so that is the one path and there is no fallback; the
+// stub sits in classes.dex there, which is the entry the lookup tries first.
+#define FF_WALLPAPER_ANDROID_JAR "/system/framework/framework.jar"
+#define FF_WALLPAPER_ANDROID_STUB "Landroid/app/IWallpaperManager$Stub;"
+
+// The method this module calls, by the name of the constant the dex carries for it. `getWallpaper`
+// is the fourth method of IWallpaperManager$Stub, but the number is resolved from the device's own
+// jar rather than written down here: the numbering is a property of the `.aidl` the ROM was built
+// from, and a vendor that inserts a method ahead of this one shifts it, after which a transcribed
+// code reaches a different method or none. Spelling the name out is the whole point -- the lookup
+// turns it into whatever this build uses, and a build that does not declare it says so instead of
+// reaching another method. See common/android/dex.h.
+#define FF_WALLPAPER_ANDROID_GET_WALLPAPER "TRANSACTION_getWallpaper"
 
 // `ffAndroidGetOwnPackage` writes at most this many bytes, terminator included.
 #define FF_WALLPAPER_ANDROID_PACKAGE_SIZE 128
@@ -67,7 +78,7 @@ typedef enum FFWallpaperAndroidWhich : int32_t {
 // being wrong here would fail the detection, not misread it.
 #define FF_WALLPAPER_ANDROID_REPLY_SIZE 512
 
-static const char* getWallpaperFile(FFBinder* binder, uint32_t handle, const char* package, FFWallpaperAndroidWhich which, FFstrbuf* result) {
+static const char* getWallpaperFile(FFBinder* binder, uint32_t handle, const char* package, FFWallpaperAndroidWhich which, int32_t transaction, FFstrbuf* result) {
     uint8_t parcelBuffer[FF_WALLPAPER_ANDROID_PARCEL_SIZE];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
     ffBinderParcelPutInterfaceToken(&parcel, FF_WALLPAPER_ANDROID_DESCRIPTOR);
@@ -81,7 +92,7 @@ static const char* getWallpaperFile(FFBinder* binder, uint32_t handle, const cha
     // TF_ACCEPT_FDS is neither optional nor a hint: a reply carrying a descriptor is only delivered
     // when the request asked for one, and a request that did not is answered with BR_FAILED_REPLY --
     // which reads like a service that is not running rather than like a missing flag.
-    const char* error = ffBinderTransact(binder, handle, FF_WALLPAPER_ANDROID_TRANSACTION_GET_WALLPAPER, TF_ACCEPT_FDS, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, (uint32_t) transaction, TF_ACCEPT_FDS, &parcel, &reply);
 
     // Whatever else happened, a descriptor that did arrive is ours: the kernel installed it in our fd
     // table, and on the paths below that return early nothing else would close it.
@@ -147,8 +158,23 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
         return "Cannot determine the package name of this process";
     }
 
+    // Resolved before the binder is opened, so that a jar which does not declare the method says so
+    // rather than the module failing later with a message about the transport. The reader reports a
+    // code it cannot find by leaving the sentinel in the result and says nothing more -- what a
+    // missing code means for this module is decided here, not there.
+    int32_t transaction = FF_DEX_STATIC_INT_UNRESOLVED;
+    const FFDexStaticIntRequest request = { FF_WALLPAPER_ANDROID_STUB, FF_WALLPAPER_ANDROID_GET_WALLPAPER, &transaction };
+    const char* error = ffDexStaticInts(FF_WALLPAPER_ANDROID_JAR, &request, 1);
+    if (error != nullptr) {
+        FF_DEBUG("Reading \"%s\" from \"%s\" failed: %s", FF_WALLPAPER_ANDROID_GET_WALLPAPER, FF_WALLPAPER_ANDROID_JAR, error);
+        return error;
+    }
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        return "The wallpaper service does not declare getWallpaper";
+    }
+
     [[gnu::cleanup(ffBinderClose)]] FFBinder binder = { .fd = -1 };
-    const char* error = ffBinderOpen(&binder);
+    error = ffBinderOpen(&binder);
     if (error != nullptr) {
         return error;
     }
@@ -160,16 +186,16 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
         FF_DEBUG("Looking up the \"%s\" service failed: %s", FF_WALLPAPER_ANDROID_SERVICE, error);
         return error;
     }
-    FF_DEBUG("The \"%s\" service is handle %u", FF_WALLPAPER_ANDROID_SERVICE, service.handle);
+    FF_DEBUG("The \"%s\" service is handle %u, getWallpaper is transaction %d", FF_WALLPAPER_ANDROID_SERVICE, service.handle, transaction);
 
     // The system wallpaper is what the module means by "the current wallpaper"; the lock screen is a
     // second, separate picture, and is only reported when the system one is not a file -- which is
     // the live-wallpaper case, where a component draws it and there is no image behind it.
-    error = getWallpaperFile(&binder, service.handle, package, FF_WALLPAPER_ANDROID_WHICH_SYSTEM, result);
+    error = getWallpaperFile(&binder, service.handle, package, FF_WALLPAPER_ANDROID_WHICH_SYSTEM, transaction, result);
     if (error == nullptr) {
         return nullptr;
     }
 
     FF_DEBUG("The system wallpaper is not a file (%s), so the lock screen is asked for instead", error);
-    return getWallpaperFile(&binder, service.handle, package, FF_WALLPAPER_ANDROID_WHICH_LOCK, result);
+    return getWallpaperFile(&binder, service.handle, package, FF_WALLPAPER_ANDROID_WHICH_LOCK, transaction, result);
 }

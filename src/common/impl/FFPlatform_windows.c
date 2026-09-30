@@ -2,13 +2,13 @@
 #include "common/io.h"
 #include "common/library.h"
 #include "common/strutil.h"
+#include "common/windows/folders.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/windows/nt.h"
 
 #include <stdalign.h>
 #include <windows.h>
-#include <shlobj.h>
 #include <sddl.h>
 
 #define SECURITY_WIN32 1 // For secext.h
@@ -43,43 +43,27 @@ static void getExePath(FFPlatform* platform) {
     ffStrbufReplaceAllC(&platform->exePath, '\\', '/');
 }
 
-static void getHomeDir(FFPlatform* platform) {
-    PWSTR pPath = nullptr;
-    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_Profile, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-        ffStrbufSetWS(&platform->homeDir, pPath);
-        ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
-        ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
-    } else {
-        ffStrbufSetS(&platform->homeDir, getenv("USERPROFILE"));
-        ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
-        ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
-    }
-    CoTaskMemFree(pPath);
-}
-
 static void getCacheDir(FFPlatform* platform) {
-    PWSTR pPath = nullptr;
-    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-        ffStrbufSetWS(&platform->cacheDir, pPath);
-        ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
-        ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
-    } else {
+    if (!ffGetKnownFolderPath(FF_KNOWN_FOLDER_LOCAL_APP_DATA, &platform->cacheDir)) {
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, "AppData/Local/");
+        return;
     }
-    CoTaskMemFree(pPath);
+
+    ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
+    ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
 }
 
-static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId) {
-    PWSTR pPath = nullptr;
-    if (SUCCEEDED(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
-        CoTaskMemFree(pPath);
-        ffStrbufReplaceAllC(&buffer, '\\', '/');
-        ffStrbufEnsureEndsWithC(&buffer, '/');
-        if (!FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
-            ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
-        }
+static void platformPathAddKnownFolder(FFlist* dirs, FFKnownFolder folder) {
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (!ffGetKnownFolderPath(folder, &buffer)) {
+        return;
+    }
+
+    ffStrbufReplaceAllC(&buffer, '\\', '/');
+    ffStrbufEnsureEndsWithC(&buffer, '/');
+    if (!FF_LIST_CONTAINS(*dirs, &buffer, ffStrbufEqual)) {
+        ffStrbufInitMove(FF_LIST_ADD(FFstrbuf, *dirs), &buffer);
     }
 }
 
@@ -112,9 +96,9 @@ static void getConfigDirs(FFPlatform* platform) {
     }
 
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
-    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_ProgramData);
-    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_RoamingAppData);
-    platformPathAddKnownFolder(&platform->configDirs, &FOLDERID_LocalAppData);
+    platformPathAddKnownFolder(&platform->configDirs, FF_KNOWN_FOLDER_PROGRAM_DATA);
+    platformPathAddKnownFolder(&platform->configDirs, FF_KNOWN_FOLDER_ROAMING_APP_DATA);
+    platformPathAddKnownFolder(&platform->configDirs, FF_KNOWN_FOLDER_LOCAL_APP_DATA);
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
 }
 
@@ -126,9 +110,9 @@ static void getDataDirs(FFPlatform* platform) {
         platformPathAddEnvSuffix(&platform->dataDirs, "MINGW_PREFIX", "share");
     }
     ffPlatformPathAddHome(&platform->dataDirs, platform, ".local/share/");
-    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_ProgramData);
-    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
-    platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
+    platformPathAddKnownFolder(&platform->dataDirs, FF_KNOWN_FOLDER_PROGRAM_DATA);
+    platformPathAddKnownFolder(&platform->dataDirs, FF_KNOWN_FOLDER_ROAMING_APP_DATA);
+    platformPathAddKnownFolder(&platform->dataDirs, FF_KNOWN_FOLDER_LOCAL_APP_DATA);
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
 }
 
@@ -156,9 +140,25 @@ static void getUserName(FFPlatform* platform) {
         TOKEN_USER* tokenUser = (TOKEN_USER*) buf;
         UNICODE_STRING sidString = { .Buffer = buffer, .Length = 0, .MaximumLength = sizeof(buffer) };
         if (NT_SUCCESS(RtlConvertSidToUnicodeString(&sidString, tokenUser->User.Sid, FALSE))) {
-            ffStrbufSetNWS(&platform->sid, sidString.Length / sizeof(wchar_t), sidString.Buffer);
+            uint32_t sidLength = sidString.Length / sizeof(wchar_t);
+            ffStrbufSetNWS(&platform->sid, sidLength, sidString.Buffer);
+
+            // The SID is already in hand, so the profile directory costs one registry read rather
+            // than a second NtQueryInformationToken(). ffGetProfilePath() needs a null-terminated
+            // string, which RtlConvertSidToUnicodeString() does not produce.
+            if (sidLength < ARRAY_SIZE(buffer)) {
+                buffer[sidLength] = L'\0';
+                ffGetProfilePath(buffer, &platform->homeDir);
+            }
         }
     }
+
+    if (platform->homeDir.length == 0) {
+        ffStrbufSetS(&platform->homeDir, getenv("USERPROFILE")); // Last resort; ffGetProfilePath() covers the normal case
+    }
+
+    ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
+    ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
 }
 
 static void getHostName(FFPlatform* platform) {
@@ -280,12 +280,12 @@ void ffPlatformInitImpl(FFPlatform* platform) {
     platform->pid = (uint32_t) (uintptr_t) ffGetTeb()->ClientId.UniqueProcess;
     getExePath(platform);
     getCwd(platform);
-    getHomeDir(platform);
+
+    getUserName(platform);
+
     getCacheDir(platform);
     getConfigDirs(platform);
     getDataDirs(platform);
-
-    getUserName(platform);
     getHostName(platform);
     getUserShell(platform);
 

@@ -92,8 +92,6 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
-cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
@@ -707,6 +705,7 @@ elseif(ANDROID)
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
+        src/detection/sound/sound_android.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -1098,6 +1097,7 @@ elseif(WIN32)
         src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.c
+        src/common/windows/folders.c
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
@@ -1845,14 +1845,6 @@ ff_lib_enable(FREETYPE
     "freetype2"
     "FreeType2"
 )
-ff_lib_enable(PULSE
-    "libpulse"
-    "Pulse"
-)
-ff_lib_enable(DDCUTIL
-    "ddcutil"
-    "Ddcutil"
-)
 ff_lib_enable(ELF
     "libelf"
     "libelf"
@@ -2275,15 +2267,6 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
-    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_executable(fastfetch-test-cpu
-            tests/cpu.c
-        )
-        target_link_libraries(fastfetch-test-cpu
-            PRIVATE libfastfetch
-        )
-    endif()
-
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2397,9 +2380,6 @@ if (BUILD_TESTS)
     )
 
     enable_testing()
-    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_test(NAME test-cpu COMMAND fastfetch-test-cpu)
-    endif()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)

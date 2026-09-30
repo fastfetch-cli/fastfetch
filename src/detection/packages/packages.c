@@ -70,7 +70,142 @@ bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t n
     return ffWriteFileBuffer(cacheDir->chars, cacheContent);
 }
 
-#ifndef _WIN32
+#if __linux__
+#include <sys/syscall.h>
+
+struct linux_dirent64 {
+    uint64_t       d_ino;    /* 64-bit inode number */
+    int64_t        d_off;    /* Not an offset; see getdents() */
+    unsigned short d_reclen; /* Size of this dirent */
+    unsigned char  d_type;   /* File type */
+    char           d_name[]; /* Filename (null-terminated) */
+};
+
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
+    FF_AUTO_CLOSE_FD int fd = open(dirname, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (fd < 0) {
+        return 0;
+    }
+
+    alignas(struct linux_dirent64) uint8_t bytes[64 * 1024];
+
+    uint32_t num_elements = 0;
+    const size_t nameOffset = offsetof(struct linux_dirent64, d_name);
+
+    for (;;) {
+        long bytesRead = syscall(SYS_getdents64, fd, bytes, sizeof(bytes));
+        if (bytesRead < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (bytesRead == 0) {
+            break;
+        }
+
+        size_t remaining = (size_t) bytesRead;
+        struct linux_dirent64* entry = (struct linux_dirent64*) bytes;
+
+        while (remaining >= nameOffset + 1) {
+            bool ok = false;
+            if (entry->d_name[0] != '.') {
+                if (__builtin_expect(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK, true)) {
+                    ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
+                } else {
+                    struct stat stbuf;
+                    if (fstatat(fd, entry->d_name, &stbuf, 0) == 0) {
+                        ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+                    }
+                }
+            }
+
+            num_elements += ok;
+            size_t recordLength = entry->d_reclen;
+            remaining -= recordLength;
+            entry = (struct linux_dirent64*) ((uint8_t*) entry + recordLength);
+        }
+
+        if (remaining != 0) {
+            break;
+        }
+    }
+
+    return num_elements;
+}
+
+#elif __APPLE__
+
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" // syscall
+
+#include <sys/syscall.h>
+
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
+    FF_AUTO_CLOSE_FD int fd = open(dirname, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (fd < 0) {
+        return 0;
+    }
+
+    alignas(struct dirent) uint8_t bytes[64 * 1024];
+    off_t seek = 0;
+    uint32_t num_elements = 0;
+    const size_t nameOffset = offsetof(struct dirent, d_name);
+
+    for (;;) {
+        // getdirentries64 stores its EOF indicator in the final four bytes.
+        uint32_t* eofFlag = (uint32_t*) (bytes + sizeof(bytes) - sizeof(uint32_t));
+        *eofFlag = 0;
+
+        long bytesRead = syscall(SYS_getdirentries64, fd, bytes, sizeof(bytes), &seek);
+        if (bytesRead < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            break;
+        }
+        if (bytesRead == 0 || (size_t) bytesRead > sizeof(bytes)) {
+            break;
+        }
+
+        size_t remaining = (size_t) bytesRead;
+        struct dirent* entry = (struct dirent*) bytes;
+        while (remaining >= nameOffset + 1) {
+            assert(((uintptr_t) entry) % alignof(struct dirent) == 0);
+
+            if (entry->d_reclen < nameOffset + 1 || entry->d_reclen > remaining ||
+                entry->d_namlen >= entry->d_reclen - nameOffset) {
+                remaining = 0;
+                break;
+            }
+
+            const char* name = (const char*) entry + nameOffset;
+            if (entry->d_ino != 0 && name[0] != '.') {
+                bool ok = false;
+                if (__builtin_expect(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK, true)) {
+                    ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
+                } else {
+                    struct stat stbuf;
+                    if (fstatat(fd, name, &stbuf, 0) == 0) {
+                        ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+                    }
+                }
+
+                num_elements += ok;
+            }
+
+            remaining -= entry->d_reclen;
+            entry = (struct dirent*) ((uint8_t*) entry + entry->d_reclen);
+        }
+
+        if ((size_t) bytesRead <= sizeof(bytes) - sizeof(uint32_t) && *eofFlag == 1) {
+            break;
+        }
+    }
+
+    return num_elements;
+}
+
+#elif !_WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
     if (dirp == nullptr) {

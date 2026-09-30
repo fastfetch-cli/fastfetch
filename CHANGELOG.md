@@ -1,3 +1,18 @@
+# Unreleased
+
+Changes:
+* LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
+
+Features:
+* Improved performance of LocalIP, NetIO and DNS on Windows
+* Added Sound detection on Android. (Sound, Android)
+
+Bugfixes:
+* Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
+* Fixed external monitors detected via DDC/CI being randomly reported as built-in, and libddcutil trace messages occasionally leaking into the output and breaking `--format json`. (#2615, Brightness / Linux)
+* Fixed the Vulkan driver name being concatenated with the driver name of a previously enumerated device on systems with more than one GPU. (#2619, Vulkan)
+* Fixed the Foot terminal font size not being parsed when written in the `Font Name-size` syntax, e.g. `Berkeley Mono-12`. (#2624, TerminalFont / Linux)
+
 # 2.69.0
 
 Changes:

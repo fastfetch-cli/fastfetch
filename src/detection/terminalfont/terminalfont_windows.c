@@ -3,13 +3,13 @@
 #include "common/path.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "common/windows/folders.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/strutil.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "terminalfont.h"
 
-#include <shlobj.h>
 #include <windows.h>
 #include <stdlib.h>
 
@@ -225,13 +225,11 @@ static void detectWTProfileFromFragmentsIn(const FFstrbuf* fragmentDir, const FF
 static void detectFromWTFragments(const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
     // Windows Terminal merges the user scoped fragments before the machine scoped ones,
     // so the user scoped fragments are more important
-    static const KNOWNFOLDERID* const fragmentFolderIds[] = { &FOLDERID_LocalAppData, &FOLDERID_ProgramData };
+    static const FFKnownFolder fragmentFolders[] = { FF_KNOWN_FOLDER_LOCAL_APP_DATA, FF_KNOWN_FOLDER_PROGRAM_DATA };
 
-    for (uint32_t i = 0; i < ARRAY_SIZE(fragmentFolderIds); ++i) {
-        PWSTR folderW = nullptr;
-        if (SUCCEEDED(SHGetKnownFolderPath(fragmentFolderIds[i], KF_FLAG_DEFAULT, nullptr, &folderW))) {
-            FF_STRBUF_AUTO_DESTROY fragmentDir = ffStrbufCreateWS(folderW);
-            CoTaskMemFree(folderW);
+    for (uint32_t i = 0; i < ARRAY_SIZE(fragmentFolders); ++i) {
+        FF_STRBUF_AUTO_DESTROY fragmentDir = ffStrbufCreate();
+        if (ffGetKnownFolderPath(fragmentFolders[i], &fragmentDir)) {
             ffStrbufAppendS(&fragmentDir, "\\Microsoft\\Windows Terminal\\Fragments\\");
 
             if (ffPathExists(fragmentDir.chars, FF_PATHTYPE_DIRECTORY)) {
@@ -258,11 +256,7 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
                 error = "Error reading Windows Terminal portable settings JSON file";
             }
         } else {
-            PWSTR localAppDataW = nullptr;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &localAppDataW))) {
-                ffStrbufSetWS(&jsonPath, localAppDataW);
-                CoTaskMemFree(localAppDataW);
-
+            if (ffGetKnownFolderPath(FF_KNOWN_FOLDER_LOCAL_APP_DATA, &jsonPath)) {
                 if (ffStrbufContainIgnCaseS(terminalExe, "_8wekyb3d8bbwe\\")) {
                     // Microsoft Store version
                     if (ffStrbufContainIgnCaseS(terminalExe, ".WindowsTerminalPreview_")) {

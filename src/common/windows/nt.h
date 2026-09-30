@@ -171,9 +171,6 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
     _Out_opt_ PULONG Attributes // EFI_VARIABLE_*
 );
 
-NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
-NTSTATUS NTAPI RtlStringFromGUIDEx(IN const GUID* Guid, OUT PUNICODE_STRING GuidString, IN BOOLEAN AllocateGuidString);
-
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION {
     BOOLEAN SecureBootEnabled;
     BOOLEAN SecureBootCapable;

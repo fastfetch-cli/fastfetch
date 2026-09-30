@@ -5,6 +5,7 @@
 #include <stdalign.h>
 
 #define FF_EFIVARS_PATH_PREFIX "/sys/firmware/efi/efivars/"
+#define FF_EFI_GLOBAL_GUID "8be4df61-93ca-11d2-aa0d-00e098032b8c"
 
 const char* ffDetectBootmgr(FFBootmgrResult* result) {
     alignas(uint16_t) uint8_t buffer[2048];
