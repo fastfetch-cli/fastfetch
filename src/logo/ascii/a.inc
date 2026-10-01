@@ -665,6 +665,18 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_CYAN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARTIX3
+    // Artix3
+    {
+        .names = { "artix3" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ARTIX3,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ARTIX_SMALL
     // ArtixSmall
     {
