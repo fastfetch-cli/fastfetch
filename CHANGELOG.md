@@ -8,6 +8,7 @@ Features:
 * Added Sound detection on Android. (Sound, Android)
 
 Bugfixes:
+* Added pkgsrc package detection on macOS (#2587, Packages, macOS)
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
 * Fixed external monitors detected via DDC/CI being randomly reported as built-in, and libddcutil trace messages occasionally leaking into the output and breaking `--format json`. (#2615, Brightness / Linux)
 * Fixed the Vulkan driver name being concatenated with the driver name of a previously enumerated device on systems with more than one GPU. (#2619, Vulkan)
