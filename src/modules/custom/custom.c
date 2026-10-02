@@ -9,6 +9,7 @@ bool ffPrintCustom(FFCustomOptions* options) {
     return true;
 }
 
+[[gnu::cold]]
 void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }

@@ -515,6 +515,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     return nullptr;
 }
 
+[[gnu::cold]]
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
     yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* obj = yyjson_mut_obj(doc);

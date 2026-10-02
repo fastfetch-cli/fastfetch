@@ -89,6 +89,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }

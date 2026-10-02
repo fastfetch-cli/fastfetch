@@ -285,6 +285,7 @@ bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageMo
     return true;
 }
 
+[[gnu::cold]]
 void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig config) {
     yyjson_mut_val* percent = yyjson_mut_obj_add_obj(doc, module, "percent");
     yyjson_mut_obj_add_uint(doc, percent, "green", config.green);

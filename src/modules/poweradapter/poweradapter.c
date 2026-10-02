@@ -51,6 +51,7 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
     return true;
 }
 
+[[gnu::cold]]
 void ffGeneratePowerAdapterJsonConfig(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }

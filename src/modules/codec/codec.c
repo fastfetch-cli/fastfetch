@@ -186,6 +186,7 @@ void ffParseCodecJsonObject(FFCodecOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateCodecJsonConfig(FFCodecOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "splitGPU", options->splitGPU);

@@ -417,6 +417,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
     return nullptr;
 }
 
+[[gnu::cold]]
 void ffPrintJsonConfig(FFdata* data, bool prepare) {
     yyjson_mut_doc* jsonDoc = data->resultDoc;
     const char* error = printJsonConfig(data, prepare);

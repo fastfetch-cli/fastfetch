@@ -105,6 +105,7 @@ void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_va
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "showEmptySlots", options->showEmptySlots);
