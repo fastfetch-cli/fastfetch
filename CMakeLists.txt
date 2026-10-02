@@ -1946,10 +1946,10 @@ elseif(APPLE)
         PRIVATE "-framework SystemConfiguration"
         PRIVATE "-framework VideoToolbox"
 
-        PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices"
         PRIVATE "-weak_framework MediaRemote"
+        PRIVATE "-weak_framework SkyLight"
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
