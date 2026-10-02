@@ -1,18 +1,26 @@
-# Unreleased
+# 2.70.0
 
 Changes:
 * LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
+* libpulse and libddcutil are no longer used on Linux. Package managers should remove them from their fastfetch package.
+* QuickJS format scripting has been removed (deprecated in v2.69.0). Migrate scripts to Lua if necessary. (General)
 
 Features:
-* Improved performance of LocalIP, NetIO and DNS on Windows
 * Added Sound detection on Android. (Sound, Android)
-* Added battery temperature, remaining time detection and the charger type (AC / USB / wireless) on Android. (Battery, Android)
+* Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
+* Performance improvements & internal cleanups
 
 Bugfixes:
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
-* Fixed external monitors detected via DDC/CI being randomly reported as built-in, and libddcutil trace messages occasionally leaking into the output and breaking `--format json`. (#2615, Brightness / Linux)
-* Fixed the Vulkan driver name being concatenated with the driver name of a previously enumerated device on systems with more than one GPU. (#2619, Vulkan)
-* Fixed the Foot terminal font size not being parsed when written in the `Font Name-size` syntax, e.g. `Berkeley Mono-12`. (#2624, TerminalFont / Linux)
+* Fixed external monitors detected via DDC/CI being randomly reported as built-in on Linux. (#2615, Brightness, Linux)
+* Fixed the Vulkan driver name being concatenated with the name of a previously enumerated device on multi-GPU systems. (#2619, Vulkan)
+* Fixed the foot terminal font size not being parsed when written as `Font Name-size`, e.g. `Berkeley Mono-12`. (#2624, TerminalFont, Linux)
+* Fixed `/boot` being hidden by default on Haiku, where it is the system volume. (Disk, Haiku)
+* Improved Snapdragon X1/X2 model name detection on Linux. (#2625, CPU, Linux)
+
+Logos:
+* Added filled Artix logo (#2631)
+* Renamed PostmarketOS to nura (#2626)
 
 # 2.69.0
 
