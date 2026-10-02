@@ -121,7 +121,6 @@ option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" 
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LUA "Enable lua scripting for format strings" ON)
-option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" OFF)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 option(ENABLE_WCWIDTH "Detect wide-width characters with wcwidth when calculating logo and separator width. Disable for a smaller and slightly faster build, but logos containing CJK/emoji may be measured too narrow and render incorrectly. Such usecases are uncommon." ON)
 set(DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Swap:Disk:LocalIp:Battery:PowerAdapter:Locale:Break:Colors" CACHE STRING "Default module structure for detection")
@@ -1848,11 +1847,6 @@ ff_lib_enable(FREETYPE
 ff_lib_enable(ELF
     "libelf"
     "libelf"
-)
-ff_lib_enable(QUICKJS
-    "qjs"
-    "qjs"
-    "qjs"
 )
 if(ENABLE_LUA)
     # Lua is a special case since its CMake config does not follow the usual pattern

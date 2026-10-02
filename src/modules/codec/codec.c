@@ -79,7 +79,7 @@ static void printCodecLine(const FFCodecOptions* options, uint8_t index, FFstrbu
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
         puts(typesJoined.length ? typesJoined.chars : "None");
     } else {
-        FF_LIST_AUTO_DESTROY typeList = ffListCreate(); // Use list instead of pre-joined string for qjs and lua
+        FF_LIST_AUTO_DESTROY typeList = ffListCreate(); // Use list instead of pre-joined string for lua
         for (FFCodecType type = FF_CODEC_TYPE_H261; type <= FF_CODEC_TYPE_MAX; type <<= 1) {
             if ((types & type) == 0) {
                 continue;

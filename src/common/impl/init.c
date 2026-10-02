@@ -178,9 +178,6 @@ void ffDestroyInstance(void) {
 #if FF_HAVE_LUA
     #include <lua.h>
 #endif
-#if FF_HAVE_QUICKJS
-    #include <quickjs.h>
-#endif
 
 // Must be in a file compiled with the libfastfetch target, because the FF_HAVE* macros are not defined for the executable targets
 void ffListFeatures(void) {
@@ -289,9 +286,6 @@ void ffListFeatures(void) {
 #endif
 #if FF_HAVE_LUA
         LUA_VERSION "\n"
-#endif
-#if FF_HAVE_QUICKJS
-        "QuickJS " FF_STR(QJS_VERSION_MAJOR) "." FF_STR(QJS_VERSION_MINOR) "." FF_STR(QJS_VERSION_PATCH) QJS_VERSION_SUFFIX "\n"
 #endif
         "",
         stdout);
