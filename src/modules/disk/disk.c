@@ -435,6 +435,8 @@ void ffInitDiskOptions(FFDiskOptions* options) {
     ffStrbufInit(&options->folders);
 #if _WIN32 || __APPLE__ || __ANDROID__
     ffStrbufInit(&options->hideFolders);
+#elif __HAIKU__
+    ffStrbufInitS(&options->hideFolders, "/esp"); // /boot on haiku is the system volume
 #else
     ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
 #endif
