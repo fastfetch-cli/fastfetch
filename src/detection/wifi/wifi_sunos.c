@@ -182,8 +182,8 @@ const char* ffDetectWifi(FFlist* result) {
             }
         }
 
-        wl_encryption_t encryption;
-        wl_authmode_t authMode;
+        wl_encryption_t encryption = 0;
+        wl_authmode_t authMode = 0;
         bool haveEncryption = getWifiValue(fd, WL_ENCRYPTION, &encryption, sizeof(encryption), buffer);
         bool haveAuthMode = getWifiValue(fd, WL_AUTH_MODE, &authMode, sizeof(authMode), buffer);
         if (haveEncryption) {
