@@ -51,7 +51,7 @@ static FFBatteryWmiEntry* getBatteryEntry(FFlist* entries, FFlist* results, ULON
     return entry;
 }
 
-static const char* queryWmiAllData(const GUID* guid, const char* guidStr, PWNODE_ALL_DATA* pAllData, ULONG* pBufferSize) {
+static const char* queryWmiAllData(const GUID* guid, [[maybe_unused]] const char* guidStr, PWNODE_ALL_DATA* pAllData, ULONG* pBufferSize) {
     [[gnu::cleanup(ffCloseWmiBlock)]] HANDLE hBlock = nullptr;
     ULONG status = WmiOpenBlock(guid, WMIGUID_QUERY, &hBlock);
     if (status != ERROR_SUCCESS) {
