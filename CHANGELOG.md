@@ -11,6 +11,7 @@ Features:
 * Performance improvements & internal cleanups
 
 Bugfixes:
+* Added pkgsrc package detection on macOS (#2587, Packages, macOS)
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
 * Fixed external monitors detected via DDC/CI being randomly reported as built-in on Linux. (#2615, Brightness, Linux)
 * Fixed the Vulkan driver name being concatenated with the name of a previously enumerated device on multi-GPU systems. (#2619, Vulkan)

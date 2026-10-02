@@ -46,6 +46,9 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
 
         result->macports = getMacPortsPackages(&baseDir);
     }
+    if (FF_PACKAGES_IS_ENABLED(options, PKGSRC)) {
+        result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/opt/pkg/pkgdb", true);
+    }
     if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
         result->nixDefault += ffPackagesGetNix(&baseDir, "/nix/var/nix/profiles/default");
