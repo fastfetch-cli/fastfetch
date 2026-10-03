@@ -127,6 +127,7 @@ FFModuleBaseInfo ffMemoryModuleInfo = {
         .cs = "Paměť",
         .de = "Speicher",
         .es = "Memoria",
+        .fi = "Keskusmuisti",
         .fr = "Mémoire",
         .gl = "Memoria",
         .he = "זיכרון",

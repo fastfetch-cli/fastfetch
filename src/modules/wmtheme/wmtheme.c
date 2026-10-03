@@ -68,6 +68,7 @@ FFModuleBaseInfo ffWMThemeModuleInfo = {
         .cs = "Motiv správce oken",
         .de = "Fenstermanager-Thema",
         .es = "Tema del gestor de ventanas",
+        .fi = "Ikkunointijärjestelmän Teema",
         .fr = "Thème du gestionnaire de fenêtres",
         .gl = "Tema do xestor de xanelas",
         .he = "ערכת נושא של מנהל חלונות",

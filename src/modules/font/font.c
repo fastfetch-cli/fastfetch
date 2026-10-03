@@ -104,6 +104,7 @@ FFModuleBaseInfo ffFontModuleInfo = {
         .cs = "Písmo",
         .de = "Schriftart",
         .es = "Fuente",
+        .fi = "Fontti",
         .fr = "Police",
         .gl = "Fonte",
         .he = "גופן",

@@ -191,6 +191,7 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         .cs = "Využití CPU",
         .de = "CPU-Auslastung",
         .es = "Uso de la CPU",
+        .fi = "Suorittimen Käyttö",
         .fr = "Utilisation du CPU",
         .gl = "Uso da CPU",
         .he = "שימוש במעבד",

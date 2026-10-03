@@ -202,6 +202,7 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         .cs = "Zpool",
         .de = "Zpool",
         .es = "Zpool",
+        .fi = "Zpool",
         .fr = "Zpool",
         .gl = "Zpool",
         .he = "Zpool",

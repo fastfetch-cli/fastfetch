@@ -186,6 +186,7 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         .cs = "Diskové I/O",
         .de = "Festplatten I/O",
         .es = "E/S del disco",
+        .fi = "Levyn I/O",
         .fr = "Entrée/Sortie disque",
         .gl = "E/S do disco",
         .he = "קלט/פלט דיסק",

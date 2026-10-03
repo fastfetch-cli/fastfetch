@@ -136,6 +136,7 @@ FFModuleBaseInfo ffOpenGLModuleInfo = {
         .cs = "OpenGL",
         .de = "OpenGL",
         .es = "OpenGL",
+        .fi = "OpenGL",
         .fr = "OpenGL",
         .gl = "OpenGL",
         .he = "OpenGL",

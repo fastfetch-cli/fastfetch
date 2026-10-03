@@ -445,6 +445,7 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         .cs = "Místní IP",
         .de = "Lokale IP",
         .es = "IP local",
+        .fi = "Paikallinen IP",
         .fr = "IP locale",
         .gl = "IP local",
         .he = "IP מקומי",

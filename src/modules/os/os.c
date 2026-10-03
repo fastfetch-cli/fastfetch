@@ -182,6 +182,7 @@ FFModuleBaseInfo ffOSModuleInfo = {
         .cs = "OS",
         .de = "Betriebssystem",
         .es = "Sistema operativo",
+        .fi = "Käyttöjärjestelmä",
         .fr = "Système d'exploitation",
         .gl = "Sistema operativo",
         .he = "מערכת הפעלה",

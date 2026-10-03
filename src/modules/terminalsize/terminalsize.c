@@ -83,6 +83,7 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
         .cs = "Velikost terminálu",
         .de = "Terminalgröße",
         .es = "Tamaño del terminal",
+        .fi = "Terminaalin Koko",
         .fr = "Taille du terminal",
         .gl = "Tamaño do terminal",
         .he = "גודל טרמינל",

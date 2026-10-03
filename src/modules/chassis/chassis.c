@@ -119,6 +119,7 @@ FFModuleBaseInfo ffChassisModuleInfo = {
         .cs = "Skříň",
         .de = "Gehäuse",
         .es = "Chasis",
+        .fi = "Alusta",
         .fr = "Châssis",
         .gl = "Chasis",
         .he = "מארז",

@@ -69,6 +69,7 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
         case 'cs': return offsetof(FFModuleDisplayName, cs);
         case 'de': return offsetof(FFModuleDisplayName, de);
         case 'es': return offsetof(FFModuleDisplayName, es);
+        case 'fi': return offsetof(FFModuleDisplayName, fi);
         case 'fr': return offsetof(FFModuleDisplayName, fr);
         case 'gl': return offsetof(FFModuleDisplayName, gl);
         case 'he': return offsetof(FFModuleDisplayName, he);

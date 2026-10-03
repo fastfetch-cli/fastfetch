@@ -185,6 +185,7 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         .cs = "Titulek",
         .de = "Titel",
         .es = "Título",
+        .fi = "Otsikko",
         .fr = "Titre",
         .gl = "Título",
         .he = "כותרת",

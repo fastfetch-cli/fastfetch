@@ -189,6 +189,7 @@ FFModuleBaseInfo ffCommandModuleInfo = {
         .cs = "Příkaz",
         .de = "Befehl",
         .es = "Comando",
+        .fi = "Komento",
         .fr = "Commande",
         .gl = "Comando",
         .he = "פקודה",

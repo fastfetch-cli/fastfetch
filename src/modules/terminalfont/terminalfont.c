@@ -112,6 +112,7 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
         .cs = "Písmo terminálu",
         .de = "Terminalschriftart",
         .es = "Fuente del terminal",
+        .fi = "Terminaalin Fontti",
         .fr = "Police du terminal",
         .gl = "Fonte do terminal",
         .he = "גופן טרמינל",

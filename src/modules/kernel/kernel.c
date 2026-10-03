@@ -71,6 +71,7 @@ FFModuleBaseInfo ffKernelModuleInfo = {
         .cs = "Jádro",
         .de = "Kernel",
         .es = "Kernel",
+        .fi = "Ydin",
         .fr = "Kernel",
         .gl = "Kernel",
         .he = "ליבה",

@@ -189,6 +189,7 @@ FFModuleBaseInfo ffUsersModuleInfo = {
         .cs = "Uživatelé",
         .de = "Benutzer",
         .es = "Usuarios",
+        .fi = "Käyttäjät",
         .fr = "Utilisateurs",
         .gl = "Usuarios",
         .he = "משתמשים",

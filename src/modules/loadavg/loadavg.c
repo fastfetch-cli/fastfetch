@@ -165,6 +165,7 @@ FFModuleBaseInfo ffLoadavgModuleInfo = {
         .cs = "Průměrná zátěž",
         .de = "Systemlast",
         .es = "Promedio de carga",
+        .fi = "Kuormituksen Keskiarvo",
         .fr = "Charge moyenne",
         .gl = "Carga media",
         .he = "עומס ממוצע",

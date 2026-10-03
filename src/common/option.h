@@ -21,23 +21,24 @@ typedef struct FFModuleFormatArgList {
 typedef struct FFModuleDisplayName {
     const char* en; // English
 
-    const char* ar; // Arabic
-    const char* cs; // Czech
-    const char* de; // German
-    const char* es; // Spanish
-    const char* fr; // French
-    const char* gl; // Galician
-    const char* he; // Hebrew
-    const char* id; // Indonesian
-    const char* it; // Italian
-    const char* ja; // Japanese
-    const char* ko; // Korean
-    const char* pl; // Polish
-    const char* pt; // (Brazilian) Portuguese
-    const char* ru; // Russian
-    const char* tr; // Turkish
-    const char* uk; // Ukrainian
-    const char* vi; // Vietnamese
+    const char* ar;    // Arabic
+    const char* cs;    // Czech
+    const char* de;    // German
+    const char* es;    // Spanish
+    const char* fi;    // Finnish
+    const char* fr;    // French
+    const char* gl;    // Galician
+    const char* he;    // Hebrew
+    const char* id;    // Indonesian
+    const char* it;    // Italian
+    const char* ja;    // Japanese
+    const char* ko;    // Korean
+    const char* pl;    // Polish
+    const char* pt;    // (Brazilian) Portuguese
+    const char* ru;    // Russian
+    const char* tr;    // Turkish
+    const char* uk;    // Ukrainian
+    const char* vi;    // Vietnamese
     const char* zh_CN; // Simplified Chinese
     const char* zh_TW; // Traditional Chinese
 } FFModuleDisplayName;

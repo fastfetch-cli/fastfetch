@@ -119,6 +119,7 @@ FFModuleBaseInfo ffEditorModuleInfo = {
         .cs = "Editor",
         .de = "Editor",
         .es = "Editor",
+        .fi = "Editori",
         .fr = "Éditeur",
         .gl = "Editor",
         .he = "עורך",

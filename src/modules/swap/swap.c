@@ -192,6 +192,7 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         .cs = "Odkládací prostor",
         .de = "Swap",
         .es = "Swap",
+        .fi = "Swap",
         .fr = "Swap",
         .gl = "Swap",
         .he = "זיכרון החלפה",

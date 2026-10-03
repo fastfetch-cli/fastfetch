@@ -140,6 +140,7 @@ FFModuleBaseInfo ffVulkanModuleInfo = {
         .cs = "Vulkan",
         .de = "Vulkan",
         .es = "Vulkan",
+        .fi = "Vulkan",
         .fr = "Vulkan",
         .gl = "Vulkan",
         .he = "Vulkan",

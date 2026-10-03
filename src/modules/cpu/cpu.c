@@ -260,6 +260,7 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         .cs = "CPU",
         .de = "CPU",
         .es = "CPU",
+        .fi = "Suoritin",
         .fr = "CPU",
         .gl = "CPU",
         .he = "מעבד",

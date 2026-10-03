@@ -440,6 +440,7 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         .cs = "Displej",
         .de = "Anzeige",
         .es = "Pantalla",
+        .fi = "Näyttö",
         .fr = "Écran",
         .gl = "Pantalla",
         .he = "תצוגה",

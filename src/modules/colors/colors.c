@@ -314,6 +314,7 @@ FFModuleBaseInfo ffColorsModuleInfo = {
         .cs = "Barvy",
         .de = "Farben",
         .es = "Colores",
+        .fi = "Värit",
         .fr = "Couleurs",
         .gl = "Cores",
         .he = "צבעים",
