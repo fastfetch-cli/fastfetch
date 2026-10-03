@@ -283,8 +283,10 @@ endif()
 # Release and MinSizeRel drop the symbol table and the unwind metadata; Debug and RelWithDebInfo keep
 # both, so those stay fully debuggable. CMake does not strip MinSizeRel on its own.
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-    # The symbol table is dead weight: 437 KB (16%) of a MinGW build, 91 KB (3%) of a GCC build.
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-s")
+    if(NOT APPLE) # ld: warning: -s is obsolete
+        # The symbol table is dead weight: 437 KB (16%) of a MinGW build, 91 KB (3%) of a GCC build.
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-s")
+    endif()
 
     # Drops .eh_frame / .eh_frame_hdr on ELF (74 KB) and .pdata / .xdata on PE (26 KB). Every C++
     # translation unit here is built with -fno-exceptions -fno-rtti and no source file contains a
