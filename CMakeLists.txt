@@ -292,18 +292,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"
     # backtrace() / gdb / perf / crash-dump stack walking in a release binary.
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-asynchronous-unwind-tables")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-asynchronous-unwind-tables")
-
-    if(NOT WIN32 AND NOT APPLE AND NOT ANDROID)
-        # Drops .rela.dyn (250 KB) and .data.rel.ro (169 KB) on ELF and removes every load-time
-        # relocation, so startup gets faster too. The cost is ASLR, and a distro that builds with
-        # hardening=+all / %_hardened_build passes -fPIE -pie and overrides this anyway.
-        # Skipped on Windows (PE has no PIE, clang warns "-no-pie unused"), on macOS (Mach-O has no
-        # .rela.dyn, and turning PIE off fights the code-signing defaults) and on Android, which
-        # rejects non-PIE executables outright.
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-pie")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-pie")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
-    endif()
 endif()
 
 #######################

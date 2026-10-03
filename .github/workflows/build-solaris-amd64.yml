@@ -28,7 +28,7 @@ jobs:
 
           run: |
             export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
             cmake --build . --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false

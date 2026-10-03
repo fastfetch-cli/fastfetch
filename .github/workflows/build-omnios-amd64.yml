@@ -35,7 +35,7 @@ jobs:
           sudo pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick ninja
 
       - name: CMake configuration
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} .
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
 
       - name: CMake build
         run: cmake --build . --verbose -j4
