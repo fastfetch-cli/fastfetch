@@ -529,6 +529,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         .cs = "Balíčky",
         .de = "Pakete",
         .es = "Paquetes",
+        .fi = "Ohjelmistopaketit",
         .fr = "Paquets",
         .gl = "Paquetes",
         .he = "חבילות",

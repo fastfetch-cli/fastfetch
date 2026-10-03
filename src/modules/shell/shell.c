@@ -98,6 +98,7 @@ FFModuleBaseInfo ffShellModuleInfo = {
         .cs = "Shell",
         .de = "Shell",
         .es = "Shell",
+        .fi = "Komentotulkki",
         .fr = "Shell",
         .gl = "Shell",
         .he = "מעטפת",

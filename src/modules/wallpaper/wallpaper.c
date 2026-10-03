@@ -84,6 +84,7 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
         .cs = "Tapeta",
         .de = "Hintergrundbild",
         .es = "Fondo de pantalla",
+        .fi = "Taustakuva",
         .fr = "Fond d'écran",
         .gl = "Fondo de escritorio",
         .he = "טפט",

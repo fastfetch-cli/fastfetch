@@ -116,6 +116,7 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         .cs = "Přehrávač médií",
         .de = "Medienplayer",
         .es = "Reproductor multimedia",
+        .fi = "Mediasoitin",
         .fr = "Lecteur multimédia",
         .gl = "Reprodutor multimedia",
         .he = "נגן מדיה",

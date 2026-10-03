@@ -232,6 +232,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
         .cs = "Mezipaměť CPU",
         .de = "CPU-Cache",
         .es = "Caché de la CPU",
+        .fi = "Suorittimen Välimuisti",
         .fr = "Cache CPU",
         .gl = "Caché da CPU",
         .he = "מטמון מעבד",

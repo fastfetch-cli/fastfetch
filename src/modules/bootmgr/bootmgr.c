@@ -112,6 +112,7 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
         .cs = "Správce spouštění",
         .de = "Boot-Manager",
         .es = "Gestor de arranque",
+        .fi = "Käynnistyslataaja",
         .fr = "Gestionnaire de démarrage",
         .gl = "Xestor de arranque",
         .he = "מנהל אתחול",

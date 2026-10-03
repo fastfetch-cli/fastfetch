@@ -211,6 +211,7 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
         .cs = "BTRFS",
         .de = "BTRFS",
         .es = "BTRFS",
+        .fi = "BTRFS",
         .fr = "BTRFS",
         .gl = "BTRFS",
         .he = "BTRFS",

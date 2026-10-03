@@ -21,23 +21,24 @@ typedef struct FFModuleFormatArgList {
 typedef struct FFModuleDisplayName {
     const char* en; // English
 
-    const char* ar; // Arabic
-    const char* cs; // Czech
-    const char* de; // German
-    const char* es; // Spanish
-    const char* fr; // French
-    const char* gl; // Galician
-    const char* he; // Hebrew
-    const char* id; // Indonesian
-    const char* it; // Italian
-    const char* ja; // Japanese
-    const char* ko; // Korean
-    const char* pl; // Polish
-    const char* pt; // (Brazilian) Portuguese
-    const char* ru; // Russian
-    const char* tr; // Turkish
-    const char* uk; // Ukrainian
-    const char* vi; // Vietnamese
+    const char* ar;    // Arabic
+    const char* cs;    // Czech
+    const char* de;    // German
+    const char* es;    // Spanish
+    const char* fi;    // Finnish
+    const char* fr;    // French
+    const char* gl;    // Galician
+    const char* he;    // Hebrew
+    const char* id;    // Indonesian
+    const char* it;    // Italian
+    const char* ja;    // Japanese
+    const char* ko;    // Korean
+    const char* pl;    // Polish
+    const char* pt;    // (Brazilian) Portuguese
+    const char* ru;    // Russian
+    const char* tr;    // Turkish
+    const char* uk;    // Ukrainian
+    const char* vi;    // Vietnamese
     const char* zh_CN; // Simplified Chinese
     const char* zh_TW; // Traditional Chinese
 } FFModuleDisplayName;
@@ -62,7 +63,7 @@ typedef struct FFModuleBaseInfo {
     const uint8_t defaultOrder;
 } FFModuleBaseInfo;
 
-typedef enum FFModuleKeyType: uint8_t {
+typedef enum FFModuleKeyType : uint8_t {
     FF_MODULE_KEY_TYPE_NONE = 0,
     FF_MODULE_KEY_TYPE_STRING = 1 << 0,
     FF_MODULE_KEY_TYPE_ICON = 1 << 1,
@@ -126,4 +127,4 @@ typedef struct FFKeyValuePair {
 
 enum { FF_OPTION_MAX_SIZE = 1 << 8 }; // Maximum size of a single option value, used for static allocation
 
-#define FF_MODULE_GET_DISPLAY_NAME(moduleName) (*(const char**) ((uint8_t*) &ff ## moduleName ## ModuleInfo.displayName + instance.config.display.keyLanguage))
+#define FF_MODULE_GET_DISPLAY_NAME(moduleName) (*(const char**) ((uint8_t*) &ff##moduleName##ModuleInfo.displayName + instance.config.display.keyLanguage))

@@ -273,6 +273,7 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         .cs = "Fyzický disk",
         .de = "Physische Festplatte",
         .es = "Disco físico",
+        .fi = "Fyysinen Levy",
         .fr = "Disque physique",
         .gl = "Disco físico",
         .he = "דיסק פיזי",

@@ -140,6 +140,7 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         .cs = "BIOS",
         .de = "BIOS",
         .es = "BIOS",
+        .fi = "BIOS",
         .fr = "BIOS",
         .gl = "BIOS",
         .he = "BIOS",

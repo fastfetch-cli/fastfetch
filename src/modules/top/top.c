@@ -272,6 +272,7 @@ FFModuleBaseInfo ffTopModuleInfo = {
         .cs = "Nejvytíženější procesy",
         .de = "Top-Prozesse",
         .es = "Procesos principales",
+        .fi = "Raskaimmat Prosessit",
         .fr = "Processus principaux",
         .gl = "Procesos principais",
         .he = "התהליכים המובילים",

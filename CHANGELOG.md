@@ -9,6 +9,7 @@ Features:
 * Added Sound detection on Android. (Sound, Android)
 * Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
 * Performance improvements & internal cleanups
+* Added Finnish Language Support
 
 Bugfixes:
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)

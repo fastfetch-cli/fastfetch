@@ -103,6 +103,7 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         .cs = "Verze",
         .de = "Version",
         .es = "Versión",
+        .fi = "Versio",
         .fr = "Version",
         .gl = "Versión",
         .he = "גרסה",

@@ -494,6 +494,7 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         .cs = "GPU",
         .de = "GPU",
         .es = "GPU",
+        .fi = "Grafiikkasuoritin",
         .fr = "GPU",
         .gl = "GPU",
         .he = "מעבד גרפי",

@@ -63,6 +63,7 @@ FFModuleBaseInfo ffCustomModuleInfo = {
         .cs = "Vlastní",
         .de = "Benutzerdefiniert",
         .es = "Personalizado",
+        .fi = "Mukautettu",
         .fr = "Personnalisé",
         .gl = "Personalizado",
         .he = "מותאם אישית",

@@ -129,6 +129,7 @@ FFModuleBaseInfo ffWMModuleInfo = {
         .cs = "Správce oken",
         .de = "Fenstermanager",
         .es = "Gestor de ventanas",
+        .fi = "Ikkunointijärjestelmä",
         .fr = "Gestionnaire de fenêtres",
         .gl = "Xestor de xanelas",
         .he = "מנהל חלונות",

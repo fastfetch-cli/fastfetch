@@ -117,6 +117,7 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
         .cs = "Veřejná IP",
         .de = "Öffentliche IP",
         .es = "IP pública",
+        .fi = "Julkinen IP",
         .fr = "IP publique",
         .gl = "IP pública",
         .he = "IP ציבורי",

@@ -112,6 +112,7 @@ FFModuleBaseInfo ffLMModuleInfo = {
         .cs = "Správce přihlášení",
         .de = "Anmeldemanager",
         .es = "Gestor de inicio de sesión",
+        .fi = "Sisäänkirjautumishallinta",
         .fr = "Gestionnaire de connexion",
         .gl = "Xestor de inicio de sesión",
         .he = "מנהל התחברות",

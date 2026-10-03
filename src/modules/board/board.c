@@ -117,6 +117,7 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         .cs = "Základní deska",
         .de = "Mainboard",
         .es = "Placa base",
+        .fi = "Emolevy",
         .fr = "Carte mère",
         .gl = "Placa base",
         .he = "לוח אם",

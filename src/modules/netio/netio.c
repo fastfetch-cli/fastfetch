@@ -213,6 +213,7 @@ FFModuleBaseInfo ffNetIOModuleInfo = {
         .cs = "Síťové I/O",
         .de = "Netzwerk I/O",
         .es = "E/S de la red",
+        .fi = "Verkon I/O",
         .fr = "E/S réseau",
         .gl = "E/S da rede",
         .he = "קלט/פלט רשת",

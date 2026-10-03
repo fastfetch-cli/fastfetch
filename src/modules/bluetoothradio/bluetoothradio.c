@@ -210,6 +210,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         .cs = "Bluetooth rádio",
         .de = "Bluetooth-Adapter",
         .es = "Adaptador Bluetooth",
+        .fi = "Bluetooth-adapteri",
         .fr = "Adaptateur Bluetooth",
         .gl = "Adaptador Bluetooth",
         .he = "רדיו בלוטות'",

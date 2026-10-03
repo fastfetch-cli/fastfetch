@@ -110,6 +110,7 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         .cs = "Init systém",
         .de = "Init-System",
         .es = "Sistema de inicio",
+        .fi = "Init-järjestelmä",
         .fr = "Système d'init",
         .gl = "Sistema de inicio",
         .he = "מערכת אתחול",

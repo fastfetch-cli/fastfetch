@@ -133,6 +133,7 @@ FFModuleBaseInfo ffSeparatorModuleInfo = {
         .cs = "Oddělovač",
         .de = "Trennlinie",
         .es = "Separador",
+        .fi = "Erotin",
         .fr = "Séparateur",
         .gl = "Separador",
         .he = "מפריד",

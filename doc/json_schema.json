@@ -1125,6 +1125,11 @@
                                 },
                                 {
                                     "type": "string",
+                                    "const": "fi",
+                                    "description": "Finnish"
+                                },
+                                {
+                                    "type": "string",
                                     "const": "fr",
                                     "description": "French"
                                 },
