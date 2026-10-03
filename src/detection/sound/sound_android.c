@@ -259,6 +259,7 @@ static const char* soundAndroidResolveCodes(FFSoundAndroidCodes* codes) {
         return error;
     }
     if (soundAndroidCodesIncomplete(codes)) {
+        FF_DEBUG("The audio service does not declare every method this module calls");
         return "The audio service does not declare every method this module calls";
     }
     return nullptr;
@@ -271,6 +272,7 @@ static const char* soundAndroidResolveCodes(FFSoundAndroidCodes* codes) {
 // release build compiles out -- hence the attribute.
 static const char* soundAndroidCallInt(FFBinder* binder, uint32_t handle, [[maybe_unused]] const char* transactionField, int32_t transaction, bool hasArgument, int32_t argument, int32_t* result) {
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The audio service does not declare that method");
         return "The audio service does not declare that method";
     }
 
@@ -374,6 +376,7 @@ static bool soundAndroidReadString16(const uint8_t* data, size_t size, size_t of
 // is taken from it.
 static const char* soundAndroidCallBtName(FFBinder* binder, uint32_t handle, int32_t transaction, FFstrbuf* result) {
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The audio service does not declare getBtActiveDeviceName");
         return "The audio service does not declare getBtActiveDeviceName";
     }
 
@@ -397,6 +400,7 @@ static const char* soundAndroidCallBtName(FFBinder* binder, uint32_t handle, int
         return "The audio service raised an exception";
     }
     if (!soundAndroidReadString16(reply.data, reply.size, sizeof(int32_t), result)) {
+        FF_DEBUG("The audio service answered a truncated device name");
         return "The audio service answered a truncated device name";
     }
     FF_DEBUG("\"%s\" is transaction %d and answered \"%s\"", FF_SOUND_ANDROID_GET_BT_ACTIVE_DEVICE_NAME, transaction,
@@ -573,6 +577,7 @@ static const char* detectNative(FFSoundOptions* options, FFlist* devices) {
     }
 
     if (name == nullptr) {
+        FF_DEBUG("The audio service selected no output device");
         return "The audio service selected no output device";
     }
 

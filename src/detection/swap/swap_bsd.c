@@ -1,6 +1,9 @@
 #include "swap.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 
+#include <errno.h>
+#include <string.h>
 #include <vm/vm_param.h>
 #include <sys/stat.h>
 #include <sys/param.h>
@@ -26,6 +29,7 @@ const char* ffDetectSwap(FFlist* result) {
     struct xswdev xsws[32];
     size_t size = sizeof(xsws);
     if (sysctlbyname("vm.swap_info_array", xsws, &size, nullptr, 0) < 0) {
+        FF_DEBUG("sysctlbyname(\"vm.swap_info_array\") failed: %s", strerror(errno));
         return "sysctlbyname(\"vm.swap_info_array\") failed";
     }
 
@@ -37,6 +41,7 @@ const char* ffDetectSwap(FFlist* result) {
     }
 
     if (xsws->xsw_version != XSWDEV_VERSION) {
+        FF_DEBUG("xswdev version mismatch");
         return "xswdev version mismatch";
     }
 
@@ -53,6 +58,7 @@ const char* ffDetectSwap(FFlist* result) {
     int mib[16];
     size_t mibsize = ARRAY_SIZE(mib);
     if (sysctlnametomib("vm.swap_info", mib, &mibsize) < 0) {
+        FF_DEBUG("sysctlnametomib(\"vm.swap_info\") failed: %s", strerror(errno));
         return "sysctlnametomib(\"vm.swap_info\") failed";
     }
 
@@ -66,6 +72,7 @@ const char* ffDetectSwap(FFlist* result) {
             break;
         }
         if (xsw.xsw_version != XSWDEV_VERSION) {
+            FF_DEBUG("xswdev version mismatch");
             return "xswdev version mismatch";
         }
 

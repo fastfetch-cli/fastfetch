@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "common/debug.h"
 
 #include <camera/NdkCameraManager.h>
 #include <camera/NdkCameraMetadata.h>
@@ -48,11 +49,13 @@ const char* ffDetectCamera(FFlist* result) {
     // API 24, so linking it unconditionally in CMakeLists.txt is fine on every supported device.
     ACameraManager* manager = ACameraManager_create();
     if (!manager) {
+        FF_DEBUG("ACameraManager_create() failed");
         return "ACameraManager_create() failed";
     }
 
     ACameraIdList* idList = nullptr;
     if (ACameraManager_getCameraIdList(manager, &idList) != ACAMERA_OK || !idList) {
+        FF_DEBUG("ACameraManager_getCameraIdList() failed");
         ACameraManager_delete(manager);
         return "ACameraManager_getCameraIdList() failed";
     }

@@ -1,4 +1,5 @@
 #include "battery.h"
+#include "common/debug.h"
 
 #include <kstat.h>
 
@@ -50,6 +51,7 @@ const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* 
     // https://github.com/illumos/illumos-gate/blob/master/usr/src/cmd/powertop/common/battery.c
     [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
+        FF_DEBUG("kstat_open() failed");
         return "kstat_open() failed";
     }
 
@@ -75,6 +77,7 @@ const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* 
     if (!getUint32(bif, "bif_last_cap", &lastCapacity) ||
         !getUint32(bst, "bst_rem_cap", &remainingCapacity) ||
         !getUint32(bst, "bst_state", &state)) {
+        FF_DEBUG("kstat_data_lookup() failed for bif_last_cap, bst_rem_cap or bst_state");
         return "kstat_data_lookup() failed";
     }
 

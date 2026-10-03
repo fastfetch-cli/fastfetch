@@ -851,6 +851,7 @@ static const char* resolveCodes(FFWifiAndroidCodes* codes) {
         return error;
     }
     if (codes->getConnectionInfo == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The Wifi service does not declare getConnectionInfo");
         return "The Wifi service does not declare getConnectionInfo";
     }
     return nullptr;
@@ -863,6 +864,7 @@ static const char* resolveCodes(FFWifiAndroidCodes* codes) {
 // build compiles out -- hence the attribute.
 static const char* callIntMethod(FFBinder* binder, uint32_t handle, [[maybe_unused]] const char* transactionField, int32_t transaction, int32_t* result) {
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The Wifi service does not declare that method");
         return "The Wifi service does not declare that method";
     }
 
@@ -906,6 +908,7 @@ static const char* callIntMethod(FFBinder* binder, uint32_t handle, [[maybe_unus
 static const char* detectWithBinder(FFlist* result) {
     char package[FF_WIFI_ANDROID_PACKAGE_SIZE];
     if (!ffAndroidGetOwnPackage(package, sizeof(package))) {
+        FF_DEBUG("Cannot determine the package name of this process");
         return "Cannot determine the package name of this process";
     }
 
@@ -983,6 +986,7 @@ static const char* detectWithBinder(FFlist* result) {
     // Nothing was found to report on at all. That is a device without a Wi-Fi interface rather than
     // one with a Wi-Fi that is off, which has a state to print by now.
     if (!connection.upKnown && !connection.connected) {
+        FF_DEBUG("No Wi-Fi interface is present");
         return "No Wi-Fi interface is present";
     }
 

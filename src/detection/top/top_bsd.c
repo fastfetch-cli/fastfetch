@@ -1,5 +1,9 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
+
+#include <errno.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>
@@ -11,6 +15,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, [[maybe_unused]] FFTopTyp
     size_t length;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
 
@@ -18,6 +23,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, [[maybe_unused]] FFTopTyp
     length += length / 8 + sizeof(struct kinfo_proc);
     FF_AUTO_FREE struct kinfo_proc* processes = malloc(length);
     if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}, processes) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));

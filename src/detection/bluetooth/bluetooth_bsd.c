@@ -1,4 +1,5 @@
 #include "bluetooth.h"
+#include "common/debug.h"
 
 #define L2CAP_SOCKET_CHECKED
 #include <bluetooth.h>
@@ -31,6 +32,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
 
     // struct hostent* ent = bt_gethostent();
     if (bt_devenum((void*) enumDev, devices) < 0) {
+        FF_DEBUG("bt_devenum() failed");
         return "bt_devenum() failed";
     }
 

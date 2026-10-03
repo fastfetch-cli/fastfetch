@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "battery.h"
+#include "common/debug.h"
 #include "common/apple/cf_helpers.h"
 #include "common/apple/smc_temps.h"
 
@@ -9,6 +10,7 @@
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
     if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSmartBattery"), &iterator) != kIOReturnSuccess) {
+        FF_DEBUG("IOServiceGetMatchingServices() failed");
         return "IOServiceGetMatchingServices() failed";
     }
 

@@ -1,4 +1,5 @@
 #include "sound.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 
 #include <fcntl.h>
@@ -59,15 +60,18 @@ static void enumerate_props(FFSoundDeviceBundle* bundle, struct sioctl_desc* des
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
     [[gnu::cleanup(close_hdl)]] struct sioctl_hdl* hdl = sioctl_open(SIO_DEVANY, SIOCTL_READ, 0);
     if (!hdl) {
+        FF_DEBUG("sio_open() failed");
         return "sio_open() failed";
     }
 
     FFSoundDeviceBundle bundle = {};
     if (sioctl_ondesc(hdl, (void*) enumerate_props, &bundle) == 0) {
+        FF_DEBUG("sioctl_ondesc() failed");
         return "sioctl_ondesc() failed";
     }
 
     if (bundle.iLevel != bundle.iMute || bundle.iLevel == 0) {
+        FF_DEBUG("Unexpected sioctl_ondesc() result");
         return "Unexpected sioctl_ondesc() result";
     }
 

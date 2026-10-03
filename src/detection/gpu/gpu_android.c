@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -51,5 +52,6 @@ double ffGPUDetectTempFromTZ(void) {
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
     FF_UNUSED(options, gpus);
+    FF_DEBUG("No permission. Fallbacks to Vulkan, OpenCL or OpenGL instead");
     return "No permission. Fallbacks to Vulkan, OpenCL or OpenGL instead";
 }

@@ -488,6 +488,8 @@ static const char* androidResolveCodes(FFMediaAndroidCodes* codes) {
         || codes->getPackageName == FF_DEX_STATIC_INT_UNRESOLVED
         || codes->getMetadata == FF_DEX_STATIC_INT_UNRESOLVED
         || codes->getPlaybackState == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("Unresolved transaction codes: getSessions=%d, getPackageName=%d, getMetadata=%d, getPlaybackState=%d",
+            (int) codes->getSessions, (int) codes->getPackageName, (int) codes->getMetadata, (int) codes->getPlaybackState);
         return "The session service does not declare every method this module calls";
     }
     return nullptr;
@@ -637,6 +639,7 @@ static const char* androidReadMetadataEntry(FFMediaAndroidReader* reader, size_t
 static const char* androidReadMetadataBundle(FFMediaAndroidReader* reader, FFMediaResult* result, const FFBinderReply* reply, FFMediaAndroidCover* cover) {
     int32_t bundleLength = 0;
     if (!androidReadI32(reader, &bundleLength) || bundleLength <= 0) {
+        FF_DEBUG("The metadata bundle length is %d, which cannot hold a bundle", (int) bundleLength);
         return "The metadata bundle is empty";
     }
     const size_t bundleEnd = reader->position + (size_t) bundleLength;
@@ -646,10 +649,12 @@ static const char* androidReadMetadataBundle(FFMediaAndroidReader* reader, FFMed
 
     int32_t magic = 0;
     if (!androidReadI32(reader, &magic) || (uint32_t) magic != FF_MEDIA_ANDROID_BUNDLE_MAGIC) {
+        FF_DEBUG("The metadata magic is 0x%08x instead of 0x%08x", (unsigned) magic, FF_MEDIA_ANDROID_BUNDLE_MAGIC);
         return "The metadata is not a bundle";
     }
     int32_t count = 0;
     if (!androidReadI32(reader, &count)) {
+        FF_DEBUG("The metadata bundle is truncated before its entry count");
         return "The metadata bundle has no entry count";
     }
 
@@ -951,6 +956,7 @@ static const char* androidDetectMediaSession(FFMediaResult* media, bool saveCove
     }
 
     if (tokenCount == 0) {
+        FF_DEBUG("The media_session service returned no session tokens");
         return "No active media session";
     }
 

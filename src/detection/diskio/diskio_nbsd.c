@@ -1,7 +1,11 @@
 #include "diskio.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 #include "common/mallocHelper.h"
+
+#include <errno.h>
+#include <string.h>
 
 #include <sys/iostat.h>
 #include <sys/sysctl.h>
@@ -10,6 +14,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     int mib[] = { CTL_HW, HW_IOSTATS, sizeof(struct io_sysctl) };
     size_t len;
     if (sysctl(mib, ARRAY_SIZE(mib), nullptr, &len, nullptr, 0) < 0) {
+        FF_DEBUG("sysctl({HW_IOSTATS}, nullptr) failed: %s", strerror(errno));
         return "sysctl({HW_IOSTATS}, nullptr) failed";
     }
     uint32_t nDrive = (uint32_t) (len / sizeof(struct io_sysctl));
@@ -17,6 +22,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     FF_AUTO_FREE struct io_sysctl* stats = malloc(len);
 
     if (sysctl(mib, ARRAY_SIZE(mib), stats, &len, nullptr, 0) < 0) {
+        FF_DEBUG("sysctl({HW_IOSTATS}, stats) failed: %s", strerror(errno));
         return "sysctl({HW_IOSTATS}, stats) failed";
     }
 

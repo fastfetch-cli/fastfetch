@@ -1,5 +1,6 @@
 #include "disk.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -285,6 +286,7 @@ static void detectStats(FFDisk* disk) {
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     FILE* mountsFile = setmntent("/proc/mounts", "r");
     if (mountsFile == nullptr) {
+        FF_DEBUG("setmntent(\"/proc/mounts\", \"r\") failed: %s", strerror(errno));
         return "setmntent(\"/proc/mounts\", \"r\") == nullptr";
     }
 

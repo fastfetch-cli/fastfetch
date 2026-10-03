@@ -686,6 +686,7 @@ static bool recvFrame(FFSoundPulseConn* conn) {
 static const char* recvReply(FFSoundPulseConn* conn, uint32_t tag, FFSoundPulseReader* reader) {
     while (true) {
         if (!recvFrame(conn)) {
+            FF_DEBUG("Failed to read the pulseaudio reply to tag %u", tag);
             return "Failed to read a pulseaudio reply";
         }
 
@@ -695,6 +696,7 @@ static const char* recvReply(FFSoundPulseConn* conn, uint32_t tag, FFSoundPulseR
         // Both the command and the tag are tagged u32s, so they must be read as
         // values. Reading four raw bytes here would swallow the 'L' of the tag.
         if (!readU32Value(&frame, &command) || !readU32Value(&frame, &replyTag)) {
+            FF_DEBUG("Malformed pulseaudio reply to tag %u: %u payload bytes", tag, frame.length);
             return "Malformed pulseaudio reply";
         }
 
@@ -707,15 +709,18 @@ static const char* recvReply(FFSoundPulseConn* conn, uint32_t tag, FFSoundPulseR
         if (command == FF_SOUND_PA_COMMAND_ERROR) {
             uint32_t error = 0;
             if (!readU32Value(&frame, &error)) {
+                FF_DEBUG("Malformed pulseaudio error reply to tag %u: %u payload bytes", tag, frame.length);
                 return "Malformed pulseaudio error reply";
             }
 
             FF_DEBUG("The pulseaudio server returned the error %u", error);
             if (error == FF_SOUND_PA_ERROR_ACCESS) {
+                FF_DEBUG("The pulseaudio server denied access to the AUTH request");
                 return "Access to the pulseaudio server was denied";
             }
 
             if (error == FF_SOUND_PA_ERROR_VERSION) {
+                FF_DEBUG("The pulseaudio server rejected our protocol version %u", FF_SOUND_PA_VERSION);
                 return "The pulseaudio server is too old";
             }
 
@@ -723,6 +728,7 @@ static const char* recvReply(FFSoundPulseConn* conn, uint32_t tag, FFSoundPulseR
         }
 
         if (command != FF_SOUND_PA_COMMAND_REPLY) {
+            FF_DEBUG("Unexpected pulseaudio command %u in the reply to tag %u", command, tag);
             return "Unexpected pulseaudio reply";
         }
 
@@ -748,6 +754,7 @@ static const char* handshake(FFSoundPulseConn* conn, FFstrbuf* serverName, FFstr
         putTagArbitrary(&payload, cookie, sizeof(cookie));
 
         if (!sendFrame(conn, &payload, true)) {
+            FF_DEBUG("Failed to send the pulseaudio AUTH request (tag %u)", tag);
             return "Failed to send the pulseaudio AUTH request";
         }
 
@@ -783,6 +790,7 @@ static const char* handshake(FFSoundPulseConn* conn, FFstrbuf* serverName, FFstr
         }
 
         if (!sendFrame(conn, &payload, false)) {
+            FF_DEBUG("Failed to send the pulseaudio SET_CLIENT_NAME request (tag %u)", tag);
             return "Failed to send the pulseaudio SET_CLIENT_NAME request";
         }
 
@@ -800,6 +808,7 @@ static const char* handshake(FFSoundPulseConn* conn, FFstrbuf* serverName, FFstr
         putTagU32(&payload, tag);
 
         if (!sendFrame(conn, &payload, false)) {
+            FF_DEBUG("Failed to send the pulseaudio GET_SERVER_INFO request (tag %u)", tag);
             return "Failed to send the pulseaudio GET_SERVER_INFO request";
         }
 
@@ -1038,6 +1047,7 @@ static const char* fetchSinkList(FFSoundPulseConn* conn, const FFSoundOptions* o
     putTagU32(&payload, tag);
 
     if (!sendFrame(conn, &payload, false)) {
+        FF_DEBUG("Failed to send the pulseaudio GET_SINK_INFO_LIST request (tag %u)", tag);
         return "Failed to send the pulseaudio GET_SINK_INFO_LIST request";
     }
 
@@ -1052,6 +1062,7 @@ static const char* fetchSinkList(FFSoundPulseConn* conn, const FFSoundOptions* o
     while (!reader.error && !readerEof(&reader)) {
         FFSoundPulseSinkInfo sink = {};
         if (!readSinkInfo(&reader, conn, defaultSinkName, &sink)) {
+            FF_DEBUG("Failed to parse a pulseaudio sink at payload offset %u of %u", reader.offset, reader.length);
             return "Failed to parse the pulseaudio sink list";
         }
 
@@ -1067,6 +1078,7 @@ static const char* fetchSinkList(FFSoundPulseConn* conn, const FFSoundOptions* o
     }
 
     if (reader.error) {
+        FF_DEBUG("The pulseaudio sink list ended at payload offset %u of %u", reader.offset, reader.length);
         return "Failed to parse the pulseaudio sink list";
     }
 
@@ -1125,6 +1137,8 @@ ffDetectSound
     }
 
     if (conn.fd < 0) {
+        FF_DEBUG("Failed to connect to the pulseaudio server on %s",
+            defaultSocketPath.length > 0 ? defaultSocketPath.chars : "no known socket path");
         ffStrbufDestroy(&conn.frame);
         return "Failed to connect to the pulseaudio server";
     }

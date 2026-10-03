@@ -1,14 +1,18 @@
 #include "processes.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/memrchr.h"
 #include "common/strutil.h"
+
+#include <string.h>
 
 #define PF_KTHREAD 0x00200000 // defined in kernel include/linux/sched.h
 
 const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (dir == nullptr) {
+        FF_DEBUG("opendir(/proc) failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 

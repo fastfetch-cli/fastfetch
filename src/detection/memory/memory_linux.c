@@ -1,10 +1,12 @@
 #include "memory.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 const char* ffDetectMemory(FFMemoryResult* ram) {
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
     if (nRead < 0) {
+        FF_DEBUG("ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf) failed: %s", strerror(errno));
         return "ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf)";
     }
     buf[nRead] = '\0';
@@ -21,6 +23,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     if ((token = memmem(buf, (size_t) nRead, "MemTotal:", strlen("MemTotal:"))) != nullptr) {
         memTotal = (uint64_t) strtoull(token + strlen("MemTotal:"), nullptr, 10);
     } else {
+        FF_DEBUG("MemTotal not found in /proc/meminfo");
         return "MemTotal not found in /proc/meminfo";
     }
 

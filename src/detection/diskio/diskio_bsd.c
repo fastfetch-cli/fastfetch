@@ -2,6 +2,7 @@
 
 #if __has_include(<libgeom.h>)
 
+    #include "common/debug.h"
     #include "common/strutil.h"
 
     #include <devstat.h>
@@ -11,18 +12,24 @@
     #include <sys/disk.h>
     #include <libgeom.h>
 
+    #include <errno.h>
+    #include <string.h>
+
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     [[gnu::cleanup(geom_deletetree)]] struct gmesh geomTree = {};
     if (geom_gettree(&geomTree) < 0) {
+        FF_DEBUG("geom_gettree() failed: %s", strerror(errno));
         return "geom_gettree() failed";
     }
 
     if (geom_stats_open() < 0) {
+        FF_DEBUG("geom_stats_open() failed: %s", strerror(errno));
         return "geom_stats_open() failed";
     }
 
     void* snap = geom_stats_snapshot_get();
     if (!snap) {
+        FF_DEBUG("geom_stats_snapshot_get() returned null");
         return "geom_stats_snapshot_get() failed";
     }
 
@@ -74,11 +81,15 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
 
 #else
 
+    #include "common/debug.h"
+
     #include <devstat.h>
     #include <memory.h>
+    #include <errno.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     if (checkversion() < 0) {
+        FF_DEBUG("checkversion() failed: %s", strerror(errno));
         return "checkversion() failed";
     }
 
@@ -86,6 +97,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
         .dinfo = (struct devinfo*) calloc(1, sizeof(struct devinfo)),
     };
     if (getdevs(&stats) < 0) {
+        FF_DEBUG("getdevs() failed: %s", strerror(errno));
         return "getdevs() failed";
     }
 

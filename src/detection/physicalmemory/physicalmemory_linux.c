@@ -1,4 +1,5 @@
 #include "physicalmemory.h"
+#include "common/debug.h"
 #include "common/endian.h"
 #include "common/smbios.h"
 
@@ -68,11 +69,13 @@ static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
 const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* result) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("Failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosMemoryDevice* data = (const FFSmbiosMemoryDevice*) (*smbiosTable)[FF_SMBIOS_TYPE_MEMORY_DEVICE];
     if (!data) {
+        FF_DEBUG("Memory device is not found in SMBIOS data");
         return "Memory device is not found in SMBIOS data";
     }
 

@@ -1,6 +1,9 @@
 #include "detection/loadavg/loadavg.h"
+#include "common/debug.h"
 #include "common/io.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/sysinfo.h>
 
 const char* ffDetectLoadavg(double result[3]) {
@@ -22,6 +25,7 @@ const char* ffDetectLoadavg(double result[3]) {
     // getloadavg requires higher ANDROID_API version
     struct sysinfo si;
     if (sysinfo(&si) < 0) {
+        FF_DEBUG("both /proc/loadavg and sysinfo() failed: %s", strerror(errno));
         return "both /proc/loadavg and sysinfo() failed";
     }
 

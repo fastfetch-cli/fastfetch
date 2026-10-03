@@ -6,6 +6,7 @@
 
 #if FF_HAVE_VA || FF_HAVE_VDPAU
 
+    #include "common/debug.h"
     #include "common/library.h"
     #include "common/mallocHelper.h"
     #include "common/strutil.h"
@@ -14,6 +15,7 @@
     #if FF_HAVE_VA
 
         #include <fcntl.h>
+        #include <string.h>
         #include <va/va.h>
 
 typedef struct FFVAData {
@@ -227,6 +229,7 @@ static const char* detectCodecByVaDrm(FFVAData* vaData, FFCodecOptions* options,
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/dev/dri/");
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(/dev/dri/) failed: %s", strerror(errno));
         return "opendir(/dev/dri/) failed";
     }
     int drifd = dirfd(dirp);
@@ -268,11 +271,13 @@ static const char* detectCodecByVaX11(FFVAData* vaData, FFCodecOptions* options,
 
     Display* x11Display = ffXOpenDisplay(nullptr);
     if (!x11Display) {
+        FF_DEBUG("XOpenDisplay() failed");
         return "XOpenDisplay() failed";
     }
 
     VADisplay display = ffvaGetDisplay(x11Display);
     if (!display) {
+        FF_DEBUG("vaGetDisplay() failed");
         ffXCloseDisplay(x11Display);
         return "vaGetDisplay() failed";
     }
@@ -380,14 +385,18 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
 
     Display* x11Display = ffXOpenDisplay(nullptr);
     if (!x11Display) {
+        FF_DEBUG("XOpenDisplay() failed");
         return "XOpenDisplay() failed";
     }
 
     VdpDevice device = VDP_INVALID_HANDLE;
     VdpGetProcAddress* ffvdp_get_proc_address = nullptr;
-    if (ffvdp_device_create_x11(x11Display, ffXDefaultScreen(x11Display), &device, &ffvdp_get_proc_address) != VDP_STATUS_OK ||
+    VdpStatus ffvdp_device_create_x11_status = ffvdp_device_create_x11(x11Display, ffXDefaultScreen(x11Display), &device, &ffvdp_get_proc_address);
+    if (ffvdp_device_create_x11_status != VDP_STATUS_OK ||
         device == VDP_INVALID_HANDLE ||
         ffvdp_get_proc_address == nullptr) {
+        FF_DEBUG("vdp_device_create_x11() failed: status=%d, device=%p, getProcAddress=%p",
+            ffvdp_device_create_x11_status, (void*) device, (void*) ffvdp_get_proc_address);
         ffXCloseDisplay(x11Display);
         return "vdp_device_create_x11() failed";
     }
@@ -398,6 +407,7 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
         ffvdp_get_proc_address(device, VDP_FUNC_ID_DECODER_QUERY_CAPABILITIES, (void**) &ffvdp_decoder_query_capabilities) != VDP_STATUS_OK ||
         ffvdp_device_destroy == nullptr ||
         ffvdp_decoder_query_capabilities == nullptr) {
+        FF_DEBUG("vdp_device_create_x11() did not provide VDP_FUNC_ID_DEVICE_DESTROY / VDP_FUNC_ID_DECODER_QUERY_CAPABILITIES");
         if (ffvdp_device_destroy) {
             ffvdp_device_destroy(device);
         }
@@ -459,6 +469,7 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /* list 
     }
     #endif
 
+    FF_DEBUG("Neither libva nor libvdpau could initialize a display");
     return "Both libva and libvdpau fail to initialize";
 }
 

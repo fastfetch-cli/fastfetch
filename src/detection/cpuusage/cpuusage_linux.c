@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <stdio.h>
@@ -9,6 +10,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData("/proc/stat", ARRAY_SIZE(buf) - 1, buf);
     if (nRead < 0) {
+        FF_DEBUG("Reading \"/proc/stat\" failed: %s", strerror(errno));
 #ifdef __ANDROID__
         return "Accessing \"/proc/stat\" is restricted on Android O+";
 #else
@@ -20,6 +22,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     // Skip first line
     char* start = nullptr;
     if ((start = strchr(buf, '\n')) == nullptr) {
+        FF_DEBUG("skip first line failed");
         return "skip first line failed";
     }
     ++start;

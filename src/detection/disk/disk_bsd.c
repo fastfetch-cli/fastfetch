@@ -1,7 +1,9 @@
 #include "disk.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/strutil.h"
 
+#include <errno.h>
 #include <stdalign.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
@@ -28,16 +30,19 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk) {
     static struct gclass* cLabels;
     if (!cLabels) {
         if (geomTree.lg_ident) {
+            FF_DEBUG("Previous geom_gettree() failed");
             return "Previous geom_gettree() failed";
         }
 
         if (geom_gettree(&geomTree) < 0) {
+            FF_DEBUG("geom_gettree() failed");
             geomTree.lg_ident = (void*) (intptr_t) -1;
             return "geom_gettree() failed";
         }
 
         for (cLabels = geomTree.lg_class.lh_first; cLabels && !ffStrEquals(cLabels->lg_name, "LABEL"); cLabels = cLabels->lg_class.le_next);
         if (!cLabels) {
+            FF_DEBUG("Class LABEL is not found");
             return "Class LABEL is not found";
         }
     }
@@ -129,11 +134,13 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
 #ifndef __NetBSD__
     int size = getfsstat(nullptr, 0, MNT_WAIT);
     if (size <= 0) {
+        FF_DEBUG("getfsstat(nullptr, 0, MNT_WAIT) failed: %s", strerror(errno));
         return "getfsstat(nullptr, 0, MNT_WAIT) failed";
     }
 #else
     int size = getvfsstat(nullptr, 0, ST_WAIT);
     if (size <= 0) {
+        FF_DEBUG("getvfsstat(nullptr, 0, ST_WAIT) failed: %s", strerror(errno));
         return "getvfsstat(nullptr, 0, ST_WAIT) failed";
     }
 #endif
@@ -141,10 +148,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     FF_AUTO_FREE struct statfs* buf = malloc(sizeof(*buf) * (unsigned) size);
 #ifndef __NetBSD__
     if (getfsstat(buf, (int) (sizeof(*buf) * (unsigned) size), MNT_NOWAIT) <= 0) {
+        FF_DEBUG("getfsstat(buf, size, MNT_NOWAIT) failed: %s", strerror(errno));
         return "getfsstat(buf, size, MNT_NOWAIT) failed";
     }
 #else
     if (getvfsstat(buf, sizeof(*buf) * (unsigned) size, ST_NOWAIT) <= 0) {
+        FF_DEBUG("getvfsstat(buf, size, ST_NOWAIT) failed: %s", strerror(errno));
         return "getvfsstat(buf, size, ST_NOWAIT) failed";
     }
 #endif

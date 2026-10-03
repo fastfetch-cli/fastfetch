@@ -1,6 +1,7 @@
 #include "gpu.h"
 #include "common/apple/cf_helpers.h"
 #include "common/apple/smc_temps.h"
+#include "common/debug.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
@@ -58,21 +59,25 @@ static const char* detectFrequency(FFGPUResult* gpu) {
 
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("pmgr"));
     if (!entryDevice) {
+        FF_DEBUG("IOServiceGetMatchingServices() failed");
         return "IOServiceGetMatchingServices() failed";
     }
 
     if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice")) {
+        FF_DEBUG("\"pmgr\" should conform to \"AppleARMIODevice\"");
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
     }
 
     FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states9-sram"), kCFAllocatorDefault, kNilOptions);
     if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID()) {
+        FF_DEBUG("\"voltage-states9-sram\" in \"pmgr\" is not found");
         return "\"voltage-states9-sram\" in \"pmgr\" is not found";
     }
 
     // voltage-states9-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
     CFIndex propLength = CFDataGetLength(freqProperty);
     if (propLength == 0 || propLength % (CFIndex) (sizeof(uint32_t) * 2) != 0) {
+        FF_DEBUG("Invalid \"voltage-states9-sram\" length");
         return "Invalid \"voltage-states9-sram\" length";
     }
 
@@ -101,6 +106,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus) {
         CFMutableDictionaryRef matches = IOServiceMatching(kIOAcceleratorClassName);
         CFDictionaryAddValue(matches, CFSTR("IOMatchCategory"), CFSTR(kIOAcceleratorClassName));
         if (IOServiceGetMatchingServices(MACH_PORT_NULL, matches, &iterator) != kIOReturnSuccess) {
+            FF_DEBUG("IOServiceGetMatchingServices() failed");
             return "IOServiceGetMatchingServices() failed";
         }
     }

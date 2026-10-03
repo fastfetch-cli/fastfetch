@@ -1,4 +1,5 @@
 #include "cpucache.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 #include "common/strutil.h"
 
@@ -6,6 +7,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
     // https://developer.apple.com/documentation/kernel/1387446-sysctlbyname/determining_system_capabilities#3901385
     uint32_t nPerfLevels = (uint32_t) ffSysctlGetInt("hw.nperflevels", 0);
     if (nPerfLevels <= 0) {
+        FF_DEBUG("sysctl(hw.nperflevels) failed");
         return "sysctl(hw.nperflevels) failed";
     }
 

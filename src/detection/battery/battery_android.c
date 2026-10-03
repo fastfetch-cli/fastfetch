@@ -360,6 +360,7 @@ static bool detectStatusFromProperty(uint64_t* status) {
 // back as it came and the caller decides what that is worth. The unit is milliseconds.
 static const char* getTimeRemaining(FFBinder* binder, uint32_t handle, int32_t transaction, int64_t* milliseconds) {
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("computeBatteryTimeRemaining is unresolved in the jar (transaction %d)", (int) transaction);
         return "The battery stats service does not declare computeBatteryTimeRemaining";
     }
 
@@ -540,6 +541,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results) {
         return error;
     }
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("getProperty is unresolved in the jar (transaction %d)", (int) transaction);
         return "The battery service does not declare getProperty";
     }
 

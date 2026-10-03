@@ -146,6 +146,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state) {
     #endif
 #else
     FF_UNUSED(state);
+    FF_DEBUG("TFO support is not available");
     return "TFO support is not available";
 #endif
 }
@@ -593,6 +594,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
 
     if (chunked && !ffNetworkingDecodeChunked(buffer, &headerEnd)) {
+        FF_DEBUG("Failed to decode chunked response");
         return "Failed to decode chunked response";
     }
 

@@ -1,5 +1,6 @@
 #include "physicaldisk.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -11,6 +12,7 @@
 static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(path->chars);
     if (!dir) {
+        FF_DEBUG("opendir(\"%s\") failed: %s", path->chars, strerror(errno));
         return "detectDiskType: opendir() failed";
     }
     uint32_t baseLen = path->length;
@@ -83,6 +85,7 @@ static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFl
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/disk");
     if (!dir) {
+        FF_DEBUG("opendir(\"/dev/disk\") failed: %s", strerror(errno));
         return "opendir(/dev/disk) failed";
     }
 

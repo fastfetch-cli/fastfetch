@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
@@ -8,6 +9,7 @@
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -831,11 +833,13 @@ bool ffCPUQualcommSnapdragonToName(FFstrbuf* name, char* compatibles) {
 static const char* detectPhysicalCores(FFCPUResult* cpu) {
     int dfd = open("/sys/devices/system/cpu/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (dfd < 0) {
+        FF_DEBUG("open(/sys/devices/system/cpu/) failed: %s", strerror(errno));
         return "open(\"/sys/devices/system/cpu/\") failed";
     }
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
     if (!dir) {
+        FF_DEBUG("fdopendir(/sys/devices/system/cpu/) failed: %s", strerror(errno));
         close(dfd);
         return "fdopendir(dfd) failed";
     }

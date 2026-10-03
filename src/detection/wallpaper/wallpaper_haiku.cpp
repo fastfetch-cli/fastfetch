@@ -1,5 +1,6 @@
 extern "C" {
 #include "wallpaper.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 }
 
@@ -18,6 +19,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
     BString path;
 
     if (find_directory(B_DESKTOP_DIRECTORY, &pDesktop) < B_OK) {
+        FF_DEBUG("find_directory(B_DESKTOP_DIRECTORY) failed");
         return "find_directory(B_DESKTOP_DIRECTORY) failed";
     }
 
@@ -46,6 +48,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
     }
 
     if (path.Length() < 1) {
+        FF_DEBUG("Failed to detect the current wallpaper path");
         return "Failed to detect the current wallpaper path";
     }
 

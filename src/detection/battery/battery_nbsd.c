@@ -1,4 +1,5 @@
 #include "battery.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/FFstrbuf.h"
 #include "common/strutil.h"
@@ -17,11 +18,13 @@
 const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* results) {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(_PATH_SYSMON) failed: %s", strerror(errno));
         return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
     }
 
     prop_dictionary_t root = nullptr;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0) {
+        FF_DEBUG("prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed");
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
     }
 

@@ -1,5 +1,6 @@
 extern "C" {
 #include "keyboard.h"
+#include "common/debug.h"
 }
 
 #include <interface/Input.h>
@@ -8,7 +9,9 @@ extern "C" {
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
     BList list;
 
-    if (get_input_devices(&list) != B_OK) {
+    status_t status = get_input_devices(&list);
+    if (status != B_OK) {
+        FF_DEBUG("get_input_devices() failed: %d", (int) status);
         return "get_input_devices() failed";
     }
 

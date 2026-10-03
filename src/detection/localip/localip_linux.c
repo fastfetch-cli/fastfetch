@@ -280,7 +280,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
     struct ifaddrs* ifAddrStruct = nullptr;
     if (getifaddrs(&ifAddrStruct) < 0) {
-        FF_DEBUG("getifaddrs() failed");
+        FF_DEBUG("getifaddrs() failed: %s", strerror(errno));
         return "getifaddrs(&ifAddrStruct) failed";
     }
 

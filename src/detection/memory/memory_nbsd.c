@@ -1,6 +1,9 @@
 #include "memory.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/param.h>
 #include <uvm/uvm_extern.h>
 
@@ -8,6 +11,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     struct uvmexp_sysctl buf;
     size_t length = sizeof(buf);
     if (sysctl((int[]) { CTL_VM, VM_UVMEXP2 }, 2, &buf, &length, nullptr, 0) < 0) {
+        FF_DEBUG("sysctl(CTL_VM, VM_UVMEXP2) failed: %s", strerror(errno));
         return "sysctl(CTL_VM, VM_UVMEXP2) failed";
     }
 

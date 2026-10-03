@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <sys/param.h>
@@ -37,6 +38,7 @@ const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist
             if (errno == ENOENT) {
                 break; // No more /dev/pciN devices
             }
+            FF_DEBUG("open(\"%s\", O_RDONLY | O_CLOEXEC) failed: %s", pciDevPath, strerror(errno));
             return "open(\"/dev/pciN\", O_RDONLY | O_CLOEXEC) failed";
         }
 

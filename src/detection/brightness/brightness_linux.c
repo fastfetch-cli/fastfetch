@@ -206,8 +206,7 @@
 
             FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
             if (fd < 0) {
-                int error = errno;
-                FF_DEBUG("Brightness DDC/CI: failed to open cached bus %d (errno=%d: %s)", device, error, strerror(error));
+                FF_DEBUG("Brightness DDC/CI: failed to open cached bus %d (errno=%d: %s)", device, errno, strerror(errno));
                 continue;
             }
 
@@ -281,6 +280,7 @@ static const char* detectWithBacklight(FFlist* result) {
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(backlightDirPath);
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(\"%s\") failed: %s", backlightDirPath, strerror(errno));
         return "Failed to open `/sys/class/backlight/`";
     }
 
