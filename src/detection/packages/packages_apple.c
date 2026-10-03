@@ -53,4 +53,8 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
         result->nixUser = ffPackagesGetNix(&baseDir, "/.nix-profile");
     }
+    if (FF_PACKAGES_IS_ENABLED(options, PKGSRC)) {
+        ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
+        result->pkgsrc = ffPackagesGetPkgsrc(&baseDir);
+    }
 }
