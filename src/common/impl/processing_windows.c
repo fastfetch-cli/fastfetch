@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/processing.h"
 #include "common/io.h"
@@ -100,6 +101,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         0,
         nullptr);
     if (hChildPipeRead == INVALID_HANDLE_VALUE) {
+        FF_DEBUG("CreateNamedPipeW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateNamedPipeW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
     }
 
@@ -116,6 +118,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         0,
         nullptr);
     if (hChildPipeWrite == INVALID_HANDLE_VALUE) {
+        FF_DEBUG("CreateFileW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
     }
 
@@ -141,7 +144,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         argvToCmdline(argv, &buf);
         uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
         cmdline = malloc(cmdlineBytes);
-        if (!NT_SUCCESS(RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, nullptr, buf.chars, buf.length + 1))) {
+        NTSTATUS status = RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, nullptr, buf.chars, buf.length + 1);
+        if (!NT_SUCCESS(status)) {
+            FF_DEBUG("RtlUTF8ToUnicodeN() failed: %s", ffDebugNtStatus(status));
             return "RtlUTF8ToUnicodeN() failed";
         }
     }
@@ -165,6 +170,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         if (GetLastError() == ERROR_FILE_NOT_FOUND) {
             return "command not found";
         }
+        FF_DEBUG("CreateProcessW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateProcessW() failed";
     }
 
@@ -197,7 +203,9 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
     handle->pid = INVALID_HANDLE_VALUE;
     handle->pipeRead = INVALID_HANDLE_VALUE;
 
-    if (timeout >= 0 && !NT_SUCCESS(NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, nullptr, SynchronizationEvent, FALSE))) {
+    NTSTATUS createStatus = STATUS_SUCCESS;
+    if (timeout >= 0 && !NT_SUCCESS(createStatus = NtCreateEvent(&hReadEvent, EVENT_ALL_ACCESS, nullptr, SynchronizationEvent, FALSE))) {
+        FF_DEBUG("NtCreateEvent() failed: %s", ffDebugNtStatus(createStatus));
         return "NtCreateEvent() failed";
     }
 
@@ -216,7 +224,8 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
             nullptr,
             nullptr);
         if (status == STATUS_PENDING) {
-            switch (NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 })) {
+            NTSTATUS waitStatus = NtWaitForSingleObject(hReadEvent, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) timeout * -10000 });
+            switch (waitStatus) {
                 case STATUS_WAIT_0:
                     status = iosb.Status;
                     break;
@@ -227,6 +236,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
                 }
 
                 default:
+                    FF_DEBUG("NtWaitForSingleObject(hReadEvent) failed: %s", ffDebugNtStatus(waitStatus));
                     terminateChildProcess(hProcess, hChildPipeRead, hReadEvent, &iosb);
                     return "NtWaitForSingleObject(hReadEvent) failed";
             }
@@ -237,6 +247,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
         }
 
         if (!NT_SUCCESS(status)) {
+            FF_DEBUG("NtReadFile(hChildPipeRead) failed: %s", ffDebugNtStatus(status));
             terminateChildProcess(hProcess, hChildPipeRead, nullptr, &iosb);
             return "NtReadFile(hChildPipeRead) failed";
         }
@@ -248,12 +259,15 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
 exit: {
     PROCESS_BASIC_INFORMATION info = {};
     ULONG size;
-    if (NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size))) {
+    NTSTATUS status = NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size);
+    if (NT_SUCCESS(status)) {
         assert(size == sizeof(info));
         if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0) {
+            FF_DEBUG("Child process exited with an error");
             return "Child process exited with an error";
         }
     } else {
+        FF_DEBUG("NtQueryInformationProcess(ProcessBasicInformation) failed: %s", ffDebugNtStatus(status));
         return "NtQueryInformationProcess(ProcessBasicInformation) failed";
     }
 }

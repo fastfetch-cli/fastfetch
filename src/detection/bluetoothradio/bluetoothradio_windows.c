@@ -1,4 +1,5 @@
 #include "bluetoothradio.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/io.h"
 #include "common/windows/unicode.h"
@@ -64,8 +65,10 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         &hRadio);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {
+            FF_DEBUG("No Bluetooth radios found or service disabled");
             return "No Bluetooth radios found or service disabled";
         } else {
+            FF_DEBUG("BluetoothFindFirstRadio() failed: %s", ffDebugWin32Error(GetLastError()));
             return "BluetoothFindFirstRadio() failed";
         }
     }

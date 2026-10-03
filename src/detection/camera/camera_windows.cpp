@@ -1,5 +1,6 @@
 extern "C" {
 #include "camera.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/windows/com.h"
 }
@@ -22,20 +23,26 @@ extern "C" const char* ffDetectCamera([[maybe_unused]] FFlist* result) {
     }
 
     FF_AUTO_RELEASE_COM_OBJECT IMFAttributes* attrs = nullptr;
-    if (FAILED(ffMFCreateAttributes(&attrs, 1))) {
+    HRESULT hr = ffMFCreateAttributes(&attrs, 1);
+    if (FAILED(hr)) {
+        FF_DEBUG("MFCreateAttributes() failed: %s", ffDebugHResult(hr));
         return "MFCreateAttributes() failed";
     }
 
-    if (FAILED(attrs->SetGUID(
+    hr = attrs->SetGUID(
             MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE,
-            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID))) {
+            MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
+    if (FAILED(hr)) {
+        FF_DEBUG("SetGUID(MF_*) failed: %s", ffDebugHResult(hr));
         return "SetGUID(MF_*) failed";
     }
 
     IMFActivate** devices = nullptr;
     uint32_t count;
 
-    if (FAILED(ffMFEnumDeviceSources(attrs, &devices, &count))) {
+    hr = ffMFEnumDeviceSources(attrs, &devices, &count);
+    if (FAILED(hr)) {
+        FF_DEBUG("MFEnumDeviceSources() failed: %s", ffDebugHResult(hr));
         return "MFEnumDeviceSources() failed";
     }
 

@@ -1,4 +1,5 @@
 #include "initsystem.h"
+#include "common/debug.h"
 #include "common/windows/unicode.h"
 #include "common/windows/nt.h"
 #include "common/windows/version.h"
@@ -52,6 +53,7 @@ fallback:
         ULONG size = sizeof(buffer);
         NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, buffer, size, &size);
         if (status != STATUS_INFO_LENGTH_MISMATCH && !NT_SUCCESS(status)) {
+            FF_DEBUG("NtQuerySystemInformation(SystemProcessInformation) failed: %s", ffDebugNtStatus(status));
             return "NtQuerySystemInformation(SystemProcessInformation) failed";
         }
 

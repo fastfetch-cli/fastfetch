@@ -1,4 +1,5 @@
 #include "common/binary.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 #include "common/windows/nt.h"
@@ -17,22 +18,28 @@
 const char* ffBinaryExtractStrings(const char* peFile, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata, uint32_t minLength) {
     FF_AUTO_CLOSE_FD HANDLE hFile = CreateFileA(peFile, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
+        FF_DEBUG("CreateFileA() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateFileA() failed";
     }
 
     FF_AUTO_CLOSE_FD HANDLE hSection = nullptr;
-    if (!NT_SUCCESS(NtCreateSection(&hSection, SECTION_MAP_READ, nullptr, nullptr, PAGE_READONLY, SEC_COMMIT, hFile))) {
+    NTSTATUS status = NtCreateSection(&hSection, SECTION_MAP_READ, nullptr, nullptr, PAGE_READONLY, SEC_COMMIT, hFile);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtCreateSection() failed: %s", ffDebugNtStatus(status));
         return "NtCreateSection() failed";
     }
 
     PVOID base = nullptr;
     SIZE_T viewSize = 0;
-    if (!NT_SUCCESS(NtMapViewOfSection(hSection, NtCurrentProcess(), &base, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY))) {
+    status = NtMapViewOfSection(hSection, NtCurrentProcess(), &base, 0, 0, nullptr, &viewSize, ViewUnmap, 0, PAGE_READONLY);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtMapViewOfSection() failed: %s", ffDebugNtStatus(status));
         return "NtMapViewOfSection() failed";
     }
 
     PIMAGE_NT_HEADERS ntHeaders = RtlImageNtHeader(base);
     if (!ntHeaders) {
+        FF_DEBUG("RtlImageNtHeader() failed");
         NtUnmapViewOfSection(NtCurrentProcess(), base);
         return "RtlImageNtHeader() failed";
     }

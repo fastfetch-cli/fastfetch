@@ -12,6 +12,7 @@
 static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice, FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
     if (hDevice == INVALID_HANDLE_VALUE) {
+        FF_DEBUG("CreateFileW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateFileW() failed";
     }
 

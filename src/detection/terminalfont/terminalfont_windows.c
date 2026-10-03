@@ -1,3 +1,4 @@
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/io.h"
 #include "common/path.h"
@@ -116,6 +117,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc) {
 static const char* detectFromWTSettings(FFstrbuf* content, const FFstrbuf* wtProfileId, FFTerminalFontWT* result) {
     [[gnu::cleanup(wrapYyjsonFree)]] yyjson_doc* doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, nullptr, nullptr);
     if (!doc) {
+        FF_DEBUG("Failed to parse WT JSON config file");
         return "Failed to parse WT JSON config file";
     }
 
@@ -124,6 +126,7 @@ static const char* detectFromWTSettings(FFstrbuf* content, const FFstrbuf* wtPro
 
     yyjson_val* profiles = yyjson_obj_get(root, "profiles");
     if (!profiles) {
+        FF_DEBUG("yyjson_obj_get(root, \"profiles\") failed");
         return "yyjson_obj_get(root, \"profiles\") failed";
     }
 

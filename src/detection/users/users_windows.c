@@ -1,4 +1,5 @@
 #include "users.h"
+#include "common/debug.h"
 #include "common/windows/unicode.h"
 #include "common/time.h"
 
@@ -12,6 +13,7 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users) {
     DWORD level = 1;
 
     if (!WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE, &level, 0, &sessionInfo, &sessionCount)) {
+        FF_DEBUG("WTSEnumerateSessionsExW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE) failed";
     }
 

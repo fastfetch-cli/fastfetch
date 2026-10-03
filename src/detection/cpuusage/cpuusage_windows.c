@@ -10,12 +10,16 @@
 
 static const char* getInfoByNqsi(FFlist* cpuTimes) {
     ULONG size = 0;
-    if (NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr, 0, &size) != STATUS_INFO_LENGTH_MISMATCH) {
+    NTSTATUS status = NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr, 0, &size);
+    if (status != STATUS_INFO_LENGTH_MISMATCH) {
+        FF_DEBUG("NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr) failed: %s", ffDebugNtStatus(status));
         return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, nullptr) failed";
     }
 
     FF_AUTO_FREE SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* pinfo = (SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION*) malloc(size);
-    if (!NT_SUCCESS(NtQuerySystemInformation(SystemProcessorPerformanceInformation, pinfo, size, &size))) {
+    status = NtQuerySystemInformation(SystemProcessorPerformanceInformation, pinfo, size, &size);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtQuerySystemInformation(SystemProcessorPerformanceInformation, size) failed: %s", ffDebugNtStatus(status));
         return "NtQuerySystemInformation(SystemProcessorPerformanceInformation, size) failed";
     }
 
@@ -57,19 +61,24 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
             .Name = PERF_WILDCARD_INSTANCE,
         };
 
-        if (PerfOpenQueryHandle(nullptr, &hQuery) != ERROR_SUCCESS) {
+        DWORD ret = PerfOpenQueryHandle(nullptr, &hQuery);
+        if (ret != ERROR_SUCCESS) {
+            FF_DEBUG("PerfOpenQueryHandle() failed: %s", ffDebugWin32Error(ret));
             PerfCloseQueryHandle(hQuery);
             hQuery = INVALID_HANDLE_VALUE;
             return "PerfOpenQueryHandle() failed";
         }
 
-        if (PerfAddCounters(hQuery, &querySpec.Identifier, sizeof(querySpec)) != ERROR_SUCCESS) {
+        ret = PerfAddCounters(hQuery, &querySpec.Identifier, sizeof(querySpec));
+        if (ret != ERROR_SUCCESS) {
+            FF_DEBUG("PerfAddCounters() failed: %s", ffDebugWin32Error(ret));
             PerfCloseQueryHandle(hQuery);
             hQuery = INVALID_HANDLE_VALUE;
             return "PerfAddCounters() failed";
         }
 
         if (querySpec.Identifier.Status != ERROR_SUCCESS) {
+            FF_DEBUG("PerfAddCounters() reports invalid identifier: %s", ffDebugWin32Error(querySpec.Identifier.Status));
             PerfCloseQueryHandle(hQuery);
             hQuery = INVALID_HANDLE_VALUE;
             return "PerfAddCounters() reports invalid identifier";
@@ -77,35 +86,44 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
     }
 
     if (hQuery == INVALID_HANDLE_VALUE) {
+        FF_DEBUG("Init hQuery failed");
         return "Init hQuery failed";
     }
 
     DWORD dataSize = 0;
-    if (PerfQueryCounterData(hQuery, nullptr, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY) {
+    DWORD ret = PerfQueryCounterData(hQuery, nullptr, 0, &dataSize);
+    if (ret != ERROR_NOT_ENOUGH_MEMORY) {
+        FF_DEBUG("PerfQueryCounterData(nullptr) failed: %s", ffDebugWin32Error(ret));
         return "PerfQueryCounterData(nullptr) failed";
     }
 
     if (dataSize <= sizeof(PERF_DATA_HEADER) + sizeof(PERF_COUNTER_HEADER)) {
+        FF_DEBUG("instance doesn't exist");
         return "instance doesn't exist";
     }
 
     FF_AUTO_FREE PERF_DATA_HEADER* const pDataHeader = (PERF_DATA_HEADER*) malloc(dataSize);
-    if (PerfQueryCounterData(hQuery, pDataHeader, dataSize, &dataSize) != ERROR_SUCCESS) {
+    ret = PerfQueryCounterData(hQuery, pDataHeader, dataSize, &dataSize);
+    if (ret != ERROR_SUCCESS) {
+        FF_DEBUG("PerfQueryCounterData(pDataHeader) failed: %s", ffDebugWin32Error(ret));
         return "PerfQueryCounterData(pDataHeader) failed";
     }
 
     PERF_COUNTER_HEADER* pCounterHeader = (PERF_COUNTER_HEADER*) (pDataHeader + 1);
     if (pCounterHeader->dwType != PERF_COUNTERSET) {
+        FF_DEBUG("Invalid counter type");
         return "Invalid counter type";
     }
 
     PERF_MULTI_COUNTERS* pMultiCounters = (PERF_MULTI_COUNTERS*) (pCounterHeader + 1);
     if (pMultiCounters->dwCounters == 0) {
+        FF_DEBUG("No CPU counters found");
         return "No CPU counters found";
     }
 
     PERF_MULTI_INSTANCES* pMultiInstances = (PERF_MULTI_INSTANCES*) ((BYTE*) pMultiCounters + pMultiCounters->dwSize);
     if (pMultiInstances->dwInstances == 0) {
+        FF_DEBUG("No CPU instances found");
         return "No CPU instances found";
     }
 
@@ -135,6 +153,7 @@ static const char* getInfoByPerflib(FFlist* cpuTimes) {
 
         if (wcschr(instanceName, L'_') == nullptr /* ignore `_Total` */) {
             if (processorUtility == UINT64_MAX) {
+                FF_DEBUG("Counter \"%% Processor Utility\" are not supported");
                 return "Counter \"% Processor Utility\" are not supported";
             }
 

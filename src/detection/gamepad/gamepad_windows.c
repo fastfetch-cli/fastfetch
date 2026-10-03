@@ -1,4 +1,5 @@
 #include "gamepad.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 #include "common/time.h"
@@ -339,13 +340,16 @@ static FFGamepadBatteryKind detectBatteryKind(uint32_t vendorId, uint32_t produc
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
     UINT nDevices = 0;
     if (GetRawInputDeviceList(nullptr, &nDevices, sizeof(RAWINPUTDEVICELIST))) {
+        FF_DEBUG("GetRawInputDeviceList(nullptr) failed: %s", ffDebugWin32Error(GetLastError()));
         return "GetRawInputDeviceList(nullptr) failed";
     }
     if (nDevices == 0) {
+        FF_DEBUG("No HID devices found");
         return "No HID devices found";
     }
     FF_AUTO_FREE RAWINPUTDEVICELIST* pRawInputDeviceList = (RAWINPUTDEVICELIST*) malloc(sizeof(RAWINPUTDEVICELIST) * nDevices);
     if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1) {
+        FF_DEBUG("GetRawInputDeviceList(pRawInputDeviceList) failed: %s", ffDebugWin32Error(GetLastError()));
         return "GetRawInputDeviceList(pRawInputDeviceList) failed";
     }
 

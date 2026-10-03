@@ -1,4 +1,5 @@
 #include "swap.h"
+#include "common/debug.h"
 #include "common/windows/unicode.h"
 
 #include <winternl.h>
@@ -10,7 +11,9 @@ const char* ffDetectSwap(FFlist* result) {
     alignas(SYSTEM_PAGEFILE_INFORMATION) uint8_t buffer[4096];
     ULONG size = sizeof(buffer);
     SYSTEM_PAGEFILE_INFORMATION* pstart = (SYSTEM_PAGEFILE_INFORMATION*) buffer;
-    if (!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size))) {
+    NTSTATUS status = NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtQuerySystemInformation(SystemPagefileInformation, size) failed: %s", ffDebugNtStatus(status));
         return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
     }
 

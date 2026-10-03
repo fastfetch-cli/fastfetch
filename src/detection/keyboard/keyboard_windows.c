@@ -1,6 +1,7 @@
 #define INITGUID
 
 #include "keyboard.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
@@ -13,14 +14,17 @@
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
     UINT nDevices = 0;
     if (GetRawInputDeviceList(nullptr, &nDevices, sizeof(RAWINPUTDEVICELIST))) {
+        FF_DEBUG("GetRawInputDeviceList(nullptr) failed: %s", ffDebugWin32Error(GetLastError()));
         return "GetRawInputDeviceList(nullptr) failed";
     }
     if (nDevices == 0) {
+        FF_DEBUG("No HID devices found");
         return "No HID devices found";
     }
 
     FF_AUTO_FREE RAWINPUTDEVICELIST* pRawInputDeviceList = (RAWINPUTDEVICELIST*) malloc(sizeof(RAWINPUTDEVICELIST) * nDevices);
     if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1) {
+        FF_DEBUG("GetRawInputDeviceList(pRawInputDeviceList) failed: %s", ffDebugWin32Error(GetLastError()));
         return "GetRawInputDeviceList(pRawInputDeviceList) failed";
     }
 

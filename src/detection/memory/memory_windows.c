@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "common/debug.h"
 
 #include "common/windows/nt.h"
 
@@ -6,8 +7,11 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     // Note: GlobalMemoryStatusEx() internally uses SystemMemoryUsageInformation in Win 10
 
     SYSTEM_BASIC_PERFORMANCE_INFORMATION sbpi;
-    if (!NT_SUCCESS(NtQuerySystemInformation(SystemBasicPerformanceInformation, &sbpi, sizeof(sbpi), NULL)))
+    NTSTATUS status = NtQuerySystemInformation(SystemBasicPerformanceInformation, &sbpi, sizeof(sbpi), NULL);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("Failed to query memory information: %s", ffDebugNtStatus(status));
         return "Failed to query memory information";
+    }
 
     uint64_t phyPages =
     #if _WIN64

@@ -198,16 +198,21 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results) {
         ifIndex = (NET_IFINDEX) ffNetifGetDefaultRouteV6()->ifIndex;
     }
     if (!ifIndex) {
+        FF_DEBUG("Failed to detect default route");
         return "Failed to detect default route";
     }
 
     NET_LUID luid;
-    if (ConvertInterfaceIndexToLuid(ifIndex, &luid) != NO_ERROR) {
+    DWORD ret = ConvertInterfaceIndexToLuid(ifIndex, &luid);
+    if (ret != NO_ERROR) {
+        FF_DEBUG("ConvertInterfaceIndexToLuid() failed: %s", ffDebugWin32Error(ret));
         return "ConvertInterfaceIndexToLuid() failed";
     }
 
     GUID guid;
-    if (ConvertInterfaceLuidToGuid(&luid, &guid) != NO_ERROR) {
+    ret = ConvertInterfaceLuidToGuid(&luid, &guid);
+    if (ret != NO_ERROR) {
+        FF_DEBUG("ConvertInterfaceLuidToGuid() failed: %s", ffDebugWin32Error(ret));
         return "ConvertInterfaceLuidToGuid() failed";
     }
 

@@ -1,4 +1,5 @@
 #include "board.h"
+#include "common/debug.h"
 #include "common/smbios.h"
 
 typedef struct [[gnu::packed]] FFSmbiosBaseboard {
@@ -23,11 +24,13 @@ static_assert(offsetof(FFSmbiosBaseboard, ContainedObjectHandles) == 0x0F,
 const char* ffDetectBoard(FFBoardResult* board) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("Baseboard information: failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*smbiosTable)[FF_SMBIOS_TYPE_BASEBOARD_INFO];
     if (!data) {
+        FF_DEBUG("Baseboard information: section is not found in SMBIOS data");
         return "Baseboard information section is not found in SMBIOS data";
     }
 

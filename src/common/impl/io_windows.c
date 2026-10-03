@@ -441,7 +441,9 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     }
 
     while (true) {
-        if (NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 }) != STATUS_WAIT_0) {
+        NTSTATUS status = NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 });
+        if (status != STATUS_WAIT_0) {
+            FF_DEBUG("NtWaitForSingleObject() failed or timeout: %s", ffDebugNtStatus(status));
             SetConsoleMode(hInput, inputMode);
             return "NtWaitForSingleObject() failed or timeout";
         }
@@ -471,7 +473,9 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true) {
         DWORD bytes = 0;
-        if (!ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, nullptr) || bytes == 0) {
+        BOOL readOk = ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, nullptr);
+        if (!readOk || bytes == 0) {
+            FF_DEBUG("ReadFile() %s, bytes=%lu: %s", readOk ? "returned no data" : "failed", bytes, readOk ? "no error" : ffDebugWin32Error(GetLastError()));
             va_end(args);
             return "ReadFile() failed";
         }
@@ -490,6 +494,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
         if (ret <= 0) {
             va_end(args);
+            FF_DEBUG("vsscanf(buffer, format, args) failed: %s", strerror(errno));
             return "vsscanf(buffer, format, args) failed";
         }
         if (ret >= nParams) {

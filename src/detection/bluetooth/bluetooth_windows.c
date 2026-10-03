@@ -1,4 +1,5 @@
 #include "bluetooth.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
@@ -64,6 +65,7 @@ static const char* detectBattery(FFlist* devices) {
     // not in the media class at all, so narrowing the filter would lose it.
     CONFIGRET status = CM_Get_Device_ID_List_SizeW(&idListLength, GUID_DEVCLASS_MEDIA_STRING, CM_GETIDLIST_FILTER_PRESENT);
     if (status != CR_SUCCESS) {
+        FF_DEBUG("CM_Get_Device_ID_List_SizeW failed: %s", ffDebugConfigRet(status));
         return "CM_Get_Device_ID_List_SizeW failed";
     }
 
@@ -73,11 +75,13 @@ static const char* detectBattery(FFlist* devices) {
 
     FF_AUTO_FREE wchar_t* idList = (wchar_t*) malloc((size_t) idListLength * sizeof(wchar_t));
     if (!idList) {
+        FF_DEBUG("malloc() failed");
         return "malloc() failed";
     }
 
     status = CM_Get_Device_ID_ListW(GUID_DEVCLASS_MEDIA_STRING, idList, idListLength, CM_GETIDLIST_FILTER_PRESENT);
     if (status != CR_SUCCESS) {
+        FF_DEBUG("CM_Get_Device_ID_ListW failed: %s", ffDebugConfigRet(status));
         return "CM_Get_Device_ID_ListW failed";
     }
 
@@ -137,6 +141,7 @@ static const char* detectClassic(FFBluetoothOptions* options, FFlist* devices /*
         &btdi);
     if (!hFind) {
         if (GetLastError() != ERROR_NO_MORE_ITEMS) {
+            FF_DEBUG("BluetoothFindFirstDevice() failed: %s", ffDebugWin32Error(GetLastError()));
             return "BluetoothFindFirstDevice() failed";
         }
         // "Nothing found" is not an error here: this search only ever sees BR/EDR devices, and a

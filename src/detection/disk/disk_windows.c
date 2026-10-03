@@ -1,4 +1,5 @@
 #include "disk.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/time.h"
 #include "common/windows/unicode.h"
@@ -12,7 +13,9 @@
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     PROCESS_DEVICEMAP_INFORMATION_EX info = {};
     ULONG size = 0;
-    if (!NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size))) {
+    NTSTATUS status = NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtQueryInformationProcess(ProcessDeviceMap) failed: %s", ffDebugNtStatus(status));
         return "NtQueryInformationProcess(ProcessDeviceMap) failed";
     }
 

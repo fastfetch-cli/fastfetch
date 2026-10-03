@@ -14,8 +14,9 @@ static LPFN_CONNECTEX ConnectEx;
 
 static const char* initWsaData(WSADATA* wsaData) {
     FF_DEBUG("Initializing WinSock");
-    if (WSAStartup(MAKEWORD(2, 2), wsaData) != 0) {
-        FF_DEBUG("WSAStartup() failed");
+    int ret = WSAStartup(MAKEWORD(2, 2), wsaData);
+    if (ret != 0) {
+        FF_DEBUG("WSAStartup() failed: %s", ffDebugWin32Error((DWORD) ret));
         return "WSAStartup() failed";
     }
 
@@ -28,7 +29,7 @@ static const char* initWsaData(WSADATA* wsaData) {
     // Dummy socket needed for WSAIoctl
     SOCKET sockfd = WSASocketW(AF_INET, SOCK_STREAM, 0, nullptr, 0, 0);
     if (sockfd == INVALID_SOCKET) {
-        FF_DEBUG("WSASocketW(AF_INET, SOCK_STREAM) failed");
+        FF_DEBUG("WSASocketW(AF_INET, SOCK_STREAM) failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         WSACleanup();
         return "WSASocketW(AF_INET, SOCK_STREAM) failed";
     }
@@ -36,7 +37,7 @@ static const char* initWsaData(WSADATA* wsaData) {
     DWORD dwBytes;
     GUID guid = WSAID_CONNECTEX;
     if (WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &ConnectEx, sizeof(ConnectEx), &dwBytes, nullptr, nullptr) != 0) {
-        FF_DEBUG("WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed");
+        FF_DEBUG("WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(sockfd);
         WSACleanup();
         return "WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed";
@@ -90,8 +91,9 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     };
 
     wchar_t hostW[256];
-    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(hostW, (ULONG) sizeof(hostW), nullptr, host, (ULONG) strlen(host) + 1))) {
-        FF_DEBUG("Failed to convert host to wide string: %s", host);
+    NTSTATUS status = RtlUTF8ToUnicodeN(hostW, (ULONG) sizeof(hostW), nullptr, host, (ULONG) strlen(host) + 1);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("Failed to convert host to wide string: %s: %s", host, ffDebugNtStatus(status));
         return "Failed to convert host to wide string";
     }
 
@@ -99,14 +101,15 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     _itow(port, portW, 10);
 
     FF_DEBUG("Resolving address: %s:%u (%s)", host, port, state->ipv6 ? "IPv6" : "IPv4");
-    if (GetAddrInfoW(hostW, portW, &hints, &addr) != 0) {
-        FF_DEBUG("GetAddrInfoW() failed");
+    int ret = GetAddrInfoW(hostW, portW, &hints, &addr);
+    if (ret != 0) {
+        FF_DEBUG("GetAddrInfoW() failed: %s", ffDebugWin32Error((DWORD) ret));
         return "GetAddrInfoW() failed";
     }
 
     state->sockfd = WSASocketW(addr->ai_family, addr->ai_socktype, addr->ai_protocol, nullptr, 0, 0);
     if (state->sockfd == INVALID_SOCKET) {
-        FF_DEBUG("WSASocketW() failed");
+        FF_DEBUG("WSASocketW() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         FreeAddrInfoW(addr);
         return "WSASocketW() failed";
     }
@@ -149,8 +152,9 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     // Initialize overlapped structure with WSA event for asynchronous I/O
     state->overlapped = (OVERLAPPED) {};
 
-    if (!NT_SUCCESS(NtCreateEvent(&state->overlapped.hEvent, EVENT_ALL_ACCESS, nullptr, NotificationEvent, FALSE))) {
-        FF_DEBUG("NtCreateEvent() failed");
+    NTSTATUS eventStatus = NtCreateEvent(&state->overlapped.hEvent, EVENT_ALL_ACCESS, nullptr, NotificationEvent, FALSE);
+    if (!NT_SUCCESS(eventStatus)) {
+        FF_DEBUG("NtCreateEvent() failed: %s", ffDebugNtStatus(eventStatus));
         closesocket(state->sockfd);
         FreeAddrInfoW(addr);
         state->sockfd = INVALID_SOCKET;
@@ -417,6 +421,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     }
 
     if (chunked && !ffNetworkingDecodeChunked(buffer, &headerEnd)) {
+        FF_DEBUG("Failed to decode chunked response");
         return "Failed to decode chunked response";
     }
 

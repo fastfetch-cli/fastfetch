@@ -1,5 +1,6 @@
 extern "C" {
 #include "bluetooth.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/percent.h"
 #include "common/strutil.h"
@@ -280,24 +281,32 @@ extern "C" const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* 
     }
 
     FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::Devices::Bluetooth::IBluetoothLEDeviceStatics2>* ledeviceStatics = nullptr;
-    if (FAILED(ffGetActivationFactory<winrt::Windows::Devices::Bluetooth::IBluetoothLEDeviceStatics2>(L"Windows.Devices.Bluetooth.BluetoothLEDevice", &ledeviceStatics)) || !ledeviceStatics) {
+    HRESULT ledeviceHr = ffGetActivationFactory<winrt::Windows::Devices::Bluetooth::IBluetoothLEDeviceStatics2>(L"Windows.Devices.Bluetooth.BluetoothLEDevice", &ledeviceStatics);
+    if (FAILED(ledeviceHr) || !ledeviceStatics) {
+        FF_DEBUG("winrt: RoGetActivationFactory(BluetoothLEDevice) failed: %s", ffDebugHResult(ledeviceHr));
         return "winrt: RoGetActivationFactory(BluetoothLEDevice) failed";
     }
 
     [[gnu::cleanup(ffDeleteHstring)]] HSTRING selector = nullptr;
-    if (FAILED(ledeviceStatics->GetDeviceSelectorFromPairingState(true, reinterpret_cast<void**>(&selector))) || !selector) {
+    HRESULT selectorHr = ledeviceStatics->GetDeviceSelectorFromPairingState(true, reinterpret_cast<void**>(&selector));
+    if (FAILED(selectorHr) || !selector) {
+        FF_DEBUG("winrt: GetDeviceSelectorFromPairingState() failed: %s", ffDebugHResult(selectorHr));
         return "winrt: GetDeviceSelectorFromPairingState() failed";
     }
 
     // Without additional properties the map carries only the eight generic ones, and every AEP key
     // is absent, so the list is not optional.
     FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::Foundation::Collections::IIterable<winrt::hstring>>* properties = nullptr;
-    if (FAILED(ffWinrtCreateHstringIterable(ffBluetoothLeProperties, (uint32_t) ARRAY_SIZE(ffBluetoothLeProperties), &properties)) || !properties) {
+    HRESULT propertiesHr = ffWinrtCreateHstringIterable(ffBluetoothLeProperties, (uint32_t) ARRAY_SIZE(ffBluetoothLeProperties), &properties);
+    if (FAILED(propertiesHr) || !properties) {
+        FF_DEBUG("winrt: building the additional-properties list failed: %s", ffDebugHResult(propertiesHr));
         return "winrt: building the additional-properties list failed";
     }
 
     FF_AUTO_RELEASE_COM_OBJECT abi_t<winrt::Windows::Devices::Enumeration::IDeviceInformationStatics>* enumerationStatics = nullptr;
-    if (FAILED(ffGetActivationFactory<winrt::Windows::Devices::Enumeration::IDeviceInformationStatics>(L"Windows.Devices.Enumeration.DeviceInformation", &enumerationStatics)) || !enumerationStatics) {
+    HRESULT deviceInfoHr = ffGetActivationFactory<winrt::Windows::Devices::Enumeration::IDeviceInformationStatics>(L"Windows.Devices.Enumeration.DeviceInformation", &enumerationStatics);
+    if (FAILED(deviceInfoHr) || !enumerationStatics) {
+        FF_DEBUG("winrt: RoGetActivationFactory(DeviceInformation) failed: %s", ffDebugHResult(deviceInfoHr));
         return "winrt: RoGetActivationFactory(DeviceInformation) failed";
     }
 
@@ -307,6 +316,7 @@ extern "C" const char* ffBluetoothDetectLe(FFBluetoothOptions* options, FFlist* 
     },
         &found);
     if (FAILED(hr) || !found) {
+        FF_DEBUG("winrt: DeviceInformation::FindAllAsync() failed: %s", ffDebugHResult(hr));
         return "winrt: DeviceInformation::FindAllAsync() failed";
     }
 
