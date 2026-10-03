@@ -127,4 +127,4 @@ typedef struct FFKeyValuePair {
 
 enum { FF_OPTION_MAX_SIZE = 1 << 8 }; // Maximum size of a single option value, used for static allocation
 
-#define FF_MODULE_GET_DISPLAY_NAME(moduleName) (*(const char**) ((uint8_t*) &ff##moduleName##ModuleInfo.displayName + instance.config.display.keyLanguage))
+#define FF_MODULE_GET_DISPLAY_NAME(moduleName) (*(const char**) ((uint8_t*) &ff ## moduleName ## ModuleInfo.displayName + instance.config.display.keyLanguage))
