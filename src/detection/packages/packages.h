@@ -14,6 +14,7 @@ typedef struct FFPackagesResult {
     uint32_t choco;
     uint32_t crux;
     uint32_t dpkg;
+    uint32_t emerald;
     uint32_t emerge;
     uint32_t eopkg;
     uint32_t flatpakSystem;
