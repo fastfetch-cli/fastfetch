@@ -1,14 +1,12 @@
 #include "common/android/dex.h"
 #include "common/debug.h"
+#include "common/io.h"
 #include "common/mallocHelper.h"
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #ifdef FF_HAVE_ZLIB
     #include "common/library.h"
@@ -599,29 +597,28 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
 
     [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
 
-    const int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
-    if (fd < 0) {
-        FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
-        return "open(jar) failed";
-    }
+    {
+        FF_AUTO_CLOSE_FD const int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
+        if (fd < 0) {
+            FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
+            return "open(jar) failed";
+        }
 
-    struct stat st = {};
-    const int statStatus = fstat(fd, &st);
-    if (statStatus != 0 || st.st_size <= 0) {
-        FF_DEBUG("fstat(%s) reported %s (%lld bytes)", jarPath,
-            statStatus != 0 ? strerror(errno) : "an empty file", (long long) st.st_size);
-        close(fd);
-        return "fstat(jar) failed";
-    }
-    mapping.mappedSize = (size_t) st.st_size;
-    mapping.mapped = mmap(nullptr, mapping.mappedSize, PROT_READ, MAP_PRIVATE, fd, 0);
-    // The mapping outlives the descriptor, so the descriptor can go either way from here.
-    const int mmapErrno = mapping.mapped == MAP_FAILED ? errno : 0;
-    close(fd);
-    if (mapping.mapped == MAP_FAILED) {
-        FF_DEBUG("mmap(%s, %zu bytes) failed: %s", jarPath, mapping.mappedSize, strerror(mmapErrno));
-        mapping.mapped = nullptr;
-        return "mmap(jar) failed";
+        struct stat st = {};
+        const int statStatus = fstat(fd, &st);
+        if (statStatus != 0 || st.st_size <= 0) {
+            FF_DEBUG("fstat(%s) reported %s (%lld bytes)", jarPath,
+                statStatus != 0 ? strerror(errno) : "an empty file", (long long) st.st_size);
+            return "fstat(jar) failed";
+        }
+        mapping.mappedSize = (size_t) st.st_size;
+        mapping.mapped = mmap(nullptr, mapping.mappedSize, PROT_READ, MAP_PRIVATE, fd, 0);
+        // The mapping outlives the descriptor, so the descriptor can go either way from here.
+        if (mapping.mapped == MAP_FAILED) {
+            FF_DEBUG("mmap(%s, %zu bytes) failed: %s", jarPath, mapping.mappedSize, strerror(errno));
+            mapping.mapped = nullptr;
+            return "mmap(jar) failed";
+        }
     }
 
     // One byte per request saying whether it is closed -- answered, or given up on -- and the type

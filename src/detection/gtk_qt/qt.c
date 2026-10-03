@@ -1,7 +1,9 @@
 #include "fastfetch.h"
 #include "common/properties.h"
+#include "common/io.h"
 #include "common/strutil.h"
 #include "common/FFcache.h"
+#include "common/mallocHelper.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 
@@ -24,12 +26,12 @@ typedef enum PlasmaCategory: uint8_t {
 } PlasmaCategory;
 
 static bool detectPlasmaFromFile(const char* filename, FFQtResult* result) {
-    FILE* kdeglobals = fopen(filename, "r");
+    FF_AUTO_CLOSE_FILE FILE* kdeglobals = fopen(filename, "r");
     if (kdeglobals == nullptr) {
         return false;
     }
 
-    char* line = nullptr;
+    FF_AUTO_FREE char* line = nullptr;
     size_t len = 0;
 
     PlasmaCategory category = PLASMA_CATEGORY_OTHER;
@@ -71,10 +73,6 @@ static bool detectPlasmaFromFile(const char* filename, FFQtResult* result) {
             }
         }
     }
-
-    free(line);
-
-    fclose(kdeglobals);
 
     return true;
 }

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stddef.h>
+#include "fastfetch.h"
 
 // The one package name the shell UID owns. android.os.Process.SHELL_UID is a single app UID that
 // owns exactly one package, so a process that cannot derive a package of its own -- a static build

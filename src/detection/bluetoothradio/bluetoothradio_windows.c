@@ -74,9 +74,11 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
     }
 
     do {
+        FF_AUTO_CLOSE_FD HANDLE hCurrent = hRadio;
+
         BTH_LOCAL_RADIO_INFO blri;
         DWORD returned;
-        if (!DeviceIoControl(hRadio, IOCTL_BTH_GET_LOCAL_INFO, nullptr, 0, &blri, sizeof(blri), &returned, nullptr)) {
+        if (!DeviceIoControl(hCurrent, IOCTL_BTH_GET_LOCAL_INFO, nullptr, 0, &blri, sizeof(blri), &returned, nullptr)) {
             continue;
         }
 
@@ -90,10 +92,8 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         device->lmpSubversion = blri.radioInfo.lmpSubversion;
         ffStrbufInitStatic(&device->vendor, ffBluetoothRadioGetVendor(blri.radioInfo.mfg));
         device->enabled = true;
-        device->connectable = ffBluetoothIsConnectable(hRadio);
-        device->discoverable = ffBluetoothIsDiscoverable(hRadio);
-
-        NtClose(hRadio);
+        device->connectable = ffBluetoothIsConnectable(hCurrent);
+        device->discoverable = ffBluetoothIsDiscoverable(hCurrent);
     } while (ffBluetoothFindNextRadio(hFind, &hRadio));
 
     ffBluetoothFindRadioClose(hFind);

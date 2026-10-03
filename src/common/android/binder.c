@@ -1,5 +1,6 @@
 #include "common/android/binder.h"
 #include "common/debug.h"
+#include "common/io.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -9,7 +10,7 @@
 const char* ffBinderOpen(FFBinder* binder) {
     *binder = (FFBinder) { .fd = -1, .shared = nullptr, .sharedSize = 0, .protocolVersion = 0 };
 
-    const int fd = open(FF_BINDER_DEVICE, O_RDWR | O_CLOEXEC);
+    FF_AUTO_CLOSE_FD int fd = open(FF_BINDER_DEVICE, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
         FF_DEBUG("open(" FF_BINDER_DEVICE ") failed: %s", strerror(errno));
         return "Failed to open " FF_BINDER_DEVICE;
@@ -21,7 +22,6 @@ const char* ffBinderOpen(FFBinder* binder) {
         FF_DEBUG("BINDER_VERSION reported protocol %u, expected %u (%s)",
             version.protocol_version, BINDER_CURRENT_PROTOCOL_VERSION,
             versionIoctl != 0 ? strerror(errno) : "version mismatch");
-        close(fd);
         return "Unsupported binder protocol version";
     }
 
@@ -30,7 +30,6 @@ const char* ffBinderOpen(FFBinder* binder) {
     void* shared = mmap(nullptr, FF_BINDER_SHARED_SIZE, PROT_READ, MAP_PRIVATE | MAP_NORESERVE, fd, 0);
     if (shared == MAP_FAILED) {
         FF_DEBUG("mmap(" FF_BINDER_DEVICE ") failed: %s", strerror(errno));
-        close(fd);
         return "Failed to mmap " FF_BINDER_DEVICE;
     }
 
@@ -40,6 +39,7 @@ const char* ffBinderOpen(FFBinder* binder) {
         .sharedSize = FF_BINDER_SHARED_SIZE,
         .protocolVersion = version.protocol_version,
     };
+    fd = -1; // ownership moved into *binder, which ffBinderClose() lets go
     return nullptr;
 }
 

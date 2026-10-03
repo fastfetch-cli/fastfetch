@@ -43,23 +43,29 @@ extern char** environ;
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static inline int ffPipe2(int* fds, int flags) {
+static inline int ffPipe2(int* readEnd, int* writeEnd, int flags) {
+    int fds[2];
 #ifndef FF_HAVE_PIPE2
     if (pipe(fds) == -1) {
         return -1;
     }
     fcntl(fds[0], F_SETFL, fcntl(fds[0], F_GETFL) | flags);
     fcntl(fds[1], F_SETFL, fcntl(fds[1], F_GETFL) | flags);
-    return 0;
 #else
-    return pipe2(fds, flags);
+    if (pipe2(fds, flags) == -1) {
+        return -1;
+    }
 #endif
+    *readEnd = fds[0];
+    *writeEnd = fds[1];
+    return 0;
 }
 
 // Not thread-safe
 const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
-    int pipes[2];
-    if (ffPipe2(pipes, O_CLOEXEC) == -1) {
+    FF_AUTO_CLOSE_FD int pipeRead = -1;
+    FF_AUTO_CLOSE_FD int pipeWrite = -1;
+    if (ffPipe2(&pipeRead, &pipeWrite, O_CLOEXEC) == -1) {
         FF_DEBUG("pipe() failed: %s", strerror(errno));
         return "pipe() failed";
     }
@@ -77,7 +83,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     posix_spawn_file_actions_t file_actions;
     posix_spawn_file_actions_init(&file_actions);
-    posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, pipeWrite, useStdErr ? STDERR_FILENO : STDOUT_FILENO);
     posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
     if (ffIsValidNativeFD(stdinFd)) {
         posix_spawn_file_actions_adddup2(&file_actions, stdinFd, STDIN_FILENO);
@@ -126,8 +132,6 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     if (ret != 0) {
         FF_DEBUG("posix_spawnp() failed: %s", strerror(ret));
-        close(pipes[0]);
-        close(pipes[1]);
         if (ret == ENOENT) {
             return "command not found";
         }
@@ -140,14 +144,12 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
     childPid = fork();
     if (childPid == -1) {
         FF_DEBUG("fork() failed: %s", strerror(errno));
-        close(pipes[0]);
-        close(pipes[1]);
         return "fork() failed";
     }
 
     if (childPid == 0) {
         // Child process
-        dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+        dup2(pipeWrite, useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         if (ffIsValidNativeFD(stdinFd)) {
             dup2(stdinFd, STDIN_FILENO);
@@ -159,9 +161,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
 #endif
 
-    close(pipes[1]);
     outHandle->pid = childPid;
-    outHandle->pipeRead = pipes[0];
+    outHandle->pipeRead = pipeRead;
+    pipeRead = -1; // ownership moved into outHandle, which ffProcessReadOutput() lets go
     return nullptr;
 }
 
