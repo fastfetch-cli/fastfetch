@@ -63,7 +63,7 @@ typedef struct FFModuleBaseInfo {
     const uint8_t defaultOrder;
 } FFModuleBaseInfo;
 
-typedef enum FFModuleKeyType : uint8_t {
+typedef enum FFModuleKeyType: uint8_t {
     FF_MODULE_KEY_TYPE_NONE = 0,
     FF_MODULE_KEY_TYPE_STRING = 1 << 0,
     FF_MODULE_KEY_TYPE_ICON = 1 << 1,
