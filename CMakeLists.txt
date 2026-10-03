@@ -474,6 +474,7 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 
 set(LIBFASTFETCH_SRC
     src/common/impl/commandoption.c
+    src/common/impl/debug.c
     src/common/impl/duration.c
     src/common/impl/font.c
     src/common/impl/format.c
@@ -1106,7 +1107,6 @@ elseif(WIN32)
         src/common/impl/processing_windows.c
         src/common/impl/FFPlatform_windows.c
         src/common/impl/binary_windows.c
-        src/common/impl/debug_windows.c
         src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.c

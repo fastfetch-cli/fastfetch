@@ -1,8 +1,50 @@
-#include "common/debug.h"
-#include "common/windows/nt.h"
+#include <errno.h>
 
-#include <windows.h>
-#include <cfgmgr32.h>
+#ifndef NDEBUG
+
+    #include "common/debug.h"
+    #include "common/thread.h"
+
+[[gnu::nonnull(1), gnu::pure, gnu::always_inline, nodiscard]]
+static inline const char* ffFindFileName(const char* file) {
+    const char* lastSlash = __builtin_strrchr(file, '/');
+    #ifdef _WIN32
+    if (lastSlash == nullptr) {
+        lastSlash = __builtin_strrchr(file, '\\');
+    }
+    #endif
+    if (lastSlash != nullptr) {
+        return lastSlash + 1;
+    }
+    return file;
+}
+
+#if __GNUC__ && !__clang__
+[[gnu::optimize("O2")]]
+#endif
+void ffDebugPrint(const char* file, int line, const char* format, ...) {
+    if (!instance.config.display.debugMode) {
+        return;
+    }
+
+    static FFThreadMutex debugMutex = FF_THREAD_MUTEX_INITIALIZER;
+    ffThreadMutexLock(&debugMutex);
+    int errno_ = errno;
+    static char errmsg_[1024];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(errmsg_, sizeof(errmsg_), format, args);
+    va_end(args);
+    fprintf(stderr, "[%s%4d, %s] %s\n", ffFindFileName(file), line, ffTimeToTimeStr(ffTimeGetNow()), errmsg_);
+    errno = errno_;
+    ffThreadMutexUnlock(&debugMutex);
+}
+
+    #if _WIN32
+        #include "common/windows/nt.h"
+
+        #include <windows.h>
+        #include <cfgmgr32.h>
 
 const char* ffDebugWin32Error(DWORD errorCode) {
     static char buffer[512];
@@ -58,3 +100,6 @@ static inline DWORD HRESULTToWin32Error(HRESULT hr) {
 const char* ffDebugHResult(HRESULT hr) {
     return ffDebugWin32Error(HRESULTToWin32Error(hr));
 }
+    #endif
+
+#endif

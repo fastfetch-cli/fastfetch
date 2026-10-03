@@ -1,10 +1,10 @@
 #define INITGUID
 
 #include "battery.h"
-#include "common/endian.h"
-
 #include "common/debug.h"
+#include "common/endian.h"
 #include "common/mallocHelper.h"
+#include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 #include "common/windows/wmi.h"
 
