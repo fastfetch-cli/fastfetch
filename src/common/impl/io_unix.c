@@ -1,5 +1,6 @@
 #include "common/io.h"
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 #include "common/time.h"
 
@@ -41,9 +42,11 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data) {
             createSubfolders(fileName);
             fd = open(fileName, openFlagsModes, openFlagsRights);
             if (fd == -1) {
+                FF_DEBUG("open(%s) failed after creating the parent folders: %s", fileName, strerror(errno));
                 return false;
             }
         } else {
+            FF_DEBUG("open(%s) failed: %s", fileName, strerror(errno));
             return false;
         }
     }
@@ -146,16 +149,19 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     if (ftty < 0) {
         ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
         if (ftty < 0) {
+            FF_DEBUG("open(/dev/tty) failed: %s", strerror(errno));
             return "open(\"/dev/tty\", O_RDWR | O_NOCTTY | O_CLOEXEC) failed";
         }
 
         if (tcgetattr(ftty, &oldTerm) == -1) {
+            FF_DEBUG("tcgetattr(/dev/tty) failed: %s", strerror(errno));
             return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
         }
 
         struct termios newTerm = oldTerm;
         newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
         if (tcsetattr(ftty, TCSAFLUSH, &newTerm) == -1) {
+            FF_DEBUG("tcsetattr(/dev/tty) failed: %s", strerror(errno));
             return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
         }
         atexit(restoreTerm);
@@ -165,7 +171,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
 // Give the terminal some time to respond
 #ifndef __APPLE__
-    if (poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0) {
+    const int pollResult = poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS);
+    if (pollResult <= 0) {
+        FF_DEBUG("poll(/dev/tty) returned %d after %d ms: %s",
+            pollResult, FF_IO_TERM_RESP_WAIT_MS, pollResult == 0 ? "timed out" : strerror(errno));
         return "poll(/dev/tty) timeout or failed";
     }
 #else
@@ -175,7 +184,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         fd_set rd;
         FD_ZERO(&rd);
         FD_SET(ftty, &rd);
-        if (select(ftty + 1, &rd, nullptr, nullptr, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0) {
+        const int selectResult = select(ftty + 1, &rd, nullptr, nullptr, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 });
+        if (selectResult <= 0) {
+            FF_DEBUG("select(/dev/tty) returned %d after %d ms: %s",
+                selectResult, FF_IO_TERM_RESP_WAIT_MS, selectResult == 0 ? "timed out" : strerror(errno));
             return "select(/dev/tty) timeout or failed";
         }
     }
@@ -191,6 +203,8 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
 
         if (nRead <= 0) {
+            FF_DEBUG("read(/dev/tty) returned %zd after %zu bytes: %s",
+                nRead, bytesRead, nRead == 0 ? "the terminal closed the connection" : strerror(errno));
             va_end(args);
             return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
         }
@@ -204,6 +218,7 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         va_end(cargs);
 
         if (ret <= 0) {
+            FF_DEBUG("vsscanf(\"%s\") matched %d of %d parameters", buffer, ret, nParams);
             va_end(args);
             return "vsscanf(buffer, format, args) failed";
         }

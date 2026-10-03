@@ -1,5 +1,7 @@
 #include "common/android/binder.h"
+#include "common/debug.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -9,11 +11,16 @@ const char* ffBinderOpen(FFBinder* binder) {
 
     const int fd = open(FF_BINDER_DEVICE, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(" FF_BINDER_DEVICE ") failed: %s", strerror(errno));
         return "Failed to open " FF_BINDER_DEVICE;
     }
 
     struct binder_version version = { .protocol_version = 0 };
-    if (ioctl(fd, BINDER_VERSION, &version) != 0 || version.protocol_version != BINDER_CURRENT_PROTOCOL_VERSION) {
+    const int versionIoctl = ioctl(fd, BINDER_VERSION, &version);
+    if (versionIoctl != 0 || version.protocol_version != BINDER_CURRENT_PROTOCOL_VERSION) {
+        FF_DEBUG("BINDER_VERSION reported protocol %u, expected %u (%s)",
+            version.protocol_version, BINDER_CURRENT_PROTOCOL_VERSION,
+            versionIoctl != 0 ? strerror(errno) : "version mismatch");
         close(fd);
         return "Unsupported binder protocol version";
     }
@@ -22,6 +29,7 @@ const char* ffBinderOpen(FFBinder* binder) {
     // addresses in BR_REPLY, so it has to stay mapped for as long as the handle is used.
     void* shared = mmap(nullptr, FF_BINDER_SHARED_SIZE, PROT_READ, MAP_PRIVATE | MAP_NORESERVE, fd, 0);
     if (shared == MAP_FAILED) {
+        FF_DEBUG("mmap(" FF_BINDER_DEVICE ") failed: %s", strerror(errno));
         close(fd);
         return "Failed to mmap " FF_BINDER_DEVICE;
     }
@@ -55,6 +63,8 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
     reply->fdCount = 0;
 
     if (parcel->truncated) {
+        FF_DEBUG("The parcel was truncated at %zu bytes, the caller buffer holds %zu",
+            parcel->size, parcel->capacity);
         return "Binder parcel does not fit the caller buffer";
     }
 
@@ -86,6 +96,7 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
         .read_buffer = (binder_uintptr_t) (uintptr_t) readBuffer,
     };
     if (ioctl(binder->fd, BINDER_WRITE_READ, &exchange) != 0) {
+        FF_DEBUG("BINDER_WRITE_READ(handle=%u, code=%u) failed: %s", handle, code, strerror(errno));
         return "BINDER_WRITE_READ failed";
     }
 
@@ -103,8 +114,10 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
                 break;
 
             case BR_FAILED_REPLY:
+                FF_DEBUG("BR_FAILED_REPLY for handle=%u, code=%u", handle, code);
                 return "Binder transaction failed";
             case BR_DEAD_REPLY:
+                FF_DEBUG("BR_DEAD_REPLY: handle=%u is dead", handle);
                 return "Binder service is not running";
 
             case BR_INCREFS:
@@ -123,6 +136,8 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
 
             case BR_REPLY: {
                 if ((size_t) (end - cursor) < sizeof(struct binder_transaction_data)) {
+                    FF_DEBUG("BR_REPLY is truncated: %zu of %zu bytes left",
+                        (size_t) (end - cursor), sizeof(struct binder_transaction_data));
                     return "Truncated binder reply";
                 }
                 struct binder_transaction_data data;
@@ -140,6 +155,8 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
                 const char* error = nullptr;
                 if (payloadSize > 0) {
                     if (payloadSize > reply->capacity) {
+                        FF_DEBUG("The reply carries %zu payload bytes, the caller buffer holds %zu",
+                            payloadSize, reply->capacity);
                         error = "Binder reply does not fit the caller buffer";
                     } else {
                         memcpy(reply->data, payload, payloadSize);
@@ -211,6 +228,7 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
                 // later transaction on them fails with BR_FAILED_REPLY, which says nothing about the
                 // real cause. Reported, but only when nothing more specific is already at hand.
                 if (ioctl(binder->fd, BINDER_WRITE_READ, &release) != 0 && error == nullptr) {
+                    FF_DEBUG("BC_ACQUIRE/BC_FREE_BUFFER failed: %s", strerror(errno));
                     error = "Releasing the binder reply failed";
                 }
 
@@ -218,10 +236,13 @@ const char* ffBinderTransact(FFBinder* binder, uint32_t handle, uint32_t code, u
             }
 
             default:
+                FF_DEBUG("Unexpected binder command 0x%08x for handle=%u, code=%u", command, handle, code);
                 return "Unexpected binder command";
         }
     }
 
+    FF_DEBUG("The binder reply for handle=%u, code=%u held no BR_REPLY (%zu bytes read)",
+        handle, code, (size_t) exchange.read_consumed);
     return "No reply from binder";
 }
 
@@ -238,12 +259,16 @@ const char* ffBinderLookupService(FFBinder* binder, const char* name, uint32_t t
         return error;
     }
     if (ffBinderReplyIsStatus(&reply)) {
+        FF_DEBUG("The service manager returned a status parcel for %s, code=%u", name, transactionCode);
         return "Service manager rejected the request";
     }
-    if (ffBinderReadI32(reply.data, reply.size, 0) != 0) {
+    const int32_t exception = ffBinderReadI32(reply.data, reply.size, 0);
+    if (exception != 0) {
+        FF_DEBUG("The service manager raised exception %d for %s", exception, name);
         return "Service manager raised an exception";
     }
     if (reply.handleCount == 0) {
+        FF_DEBUG("The service manager returned no handle for %s", name);
         return "Service is not registered";
     }
 

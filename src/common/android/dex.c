@@ -2,8 +2,10 @@
 #include "common/debug.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -460,6 +462,8 @@ static const char* findDexEntry(const uint8_t* jar, size_t jarSize, const char* 
         }
     }
     if (eocd == SIZE_MAX) {
+        FF_DEBUG("No end-of-central-directory record in the last %zu bytes of a %zu byte jar",
+            newest - oldest + FF_ZIP_EOCD_SIZE, jarSize);
         return "The jar has no zip directory";
     }
 
@@ -479,6 +483,8 @@ static const char* findDexEntry(const uint8_t* jar, size_t jarSize, const char* 
         const uint16_t commentLength = dexU16(jar + offset + FF_ZIP_OFF_CENTRAL_COMMENT_LENGTH);
         const size_t entrySize = FF_ZIP_CENTRAL_SIZE + (size_t) nameLength + (size_t) extraLength + (size_t) commentLength;
         if (entrySize > directoryEnd - offset) {
+            FF_DEBUG("A zip entry claims %zu bytes but only %zu remain in the directory",
+                entrySize, (size_t) (directoryEnd - offset));
             return "A zip directory entry runs past the directory";
         }
 
@@ -487,6 +493,8 @@ static const char* findDexEntry(const uint8_t* jar, size_t jarSize, const char* 
             const uint32_t uncompressed = dexU32(jar + offset + FF_ZIP_OFF_CENTRAL_UNCOMPRESSED_SIZE);
             const uint32_t localOffset = dexU32(jar + offset + FF_ZIP_OFF_CENTRAL_LOCAL_OFFSET);
             if (compressedSize == FF_ZIP_ZIP64_SENTINEL || uncompressed == FF_ZIP_ZIP64_SENTINEL || localOffset == FF_ZIP_ZIP64_SENTINEL) {
+                FF_DEBUG("The dex entry is zip64: compressed=%u, uncompressed=%u, localOffset=%u",
+                    compressedSize, uncompressed, localOffset);
                 return "A dex entry is stored as zip64, which is not supported";
             }
             if (localOffset > jarSize || FF_ZIP_LOCAL_HEADER_SIZE > jarSize - localOffset) {
@@ -509,6 +517,7 @@ static const char* findDexEntry(const uint8_t* jar, size_t jarSize, const char* 
 
         offset += entrySize;
     }
+    FF_DEBUG("No entry in the %zu byte jar is named %s", jarSize, entry);
     return "The jar has no usable dex entry";
 }
 
@@ -545,6 +554,7 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
     // the pointer, which is also why no failure path has to free it by hand.
     FF_AUTO_FREE uint8_t* buffer = malloc(uncompressedSize);
     if (buffer == nullptr) {
+        FF_DEBUG("malloc(%u) for the inflated dex failed", uncompressedSize);
         return "malloc failed";
     }
 
@@ -557,12 +567,16 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
     stream.next_out = buffer;
     stream.avail_out = (uInt) uncompressedSize;
 
-    if (ffinflateInit2_(&stream, -MAX_WBITS, ZLIB_VERSION, (int) sizeof(z_stream)) != Z_OK) {
+    const int initStatus = ffinflateInit2_(&stream, -MAX_WBITS, ZLIB_VERSION, (int) sizeof(z_stream));
+    if (initStatus != Z_OK) {
+        FF_DEBUG("inflateInit2() failed: zlib status %d", initStatus);
         return "inflateInit2 failed";
     }
     const int status = ffinflate(&stream, Z_FINISH);
     ffinflateEnd(&stream);
     if (status != Z_STREAM_END || stream.total_out != (uLong) uncompressedSize) {
+        FF_DEBUG("inflate() returned %d, produced %lu of %u bytes",
+            status, stream.total_out, uncompressedSize);
         return "Inflating the dex failed";
     }
 
@@ -587,19 +601,25 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
 
     const int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
         return "open(jar) failed";
     }
 
     struct stat st = {};
-    if (fstat(fd, &st) != 0 || st.st_size <= 0) {
+    const int statStatus = fstat(fd, &st);
+    if (statStatus != 0 || st.st_size <= 0) {
+        FF_DEBUG("fstat(%s) reported %s (%lld bytes)", jarPath,
+            statStatus != 0 ? strerror(errno) : "an empty file", (long long) st.st_size);
         close(fd);
         return "fstat(jar) failed";
     }
     mapping.mappedSize = (size_t) st.st_size;
     mapping.mapped = mmap(nullptr, mapping.mappedSize, PROT_READ, MAP_PRIVATE, fd, 0);
     // The mapping outlives the descriptor, so the descriptor can go either way from here.
+    const int mmapErrno = mapping.mapped == MAP_FAILED ? errno : 0;
     close(fd);
     if (mapping.mapped == MAP_FAILED) {
+        FF_DEBUG("mmap(%s, %zu bytes) failed: %s", jarPath, mapping.mappedSize, strerror(mmapErrno));
         mapping.mapped = nullptr;
         return "mmap(jar) failed";
     }
@@ -610,6 +630,8 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
     FF_AUTO_FREE uint8_t* settled = calloc(count, 1);
     FF_AUTO_FREE uint32_t* typeIndexes = malloc((size_t) count * sizeof(uint32_t));
     if (settled == nullptr || typeIndexes == nullptr) {
+        FF_DEBUG("Allocating %zu bytes for %u static int requests failed",
+            (size_t) count * (1 + sizeof(uint32_t)), count);
         return "malloc failed";
     }
 
@@ -650,6 +672,7 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
             }
             data = findDexMagic(mapping.mapped, mapping.mappedSize, &dataSize);
             if (data == nullptr) {
+                FF_DEBUG("Neither %s nor a dex magic signature is in the %zu byte jar", entry, mapping.mappedSize);
                 return "No dex in the jar";
             }
         } else if (method == FF_ZIP_METHOD_DEFLATED) {
@@ -664,6 +687,8 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
             return "The jar deflates its dex entries and fastfetch was built without zlib";
             #endif
         } else if (method != FF_ZIP_METHOD_STORED) {
+            FF_DEBUG("%s uses compression method %u, only %u (stored) and %u (deflated) are handled",
+                entry, method, FF_ZIP_METHOD_STORED, FF_ZIP_METHOD_DEFLATED);
             return "A dex entry uses an unsupported compression method";
         }
         // A STORED entry needs no further work: `dataSize` already holds the `compressedSize` that

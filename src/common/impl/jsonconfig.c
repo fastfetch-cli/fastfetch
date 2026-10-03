@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/color.h"
+#include "common/debug.h"
 #include "common/jsonconfig.h"
 #include "common/printing.h"
 #include "common/io.h"
@@ -87,6 +88,7 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
             }
         }
 
+        FF_DEBUG("The enum value %d is not one of the accepted integers", intVal);
         return "Invalid enum integer";
     } else if (yyjson_is_str(val)) {
         const char* strVal = yyjson_get_str(val);
@@ -97,8 +99,11 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
             }
         }
 
+        FF_DEBUG("The enum string \"%s\" is not one of the accepted names", strVal);
         return "Invalid enum string";
     } else {
+        FF_DEBUG("The enum value is of JSON type %s, not a string or an integer",
+            yyjson_get_type_desc(val));
         return "Invalid enum value type; must be a string or integer";
     }
 }
@@ -273,6 +278,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
     assert(root);
 
     if (!yyjson_is_obj(root)) {
+        FF_DEBUG("The config root is of JSON type %s", yyjson_get_type_desc(root));
         return "Invalid JSON config format. Root value must be an object";
     }
 
@@ -281,6 +287,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
         return nullptr;
     }
     if (!yyjson_is_arr(modules)) {
+        FF_DEBUG("'modules' is of JSON type %s", yyjson_get_type_desc(modules));
         return "Property 'modules' must be an array of strings or objects";
     }
 
@@ -303,6 +310,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
             yyjson_val* conditions = yyjson_obj_get(module, "condition");
             if (conditions) {
                 if (!yyjson_is_obj(conditions)) {
+                    FF_DEBUG("'condition' is of JSON type %s", yyjson_get_type_desc(conditions));
                     return "Property 'condition' must be an object";
                 }
 
@@ -329,6 +337,8 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                 yyjson_val* previousSucceeded = yyjson_obj_get(conditions, "succeeded");
                 if (previousSucceeded && !unsafe_yyjson_is_null(previousSucceeded)) {
                     if (!unsafe_yyjson_is_bool(previousSucceeded)) {
+                        FF_DEBUG("'condition.succeeded' is of JSON type %s",
+                            yyjson_get_type_desc(previousSucceeded));
                         return "Property 'succeeded' in 'condition' must be a boolean";
                     }
                     gatedOnSucceeded = true;
@@ -355,6 +365,7 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
                     if (gatedOnSucceeded && ffStrEqualsIgnCase(yyjson_get_str(yyjson_obj_get(module, "type")), ffCommandModuleInfo.name)) {
                         yyjson_val* parallel = yyjson_obj_get(module, "parallel");
                         if (parallel == nullptr || yyjson_get_bool(parallel)) {
+                            FF_DEBUG("The command module at index %zu is gated on 'condition.succeeded' and runs in parallel", idx);
                             return "Module \"command\" cannot be combined with \"condition.succeeded\" while it runs in "
                                    "parallel: whether it is printed is only known in the print pass, so it cannot be "
                                    "prepared, and the prepared results are matched to modules by position. Set "
@@ -371,12 +382,14 @@ static const char* printJsonConfig(FFdata* data, bool prepare) {
 
             type = yyjson_get_str(yyjson_obj_get(module, "type"));
             if (!type) {
+                FF_DEBUG("The module object at index %zu has no \"type\" key, or it is not a string", idx);
                 return "module object must contain a \"type\" key ( case sensitive )";
             }
             if (yyjson_obj_size(module) == 1) { // contains only Property type
                 module = nullptr;
             }
         } else {
+            FF_DEBUG("The modules entry at index %zu is of JSON type %s", idx, yyjson_get_type_desc(module));
             return "modules must be an array of strings or objects";
         }
 
