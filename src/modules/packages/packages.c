@@ -92,6 +92,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
         }
         FF_PRINT_PACKAGE_NAME(installrelease, "install-release")
         FF_PRINT_PACKAGE(kiss)
+        FF_PRINT_PACKAGE(kuzpkg)
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
@@ -169,6 +170,7 @@ bool ffPrintPackages(FFPackagesOptions* options) {
                 FF_ARG(counts.hpkgUser, "hpkg-user"),
                 FF_ARG(counts.installrelease, "install-release"),
                 FF_ARG(counts.kiss, "kiss"),
+                FF_ARG(counts.kuzpkg, "kuzpkg"),
                 FF_ARG(counts.linglong, "linglong"),
                 FF_ARG(counts.lpkg, "lpkg"),
                 FF_ARG(counts.lpkgbuild, "lpkgbuild"),
@@ -298,6 +300,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
                             if (false)
                                 ;
                             FF_TEST_PACKAGE_NAME(KISS)
+                            FF_TEST_PACKAGE_NAME(KUZPKG)
                             break;
                         case 'L':
                             if (false)
@@ -405,6 +408,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(GUIX)
     FF_TEST_PACKAGE_NAME(HPKG)
     FF_TEST_PACKAGE_NAME(KISS)
+    FF_TEST_PACKAGE_NAME(KUZPKG)
     FF_TEST_PACKAGE_NAME(LINGLONG)
     FF_TEST_PACKAGE_NAME(LPKG)
     FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -473,6 +477,7 @@ bool ffGeneratePackagesJsonResult(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_APPEND_PACKAGE_COUNT(hpkgUser)
     FF_APPEND_PACKAGE_COUNT(installrelease)
     FF_APPEND_PACKAGE_COUNT(kiss)
+    FF_APPEND_PACKAGE_COUNT(kuzpkg)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(lpkg)
     FF_APPEND_PACKAGE_COUNT(lpkgbuild)
@@ -574,6 +579,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of hpkg-user packages", "hpkg-user" },
         { "Number of install-release packages", "install-release" },
         { "Number of kiss packages", "kiss" },
+        { "Number of kuzpkg packages", "kuzpkg" },
         { "Number of linglong packages", "linglong" },
         { "Number of lpkg packages", "lpkg" },
         { "Number of lpkgbuild packages", "lpkgbuild" },
