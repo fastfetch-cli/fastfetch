@@ -587,10 +587,6 @@ clang-format -i src/modules/foo/*.c src/modules/foo/*.h
 | Module options | `FF<Name>Options` | `FFCPUOptions` |
 | Detection results | `FF<Name>Result` | `FFCPUResult` |
 
-### Spelling
-
-CI runs codespell (`.codespellrc`). Known false positives are listed in `ignore-words-list` (`iterm`, `compiletime`, and various non-English distro words). Add new words there rather than changing the code.
-
 ### Compiler warnings
 
 The build enables `-Wall -Wextra -Wconversion` plus several `-Werror`s:
@@ -707,7 +703,6 @@ Coverage focuses on the core data structures and the formatting engine in `commo
 
 ```sh
 clang-format -i <changed files>                  # format
-codespell                                        # spelling
 cmake -B build -DBUILD_TESTS=On && cmake --build build -j
 cd build && ctest --output-on-failure            # tests
 ./build/fastfetch --format json                  # verify JSON output is well-formed

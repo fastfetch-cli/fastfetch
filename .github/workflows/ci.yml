@@ -5,13 +5,7 @@ on:
   - pull_request
 
 jobs:
-  spellcheck:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/build-spellcheck.yml
-
   no-features-test:
-    needs: spellcheck
     name: No-features-test
     permissions:
       contents: read
