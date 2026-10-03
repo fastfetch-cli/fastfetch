@@ -1,3 +1,8 @@
+# Unreleased
+
+Bugfixes:
+* Fixed the Command module timing out when a command exits after spawning a background process that keeps its output pipe open. (Command, macOS)
+
 # 2.70.0
 
 Changes:

@@ -4,6 +4,7 @@
 #include "common/io.h"
 #include "common/strutil.h"
 #include "common/mallocHelper.h"
+#include "common/time.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -167,6 +168,18 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
     return nullptr;
 }
 
+static const char* ffProcessCheckExitStatus(int stat_loc) {
+    if (!WIFEXITED(stat_loc)) {
+        return "child process exited abnormally";
+    }
+    if (WEXITSTATUS(stat_loc) == 127) {
+        FF_DEBUG("command not found");
+        return "command not found";
+    }
+    // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
+    return nullptr;
+}
+
 const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
     assert(handle->pipeRead != -1);
     assert(handle->pid != -1);
@@ -177,49 +190,89 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
     handle->pipeRead = -1;
     handle->pid = -1;
     char str[FF_PIPE_BUFSIZ];
+    double lastOutputTick = ffTimeGetTick();
+    bool childExited = false;
+    int stat_loc = 0;
+    enum { FF_PROCESS_POLL_INTERVAL = 50 };
 
     for (;;) {
-        if (timeout >= 0) {
-            struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
-            int pollret = poll(&pollfd, 1, timeout);
-            if (pollret == 0) {
-                FF_DEBUG("poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)");
-                kill(childPid, SIGTERM);
-                waitpid(childPid, nullptr, 0);
-                return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
-            } else if (pollret < 0 || (pollfd.revents & POLLERR)) {
-                kill(childPid, SIGTERM);
-                waitpid(childPid, nullptr, 0);
-                return pollret < 0
-                    ? "poll(&pollfd, 1, timeout) error: pollret < 0"
-                    : "poll(&pollfd, 1, timeout) error: pollfd.revents & POLLERR";
+        // poll() has no portable way to watch a child process on every supported POSIX system.
+        // Use short slices so a child that exits while a daemonized descendant still holds the
+        // output pipe open can be observed without process-global signal handling.
+        int pollTimeout = FF_PROCESS_POLL_INTERVAL;
+        if (childExited) {
+            pollTimeout = 0;
+        } else if (timeout >= 0) {
+            double remaining = (double) timeout - (ffTimeGetTick() - lastOutputTick);
+            if (remaining <= 0) {
+                pollTimeout = 0;
+            } else if (remaining < FF_PROCESS_POLL_INTERVAL) {
+                pollTimeout = (int) remaining;
             }
         }
 
-        ssize_t nRead = read(childPipeFd, str, FF_PIPE_BUFSIZ);
-        if (nRead > 0) {
-            ffStrbufAppendNS(buffer, (uint32_t) nRead, str);
-        } else if (nRead == 0) {
-            int stat_loc = 0;
-            if (childPid > 0 && waitpid(childPid, &stat_loc, 0) == childPid) {
-                if (!WIFEXITED(stat_loc)) {
-                    return "child process exited abnormally";
-                }
-                if (WEXITSTATUS(stat_loc) == 127) {
-                    FF_DEBUG("command not found");
-                    return "command not found";
-                }
-                // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
-                return nullptr;
+        struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
+        int pollret = poll(&pollfd, 1, pollTimeout);
+        bool pollInterrupted = pollret < 0 && errno == EINTR;
+        if (pollret < 0 && !pollInterrupted) {
+            kill(childPid, SIGTERM);
+            while (waitpid(childPid, nullptr, 0) < 0 && errno == EINTR) {}
+            return "poll(&pollfd, 1, timeout) error: pollret < 0";
+        }
+        if (pollret > 0 && (pollfd.revents & (POLLERR | POLLNVAL))) {
+            kill(childPid, SIGTERM);
+            while (waitpid(childPid, nullptr, 0) < 0 && errno == EINTR) {}
+            return "poll(&pollfd, 1, timeout) error: pollfd.revents & POLLERR";
+        }
+
+        if (!childExited) {
+            pid_t waitResult;
+            do {
+                waitResult = waitpid(childPid, &stat_loc, WNOHANG);
+            } while (waitResult < 0 && errno == EINTR);
+            if (waitResult == childPid || (waitResult < 0 && errno == ECHILD)) {
+                childExited = true;
+            } else if (waitResult < 0) {
+                return "waitpid(childPid, &stat_loc, WNOHANG) failed";
             }
-            return nullptr;
-        } else if (nRead < 0) {
-            break;
+        }
+
+        if (pollInterrupted) {
+            continue;
+        }
+
+        if (pollret > 0 && (pollfd.revents & (POLLIN | POLLHUP))) {
+            ssize_t nRead = read(childPipeFd, str, FF_PIPE_BUFSIZ);
+            if (nRead > 0) {
+                ffStrbufAppendNS(buffer, (uint32_t) nRead, str);
+                lastOutputTick = ffTimeGetTick();
+                continue;
+            } else if (nRead == 0) {
+                if (!childExited && childPid > 0) {
+                    pid_t waitResult;
+                    do {
+                        waitResult = waitpid(childPid, &stat_loc, 0);
+                    } while (waitResult < 0 && errno == EINTR);
+                    childExited = waitResult == childPid;
+                }
+                return childExited ? ffProcessCheckExitStatus(stat_loc) : nullptr;
+            } else if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
+                FF_DEBUG("read(childPipeFd, str, FF_PIPE_BUFSIZ) failed: %s", strerror(errno));
+                return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
+            }
+        }
+
+        if (childExited) {
+            return ffProcessCheckExitStatus(stat_loc);
+        }
+
+        if (timeout >= 0 && ffTimeGetTick() - lastOutputTick >= (double) timeout) {
+            FF_DEBUG("poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)");
+            kill(childPid, SIGTERM);
+            while (waitpid(childPid, nullptr, 0) < 0 && errno == EINTR) {}
+            return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
         }
     }
-
-    FF_DEBUG("read(childPipeFd, str, FF_PIPE_BUFSIZ) failed: %s", strerror(errno));
-    return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
 
 void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath) {
