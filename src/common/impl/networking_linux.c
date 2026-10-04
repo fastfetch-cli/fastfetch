@@ -214,12 +214,6 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     }
     ffStrbufAppendS(&state->command, "\r\nConnection: close\r\n"); // Explicitly tell the server we don't need to keep the connection
 
-    // If compression needs to be enabled
-    if (state->compression) {
-        FF_DEBUG("Enabling HTTP content compression");
-        ffStrbufAppendS(&state->command, "Accept-Encoding: gzip\r\n");
-    }
-
     ffStrbufAppendS(&state->command, headers);
     ffStrbufAppendS(&state->command, "\r\n");
 
@@ -330,26 +324,6 @@ error:
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, uint16_t port, const char* path, const char* headers) {
     FF_DEBUG("Preparing to send HTTP request: host=%s, port=%u, path=%s", host, port, path);
-
-    if (state->compression) {
-        FF_DEBUG("Compression enabled, checking if zlib is available");
-
-#ifdef FF_HAVE_ZLIB
-        const char* zlibError = ffNetworkingLoadZlibLibrary();
-        // Only enable compression if zlib library is successfully loaded
-        if (zlibError == nullptr) {
-            FF_DEBUG("Successfully loaded zlib library, compression enabled");
-        } else {
-            FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
-            state->compression = false;
-        }
-#else
-        FF_DEBUG("zlib not supported at build time, compression disabled");
-        state->compression = false;
-#endif
-    } else {
-        FF_DEBUG("Compression disabled");
-    }
 
     const char* initResult = initNetworkingState(state, host, port, path, headers);
     if (initResult != nullptr) {
@@ -611,19 +585,6 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Received content length mismatches: %u != %u", buffer->length, contentLength + headerEnd + 4);
         return "Content length mismatch";
     }
-
-// If compression was used, try to decompress
-#ifdef FF_HAVE_ZLIB
-    if (state->compression) {
-        FF_DEBUG("Content received, checking if compressed");
-        if (!ffNetworkingDecompressGzip(buffer, buffer->chars + headerEnd)) {
-            FF_DEBUG("Decompression failed or invalid compression format");
-            return "Failed to decompress or invalid format";
-        } else {
-            FF_DEBUG("Decompression successful or no decompression needed, total length after decompression: %u bytes", buffer->length);
-        }
-    }
-#endif
 
     return nullptr;
 }
