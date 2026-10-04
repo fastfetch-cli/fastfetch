@@ -1,5 +1,6 @@
 #include "image.h"
 #include "common/io.h"
+#include "common/library.h"
 #include "common/mallocHelper.h"
 #include "common/printing.h"
 #include "common/processing.h"
@@ -497,7 +498,6 @@ static bool printImageKittyDirect(bool printError) {
     #endif
 
     #ifdef FF_HAVE_ZLIB
-        #include "common/library.h"
         #include <zlib.h>
 
 static bool compressBlob(void** blob, size_t* length) {
