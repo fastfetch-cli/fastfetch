@@ -61,7 +61,7 @@ typedef struct FFNetworkingState {
 // `Content-Length` header in place of `Transfer-Encoding`.
 // `headerEnd` is updated in place: the rewrite changes the header length, so the value the caller
 // passed in no longer describes the buffer afterwards. Callers must use the new one for anything
-// that addresses the body, such as ffNetworkingDecompressGzip().
+// that addresses the body.
 [[gnu::nonnull(1, 2), nodiscard]] bool ffNetworkingDecodeChunked(FFstrbuf* buffer, uint32_t* headerEnd);
 
 // Result of parsing a `Transfer-Encoding` header value
@@ -77,8 +77,3 @@ typedef enum FFNetworkingTransferEncoding {
 // client cannot decode. Only a lone `chunked` is accepted; everything else is reported
 // as unsupported so that the caller fails the response instead of returning garbage.
 [[gnu::nonnull(1), gnu::pure, nodiscard]] FFNetworkingTransferEncoding ffNetworkingParseTransferEncoding(const char* value, uint32_t valueLen);
-
-#ifdef FF_HAVE_ZLIB
-const char* ffNetworkingLoadZlibLibrary(void);
-[[gnu::nonnull(1, 2), nodiscard]] bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd);
-#endif
