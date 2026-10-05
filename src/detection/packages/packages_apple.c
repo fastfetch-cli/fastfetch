@@ -50,14 +50,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         const char* prefix = getenv("PKG_DBDIR");
         if (ffStrSet(prefix)) {
             result->pkgsrc = ffPackagesGetNumElements(prefix, true);
-        } else {
-            result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/opt/pkg/pkgdb", true);
-            if (result->pkgsrc == 0) {
-                result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/usr/pkg/pkgdb", true);
-                if (result->pkgsrc == 0) {
-                    result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/var/db/pkg", true);
-                }
-            }
         }
     }
     if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
