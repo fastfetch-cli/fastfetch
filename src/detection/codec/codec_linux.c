@@ -395,8 +395,8 @@ static const char* detectCodecByVdpau(FFCodecOptions* options, FFlist* result) {
     if (ffvdp_device_create_x11_status != VDP_STATUS_OK ||
         device == VDP_INVALID_HANDLE ||
         ffvdp_get_proc_address == nullptr) {
-        FF_DEBUG("vdp_device_create_x11() failed: status=%d, device=%p, getProcAddress=%p",
-            ffvdp_device_create_x11_status, (void*) device, (void*) ffvdp_get_proc_address);
+        FF_DEBUG("vdp_device_create_x11() failed: status=%d, device=%x, getProcAddress=%p",
+            ffvdp_device_create_x11_status, (unsigned) device, (void*) ffvdp_get_proc_address);
         ffXCloseDisplay(x11Display);
         return "vdp_device_create_x11() failed";
     }
