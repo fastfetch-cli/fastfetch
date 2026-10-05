@@ -9,8 +9,7 @@
 #include <sys/stat.h>
 
 #ifdef FF_HAVE_ZLIB
-    #include "common/library.h"
-    #include <zlib.h>
+    #include "common/zlib.h"
 #endif
 
 // Offsets into the dex header, from https://source.android.com/docs/core/runtime/dex-format.
@@ -543,10 +542,11 @@ static const uint8_t* findDexMagic(const uint8_t* jar, size_t jarSize, size_t* d
 
 #ifdef FF_HAVE_ZLIB
 static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t uncompressedSize, uint8_t** out) {
-    FF_LIBRARY_LOAD(zlib, "dlopen(libz) failed", "libz" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL(zlib, inflateInit2_, "dlsym(inflateInit2_) failed")
-    FF_LIBRARY_LOAD_SYMBOL(zlib, inflate, "dlsym(inflate) failed")
-    FF_LIBRARY_LOAD_SYMBOL(zlib, inflateEnd, "dlsym(inflateEnd) failed")
+    const char* error = ffZlibLoad(FF_ZLIB_INFLATE);
+    if (error != nullptr) {
+        FF_DEBUG("The dex cannot be inflated: %s", error);
+        return error;
+    }
 
     // Released by the cleanup on every path out below; ownership moves to the caller by clearing
     // the pointer, which is also why no failure path has to free it by hand.
@@ -565,13 +565,13 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
     stream.next_out = buffer;
     stream.avail_out = (uInt) uncompressedSize;
 
-    const int initStatus = ffinflateInit2_(&stream, -MAX_WBITS, ZLIB_VERSION, (int) sizeof(z_stream));
+    const int initStatus = inflateInit2(&stream, -MAX_WBITS);
     if (initStatus != Z_OK) {
         FF_DEBUG("inflateInit2() failed: zlib status %d", initStatus);
         return "inflateInit2 failed";
     }
-    const int status = ffinflate(&stream, Z_FINISH);
-    ffinflateEnd(&stream);
+    const int status = inflate(&stream, Z_FINISH);
+    inflateEnd(&stream);
     if (status != Z_STREAM_END || stream.total_out != (uLong) uncompressedSize) {
         FF_DEBUG("inflate() returned %d, produced %lu of %u bytes",
             status, stream.total_out, uncompressedSize);

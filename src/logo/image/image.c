@@ -489,6 +489,7 @@ static bool printImageKittyDirect(bool printError) {
     #include <fcntl.h>
 
     #include "common/time.h"
+    #include "common/debug.h"
 
     #ifndef _WIN32
         #include <sys/ioctl.h>
@@ -498,19 +499,14 @@ static bool printImageKittyDirect(bool printError) {
     #endif
 
     #ifdef FF_HAVE_ZLIB
-        #include <zlib.h>
+        #include "common/zlib.h"
 
 static bool compressBlob(void** blob, size_t* length) {
-    FF_LIBRARY_LOAD(zlib, false,
-        #ifdef _WIN32
-        "zlib1"
-        #else
-        "libz"
-        #endif
-        FF_LIBRARY_EXTENSION,
-        2)
-    FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
-    FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
+    const char* error = ffZlibLoad(FF_ZLIB_COMPRESS);
+    if (error != nullptr) {
+        FF_DEBUG("The logo stays uncompressed: %s", error);
+        return false;
+    }
 
         #if _WIN32
     // zlib's uLong is 32-bit on Windows (LLP64), so a >4 GiB source can't be
@@ -520,7 +516,7 @@ static bool compressBlob(void** blob, size_t* length) {
     }
         #endif
 
-    uLong compressedLength = ffcompressBound((uLong) *length);
+    uLong compressedLength = compressBound((uLong) *length);
     void* compressed = malloc(compressedLength);
     if (compressed == nullptr) {
         return false;
@@ -534,7 +530,7 @@ static bool compressBlob(void** blob, size_t* length) {
     // The gap is far wider on Windows, where the same frames cost 37.7 ms each at level 9 against
     // 6.4 at level 6: raising this back to 9 now that the DLL name above actually loads is a 4.2x
     // slowdown there (398 ms -> 1692 ms). Re-measure both platforms before touching it.
-    if (ffcompress2(compressed, &compressedLength, *blob, (uLong) *length, Z_DEFAULT_COMPRESSION) != Z_OK) {
+    if (compress2(compressed, &compressedLength, *blob, (uLong) *length, Z_DEFAULT_COMPRESSION) != Z_OK) {
         free(compressed);
         return false;
     }

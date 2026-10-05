@@ -55,35 +55,32 @@ static const char* getSshdVersion(FFstrbuf* version) {
 }
 
 #ifdef FF_HAVE_ZLIB
-    #include "common/library.h"
     #include "common/path.h"
+    #include "common/zlib.h"
 
     #include <stdlib.h>
-    #include <zlib.h>
 
 static const char* getSddmVersion(FFstrbuf* version) {
-    FF_LIBRARY_LOAD_MESSAGE(zlib, "libz" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gztell)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzrewind)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzclose)
+    const char* error = ffZlibLoad(FF_ZLIB_GZFILE);
+    if (error != nullptr) {
+        FF_DEBUG("The sddm version cannot be read: %s", error);
+        return error;
+    }
 
-    gzFile file = ffgzopen(FF_PATH_PKG_BASE "/share/man/man1/sddm.1.gz", "rb");
+    gzFile file = gzopen(FF_PATH_PKG_BASE "/share/man/man1/sddm.1.gz", "rb");
     if (file == Z_NULL) {
-        FF_DEBUG("ffgzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed: %s", strerror(errno));
-        return "ffgzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed";
+        FF_DEBUG("gzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed: %s", strerror(errno));
+        return "gzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed";
     }
 
     ffStrbufEnsureFree(version, 2047);
     memset(version->chars, 0, version->allocated);
-    int size = ffgzread(file, version->chars, version->allocated - 1);
-    ffgzclose(file);
+    int size = gzread(file, version->chars, version->allocated - 1);
+    gzclose(file);
 
     if (size <= 0) {
-        FF_DEBUG("ffgzread(file, version->chars, version->length) failed");
-        return "ffgzread(file, version->chars, version->length) failed";
+        FF_DEBUG("gzread(file, version->chars, version->length) failed");
+        return "gzread(file, version->chars, version->length) failed";
     }
 
     version->length = (uint32_t) size;
