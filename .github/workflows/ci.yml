@@ -72,6 +72,21 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-musl-amd64.yml
 
+  android:
+    needs: no-features-test
+    name: Android-${{ matrix.abi }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        abi:
+          - arm64-v8a
+          - armeabi-v7a
+          - x86_64
+    uses: ./.github/workflows/build-android.yml
+    with:
+      abi: ${{ matrix.abi }}
+
   macos-hosts:
     needs: no-features-test
     name: macOS-${{ matrix.arch }}
@@ -190,6 +205,7 @@ jobs:
       - linux-loong64
       - linux-vms
       - musl-amd64
+      - android
       - macos-hosts
       - freebsd-amd64
       - openbsd-amd64
