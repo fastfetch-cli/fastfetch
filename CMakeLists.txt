@@ -60,6 +60,7 @@ endif()
 
 include(CheckIncludeFile)
 include(CheckFunctionExists)
+include(CheckSymbolExists)
 
 if(LINUX)
     CHECK_INCLUDE_FILE("linux/version.h" HAVE_LINUX_VERSION_H)
@@ -1736,9 +1737,18 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
                     endif()
                 endif()
             else()
-                set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
-                set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
-                set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+                # find_package modules disagree on how they name their result variables. Newer ones
+                # export <PackageName>_* (FindVulkan sets Vulkan_INCLUDE_DIRS), but older ones only
+                # set the upper-case form: FindFreetype sets FREETYPE_INCLUDE_DIRS and
+                # FREETYPE_LIBRARIES and has no Freetype_INCLUDE_DIRS at all. Assigning
+                # unconditionally would therefore wipe the include path the module had just
+                # provided, and the package would be "found" with nothing to compile against.
+                # Fill in only the gaps.
+                foreach(_FF_SUFFIX INCLUDE_DIRS LIBRARIES CFLAGS_OTHER)
+                    if(NOT DEFINED ${VARNAME}_${_FF_SUFFIX} OR "${${VARNAME}_${_FF_SUFFIX}}" STREQUAL "")
+                        set(${VARNAME}_${_FF_SUFFIX} ${${CMAKE_NAME}_${_FF_SUFFIX}})
+                    endif()
+                endforeach()
             endif()
         endif()
     endif()
@@ -1857,9 +1867,11 @@ ff_lib_enable(OPENCL
     "OpenCL"
     "OpenCL"
 )
+# `Freetype` is the module CMake ships (Modules/FindFreetype.cmake); there is no FindFreeType2, so
+# this name never resolved and only pkg-config could ever turn freetype on.
 ff_lib_enable(FREETYPE
     "freetype2"
-    "FreeType2"
+    "Freetype"
 )
 ff_lib_enable(ELF
     "libelf"
@@ -2158,7 +2170,17 @@ if(NOT WIN32)
         endif()
     endif()
     if(NOT ENABLE_WORDEXP)
-        message(STATUS "wordexp.h not found or disabled, glob used instead")
+        # wordexp.h is not the only thing that can be missing. bionic declares glob() and globfree()
+        # only from API 28, so an NDK build aimed at 24 has neither and a fallback that assumed glob
+        # would have nothing to call. The symbol is what has to be checked, not the header: <glob.h>
+        # is present at every level, it just declares nothing below 28.
+        check_symbol_exists("glob" "glob.h" HAVE_GLOB)
+        if(HAVE_GLOB)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_GLOB=1)
+            message(STATUS "wordexp.h not found or disabled, glob used instead")
+        else()
+            message(STATUS "neither wordexp.h nor glob.h is usable, config paths will not be expanded")
+        endif()
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

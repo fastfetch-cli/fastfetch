@@ -17,7 +17,7 @@
 
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
-#else
+#elif FF_HAVE_GLOB
     #include <glob.h>
 #endif
 
@@ -112,7 +112,7 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
 
     wordfree(&exp);
 
-#else
+#elif FF_HAVE_GLOB
 
     glob_t gb;
     if (glob(in, GLOB_NOSORT
@@ -133,6 +133,10 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
     }
 
     globfree(&gb);
+
+#else
+
+    FF_UNUSED(in, out)
 
 #endif
 

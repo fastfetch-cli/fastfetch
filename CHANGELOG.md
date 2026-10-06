@@ -18,6 +18,7 @@ Bugfixes:
 * Fixed the foot terminal font size not being parsed when written as `Font Name-size`, e.g. `Berkeley Mono-12`. (#2624, TerminalFont, Linux)
 * Fixed `/boot` being hidden by default on Haiku, where it is the system volume. (Disk, Haiku)
 * Improved Snapdragon X1/X2 model name detection on Linux. (#2625, CPU, Linux)
+* Fixed the Android build failing with `GL/gl.h` not found, because the NDK ships the EGL headers that turned OpenGL detection on but not the desktop GL headers it includes. (OpenGL, Android)
 
 Logos:
 * Added filled Artix logo (#2631)

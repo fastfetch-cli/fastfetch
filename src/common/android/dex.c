@@ -598,7 +598,7 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
     [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
 
     {
-        FF_AUTO_CLOSE_FD const int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
+        FF_AUTO_CLOSE_FD int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
         if (fd < 0) {
             FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
             return "open(jar) failed";

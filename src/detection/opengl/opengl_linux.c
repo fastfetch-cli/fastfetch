@@ -6,8 +6,11 @@
 #include <string.h>
 
 #if __ANDROID__ && !defined(FF_HAVE_EGL)
-    // On Android, installing OpenGL headers is enough (mesa-dev)
-    #if __has_include(<EGL/egl.h>)
+    // On Android the EGL headers ship with the NDK, but the desktop GL ones only come from mesa-dev,
+    // which a plain NDK build does not have. The block below includes <GL/gl.h>, so that is the
+    // header to probe: probing <EGL/egl.h> turns this on for every NDK build and then fails to
+    // compile. Termux installs mesa-dev, so it still gets the EGL path.
+    #if __has_include(<EGL/egl.h>) && __has_include(<GL/gl.h>)
         #define FF_HAVE_EGL 1
     #endif
 #endif
