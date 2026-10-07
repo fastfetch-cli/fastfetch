@@ -299,10 +299,7 @@ static void getHostName(FFPlatform* platform, const struct utsname* uts) {
 }
 
 static void getUserShell(FFPlatform* platform, const struct passwd* pwd) {
-    const char* shell = getenv("SHELL");
-    if (!ffStrSet(shell) && pwd) {
-        shell = pwd->pw_shell;
-    }
+    const char* shell = pwd ? pwd->pw_shell : getenv("SHELL");
 
     ffStrbufAppendS(&platform->userShell, shell);
 }
