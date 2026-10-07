@@ -1550,11 +1550,15 @@ if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/opt/local/lib")
 endif()
 
+# Termux installs the libraries fastfetch dlopens -- freetype among them -- under TARGET_DIR_ROOT, which
+# is not on the Android linker's default search path (DT_RUNPATH, LD_LIBRARY_PATH and the default
+# namespace). Termux's own clang injects -rpath=$PREFIX/lib into every binary it links, so a build made
+# inside Termux finds them; a plain NDK build, which is what the CI does, does not.
 if(ANDROID)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib64 -Wl,-rpath,/system/lib64")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${TARGET_DIR_ROOT}/lib -Wl,-rpath,/vendor/lib64 -Wl,-rpath,/system/lib64")
     else()
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib -Wl,-rpath,/system/lib")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${TARGET_DIR_ROOT}/lib -Wl,-rpath,/vendor/lib -Wl,-rpath,/system/lib")
     endif()
 endif()
 

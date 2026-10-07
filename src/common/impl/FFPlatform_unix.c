@@ -333,7 +333,12 @@ static void getCwd(FFPlatform* platform) {
 void ffPlatformInitImpl(FFPlatform* platform) {
     platform->pid = (uint32_t) getpid();
     platform->uid = getuid();
+#if !__ANDROID__
     struct passwd* pwd = getpwuid(platform->uid);
+#else
+    // On Android, /etc/passwd is empty, and getpwuid() will return `/data` for pw_dir
+    struct passwd* pwd = nullptr;
+#endif
 
     struct utsname uts;
     if (uname(&uts) < 0) {
