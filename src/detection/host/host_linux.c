@@ -2,6 +2,7 @@
 #include "common/io.h"
 #include "common/processing.h"
 #include "common/smbios.h"
+#include "common/keenetic/version.h"
 
 #include <stdlib.h>
 
@@ -110,6 +111,19 @@ const char* ffDetectHost(FFHostResult* host) {
                 ffStrbufSetS(&host->version, instance.state.platform.sysinfo.version.chars + strlen("FreeBSD "));
                 ffStrbufSubstrBeforeFirstC(&host->version, ' ');
             }
+        }
+    }
+
+    // Keenetic OS / NDMS detection
+    const FFKeeneticInfo* keen = ffDetectKeenetic();
+    if (keen->available) {
+        ffKeeneticFormatHost(&host->name);
+        ffStrbufSetS(&host->family, keen->family);
+        if (keen->vendor_full.length > 0) {
+            ffStrbufSetS(&host->vendor, keen->vendor_full.chars);
+        }
+        if (keen->version.length > 0) {
+            ffStrbufSetS(&host->version, keen->version.chars);
         }
     }
 
