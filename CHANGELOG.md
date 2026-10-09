@@ -19,6 +19,7 @@ Bugfixes:
 * Fixed `/boot` being hidden by default on Haiku, where it is the system volume. (Disk, Haiku)
 * Improved Snapdragon X1/X2 model name detection on Linux. (#2625, CPU, Linux)
 * Fixed the Android build failing with `GL/gl.h` not found, because the NDK ships the EGL headers that turned OpenGL detection on but not the desktop GL headers it includes. (OpenGL, Android)
+* Fixed MAC address reporting 20:00:00:00:00:00 on macOS 27. (LocalIP, Apple)
 
 Logos:
 * Added filled Artix logo (#2631)
