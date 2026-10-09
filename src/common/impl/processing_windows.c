@@ -263,7 +263,7 @@ exit: {
     if (NT_SUCCESS(status)) {
         assert(size == sizeof(info));
         if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0) {
-            FF_DEBUG("Child process exited with an error");
+            FF_DEBUG("Child process exited with an error: %x %s", (unsigned) info.ExitStatus, ffDebugNtStatus(info.ExitStatus));
             return "Child process exited with an error";
         }
     } else {
