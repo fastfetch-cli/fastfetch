@@ -111,7 +111,10 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "waitTime")) {
-            options->waitTime = (uint32_t) yyjson_get_uint(val);
+            if (!ffJsonConfigParseUInt32(val, &options->waitTime, UINT32_MAX)) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(DiskIO), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Property 'waitTime' must be a non-negative integer no greater than 4294967295");
+                continue;
+            }
             if (options->waitTime == 0) {
                 options->waitTime = 1;
             }
@@ -122,6 +125,7 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDiskIOJsonConfig(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -165,7 +169,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options) {
 
     ffStrbufInit(&options->namePrefix);
     options->detectTotal = false;
-    options->waitTime = 500;
+    options->waitTime = 250;
 }
 
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options) {
@@ -182,6 +186,7 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         .cs = "Diskové I/O",
         .de = "Festplatten I/O",
         .es = "E/S del disco",
+        .fi = "Levyn I/O",
         .fr = "Entrée/Sortie disque",
         .gl = "E/S do disco",
         .he = "קלט/פלט דיסק",
@@ -205,14 +210,14 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
     .generateJsonResult = (void*) ffGenerateDiskIOJsonResult,
     .generateJsonConfig = (void*) ffGenerateDiskIOJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Size of data read [per second] (formatted)", "size-read" },
+        { "Size of data read [per second] (formatted)"   , "size-read" },
         { "Size of data written [per second] (formatted)", "size-written" },
-        { "Device name", "name" },
-        { "Device raw file path", "dev-path" },
+        { "Device name *", "name" },
+        { "Device raw file path *", "dev-path" },
         { "Size of data read [per second] (in bytes)", "bytes-read" },
         { "Size of data written [per second] (in bytes)", "bytes-written" },
         { "Number of reads", "read-count" },
         { "Number of writes", "write-count" },
     })),
-    .defaultOrder = 67,
+    .defaultOrder = 68,
 };

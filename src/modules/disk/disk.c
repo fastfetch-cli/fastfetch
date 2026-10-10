@@ -332,6 +332,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -435,6 +436,8 @@ void ffInitDiskOptions(FFDiskOptions* options) {
     ffStrbufInit(&options->folders);
 #if _WIN32 || __APPLE__ || __ANDROID__
     ffStrbufInit(&options->hideFolders);
+#elif __HAIKU__
+    ffStrbufInitS(&options->hideFolders, "/esp"); // /boot on haiku is the system volume
 #else
     ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
 #endif
@@ -460,6 +463,7 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         .cs = "Disk",
         .de = "Festplatte",
         .es = "Disco",
+        .fi = "Levy",
         .fr = "Disque",
         .gl = "Disco",
         .he = "דיסק",
@@ -491,8 +495,8 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         { "Files percentage num", "files-percentage" },
         { "True if external volume", "is-external" },
         { "True if hidden volume", "is-hidden" },
-        { "Filesystem", "filesystem" },
-        { "Label / name", "name" },
+        { "Filesystem *", "filesystem" },
+        { "Label / name *", "name" },
         { "True if read-only", "is-readonly" },
         { "Create time in local timezone", "create-time" },
         { "Size percentage bar", "size-percentage-bar" },
@@ -502,13 +506,13 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         { "Minutes after creation", "minutes" },
         { "Seconds after creation", "seconds" },
         { "Milliseconds after creation", "milliseconds" },
-        { "Mount point / drive letter", "mountpoint" },
-        { "Mount from (device path)", "mount-from" },
+        { "Mount point / drive letter *", "mountpoint" },
+        { "Mount from (device path) *", "mount-from" },
         { "Years integer after creation", "years" },
         { "Days of year after creation", "days-of-year" },
         { "Years fraction after creation", "years-fraction" },
         { "Size free", "size-free" },
         { "Size available", "size-available" },
     })),
-    .defaultOrder = 41,
+    .defaultOrder = 42,
 };

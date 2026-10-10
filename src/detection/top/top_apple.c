@@ -1,18 +1,29 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <errno.h>
+#include <string.h>
 #include <sys/sysctl.h>
 #include <libproc.h>
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int npids = proc_listallpids(nullptr, 0);
     if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(nullptr, 0) failed: %s", strerror(errno));
         return "proc_listallpids(nullptr, 0) failed";
     }
-    FF_AUTO_FREE pid_t* pids = malloc((uint32_t) (npids + npids / 8 + 1) * sizeof(pid_t));
-    npids = proc_listallpids(pids, npids);
+    // `proc_listallpids` returns the number of pids, but it wants the size of the buffer in bytes:
+    // passing the count back would only let the kernel fill a quarter of it.
+    const int pidCapacity = npids + npids / 8 + 1;
+    FF_AUTO_FREE pid_t* pids = malloc((size_t) pidCapacity * sizeof(pid_t));
+    if (pids == nullptr) {
+        FF_DEBUG("malloc(%zu) for %d pids failed", (size_t) pidCapacity * sizeof(pid_t), pidCapacity);
+        return "malloc() failed";
+    }
+    npids = proc_listallpids(pids, pidCapacity * (int) sizeof(pid_t));
     if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(pids, %d) failed: %s", pidCapacity * (int) sizeof(pid_t), strerror(errno));
         return "proc_listallpids(pids, bufferSize) failed";
     }
 
@@ -41,6 +52,10 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
         item->startTime = proc.pbsd.pbi_start_tvsec * 1000u + proc.pbsd.pbi_start_tvusec / 1000u; // convert to ms
         item->threads = (uint32_t) proc.ptinfo.pti_threadnum;
 
+        // FF_LIST_ADD does not zero the element, and top.c subtracts both counters for every
+        // process it samples, whether or not they were collected.
+        item->bytesRead = 0;
+        item->bytesWritten = 0;
         if (showTypes & FF_TOP_TYPE_DISK) {
             struct rusage_info_v2 rusage;
             if (proc_pid_rusage(pid, RUSAGE_INFO_V2, (rusage_info_t*) &rusage) == 0) {

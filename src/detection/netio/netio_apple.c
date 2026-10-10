@@ -1,8 +1,10 @@
 #include "netio.h"
 
+#include "common/debug.h"
 #include "common/netif.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
 #include <net/if.h>
 #include <net/if_mib.h>
 #include <sys/sysctl.h>
@@ -12,6 +14,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
 
     size_t bufSize = 0;
     if (sysctl(mib, ARRAY_SIZE(mib), nullptr, &bufSize, 0, 0) < 0) {
+        FF_DEBUG("sysctl(mib, ARRAY_SIZE(mib), nullptr, &bufSize, 0, 0) failed: %s", strerror(errno));
         return "sysctl(mib, ARRAY_SIZE(mib), nullptr, &bufSize, 0, 0) failed";
     }
 
@@ -19,6 +22,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
 
     FF_AUTO_FREE struct ifmibdata* buf = (struct ifmibdata*) malloc(bufSize);
     if (sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) < 0) {
+        FF_DEBUG("sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) failed: %s", strerror(errno));
         return "sysctl(mib, ARRAY_SIZE(mib), buf, &bufSize, 0, 0) failed";
     }
 

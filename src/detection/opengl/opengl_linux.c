@@ -1,12 +1,16 @@
 #include "fastfetch.h"
 #include "opengl.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <string.h>
 
 #if __ANDROID__ && !defined(FF_HAVE_EGL)
-    // On Android, installing OpenGL headers is enough (mesa-dev)
-    #if __has_include(<EGL/egl.h>)
+    // On Android the EGL headers ship with the NDK, but the desktop GL ones only come from mesa-dev,
+    // which a plain NDK build does not have. The block below includes <GL/gl.h>, so that is the
+    // header to probe: probing <EGL/egl.h> turns this on for every NDK build and then fails to
+    // compile. Termux installs mesa-dev, so it still gets the EGL path.
+    #if __has_include(<EGL/egl.h>) && __has_include(<GL/gl.h>)
         #define FF_HAVE_EGL 1
     #endif
 #endif
@@ -50,6 +54,7 @@ typedef struct GLXData {
 
 static const char* glxHandleContext(FFOpenGLResult* result, GLXData* data) {
     if (data->ffglXMakeCurrent(data->display, data->glxPixmap, data->context) != True) {
+        FF_DEBUG("glXMakeCurrent() returned False");
         return "glXMakeCurrent returned False";
     }
     ffOpenGLHandleResult(result, data->ffglGetString);
@@ -67,6 +72,7 @@ static const char* glxHandleContext(FFOpenGLResult* result, GLXData* data) {
 static const char* glxHandleGLXPixmap(FFOpenGLResult* result, GLXData* data) {
     data->context = data->ffglXCreateContext(data->display, data->visualInfo, nullptr, True);
     if (data->context == nullptr) {
+        FF_DEBUG("glXCreateContext() returned nullptr");
         return "glXCreateContext returned nullptr";
     }
 
@@ -78,6 +84,7 @@ static const char* glxHandleGLXPixmap(FFOpenGLResult* result, GLXData* data) {
 static const char* glxHandlePixmap(FFOpenGLResult* result, GLXData* data) {
     data->glxPixmap = data->ffglXCreateGLXPixmap(data->display, data->visualInfo, data->pixmap);
     if (data->glxPixmap == None) {
+        FF_DEBUG("glXCreateGLXPixmap() returned None");
         return "glXCreateGLXPixmap returned None";
     }
 
@@ -89,6 +96,7 @@ static const char* glxHandlePixmap(FFOpenGLResult* result, GLXData* data) {
 static const char* glxHandleVisualInfo(FFOpenGLResult* result, GLXData* data) {
     data->pixmap = data->ffXCreatePixmap(data->display, DefaultRootWindow(data->display), FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, (unsigned int) data->visualInfo->depth);
     if (data->pixmap == None) {
+        FF_DEBUG("XCreatePixmap() returned None");
         return "XCreatePixmap returned None";
     }
 
@@ -100,6 +108,7 @@ static const char* glxHandleVisualInfo(FFOpenGLResult* result, GLXData* data) {
 static const char* glxHandleDisplay(FFOpenGLResult* result, GLXData* data) {
     data->visualInfo = data->ffglXChooseVisual(data->display, DefaultScreen(data->display), (int[]) { None });
     if (data->visualInfo == nullptr) {
+        FF_DEBUG("glXChooseVisual() returned nullptr");
         return "glXChooseVisual returned nullptr";
     }
 
@@ -111,11 +120,13 @@ static const char* glxHandleDisplay(FFOpenGLResult* result, GLXData* data) {
 static const char* glxHandleData(FFOpenGLResult* result, GLXData* data) {
     data->ffglGetString = (typeof(data->ffglGetString)) data->ffglXGetProcAddress((const GLubyte*) "glGetString");
     if (data->ffglGetString == nullptr) {
+        FF_DEBUG("glXGetProcAddress(glGetString) returned nullptr");
         return "glXGetProcAddress(glGetString) returned nullptr";
     }
 
     data->display = data->ffXOpenDisplay(nullptr);
     if (data->display == nullptr) {
+        FF_DEBUG("XOpenDisplay() returned nullptr");
         return "XOpenDisplay returned nullptr";
     }
 

@@ -161,8 +161,8 @@ void* dlsym(void* handle, const char* symbol) {
 }
 
 void* ffLibraryGetModule(const wchar_t* libraryFileName) {
-    assert(libraryFileName != nullptr && "Use \"ffGetPeb()->ImageBaseAddress\" instead");
-
+    // `libraryFileName` is non-null per the `nonnull(1)` contract.
+    // Prefer `ffGetPeb()->ImageBaseAddress` over looking the main module up by name.
     void* module = nullptr;
     USHORT libraryFileNameBytes = (USHORT) (wcslen(libraryFileName) * sizeof(wchar_t) + sizeof(wchar_t));
     NTSTATUS status = LdrGetDllHandle(nullptr, nullptr, &(UNICODE_STRING) {

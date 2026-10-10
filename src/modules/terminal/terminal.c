@@ -48,6 +48,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -91,6 +92,7 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         .cs = "Terminál",
         .de = "Terminal",
         .es = "Terminal",
+        .fi = "Terminaali",
         .fr = "Terminal",
         .gl = "Terminal",
         .he = "טרמינל",

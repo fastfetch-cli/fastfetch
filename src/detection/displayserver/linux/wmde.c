@@ -75,6 +75,10 @@ static const char* parseEnv(void) {
         return "Sway";
     }
 
+    if (getenv("COSMIC_VERSION") != nullptr) {
+        return "COSMIC";
+    }
+
 #if __linux__ && !__ANDROID__
     if (
         getenv("WAYLAND_DISPLAY") != nullptr &&

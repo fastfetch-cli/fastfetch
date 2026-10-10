@@ -1,5 +1,6 @@
 #include "physicaldisk.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOBSD.h>
@@ -25,11 +26,13 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
     [[gnu::cleanup(wrapIoDestroyPlugInInterface)]] IOCFPlugInInterface** pluginInf = nullptr;
     int32_t score;
     if (IOCreatePlugInInterfaceForService(entryPhysical, kIONVMeSMARTUserClientTypeID, kIOCFPlugInInterfaceID, &pluginInf, &score) != kIOReturnSuccess) {
+        FF_DEBUG("IOCreatePlugInInterfaceForService(kIONVMeSMARTUserClientTypeID) failed");
         return "IOCreatePlugInInterfaceForService() failed";
     }
 
     IONVMeSMARTInterface** smartInf = nullptr;
     if ((*pluginInf)->QueryInterface(pluginInf, CFUUIDGetUUIDBytes(kIONVMeSMARTInterfaceID), (LPVOID) &smartInf) != kIOReturnSuccess) {
+        FF_DEBUG("QueryInterface(kIONVMeSMARTInterfaceID) failed");
         return "QueryInterface() failed";
     }
 
@@ -44,6 +47,7 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
     (*pluginInf)->Release(smartInf);
     return error;
 #else
+    FF_DEBUG("SSD temperature detection needs macOS 10.15 or newer");
     return "No support for old MacOS version";
 #endif
 }
@@ -51,6 +55,7 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = 0;
     if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOBlockStorageDriverClass), &iterator) != KERN_SUCCESS) {
+        FF_DEBUG("IOServiceGetMatchingServices(kIOBlockStorageDriverClass) failed");
         return "IOServiceGetMatchingServices() failed";
     }
 

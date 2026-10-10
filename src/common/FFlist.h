@@ -15,17 +15,18 @@ typedef struct FFlist {
 } FFlist;
 
 // Removes the first element, and copy its value to `*result`
-bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result);
+// `result` is only written when the list is not empty, so it may be null for an empty list
+[[gnu::nonnull(1), nodiscard]] bool ffListShift(FFlist* list, uint32_t elementSize, void* __restrict result);
 // Removes the last element, and copy its value to `*result`
-bool ffListPop(FFlist* list, uint32_t elementSize, void* __restrict result);
+[[gnu::nonnull(1), nodiscard]] bool ffListPop(FFlist* list, uint32_t elementSize, void* __restrict result);
 
-static inline void ffListInit(FFlist* list) {
+[[gnu::nonnull(1)]] static inline void ffListInit(FFlist* list) {
     list->capacity = 0;
     list->length = 0;
     list->data = nullptr;
 }
 
-static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity) {
+[[gnu::nonnull(1)]] static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity) {
     ffListInit(list);
     list->capacity = capacity;
     list->data = __builtin_expect(capacity == 0, 0) ? nullptr : (uint8_t*) malloc((size_t) capacity * elementSize);
@@ -43,12 +44,13 @@ static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capa
     return result;
 }
 
-[[nodiscard]] static inline void* ffListGet(const FFlist* list, uint32_t elementSize, uint32_t index) {
+[[gnu::nonnull(1), gnu::pure, nodiscard]] static inline void* ffListGet(const FFlist* list, uint32_t elementSize, uint32_t index) {
     assert(list->capacity > index);
     return list->data + (index * elementSize);
 }
 
-[[nodiscard]] static inline uint32_t ffListFirstIndexComp(const FFlist* list, uint32_t elementSize, void* compElement, bool (*compFunc)(const void*, const void*)) {
+// Not `pure`: `compFunc` is caller-supplied and may have side effects
+[[gnu::nonnull(1, 3, 4), nodiscard]] static inline uint32_t ffListFirstIndexComp(const FFlist* list, uint32_t elementSize, void* compElement, bool (*compFunc)(const void*, const void*)) {
     for (uint32_t i = 0; i < list->length; i++) {
         if (compFunc(ffListGet(list, elementSize, i), compElement)) {
             return i;
@@ -58,16 +60,17 @@ static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capa
     return list->length;
 }
 
-[[nodiscard]] static inline bool ffListContains(const FFlist* list, uint32_t elementSize, void* compElement, bool (*compFunc)(const void*, const void*)) {
+// Not `pure`, same reason as ffListFirstIndexComp
+[[gnu::nonnull(1, 3, 4), nodiscard]] static inline bool ffListContains(const FFlist* list, uint32_t elementSize, void* compElement, bool (*compFunc)(const void*, const void*)) {
     return ffListFirstIndexComp(list, elementSize, compElement, compFunc) != list->length;
 }
 
-static inline void ffListSort(FFlist* list, uint32_t elementSize, int (*compar)(const void*, const void*)) {
+[[gnu::nonnull(1, 3)]] static inline void ffListSort(FFlist* list, uint32_t elementSize, int (*compar)(const void*, const void*)) {
     qsort(list->data, list->length, elementSize, compar);
 }
 
 // Move the contents of `src` into `list`, and left `src` empty
-static inline void ffListInitMove(FFlist* list, FFlist* src) {
+[[gnu::nonnull(1)]] static inline void ffListInitMove(FFlist* list, FFlist* src) {
     if (src) {
         list->capacity = src->capacity;
         list->length = src->length;
@@ -78,7 +81,7 @@ static inline void ffListInitMove(FFlist* list, FFlist* src) {
     }
 }
 
-static inline void ffListDestroy(FFlist* list) {
+[[gnu::nonnull(1)]] static inline void ffListDestroy(FFlist* list) {
     if (!list->data) {
         return;
     }
@@ -89,11 +92,11 @@ static inline void ffListDestroy(FFlist* list) {
     list->data = nullptr;
 }
 
-static inline void ffListClear(FFlist* list) {
+[[gnu::nonnull(1)]] static inline void ffListClear(FFlist* list) {
     list->length = 0;
 }
 
-static inline void ffListReserve(FFlist* list, uint32_t elementSize, uint32_t newCapacity) {
+[[gnu::nonnull(1)]] static inline void ffListReserve(FFlist* list, uint32_t elementSize, uint32_t newCapacity) {
     if (__builtin_expect(newCapacity <= list->capacity, false)) {
         return;
     }
@@ -102,7 +105,7 @@ static inline void ffListReserve(FFlist* list, uint32_t elementSize, uint32_t ne
     list->capacity = newCapacity;
 }
 
-static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
+[[gnu::nonnull(1)]] static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
     if (__builtin_expect(list->length == list->capacity, false)) {
         ffListReserve(list, elementSize, list->capacity == 0 ? FF_LIST_DEFAULT_ALLOC : list->capacity * 2);
     }
@@ -111,13 +114,13 @@ static inline void* ffListAdd(FFlist* list, uint32_t elementSize) {
     return ffListGet(list, elementSize, list->length - 1);
 }
 
-static inline void ffListRemoveAt(FFlist* list, uint32_t elementSize, uint32_t index) {
+[[gnu::nonnull(1)]] static inline void ffListRemoveAt(FFlist* list, uint32_t elementSize, uint32_t index) {
     assert(list->length > index);
     memmove(list->data + (index * elementSize), list->data + ((index + 1) * elementSize), (size_t) (list->length - index - 1) * elementSize);
     --list->length;
 }
 
-static inline void ffListInsertAt(FFlist* list, uint32_t elementSize, uint32_t index, const void* element) {
+[[gnu::nonnull(1, 4)]] static inline void ffListInsertAt(FFlist* list, uint32_t elementSize, uint32_t index, const void* element) {
     assert(list->length >= index);
     ffListAdd(list, elementSize);
     memmove(list->data + ((index + 1) * elementSize), list->data + (index * elementSize), (size_t) (list->length - index - 1) * elementSize);

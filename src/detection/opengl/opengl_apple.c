@@ -1,6 +1,7 @@
 
 #include "fastfetch.h"
 #include "opengl.h"
+#include "common/debug.h"
 
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
@@ -9,7 +10,9 @@
 void ffOpenGLHandleResult(FFOpenGLResult* result, typeof(&glGetString) ffglGetString);
 
 static const char* cglHandleContext(FFOpenGLResult* result, CGLContextObj context) {
-    if (CGLSetCurrentContext(context) != kCGLNoError) {
+    CGLError setContextError = CGLSetCurrentContext(context);
+    if (setContextError != kCGLNoError) {
+        FF_DEBUG("CGLSetCurrentContext() failed: CGLError %d", (int) setContextError);
         return "CGLSetCurrentContext() failed";
     }
 
@@ -25,7 +28,9 @@ static const char* cglHandleContext(FFOpenGLResult* result, CGLContextObj contex
 static const char* cglHandlePixelFormat(FFOpenGLResult* result, CGLPixelFormatObj pixelFormat) {
     CGLContextObj context;
 
-    if (CGLCreateContext(pixelFormat, nullptr, &context) != kCGLNoError) {
+    CGLError createContextError = CGLCreateContext(pixelFormat, nullptr, &context);
+    if (createContextError != kCGLNoError) {
+        FF_DEBUG("CGLCreateContext() failed: CGLError %d", (int) createContextError);
         return "CGLCreateContext() failed";
     }
 
@@ -41,7 +46,9 @@ const char* cglDetectOpenGL(FFOpenGLResult* result) {
     };
 
     GLint num;
-    if (CGLChoosePixelFormat(attrs, &pixelFormat, &num) != kCGLNoError) {
+    CGLError choosePixelFormatError = CGLChoosePixelFormat(attrs, &pixelFormat, &num);
+    if (choosePixelFormatError != kCGLNoError) {
+        FF_DEBUG("CGLChoosePixelFormat() failed: CGLError %d", (int) choosePixelFormatError);
         return "CGLChoosePixelFormat() failed";
     }
 
@@ -61,6 +68,7 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result) {
         return "fastfetch was compiled without egl support";
 #endif
     } else {
+        FF_DEBUG("Unsupported OpenGL library requested: %d", (int) options->library);
         return "Unsupported OpenGL library";
     }
 }

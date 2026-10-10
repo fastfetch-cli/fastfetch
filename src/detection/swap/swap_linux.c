@@ -1,5 +1,6 @@
 #include "swap.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 
@@ -11,6 +12,7 @@ static const char* detectByProcMeminfo(FFlist* result) {
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
     if (nRead < 0) {
+        FF_DEBUG("ffReadFileData(\"/proc/meminfo\") failed");
         return "ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf)";
     }
     buf[nRead] = '\0';
@@ -39,6 +41,7 @@ static const char* detectByProcSwaps(FFlist* result) {
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData("/proc/swaps", ARRAY_SIZE(buf) - 1, buf);
     if (nRead <= 0) {
+        FF_DEBUG("ffReadFileData(\"/proc/swaps\") failed");
         return "ffReadFileData(\"/proc/swaps\", ARRAY_SIZE(buf)-1, buf) failed";
     }
     buf[nRead] = '\0';
@@ -50,6 +53,7 @@ static const char* detectByProcSwaps(FFlist* result) {
         uint64_t total, used;
         char name[256];
         if (sscanf(line, "%255s %*[^\t]%" SCNu64 "%" SCNu64, name, &total, &used) != 3) {
+            FF_DEBUG("Invalid /proc/swaps format found");
             return "Invalid /proc/swaps format found";
         }
 

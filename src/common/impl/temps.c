@@ -154,6 +154,7 @@ bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, F
     return true;
 }
 
+[[gnu::cold]]
 void ffTempsGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, bool temp, FFColorRangeConfig config) {
     if (!temp) {
         yyjson_mut_obj_add_bool(doc, module, "temp", false);

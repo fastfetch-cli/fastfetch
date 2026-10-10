@@ -1,4 +1,5 @@
 #include "bios.h"
+#include "common/debug.h"
 #include "common/smbios.h"
 
 #ifdef _WIN32
@@ -46,11 +47,13 @@ static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
 const char* ffDetectBios(FFBiosResult* bios) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("BIOS: failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosBios* data = (const FFSmbiosBios*) (*smbiosTable)[FF_SMBIOS_TYPE_BIOS];
     if (!data) {
+        FF_DEBUG("BIOS: section is not found in SMBIOS data");
         return "BIOS section is not found in SMBIOS data";
     }
 

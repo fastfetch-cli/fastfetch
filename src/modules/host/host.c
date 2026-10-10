@@ -79,6 +79,7 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -144,6 +145,7 @@ FFModuleBaseInfo ffHostModuleInfo = {
         .cs = "Hostitel",
         .de = "Rechner",
         .es = "Host",
+        .fi = "Isäntä",
         .fr = "Hôte",
         .gl = "Host",
         .he = "מארח",

@@ -71,6 +71,18 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
         case 13:
             version = "5.4";
             break;
+        case 14:
+            version = "6.0";
+            break;
+        case 15:
+            version = "6.1";
+            break;
+        case 16:
+            version = "6.2";
+            break;
+        case 17:
+            version = "6.3";
+            break;
     }
 
     if (options->moduleArgs.outputFormat.length == 0) {
@@ -140,6 +152,7 @@ void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_va
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -197,6 +210,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         .cs = "Bluetooth rádio",
         .de = "Bluetooth-Adapter",
         .es = "Adaptador Bluetooth",
+        .fi = "Bluetooth-adapteri",
         .fr = "Adaptateur Bluetooth",
         .gl = "Adaptador Bluetooth",
         .he = "רדיו בלוטות'",
@@ -220,7 +234,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,
     .generateJsonConfig = (void*) ffGenerateBluetoothRadioJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Radio name for discovering", "name" },
+        { "Radio name for discovering *", "name" },
         { "Address", "address" },
         { "LMP version", "lmp-version" },
         { "LMP subversion", "lmp-subversion" },
@@ -229,5 +243,5 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         { "Discoverable", "discoverable" },
         { "Connectable / Pairable", "connectable" },
     })),
-    .defaultOrder = 59,
+    .defaultOrder = 60,
 };

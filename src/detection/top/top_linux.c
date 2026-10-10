@@ -68,12 +68,9 @@ static bool parseStat(const char* buffer, size_t length, FFTopProcessSnapshot* r
 }
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
-    const long ticks = sysconf(_SC_CLK_TCK);
-    const long pageSize = instance.state.platform.sysinfo.pageSize;
-    FF_DEBUG("Scanning /proc: clk_tck=%ld, pageSize=%ld", ticks, pageSize);
-    if (ticks <= 0 || pageSize <= 0) {
-        return "sysconf(_SC_CLK_TCK or _SC_PAGESIZE) failed";
-    }
+    const long ticks = sysconf(_SC_CLK_TCK); // sysconf returns -1 ONLY if `_SC_CLK_TCK` is an invalid name
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
+    FF_DEBUG("Scanning /proc: clk_tck=%ld, pageSizeShift=%u", ticks, (unsigned) pageSizeShift);
 
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (!dir) {
@@ -150,7 +147,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
         }
 
         snapshot->pid = (uint32_t) pid;
-        snapshot->memBytes = rssPages * (uint64_t) pageSize;
+        snapshot->memBytes = (uint64_t) rssPages << pageSizeShift;
         snapshot->bytesRead = 0;
         snapshot->bytesWritten = 0;
         if (ioLength > 0) {

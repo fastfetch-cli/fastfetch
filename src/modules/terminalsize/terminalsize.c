@@ -7,7 +7,7 @@
 bool ffPrintTerminalSize(FFTerminalSizeOptions* options) {
     FFTerminalSizeResult result = {};
 
-    if (!ffDetectTerminalSize(&result)) {
+    if (!ffDetectTerminalSize(&result, false)) {
         ffPrintError(FF_MODULE_GET_DISPLAY_NAME(TerminalSize), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal size");
         return false;
     }
@@ -44,6 +44,7 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -51,7 +52,7 @@ void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut
 bool ffGenerateTerminalSizeJsonResult([[maybe_unused]] FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     FFTerminalSizeResult result;
 
-    if (!ffDetectTerminalSize(&result)) {
+    if (!ffDetectTerminalSize(&result, false)) {
         yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect terminal size");
         return false;
     }
@@ -82,6 +83,7 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
         .cs = "Velikost terminálu",
         .de = "Terminalgröße",
         .es = "Tamaño del terminal",
+        .fi = "Terminaalin Koko",
         .fr = "Taille du terminal",
         .gl = "Tamaño do terminal",
         .he = "גודל טרמינל",

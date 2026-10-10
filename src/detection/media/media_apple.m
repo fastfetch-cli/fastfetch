@@ -111,7 +111,14 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
 }
 
 #if !FF_MODULE_DISABLE_MEDIA
-[[gnu::visibility("default"), gnu::used]] int ffPrintMediaByMediaRemote(int saveCover) {
+// Called from the Perl helper process through `DynaLoader::dl_install_xsub`. That mechanism installs a
+// plain C function as an XSUB, so Perl calls it with the `CV*` in the first parameter slot and no Perl
+// argument ever reaches a parameter — a `bool saveCover` parameter read as a pointer and was always
+// truthy. The flag has to travel in the environment instead; see `getMediaByAuthorizedProcess`.
+[[gnu::visibility("default"), gnu::used]] int ffPrintMediaByMediaRemote(void) {
+    const char* saveCoverEnv = getenv("FF_MEDIA_REMOTE_SAVE_COVER");
+    bool saveCover = saveCoverEnv && saveCoverEnv[0] == '1';
+
     FFMediaResult media = {
         .status = ffStrbufCreate(),
         .song = ffStrbufCreate(),
@@ -121,7 +128,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
         .player = ffStrbufCreate(),
         .cover = ffStrbufCreate(),
     };
-    if (getMediaByMediaRemote(&media, !!saveCover) != nullptr) {
+    if (getMediaByMediaRemote(&media, saveCover) != nullptr) {
         return 1;
     }
     ffStrbufAppendC(&media.status, '\n');
@@ -156,13 +163,17 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover) 
 
 static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveCover) {
     // #1737
-    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("require DynaLoader;\
+    // `DynaLoader::dl_install_xsub` hands the C function the `CV*` as its first parameter, so the flag
+    // cannot be passed as a Perl argument — `ffPrintMediaByMediaRemote` reads it from the environment,
+    // which the child process inherits.
+    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("$ENV{'FF_MEDIA_REMOTE_SAVE_COVER'}='%c';\
+require DynaLoader;\
 my $so = DynaLoader::dl_load_file('%s', 0);\
 my $sym = DynaLoader::dl_find_symbol($so, 'ffPrintMediaByMediaRemote');\
 DynaLoader::dl_install_xsub('fn', $sym, __FILE__);\
-exit(fn(%c))",
-                                                    instance.state.platform.exePath.chars,
-                                                    saveCover ? '1' : '0');
+exit(fn())",
+                                                    saveCover ? '1' : '0',
+                                                    instance.state.platform.exePath.chars);
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     const char* error = ffProcessAppendStdOut(
@@ -201,12 +212,17 @@ void ffDetectMediaImpl(FFMediaResult* media, bool saveCover) {
     }
     if (error) {
         ffStrbufAppendS(&media->error, error);
-    } else if (media->player.length == 0 && media->playerId.length > 0) {
-        ffStrbufSet(&media->player, &media->playerId);
-        if (ffStrbufStartsWithIgnCaseS(&media->player, "com.")) {
-            ffStrbufSubstrAfter(&media->player, strlen("com.") - 1);
+    } else {
+        if (media->player.length == 0 && media->playerId.length > 0) {
+            ffStrbufSet(&media->player, &media->playerId);
+            if (ffStrbufStartsWithIgnCaseS(&media->player, "com.")) {
+                ffStrbufSubstrAfter(&media->player, strlen("com.") - 1);
+            }
+            ffStrbufReplaceAllC(&media->player, '.', ' ');
         }
-        ffStrbufReplaceAllC(&media->player, '.', ' ');
+        // The cover is a temporary file that this process created, so it is ours to delete. This used
+        // to be flagged only in the branch above, which meant the file was left behind on every run
+        // whose player name was already known — that is, almost all of them.
         if (media->cover.length > 0) {
             media->removeCoverAfterUse = true;
         }

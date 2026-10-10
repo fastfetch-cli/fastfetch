@@ -62,6 +62,7 @@ void ffParsePublicIpJsonObject(FFPublicIPOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePublicIpJsonConfig(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -116,6 +117,7 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
         .cs = "Veřejná IP",
         .de = "Öffentliche IP",
         .es = "IP pública",
+        .fi = "Julkinen IP",
         .fr = "IP publique",
         .gl = "IP pública",
         .he = "IP ציבורי",
@@ -142,5 +144,5 @@ FFModuleBaseInfo ffPublicIPModuleInfo = {
         { "Public IP address", "ip" },
         { "Location", "location" },
     })),
-    .defaultOrder = 48,
+    .defaultOrder = 49,
 };

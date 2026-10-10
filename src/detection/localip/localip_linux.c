@@ -4,16 +4,10 @@
 #include "common/strutil.h"
 #include "common/debug.h"
 
-#include <string.h>
-#include <ctype.h>
-#include <net/if.h>
 #include <ifaddrs.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
-#include <fcntl.h>
 
 #ifdef __linux__
     #include <linux/ethtool.h>
@@ -280,7 +274,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
 
     struct ifaddrs* ifAddrStruct = nullptr;
     if (getifaddrs(&ifAddrStruct) < 0) {
-        FF_DEBUG("getifaddrs() failed");
+        FF_DEBUG("getifaddrs() failed: %s", strerror(errno));
         return "getifaddrs(&ifAddrStruct) failed";
     }
 
@@ -534,6 +528,11 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results) {
         (void) adapter;
 #endif
     }
+
+#if defined(__APPLE__)
+    void ffLocalIpFixRedactedMacs(FFlist* results);
+    ffLocalIpFixRedactedMacs(results);
+#endif
 
     FF_LIST_FOR_EACH (FFAdapter, adapter, adapters) {
         ffListDestroy(&adapter->ipv4);

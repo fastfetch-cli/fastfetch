@@ -1,5 +1,8 @@
 #include "detection/loadavg/loadavg.h"
+#include "common/debug.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/sysctl.h>
 
 #if __FreeBSD__ || __OpenBSD__ || __NetBSD__
@@ -14,6 +17,7 @@ const char* ffDetectLoadavg(double result[3]) {
     struct loadavg load;
     size_t size = sizeof(load);
     if (sysctl((int[]) { CTL_VM, VM_LOADAVG }, 2, &load, &size, nullptr, 0) < 0) {
+        FF_DEBUG("sysctl({CTL_VM, VM_LOADAVG}) failed: %s", strerror(errno));
         return "sysctl({CTL_VM, VM_LOADAVG}) failed";
     }
     for (int i = 0; i < 3; i++) {

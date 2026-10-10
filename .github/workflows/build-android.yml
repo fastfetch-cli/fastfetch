@@ -1,0 +1,163 @@
+name: Reusable Android
+
+on:
+  workflow_call:
+    inputs:
+      abi:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: uname -a
+        run: uname -a
+
+      # The NDK comes with the runner image, so nothing is downloaded here. The image is pinned to
+      # ubuntu-24.04 rather than ubuntu-latest because which NDK a build used is part of what it is.
+      #
+      # The image's *latest* NDK, not its default one: the default is r27d (clang 18), while fastfetch
+      # is built and shipped on Termux with clang 21. Testing three majors behind the compiler the
+      # supported path uses buys nothing and rejects code clang 21 accepts.
+      - name: print NDK version
+        run: |
+          echo "default: ${ANDROID_NDK_HOME}"
+          echo "latest:  ${ANDROID_NDK_LATEST_HOME}"
+          test -f "${ANDROID_NDK_LATEST_HOME}/build/cmake/android.toolchain.cmake"
+          cat "${ANDROID_NDK_LATEST_HOME}/source.properties"
+          "${ANDROID_NDK_LATEST_HOME}"/toolchains/llvm/prebuilt/*/bin/clang --version
+
+      # freetype is the one library this build wants that the NDK does not ship: its headers are not
+      # in the sysroot and the runner image has no libfreetype-dev, so without this step
+      # ff_lib_enable(FREETYPE ...) prints "Library: missing: FREETYPE" and
+      # src/detection/terminalfont/terminalfont_android.c compiles only its #else branch. That is the
+      # branch the shipped Termux build never takes, so the freetype code would rot untested here.
+      #
+      # Handing it the host's copy is sound, for two reasons. fastfetch never links freetype --
+      # BINARY_LINK_TYPE is dlopen, so ff_lib_enable skips its target_link_libraries and only the
+      # include path and FF_HAVE_FREETYPE are needed. And freetype's public headers carry no host
+      # assumptions: FT_SIZEOF_LONG and FT_SIZEOF_INT in freetype/config/integer-types.h are derived
+      # from FT_ULONG_MAX/FT_UINT_MAX, which come from the *target's* <limits.h>, so the same copy
+      # describes FT_FaceRec -- and the offset of the family_name that terminalfont_android.c reads --
+      # correctly for aarch64, armv7 and x86_64 alike.
+      #
+      # pkg-config is the only route that can find it: the NDK toolchain leaves PKG_CONFIG_PATH,
+      # PKG_CONFIG_LIBDIR and PKG_CONFIG_SYSROOT_DIR untouched, so the ordinary host search path is
+      # what gets used.
+      #
+      # The .pc is written here rather than taken from libfreetype-dev, whose own copy carries
+      # `Requires.private: zlib, bzip2, libpng, harfbuzz, libbrotlidec`. pkgconf -- which is what
+      # `pkg-config` has been on Ubuntu since 22.10 -- fails outright on a private requirement it
+      # cannot resolve, even for --exists, and libfreetype-dev only pulls in libpng-dev and
+      # zlib1g-dev. Nothing is linked, so the include directory is the whole contract. A Version
+      # field is mandatory (pkgconf treats a .pc without one as not found), hence the sed.
+      - name: install freetype headers
+        run: |
+          sudo apt-get install -y --no-install-recommends libfreetype-dev
+          test -f /usr/include/freetype2/ft2build.h
+          VERSION=$(awk '/^#define FREETYPE_(MAJOR|MINOR|PATCH)/ {printf "%s%s", sep, $3; sep="."}' /usr/include/freetype2/freetype/freetype.h)
+          test -n "${VERSION}"
+          mkdir -p freetype-pc
+          cat > freetype-pc/freetype2.pc <<'EOF'
+          prefix=/usr
+          includedir=${prefix}/include
+
+          Name: FreeType 2
+          Description: A free, high-quality, and portable font engine.
+          Version: 0
+          Cflags: -I${includedir}/freetype2
+          EOF
+          sed -i "s/^Version: .*/Version: ${VERSION}/" freetype-pc/freetype2.pc
+          PKG_CONFIG_PATH="$PWD/freetype-pc" pkg-config --cflags freetype2
+
+      # android-24 (Android 7.0) is Termux's own floor, and it is the floor for a second, independent
+      # reason: libcamera2ndk.so only exists from API 24, fastfetch links it unconditionally, and the
+      # NDK has no such thing as a weak *library* reference -- a build aimed lower would fail to load
+      # on exactly the devices it was aimed at. The level is also what makes this job check anything:
+      # at 24 the NDK marks AImageDecoder_* / AndroidBitmap_compress (30) and AMediaCodec_getName /
+      # AMediaCodec_releaseName (28) unavailable, which is what CMakeLists.txt's
+      # -D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__ -Werror=unguarded-availability pair is built on.
+      # Building against a newer platform would quietly stop enforcing it.
+      #
+      # BUILD_TESTS stays off. The test binaries are host programs, there is no device here to run
+      # them on, and `ctest` therefore cannot follow -- unlike every other job in this workflow set.
+      # The platform branch of the build is what this job covers.
+      - name: configure project
+        env:
+          # Picks up the freetype2.pc written by the step above. The rest of the search path is left
+          # alone, so zlib and every other host .pc file is still found exactly as before.
+          PKG_CONFIG_PATH: ${{ github.workspace }}/freetype-pc
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=Off -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_LATEST_HOME}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=${{ inputs.abi }} -DANDROID_PLATFORM=android-24 -DCMAKE_INSTALL_PREFIX=/data/data/com.termux/files/usr .
+
+      # A silent regression back to "Library: missing: FREETYPE" would look exactly like a passing
+      # build -- the module would simply stop being compiled, and the only trace would be a line in
+      # the configure log nobody diffs. Assert that the define actually reached the compile line.
+      - name: check freetype was detected
+        run: |
+          grep -q -- '-DFF_HAVE_FREETYPE=1' CMakeFiles/libfastfetch.dir/flags.make || {
+              echo "::error::freetype was not detected, so terminalfont_android.c compiled its #else branch only"
+              grep -o -- '-DFF_HAVE_[A-Z0-9_]*' CMakeFiles/libfastfetch.dir/flags.make | sort -u
+              exit 1
+          }
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: print ELF header
+        run: readelf --wide -h fastfetch
+
+      - name: print dynamic dependencies
+        run: readelf --wide -d fastfetch
+
+      # libjnigraphics.so, libmediandk.so and libcamera2ndk.so are what provide the entry points
+      # CMakeLists.txt weakens. A weak reference resolves to null instead of failing the load, and
+      # FF_ANDROID_API_AT_LEAST() reads the platform level rather than the symbol -- so a library
+      # dropped from the link line still passes the guard on a device new enough, and the call goes
+      # through a null pointer. DT_NEEDED is the only place that mistake is visible.
+      - name: check linked libraries
+        run: |
+          for lib in libjnigraphics.so libmediandk.so libcamera2ndk.so; do
+              readelf --wide -d fastfetch | grep -q "NEEDED.*\[${lib}\]" || { echo "::error::${lib} is not in DT_NEEDED"; exit 1; }
+          done
+
+      # Every reference to an entry point the NDK marks unavailable at API 24 has to be weak: a strong
+      # one turns a device below API 28/30 into a load failure instead of a graceful downgrade, which
+      # is the entire reason those three files are compiled with -D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__.
+      # `nm -D` prints a weak undefined symbol as `w` and a strong undefined one as `U`.
+      #
+      # The families are whole prefixes on purpose: every AImageDecoder* entry point is API 30 or 31,
+      # but the frame-info and header-info ones spell the prefix AImageDecoderFrameInfo / HeaderInfo
+      # without an underscore, and matching only `AImageDecoder_` would leave them unchecked. The
+      # AMediaCodec ones are named one by one because the rest of that API -- createDecoderByType,
+      # createEncoderByType, delete -- is API 21 and is correctly a strong reference.
+      - name: check weak references
+        run: |
+          nm -D fastfetch | grep -E ' (AImageDecoder|AndroidBitmap_compress|AMediaCodec_getName$|AMediaCodec_releaseName$)' > weak.txt
+          cat weak.txt
+          test -s weak.txt || { echo "::error::none of these entry points is referenced any more -- if the last use is gone on purpose, this check and the -Werror=unguarded-availability pair it guards should go with it"; exit 1; }
+          if grep -qv '^ *w ' weak.txt; then
+              echo "::error::expected every one of these to be a weak reference:"
+              grep -v '^ *w ' weak.txt
+              exit 1
+          fi
+
+      - name: print size
+        run: |
+          file fastfetch
+          ls -l fastfetch
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fastfetch-android-${{ inputs.abi }}
+          path: ./fastfetch-*.*

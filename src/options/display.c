@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/color.h"
+#include "common/io.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/strutil.h"
@@ -68,6 +69,7 @@ static uint32_t optionParseLanguageString(FFstrbuf* language) {
         case 'cs': return offsetof(FFModuleDisplayName, cs);
         case 'de': return offsetof(FFModuleDisplayName, de);
         case 'es': return offsetof(FFModuleDisplayName, es);
+        case 'fi': return offsetof(FFModuleDisplayName, fi);
         case 'fr': return offsetof(FFModuleDisplayName, fr);
         case 'gl': return offsetof(FFModuleDisplayName, gl);
         case 'he': return offsetof(FFModuleDisplayName, he);
@@ -286,11 +288,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) {
                 if (!yyjson_is_uint(ndigits)) {
-                    return "display.temperature.ndigits must be an unsigned integer";
+                    return "display.temp.ndigits must be an unsigned integer";
                 }
                 uint64_t val = yyjson_get_uint(ndigits);
                 if (val > 9) {
-                    return "display.temperature.ndigits must be between 0 and 9";
+                    return "display.temp.ndigits must be between 0 and 9";
                 }
                 options->tempNdigits = (uint8_t) val;
             }
@@ -298,7 +300,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color) {
                 if (!yyjson_is_obj(color)) {
-                    return "display.temperature.color must be an object";
+                    return "display.temp.color must be an object";
                 }
 
                 yyjson_val* green = yyjson_obj_get(color, "green");
@@ -952,7 +954,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options) {
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
-    options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
+    options->pipe = !ffIsTerminal(STDOUT_FILENO) || !!getenv("NO_COLOR");
     options->disableLinewrap = false;
 
 #ifndef NDEBUG
@@ -1036,6 +1038,48 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options) {
     ffListDestroy(&options->constants);
 }
 
+// `names` is indexed by the enum value, so its order must match the enum declaration. A value outside
+// the array adds no key at all, which is what the exhaustive switches this replaces did.
+static void optionAddEnumString(yyjson_mut_doc* doc, yyjson_mut_val* obj, const char* key, const char* const names[], size_t count, uint32_t value) {
+    if (value < count) {
+        yyjson_mut_obj_add_str(doc, obj, key, names[value]);
+    }
+}
+
+static void optionAddSpaceBeforeUnit(yyjson_mut_doc* doc, yyjson_mut_val* obj, FFSpaceBeforeUnitType type) {
+    static const char* const names[] = {"default", "always", "never"};
+    optionAddEnumString(doc, obj, "spaceBeforeUnit", names, sizeof(names) / sizeof(*names), type);
+}
+
+// @returns the language code for offsetof(FFModuleDisplayName, <language>), or nullptr if unknown
+// @see optionParseLanguageString
+static const char* optionGetLanguageString(uint32_t offset) {
+    switch (offset) {
+        case offsetof(FFModuleDisplayName, en): return "en";
+        case offsetof(FFModuleDisplayName, ar): return "ar";
+        case offsetof(FFModuleDisplayName, cs): return "cs";
+        case offsetof(FFModuleDisplayName, de): return "de";
+        case offsetof(FFModuleDisplayName, es): return "es";
+        case offsetof(FFModuleDisplayName, fr): return "fr";
+        case offsetof(FFModuleDisplayName, gl): return "gl";
+        case offsetof(FFModuleDisplayName, he): return "he";
+        case offsetof(FFModuleDisplayName, id): return "id";
+        case offsetof(FFModuleDisplayName, it): return "it";
+        case offsetof(FFModuleDisplayName, ja): return "ja";
+        case offsetof(FFModuleDisplayName, ko): return "ko";
+        case offsetof(FFModuleDisplayName, pl): return "pl";
+        case offsetof(FFModuleDisplayName, pt): return "pt";
+        case offsetof(FFModuleDisplayName, ru): return "ru";
+        case offsetof(FFModuleDisplayName, tr): return "tr";
+        case offsetof(FFModuleDisplayName, uk): return "uk";
+        case offsetof(FFModuleDisplayName, vi): return "vi";
+        case offsetof(FFModuleDisplayName, zh_CN): return "zh_CN";
+        case offsetof(FFModuleDisplayName, zh_TW): return "zh_TW";
+    }
+    return nullptr;
+}
+
+[[gnu::cold]]
 void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options) {
     yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "display");
@@ -1069,20 +1113,11 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
     {
         yyjson_mut_val* duration = yyjson_mut_obj_add_obj(doc, obj, "duration");
         yyjson_mut_obj_add_bool(doc, duration, "abbreviation", options->durationAbbreviation);
-        switch (options->durationSpaceBeforeUnit) {
-            case FF_SPACE_BEFORE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "default");
-                break;
-            case FF_SPACE_BEFORE_UNIT_ALWAYS:
-                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "always");
-                break;
-            case FF_SPACE_BEFORE_UNIT_NEVER:
-                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "never");
-                break;
-        }
+        optionAddSpaceBeforeUnit(doc, duration, options->durationSpaceBeforeUnit);
     }
 
     {
+        static const char* const binaryPrefixNames[] = {"iec", "si", "jedec"};
         yyjson_mut_val* size = yyjson_mut_obj_add_obj(doc, obj, "size");
         yyjson_mut_obj_add_str(doc, size, "maxPrefix", ((const char*[]) {
                                                            "B",
@@ -1095,47 +1130,15 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
                                                            "ZB",
                                                            "YB",
                                                        })[options->sizeMaxPrefix]);
-        switch (options->sizeBinaryPrefix) {
-            case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
-                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "iec");
-                break;
-            case FF_SIZE_BINARY_PREFIX_TYPE_SI:
-                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "si");
-                break;
-            case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
-                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "jedec");
-                break;
-        }
+        optionAddEnumString(doc, size, "binaryPrefix", binaryPrefixNames, sizeof(binaryPrefixNames) / sizeof(*binaryPrefixNames), options->sizeBinaryPrefix);
         yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
-        switch (options->sizeSpaceBeforeUnit) {
-            case FF_SPACE_BEFORE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "default");
-                break;
-            case FF_SPACE_BEFORE_UNIT_ALWAYS:
-                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "always");
-                break;
-            case FF_SPACE_BEFORE_UNIT_NEVER:
-                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "never");
-                break;
-        }
+        optionAddSpaceBeforeUnit(doc, size, options->sizeSpaceBeforeUnit);
     }
 
     {
+        static const char* const tempUnitNames[] = {"D", "C", "F", "K"};
         yyjson_mut_val* temperature = yyjson_mut_obj_add_obj(doc, obj, "temp");
-        switch (options->tempUnit) {
-            case FF_TEMPERATURE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, temperature, "unit", "D");
-                break;
-            case FF_TEMPERATURE_UNIT_CELSIUS:
-                yyjson_mut_obj_add_str(doc, temperature, "unit", "C");
-                break;
-            case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-                yyjson_mut_obj_add_str(doc, temperature, "unit", "F");
-                break;
-            case FF_TEMPERATURE_UNIT_KELVIN:
-                yyjson_mut_obj_add_str(doc, temperature, "unit", "K");
-                break;
-        }
+        optionAddEnumString(doc, temperature, "unit", tempUnitNames, sizeof(tempUnitNames) / sizeof(*tempUnitNames), options->tempUnit);
         yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
         {
             yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, temperature, "color");
@@ -1143,17 +1146,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->tempColorYellow);
             yyjson_mut_obj_add_strbuf(doc, color, "red", &options->tempColorRed);
         }
-        switch (options->tempSpaceBeforeUnit) {
-            case FF_SPACE_BEFORE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "default");
-                break;
-            case FF_SPACE_BEFORE_UNIT_ALWAYS:
-                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "always");
-                break;
-            case FF_SPACE_BEFORE_UNIT_NEVER:
-                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "never");
-                break;
-        }
+        optionAddSpaceBeforeUnit(doc, temperature, options->tempSpaceBeforeUnit);
     }
 
     {
@@ -1183,17 +1176,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->percentColorYellow);
             yyjson_mut_obj_add_strbuf(doc, color, "red", &options->percentColorRed);
         }
-        switch (options->percentSpaceBeforeUnit) {
-            case FF_SPACE_BEFORE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "default");
-                break;
-            case FF_SPACE_BEFORE_UNIT_ALWAYS:
-                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "always");
-                break;
-            case FF_SPACE_BEFORE_UNIT_NEVER:
-                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "never");
-                break;
-        }
+        optionAddSpaceBeforeUnit(doc, percent, options->percentSpaceBeforeUnit);
         yyjson_mut_obj_add_uint(doc, percent, "width", options->percentWidth);
     }
 
@@ -1219,6 +1202,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
     }
 
     {
+        static const char* const trailingZerosNames[] = {"default", "always", "never"};
         yyjson_mut_val* fraction = yyjson_mut_obj_add_obj(doc, obj, "fraction");
 
         if (options->fractionNdigits < 0) {
@@ -1227,17 +1211,7 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
             yyjson_mut_obj_add_uint(doc, fraction, "ndigits", (uint8_t) options->fractionNdigits);
         }
 
-        switch (options->fractionTrailingZeros) {
-            case FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT:
-                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "default");
-                break;
-            case FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS:
-                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "always");
-                break;
-            case FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER:
-                yyjson_mut_obj_add_str(doc, fraction, "trailingZeros", "never");
-                break;
-        }
+        optionAddEnumString(doc, fraction, "trailingZeros", trailingZerosNames, sizeof(trailingZerosNames) / sizeof(*trailingZerosNames), options->fractionTrailingZeros);
     }
 
     yyjson_mut_obj_add_bool(doc, obj, "noBuffer", options->noBuffer);
@@ -1274,84 +1248,16 @@ void ffOptionsGenerateDisplayJsonConfig(FFdata* data, FFOptionsDisplay* options)
 
         yyjson_mut_obj_add_uint(doc, key, "paddingLeft", options->keyPaddingLeft);
 
-        switch (options->keyLanguage) {
-            case offsetof(FFModuleDisplayName, en):
-                yyjson_mut_obj_add_str(doc, key, "language", "en");
-                break;
-            case offsetof(FFModuleDisplayName, ar):
-                yyjson_mut_obj_add_str(doc, key, "language", "ar");
-                break;
-            case offsetof(FFModuleDisplayName, cs):
-                yyjson_mut_obj_add_str(doc, key, "language", "cs");
-                break;
-            case offsetof(FFModuleDisplayName, de):
-                yyjson_mut_obj_add_str(doc, key, "language", "de");
-                break;
-            case offsetof(FFModuleDisplayName, es):
-                yyjson_mut_obj_add_str(doc, key, "language", "es");
-                break;
-            case offsetof(FFModuleDisplayName, fr):
-                yyjson_mut_obj_add_str(doc, key, "language", "fr");
-                break;
-            case offsetof(FFModuleDisplayName, gl):
-                yyjson_mut_obj_add_str(doc, key, "language", "gl");
-                break;
-            case offsetof(FFModuleDisplayName, he):
-                yyjson_mut_obj_add_str(doc, key, "language", "he");
-                break;
-            case offsetof(FFModuleDisplayName, id):
-                yyjson_mut_obj_add_str(doc, key, "language", "id");
-                break;
-            case offsetof(FFModuleDisplayName, it):
-                yyjson_mut_obj_add_str(doc, key, "language", "it");
-                break;
-            case offsetof(FFModuleDisplayName, ja):
-                yyjson_mut_obj_add_str(doc, key, "language", "ja");
-                break;
-            case offsetof(FFModuleDisplayName, ko):
-                yyjson_mut_obj_add_str(doc, key, "language", "ko");
-                break;
-            case offsetof(FFModuleDisplayName, pl):
-                yyjson_mut_obj_add_str(doc, key, "language", "pl");
-                break;
-            case offsetof(FFModuleDisplayName, pt):
-                yyjson_mut_obj_add_str(doc, key, "language", "pt");
-                break;
-            case offsetof(FFModuleDisplayName, ru):
-                yyjson_mut_obj_add_str(doc, key, "language", "ru");
-                break;
-            case offsetof(FFModuleDisplayName, tr):
-                yyjson_mut_obj_add_str(doc, key, "language", "tr");
-                break;
-            case offsetof(FFModuleDisplayName, uk):
-                yyjson_mut_obj_add_str(doc, key, "language", "uk");
-                break;
-            case offsetof(FFModuleDisplayName, vi):
-                yyjson_mut_obj_add_str(doc, key, "language", "vi");
-                break;
-            case offsetof(FFModuleDisplayName, zh_CN):
-                yyjson_mut_obj_add_str(doc, key, "language", "zh_CN");
-                break;
-            case offsetof(FFModuleDisplayName, zh_TW):
-                yyjson_mut_obj_add_str(doc, key, "language", "zh_TW");
-                break;
+        const char* language = optionGetLanguageString(options->keyLanguage);
+        if (language != nullptr) {
+            yyjson_mut_obj_add_str(doc, key, "language", language);
         }
     }
 
     {
         yyjson_mut_val* freq = yyjson_mut_obj_add_obj(doc, obj, "freq");
         yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
-        switch (options->freqSpaceBeforeUnit) {
-            case FF_SPACE_BEFORE_UNIT_DEFAULT:
-                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "default");
-                break;
-            case FF_SPACE_BEFORE_UNIT_ALWAYS:
-                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "always");
-                break;
-            case FF_SPACE_BEFORE_UNIT_NEVER:
-                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "never");
-                break;
-        }
+        optionAddSpaceBeforeUnit(doc, freq, options->freqSpaceBeforeUnit);
     }
 
     {

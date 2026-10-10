@@ -37,6 +37,7 @@ const char* ffDetectCamera(FFlist* result)
         ffStrbufInitS(&camera->name, device.localizedName.UTF8String);
         ffStrbufInitS(&camera->vendor, device.manufacturer.UTF8String);
         ffStrbufInitS(&camera->id, device.uniqueID.UTF8String);
+        ffStrbufInit(&camera->colorspace);
         switch (device.activeColorSpace)
         {
             case AVCaptureColorSpace_sRGB: ffStrbufInitStatic(&camera->colorspace, "sRGB"); break;

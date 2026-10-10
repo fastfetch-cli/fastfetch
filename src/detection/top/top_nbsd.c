@@ -1,16 +1,19 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <errno.h>
+#include <string.h>
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC2, KERN_PROC_ALL, -1, sizeof(struct kinfo_proc2), INT_MAX };
     size_t length;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, nullptr}) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, nullptr}) failed";
     }
 
@@ -19,11 +22,12 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
 
     FF_AUTO_FREE struct kinfo_proc2* processes = malloc(length);
     if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, processes}) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC2, KERN_PROC_ALL, processes}) failed";
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc2));
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (uint32_t i = 0; i < count; ++i) {
         const struct kinfo_proc2* proc = &processes[i];
@@ -43,7 +47,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
             (uint64_t) proc->p_ustime_usec / 1000;
         item->cpuTime = userMs + sysMs;
 
-        item->memBytes = (uint64_t) proc->p_vm_rssize * (uint64_t) pageSize;
+        item->memBytes = (uint64_t) proc->p_vm_rssize << pageSizeShift;
 
         item->startTime = (uint64_t) proc->p_ustart_sec * 1000 +
             (uint64_t) proc->p_ustart_usec / 1000;

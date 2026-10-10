@@ -1,4 +1,7 @@
 #include "swap.h"
+#include "common/debug.h"
+#include <errno.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <limits.h>
@@ -17,15 +20,16 @@ const char* ffDetectSwap(FFlist* result) {
 
     int size = swapctl(SC_LIST, table);
     if (size < 0) {
+        FF_DEBUG("swapctl() failed: %s", strerror(errno));
         return "swapctl() failed";
     }
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
     for (int i = 0; i < size; ++i) {
         FFSwapResult* swap = FF_LIST_ADD(FFSwapResult, *result);
         ffStrbufInitS(&swap->name, table->swt_ent[i].ste_path);
-        swap->bytesTotal = (uint64_t) table->swt_ent[i].ste_pages * pageSize;
-        swap->bytesUsed = swap->bytesTotal - (uint64_t) table->swt_ent[i].ste_free * pageSize;
+        swap->bytesTotal = (uint64_t) table->swt_ent[i].ste_pages << pageSizeShift;
+        swap->bytesUsed = swap->bytesTotal - ((uint64_t) table->swt_ent[i].ste_free << pageSizeShift);
     }
 
     return nullptr;

@@ -159,7 +159,8 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
         NTSTATUS monitorStatus = ffGetPhysicalMonitors(&deviceName, 1, &monitorCount, &physicalMonitor);
         if (NT_SUCCESS(monitorStatus) && monitorCount >= 1) {
             DWORD curr = 0, max = 0;
-            if (NT_SUCCESS(ffDDCCIGetVCPFeature(physicalMonitor, FF_DDC_CI_LUMINANCE_OPCODE, nullptr, &curr, &max))) {
+            monitorStatus = ffDDCCIGetVCPFeature(physicalMonitor, FF_DDC_CI_LUMINANCE_OPCODE, nullptr, &curr, &max);
+            if (NT_SUCCESS(monitorStatus)) {
                 FFBrightnessResult* brightness = FF_LIST_ADD(FFBrightnessResult, *result);
                 if (display->name.length > 0) {
                     ffStrbufInitCopy(&brightness->name, &display->name);
@@ -167,8 +168,11 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                     FF_LIBRARY_LOAD_SYMBOL_LAZY(gdi32, GetPhysicalMonitorDescription)
                     if (ffGetPhysicalMonitorDescription) {
                         wchar_t description[128 /*MUST be PHYSICAL_MONITOR_DESCRIPTION_SIZE*/];
-                        if (NT_SUCCESS(ffGetPhysicalMonitorDescription(physicalMonitor, ARRAY_SIZE(description), description))) {
+                        monitorStatus = ffGetPhysicalMonitorDescription(physicalMonitor, ARRAY_SIZE(description), description);
+                        if (NT_SUCCESS(monitorStatus)) {
                             ffStrbufInitWS(&brightness->name, description);
+                        } else {
+                            FF_DEBUG("DDC/CI: GetPhysicalMonitorDescription failed for monitor '%ls': %s", deviceName.Buffer, ffDebugNtStatus(monitorStatus));
                         }
                     }
                     if (brightness->name.length == 0) {
@@ -182,7 +186,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
 
                 FF_DEBUG("DDC/CI: detected external display '%s', current=%u, max=%u", brightness->name.chars, (unsigned) curr, (unsigned) max);
             } else {
-                FF_DEBUG("DDC/CI: DDCCIGetVCPFeature failed for monitor '%ls': %s", deviceName.Buffer, ffDebugWin32Error(GetLastError()));
+                FF_DEBUG("DDC/CI: DDCCIGetVCPFeature failed for monitor '%ls': %s", deviceName.Buffer, ffDebugNtStatus(monitorStatus));
             }
 
             ffDestroyPhysicalMonitorInternal(physicalMonitor);

@@ -1,17 +1,22 @@
 #include "common/sysctl.h"
+#include "common/debug.h"
 
+#include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __OpenBSD__
 const char* ffSysctlGetString(int mib1, int mib2, FFstrbuf* result) {
     size_t neededLength;
     if (sysctl((int[]) { mib1, mib2 }, 2, nullptr, &neededLength, nullptr, 0) != 0 || neededLength == 1) { // neededLength is 1 for empty strings, because of the null terminator
+        FF_DEBUG("sysctl({%d, %d}) length query failed: %s", mib1, mib2, strerror(errno));
         return "sysctl() length query failed";
     }
 
     ffStrbufEnsureFree(result, (uint32_t) neededLength - 1);
 
     if (sysctl((int[]) { mib1, mib2 }, 2, result->chars + result->length, &neededLength, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({%d, %d}) failed to retrieve %zu bytes: %s", mib1, mib2, neededLength, strerror(errno));
         return "sysctl() failed to retrieve string data";
     }
 
@@ -62,12 +67,14 @@ int64_t ffSysctlGetInt64(int mib1, int mib2, int64_t defaultValue) {
 const char* ffSysctlGetString(const char* propName, FFstrbuf* result) {
     size_t neededLength;
     if (sysctlbyname(propName, nullptr, &neededLength, nullptr, 0) != 0 || neededLength == 1) { // neededLength is 1 for empty strings, because of the null terminator
+        FF_DEBUG("sysctlbyname(%s) length query failed: %s", propName, strerror(errno));
         return "sysctlbyname() failed";
     }
 
     ffStrbufEnsureFree(result, (uint32_t) neededLength - 1);
 
     if (sysctlbyname(propName, result->chars + result->length, &neededLength, nullptr, 0) != 0) {
+        FF_DEBUG("sysctlbyname(%s) failed to retrieve %zu bytes: %s", propName, neededLength, strerror(errno));
         return "sysctlbyname() failed to retrieve string data";
     }
 

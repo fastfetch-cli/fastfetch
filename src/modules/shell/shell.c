@@ -50,6 +50,7 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -97,6 +98,7 @@ FFModuleBaseInfo ffShellModuleInfo = {
         .cs = "Shell",
         .de = "Shell",
         .es = "Shell",
+        .fi = "Komentotulkki",
         .fr = "Shell",
         .gl = "Shell",
         .he = "מעטפת",

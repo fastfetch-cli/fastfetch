@@ -87,6 +87,7 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -113,6 +114,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
         .cs = "Monitor",
         .de = "Monitor",
         .es = "Monitor",
+        .fi = "Monitori",
         .fr = "Moniteur",
         .gl = "Monitor",
         .he = "צג",
@@ -136,7 +138,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMonitorJsonResult,
     .generateJsonConfig = (void*) ffGenerateMonitorJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Display name", "name" },
+        { "Display name *", "name" },
         { "Native resolution width in pixels", "width" },
         { "Native resolution height in pixels", "height" },
         { "Physical width in millimeters", "physical-width" },

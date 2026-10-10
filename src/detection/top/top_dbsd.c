@@ -23,7 +23,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (uint32_t i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &processes[i];
@@ -45,7 +45,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
         uint64_t liveMs = (proc->kp_lwp.kl_uticks + proc->kp_lwp.kl_sticks) / 1000;
         item->cpuTime = exitedMs + liveMs;
 
-        item->memBytes = (uint64_t) proc->kp_vm_rssize * pageSize;
+        item->memBytes = (uint64_t) proc->kp_vm_rssize << pageSizeShift;
 
         item->startTime = (uint64_t) proc->kp_start.tv_sec * 1000 +
             (uint64_t) proc->kp_start.tv_usec / 1000;

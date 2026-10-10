@@ -394,6 +394,8 @@ const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* 
             },
             soName);
     }
+#else
+    FF_UNUSED(options, gpu, pciBusId);
 #endif
 
     return "No driver-specific detection function found for the GPU vendor";

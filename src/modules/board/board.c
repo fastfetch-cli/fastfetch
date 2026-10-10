@@ -60,6 +60,7 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -116,6 +117,7 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         .cs = "Základní deska",
         .de = "Mainboard",
         .es = "Placa base",
+        .fi = "Emolevy",
         .fr = "Carte mère",
         .gl = "Placa base",
         .he = "לוח אם",

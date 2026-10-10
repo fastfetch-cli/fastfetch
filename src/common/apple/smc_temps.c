@@ -1,5 +1,6 @@
 #include "smc_temps.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 
 #include <stdint.h>
@@ -83,7 +84,10 @@ static void smcUltostr(char* str, uint32_t val) {
 static const char* smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t* inputStructure, SmcKeyData_t* outputStructure) {
     size_t size = sizeof(SmcKeyData_t);
 
-    if (IOConnectCallStructMethod(conn, selector, inputStructure, size, outputStructure, &size) != kIOReturnSuccess) {
+    const IOReturn callStatus = IOConnectCallStructMethod(conn, selector, inputStructure, size, outputStructure, &size);
+    if (callStatus != kIOReturnSuccess) {
+        FF_DEBUG("IOConnectCallStructMethod(selector=%u, command=%u) failed: IOReturn 0x%08x",
+            selector, (uint32_t) (unsigned char) inputStructure->data8, (unsigned) callStatus);
         return "IOConnectCallStructMethod(conn) failed";
     }
     return nullptr;
@@ -136,10 +140,13 @@ static const char* smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 static const char* smcOpen(io_connect_t* conn) {
     FF_IOOBJECT_AUTO_RELEASE io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
     if (!device) {
+        FF_DEBUG("IOKit has no AppleSMC service");
         return "No SMC device found";
     }
 
-    if (IOServiceOpen(device, mach_task_self(), 0, conn) != kIOReturnSuccess) {
+    const IOReturn openStatus = IOServiceOpen(device, mach_task_self(), 0, conn);
+    if (openStatus != kIOReturnSuccess) {
+        FF_DEBUG("IOServiceOpen(AppleSMC) failed: IOReturn 0x%08x", (unsigned) openStatus);
         return "IOServiceOpen() failed";
     }
 
@@ -153,6 +160,7 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
         return error;
     }
     if (val.dataSize == 0) {
+        FF_DEBUG("The SMC key %s reported a data size of 0", key);
         return "Empty SMC result";
     }
 
@@ -173,9 +181,12 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                         *value = (double) ntohll(*(uint64_t*) (val.bytes));
                         break;
                     default:
+                        FF_DEBUG("SMC key %s: unsigned type %s has an unsupported size of %u bytes",
+                            key, val.dataType, val.dataSize);
                         return "Unsupported SMC unsigned integer data size";
                 }
             } else {
+                FF_DEBUG("SMC key %s: unsupported unsigned type %s", key, val.dataType);
                 return "Unsupported SMC unsigned data type";
             }
             break;
@@ -204,9 +215,13 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                 } else if (ffStrEquals(val.dataType, "fpe2")) {
                     *value = ntohs(*(uint16_t*) (val.bytes)) / 4.0;
                 } else {
+                    FF_DEBUG("SMC key %s: unsupported fixed point type %s of %u bytes",
+                        key, val.dataType, val.dataSize);
                     return "Unsupported SMC floating point data type";
                 }
             } else {
+                FF_DEBUG("SMC key %s: unsupported floating point type %s of %u bytes",
+                    key, val.dataType, val.dataSize);
                 return "Unsupported SMC floating point data type";
             }
             break;
@@ -227,6 +242,8 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                         *value = (double) ntohll(*(int64_t*) (val.bytes));
                         break;
                     default:
+                        FF_DEBUG("SMC key %s: signed type %s has an unsupported size of %u bytes",
+                            key, val.dataType, val.dataSize);
                         return "Unsupported SMC signed integer data size";
                 }
             } else if (val.dataType[1] == 'p' && val.dataSize == 2) // signed fixed point types
@@ -252,9 +269,12 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
                 } else if (ffStrEquals(val.dataType, "spf0")) {
                     *value = (int16_t) ntohs(*(int16_t*) (val.bytes)) / 1.0;
                 } else {
+                    FF_DEBUG("SMC key %s: unsupported signed fixed point type %s of %u bytes",
+                        key, val.dataType, val.dataSize);
                     return "Unsupported SMC signed integer data type";
                 }
             } else {
+                FF_DEBUG("SMC key %s: unsupported signed type %s", key, val.dataType);
                 return "Unsupported SMC signed data type";
             }
             break;
@@ -263,11 +283,15 @@ static const char* smcReadValue(io_connect_t conn, const UInt32Char_t key, doubl
             if (ffStrEquals(val.dataType, "{pwm") && val.dataSize == 2) {
                 *value = (double) ntohs(*(uint16_t*) (val.bytes)) * 100 / 65536.0;
             } else {
+                FF_DEBUG("SMC key %s: unsupported special type %s of %u bytes", key, val.dataType, val.dataSize);
                 return "Unsupported SMC special data type";
             }
             break;
 
         default:
+            FF_DEBUG("SMC key %s: unknown data type '%c%c' (%s) of %u bytes",
+                key, val.dataType[0] ? val.dataType[0] : '?', val.dataType[1] ? val.dataType[1] : '?',
+                val.dataType, val.dataSize);
             return "Unsupported SMC data type";
     }
     return nullptr;
@@ -300,6 +324,7 @@ const char* ffDetectSmcSpecificTemp(const char* sensor, double* result) {
     }
 
     if (!detectTemp(conn, sensor, result)) {
+        FF_DEBUG("The SMC sensor %s could not be read, or read a value outside 10..120", sensor);
         return "Could not read SMC temperature";
     }
 
@@ -490,6 +515,7 @@ const char* ffDetectSmcTemps(enum FFTempType type, double* result) {
             break;
     }
 
+    FF_DEBUG("None of the SMC sensors for temp type %d reported a usable reading", (int) type);
     if (count == 0) {
         return "No temperatures detected";
     }

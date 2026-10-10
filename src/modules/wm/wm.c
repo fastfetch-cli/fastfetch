@@ -76,6 +76,7 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateWMJsonConfig(FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -128,6 +129,7 @@ FFModuleBaseInfo ffWMModuleInfo = {
         .cs = "Správce oken",
         .de = "Fenstermanager",
         .es = "Gestor de ventanas",
+        .fi = "Ikkunointijärjestelmä",
         .fr = "Gestionnaire de fenêtres",
         .gl = "Xestor de xanelas",
         .he = "מנהל חלונות",

@@ -1,4 +1,5 @@
 #include "sound.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <fcntl.h>
@@ -13,10 +14,12 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
         char audiop[12];
         ssize_t plen = readlink("/dev/audio", audiop, ARRAY_SIZE(audiop));
         if (plen < (ssize_t) strlen("audioN")) {
+            FF_DEBUG("readlink(/dev/audio) failed");
             return "readlink(/dev/audio) failed";
         }
         defaultDev = audiop[plen - 1] - '0';
         if (defaultDev < 0 || defaultDev > 9) {
+            FF_DEBUG("Invalid audio device");
             return "Invalid audio device";
         }
     }

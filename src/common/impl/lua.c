@@ -1,6 +1,7 @@
 #if FF_HAVE_LUA
 
     #include "common/lua.h"
+    #include "common/debug.h"
     #include "common/mallocHelper.h"
 
 struct FFLuaData luaData;
@@ -141,6 +142,7 @@ static int yyjsonEncode(lua_State* L) {
 const char* ffLuaLoadState(void) {
     if (luaData.inited) {
         if (luaData.L == nullptr) {
+            FF_DEBUG("The Lua state was already initialised and is gone");
             return "Lua library is not available";
         }
         return nullptr;
@@ -212,6 +214,7 @@ const char* ffLuaLoadState(void) {
 
     lua_State* L = ffluaL_newstate();
     if (L == nullptr) {
+        FF_DEBUG("luaL_newstate() could not allocate an interpreter");
         return "luaL_newstate() failed";
     }
     #if LUA_VERSION_NUM >= 505

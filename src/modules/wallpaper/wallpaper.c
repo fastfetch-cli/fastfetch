@@ -50,6 +50,7 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
     }
 }
 
+[[gnu::cold]]
 void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -83,6 +84,7 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
         .cs = "Tapeta",
         .de = "Hintergrundbild",
         .es = "Fondo de pantalla",
+        .fi = "Taustakuva",
         .fr = "Fond d'écran",
         .gl = "Fondo de escritorio",
         .he = "טפט",

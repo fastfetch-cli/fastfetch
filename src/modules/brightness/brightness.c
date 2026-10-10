@@ -135,6 +135,7 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -199,6 +200,7 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
         .cs = "Jas",
         .de = "Helligkeit",
         .es = "Brillo",
+        .fi = "Kirkkaus",
         .fr = "Luminosité",
         .gl = "Brillo",
         .he = "בהירות",
@@ -223,7 +225,7 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateBrightnessJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Screen brightness (percentage num)", "percentage" },
-        { "Screen name", "name" },
+        { "Screen name *", "name" },
         { "Maximum brightness value", "max" },
         { "Minimum brightness value", "min" },
         { "Current brightness value", "current" },

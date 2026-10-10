@@ -18,7 +18,10 @@ bool ffPrintProcesses(FFProcessesOptions* options) {
 
         printf("%u (%u threads)\n", result.processes, result.threads);
     } else {
-        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) { FF_ARG(result.processes, "result") }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Processes), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+            FF_ARG(result.processes, "result"),
+            FF_ARG(result.threads, "threads")
+        }));
     }
 
     return true;
@@ -41,6 +44,7 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
     }
 }
 
+[[gnu::cold]]
 void ffGenerateProcessesJsonConfig(FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "countKprocs", options->countKprocs);
@@ -81,6 +85,7 @@ FFModuleBaseInfo ffProcessesModuleInfo = {
         .cs = "Procesy",
         .de = "Prozesse",
         .es = "Procesos",
+        .fi = "Prosessit",
         .fr = "Processus",
         .gl = "Procesos",
         .he = "תהליכים",
@@ -105,6 +110,7 @@ FFModuleBaseInfo ffProcessesModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateProcessesJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Process count", "result" },
+        { "Thread count", "threads" },
     })),
     .defaultOrder = 13,
 };

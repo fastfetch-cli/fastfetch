@@ -1,15 +1,19 @@
 #include "top.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <procfs.h>
 #include <sys/param.h> // DEV_BSIZE
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/proc");
     if (!dirp) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 

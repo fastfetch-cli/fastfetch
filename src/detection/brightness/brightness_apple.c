@@ -1,6 +1,7 @@
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 #include "common/edidHelper.h"
 #include "common/time.h"
 
@@ -28,6 +29,7 @@ typedef CFTypeRef IOAVServiceRef;
 // Works for internal display
 static const char* detectWithDisplayServices(const FFDisplayServerResult* displayServer, FFlist* result) {
     if (DisplayServicesGetBrightness == nullptr) {
+        FF_DEBUG("DisplayServices function DisplayServicesGetBrightness is not available");
         return "DisplayServices function DisplayServicesGetBrightness is not available";
     }
 
@@ -53,11 +55,13 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
 // Works for Apple Silicon and USB-C adapter connection ( but not HTMI )
 static const char* detectWithDdcci([[maybe_unused]] const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result) {
     if (!IOAVServiceCreate || !IOAVServiceReadI2C || !IOAVServiceWriteI2C) {
+        FF_DEBUG("IOAVService is not available");
         return "IOAVService is not available";
     }
 
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
     if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("DCPAVServiceProxy"), &iterator) != kIOReturnSuccess) {
+        FF_DEBUG("IOServiceGetMatchingServices() failed");
         return "IOServiceGetMatchingServices() failed";
     }
 
@@ -154,10 +158,12 @@ static IOOptionBits getSupportedTransactionType(void) {
 
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result) {
     if (!CGSServiceForDisplayNumber) {
+        FF_DEBUG("CGSServiceForDisplayNumber is not available");
         return "CGSServiceForDisplayNumber is not available";
     }
     IOOptionBits transactionType = getSupportedTransactionType();
     if (transactionType == kIOI2CNoTransactionType) {
+        FF_DEBUG("No supported IOI2C transaction type found");
         return "No supported IOI2C transaction type found";
     }
 

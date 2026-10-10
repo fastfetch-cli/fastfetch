@@ -1,11 +1,16 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "common/io.h"
+
+#include <errno.h>
+#include <string.h>
 
 #include <private/drivers/poke.h>
 
 const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist* gpus) {
     FF_AUTO_CLOSE_FD int pokefd = open(POKE_DEVICE_FULLNAME, O_RDWR | O_CLOEXEC);
     if (pokefd < 0) {
+        FF_DEBUG("open(%s) failed: %s", POKE_DEVICE_FULLNAME, strerror(errno));
         return "open(POKE_DEVICE_FULLNAME) failed";
     }
 

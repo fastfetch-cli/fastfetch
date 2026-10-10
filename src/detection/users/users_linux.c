@@ -1,8 +1,10 @@
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/properties.h"
 #include "fastfetch.h"
 #include "users.h"
 
+#include <string.h>
 #include <unistd.h>
 
 #if FF_HAVE_UTMPX
@@ -102,6 +104,7 @@ const char* detectBySystemd(FFUsersOptions* options, FFlist* users) {
         const uint32_t pathUsersBaseLen = pathUsers.length;
         FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pathUsers.chars);
         if (!dirp) {
+            FF_DEBUG("opendir(\"%s\") failed: %s", pathUsers.chars, strerror(errno));
             return "opendir(\"/run/systemd/users/\") failed";
         }
 

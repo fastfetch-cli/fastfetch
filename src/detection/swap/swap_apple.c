@@ -1,12 +1,17 @@
 #include "swap.h"
 
+#include "common/debug.h"
 #include "common/sysctl.h"
+
+#include <errno.h>
+#include <string.h>
 #include <mach/mach.h>
 
 const char* ffDetectSwap(FFlist* result) {
     struct xsw_usage xsw;
     size_t size = sizeof(xsw);
     if (sysctl((int[]) { CTL_VM, VM_SWAPUSAGE }, 2, &xsw, &size, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl(vm.swapusage) failed: %s", strerror(errno));
         return "Failed to read vm.swapusage";
     }
 

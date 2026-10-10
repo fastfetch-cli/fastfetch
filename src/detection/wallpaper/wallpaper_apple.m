@@ -1,6 +1,5 @@
 #include "wallpaper.h"
 #include "common/settings.h"
-#include "common/apple/osascript.h"
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
@@ -8,7 +7,9 @@
 const char* detectFromPlist(FFstrbuf* result) {
     // For Sonoma and later (macOS 14.0+)
     // https://github.com/JohnCoates/Aerial/issues/1332
-    NSError* error;
+    // Initialised because the check below reads it: the method is documented to assign it, but an
+    // uninitialised read decides between two sources of the wallpaper, so it is not worth relying on.
+    NSError* error = nil;
     NSString* fileName = [NSString stringWithFormat:@"file://%s/Library/Application Support/com.apple.wallpaper/Store/Index.plist", instance.state.platform.homeDir.chars];
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                                              error:&error];
@@ -22,9 +23,16 @@ const char* detectFromPlist(FFstrbuf* result) {
         NSDictionary* choice = choices[0];
 
         NSArray* files = choice[@"Files"];
-        if (files.count > 0) {
-            NSString* file = files[0][@"relative"];
-            ffStrbufSetS(result, [NSURL URLWithString:file].path.UTF8String);
+        if ([files isKindOfClass:NSArray.class] && files.count > 0) {
+            NSDictionary* fileEntry = files[0];
+            // `relative` is read through a dictionary, which raises an unrecognized selector rather
+            // than returning nil when the entry is not one.
+            if ([fileEntry isKindOfClass:NSDictionary.class]) {
+                NSString* relative = fileEntry[@"relative"];
+                if ([relative isKindOfClass:NSString.class]) {
+                    ffStrbufSetS(result, [NSURL URLWithString:relative].path.UTF8String);
+                }
+            }
         }
 
         if (result->length == 0) {
@@ -118,9 +126,19 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
 
     if (@available(macOS 14.0, *)) {
         error = detectFromPlist(result);
+        if (error) {
+            // The plist is the authoritative source on Sonoma and later, but when it can not be read
+            // at all, NSWorkspace can still resolve a user-picked static image.
+            error = detectFromNSWorkspace(result);
+        }
     } else {
 #ifdef FF_HAVE_SQLITE3
         error = detectFromSQLite(result);
+        if (error) {
+            // The database only holds the user-picked picture, so it goes missing on a machine that
+            // never changed its wallpaper. NSWorkspace answers for the system default there.
+            error = detectFromNSWorkspace(result);
+        }
 #else
         error = detectFromNSWorkspace(result);
 #endif

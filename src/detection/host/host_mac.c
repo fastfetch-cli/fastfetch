@@ -229,6 +229,18 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel) {
         }
     } else if (ffStrbufStartsWithS(hwModel, "Mac")) {
         const char* version = hwModel->chars + strlen("Mac");
+        if (ffStrEquals(version, "18,5")) {
+            return "Mac Mini (M6, 2026)";
+        }
+        if (ffStrEquals(version, "17,16")) {
+            return "Mac Mini (M5 Pro, 2026)";
+        }
+        if (ffStrEquals(version, "17,15")) {
+            return "Mac Studio (M5 Ultra, 2026)";
+        }
+        if (ffStrEquals(version, "17,14")) {
+            return "Mac Studio (M5 Max, 2026)";
+        }
         if (ffStrEquals(version, "17,9")) {
             return "MacBook Pro (14-inch, M5 Pro, 2026)";
         }

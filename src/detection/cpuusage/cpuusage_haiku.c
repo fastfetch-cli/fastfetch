@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "detection/cpuusage/cpuusage.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <OS.h>
@@ -7,11 +8,13 @@
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     system_info sysInfo;
     if (get_system_info(&sysInfo) != B_OK) {
+        FF_DEBUG("get_system_info() failed");
         return "get_system_info() failed";
     }
 
     FF_AUTO_FREE cpu_info* cpuInfo = malloc(sizeof(*cpuInfo) * sysInfo.cpu_count);
     if (get_cpu_info(0, sysInfo.cpu_count, cpuInfo) != B_OK) {
+        FF_DEBUG("get_cpu_info() failed");
         return "get_cpu_info() failed";
     }
 

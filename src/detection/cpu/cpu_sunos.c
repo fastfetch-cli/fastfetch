@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/processing.h"
 #include "common/strutil.h"
 #include <kstat.h>
@@ -31,6 +32,7 @@ static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t
         }
     }
 
+    FF_DEBUG("Failed to find CPU temperature using kstat");
     return "Failed to find CPU temperature using kstat";
 }
 
@@ -50,6 +52,7 @@ static const char* detectCPUTempByIpmiTool(FFCPUResult* cpu) {
         }
     }
 
+    FF_DEBUG("ipmitool sdr list failed to find CPU temperature");
     return "ipmitool sdr list failed to find CPU temperature";
 }
 
@@ -101,15 +104,18 @@ static inline uint16_t countTypeId(kstat_ctl_t* kc, const char* type) {
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
     [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
+        FF_DEBUG("kstat_open() failed");
         return "kstat_open() failed";
     }
 
     kstat_t* ks = kstat_lookup(kc, "cpu_info", -1, nullptr);
     if (!ks) {
+        FF_DEBUG("kstat_lookup() failed");
         return "kstat_lookup() failed";
     }
 
     if (kstat_read(kc, ks, nullptr) < 0) {
+        FF_DEBUG("kstat_read() failed");
         return "kstat_read() failed";
     }
 

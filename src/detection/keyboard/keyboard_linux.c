@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -9,6 +10,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
     // This detects both wired and Bluetooth keyboards uniformly.
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     if (!ffAppendFileBuffer("/proc/bus/input/devices", &content)) {
+        FF_DEBUG("ffAppendFileBuffer(\"/proc/bus/input/devices\") failed");
         return "ffAppendFileBuffer(\"/proc/bus/input/devices\") == nullptr";
     }
 

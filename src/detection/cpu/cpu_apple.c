@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 #include "common/apple/smc_temps.h"
 #include "common/strutil.h"
@@ -53,15 +54,18 @@ static const char* detectFrequency(FFCPUResult* cpu) {
 
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("pmgr"));
     if (!entryDevice) {
+        FF_DEBUG("IOServiceGetMatchingService() failed");
         return "IOServiceGetMatchingService() failed";
     }
 
     if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice")) {
+        FF_DEBUG("\"pmgr\" should conform to \"AppleARMIODevice\"");
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
     }
 
     FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states5-sram"), kCFAllocatorDefault, kNilOptions);
     if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID()) {
+        FF_DEBUG("\"voltage-states5-sram\" in \"pmgr\" is not found");
         return "\"voltage-states5-sram\" in \"pmgr\" is not found";
     }
 
@@ -69,6 +73,7 @@ static const char* detectFrequency(FFCPUResult* cpu) {
     // voltage-states1-sram stores ecores'
     CFIndex propLength = CFDataGetLength(freqProperty);
     if (propLength == 0 || propLength % (CFIndex) (sizeof(uint32_t) * 2) != 0) {
+        FF_DEBUG("Invalid \"voltage-states5-sram\" length");
         return "Invalid \"voltage-states5-sram\" length";
     }
 
@@ -106,6 +111,7 @@ static const char* detectFrequency(FFCPUResult* cpu) {
 static const char* detectCoreCount(FFCPUResult* cpu) {
     uint32_t nPerfLevels = (uint32_t) ffSysctlGetInt("hw.nperflevels", 0);
     if (nPerfLevels <= 0) {
+        FF_DEBUG("sysctl(hw.nperflevels) failed");
         return "sysctl(hw.nperflevels) failed";
     }
 
@@ -124,7 +130,9 @@ static const char* detectCoreCount(FFCPUResult* cpu) {
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != nullptr) {
+    const char* error = ffSysctlGetString("machdep.cpu.brand_string", &cpu->name);
+    if (error != nullptr) {
+        FF_DEBUG("sysctlbyname(machdep.cpu.brand_string) failed: %s", error);
         return "sysctlbyname(machdep.cpu.brand_string) failed";
     }
 

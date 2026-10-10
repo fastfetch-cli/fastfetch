@@ -43,7 +43,7 @@ jobs:
         run: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y gcc-13 jq libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev libefl-all-dev libunwind-dev liblua5.4-dev libvdpau-dev libva-dev rpm ninja-build
+        run: sudo apt-get update && sudo apt-get install -y gcc-13 jq libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libdrm-dev libelf-dev libefl-all-dev libunwind-dev liblua5.4-dev libvdpau-dev libva-dev rpm ninja-build
 
       - name: install linuxbrew packages
         run: |
@@ -52,19 +52,19 @@ jobs:
 
       - name: Initialize CodeQL
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
           languages: c
 
       - name: configure project
-        run: CC=gcc-13 CMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: CC=gcc-13 CMAKE_PREFIX_PATH=/home/linuxbrew/.linuxbrew PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
 
       - name: perform CodeQL analysis
         if: inputs.arch == 'amd64'
-        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
 
       - name: list features
         run: ./fastfetch --list-features

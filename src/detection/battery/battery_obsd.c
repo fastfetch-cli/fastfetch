@@ -1,6 +1,8 @@
 #include "battery.h"
+#include "common/debug.h"
 #include "common/io.h"
 
+#include <string.h>
 #include <machine/apmvar.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -10,12 +12,14 @@ const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* 
     FF_AUTO_CLOSE_FD int devfd = open("/dev/apm", O_RDONLY | O_CLOEXEC);
 
     if (devfd < 0) {
+        FF_DEBUG("open(\"/dev/apm\") failed: %s", strerror(errno));
         return "open(dev/apm, O_RDONLY | O_CLOEXEC) failed";
     }
 
     struct apm_power_info info = {};
 
     if (ioctl(devfd, APM_IOC_GETPOWER, &info) < 0) {
+        FF_DEBUG("ioctl(APM_IOC_GETPOWER) failed: %s", strerror(errno));
         return "ioctl(APM_IOC_GETPOWER) failed";
     }
 

@@ -62,6 +62,7 @@ void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -108,6 +109,7 @@ FFModuleBaseInfo ffCursorModuleInfo = {
         .cs = "Kurzor",
         .de = "Mauszeiger",
         .es = "Cursor",
+        .fi = "Kursori",
         .fr = "Curseur",
         .gl = "Cursor",
         .he = "סמן",

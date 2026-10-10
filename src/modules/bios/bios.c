@@ -85,6 +85,7 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBiosJsonConfig(FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -139,6 +140,7 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         .cs = "BIOS",
         .de = "BIOS",
         .es = "BIOS",
+        .fi = "BIOS",
         .fr = "BIOS",
         .gl = "BIOS",
         .he = "BIOS",
@@ -161,12 +163,12 @@ FFModuleBaseInfo ffBiosModuleInfo = {
     .printModule = (void*) ffPrintBios,
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,
     .generateJsonConfig = (void*) ffGenerateBiosJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "BIOS date", "date" },
         { "BIOS release", "release" },
         { "BIOS vendor", "vendor" },
         { "BIOS version", "version" },
-        { "Firmware type", "type" },
+        { "Firmware type *", "type" },
     })),
     .defaultOrder = 5,
 };

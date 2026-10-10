@@ -3,7 +3,9 @@
 
 #include <windows.h>
 
-bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
+bool ffDetectTerminalSize(FFTerminalSizeResult* result, bool fastOnly) {
+    *result = (FFTerminalSizeResult){};
+
     HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
     FF_AUTO_CLOSE_FD HANDLE hConout = INVALID_HANDLE_VALUE;
     {
@@ -18,14 +20,18 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
         if (GetConsoleScreenBufferInfo(hOutput, &csbi)) {
             result->columns = (uint16_t) (csbi.srWindow.Right - csbi.srWindow.Left + 1);
             result->rows = (uint16_t) (csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
-        } else {
+        } else if (!fastOnly) {
             // Windows Terminal doesn't report `\e` for some reason
             ffGetTerminalResponse("\e[18t", 2, "%*[^;];%hu;%hut", &result->rows, &result->columns);
         }
     }
 
-    if (result->columns == 0 && result->rows == 0) {
+    if (result->columns == 0 || result->rows == 0) {
         return false;
+    }
+
+    if (fastOnly) {
+        return true;
     }
 
     {
@@ -41,5 +47,5 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
         }
     }
 
-    return result->columns > 0 && result->rows > 0;
+    return true;
 }

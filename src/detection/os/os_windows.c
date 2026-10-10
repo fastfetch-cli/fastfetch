@@ -26,6 +26,19 @@ static bool getCodeName(FFOSResult* os) {
 
 void ffDetectOSImpl(FFOSResult* os) {
     // https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
+
+    // Reads a single branding field from winbrand.dll. The buffer is allocated with
+    // GlobalAlloc(GMEM_ZEROINIT) by winbrand, so it is ours to release.
+    //
+    // Fields offered by winbrand.dll (enumerated in basebrd.dll's RES_METADATA resource):
+    //   %WINDOWS_GENERIC%   the OS family, independent of edition and release ("Windows")
+    //   %WINDOWS_SHORT%     family + release, but hardcoded to "Windows 10" since Windows 10
+    //   %WINDOWS_LONG%      "<family> <release> <edition> [...]" ("Windows 11 Pro Insider Preview")
+    //   %WINDOWS_PRODUCT%   the product of the running edition
+    //   %WINDOWS_COPYRIGHT%, %MICROSOFT_COMPANYNAME%, %MICROSOFT_ACCOUNT(S)%
+    // There is deliberately no field for the bare release number: basebrd.dll stores it
+    // inside the same per-edition resource as the rest of %WINDOWS_LONG%
+    // ("Windows 11 Pro%1%2"), so the release can only be peeled off that string.
     const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
     ffStrbufSetWS(&os->variant, rawName);
     GlobalFree((HGLOBAL) rawName);

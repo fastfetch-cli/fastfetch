@@ -1,10 +1,12 @@
 #include "mouse.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
 const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/input/");
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(\"/sys/class/input/\") failed: %s", strerror(errno));
         return "opendir(\"/sys/class/input/\") == nullptr";
     }
 

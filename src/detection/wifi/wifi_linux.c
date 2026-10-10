@@ -2,6 +2,7 @@
 #include "common/endian.h"
 #include "common/io.h"
 #include "common/debug.h"
+#include "common/percent.h"
 #include "common/strutil.h"
 
 #include <sys/time.h>
@@ -34,11 +35,6 @@ typedef struct FFWifiSecurityFlags {
     bool owe : 1;
     bool eap : 1;
 } FFWifiSecurityFlags;
-
-static inline double rssiToSignalQuality(int rssi) {
-    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0
-                                                      : (rssi + 100) * 2);
-}
 
 static inline uint32_t ffWifiGetNetlinkPortId(int sockFd) {
     struct sockaddr_nl addr = {};
@@ -605,7 +601,7 @@ static void ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item)
             item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
         } else if (type == NL80211_BSS_SIGNAL_MBM && payload >= sizeof(int32_t)) {
             int rssi = *(int32_t*) ffWifiNlAttrData(attr) / 100; // mBm (100 * dBm) => dBm
-            item->conn.signalQuality = rssiToSignalQuality(rssi);
+            item->conn.signalQuality = ffRssiToSignalQuality(rssi);
         } else if (type == NL80211_BSS_CAPABILITY && payload >= sizeof(uint16_t)) {
             uint16_t capability = *(uint16_t*) ffWifiNlAttrData(attr);
             sec.privacy = (capability & (1u << 4u)) != 0; // IEEE 802.11 capability bit 4: privacy
@@ -717,7 +713,7 @@ static void ffWifiParseStationInfo(const struct nlattr* staInfoAttr, FFWifiResul
 
         if (type == NL80211_STA_INFO_SIGNAL && payload >= sizeof(uint8_t) && item->conn.signalQuality == -DBL_MAX) {
             int rssi = (int8_t) *(const uint8_t*) ffWifiNlAttrData(attr);
-            item->conn.signalQuality = rssiToSignalQuality(rssi);
+            item->conn.signalQuality = ffRssiToSignalQuality(rssi);
         } else if (type == NL80211_STA_INFO_TX_BITRATE && (item->conn.txRate == -DBL_MAX || item->conn.channelWidth == 0)) {
             double tx = ffWifiParseBitrateFromRateInfo(attr, &item->conn.protocol, &item->conn.channelWidth);
             if (tx != -DBL_MAX) {

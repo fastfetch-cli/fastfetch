@@ -1,4 +1,5 @@
 #include "physicaldisk.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 #include "sys/scsi/generic/inquiry.h"
 
@@ -98,6 +99,7 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     di_node_t rootNode = di_init("/", DINFOCPYALL);
     if (rootNode == DI_NODE_NIL) {
+        FF_DEBUG("di_init() failed");
         return "di_init() failed";
     }
     di_walk_minor(rootNode, DDI_NT_BLOCK, DI_WALK_CLDFIRST, &(struct FFWalkTreeBundle) { options, result }, (void*) walkDevTree);

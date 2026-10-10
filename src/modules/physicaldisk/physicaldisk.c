@@ -171,6 +171,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -272,6 +273,7 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         .cs = "Fyzický disk",
         .de = "Physische Festplatte",
         .es = "Disco físico",
+        .fi = "Fyysinen Levy",
         .fr = "Disque physique",
         .gl = "Disco físico",
         .he = "דיסק פיזי",
@@ -296,9 +298,9 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
     .generateJsonConfig = (void*) ffGeneratePhysicalDiskJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Device size (formatted)", "size" },
-        { "Device name", "name" },
+        { "Device name *", "name" },
         { "Device interconnect type", "interconnect" },
-        { "Device raw file path", "dev-path" },
+        { "Device raw file path *", "dev-path" },
         { "Serial number", "serial" },
         { "Device kind (SSD or HDD)", "physical-type" },
         { "Device kind (Removable or Fixed)", "removable-type" },
@@ -306,5 +308,5 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         { "Product revision", "revision" },
         { "Device temperature (formatted)", "temperature" },
     })),
-    .defaultOrder = 68,
+    .defaultOrder = 69,
 };

@@ -65,6 +65,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                                                                                                          FF_ARG(buffer, "result"),
                                                                                                          FF_ARG(buffer2, "sum"),
+                                                                                                         FF_ARG(levelStr, "level"),
                                                                                                      }));
         }
     }
@@ -150,6 +151,7 @@ void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateCPUCacheJsonConfig(FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -230,6 +232,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
         .cs = "Mezipaměť CPU",
         .de = "CPU-Cache",
         .es = "Caché de la CPU",
+        .fi = "Suorittimen Välimuisti",
         .fr = "Cache CPU",
         .gl = "Caché da CPU",
         .he = "מטמון מעבד",
@@ -255,6 +258,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         { "Separate result", "result" },
         { "Sum result", "sum" },
+        { "Cache level *", "level" },
     })),
     .defaultOrder = 34,
 };

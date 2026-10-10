@@ -1,4 +1,5 @@
 #include "lm.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 #include "common/properties.h"
@@ -9,6 +10,7 @@
     #include "common/dbus.h"
 #endif
 
+#include <errno.h>
 #include <unistd.h>
 
 #if __FreeBSD__
@@ -30,6 +32,7 @@ static const char* getGdmVersion(FFstrbuf* version) {
     if (error || version->length == 0) {
         error = ffProcessAppendStdOut(version, (char* const[]) { "gdm", "--version", nullptr });
         if (error || version->length == 0) {
+            FF_DEBUG("Failed to get GDM version");
             return "Failed to get GDM version";
         }
     }
@@ -52,38 +55,38 @@ static const char* getSshdVersion(FFstrbuf* version) {
 }
 
 #ifdef FF_HAVE_ZLIB
-    #include "common/library.h"
     #include "common/path.h"
+    #include "common/zlib.h"
 
     #include <stdlib.h>
-    #include <zlib.h>
 
 static const char* getSddmVersion(FFstrbuf* version) {
-    FF_LIBRARY_LOAD_MESSAGE(zlib, "libz" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gztell)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzrewind)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzclose)
+    const char* error = ffZlibLoad(FF_ZLIB_GZFILE);
+    if (error != nullptr) {
+        FF_DEBUG("The sddm version cannot be read: %s", error);
+        return error;
+    }
 
-    gzFile file = ffgzopen(FF_PATH_PKG_BASE "/share/man/man1/sddm.1.gz", "rb");
+    gzFile file = gzopen(FF_PATH_PKG_BASE "/share/man/man1/sddm.1.gz", "rb");
     if (file == Z_NULL) {
-        return "ffgzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed";
+        FF_DEBUG("gzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed: %s", strerror(errno));
+        return "gzopen(\"/usr/share/man/man1/sddm.1.gz\", \"rb\") failed";
     }
 
     ffStrbufEnsureFree(version, 2047);
     memset(version->chars, 0, version->allocated);
-    int size = ffgzread(file, version->chars, version->allocated - 1);
-    ffgzclose(file);
+    int size = gzread(file, version->chars, version->allocated - 1);
+    gzclose(file);
 
     if (size <= 0) {
-        return "ffgzread(file, version->chars, version->length) failed";
+        FF_DEBUG("gzread(file, version->chars, version->length) failed");
+        return "gzread(file, version->chars, version->length) failed";
     }
 
     version->length = (uint32_t) size;
     uint32_t index = ffStrbufFirstIndexS(version, ".TH ");
     if (index == version->length) {
+        FF_DEBUG(".TH is not found");
         ffStrbufClear(version);
         return ".TH is not found";
     }
@@ -137,6 +140,7 @@ static const char* detectBySystemdDbus(FFLMResult* result) {
     // and requires no $XDG_SESSION_ID being available
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     if (ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus) != nullptr) {
+        FF_DEBUG("Failed to load system DBus");
         return "Failed to load system DBus";
     }
 
@@ -147,6 +151,7 @@ static const char* detectBySystemdDbus(FFLMResult* result) {
             "org.freedesktop.login1.Session",
             "Service",
             &result->service)) {
+        FF_DEBUG("Failed to get systemd session Service property");
         return "Failed to get systemd session Service property";
     }
 
@@ -170,6 +175,7 @@ static const char* detectBySystemdPrivate(FFLMResult* result) {
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use
         if (!ffParsePropFile(path.chars, "DISPLAY=", &sessionId)) {
+            FF_DEBUG("Failed to get $XDG_SESSION_ID");
             return "Failed to get $XDG_SESSION_ID";
         }
     }
@@ -255,11 +261,13 @@ const char* detectByProcesses(FFLMResult* result) {
     size_t length = 0;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
     if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
     }
 
@@ -277,12 +285,14 @@ const char* detectByProcesses(FFLMResult* result) {
     size_t length = 0;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
     request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
     if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
     }
 
@@ -297,6 +307,7 @@ const char* detectByProcesses(FFLMResult* result) {
 #elif __sun
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if (procdir == nullptr) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 
@@ -331,6 +342,7 @@ const char* detectByProcesses(FFLMResult* result) {
 #elif __linux__ || __GNU__
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if (procdir == nullptr) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 
@@ -384,12 +396,14 @@ const char* detectByProcesses(FFLMResult* result) {
 
     size_t size = 0;
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &size, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl(KERN_PROC_UID, nullptr) failed: %s", strerror(errno));
         return "sysctl(KERN_PROC_UID, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc2* procs = malloc(size);
 
     if (sysctl(request, ARRAY_SIZE(request), procs, &size, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl(KERN_PROC_UID, procs) failed: %s", strerror(errno));
         return "sysctl(KERN_PROC_UID, procs) failed";
     }
 
@@ -403,6 +417,7 @@ const char* detectByProcesses(FFLMResult* result) {
 #endif
 
     if (result->service.length == 0) {
+        FF_DEBUG("Failed to detect login manager by processes");
         return "Failed to detect login manager by processes";
     }
 

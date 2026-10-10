@@ -1,4 +1,5 @@
 #include "icons.h"
+#include "common/debug.h"
 #include "common/parsing.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
@@ -16,6 +17,7 @@ const char* ffDetectIcons(FFIconsResult* result) {
     const FFstrbuf* gtk4 = &ffDetectGTK4()->icons;
 
     if (plasma->length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0) {
+        FF_DEBUG("No icons could be found");
         return "No icons could be found";
     }
 

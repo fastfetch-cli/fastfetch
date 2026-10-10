@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/percent.h"
 #include "common/color.h"
 #include "common/option.h"
@@ -27,6 +28,8 @@ const char* ffPercentParseTypeJsonConfig(yyjson_val* jsonVal, FFPercentageTypeFl
         yyjson_arr_foreach (jsonVal, idx, max, item) {
             const char* flag = yyjson_get_str(item);
             if (!flag) {
+                FF_DEBUG("A percent.type array entry is of JSON type %s, not a string",
+                    yyjson_get_type_desc(item));
                 return "Error: percent.type: invalid flag string";
             }
             if (ffStrEqualsIgnCase(flag, "num")) {
@@ -40,6 +43,7 @@ const char* ffPercentParseTypeJsonConfig(yyjson_val* jsonVal, FFPercentageTypeFl
             } else if (ffStrEqualsIgnCase(flag, "bar-monochrome")) {
                 flags |= FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT;
             } else {
+                FF_DEBUG("Unknown percent.type flag \"%s\"", flag);
                 return "Error: percent.type: unknown flag string";
             }
         }
@@ -48,6 +52,7 @@ const char* ffPercentParseTypeJsonConfig(yyjson_val* jsonVal, FFPercentageTypeFl
         return nullptr;
     }
 
+    FF_DEBUG("percent.type is of JSON type %s", yyjson_get_type_desc(jsonVal));
     return "Error: usage: percent.type must be a number or an array of strings";
 }
 
@@ -285,6 +290,7 @@ bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageMo
     return true;
 }
 
+[[gnu::cold]]
 void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig config) {
     yyjson_mut_val* percent = yyjson_mut_obj_add_obj(doc, module, "percent");
     yyjson_mut_obj_add_uint(doc, percent, "green", config.green);

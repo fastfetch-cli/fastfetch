@@ -1,8 +1,10 @@
 #include "wm.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/io.h"
 #include "common/library.h"
 #include "common/processing.h"
+#include "common/windows/folders.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 #include "common/windows/version.h"
@@ -10,7 +12,6 @@
 #include <stdalign.h>
 #include <windows.h>
 #include <ntstatus.h>
-#include <shlobj.h>
 #include <softpub.h>
 
 typedef enum {
@@ -69,16 +70,18 @@ static bool isProcessTrusted(DWORD processId, FFProcessType processType, UNICODE
         static wchar_t windowsAppsPath[MAX_PATH];
         static uint32_t windowsAppsPathLen;
         if (windowsAppsPathLen == 0) {
-            PWSTR pPath = nullptr;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-                windowsAppsPathLen = (uint32_t) wcslen(pPath);
-                memcpy(windowsAppsPath, pPath, windowsAppsPathLen * sizeof(wchar_t));
-                memcpy(windowsAppsPath + windowsAppsPathLen, L"\\WindowsApps\\", sizeof(L"\\WindowsApps\\"));
-                windowsAppsPathLen += strlen("\\WindowsApps\\");
+            FF_STRBUF_AUTO_DESTROY programFiles = ffStrbufCreate();
+            ULONG length = 0; // in bytes, including the null terminator
+            if (ffGetKnownFolderPath(FF_KNOWN_FOLDER_PROGRAM_FILES, &programFiles)) {
+                ffStrbufAppendS(&programFiles, "\\WindowsApps\\");
+                if (NT_SUCCESS(RtlUTF8ToUnicodeN(windowsAppsPath, (ULONG) sizeof(windowsAppsPath), &length, programFiles.chars, (ULONG) programFiles.length + 1))) {
+                    windowsAppsPathLen = (uint32_t) (length / sizeof(wchar_t) - 1);
+                } else {
+                    windowsAppsPathLen = -1u;
+                }
             } else {
                 windowsAppsPathLen = -1u;
             }
-            CoTaskMemFree(pPath);
         }
         if (windowsAppsPathLen != -1u &&
             (buffer->Length <= windowsAppsPathLen * sizeof(wchar_t) ||               // Path is too short to be in WindowsApps
@@ -206,6 +209,7 @@ fallback:
             } else if (status == STATUS_INFO_LENGTH_MISMATCH && attempts < 4) {
                 size += sizeof(SYSTEM_PROCESS_INFORMATION) * 5;
             } else {
+                FF_DEBUG("NtQuerySystemInformation(SystemProcessInformation) failed: %s", ffDebugNtStatus(status));
                 return "NtQuerySystemInformation(SystemProcessInformation) failed";
             }
         }
@@ -226,19 +230,17 @@ fallback:
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     if (!wmName) {
+        FF_DEBUG("No WM detected");
         return "No WM detected";
     }
 
     if (ffStrbufEqualS(wmName, "dwm.exe")) {
-        PWSTR pPath = nullptr;
-        if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_System, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-            wchar_t fullPath[MAX_PATH];
-            wcscpy(fullPath, pPath);
-            wcscat(fullPath, L"\\dwm.exe");
-            ffGetFileVersion(fullPath, nullptr, result);
-        }
-        CoTaskMemFree(pPath);
+        wchar_t exePath[MAX_PATH];
+        _snwprintf(exePath, ARRAY_SIZE(exePath), L"%ls\\system32\\%ls", (const wchar_t*) SharedUserData->NtSystemRoot, L"dwm.exe");
+        ffGetFileVersion(exePath, nullptr, result);
+
         return nullptr;
     }
+    FF_DEBUG("Not supported on this platform");
     return "Not supported on this platform";
 }

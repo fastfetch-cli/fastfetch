@@ -1,4 +1,5 @@
 #include "initsystem.h"
+#include "common/debug.h"
 #include "common/windows/unicode.h"
 #include "common/windows/nt.h"
 #include "common/windows/version.h"
@@ -25,7 +26,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
     if (ffIsSystemBasicProcessInfoAvailable()) {
         // SYSTEM_BASICPROCESS_INFORMATION entries are much smaller than SYSTEM_PROCESS_INFORMATION ones,
         // so a modest buffer should be enough to contain all processes
-        SYSTEM_BASICPROCESS_INFORMATION buffer[1024];
+        SYSTEM_BASICPROCESS_INFORMATION buffer[1024] = {};
         NTSTATUS status = NtQuerySystemInformation(SystemBasicProcessInformation, buffer, sizeof(buffer), NULL);
         if (status != STATUS_INFO_LENGTH_MISMATCH && !NT_SUCCESS(status)) {
             goto fallback;
@@ -52,6 +53,7 @@ fallback:
         ULONG size = sizeof(buffer);
         NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, buffer, size, &size);
         if (status != STATUS_INFO_LENGTH_MISMATCH && !NT_SUCCESS(status)) {
+            FF_DEBUG("NtQuerySystemInformation(SystemProcessInformation) failed: %s", ffDebugNtStatus(status));
             return "NtQuerySystemInformation(SystemProcessInformation) failed";
         }
 

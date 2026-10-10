@@ -1,7 +1,10 @@
 #include "top.h"
 
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/param.h> // DEV_BSIZE
 #include <sys/sysctl.h>
@@ -11,17 +14,19 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     size_t length = 0;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc* processes = (struct kinfo_proc*) malloc(length);
     request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
     if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, processes) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, processes) failed";
     }
 
     int count = (int) (length / sizeof(struct kinfo_proc));
-    const uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (int i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &processes[i];
@@ -35,7 +40,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
         item->pid = (uint32_t) proc->p_pid;
         item->cpuTime = ((uint64_t) proc->p_uutime_sec * 1000 + (uint64_t) proc->p_uutime_usec / 1000) +
             ((uint64_t) proc->p_ustime_sec * 1000 + (uint64_t) proc->p_ustime_usec / 1000);
-        item->memBytes = (uint64_t) proc->p_vm_rssize * pageSize;
+        item->memBytes = (uint64_t) proc->p_vm_rssize << pageSizeShift;
         item->startTime = (uint64_t) proc->p_ustart_sec * 1000 + (uint64_t) proc->p_ustart_usec / 1000;
         item->bytesRead = (uint64_t) proc->p_uru_inblock * DEV_BSIZE;
         item->bytesWritten = (uint64_t) proc->p_uru_oublock * DEV_BSIZE;

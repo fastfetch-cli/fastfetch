@@ -1,5 +1,6 @@
 #include "bootmgr.h"
 #include "efi_helper.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #ifdef __OpenBSD__
@@ -22,6 +23,7 @@ typedef uint16_t efi_char;
 const char* ffDetectBootmgr(FFBootmgrResult* result) {
     FF_AUTO_CLOSE_FD int efifd = open("/dev/efi", O_RDWR | O_CLOEXEC);
     if (efifd < 0) {
+        FF_DEBUG("open(\"/dev/efi\") failed: %s", strerror(errno));
         return "open(/dev/efi) failed";
     }
 
@@ -35,6 +37,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     ioc.name = (efi_char[]) { 'B', 'o', 'o', 't', 'C', 'u', 'r', 'r', 'e', 'n', 't', '\0' };
     ioc.namesize = sizeof("BootCurrent") * 2;
     if (ioctl(efifd, EFIIOC_VAR_GET, &ioc) < 0 || ioc.datasize != 2) {
+        FF_DEBUG("ioctl(EFIIOC_VAR_GET, BootCurrent) failed");
         return "ioctl(EFIIOC_VAR_GET, BootCurrent) failed";
     }
 
@@ -46,6 +49,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     ioc.name = (efi_char[]) { 'B', 'o', 'o', 't', hex[0], hex[1], hex[2], hex[3], '\0' };
     ioc.namesize = sizeof("Boot####") * 2;
     if (ioctl(efifd, EFIIOC_VAR_GET, &ioc) < 0 || ioc.datasize == sizeof(buffer)) {
+        FF_DEBUG("ioctl(EFIIOC_VAR_GET, Boot####) failed");
         return "ioctl(EFIIOC_VAR_GET, Boot####) failed";
     }
 

@@ -1,12 +1,17 @@
 #include "fastfetch.h"
 #include "users.h"
+#include "common/debug.h"
 #include "common/io.h"
+
+#include <errno.h>
+#include <string.h>
 
 #include <utmp.h>
 
 const char* ffDetectUsers([[maybe_unused]] FFUsersOptions* options, FFlist* users) {
     FF_AUTO_CLOSE_FILE FILE* fp = fopen(_PATH_UTMP, "r");
     if (!fp) {
+        FF_DEBUG("fopen(\"%s\", \"r\") failed: %s", _PATH_UTMP, strerror(errno));
         return "fopen(_PATH_UTMP, r) failed";
     }
 

@@ -54,6 +54,7 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -91,6 +92,7 @@ FFModuleBaseInfo ffUptimeModuleInfo = {
         .cs = "Doba běhu",
         .de = "Betriebszeit",
         .es = "Tiempo de actividad",
+        .fi = "Käynnissäoloaika",
         .fr = "Temps de fonctionnement",
         .gl = "Tempo de actividade",
         .he = "זמן פעילות",

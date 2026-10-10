@@ -3,6 +3,7 @@
 #include "common/library.h"
 #include "common/thread.h"
 #include "common/io.h"
+#include "common/debug.h"
 
 #include <string.h>
 
@@ -380,72 +381,85 @@ static const SQLiteData* getSQLiteData(void) {
     return &data;
 }
 
-int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
-    if (!ffPathExists(dbPath, FF_PATHTYPE_FILE)) {
-        return 0;
-    }
-
-    const SQLiteData* data = getSQLiteData();
-    if (data == nullptr) {
-        return 0;
-    }
-
+typedef struct FFSQLite3Bundle {
+    const SQLiteData* data;
     sqlite3* db;
-    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX, nullptr) != SQLITE_OK) {
-        return 0;
-    }
-
     sqlite3_stmt* stmt;
-    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, nullptr) != SQLITE_OK) {
-        data->ffsqlite3_close(db);
+} FFSQLite3Bundle;
+static void destroySQLite3Bundle(FFSQLite3Bundle* bundle) {
+    if (!bundle->data) {
+        return;
+    }
+    if (bundle->stmt) {
+        bundle->data->ffsqlite3_finalize(bundle->stmt);
+        bundle->stmt = nullptr;
+    }
+    if (bundle->db) {
+        bundle->data->ffsqlite3_close(bundle->db);
+        bundle->db = nullptr;
+    }
+}
+
+static bool prepareSQLite3Statement(const char* dbPath, const char* query, FFSQLite3Bundle* bundle) {
+    if (!ffPathExists(dbPath, FF_PATHTYPE_FILE)) {
+        return false;
+    }
+
+    const SQLiteData* data = bundle->data = getSQLiteData();
+    if (data == nullptr) {
+        FF_DEBUG("Failed to load SQLite3 library");
+        return false;
+    }
+
+    // Read-only WAL databases may require a -shm or lock file during prepare, which is not
+    // possible when the database directory is not writable. immutable=1 avoids those files.
+    FF_STRBUF_AUTO_DESTROY pathImmutable = ffStrbufCreateStatic("file:");
+    ffStrbufAppendS(&pathImmutable, dbPath);
+    ffStrbufAppendS(&pathImmutable, "?immutable=1");
+
+    int ret = data->ffsqlite3_open_v2(pathImmutable.chars, &bundle->db, SQLITE_OPEN_READONLY | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_URI, nullptr);
+    if (ret != SQLITE_OK) {
+        FF_DEBUG("Failed to open SQLite3 database: %s (%d)", dbPath, ret);
+        return false;
+    }
+
+    ret = data->ffsqlite3_prepare_v2(bundle->db, query, (int) strlen(query), &bundle->stmt, nullptr);
+    if (ret != SQLITE_OK) {
+        FF_DEBUG("Failed to prepare SQLite3 statement: %s (%d)", query, ret);
+        return false;
+    }
+
+    ret = data->ffsqlite3_step(bundle->stmt);
+    if (ret != SQLITE_ROW) {
+        FF_DEBUG("Failed to step SQLite3 statement: %s (%d)", query, ret);
+        return false;
+    }
+
+    ret = data->ffsqlite3_data_count(bundle->stmt);
+    if (ret < 1) {
+        FF_DEBUG("No data returned for SQLite3 statement: %s", query);
+        return false;
+    }
+
+    return true;
+}
+
+int ffSettingsGetSQLite3Int(const char* dbPath, const char* query) {
+    [[gnu::cleanup(destroySQLite3Bundle)]] FFSQLite3Bundle bundle = {};
+    if (!prepareSQLite3Statement(dbPath, query, &bundle)) {
         return 0;
     }
 
-    if (data->ffsqlite3_step(stmt) != SQLITE_ROW || data->ffsqlite3_data_count(stmt) < 1) {
-        data->ffsqlite3_finalize(stmt);
-        data->ffsqlite3_close(db);
-        return 0;
-    }
-
-    int result = data->ffsqlite3_column_int(stmt, 0);
-
-    data->ffsqlite3_finalize(stmt);
-    data->ffsqlite3_close(db);
-
-    return result;
+    return bundle.data->ffsqlite3_column_int(bundle.stmt, 0);
 }
 
 bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf* result) {
-    if (!ffPathExists(dbPath, FF_PATHTYPE_FILE)) {
+    [[gnu::cleanup(destroySQLite3Bundle)]] FFSQLite3Bundle bundle = {};
+    if (!prepareSQLite3Statement(dbPath, query, &bundle)) {
         return false;
     }
 
-    const SQLiteData* data = getSQLiteData();
-    if (data == nullptr) {
-        return false;
-    }
-
-    sqlite3* db;
-    if (data->ffsqlite3_open_v2(dbPath, &db, SQLITE_OPEN_READONLY, nullptr) != SQLITE_OK) {
-        return false;
-    }
-
-    sqlite3_stmt* stmt;
-    if (data->ffsqlite3_prepare_v2(db, query, (int) strlen(query), &stmt, nullptr) != SQLITE_OK) {
-        data->ffsqlite3_close(db);
-        return false;
-    }
-
-    if (data->ffsqlite3_step(stmt) != SQLITE_ROW || data->ffsqlite3_data_count(stmt) < 1) {
-        data->ffsqlite3_finalize(stmt);
-        data->ffsqlite3_close(db);
-        return false;
-    }
-
-    ffStrbufSetS(result, (const char*) data->ffsqlite3_column_text(stmt, 0));
-
-    data->ffsqlite3_finalize(stmt);
-    data->ffsqlite3_close(db);
+    ffStrbufSetS(result, (const char*) bundle.data->ffsqlite3_column_text(bundle.stmt, 0));
 
     return true;
 }

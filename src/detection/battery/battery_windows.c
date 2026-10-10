@@ -1,10 +1,10 @@
 #define INITGUID
 
 #include "battery.h"
-#include "common/endian.h"
-
 #include "common/debug.h"
+#include "common/endian.h"
 #include "common/mallocHelper.h"
+#include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 #include "common/windows/wmi.h"
 
@@ -51,7 +51,7 @@ static FFBatteryWmiEntry* getBatteryEntry(FFlist* entries, FFlist* results, ULON
     return entry;
 }
 
-static const char* queryWmiAllData(const GUID* guid, const char* guidStr, PWNODE_ALL_DATA* pAllData, ULONG* pBufferSize) {
+static const char* queryWmiAllData(const GUID* guid, [[maybe_unused]] const char* guidStr, PWNODE_ALL_DATA* pAllData, ULONG* pBufferSize) {
     [[gnu::cleanup(ffCloseWmiBlock)]] HANDLE hBlock = nullptr;
     ULONG status = WmiOpenBlock(guid, WMIGUID_QUERY, &hBlock);
     if (status != ERROR_SUCCESS) {
@@ -66,6 +66,7 @@ static const char* queryWmiAllData(const GUID* guid, const char* guidStr, PWNODE
     }
 
     if (*pBufferSize == 0) {
+        FF_DEBUG("WMI: WmiQueryAllDataW(nullptr) returned no data");
         return "WmiQueryAllDataW(nullptr) returned no data";
     }
 

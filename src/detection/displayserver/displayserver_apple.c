@@ -12,12 +12,23 @@
 #include <IOKit/IOKitLib.h>
 
 #ifdef MAC_OS_X_VERSION_10_15
-[[clang::weak_import]] extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display);
-[[clang::weak_import]] extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display);
-[[clang::weak_import]] extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display);
+// CoreDisplay_Display_* are thin wrappers around these: the CoreDisplay versions just dlsym the
+// SkyLight symbol and call it with the same display id (CoreDisplay_DisplayCreateInfoDictionary
+// only falls back to its own Mach IPC path when SkyLight is absent). Call SkyLight directly.
+[[clang::weak_import]] extern Boolean SLSDisplaySupportsHDRMode(CGDirectDisplayID display);
+[[clang::weak_import]] extern Boolean SLSDisplayIsHDRModeEnabled(CGDirectDisplayID display);
+[[clang::weak_import]] extern CFDictionaryRef SLSCopyDisplayInfoDictionary(CGDirectDisplayID display);
 #else
     #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
+
+// A CGDisplayModeRef keeps the IOKit mode description in a private CFDictionaryRef that
+// CoreGraphics never hands out (it only reads single keys out of it by itself), so there is no
+// public API for e.g. BitsPerSample. SkyLight exports a plain accessor for it instead, which is
+// the same value the private dictionary holds for the display's current mode:
+//   {_CGSDisplayModeDescription=... "bitsPerPixel"i "bitsPerSample"i "samplesPerPixel"i ...}
+// Use that rather than reading CGDisplayModeRef's private layout.
+[[clang::weak_import]] extern int SLDisplayBitsPerSample(CGDirectDisplayID display);
 
 static void detectDisplays(FFDisplayServerResult* ds) {
     CGDirectDisplayID screens[128];
@@ -52,8 +63,8 @@ static void detectDisplays(FFDisplayServerResult* ds) {
             ffStrbufClear(&buffer);
             FF_CFTYPE_AUTO_RELEASE CFDictionaryRef displayInfo = nullptr;
 #ifdef MAC_OS_X_VERSION_10_15
-            if (CoreDisplay_DisplayCreateInfoDictionary) {
-                displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
+            if (SLSCopyDisplayInfoDictionary) {
+                displayInfo = SLSCopyDisplayInfoDictionary(screen);
             }
 #else
             {
@@ -151,21 +162,13 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                 physicalHeight,
                 "CoreGraphics");
             if (display) {
-#ifndef MAC_OS_X_VERSION_10_11
-                FF_CFTYPE_AUTO_RELEASE CFStringRef pe = CGDisplayModeCopyPixelEncoding(mode);
-                if (pe) {
-                    display->bitDepth = (uint8_t) (CFStringGetLength(pe) - CFStringFind(pe, CFSTR("B"), 0).location);
+                if (SLDisplayBitsPerSample) {
+                    // See the comment on SLDisplayBitsPerSample. Returns 0 for an unknown display.
+                    int bitsPerSample = SLDisplayBitsPerSample(screen);
+                    if (bitsPerSample > 0) {
+                        display->bitDepth = (uint8_t) bitsPerSample;
+                    }
                 }
-#else
-                // https://stackoverflow.com/a/33519316/9976392
-                // Also shitty, but better than parsing `CFCopyDescription(mode)`
-                CFDictionaryRef dict = (CFDictionaryRef) * ((int64_t*) mode + 2);
-                if (CFGetTypeID(dict) == CFDictionaryGetTypeID()) {
-                    int32_t bitDepth;
-                    ffCfDictGetInt(dict, kCGDisplayBitsPerSample, &bitDepth);
-                    display->bitDepth = (uint8_t) bitDepth;
-                }
-#endif
 
                 if (display->type == FF_DISPLAY_TYPE_BUILTIN && displayInfo) {
                     display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))
@@ -173,10 +176,10 @@ static void detectDisplays(FFDisplayServerResult* ds) {
                         : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                 }
 #ifdef MAC_OS_X_VERSION_10_15
-                else if (CoreDisplay_Display_SupportsHDRMode) {
-                    if (CoreDisplay_Display_SupportsHDRMode(screen)) {
+                else if (SLSDisplaySupportsHDRMode) {
+                    if (SLSDisplaySupportsHDRMode(screen)) {
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
-                        if (CoreDisplay_Display_IsHDRModeEnabled && CoreDisplay_Display_IsHDRModeEnabled(screen)) {
+                        if (SLSDisplayIsHDRModeEnabled && SLSDisplayIsHDRModeEnabled(screen)) {
                             display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
                         }
                     } else {

@@ -1,4 +1,5 @@
 #include "detection/gpu/gpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/FFstrbuf.h"
 #include "common/strutil.h"
@@ -57,6 +58,7 @@ static bool detectDriverFromSysfs(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* 
     sprintf(path, "/sys/class/drm/%s/device/drm", drmCardKey);
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path);
     if (!dirp) {
+        FF_DEBUG("opendir(%s) failed: %s", path, strerror(errno));
         return "Failed to open `/sys/class/drm/{drmCardKey}/device/drm`";
     }
 
@@ -68,6 +70,7 @@ static bool detectDriverFromSysfs(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* 
             return nullptr;
         }
     }
+    FF_DEBUG("Failed to find render device");
     return "Failed to find render device";
 }
 
@@ -214,6 +217,7 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(%s) failed: %s", buffer->chars, strerror(errno));
         return "Failed to open drm device";
     }
 
@@ -222,6 +226,7 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     } else if (ffStrbufEqualS(&gpu->driver, "i915")) {
         return ffDrmDetectI915(gpu, fd);
     }
+    FF_DEBUG("Unknown Intel GPU driver");
     return "Unknown Intel GPU driver";
 }
 
@@ -257,6 +262,7 @@ static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(%s) failed: %s", buffer->chars, strerror(errno));
         return "Failed to open drm device";
     }
 
@@ -336,6 +342,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     uint32_t vendorId, deviceId, subVendorId, subDeviceId;
     uint8_t classId, subclassId;
     if (sscanf(buffer->chars + strlen("pci:"), "v%8" SCNx32 "d%8" SCNx32 "sv%8" SCNx32 "sd%8" SCNx32 "bc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &subVendorId, &subDeviceId, &classId, &subclassId) != 6) {
+        FF_DEBUG("Failed to parse pci modalias");
         return "Failed to parse pci modalias";
     }
 
@@ -348,6 +355,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     if (drmKey) {
         ssize_t pathLength = readlink(deviceDir->chars, pciPath, ARRAY_SIZE(pciPath) - 1);
         if (pathLength <= 0) {
+            FF_DEBUG("readlink(%s) failed: %s", deviceDir->chars, strerror(errno));
             return "Unable to get PCI device path";
         }
         pciPath[pathLength] = '\0';
@@ -365,6 +373,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     uint32_t pciDomain, pciBus, pciDevice, pciFunc;
     if (sscanf(pPciPath, "%" SCNx32 ":%" SCNx32 ":%" SCNx32 ".%" SCNx32, &pciDomain, &pciBus, &pciDevice, &pciFunc) != 4) {
+        FF_DEBUG("Invalid PCI device path");
         return "Invalid PCI device path";
     }
 
@@ -517,6 +526,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, const char* drmKey) {
     char compatible[256]; // vendor,model-name
     if (sscanf(buffer->chars + strlen("of:"), "NgpuT%*[^C]C%255[^C]", compatible) != 1) {
+        FF_DEBUG("Failed to parse of modalias or not a GPU device");
         return "Failed to parse of modalias or not a GPU device";
     }
 
@@ -573,6 +583,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus) {
 
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(drmDir.chars);
     if (dir == nullptr) {
+        FF_DEBUG("opendir(%s) failed: %s", drmDir.chars, strerror(errno));
         return "Failed to open `/sys/class/drm/`";
     }
 
@@ -612,6 +623,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus) {
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDirPath);
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(%s) failed: %s", pciDirPath, strerror(errno));
         return "Failed to open `/sys/bus/pci/devices/`";
     }
 

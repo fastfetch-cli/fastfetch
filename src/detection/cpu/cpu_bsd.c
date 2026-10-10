@@ -1,7 +1,10 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 #include "common/strutil.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/param.h>
 #if __has_include(<sys/cpuset.h>)
     #include <sys/cpuset.h>
@@ -13,6 +16,7 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
     if (options->tempSensor.length > 0) {
         temp = ffSysctlGetInt(options->tempSensor.chars, -999999);
         if (temp == -999999) {
+            FF_DEBUG("sysctlbyname(%s) failed: %s", options->tempSensor.chars, strerror(errno));
             return "ffSysctlGetInt(options->tempSensor) failed";
         }
     } else {
@@ -21,6 +25,7 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
             // Thermal zone temperature
             temp = ffSysctlGetInt("hw.acpi.thermal.tz0.temperature", -999999);
             if (temp == -999999) {
+                FF_DEBUG("Neither sysctlbyname(dev.cpu.0.temperature) nor sysctlbyname(hw.acpi.thermal.tz0.temperature) is readable: %s", strerror(errno));
                 return "ffSysctlGetInt(\"dev.cpu.0.temperature\" or \"hw.acpi.thermal.tz0.temperature\") failed";
             }
         }
@@ -32,7 +37,9 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    if (ffSysctlGetString("hw.model", &cpu->name) != nullptr) {
+    const char* modelError = ffSysctlGetString("hw.model", &cpu->name);
+    if (modelError != nullptr) {
+        FF_DEBUG("sysctlbyname(hw.model) failed: %s", modelError);
         return "sysctlbyname(hw.model) failed";
     }
 

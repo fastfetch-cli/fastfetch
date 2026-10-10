@@ -101,7 +101,7 @@
         "gamepad",
         "mouse",
         "keyboard",
-        "top",
+        "tpm",
         "netio",
         "diskio",
         {
@@ -112,7 +112,7 @@
             "type": "weather",
             "timeout": 1000
         },
-        "tpm",
+        "top",
         "version",
         "logo",
         "break",

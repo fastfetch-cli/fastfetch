@@ -1,5 +1,6 @@
 extern "C" {
 #include "codec.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/windows/com.h"
 #include "common/windows/unicode.h"
@@ -523,6 +524,7 @@ const char* detectD3d12va(FFCodecOptions* options, FFlist* result /*list of FFCo
     });
 
     if (result->length == resultLengthBefore) {
+        FF_DEBUG("No D3D12 video acceleration support");
         return "No D3D12 video acceleration support";
     }
 
@@ -539,7 +541,9 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list o
     }
 
     FF_AUTO_RELEASE_COM_OBJECT IDXGIFactory1* factory = nullptr;
-    if (FAILED(ffCreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) &factory)) || !factory) {
+    HRESULT hr = ffCreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**) &factory);
+    if (FAILED(hr) || !factory) {
+        FF_DEBUG("CreateDXGIFactory1() failed: %s", ffDebugHResult(hr));
         return "CreateDXGIFactory1() failed";
     }
 
