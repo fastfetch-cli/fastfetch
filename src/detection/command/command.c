@@ -15,6 +15,12 @@ static const char* spawnProcess(FFCommandOptions* options, FFProcessHandle* hand
         return "No command text specified";
     }
 
+#if _WIN32
+    if (ffStrbufEqualS(&options->shell, "cmd.exe") && ffStrbufEqualS(&options->param, "/d/c")) {
+        ffStrbufAppendS(&options->text, " & exit %^errorlevel%"); // Necessary to propagate 9009 from CMD
+    }
+#endif
+
     return ffProcessSpawn(options->param.length ? (char* const[]) {
                                                       options->shell.chars,
                                                       options->param.chars,

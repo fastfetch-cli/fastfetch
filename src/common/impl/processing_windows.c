@@ -29,7 +29,7 @@ static void argvToCmdline(char* const argv[], FFstrbuf* result) {
         }
 
         // Add quotes around string if whitespace chars are present (with slash duplicating at the end of string)
-        if (ffStrbufFirstIndexS(&temp, " \t") != temp.length) {
+        if (ffStrbufContainAnyC(&temp, " \t")) {
             uint32_t pos = temp.length;
             uint32_t cnt = 0;
             while (pos > 0 && temp.chars[pos - 1] == '\\') { ++cnt, --pos; }
@@ -142,6 +142,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
     {
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
         argvToCmdline(argv, &buf);
+        FF_DEBUG("Command line: %s", buf.chars);
         uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
         cmdline = malloc(cmdlineBytes);
         NTSTATUS status = RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, nullptr, buf.chars, buf.length + 1);
@@ -265,6 +266,12 @@ exit: {
     if (NT_SUCCESS(status)) {
         assert(size == sizeof(info));
         if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0) {
+            if (info.ExitStatus == 9009) {
+                // Note: CMD swallows 9009 errorlevel and returns 1 by default.
+                // One must use `& call exit %^ERRORLEVEL%` to propagate the correct error code.
+                FF_DEBUG("Child process exited with error code 9009 (command not found)");
+                return "command not found";
+            }
             FF_DEBUG("Child process exited with an error: %x %s", (unsigned) info.ExitStatus, ffDebugNtStatus(info.ExitStatus));
             return "Child process exited with an error";
         }

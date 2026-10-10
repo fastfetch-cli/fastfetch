@@ -162,7 +162,7 @@ void ffInitCommandOptions(FFCommandOptions* options) {
     );
     ffStrbufInitStatic(&options->param,
 #ifdef _WIN32
-        "/c"
+        "/d/c"
 #else
         "-c"
 #endif
