@@ -167,10 +167,12 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     NtClose(hChildPipeWrite);
     if (!success) {
-        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+        DWORD error = GetLastError();
+        if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+            FF_DEBUG("Command not found: %s (%s)", argv[0], ffDebugWin32Error(error));
             return "command not found";
         }
-        FF_DEBUG("CreateProcessW() failed: %s", ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("CreateProcessW(%s) failed: %s", argv[0], ffDebugWin32Error(error));
         return "CreateProcessW() failed";
     }
 
