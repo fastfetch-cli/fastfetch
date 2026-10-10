@@ -411,6 +411,20 @@ static bool detectWithDumpsys(FFDisplayServerResult* ds) {
 #define FF_DISPLAY_ANDROID_NESTED_FIELDS 8
 #define FF_DISPLAY_ANDROID_MODE_FIELDS 12
 
+// The two instance fields of `DisplayCutout` that lengthen its body, in the order the request writes
+// their results. `mCutoutPathParserInfo` arrived in Android 13 and adds nine writes, `mSideOverrides`
+// in 16 and adds one; Android 11 declares neither.
+typedef enum FFDisplayAndroidCutoutField : uint32_t {
+    FF_DISPLAY_ANDROID_CUTOUT_PATH_PARSER_INFO,
+    FF_DISPLAY_ANDROID_CUTOUT_SIDE_OVERRIDES,
+    FF_DISPLAY_ANDROID_CUTOUT_FIELD_COUNT,
+} FFDisplayAndroidCutoutField;
+
+static const char* const ffDisplayAndroidCutoutFields[FF_DISPLAY_ANDROID_CUTOUT_FIELD_COUNT] = {
+    "mCutoutPathParserInfo",
+    "mSideOverrides",
+};
+
 // The write sequence of every class the reply is made of, read out of the device's own jar. It is
 // what turns the parse from a sequence written against one release into a walk of the release that
 // is running.
@@ -432,13 +446,14 @@ typedef struct FFDisplayAndroidLayout {
 
     // `DisplayCutout` is the one class whose body is not field-driven -- `writeCutoutToParcel` reads
     // everything through compiler-synthesised accessors, so there is no `iget` to walk. What says how
-    // long its body is, is which fields the class declares: `mCutoutPathParserInfo` arrived in
-    // Android 13 and adds nine writes, `mSideOverrides` in 16 and adds one.
-    bool cutoutPathParserInfo;
-    bool cutoutSideOverrides;
+    // long its body is, is which fields the class declares, and that is what is asked for here. They
+    // are one array rather than two members because the request writes them as a run.
+    bool cutoutFields[FF_DISPLAY_ANDROID_CUTOUT_FIELD_COUNT];
 } FFDisplayAndroidLayout;
 
-// Reads every sequence above out of the dex entries of `jarPath`, in one lookup.
+// Reads every sequence above, and `DisplayCutout`'s declared fields, out of the dex entries of
+// `jarPath` -- in one lookup, because the walk behind it is what a lookup costs and the class data it
+// reads along the way already holds everything asked for here.
 //
 // Every sequence but `FrameRateCategoryRate` is required: a class the jar does not declare leaves an
 // empty sequence, and a walk without one has nothing to follow. `FrameRateCategoryRate` arrived in
@@ -499,6 +514,18 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
             .capacity = FF_DISPLAY_ANDROID_NESTED_FIELDS,
             .count = &layout->frameRateCategoryRateCount,
         },
+        {
+            // The one class whose body is not field-driven. `writeCutoutToParcel` reads everything
+            // through compiler-synthesised accessors, so there is no `iget` to walk and no class name
+            // on the wire either -- what says how long its body is, is which fields the class
+            // declares. Asking here rather than by a call of its own is the point: the walk that
+            // answers the seven sequences above is already holding this class's field list, and a
+            // second call would repeat it from the mapping down for 7.0 ms of a 23.5 ms lookup.
+            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_CUTOUT,
+            .instanceFieldNames = ffDisplayAndroidCutoutFields,
+            .instanceFieldResults = layout->cutoutFields,
+            .instanceFieldCount = ARRAY_SIZE(ffDisplayAndroidCutoutFields),
+        },
     };
 
     const char* error = ffDexParcelFields(jarPath, requests, ARRAY_SIZE(requests));
@@ -512,28 +539,11 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
         return false;
     }
 
-    const FFDexInstanceFieldRequest cutoutRequests[] = {
-        {
-            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_CUTOUT,
-            .fieldName = "mCutoutPathParserInfo",
-            .result = &layout->cutoutPathParserInfo,
-        },
-        {
-            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_CUTOUT,
-            .fieldName = "mSideOverrides",
-            .result = &layout->cutoutSideOverrides,
-        },
-    };
-    error = ffDexInstanceFields(jarPath, cutoutRequests, ARRAY_SIZE(cutoutRequests));
-    if (error != nullptr) {
-        FF_DEBUG("Reading the cutout layout out of %s failed: %s", jarPath, error);
-        return false;
-    }
-
     FF_DEBUG(
         "Display layout: %u fields in DisplayInfo, %u in a mode, cutout path parser info %s, side overrides %s",
         layout->displayInfoCount, layout->modeCount,
-        layout->cutoutPathParserInfo ? "yes" : "no", layout->cutoutSideOverrides ? "yes" : "no"
+        layout->cutoutFields[FF_DISPLAY_ANDROID_CUTOUT_PATH_PARSER_INFO] ? "yes" : "no",
+        layout->cutoutFields[FF_DISPLAY_ANDROID_CUTOUT_SIDE_OVERRIDES] ? "yes" : "no"
     );
     return true;
 }
@@ -1044,7 +1054,8 @@ static bool readerDisplayCutout(FFDisplayAndroidReader* reader, const FFDisplayA
         return false;
     }
 
-    if (layout->cutoutPathParserInfo) {
+    const bool* cutout = layout->cutoutFields;
+    if (cutout[FF_DISPLAY_ANDROID_CUTOUT_PATH_PARSER_INFO]) {
         // the display size the cutout was built for and then the physical one
         if (!readerSkip(reader, 4 * sizeof(int32_t))) {
             return false;
@@ -1060,7 +1071,7 @@ static bool readerDisplayCutout(FFDisplayAndroidReader* reader, const FFDisplayA
             return false;
         }
     }
-    if (layout->cutoutSideOverrides) {
+    if (cutout[FF_DISPLAY_ANDROID_CUTOUT_SIDE_OVERRIDES]) {
         return readerSkipArray(reader, sizeof(int32_t)); // mSideOverrides
     }
     return true;

@@ -122,42 +122,46 @@ typedef struct FFDexParcelField {
     char type[FF_DEX_PARCEL_FIELD_TYPE_MAX];
 } FFDexParcelField;
 
-// One `<classDescriptor>.<methodName>` write sequence, and where it is written.
+// One class, and the two things that can be asked about it: the write sequence of one of its methods,
+// and which instance fields it declares. Either half may be left out, and both are answered out of
+// the same `class_data_item` -- which is why they are one request rather than two calls.
+//
+// Asking for them together is not a convenience. Both halves are read from a walk that is dominated
+// by the type table -- 8428 descriptors in `framework.jar`'s `classes.dex`, each read from a
+// different part of a 51 MB mapping -- and the fields a class declares are listed in the very
+// `class_data_item` the sequence is read out of. A second call would map the jar again, open every
+// entry again and make that pass again to reach a list the first call already had in hand. Measured
+// on a Redmi 9A, that second call was 7.0 ms of a 23.5 ms lookup.
 typedef struct FFDexParcelRequest {
     const char* classDescriptor;
+
+    // The write sequence. Left out by a request that only wants the instance fields, in which case
+    // `fields`, `capacity` and `count` are not read.
     const char* methodName;
     FFDexParcelField* fields;
     uint32_t capacity;
     uint32_t* count; // how many fields the sequence holds, or 0 when the jar cannot answer
+
+    // The instance fields. This is the question a Parcelable whose layout is not field-driven needs.
+    // `DisplayCutout` is one: its `writeCutoutToParcel` reads everything through `-$$Nest$` accessors
+    // the compiler synthesised, so there is no `iget` to walk and no class name on the wire either.
+    // What does say how long its body is, is which fields the class carries -- Android 11 declares
+    // three, Android 13 adds `mCutoutPathParserInfo` and Android 16 adds `mSideOverrides`, and each
+    // one adds a known run of writes behind the three both have. A declaration is a field set rather
+    // than an order, which is exactly what this answers.
+    const char* const* instanceFieldNames;
+    bool* instanceFieldResults;
+    uint32_t instanceFieldCount;
 } FFDexParcelRequest;
 
-// Resolves the write sequence of every request out of the dex entries of `jarPath`, walking
-// `classes.dex`, `classes2.dex`, ... in order until one of them defines the class -- the same walk,
-// and the same one pass over the type table, that ffDexStaticInts makes.
+// Resolves every request out of the dex entries of `jarPath`, walking `classes.dex`, `classes2.dex`,
+// ... in order until one of them defines the class -- the same walk, and the same one pass over the
+// type table, that ffDexStaticInts makes.
 //
-// Every request is written a count or 0. A class the jar does not declare, a method it does not
-// declare, and a sequence longer than the caller's `capacity` all leave 0 behind, and none of them
-// holds back the others: they are independent questions about the same pass. A count of 0 is not a
-// failure but an answer -- this build does not write that class, so a caller reading it has nothing
-// to walk. The return value is reserved for the jar itself, as in ffDexStaticInts.
+// Every request is written its answers before anything can fail: a count of 0 for the sequence, and
+// `false` for every instance field. A class the jar does not declare, a method it does not declare,
+// and a sequence longer than the caller's `capacity` all leave the count at 0, and none of them holds
+// back the others: they are independent questions about the same pass. A count of 0 is not a failure
+// but an answer -- this build does not write that class, so a caller reading it has nothing to walk.
+// The return value is reserved for the jar itself, as in ffDexStaticInts.
 [[gnu::nonnull(1, 2), nodiscard]] const char* ffDexParcelFields(const char* jarPath, const FFDexParcelRequest* requests, uint32_t count);
-
-// Whether `<classDescriptor>` declares an instance field named `<fieldName>`.
-//
-// This is the question a Parcelable whose layout is not field-driven needs. `DisplayCutout` is one:
-// its `writeCutoutToParcel` reads everything through `-$$Nest$` accessors the compiler synthesised,
-// so there is no `iget` to walk and no class name on the wire either. What does say how long its body
-// is, is which fields the class carries -- Android 11 declares three, Android 13 adds
-// `mCutoutPathParserInfo` and Android 16 adds `mSideOverrides`, and each one adds a known run of
-// writes behind the three both have. The declaration is a field set rather than an order, which is
-// exactly what this answers.
-typedef struct FFDexInstanceFieldRequest {
-    const char* classDescriptor;
-    const char* fieldName;
-    bool* result;
-} FFDexInstanceFieldRequest;
-
-// Writes `false` for every request the jar cannot answer, on every path out -- a class the jar does
-// not declare and a field the class does not declare are the same answer here, because both mean the
-// field is not in the parcel. The return value is reserved for the jar itself.
-[[gnu::nonnull(1, 2), nodiscard]] const char* ffDexInstanceFields(const char* jarPath, const FFDexInstanceFieldRequest* requests, uint32_t count);

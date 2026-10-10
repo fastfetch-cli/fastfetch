@@ -698,6 +698,46 @@ static const char* dexWalkParcelFields(const FFDexTables* tables, const uint8_t*
     return nullptr;
 }
 
+// Walks the instance field list of one `class_data_item` and writes `true` for every name it holds.
+// The list is the caller's, so this answers one request's worth of names or several.
+//
+// This is the question a Parcelable whose layout is not field-driven needs: `DisplayCutout` reads
+// everything through compiler-synthesised accessors, so the set of fields its class declares is the
+// only thing that says how long its body is. It is asked as part of a write-sequence request rather
+// than by a call of its own -- the list is already positioned by the `class_data_item` the sequence
+// comes out of, and a separate call would repeat the whole walk to reach it.
+static const char* dexMatchInstanceFields(const FFDexTables* tables, const uint8_t* fields, uint32_t fieldCount, const char* const* names, bool* results, uint32_t nameCount) {
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+
+    uint32_t fieldIndex = 0;
+    for (uint32_t j = 0; j < fieldCount; ++j) {
+        if (fields >= end) {
+            return "The dex class data is truncated";
+        }
+        const uint32_t fieldIndexDiff = dexUleb128(&fields, end); // field_idx_diff
+        if (fieldIndexDiff > UINT32_MAX - fieldIndex) {
+            return "The dex field index is out of range";
+        }
+        fieldIndex += fieldIndexDiff;
+        (void) dexUleb128(&fields, end); // access_flags
+
+        if (fieldIndex >= tables->fieldIdCount) {
+            return "The dex field table is out of range";
+        }
+        const char* name = dexString(dex, end, dexU32(tables->fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
+        if (name == nullptr) {
+            continue;
+        }
+        for (uint32_t i = 0; i < nameCount; ++i) {
+            if (!results[i] && strcmp(name, names[i]) == 0) {
+                results[i] = true;
+            }
+        }
+    }
+    return nullptr;
+}
+
 // Walks the method list of the class that `typeIndex` names, and for every request whose method name
 // it holds walks that method's instructions. `defined` is what `dexClassStaticInts` reports, for the
 // same reason.
@@ -719,6 +759,22 @@ static const char* dexClassParcelFields(const FFDexTables* tables, uint32_t type
     const char* error = dexReadClassData(tables, classDef, &classData);
     if (error != nullptr) {
         return error;
+    }
+
+    // The instance fields first, out of the list the `class_data_item` has already positioned. A
+    // request that asked for them is answered here whether or not it also asked for a sequence, and
+    // one that asked for neither is settled by the loop at the end like any other.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (settled[r] || typeIndexes[r] != typeIndex || requests[r].instanceFieldCount == 0) {
+            continue;
+        }
+        error = dexMatchInstanceFields(
+            tables, classData.instanceFields, classData.instanceFieldCount,
+            requests[r].instanceFieldNames, requests[r].instanceFieldResults, requests[r].instanceFieldCount
+        );
+        if (error != nullptr) {
+            return error;
+        }
     }
 
     const uint8_t* methods = classData.methods;
@@ -748,7 +804,10 @@ static const char* dexClassParcelFields(const FFDexTables* tables, uint32_t type
             }
 
             for (uint32_t r = 0; r < count; ++r) {
-                if (settled[r] || typeIndexes[r] != typeIndex || strcmp(name, requests[r].methodName) != 0) {
+                // A request that left the sequence out is one that only wanted the instance fields,
+                // which are already written; it has no method name to match against.
+                if (settled[r] || typeIndexes[r] != typeIndex || requests[r].methodName == nullptr
+                    || strcmp(name, requests[r].methodName) != 0) {
                     continue;
                 }
                 // A method with no body -- abstract, or native -- writes nothing, and the count stays 0.
@@ -769,66 +828,6 @@ static const char* dexClassParcelFields(const FFDexTables* tables, uint32_t type
 
     // The class is defined here, so a request of its own that went unanswered is one whose method the
     // class does not declare. The count it already holds is the 0 that says so.
-    for (uint32_t r = 0; r < count; ++r) {
-        if (!settled[r] && typeIndexes[r] == typeIndex) {
-            settled[r] = 1;
-        }
-    }
-    return nullptr;
-}
-
-// Walks the instance field list of the class that `typeIndex` names and answers every request whose
-// field name it holds. `defined` as above.
-//
-// This is the question a Parcelable whose layout is not field-driven needs: `DisplayCutout` reads
-// everything through compiler-synthesised accessors, so the set of fields its class declares is the
-// only thing that says how long its body is.
-static const char* dexClassInstanceFields(const FFDexTables* tables, uint32_t typeIndex, const FFDexInstanceFieldRequest* requests, const uint32_t* typeIndexes, uint8_t* settled, uint32_t count, bool* defined) {
-    const uint8_t* classDef = dexFindClassDef(tables, typeIndex);
-    *defined = classDef != nullptr;
-    if (classDef == nullptr) {
-        return nullptr;
-    }
-
-    const uint8_t* dex = tables->dex;
-    const uint8_t* end = tables->end;
-
-    FFDexClassData classData;
-    const char* error = dexReadClassData(tables, classDef, &classData);
-    if (error != nullptr) {
-        return error;
-    }
-
-    const uint8_t* fields = classData.instanceFields;
-    uint32_t fieldIndex = 0;
-    for (uint32_t j = 0; j < classData.instanceFieldCount; ++j) {
-        if (fields >= end) {
-            return "The dex class data is truncated";
-        }
-        const uint32_t fieldIndexDiff = dexUleb128(&fields, end); // field_idx_diff
-        if (fieldIndexDiff > UINT32_MAX - fieldIndex) {
-            return "The dex field index is out of range";
-        }
-        fieldIndex += fieldIndexDiff;
-        (void) dexUleb128(&fields, end); // access_flags
-
-        if (fieldIndex >= tables->fieldIdCount) {
-            return "The dex field table is out of range";
-        }
-        const char* name = dexString(dex, end, dexU32(tables->fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
-        if (name == nullptr) {
-            continue;
-        }
-        for (uint32_t r = 0; r < count; ++r) {
-            if (settled[r] || typeIndexes[r] != typeIndex || strcmp(name, requests[r].fieldName) != 0) {
-                continue;
-            }
-            *requests[r].result = true;
-            settled[r] = 1;
-        }
-    }
-
-    // A field the class does not declare is a `false`, which the results already hold.
     for (uint32_t r = 0; r < count; ++r) {
         if (!settled[r] && typeIndexes[r] == typeIndex) {
             settled[r] = 1;
@@ -1215,10 +1214,17 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
 }
 
 const char* ffDexParcelFields(const char* jarPath, const FFDexParcelRequest* requests, uint32_t count) {
-    // Every request is written a count of 0 before anything can fail, so that a caller reads an
-    // answer rather than whatever its own stack held there, however this returns.
+    // Every request is written its answers before anything can fail, so that a caller reads an answer
+    // rather than whatever its own stack held there, however this returns. The instance fields go
+    // first: `false` is what both "the class does not declare it" and "the jar cannot be read" mean,
+    // and the walk below only ever turns one of them true.
     for (uint32_t r = 0; r < count; ++r) {
-        *requests[r].count = 0;
+        if (requests[r].methodName != nullptr) {
+            *requests[r].count = 0;
+        }
+        for (uint32_t i = 0; i < requests[r].instanceFieldCount; ++i) {
+            requests[r].instanceFieldResults[i] = false;
+        }
     }
     if (count == 0) {
         return nullptr;
@@ -1287,88 +1293,16 @@ const char* ffDexParcelFields(const char* jarPath, const FFDexParcelRequest* req
     // A request still holding 0 is one whose class no entry of the jar defines, or whose class does
     // not declare the method. Both are the same answer -- this build does not write that class -- and
     // for a debug build it is worth saying which of the two it was, since the count on its own does
-    // not tell "this build has no such method" apart from "the reader went wrong".
+    // not tell "this build has no such method" apart from "the reader went wrong". The same goes for
+    // an instance field left `false`.
     for (uint32_t r = 0; r < count; ++r) {
-        if (*requests[r].count == 0) {
+        if (requests[r].methodName != nullptr && *requests[r].count == 0) {
             FF_DEBUG("The write sequence of \"%s.%s\" is not in the jar", requests[r].classDescriptor, requests[r].methodName);
         }
-    }
-    return nullptr;
-}
-
-const char* ffDexInstanceFields(const char* jarPath, const FFDexInstanceFieldRequest* requests, uint32_t count) {
-    // Every request is written `false` before anything can fail, so that a caller reads an answer
-    // rather than whatever its own stack held there, however this returns.
-    for (uint32_t r = 0; r < count; ++r) {
-        *requests[r].result = false;
-    }
-    if (count == 0) {
-        return nullptr;
-    }
-
-    [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
-    const char* error = dexMapJar(jarPath, &mapping);
-    if (error != nullptr) {
-        return error;
-    }
-
-    FF_AUTO_FREE uint8_t* settled = calloc(count, 1);
-    FF_AUTO_FREE uint32_t* typeIndexes = malloc((size_t) count * sizeof(uint32_t));
-    FF_AUTO_FREE const char** descriptors = malloc((size_t) count * sizeof(const char*));
-    if (settled == nullptr || typeIndexes == nullptr || descriptors == nullptr) {
-        FF_DEBUG("Allocating the tables for %u instance field requests failed", count);
-        return "malloc failed";
-    }
-    for (uint32_t r = 0; r < count; ++r) {
-        descriptors[r] = requests[r].classDescriptor;
-    }
-
-    uint32_t pending = count;
-    for (uint32_t index = 1; index <= FF_DEX_MAX_ENTRIES && pending > 0; ++index) {
-        FF_AUTO_FREE uint8_t* inflated = nullptr;
-        FFDexEntry entry = {};
-        bool present = false;
-        error = dexOpenEntry(&mapping, index, &present, &inflated, &entry);
-        if (error != nullptr) {
-            // The dex cannot be read at all, which no later entry can fix.
-            return error;
-        }
-        if (!present) {
-            break;
-        }
-
-        dexFindTypes(&entry.tables, descriptors, settled, typeIndexes, count);
-
-        for (uint32_t r = 0; r < count; ++r) {
-            if (settled[r] || typeIndexes[r] == UINT32_MAX) {
-                continue;
+        for (uint32_t i = 0; i < requests[r].instanceFieldCount; ++i) {
+            if (!requests[r].instanceFieldResults[i]) {
+                FF_DEBUG("\"%s\" is not an instance field of \"%s\"", requests[r].instanceFieldNames[i], requests[r].classDescriptor);
             }
-            const uint32_t typeIndex = typeIndexes[r];
-            bool defined = false;
-            error = dexClassInstanceFields(&entry.tables, typeIndex, requests, typeIndexes, settled, count, &defined);
-            if (error != nullptr) {
-                return error;
-            }
-            if (!defined) {
-                for (uint32_t s = r; s < count; ++s) {
-                    if (typeIndexes[s] == typeIndex) {
-                        typeIndexes[s] = UINT32_MAX;
-                    }
-                }
-            }
-        }
-
-        pending = 0;
-        for (uint32_t r = 0; r < count; ++r) {
-            if (!settled[r]) {
-                ++pending;
-            }
-        }
-    }
-
-    for (uint32_t r = 0; r < count; ++r) {
-        if (!*requests[r].result) {
-            FF_DEBUG("\"%s\" is not an instance field of \"%s\"", requests[r].fieldName, requests[r].classDescriptor);
         }
     }
     return nullptr;
