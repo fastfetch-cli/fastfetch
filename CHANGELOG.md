@@ -12,9 +12,7 @@ Changes:
 
 Features:
 * Added Sound detection on Android. (Sound, Android)
-* Added display detection on Android over binder, which needs neither a child process nor a permission.
-    * The module took 16.0-26.5 ms on the test device and now takes 1.3-1.5 ms. The `cmd` and `dumpsys` routes are unchanged and remain the fallback.
-    * It is also the only route that answers for an app UID on Android 12 and older, where `cmd display get-displays` does not exist and `dumpsys` is behind `android.permission.DUMP`. (Display, Android)
+* Added display detection on Android over binder, which needs neither a child process nor a permission. (Display, Android)
 * Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
 * Performance improvements & internal cleanups
 * Added Finnish language support. (General)

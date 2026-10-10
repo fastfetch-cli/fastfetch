@@ -6,346 +6,24 @@
 #include "common/debug.h"
 #include "common/settings.h"
 #include "common/strutil.h"
-#include "common/processing.h"
 #include "linux/displayserver_linux.h"
 
 #include <math.h>
-
-static bool detectWithGetprop(FFDisplayServerResult* ds) {
-    // Only for MiUI
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-
-    if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
-        ffStrbufContainC(&buffer, ',')) {
-        // 1440,3200,560 => width,height,densityDpi
-        uint32_t width = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrAfterFirstC(&buffer, ',');
-        uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrAfterFirstC(&buffer, ',');
-        uint32_t dpi = (uint32_t) ffStrbufToUInt(&buffer, 0) * 96 / 160;
-        FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width,
-            height,
-            0,
-            dpi,
-            0,
-            0,
-            0,
-            0,
-            nullptr,
-            FF_DISPLAY_TYPE_BUILTIN,
-            false,
-            0,
-            0,
-            0,
-            "getprop");
-        return !!display;
-    }
-
-    return false;
-}
-
-// `cmd display get-displays` and `dumpsys display` print the same thing -- the `DisplayInfo` of every
-// display, one per line -- so one parser covers both and only the command and the marker in front of
-// each record differ:
-//
-//  * `cmd display get-displays` needs no permission, which is what makes it usable for an app UID,
-//    but the subcommand was only added to `DisplayManagerShellCommand` in Android 13. Android 11 and
-//    12 answer `Unknown command: get-displays` on stdout with exit code 255.
-//  * `dumpsys display` covers every release, including the ones that predate `get-displays`, but it
-//    is gated behind `android.permission.DUMP`, so it only answers for `adb shell` and root.
-//
-// The record layout has changed across releases, and every difference is accepted rather than version
-// checked:
-//
-//  * The mode list is printed as `modes [...]` up to Android 14 and as `supportedModes [...]` from
-//    Android 15 on, which also prints `appsSupportedModes [...]` right behind it. Both spellings are
-//    searched for.
-//  * `renderFrameRate` is printed from Android 15 on. Before that the active mode's fps is the only
-//    refresh rate the dump carries. The active mode's fps is preferred even where it exists, see
-//    the comment on `refreshRate` below.
-//  * `displayGroupId` is printed from Android 12 on, the physical dpi behind `density` from
-//    Android 11 on, and `isForceSdr` from Android 15 on.
-//
-// A record is one line, and the `DisplayInfo{` inside it is what gets parsed, so the `Display id 0: `
-// of the one command and the `mBaseDisplayInfo=` of the other are both skipped by the same code.
-static bool detectWithCommand(FFDisplayServerResult* ds, char* const argv[], const char* marker, const char* platformApi) {
-    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    FFProcessHandle handle;
-    // `cmd` forwards its stdin to the service over binder, and the kernel rejects the whole
-    // transaction when that fd is a terminal, which it is whenever fastfetch runs in a terminal.
-    // Detaching the child from our stdin is only needed here, so the low level API is called instead
-    // of `ffProcessAppendStdOut`.
-    if (ffProcessSpawn(argv, FF_PROCESS_OUTPUT_STDOUT_BIT, ffGetNullFD(), &handle) != nullptr) {
-        return false; // Neither command is available on every Android version
-    }
-
-    if (ffProcessReadOutput(&handle, &buf) != nullptr || buf.length == 0) {
-        return false;
-    }
-    ffStrbufTrimRightSpace(&buf);
-
-    uint32_t index = 0;
-    while ((index = ffStrbufNextIndexS(&buf, index, marker)) < buf.length) {
-        index += strlen(marker);
-
-        uint32_t nextIndex = ffStrbufNextIndexC(&buf, index, '\n');
-        buf.chars[nextIndex] = '\0';
-        const char* info = buf.chars + index;
-
-        // 0: DisplayInfo{"Builtin display", displayId 0, ..., real 1440 x 3168, ..., mode 2,
-        //    renderFrameRate 60.000004, ..., defaultMode 4, ..., supportedModes [{id=2,
-        //    width=1440, height=3168, fps=60.000004, ...}], ..., hdrCapabilities
-        //    HdrCapabilities{mSupportedHdrTypes=[1, 2, 3, 4], ...}, isForceSdr false, ...,
-        //    rotation 0, ..., type INTERNAL, uniqueId "local:4630946557703207059", ...,
-        //    density 560 (560.0 x 560.0) dpi, ..., deviceProductInfo DeviceProductInfo{...,
-        //    manufactureDate=ManufactureDate{week=27, year=2006}, ...}, ...}
-        const char* field = strstr(info, "DisplayInfo{\"");
-        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateA(64);
-        if (field) {
-            field += strlen("DisplayInfo{\"");
-            const char* nameEnd = strchr(field, '"');
-            if (nameEnd) {
-                ffStrbufAppendNS(&name, (uint32_t) (nameEnd - field), field);
-            }
-        }
-
-        // `real` is the size the display currently uses, which is smaller than the panel's when the
-        // framework emulates a smaller display size
-        unsigned width = 0, height = 0;
-        if ((field = strstr(info, ", real ")) && sscanf(field, ", real %u x %u", &width, &height) < 2) {
-            width = height = 0;
-        }
-
-        // `renderFrameRate` is printed from Android 15 on. It is documented as "a divisor of the
-        // active mode refresh rate", so it is the rate the display is currently *rendering* at and
-        // can be lower than the mode it is set to. It is therefore only used for a record whose
-        // mode list can not be read, where a possibly divided rate still beats none.
-        double renderFrameRate = 0;
-        if ((field = strstr(info, ", renderFrameRate ")) && sscanf(field, ", renderFrameRate %lf", &renderFrameRate) < 1) {
-            renderFrameRate = 0;
-        }
-
-        unsigned activeMode = 0, defaultMode = 0;
-        if ((field = strstr(info, ", mode ")) && sscanf(field, ", mode %u", &activeMode) < 1) {
-            activeMode = 0;
-        }
-        if ((field = strstr(info, ", defaultMode ")) && sscanf(field, ", defaultMode %u", &defaultMode) < 1) {
-            defaultMode = 0;
-        }
-
-        // The modes are listed with their resolution in the natural orientation, which is also how
-        // the preferred values are reported on the other platforms. `defaultMode` is the mode the
-        // display itself prefers, so it carries the panel's native resolution.
-        uint32_t preferredWidth = 0, preferredHeight = 0;
-        double preferredRefreshRate = 0, activeModeRefreshRate = 0;
-        field = strstr(info, ", supportedModes [");
-        if (field == nullptr) {
-            field = strstr(info, ", modes ["); // Android 14 and older
-        }
-        while (field && (field = strstr(field, "{id="))) {
-            // {id=2, width=1440, height=3168, fps=60.000004, ...
-            unsigned id = 0, modeWidth = 0, modeHeight = 0;
-            double fps = 0;
-            if (sscanf(field, "{id=%u, width=%u, height=%u, fps=%lf", &id, &modeWidth, &modeHeight, &fps) < 4) {
-                break;
-            }
-            if (id == activeMode) {
-                activeModeRefreshRate = fps;
-            }
-            if (id == defaultMode) {
-                preferredWidth = modeWidth;
-                preferredHeight = modeHeight;
-                preferredRefreshRate = fps;
-            }
-            if (activeModeRefreshRate > 0 && preferredWidth > 0) {
-                break; // Both are in, and the same list is printed a second time from Android 15 on
-            }
-            ++field;
-        }
-
-        // The nominal rate of the active mode, which is what `Display.getRefreshRate()` reports
-        // (`refreshRateOverride` if it is set, the mode's own rate otherwise) and what every other
-        // platform reports. `renderFrameRate` is deliberately not preferred: it is a render
-        // cadence that follows the content rather than a property of the display, and it does not
-        // exist before Android 15, so using it would make the reported rate change with the
-        // Android version as well as with what is on screen.
-        double refreshRate = activeModeRefreshRate;
-        if (refreshRate <= 0) {
-            refreshRate = renderFrameRate;
-        }
-
-        unsigned rotation = 0;
-        if ((field = strstr(info, ", rotation ")) && sscanf(field, ", rotation %u", &rotation) < 1) {
-            rotation = 0;
-        }
-
-        FFDisplayType type = FF_DISPLAY_TYPE_UNKNOWN;
-        if ((field = strstr(info, ", type "))) {
-            field += strlen(", type ");
-            if (ffStrStartsWith(field, "INTERNAL")) {
-                type = FF_DISPLAY_TYPE_BUILTIN;
-            } else if (ffStrStartsWith(field, "EXTERNAL") || ffStrStartsWith(field, "WIFI")) {
-                // A WIFI display is a wireless sink, which is as external as a wired one
-                type = FF_DISPLAY_TYPE_EXTERNAL;
-            }
-        }
-
-        unsigned density = 0;
-        double physicalXDpi = 0, physicalYDpi = 0;
-        if ((field = strstr(info, ", density "))) {
-            // `density 640 (501.0411 x 509.28604) dpi`, the physical dpi is only printed since
-            // Android 11
-            if (sscanf(field, ", density %u (%lf x %lf) dpi", &density, &physicalXDpi, &physicalYDpi) < 1) {
-                density = 0;
-            }
-        }
-
-        // The physical dpi describes the panel itself and does not change with the logical display
-        // size, so the physical size has to be derived from the native resolution
-        uint32_t physicalWidth = 0, physicalHeight = 0;
-        if (physicalXDpi > 0) {
-            physicalWidth = (uint32_t) ((preferredWidth ? preferredWidth : width) * 25.4 / physicalXDpi + 0.5);
-        }
-        if (physicalYDpi > 0) {
-            physicalHeight = (uint32_t) ((preferredHeight ? preferredHeight : height) * 25.4 / physicalYDpi + 0.5);
-        }
-
-        // `uniqueId` identifies the display across reboots, e.g. `local:4630946557703207059` on a
-        // physical display and `virtual:...` on a virtual one
-        uint64_t id = 0;
-        if ((field = strstr(info, ", uniqueId \""))) {
-            field += strlen(", uniqueId \"");
-            const char* uniqueIdEnd = strchr(field, '"');
-            const char* digits = uniqueIdEnd ? memchr(field, ':', (size_t) (uniqueIdEnd - field)) : nullptr;
-            id = (uint64_t) strtoull(digits ? digits + 1 : field, nullptr, 10);
-        }
-
-        uint16_t manufactureYear = 0, manufactureWeek = 0;
-        if ((field = strstr(info, ", deviceProductInfo "))) {
-            // `manufactureDate=ManufactureDate{week=27, year=2006}`, either field may be `null`
-            const char* date = strstr(field, "manufactureDate=ManufactureDate{");
-            unsigned year = 0, week = 0;
-            if (date && sscanf(date + strlen("manufactureDate=ManufactureDate{"), "week=%u, year=%u", &week, &year) == 2) {
-                manufactureYear = (uint16_t) year;
-                manufactureWeek = (uint16_t) week;
-            } else if ((field = strstr(field, ", modelYear=")) && sscanf(field, ", modelYear=%u", &year) == 1) {
-                // A display reports either the date of manufacture or the model year
-                manufactureYear = (uint16_t) year;
-            }
-        }
-
-        // `displayId` sits inside the record, not in front of it: `cmd` prints the id again in its
-        // own prefix, but `dumpsys` prints only `mBaseDisplayInfo=`
-        unsigned displayId = 0;
-        if ((field = strstr(info, ", displayId ")) && sscanf(field, ", displayId %u", &displayId) < 1) {
-            displayId = 0;
-        }
-        bool primary = displayId == 0; // Display 0 is the default one
-
-        // Android counts density in dpi with 160 as the 1x baseline, fastfetch uses 96
-        FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width,
-            height,
-            refreshRate,
-            density * 96 / 160,
-            preferredWidth,
-            preferredHeight,
-            preferredRefreshRate,
-            rotation,
-            &name,
-            type,
-            primary,
-            id,
-            physicalWidth,
-            physicalHeight,
-            platformApi);
-        if (display) {
-            display->manufactureYear = manufactureYear;
-            display->manufactureWeek = manufactureWeek;
-
-            // Reported for every display, not only for the built-in one: `hdrCapabilities` is a
-            // field of the `DisplayInfo` record itself, so it describes that display and nothing
-            // else, and the other platforms report HDR per display too (EDID on Linux, the
-            // advanced color info per target on Windows). An external display or a wireless sink
-            // carries the field as well.
-            //
-            // `hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[1, 2, 3, 4], ...}` is printed
-            // since Android 11, where an empty list means that the display can not do HDR at all.
-            // The two fallbacks below it are device wide vendor properties, which is the price of
-            // answering for a record that does not print the field.
-            FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-            field = strstr(info, "hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[");
-            if (field) {
-                field += strlen("hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[");
-                display->hdrStatus = *field == ']' ? FF_DISPLAY_HDR_STATUS_UNSUPPORTED : FF_DISPLAY_HDR_STATUS_SUPPORTED;
-            } else if (ffSettingsGetAndroidProperty("ro.surface_flinger.has_HDR_display", &buffer)) {
-                display->hdrStatus = ffStrbufIgnCaseEqualS(&buffer, "true") ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-            } else {
-                display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
-            }
-
-            if (display->hdrStatus == FF_DISPLAY_HDR_STATUS_SUPPORTED) {
-                // `persist.sys.hdr_mode` is non-zero while HDR is turned on, and `isForceSdr
-                // true` means that the framework disabled every HDR capability of this display.
-                // Note that `ffSettingsGetAndroidProperty` appends, so the value needs its own
-                // buffer.
-                FF_STRBUF_AUTO_DESTROY hdrMode = ffStrbufCreate();
-                if (ffSettingsGetAndroidProperty("persist.sys.hdr_mode", &hdrMode) &&
-                    ffStrbufToUInt(&hdrMode, 0) > 0 &&
-                    !strstr(info, ", isForceSdr true")) {
-                    display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
-                }
-            }
-        }
-
-        // The last display of the dump is not followed by a newline, so the loop must not step
-        // past the end of the buffer (`ffStrbufNextIndexC` returns the length when it finds none)
-        index = nextIndex < buf.length ? nextIndex + 1 : buf.length;
-    }
-
-    // A command that produced no `DisplayInfo` record has to be reported as a failure: the caller
-    // keys off this value to decide whether to try the other command, and on Android 12 and older
-    // `dumpsys` is the only one that can still yield a display.
-    return ds->displays.length > 0;
-}
-
-static bool detectWithCmd(FFDisplayServerResult* ds) {
-    return detectWithCommand(ds,
-        (char*[]) { "/system/bin/cmd", "display", "get-displays", nullptr },
-        "Display id ",
-        "cmd");
-}
-
-static bool detectWithDumpsys(FFDisplayServerResult* ds) {
-    // `dumpsys` needs android.permission.DUMP, which only the shell UID and root hold. Every other UID
-    // is answered with `Permission Denial: can't dump DisplayManagerService from from pid=..., uid=...
-    // due to missing android.permission.DUMP permission` on stdout and a zero exit status, so the fork
-    // buys a child process and the record loop then finds no `DisplayInfo` -- the same "no display" the
-    // caller reads as "try the next route". Not forking is the only difference this makes, but it is
-    // the difference between the fallback chain describing what is available and it guessing.
-    if (!ffAndroidIsRootOrShell(instance.state.platform.uid)) {
-        return false;
-    }
-
-    return detectWithCommand(ds,
-        (char*[]) { "/system/bin/dumpsys", "display", nullptr },
-        "mBaseDisplayInfo=",
-        "dumpsys");
-}
 
 // ---------------------------------------------------------------------------------------------
 // The binder route
 // ---------------------------------------------------------------------------------------------
 //
-// `cmd display get-displays` and `dumpsys display` are both a child process, and that fork is all of
-// what this module costs: it took 16.0-26.5 ms on the test device, where `cmd display get-displays`
-// itself takes 9.2 ms and a bare fork 8.6 ms. `cmd` does not exist before Android 13 either, so on
-// Android 11 and 12 an app UID has no display at all -- `dumpsys` is behind
-// android.permission.DUMP there. `display` is the service both sit on,
-// android.hardware.display.IDisplayManager: it lives in system_server, an app UID may call it, and
+// `cmd display get-displays` and `dumpsys display` used to be the routes here, and both are a child
+// process -- that fork was all of what this module cost: it took 16.0-26.5 ms on the test device,
+// where `cmd display get-displays` itself takes 9.2 ms and a bare fork 8.6 ms. `cmd` does not exist
+// before Android 13 either, and `dumpsys` is behind android.permission.DUMP, so on Android 11 and 12
+// an app UID had no display at all. Both are gone: `display` is the service they sat on,
+// android.hardware.display.IDisplayManager, it lives in system_server, an app UID may call it, and
 // one `getDisplayInfo(0)` answers the whole `DisplayInfo` the dump prints, field for field. With the
-// fork gone the module takes 1.3-1.5 ms.
+// fork gone the module took 2.8-3.2 ms where `cmd` took 16.0-26.5 ms, and Android 11 -- the release
+// `cmd` could not serve at all -- has been read this way on a device. What is left is dominated by
+// the dex read below, not by the transaction.
 //
 // What it costs is the parse. The reply is a Java Parcelable and its field set moves with every
 // release and every vendor fork -- `DisplayInfo` writes 34 fields on Android 11, 42 on 13 and 57 on
@@ -359,7 +37,9 @@ static bool detectWithDumpsys(FFDisplayServerResult* ds) {
 // both a `Ljava/lang/String;` on the wire and are not the same length. The type descriptor settles
 // the primitives and both array shapes, a handful of names settle the rest, and every nested
 // Parcelable is anchored on its class name. A layout this does not recognise fails the route rather
-// than answering, which is what makes the `cmd` / `dumpsys` fallback behind it worth having.
+// than answering. There is no second route behind this one any more, so a build whose layout is not
+// one this parser reads reports no display at all, rather than a plausible number out of the middle of
+// a different field.
 
 #define FF_DISPLAY_ANDROID_SERVICE "display"
 #define FF_DISPLAY_ANDROID_DESCRIPTOR "android.hardware.display.IDisplayManager"
@@ -460,9 +140,10 @@ typedef struct FFDisplayAndroidLayout {
 // Android 15, so a jar that does not declare it is answering rather than failing -- the field is
 // simply not in the sequence behind it, and the walk never asks.
 //
-// A jar that cannot be read at all fails too, and the route falls back to `cmd` / `dumpsys`. That is
-// the point of the dex being the source: a build this parser cannot read gets the fallback, rather
-// than a plausible number read out of the middle of a different field.
+// A jar that cannot be read at all fails too, and with nothing behind this route that leaves the
+// module with no display to report. Which is the point of the dex being the source: a build this
+// parser cannot read declines to answer, rather than reporting a plausible number read out of the
+// middle of a different field.
 static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layout) {
     const FFDexParcelRequest requests[] = {
         {
@@ -548,8 +229,8 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
     return true;
 }
 
-// `DisplayInfo.type`, i.e. `Display.TYPE_*`. The `cmd` route compares the same field as the text
-// `INTERNAL` / `EXTERNAL` / `WIFI`; the numbers are what the parcel carries.
+// `DisplayInfo.type`, i.e. `Display.TYPE_*`. A dump prints these as `INTERNAL` / `EXTERNAL` /
+// `WIFI`; the numbers are what the parcel carries.
 typedef enum FFDisplayAndroidType : int32_t {
     FF_DISPLAY_ANDROID_TYPE_UNKNOWN = 0,
     FF_DISPLAY_ANDROID_TYPE_INTERNAL = 1,
@@ -570,7 +251,7 @@ typedef enum FFDisplayAndroidValue : int32_t {
 
 // A cursor over one reply. Every read is bounds checked and every mismatch raises `failed` rather
 // than returning a value: once a field has been read at the wrong place nothing behind it can be
-// trusted, and the only safe answer left is the fallback.
+// trusted, and the only safe answer left is to report nothing.
 typedef struct FFDisplayAndroidReader {
     const uint8_t* data;
     size_t size;
@@ -851,7 +532,18 @@ static bool readerRect(FFDisplayAndroidReader* reader) {
 // body this parser reads differently can not move the fields behind it. The size counts from its own
 // end, not from its start.
 static bool readerManufactureDate(FFDisplayAndroidReader* reader, const FFDisplayAndroidLayout* layout, uint16_t* year, uint16_t* week) {
-    if ((FFDisplayAndroidValue) readerI32(reader) != FF_DISPLAY_ANDROID_VALUE_PARCELABLE) {
+    // `mManufactureDate` is `@Nullable`, so a display with no date writes a bare `VAL_NULL` and
+    // nothing behind it -- and a date is not what the display is being read for. A missing one is
+    // skipped rather than failed: everything the module needs is still in the record, and dropping
+    // the display over an absent date would answer nothing at all. Only a tag that is neither a
+    // Parcelable nor a null fails, because that is a framing this walk does not know how to step over.
+    const int32_t tag = readerI32(reader);
+    if (tag == FF_DISPLAY_ANDROID_VALUE_NULL) {
+        *year = 0;
+        *week = 0;
+        return true;
+    }
+    if (tag != FF_DISPLAY_ANDROID_VALUE_PARCELABLE) {
         reader->failed = true;
         return false;
     }
@@ -1171,8 +863,8 @@ typedef struct FFDisplayAndroidWalk {
 } FFDisplayAndroidWalk;
 
 // `uniqueId` identifies the display across reboots, e.g. `local:4630946557703207059` for the panel
-// and `virtual:...` for a virtual one. The number behind the colon is what the `cmd` route extracts
-// from the same string, so the two routes report the same id.
+// and `virtual:...` for a virtual one. The prefix says what kind of display it is, and the number
+// behind the colon is the id.
 static uint64_t displayUniqueId(const char* uniqueId) {
     const char* colon = strchr(uniqueId, ':');
     return (uint64_t) strtoull(colon != nullptr ? colon + 1 : uniqueId, nullptr, 10);
@@ -1341,7 +1033,9 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
         || info->density > 4000
         || !(info->physicalXDpi >= 0) || info->physicalXDpi > 2000
         || !(info->physicalYDpi >= 0) || info->physicalYDpi > 2000
-        || info->name.length == 0 || info->name.length > 256
+        // A display with no name is still a display -- the key falls back to a number -- so only a
+        // name that could not have come from a string is a reason to drop the record.
+        || info->name.length > 256
         || uniqueId.length > 256) {
         FF_DEBUG(
             "getDisplayInfo(%u) answered type %d, %u x %u, rotation %u, mode %d, density %u, %f x %f dpi",
@@ -1358,8 +1052,8 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
     // every other platform reports. `renderFrameRate` is only used when the list has no entry for
     // `modeId`, because it is a render cadence that follows the content rather than a property of the
     // display -- and it is not written at all before Android 15. `refreshRateOverride` is deliberately
-    // not consulted either: the `cmd` route can not see it, and the two routes have to answer the same
-    // thing.
+    // not consulted either: it is what an app asked the framework to hold the panel at, not a
+    // property of the display.
     info->refreshRate = walk.active.refreshRate > 0 ? walk.active.refreshRate : info->renderFrameRate;
     info->id = displayUniqueId(uniqueId.chars);
     return true;
@@ -1380,8 +1074,8 @@ static FFDisplayType displayType(int32_t type) {
 
 // `hdrCapabilities.mSupportedHdrTypes` is the display's own answer and an empty list means it can not
 // do HDR at all. `isForceSdr` is the framework having turned every capability of this display off and
-// `persist.sys.hdr_mode` is the vendor's switch; both are what the `cmd` route consults, and both are
-// consulted here so that the two routes answer the same thing.
+// `persist.sys.hdr_mode` is the vendor's switch, so `Supported` and `Enabled` stay two different
+// questions: the list is what the panel can do, those two are whether anything is asking for it.
 static FFDisplayHdrStatus displayHdrStatus(const FFDisplayAndroidInfo* info) {
     if (info->hdrTypeCount <= 0) {
         return FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
@@ -1394,8 +1088,8 @@ static FFDisplayHdrStatus displayHdrStatus(const FFDisplayAndroidInfo* info) {
 }
 
 // Reads every enabled display over binder. Returns false without appending anything when the service,
-// the transaction or the layout is not what this parser was written for, which is what hands the
-// answer to `cmd` and `dumpsys` behind it.
+// the transaction or the layout is not what this parser was written for. There is no route behind
+// this one, so that is also how the module ends up reporting no display.
 static bool detectWithBinder(FFDisplayServerResult* ds) {
     // The write sequence first. It is what the whole parse is made of, and a build whose jar cannot be
     // read has nothing to walk -- so failing here costs one file open rather than a round trip to a
@@ -1423,9 +1117,13 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
     uint8_t parcelBuffer[FF_DISPLAY_ANDROID_PARCEL_SIZE];
     uint8_t replyBuffer[FF_DISPLAY_ANDROID_REPLY_SIZE];
 
-    // `getDisplayIds(false)` is the list of the enabled displays, which is the set `cmd display
-    // get-displays` prints. It is a separate call rather than a loop over 0..n because the ids are not
-    // contiguous, and it is twelve bytes.
+    // `getDisplayIds(false)` is the list of the enabled displays, which is the set a display dump
+    // prints. It is a separate call rather than a loop over 0..n because the ids are not contiguous,
+    // and it is twelve bytes.
+    //
+    // The argument is written unconditionally although the method takes none on Android 11: the
+    // generated stub reads the parameters its own signature declares and leaves the rest of the
+    // parcel alone, so the extra int is dropped on those releases.
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
     ffBinderParcelPutInterfaceToken(&parcel, FF_DISPLAY_ANDROID_DESCRIPTOR);
     ffBinderParcelPutI32(&parcel, 0); // includeDisabled
@@ -1499,8 +1197,8 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
         FFDisplayAndroidInfo* info = &infos[i];
 
         // The physical dpi describes the panel itself and does not change with the logical display
-        // size, so the physical size has to be derived from the native resolution -- the same
-        // derivation the `cmd` route makes.
+        // size, so the physical size has to be derived from the native resolution. Nothing in the
+        // record carries it directly.
         uint32_t physicalWidth = 0, physicalHeight = 0;
         if (info->physicalXDpi > 0) {
             physicalWidth = (uint32_t) ((info->preferredWidth ? info->preferredWidth : info->width) * 25.4 / info->physicalXDpi + 0.5);
@@ -1526,7 +1224,9 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
             physicalHeight,
             "binder");
         if (display == nullptr) {
-            continue; // a record with no size, which the parser above does not let through
+            // `ffdsAppendDisplay` moves `name` only when it keeps the display, so it is still ours
+            ffStrbufDestroy(&info->name);
+            continue;
         }
         display->manufactureYear = info->manufactureYear;
         display->manufactureWeek = info->manufactureWeek;
@@ -1876,14 +1576,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
     ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
     ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
-    // Binder comes first: it needs no permission and no child process, and it is the only route that
-    // answers for an app UID on Android 12 and older. `cmd` is behind it for a record whose parcel
-    // layout is not the one the parser above knows, `dumpsys` for the shell and root -- it is the only
-    // route that answers at all on Android 12 and older, and it is skipped without a fork for every
-    // other UID, see detectWithDumpsys -- and `getprop` is MiUI specific and the last resort.
-    if (!detectWithBinder(ds) && !detectWithCmd(ds) && !detectWithDumpsys(ds)) {
-        detectWithGetprop(ds);
-    }
+    detectWithBinder(ds);
 
     detectDE(ds);
 }
