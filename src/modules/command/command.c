@@ -85,7 +85,24 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module) {
         }
 
         if (unsafe_yyjson_equals_str(key, "useStdErr")) {
-            options->useStdErr = yyjson_get_bool(val);
+            options->useOutput = yyjson_get_bool(val) ? FF_PROCESS_OUTPUT_STDERR_BIT : FF_PROCESS_OUTPUT_STDOUT_BIT;
+            ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "useStdErr is deprecated, use useOutput instead");
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "useOutput")) {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                                                                       { "stdout", FF_PROCESS_OUTPUT_STDOUT_BIT },
+                                                                       { "stderr", FF_PROCESS_OUTPUT_STDERR_BIT },
+                                                                       { "both", FF_PROCESS_OUTPUT_BOTH },
+                                                                       {},
+                                                                   });
+            if (error) {
+                ffPrintError(FF_MODULE_GET_DISPLAY_NAME(Command), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            } else {
+                options->useOutput = (FFProcessOutputType) value;
+            }
             continue;
         }
 
@@ -110,7 +127,19 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
     yyjson_mut_obj_add_strbuf(doc, module, "param", &options->param);
     yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
-    yyjson_mut_obj_add_bool(doc, module, "useStdErr", options->useStdErr);
+    switch (options->useOutput) {
+        case FF_PROCESS_OUTPUT_STDOUT_BIT:
+            yyjson_mut_obj_add_str(doc, module, "useOutput", "stdout");
+            break;
+        case FF_PROCESS_OUTPUT_STDERR_BIT:
+            yyjson_mut_obj_add_str(doc, module, "useOutput", "stderr");
+            break;
+        case FF_PROCESS_OUTPUT_BOTH:
+            yyjson_mut_obj_add_str(doc, module, "useOutput", "both");
+            break;
+        default:
+            break;
+    }
     yyjson_mut_obj_add_bool(doc, module, "parallel", options->parallel);
     yyjson_mut_obj_add_bool(doc, module, "splitLines", options->splitLines);
 }
@@ -168,7 +197,9 @@ void ffInitCommandOptions(FFCommandOptions* options) {
 #endif
     );
     ffStrbufInit(&options->text);
-    options->useStdErr = false;
+    // Capture both streams by default: most tools log to stdout or stderr without saying which, and
+    // the previous single-stream default silently dropped one of them.
+    options->useOutput = FF_PROCESS_OUTPUT_BOTH;
     options->parallel = true;
     options->splitLines = false;
 }

@@ -4,6 +4,9 @@ Changes:
 * LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
 * libpulse and libddcutil are no longer used on Linux. Package managers should remove them from their fastfetch package.
 * QuickJS format scripting has been removed (deprecated in v2.69.0). Migrate scripts to Lua if necessary. (General)
+* The Command module option `useStdErr` has been replaced with `useOutput`, which selects which of the command's output streams to capture: `"stdout"`, `"stderr"` or `"both"`.
+    * It defaults to `"both"`, so a command that logs to stderr now has that output captured instead of discarded.
+    * Set it to `"stdout"` or `"stderr"` to restore the old single-stream behavior. (Command)
 
 Features:
 * Added Sound detection on Android. (Sound, Android)

@@ -84,7 +84,7 @@ static wchar_t* createChildEnvironment(void) {
     return result;
 }
 
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
+const char* ffProcessSpawn(char* const argv[], FFProcessOutputType useOutput, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
     const int32_t timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
@@ -127,13 +127,12 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         .cb = sizeof(siStartInfo),
         .dwFlags = STARTF_USESTDHANDLES,
     };
-    if (useStdErr) {
-        siStartInfo.hStdOutput = ffGetNullFD();
-        siStartInfo.hStdError = hChildPipeWrite;
-    } else {
-        siStartInfo.hStdOutput = hChildPipeWrite;
-        siStartInfo.hStdError = ffGetNullFD();
-    }
+
+    HANDLE nullFile = ffGetNullFD();
+    // A stream wired to the pipe is captured; the other goes to the null device so it cannot mix
+    // into the captured text or fill the pipe and block the child. Both may share the pipe handle.
+    siStartInfo.hStdOutput = (useOutput & FF_PROCESS_OUTPUT_STDOUT_BIT) ? hChildPipeWrite : nullFile;
+    siStartInfo.hStdError = (useOutput & FF_PROCESS_OUTPUT_STDERR_BIT) ? hChildPipeWrite : nullFile;
     if (ffIsValidNativeFD(stdinFd)) {
         siStartInfo.hStdInput = stdinFd;
     }

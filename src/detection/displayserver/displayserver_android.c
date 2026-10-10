@@ -73,7 +73,7 @@ static bool detectWithCommand(FFDisplayServerResult* ds, char* const argv[], con
     // transaction when that fd is a terminal, which it is whenever fastfetch runs in a terminal.
     // Detaching the child from our stdin is only needed here, so the low level API is called instead
     // of `ffProcessAppendStdOut`.
-    if (ffProcessSpawn(argv, false, ffGetNullFD(), &handle) != nullptr) {
+    if (ffProcessSpawn(argv, FF_PROCESS_OUTPUT_STDOUT_BIT, ffGetNullFD(), &handle) != nullptr) {
         return false; // Neither command is available on every Android version
     }
 

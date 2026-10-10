@@ -2381,10 +2381,24 @@
                                         "description": "Command text to execute",
                                         "type": "string"
                                     },
-                                    "useStdErr": {
-                                        "description": "Whether to use stderr instead of stdout for command output",
-                                        "type": "boolean",
-                                        "default": false
+                                    "useOutput": {
+                                        "description": "Which of the command's output streams to capture\nThe stream that is not captured is discarded",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "const": "stdout",
+                                                "description": "Capture stdout only and discard stderr"
+                                            },
+                                            {
+                                                "const": "stderr",
+                                                "description": "Capture stderr only and discard stdout"
+                                            },
+                                            {
+                                                "const": "both",
+                                                "description": "Capture both stdout and stderr"
+                                            }
+                                        ],
+                                        "default": "both"
                                     },
                                     "parallel": {
                                         "description": "Whether to execute the command in parallel with other commands\nThis can improve performance when using multiple commands, but may cause issues with some commands",

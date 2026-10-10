@@ -27,7 +27,7 @@ static const char* spawnProcess(FFCommandOptions* options, FFProcessHandle* hand
                                                       options->text.chars,
                                                       nullptr }
                                                 : (char* const[]) { options->shell.chars, options->text.chars, nullptr },
-        options->useStdErr,
+        options->useOutput,
         FF_PROCESS_INHERIT_STDIN,
         handle);
 }
