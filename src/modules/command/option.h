@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/option.h"
+#include "common/processing.h" // FFProcessOutputType
 
 typedef struct FFCommandOptions {
     FFModuleArgs moduleArgs;
@@ -8,7 +9,7 @@ typedef struct FFCommandOptions {
     FFstrbuf shell;
     FFstrbuf param;
     FFstrbuf text;
-    bool useStdErr;
+    FFProcessOutputType useOutput;
     bool parallel;
     bool splitLines;
 } FFCommandOptions;

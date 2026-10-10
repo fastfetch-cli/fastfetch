@@ -29,7 +29,7 @@ static void argvToCmdline(char* const argv[], FFstrbuf* result) {
         }
 
         // Add quotes around string if whitespace chars are present (with slash duplicating at the end of string)
-        if (ffStrbufFirstIndexS(&temp, " \t") != temp.length) {
+        if (ffStrbufContainAnyC(&temp, " \t")) {
             uint32_t pos = temp.length;
             uint32_t cnt = 0;
             while (pos > 0 && temp.chars[pos - 1] == '\\') { ++cnt, --pos; }
@@ -84,7 +84,7 @@ static wchar_t* createChildEnvironment(void) {
     return result;
 }
 
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
+const char* ffProcessSpawn(char* const argv[], FFProcessOutputType useOutput, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
     const int32_t timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
@@ -127,13 +127,12 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
         .cb = sizeof(siStartInfo),
         .dwFlags = STARTF_USESTDHANDLES,
     };
-    if (useStdErr) {
-        siStartInfo.hStdOutput = ffGetNullFD();
-        siStartInfo.hStdError = hChildPipeWrite;
-    } else {
-        siStartInfo.hStdOutput = hChildPipeWrite;
-        siStartInfo.hStdError = ffGetNullFD();
-    }
+
+    HANDLE nullFile = ffGetNullFD();
+    // A stream wired to the pipe is captured; the other goes to the null device so it cannot mix
+    // into the captured text or fill the pipe and block the child. Both may share the pipe handle.
+    siStartInfo.hStdOutput = (useOutput & FF_PROCESS_OUTPUT_STDOUT_BIT) ? hChildPipeWrite : nullFile;
+    siStartInfo.hStdError = (useOutput & FF_PROCESS_OUTPUT_STDERR_BIT) ? hChildPipeWrite : nullFile;
     if (ffIsValidNativeFD(stdinFd)) {
         siStartInfo.hStdInput = stdinFd;
     }
@@ -142,6 +141,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
     {
         FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
         argvToCmdline(argv, &buf);
+        FF_DEBUG("Command line: %s", buf.chars);
         uint32_t cmdlineBytes = (buf.length + 1) * sizeof(wchar_t);
         cmdline = malloc(cmdlineBytes);
         NTSTATUS status = RtlUTF8ToUnicodeN(cmdline, cmdlineBytes, nullptr, buf.chars, buf.length + 1);
@@ -167,10 +167,12 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     NtClose(hChildPipeWrite);
     if (!success) {
-        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+        DWORD error = GetLastError();
+        if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+            FF_DEBUG("Command not found: %s (%s)", argv[0], ffDebugWin32Error(error));
             return "command not found";
         }
-        FF_DEBUG("CreateProcessW() failed: %s", ffDebugWin32Error(GetLastError()));
+        FF_DEBUG("CreateProcessW(%s) failed: %s", argv[0], ffDebugWin32Error(error));
         return "CreateProcessW() failed";
     }
 
@@ -263,6 +265,12 @@ exit: {
     if (NT_SUCCESS(status)) {
         assert(size == sizeof(info));
         if (info.ExitStatus != STILL_ACTIVE && info.ExitStatus != 0) {
+            if (info.ExitStatus == 9009) {
+                // Note: CMD swallows 9009 errorlevel and returns 1 by default.
+                // One must use `& call exit %^ERRORLEVEL%` to propagate the correct error code.
+                FF_DEBUG("Child process exited with error code 9009 (command not found)");
+                return "command not found";
+            }
             FF_DEBUG("Child process exited with an error: %x %s", (unsigned) info.ExitStatus, ffDebugNtStatus(info.ExitStatus));
             return "Child process exited with an error";
         }

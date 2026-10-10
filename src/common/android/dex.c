@@ -20,7 +20,10 @@
 #define FF_DEX_OFF_STRING_IDS 0x3C
 #define FF_DEX_OFF_TYPE_IDS_SIZE 0x40
 #define FF_DEX_OFF_TYPE_IDS 0x44
+#define FF_DEX_OFF_FIELD_IDS_SIZE 0x50
 #define FF_DEX_OFF_FIELD_IDS 0x54
+#define FF_DEX_OFF_METHOD_IDS_SIZE 0x58
+#define FF_DEX_OFF_METHOD_IDS 0x5C
 #define FF_DEX_OFF_CLASS_DEFS_SIZE 0x60
 #define FF_DEX_OFF_CLASS_DEFS 0x64
 
@@ -32,7 +35,24 @@
 
 // field_id_item: [u16 class_idx][u16 type_idx][u32 name_idx]
 #define FF_DEX_FIELD_ID_SIZE 8
+#define FF_DEX_OFF_FIELD_ID_TYPE 2
 #define FF_DEX_OFF_FIELD_ID_NAME 4
+
+// method_id_item: [u16 class_idx][u16 proto_idx][u32 name_idx]
+#define FF_DEX_METHOD_ID_SIZE 8
+#define FF_DEX_OFF_METHOD_ID_NAME 4
+
+// code_item: [u16 registers_size][u16 ins_size][u16 outs_size][u16 tries_size][u32 debug_info_off]
+// [u32 insns_size][u16 insns...]. Everything before the instruction stream is skipped by reading
+// `insns_size` and starting `insns` where it ends.
+#define FF_DEX_OFF_CODE_INSNS_SIZE 12
+#define FF_DEX_OFF_CODE_INSNS 16
+
+// The seven `iget*` opcodes, which are how a method reads an instance field. `iput*` shares the same
+// format and the same operand, and a `writeToParcel` does not store to a field, so one range covers
+// both and the walk does not have to tell them apart.
+#define FF_DEX_OP_FIELD_FIRST 0x52
+#define FF_DEX_OP_FIELD_LAST 0x5F
 
 // The zip local file header, from APPNOTE.TXT 4.3.7. Only the two length fields are read from it:
 // the payload starts right behind them, and the local extra field is allowed to differ from the
@@ -231,11 +251,25 @@ static const char* dexString(const uint8_t* dex, const uint8_t* end, uint32_t in
 
 // One dex entry, validated. Every offset in the header comes out of the file, so each table is range
 // checked before the walk uses it.
+//
+// `fieldIds` and `methodIds` are the two tables a class's own lists are resolved through: a
+// class_data_item names its members by index into them, and the `name_idx` of the entry is what says
+// which member it is. Holding them here rather than re-reading the header offset per class also
+// turns the per-member bounds check into a count comparison, which has to happen before the index is
+// multiplied out anyway -- on a 32-bit build `index * 8` wraps for a large enough index and the
+// range check that follows passes again.
+//
+// `string_ids` is deliberately not held here: `dexString` checks the one entry it reads, and a table
+// nothing walks in order does not need a second check.
 typedef struct FFDexTables {
     const uint8_t* dex;
     const uint8_t* end;
     const uint8_t* types;
     uint32_t typeCount;
+    const uint8_t* fieldIds;
+    uint32_t fieldIdCount;
+    const uint8_t* methodIds;
+    uint32_t methodIdCount;
     const uint8_t* classes;
     uint32_t classCount;
 } FFDexTables;
@@ -256,6 +290,18 @@ static const char* dexOpen(const uint8_t* dex, size_t size, FFDexTables* tables)
         return "The dex type table is out of range";
     }
 
+    const uint8_t* fieldIds = dex + dexU32(dex + FF_DEX_OFF_FIELD_IDS);
+    const uint32_t fieldIdCount = dexU32(dex + FF_DEX_OFF_FIELD_IDS_SIZE);
+    if (!dexTableInRange(dex, end, fieldIds, fieldIdCount, FF_DEX_FIELD_ID_SIZE)) {
+        return "The dex field table is out of range";
+    }
+
+    const uint8_t* methodIds = dex + dexU32(dex + FF_DEX_OFF_METHOD_IDS);
+    const uint32_t methodIdCount = dexU32(dex + FF_DEX_OFF_METHOD_IDS_SIZE);
+    if (!dexTableInRange(dex, end, methodIds, methodIdCount, FF_DEX_METHOD_ID_SIZE)) {
+        return "The dex method table is out of range";
+    }
+
     const uint8_t* classes = dex + dexU32(dex + FF_DEX_OFF_CLASS_DEFS);
     const uint32_t classCount = dexU32(dex + FF_DEX_OFF_CLASS_DEFS_SIZE);
     if (!dexTableInRange(dex, end, classes, classCount, FF_DEX_CLASS_DEF_SIZE)) {
@@ -266,9 +312,21 @@ static const char* dexOpen(const uint8_t* dex, size_t size, FFDexTables* tables)
     tables->end = end;
     tables->types = types;
     tables->typeCount = typeCount;
+    tables->fieldIds = fieldIds;
+    tables->fieldIdCount = fieldIdCount;
+    tables->methodIds = methodIds;
+    tables->methodIdCount = methodIdCount;
     tables->classes = classes;
     tables->classCount = classCount;
     return nullptr;
+}
+
+// The descriptor a type index names, e.g. "I", "[F" or "Landroid/os/Parcel;".
+static const char* dexTypeString(const FFDexTables* tables, uint32_t typeIndex) {
+    if (typeIndex >= tables->typeCount) {
+        return nullptr;
+    }
+    return dexString(tables->dex, tables->end, dexU32(tables->types + (size_t) typeIndex * 4));
 }
 
 // One pass over the type table, resolving the type index of every class that still has a request
@@ -278,9 +336,10 @@ static const char* dexOpen(const uint8_t* dex, size_t size, FFDexTables* tables)
 // read once however many classes are being looked for, and the pass ends as soon as the last request
 // has an index rather than at the end of the table.
 //
-// `typeIndexes` is parallel to `requests` and rebuilt here rather than kept across entries: a type
-// index is a property of the entry's own table, and the next entry numbers its types differently.
-static void dexFindTypes(const FFDexTables* tables, const FFDexStaticIntRequest* requests, const uint8_t* settled, uint32_t* typeIndexes, uint32_t count) {
+// `typeIndexes` is parallel to `descriptors` and rebuilt here rather than kept across entries: a
+// type index is a property of the entry's own table, and the next entry numbers its types
+// differently.
+static void dexFindTypes(const FFDexTables* tables, const char* const* descriptors, const uint8_t* settled, uint32_t* typeIndexes, uint32_t count) {
     uint32_t remaining = 0;
     for (uint32_t r = 0; r < count; ++r) {
         typeIndexes[r] = UINT32_MAX;
@@ -295,7 +354,7 @@ static void dexFindTypes(const FFDexTables* tables, const FFDexStaticIntRequest*
             continue;
         }
         for (uint32_t r = 0; r < count; ++r) {
-            if (settled[r] || typeIndexes[r] != UINT32_MAX || strcmp(descriptor, requests[r].classDescriptor) != 0) {
+            if (settled[r] || typeIndexes[r] != UINT32_MAX || strcmp(descriptor, descriptors[r]) != 0) {
                 continue;
             }
             typeIndexes[r] = i;
@@ -304,15 +363,113 @@ static void dexFindTypes(const FFDexTables* tables, const FFDexStaticIntRequest*
     }
 }
 
+// The lists of a class_data_item, each positioned at its first entry.
+//
+// A class_data_item is `[uleb static_fields_size][uleb instance_fields_size][uleb direct_methods_size]
+// [uleb virtual_methods_size]` followed by the four lists in that order, so the start of each list is
+// only reachable by stepping over the one in front of it. That is done once here for the three
+// readers that each want a different list: the static field reader pairs the first with the class's
+// static value array, the write-sequence reader walks the methods, and the field-existence reader
+// walks the second.
+//
+// A field entry is `[uleb field_idx_diff][uleb access_flags]` and a method entry is the same plus a
+// trailing `[uleb code_off]`, which is the offset of the code_item holding its instructions -- or 0
+// for a method with no body, an abstract or native one.
+//
+// Each of the four lists is delta-encoded from zero on its own, so the counts are kept apart rather
+// than summed: a class routinely has a direct method and a virtual one under the same index, and one
+// accumulator carried across the two method lists reads the second list's names out of the wrong end
+// of the method table. The field lists are read the same way, which is why the reader of each one
+// starts its index at zero rather than continuing from the list in front of it.
+typedef struct FFDexClassData {
+    const uint8_t* staticFields;
+    const uint8_t* instanceFields;
+    const uint8_t* methods;
+    uint32_t staticFieldCount;
+    uint32_t instanceFieldCount;
+    uint32_t directMethodCount;
+    uint32_t virtualMethodCount;
+} FFDexClassData;
+
+// Steps over `count` field entries. A list that ends before its own count is a file that is not what
+// it claims, not a short list: the count and the entries both come out of the same file.
+static bool dexSkipFields(const uint8_t** p, const uint8_t* end, uint32_t count) {
+    for (uint32_t i = 0; i < count; ++i) {
+        if (*p >= end) {
+            return false;
+        }
+        (void) dexUleb128(p, end); // field_idx_diff
+        (void) dexUleb128(p, end); // access_flags
+    }
+    return true;
+}
+
+static const char* dexReadClassData(const FFDexTables* tables, const uint8_t* classDef, FFDexClassData* data) {
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+    const uint32_t classDataOff = dexU32(classDef + FF_DEX_OFF_CLASS_DEF_DATA);
+    if (classDataOff == 0) {
+        // A class with no class_data_item declares nothing of its own -- its members are all
+        // inherited. That is four empty lists, not a file that cannot be read, and the counts below
+        // are what carry the answer.
+        data->staticFields = nullptr;
+        data->instanceFields = nullptr;
+        data->methods = nullptr;
+        data->staticFieldCount = 0;
+        data->instanceFieldCount = 0;
+        data->directMethodCount = 0;
+        data->virtualMethodCount = 0;
+        return nullptr;
+    }
+
+    const uint8_t* p = dex + classDataOff;
+    // One byte, so that the first uleb128 has something to read.
+    if (!dexInRange(dex, end, p, 1)) {
+        return "The dex class data is out of range";
+    }
+
+    data->staticFieldCount = dexUleb128(&p, end);
+    data->instanceFieldCount = dexUleb128(&p, end);
+    data->directMethodCount = dexUleb128(&p, end);
+    data->virtualMethodCount = dexUleb128(&p, end);
+
+    data->staticFields = p;
+    if (!dexSkipFields(&p, end, data->staticFieldCount)) {
+        return "The dex class data is truncated";
+    }
+    data->instanceFields = p;
+    if (!dexSkipFields(&p, end, data->instanceFieldCount)) {
+        return "The dex class data is truncated";
+    }
+    data->methods = p;
+    return nullptr;
+}
+
+// The class_def_item of the class that `typeIndex` names, or nullptr when this dex only references
+// the class.
+//
+// Having a type index is not the same as being defined here: a dex lists every type it references in
+// its type table, so a class that a later entry of the jar defines still has a type index in this
+// one, with no class_def_item behind it. Only a class_def_item makes the answer this dex's, and
+// without one the caller moves on to the next entry.
+static const uint8_t* dexFindClassDef(const FFDexTables* tables, uint32_t typeIndex) {
+    for (uint32_t i = 0; i < tables->classCount; ++i) {
+        const uint8_t* classDef = tables->classes + (size_t) i * FF_DEX_CLASS_DEF_SIZE;
+        if (dexU32(classDef) == typeIndex) {
+            return classDef;
+        }
+    }
+    return nullptr;
+}
+
 // Walks the static field list of the class that `typeIndex` names and the class's static value array
 // in step, writing the value of every request for that class whose field name matches. Both lists are
 // ordered by field index and cover exactly the same fields -- when they do not, the pairing is not
 // trustworthy and nothing is written.
 //
-// `defined` says whether this dex *defines* the class, which is not the same as mentioning it: a dex
-// lists every type it references in its type table, so a class that a later entry of the jar defines
-// still has a type index here, with no class_def_item behind it. Only a class_def_item makes the
-// answer this dex's; without one the caller moves on to the next entry.
+// `defined` says whether this dex *defines* the class, which the caller needs: a request the class
+// cannot answer has to be left open when the class belongs to a later entry of the jar and closed
+// when it does not.
 //
 // A request this class cannot answer -- a field it does not declare, or one it declares as something
 // other than an int -- is closed here rather than reported: the class is this dex's, so no later
@@ -320,91 +477,362 @@ static void dexFindTypes(const FFDexTables* tables, const FFDexStaticIntRequest*
 // not hold back the rest of the batch. It is closed with the sentinel, and what this returns is only
 // ever a dex that cannot be read, which is the one thing no later entry can fix.
 static const char* dexClassStaticInts(const FFDexTables* tables, uint32_t typeIndex, const FFDexStaticIntRequest* requests, const uint32_t* typeIndexes, uint8_t* settled, uint32_t count, bool* defined) {
-    *defined = false;
+    const uint8_t* classDef = dexFindClassDef(tables, typeIndex);
+    *defined = classDef != nullptr;
+    if (classDef == nullptr) {
+        return nullptr;
+    }
+
     const uint8_t* dex = tables->dex;
     const uint8_t* end = tables->end;
 
-    for (uint32_t i = 0; i < tables->classCount; ++i) {
-        const uint8_t* classDef = tables->classes + (size_t) i * FF_DEX_CLASS_DEF_SIZE;
-        if (dexU32(classDef) != typeIndex) {
+    FFDexClassData classData;
+    const char* error = dexReadClassData(tables, classDef, &classData);
+    if (error != nullptr) {
+        return error;
+    }
+
+    // The static value array is parallel to the static field list and covers exactly the same fields,
+    // which is what makes walking the two in step below meaningful. It is absent in two cases -- a
+    // class with no static field, and a class none of whose static fields has a constant value -- and
+    // the header writes 0 for it in both. The read is skipped rather than made against whatever byte
+    // a zero offset points at, which is the dex magic and decodes as a four byte int.
+    const uint8_t* fields = classData.staticFields;
+    const uint8_t* values = dex;
+    bool hasValues = false;
+    if (classData.staticFieldCount > 0) {
+        const uint32_t staticValuesOff = dexU32(classDef + FF_DEX_OFF_CLASS_DEF_STATIC_VALUES);
+        if (staticValuesOff != 0) {
+            values = dex + staticValuesOff;
+            if (!dexInRange(dex, end, values, 1)) {
+                return "The dex class data is out of range";
+            }
+            if (classData.staticFieldCount != dexUleb128(&values, end)) {
+                return "The dex static fields and values do not pair up";
+            }
+            hasValues = true;
+        }
+    }
+
+    uint32_t fieldIndex = 0;
+    for (uint32_t j = 0; j < classData.staticFieldCount; ++j) {
+        // The two arrays are walked in step, so running out of either one is a truncation.
+        if (fields >= end || (hasValues && values >= end)) {
+            return "The dex static field list is truncated";
+        }
+
+        const uint32_t fieldIndexDiff = dexUleb128(&fields, end); // field_idx_diff
+        if (fieldIndexDiff > UINT32_MAX - fieldIndex) {
+            return "The dex field index is out of range";
+        }
+        fieldIndex += fieldIndexDiff;
+        (void) dexUleb128(&fields, end); // access_flags
+        int32_t value = 0;
+        // Left false when there is no value array, which closes the field with the sentinel below:
+        // a class with no static value for the field has no answer for it.
+        bool isInt = false;
+        if (hasValues && !dexEncodedValue(&values, end, &value, &isInt)) {
+            return "The dex static value list is truncated";
+        }
+
+        if (fieldIndex >= tables->fieldIdCount) {
+            return "The dex field table is out of range";
+        }
+        const char* name = dexString(dex, end, dexU32(tables->fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
+        if (name == nullptr) {
             continue;
         }
-        // Defined here, so from this point on the answer is this dex's, whatever it turns out to be.
-        *defined = true;
-
-        const uint8_t* fields = dex + dexU32(classDef + FF_DEX_OFF_CLASS_DEF_DATA);
-        const uint8_t* values = dex + dexU32(classDef + FF_DEX_OFF_CLASS_DEF_STATIC_VALUES);
-        // One byte each, so that the first uleb128 below has something to read.
-        if (!dexInRange(dex, end, fields, 1) || !dexInRange(dex, end, values, 1)) {
-            return "The dex class data is out of range";
+        for (uint32_t r = 0; r < count; ++r) {
+            if (settled[r] || typeIndexes[r] != typeIndex || strcmp(name, requests[r].fieldName) != 0) {
+                continue;
+            }
+            if (!isInt) {
+                // The field exists but is not an int, so its value is not the constant asked for.
+                // Closed the way a field the class does not declare is, because it is this dex's
+                // answer too. The check is here rather than on the first non-int in the list because
+                // the list legitimately holds strings (`DESCRIPTOR`) and booleans.
+                *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+                settled[r] = 1;
+                continue;
+            }
+            *requests[r].result = value;
+            settled[r] = 1;
         }
+    }
 
-        const uint32_t staticFields = dexUleb128(&fields, end);
-        (void) dexUleb128(&fields, end); // instance_fields_size
-        (void) dexUleb128(&fields, end); // direct_methods_size
-        (void) dexUleb128(&fields, end); // virtual_methods_size
-        const uint32_t staticValues = dexUleb128(&values, end);
-        if (staticFields != staticValues) {
-            return "The dex static fields and values do not pair up";
+    // The class is defined here, so a request of its own that went unanswered is one whose field the
+    // class does not declare as a static field. Closed here for the same reason as above.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (!settled[r] && typeIndexes[r] == typeIndex) {
+            *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+            settled[r] = 1;
         }
+    }
+    return nullptr;
+}
 
-        const uint8_t* fieldIds = dex + dexU32(dex + FF_DEX_OFF_FIELD_IDS);
-        uint32_t fieldIndex = 0;
-        for (uint32_t j = 0; j < staticFields; ++j) {
-            // The two arrays are walked in step, so running out of either one is a truncation.
-            if (fields >= end || values >= end) {
-                return "The dex static field list is truncated";
-            }
+// ---------------------------------------------------------------------------------------------
+// Walking a method's instructions
+// ---------------------------------------------------------------------------------------------
 
-            const uint32_t fieldIndexDiff = dexUleb128(&fields, end); // field_idx_diff
-            if (fieldIndexDiff > UINT32_MAX - fieldIndex) {
-                return "The dex field index is out of range";
-            }
-            fieldIndex += fieldIndexDiff;
-            (void) dexUleb128(&fields, end); // access_flags
-            int32_t value;
-            bool isInt;
-            if (!dexEncodedValue(&values, end, &value, &isInt)) {
-                return "The dex static value list is truncated";
-            }
+// The width of every instruction, in code units. This is ART's `Instruction::SizeInCodeUnits`, and
+// the walk below cannot stay on the instruction grid without it -- a walk that leaves the grid still
+// produces a plausible-looking list of fields, which is what makes this worth a table rather than a
+// guess. Unused and odex-only opcodes are 1 rather than 0, so that a byte which is not an instruction
+// at all moves the walk on instead of leaving it where it is.
+static const uint8_t dexOpcodeSize[256] = {
+    /* 00 */ 1, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 1, 1, 1, 1,
+    /* 10 */ 1, 1, 1, 2, 3, 2, 2, 3, 5, 2, 2, 3, 2, 1, 1, 2,
+    /* 20 */ 2, 1, 2, 2, 3, 3, 3, 1, 1, 2, 3, 3, 3, 2, 2, 2,
+    /* 30 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1,
+    /* 40 */ 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    /* 50 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    /* 60 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3,
+    /* 70 */ 3, 3, 3, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1,
+    /* 80 */ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    /* 90 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    /* a0 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    /* b0 */ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    /* c0 */ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    /* d0 */ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    /* e0 */ 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    /* f0 */ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 3, 3, 2, 2,
+};
 
-            if (!dexTableInRange(dex, end, fieldIds, (uint64_t) fieldIndex + 1, FF_DEX_FIELD_ID_SIZE)) {
+// The code_item at `codeOff`, with its instruction array range checked. nullptr is one that cannot
+// be read: an offset outside the mapping, or an instruction count that runs past the end.
+static const uint8_t* dexReadCode(const FFDexTables* tables, uint32_t codeOff) {
+    const uint8_t* code = tables->dex + codeOff;
+    if (!dexInRange(tables->dex, tables->end, code, FF_DEX_OFF_CODE_INSNS)) {
+        return nullptr;
+    }
+    const uint32_t insnsSize = dexU32(code + FF_DEX_OFF_CODE_INSNS_SIZE);
+    if (!dexTableInRange(tables->dex, tables->end, code + FF_DEX_OFF_CODE_INSNS, insnsSize, 2)) {
+        return nullptr;
+    }
+    return code;
+}
+
+// Records `name` and `type` as the next field of a write sequence, unless the name is already in it.
+//
+// An array field is read twice: once for its length, which is the count written ahead of the elements,
+// and again inside the loop that writes them. A class cannot declare two instance fields under one
+// name, so a repeat is always that reload, and the first read is where the field belongs in the
+// sequence.
+//
+// A name or descriptor longer than the caller's buffer is refused rather than truncated: half a name
+// matches nothing, which is indistinguishable from the field not being in the class at all. Refusing
+// one field leaves the whole sequence unwritten, because a caller walking a sequence with a hole in
+// it would read every field behind the hole from the wrong place.
+static bool dexParcelFieldAdd(FFDexParcelField* fields, uint32_t* count, uint32_t capacity, const char* name, const char* type) {
+    for (uint32_t i = 0; i < *count; ++i) {
+        if (strcmp(fields[i].name, name) == 0) {
+            return true;
+        }
+    }
+    if (*count >= capacity) {
+        return false;
+    }
+    const size_t nameSize = strlen(name) + 1;
+    const size_t typeSize = strlen(type) + 1;
+    if (nameSize > FF_DEX_PARCEL_FIELD_NAME_MAX || typeSize > FF_DEX_PARCEL_FIELD_TYPE_MAX) {
+        return false;
+    }
+    memcpy(fields[*count].name, name, nameSize);
+    memcpy(fields[*count].type, type, typeSize);
+    ++*count;
+    return true;
+}
+
+// Walks the instruction grid of a code_item and records every instance field the method reads, in the
+// order it reads them -- which is the order `writeToParcel` puts them on the wire.
+//
+// The grid is followed by opcode width, so the walk only ever lands on an instruction start, and it
+// stops at the first payload pseudo-instruction. A `switch` or a `fill-array-data` leaves one behind
+// every reachable instruction; its contents are data rather than instructions, and stepping into it
+// desynchronises the grid for good.
+//
+// `iget*` and `iput*` share a format and put the field index in the code unit behind the opcode in
+// both, which is what lets one test cover the whole range. A `writeToParcel` does not store to a
+// field, so the `iput` half is never taken -- it is in the range because splitting it would be a
+// claim about the method that the opcode does not make.
+static const char* dexWalkParcelFields(const FFDexTables* tables, const uint8_t* code, FFDexParcelField* fields, uint32_t capacity, uint32_t* count) {
+    *count = 0;
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+    const uint32_t insnsSize = dexU32(code + FF_DEX_OFF_CODE_INSNS_SIZE);
+    const uint8_t* insns = code + FF_DEX_OFF_CODE_INSNS;
+
+    for (uint32_t i = 0; i < insnsSize;) {
+        const uint16_t unit = dexU16(insns + (size_t) i * 2);
+        // The three payload pseudo-instructions put their ident in the high byte and zero in the low
+        // one. `nop` is the one instruction whose low byte is zero as well, and it is told apart by
+        // the whole code unit being zero. Testing the high byte alone is what gets this wrong: a
+        // `sparse-switch` over register 2 encodes as 0x022c, which is an instruction, not a payload.
+        if ((unit & 0xFF) == 0 && unit != 0) {
+            break;
+        }
+        const uint32_t opcode = unit & 0xFF;
+        if (opcode >= FF_DEX_OP_FIELD_FIRST && opcode <= FF_DEX_OP_FIELD_LAST) {
+            if (i + 1 >= insnsSize) {
+                break;
+            }
+            const uint32_t fieldIndex = dexU16(insns + ((size_t) i + 1) * 2);
+            if (fieldIndex >= tables->fieldIdCount) {
                 return "The dex field table is out of range";
             }
-            const char* name = dexString(dex, end, dexU32(fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
+            const uint8_t* fieldId = tables->fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE;
+            const char* name = dexString(dex, end, dexU32(fieldId + FF_DEX_OFF_FIELD_ID_NAME));
+            const char* type = dexTypeString(tables, dexU16(fieldId + FF_DEX_OFF_FIELD_ID_TYPE));
+            if (name == nullptr || type == nullptr) {
+                return "The dex field is not resolvable";
+            }
+            if (!dexParcelFieldAdd(fields, count, capacity, name, type)) {
+                FF_DEBUG("\"%s\" (%s) does not fit a sequence of %u fields", name, type, capacity);
+                *count = 0;
+                return nullptr;
+            }
+        }
+        i += dexOpcodeSize[opcode];
+    }
+    return nullptr;
+}
+
+// Walks the instance field list of one `class_data_item` and writes `true` for every name it holds.
+// The list is the caller's, so this answers one request's worth of names or several.
+//
+// This is the question a Parcelable whose layout is not field-driven needs: `DisplayCutout` reads
+// everything through compiler-synthesised accessors, so the set of fields its class declares is the
+// only thing that says how long its body is. It is asked as part of a write-sequence request rather
+// than by a call of its own -- the list is already positioned by the `class_data_item` the sequence
+// comes out of, and a separate call would repeat the whole walk to reach it.
+static const char* dexMatchInstanceFields(const FFDexTables* tables, const uint8_t* fields, uint32_t fieldCount, const char* const* names, bool* results, uint32_t nameCount) {
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+
+    uint32_t fieldIndex = 0;
+    for (uint32_t j = 0; j < fieldCount; ++j) {
+        if (fields >= end) {
+            return "The dex class data is truncated";
+        }
+        const uint32_t fieldIndexDiff = dexUleb128(&fields, end); // field_idx_diff
+        if (fieldIndexDiff > UINT32_MAX - fieldIndex) {
+            return "The dex field index is out of range";
+        }
+        fieldIndex += fieldIndexDiff;
+        (void) dexUleb128(&fields, end); // access_flags
+
+        if (fieldIndex >= tables->fieldIdCount) {
+            return "The dex field table is out of range";
+        }
+        const char* name = dexString(dex, end, dexU32(tables->fieldIds + (size_t) fieldIndex * FF_DEX_FIELD_ID_SIZE + FF_DEX_OFF_FIELD_ID_NAME));
+        if (name == nullptr) {
+            continue;
+        }
+        for (uint32_t i = 0; i < nameCount; ++i) {
+            if (!results[i] && strcmp(name, names[i]) == 0) {
+                results[i] = true;
+            }
+        }
+    }
+    return nullptr;
+}
+
+// Walks the method list of the class that `typeIndex` names, and for every request whose method name
+// it holds walks that method's instructions. `defined` is what `dexClassStaticInts` reports, for the
+// same reason.
+//
+// A request the class does not answer is closed with a count of 0 -- the count a caller reads as
+// "this build does not write that class", which is the truth: the class is this dex's, so no later
+// entry of the jar has the method either.
+static const char* dexClassParcelFields(const FFDexTables* tables, uint32_t typeIndex, const FFDexParcelRequest* requests, const uint32_t* typeIndexes, uint8_t* settled, uint32_t count, bool* defined) {
+    const uint8_t* classDef = dexFindClassDef(tables, typeIndex);
+    *defined = classDef != nullptr;
+    if (classDef == nullptr) {
+        return nullptr;
+    }
+
+    const uint8_t* dex = tables->dex;
+    const uint8_t* end = tables->end;
+
+    FFDexClassData classData;
+    const char* error = dexReadClassData(tables, classDef, &classData);
+    if (error != nullptr) {
+        return error;
+    }
+
+    // The instance fields first, out of the list the `class_data_item` has already positioned. A
+    // request that asked for them is answered here whether or not it also asked for a sequence, and
+    // one that asked for neither is settled by the loop at the end like any other.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (settled[r] || typeIndexes[r] != typeIndex || requests[r].instanceFieldCount == 0) {
+            continue;
+        }
+        error = dexMatchInstanceFields(
+            tables, classData.instanceFields, classData.instanceFieldCount,
+            requests[r].instanceFieldNames, requests[r].instanceFieldResults, requests[r].instanceFieldCount
+        );
+        if (error != nullptr) {
+            return error;
+        }
+    }
+
+    const uint8_t* methods = classData.methods;
+    // Two runs, each delta-encoded from zero on its own -- so the index is reset per run rather than
+    // carried across, and a direct method and a virtual one under the same index both resolve.
+    for (uint32_t list = 0; list < 2; ++list) {
+        const uint32_t listCount = list == 0 ? classData.directMethodCount : classData.virtualMethodCount;
+        uint32_t methodIndex = 0;
+        for (uint32_t j = 0; j < listCount; ++j) {
+            if (methods >= end) {
+                return "The dex class data is truncated";
+            }
+            const uint32_t methodIndexDiff = dexUleb128(&methods, end); // method_idx_diff
+            if (methodIndexDiff > UINT32_MAX - methodIndex) {
+                return "The dex method index is out of range";
+            }
+            methodIndex += methodIndexDiff;
+            (void) dexUleb128(&methods, end); // access_flags
+            const uint32_t codeOff = dexUleb128(&methods, end);
+
+            if (methodIndex >= tables->methodIdCount) {
+                return "The dex method table is out of range";
+            }
+            const char* name = dexString(dex, end, dexU32(tables->methodIds + (size_t) methodIndex * FF_DEX_METHOD_ID_SIZE + FF_DEX_OFF_METHOD_ID_NAME));
             if (name == nullptr) {
                 continue;
             }
-            for (uint32_t r = 0; r < count; ++r) {
-                if (settled[r] || typeIndexes[r] != typeIndex || strcmp(name, requests[r].fieldName) != 0) {
-                    continue;
-                }
-                if (!isInt) {
-                    // The field exists but is not an int, so its value is not the constant asked
-                    // for. Closed the way a field the class does not declare is, because it is this
-                    // dex's answer too. The check is here rather than on the first non-int in the
-                    // list because the list legitimately holds strings (`DESCRIPTOR`) and booleans.
-                    *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
-                    settled[r] = 1;
-                    continue;
-                }
-                *requests[r].result = value;
-                settled[r] = 1;
-            }
-        }
 
-        // The class is defined here, so a request of its own that went unanswered is one whose field
-        // the class does not declare as a static field. Closed here for the same reason as above.
-        for (uint32_t r = 0; r < count; ++r) {
-            if (!settled[r] && typeIndexes[r] == typeIndex) {
-                *requests[r].result = FF_DEX_STATIC_INT_UNRESOLVED;
+            for (uint32_t r = 0; r < count; ++r) {
+                // A request that left the sequence out is one that only wanted the instance fields,
+                // which are already written; it has no method name to match against.
+                if (settled[r] || typeIndexes[r] != typeIndex || requests[r].methodName == nullptr
+                    || strcmp(name, requests[r].methodName) != 0) {
+                    continue;
+                }
+                // A method with no body -- abstract, or native -- writes nothing, and the count stays 0.
+                const uint8_t* code = codeOff == 0 ? nullptr : dexReadCode(tables, codeOff);
+                if (codeOff != 0 && code == nullptr) {
+                    return "The dex code is out of range";
+                }
+                if (code != nullptr) {
+                    error = dexWalkParcelFields(tables, code, requests[r].fields, requests[r].capacity, requests[r].count);
+                    if (error != nullptr) {
+                        return error;
+                    }
+                }
                 settled[r] = 1;
             }
         }
-        return nullptr;
     }
-    // The descriptor is in this dex's type table but the class itself is defined by another entry of
-    // the jar. That is not a failure: `defined` stays false and the caller reads the next entry.
+
+    // The class is defined here, so a request of its own that went unanswered is one whose method the
+    // class does not declare. The count it already holds is the 0 that says so.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (!settled[r] && typeIndexes[r] == typeIndex) {
+            settled[r] = 1;
+        }
+    }
     return nullptr;
 }
 
@@ -413,10 +841,8 @@ static const char* dexClassStaticInts(const FFDexTables* tables, uint32_t typeIn
 // ---------------------------------------------------------------------------------------------
 
 typedef struct FFDexMapping {
-    uint8_t* mapped;     // the jar, as mapped; nullptr once released
+    uint8_t* mapped; // the jar, as mapped; nullptr once released
     size_t mappedSize;
-    const uint8_t* data; // the dex bytes, inside `mapped`
-    size_t size;
 } FFDexMapping;
 
 static void wrapDexMapping(FFDexMapping* mapping) {
@@ -424,6 +850,33 @@ static void wrapDexMapping(FFDexMapping* mapping) {
     if (mapping->mapped != nullptr) {
         munmap(mapping->mapped, mapping->mappedSize);
     }
+}
+
+// Maps the jar read-only. The pages the walk touches are the only ones faulted in, which is what
+// keeps a 52 MB framework.jar off the heap and out of the cost of a lookup. The mapping outlives the
+// descriptor, so the descriptor is closed before this returns.
+static const char* dexMapJar(const char* jarPath, FFDexMapping* mapping) {
+    FF_AUTO_CLOSE_FD int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) {
+        FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
+        return "open(jar) failed";
+    }
+
+    struct stat st = {};
+    const int statStatus = fstat(fd, &st);
+    if (statStatus != 0 || st.st_size <= 0) {
+        FF_DEBUG("fstat(%s) reported %s (%lld bytes)", jarPath,
+            statStatus != 0 ? strerror(errno) : "an empty file", (long long) st.st_size);
+        return "fstat(jar) failed";
+    }
+    mapping->mappedSize = (size_t) st.st_size;
+    mapping->mapped = mmap(nullptr, mapping->mappedSize, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (mapping->mapped == MAP_FAILED) {
+        FF_DEBUG("mmap(%s, %zu bytes) failed: %s", jarPath, mapping->mappedSize, strerror(errno));
+        mapping->mapped = nullptr;
+        return "mmap(jar) failed";
+    }
+    return nullptr;
 }
 
 // Locates an entry through the jar's central directory.
@@ -584,6 +1037,74 @@ static const char* inflateDex(const uint8_t* data, size_t dataSize, uint32_t unc
 }
 #endif
 
+// The dex bytes of one jar entry, and the validated tables of the dex they hold.
+typedef struct FFDexEntry {
+    const uint8_t* data;
+    size_t size;
+    FFDexTables tables;
+} FFDexEntry;
+
+// Locates `classesN.dex`, inflates it when the entry is deflated, and validates the header.
+//
+// `present` reports whether the jar holds the entry at all. A jar spreads its classes over as many
+// entries as it needs and then simply runs out, so an entry that is not there ends the walk rather
+// than failing it -- except for the first, which every jar has and which is where the magic scan
+// stands in for a directory that cannot be read. `inflated` receives the buffer the caller has to
+// release when the entry needed one, and is left alone otherwise.
+static const char* dexOpenEntry(const FFDexMapping* mapping, uint32_t index, bool* present, uint8_t** inflated, FFDexEntry* entry) {
+    // Wide enough for `classes999.dex`, which is the longest name `FF_DEX_MAX_ENTRIES` can ask for.
+    char name[sizeof("classes999.dex")];
+    if (index == 1) {
+        memcpy(name, FF_DEX_ENTRY, sizeof(FF_DEX_ENTRY));
+    } else {
+        (void) snprintf(name, sizeof(name), "classes%u.dex", index);
+    }
+    *present = true;
+
+    const uint8_t* data = nullptr;
+    size_t dataSize = 0;
+    uint32_t uncompressedSize = 0;
+    uint16_t method = FF_ZIP_METHOD_STORED;
+    if (findDexEntry(mapping->mapped, mapping->mappedSize, name, &data, &dataSize, &uncompressedSize, &method) != nullptr) {
+        if (index > 1) {
+            // The magic scan only ever finds the first dex, so it cannot stand in for a later entry:
+            // running past the end of the entries that exist ends the walk.
+            *present = false;
+            return nullptr;
+        }
+        data = findDexMagic(mapping->mapped, mapping->mappedSize, &dataSize);
+        if (data == nullptr) {
+            FF_DEBUG("Neither %s nor a dex magic signature is in the %zu byte jar", name, mapping->mappedSize);
+            return "No dex in the jar";
+        }
+    } else if (method == FF_ZIP_METHOD_DEFLATED) {
+        #ifdef FF_HAVE_ZLIB
+        const char* error = inflateDex(data, dataSize, uncompressedSize, inflated);
+        if (error != nullptr) {
+            return error;
+        }
+        data = *inflated;
+        dataSize = uncompressedSize;
+        #else
+        (void) inflated; // the parameter is only written on the inflating path
+        return "The jar deflates its dex entries and fastfetch was built without zlib";
+        #endif
+    } else if (method != FF_ZIP_METHOD_STORED) {
+        FF_DEBUG("%s uses compression method %u, only %u (stored) and %u (deflated) are handled",
+            name, method, FF_ZIP_METHOD_STORED, FF_ZIP_METHOD_DEFLATED);
+        return "A dex entry uses an unsupported compression method";
+    }
+    // A STORED entry needs no further work: `dataSize` already holds the `compressedSize` that
+    // `findDexEntry` checked against the mapping, and for a STORED entry the payload is the file
+    // itself. The header's `uncompressedSize` is deliberately not used for it -- nothing bounds that
+    // value, so a corrupt one reaches past the end of the mapping, which is exactly what the dex
+    // header would then be validated against.
+
+    entry->data = data;
+    entry->size = dataSize;
+    return dexOpen(entry->data, entry->size, &entry->tables);
+}
+
 const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* requests, uint32_t count) {
     // Every request is written the sentinel before anything can fail, so that a caller reads a result
     // rather than whatever its own stack held there, however this returns. Nothing below has to
@@ -596,40 +1117,24 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
     }
 
     [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
-
-    {
-        FF_AUTO_CLOSE_FD int fd = open(jarPath, O_RDONLY | O_CLOEXEC);
-        if (fd < 0) {
-            FF_DEBUG("open(%s) failed: %s", jarPath, strerror(errno));
-            return "open(jar) failed";
-        }
-
-        struct stat st = {};
-        const int statStatus = fstat(fd, &st);
-        if (statStatus != 0 || st.st_size <= 0) {
-            FF_DEBUG("fstat(%s) reported %s (%lld bytes)", jarPath,
-                statStatus != 0 ? strerror(errno) : "an empty file", (long long) st.st_size);
-            return "fstat(jar) failed";
-        }
-        mapping.mappedSize = (size_t) st.st_size;
-        mapping.mapped = mmap(nullptr, mapping.mappedSize, PROT_READ, MAP_PRIVATE, fd, 0);
-        // The mapping outlives the descriptor, so the descriptor can go either way from here.
-        if (mapping.mapped == MAP_FAILED) {
-            FF_DEBUG("mmap(%s, %zu bytes) failed: %s", jarPath, mapping.mappedSize, strerror(errno));
-            mapping.mapped = nullptr;
-            return "mmap(jar) failed";
-        }
+    const char* error = dexMapJar(jarPath, &mapping);
+    if (error != nullptr) {
+        return error;
     }
 
-    // One byte per request saying whether it is closed -- answered, or given up on -- and the type
-    // index it was found under in the entry being walked. Both are sized from `count` rather than
-    // from a fixed bound, and both are released by their cleanup however this function returns.
+    // One byte per request saying whether it is closed -- answered, or given up on -- the type index
+    // it was found under in the entry being walked, and the descriptor that index was found for. All
+    // three are sized from `count` rather than from a fixed bound, and all three are released by
+    // their cleanup however this function returns.
     FF_AUTO_FREE uint8_t* settled = calloc(count, 1);
     FF_AUTO_FREE uint32_t* typeIndexes = malloc((size_t) count * sizeof(uint32_t));
-    if (settled == nullptr || typeIndexes == nullptr) {
-        FF_DEBUG("Allocating %zu bytes for %u static int requests failed",
-            (size_t) count * (1 + sizeof(uint32_t)), count);
+    FF_AUTO_FREE const char** descriptors = malloc((size_t) count * sizeof(const char*));
+    if (settled == nullptr || typeIndexes == nullptr || descriptors == nullptr) {
+        FF_DEBUG("Allocating the tables for %u static int requests failed", count);
         return "malloc failed";
+    }
+    for (uint32_t r = 0; r < count; ++r) {
+        descriptors[r] = requests[r].classDescriptor;
     }
 
     // A jar spreads its classes over `classes.dex`, `classes2.dex`, `classes3.dex`, ... and the
@@ -643,68 +1148,23 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
     // for -- which is what the modules here ask for, one class per interface -- costs one entry read
     // and one pass over its type table.
     uint32_t pending = count;
-    const char* error = nullptr;
     for (uint32_t index = 1; index <= FF_DEX_MAX_ENTRIES && pending > 0; ++index) {
-        char entry[sizeof("classes999.dex")];
-        if (index == 1) {
-            memcpy(entry, FF_DEX_ENTRY, sizeof(FF_DEX_ENTRY));
-        } else {
-            (void) snprintf(entry, sizeof(entry), "classes%u.dex", index);
-        }
-
-        const uint8_t* data = nullptr;
-        size_t dataSize = 0;
-        uint32_t uncompressedSize = 0;
-        uint16_t method = FF_ZIP_METHOD_STORED;
         // The decompressed dex, when the entry needed one. The cleanup releases it at the end of
         // the iteration, so every entry gets a buffer of its own and no way out of the loop -- an
         // early return included -- can leak one.
         FF_AUTO_FREE uint8_t* inflated = nullptr;
-
-        if (findDexEntry(mapping.mapped, mapping.mappedSize, entry, &data, &dataSize, &uncompressedSize, &method) != nullptr) {
-            if (index > 1) {
-                // The magic scan only ever finds the first dex, so it cannot stand in for a later
-                // entry: running past the end of the entries that exist ends the walk.
-                break;
-            }
-            data = findDexMagic(mapping.mapped, mapping.mappedSize, &dataSize);
-            if (data == nullptr) {
-                FF_DEBUG("Neither %s nor a dex magic signature is in the %zu byte jar", entry, mapping.mappedSize);
-                return "No dex in the jar";
-            }
-        } else if (method == FF_ZIP_METHOD_DEFLATED) {
-            #ifdef FF_HAVE_ZLIB
-            error = inflateDex(data, dataSize, uncompressedSize, &inflated);
-            if (error != nullptr) {
-                return error;
-            }
-            data = inflated;
-            dataSize = uncompressedSize;
-            #else
-            return "The jar deflates its dex entries and fastfetch was built without zlib";
-            #endif
-        } else if (method != FF_ZIP_METHOD_STORED) {
-            FF_DEBUG("%s uses compression method %u, only %u (stored) and %u (deflated) are handled",
-                entry, method, FF_ZIP_METHOD_STORED, FF_ZIP_METHOD_DEFLATED);
-            return "A dex entry uses an unsupported compression method";
-        }
-        // A STORED entry needs no further work: `dataSize` already holds the `compressedSize` that
-        // `findDexEntry` checked against the mapping, and for a STORED entry the payload is the file
-        // itself. The header's `uncompressedSize` is deliberately not used for it -- nothing bounds
-        // that value, so a corrupt one reaches past the end of the mapping, which is exactly what the
-        // dex header would then be validated against.
-
-        mapping.data = data;
-        mapping.size = dataSize;
-
-        FFDexTables tables = {};
-        error = dexOpen(mapping.data, mapping.size, &tables);
+        FFDexEntry entry = {};
+        bool present = false;
+        error = dexOpenEntry(&mapping, index, &present, &inflated, &entry);
         if (error != nullptr) {
             // The dex cannot be read at all, which no later entry can fix.
             return error;
         }
+        if (!present) {
+            break;
+        }
 
-        dexFindTypes(&tables, requests, settled, typeIndexes, count);
+        dexFindTypes(&entry.tables, descriptors, settled, typeIndexes, count);
 
         // Every class this entry defines is walked once, however many of its fields were asked for.
         // A request whose class is not in this entry's type table keeps `UINT32_MAX` and is left for
@@ -716,7 +1176,7 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
             }
             const uint32_t typeIndex = typeIndexes[r];
             bool defined = false;
-            error = dexClassStaticInts(&tables, typeIndex, requests, typeIndexes, settled, count, &defined);
+            error = dexClassStaticInts(&entry.tables, typeIndex, requests, typeIndexes, settled, count, &defined);
             if (error != nullptr) {
                 // The dex cannot be read, which no later entry can fix.
                 return error;
@@ -748,6 +1208,101 @@ const char* ffDexStaticInts(const char* jarPath, const FFDexStaticIntRequest* re
     for (uint32_t r = 0; r < count; ++r) {
         if (*requests[r].result == FF_DEX_STATIC_INT_UNRESOLVED) {
             FF_DEBUG("\"%s\" is not a static int field of \"%s\"", requests[r].fieldName, requests[r].classDescriptor);
+        }
+    }
+    return nullptr;
+}
+
+const char* ffDexParcelFields(const char* jarPath, const FFDexParcelRequest* requests, uint32_t count) {
+    // Every request is written its answers before anything can fail, so that a caller reads an answer
+    // rather than whatever its own stack held there, however this returns. The instance fields go
+    // first: `false` is what both "the class does not declare it" and "the jar cannot be read" mean,
+    // and the walk below only ever turns one of them true.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (requests[r].methodName != nullptr) {
+            *requests[r].count = 0;
+        }
+        for (uint32_t i = 0; i < requests[r].instanceFieldCount; ++i) {
+            requests[r].instanceFieldResults[i] = false;
+        }
+    }
+    if (count == 0) {
+        return nullptr;
+    }
+
+    [[gnu::cleanup(wrapDexMapping)]] FFDexMapping mapping = {};
+    const char* error = dexMapJar(jarPath, &mapping);
+    if (error != nullptr) {
+        return error;
+    }
+
+    FF_AUTO_FREE uint8_t* settled = calloc(count, 1);
+    FF_AUTO_FREE uint32_t* typeIndexes = malloc((size_t) count * sizeof(uint32_t));
+    FF_AUTO_FREE const char** descriptors = malloc((size_t) count * sizeof(const char*));
+    if (settled == nullptr || typeIndexes == nullptr || descriptors == nullptr) {
+        FF_DEBUG("Allocating the tables for %u parcel field requests failed", count);
+        return "malloc failed";
+    }
+    for (uint32_t r = 0; r < count; ++r) {
+        descriptors[r] = requests[r].classDescriptor;
+    }
+
+    uint32_t pending = count;
+    for (uint32_t index = 1; index <= FF_DEX_MAX_ENTRIES && pending > 0; ++index) {
+        FF_AUTO_FREE uint8_t* inflated = nullptr;
+        FFDexEntry entry = {};
+        bool present = false;
+        error = dexOpenEntry(&mapping, index, &present, &inflated, &entry);
+        if (error != nullptr) {
+            // The dex cannot be read at all, which no later entry can fix.
+            return error;
+        }
+        if (!present) {
+            break;
+        }
+
+        dexFindTypes(&entry.tables, descriptors, settled, typeIndexes, count);
+
+        for (uint32_t r = 0; r < count; ++r) {
+            if (settled[r] || typeIndexes[r] == UINT32_MAX) {
+                continue;
+            }
+            const uint32_t typeIndex = typeIndexes[r];
+            bool defined = false;
+            error = dexClassParcelFields(&entry.tables, typeIndex, requests, typeIndexes, settled, count, &defined);
+            if (error != nullptr) {
+                return error;
+            }
+            if (!defined) {
+                for (uint32_t s = r; s < count; ++s) {
+                    if (typeIndexes[s] == typeIndex) {
+                        typeIndexes[s] = UINT32_MAX;
+                    }
+                }
+            }
+        }
+
+        pending = 0;
+        for (uint32_t r = 0; r < count; ++r) {
+            if (!settled[r]) {
+                ++pending;
+            }
+        }
+    }
+
+    // A request still holding 0 is one whose class no entry of the jar defines, or whose class does
+    // not declare the method. Both are the same answer -- this build does not write that class -- and
+    // for a debug build it is worth saying which of the two it was, since the count on its own does
+    // not tell "this build has no such method" apart from "the reader went wrong". The same goes for
+    // an instance field left `false`.
+    for (uint32_t r = 0; r < count; ++r) {
+        if (requests[r].methodName != nullptr && *requests[r].count == 0) {
+            FF_DEBUG("The write sequence of \"%s.%s\" is not in the jar", requests[r].classDescriptor, requests[r].methodName);
+        }
+        for (uint32_t i = 0; i < requests[r].instanceFieldCount; ++i) {
+            if (!requests[r].instanceFieldResults[i]) {
+                FF_DEBUG("\"%s\" is not an instance field of \"%s\"", requests[r].instanceFieldNames[i], requests[r].classDescriptor);
+            }
         }
     }
     return nullptr;

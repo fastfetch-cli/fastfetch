@@ -62,7 +62,7 @@ static inline int ffPipe2(int* readEnd, int* writeEnd, int flags) {
 }
 
 // Not thread-safe
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
+const char* ffProcessSpawn(char* const argv[], FFProcessOutputType useOutput, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
     FF_AUTO_CLOSE_FD int pipeRead = -1;
     FF_AUTO_CLOSE_FD int pipeWrite = -1;
     if (ffPipe2(&pipeRead, &pipeWrite, O_CLOEXEC) == -1) {
@@ -72,6 +72,10 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     pid_t childPid = -1;
     int nullFile = ffGetNullFD();
+    // Each stream is wired to the pipe when its bit is set and to the null device otherwise, so an
+    // unselected stream can neither mix into the captured text nor fill the pipe and block the child.
+    int stdoutFd = (useOutput & FF_PROCESS_OUTPUT_STDOUT_BIT) ? pipeWrite : nullFile;
+    int stderrFd = (useOutput & FF_PROCESS_OUTPUT_STDERR_BIT) ? pipeWrite : nullFile;
 
 #if !(__ANDROID__ || __OpenBSD__)
 
@@ -83,8 +87,8 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     posix_spawn_file_actions_t file_actions;
     posix_spawn_file_actions_init(&file_actions);
-    posix_spawn_file_actions_adddup2(&file_actions, pipeWrite, useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-    posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, stdoutFd, STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, stderrFd, STDERR_FILENO);
     if (ffIsValidNativeFD(stdinFd)) {
         posix_spawn_file_actions_adddup2(&file_actions, stdinFd, STDIN_FILENO);
     }
@@ -149,8 +153,8 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFNativeFD stdinF
 
     if (childPid == 0) {
         // Child process
-        dup2(pipeWrite, useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-        dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        dup2(stdoutFd, STDOUT_FILENO);
+        dup2(stderrFd, STDERR_FILENO);
         if (ffIsValidNativeFD(stdinFd)) {
             dup2(stdinFd, STDIN_FILENO);
         }

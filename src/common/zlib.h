@@ -15,10 +15,9 @@ typedef enum FFZlibGroup : uint8_t {
 
     #if FF_DISABLE_DLOPEN
 
-        #define Z_LARGE64 1
         #include <zlib.h>
 
-const char* ffZlibLoad([[maybe_unused]] FFZlibGroup group) {
+static inline const char* ffZlibLoad([[maybe_unused]] FFZlibGroup group) {
     // the library is linked in: nothing to open, nothing to resolve, nothing to fail
     return nullptr;
 }
@@ -41,9 +40,16 @@ const char* ffZlibLoad([[maybe_unused]] FFZlibGroup group) {
         #define Z_EXTERN static inline
         #define Z_EXPORT
 
+        // Redeclaring everything as `static inline` above means <zlib.h> now defines entry points
+        // that a given translation unit may not call at all. Silenced for the include only: the
+        // pragma is popped right after, so the rest of the file -- and the rest of the translation
+        // unit that includes this header -- still reports unused functions.
+        #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wunused-function"
 
         #include <zlib.h>
+
+        #pragma GCC diagnostic pop
 
         #include "common/library.h"
 

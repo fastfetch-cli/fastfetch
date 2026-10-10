@@ -27,9 +27,9 @@
 // of control packets always uses the channel 0xFFFFFFFF with a zero offset and
 // flag word.
 //
-// See doc/pulseaudio-native-protocol.md for the byte level details, for the
-// command numbers and for the pulseaudio source references they were derived
-// from.
+// The command numbers, the tag characters and the field orders below are the ones in pulseaudio's
+// own sources -- pulsecore/native-common.h, pulsecore/tagstruct.{c,h} and
+// pulsecore/protocol-native.c -- and the place each of them was read from is named where it is used.
 
 typedef enum FFSoundPulseCommand : uint32_t {
     FF_SOUND_PA_COMMAND_ERROR = 0,
