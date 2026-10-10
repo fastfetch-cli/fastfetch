@@ -28,16 +28,19 @@ void ffDebugPrint(const char* file, int line, const char* format, ...) {
     }
 
     static FFThreadMutex debugMutex = FF_THREAD_MUTEX_INITIALIZER;
-    ffThreadMutexLock(&debugMutex);
+    // Saved before the lock and restored after the unlock: FF_DEBUG() is called from error paths
+    // that go on to read `errno`, so nothing this function does -- neither the lock nor the
+    // formatting -- may be allowed to leave its own value behind.
     int errno_ = errno;
-    static char errmsg_[1024];
+    ffThreadMutexLock(&debugMutex);
+    static char errmsg_[1024]; // Don't increase stack size
     va_list args;
     va_start(args, format);
     vsnprintf(errmsg_, sizeof(errmsg_), format, args);
     va_end(args);
     fprintf(stderr, "[%s%4d, %s] %s\n", ffFindFileName(file), line, ffTimeToTimeStr(ffTimeGetNow()), errmsg_);
-    errno = errno_;
     ffThreadMutexUnlock(&debugMutex);
+    errno = errno_;
 }
 
     #if _WIN32
