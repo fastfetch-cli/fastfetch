@@ -2,17 +2,20 @@
 
 Changes:
 * LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
+    * Interfaces that carry no unicast address are no longer reported, since both the addresses and the interface properties are now enumerated from the unicast address table. (LocalIP, Windows)
 * libpulse and libddcutil are no longer used on Linux. Package managers should remove them from their fastfetch package.
 * QuickJS format scripting has been removed (deprecated in v2.69.0). Migrate scripts to Lua if necessary. (General)
 * The Command module option `useStdErr` has been replaced with `useOutput`, which selects which of the command's output streams to capture: `"stdout"`, `"stderr"` or `"both"`.
     * It defaults to `"both"`, so a command that logs to stderr now has that output captured instead of discarded.
     * Set it to `"stdout"` or `"stderr"` to restore the old single-stream behavior. (Command)
+* The Shell module now reports the shell from the password database (`/etc/passwd`) instead of the `$SHELL` environment variable, which may differ when the login shell was changed after the session started. (Title)
 
 Features:
 * Added Sound detection on Android. (Sound, Android)
 * Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
 * Performance improvements & internal cleanups
-* Added Finnish Language Support
+* Added Finnish language support. (General)
+* Added pkgsrc package detection on macOS. (#2627, Packages, Apple)
 
 Bugfixes:
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
@@ -22,8 +25,9 @@ Bugfixes:
 * Fixed `/boot` being hidden by default on Haiku, where it is the system volume. (Disk, Haiku)
 * Improved Snapdragon X1/X2 model name detection on Linux. (#2625, CPU, Linux)
 * Fixed the Android build failing with `GL/gl.h` not found, because the NDK ships the EGL headers that turned OpenGL detection on but not the desktop GL headers it includes. (OpenGL, Android)
-* Fixed MAC address reporting `20:00:00:00:00:00` on macOS 27. (LocalIP, Apple)
-* Fixed assertion failure when percentage exceeds 100 (Percent)
+* Fixed MAC address reporting `02:00:00:00:00:00` on macOS 27. (LocalIP, Apple)
+* Fixed assertion failure when percentage exceeds 100. (Percent)
+* Fixed a non-existent command being reported as a generic child process error on Windows instead of `command not found`. (Command, Windows)
 
 Logos:
 * Added filled Artix logo (#2631)
