@@ -466,7 +466,6 @@ static inline bool ffStrbufInitJsonVal(FFstrbuf* strbuf, yyjson_val* jsonVal) {
     return ptr ? (uint32_t) (ptr - strbuf->chars) : strbuf->length;
 }
 
-//
 [[gnu::nonnull(1), gnu::pure, nodiscard]] static inline bool ffStrbufContainAnyC(const FFstrbuf* strbuf, const char* cs) {
     assert(cs != nullptr);
 
