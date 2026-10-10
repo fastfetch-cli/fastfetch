@@ -454,7 +454,29 @@ fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
+    # `mediaremoted` serves now-playing data only to clients whose bundle id starts
+    # with "com.apple.": -[MRDMediaRemoteClient isAllowedAccessToDataFromPlayerPath:]
+    # accepts the 0x200 entitlement bit either for the private
+    # com.apple.mediaremote.now-playing-read-access entitlement or for that prefix,
+    # and it derives the client's identity from the code signature / XPC audit token
+    # rather than from the process's own NSBundle. Both the embedded
+    # CFBundleIdentifier and the ad-hoc signing identifier below therefore have to
+    # carry the prefix; keep them in sync through these variables.
+    set(FASTFETCH_BUNDLE_ID "com.apple.fastfetch")
+    set(FLASHFETCH_BUNDLE_ID "com.apple.flashfetch")
+    # configure_file() inputs are not configure dependencies on their own, so
+    # without this an edit to Info.plist.in never even regenerates Info.plist.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/common/apple/Info.plist.in")
+    # Each executable gets its own plist: the file is embedded with -sectcreate and read
+    # back by the system as the bundle id, so two targets sharing one would leave one of
+    # them advertising an identifier that its code signature does not match.
+    set(BUNDLE_ID "${FASTFETCH_BUNDLE_ID}")
     configure_file(src/common/apple/Info.plist.in Info.plist @ONLY)
+    if(BUILD_FLASHFETCH)
+        set(BUNDLE_ID "${FLASHFETCH_BUNDLE_ID}")
+        configure_file(src/common/apple/Info.plist.in Info.plist.flashfetch @ONLY)
+    endif()
+    unset(BUNDLE_ID)
 endif()
 
 ####################
@@ -2244,12 +2266,30 @@ set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
+    # version.rc embeds manifest.xml (RT_MANIFEST) and logo.ico (ICON) as *resource
+    # references*, not as #includes, so the resource compiler never reports them and
+    # CMake would keep a stale .res when only the manifest or the icon changes. Both
+    # are plain files rather than generated ones, so declare them by hand; the source
+    # file property is per-path, which is why flashfetch below needs no repeat.
+    set_property(SOURCE src/common/windows/version.rc APPEND PROPERTY OBJECT_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/manifest.xml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/logo.ico"
+    )
     target_sources(fastfetch
         PRIVATE src/common/windows/version.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+    )
+    # `LINKER:` options are handed to ld verbatim and are not registered as build
+    # dependencies, so without this ninja never relinks when Info.plist changes.
+    set_property(TARGET fastfetch APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Info.plist")
+    # ld derives the ad-hoc code-signing identifier from the output file name and
+    # ignores the embedded CFBundleIdentifier, so set it explicitly.
+    add_custom_command(TARGET fastfetch POST_BUILD
+        COMMAND codesign --force --sign - --identifier "${FASTFETCH_BUNDLE_ID}" "$<TARGET_FILE:fastfetch>"
+        VERBATIM
     )
 endif()
 
@@ -2276,8 +2316,15 @@ if (BUILD_FLASHFETCH)
             PRIVATE src/common/windows/version.rc
         )
     elseif(APPLE)
+        # flashfetch embeds its own plist so that its CFBundleIdentifier matches the
+        # identifier it is signed with below (see the APPLE block near the top).
         target_link_options(flashfetch
-            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist.flashfetch
+        )
+        set_property(TARGET flashfetch APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Info.plist.flashfetch")
+        add_custom_command(TARGET flashfetch POST_BUILD
+            COMMAND codesign --force --sign - --identifier "${FLASHFETCH_BUNDLE_ID}" "$<TARGET_FILE:flashfetch>"
+            VERBATIM
         )
     endif()
 
