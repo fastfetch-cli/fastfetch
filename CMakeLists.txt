@@ -2291,6 +2291,15 @@ endif()
 ###################
 
 if (BUILD_TESTS)
+    if (NOT WIN32)
+        add_executable(fastfetch-test-processing
+            tests/processing.c
+        )
+        target_link_libraries(fastfetch-test-processing
+            PRIVATE libfastfetch Threads::Threads
+        )
+    endif()
+
     add_executable(fastfetch-test-cache
         tests/cache.c
     )
@@ -2418,6 +2427,10 @@ if (BUILD_TESTS)
     )
 
     enable_testing()
+    if (NOT WIN32)
+        add_test(NAME test-processing COMMAND fastfetch-test-processing)
+        set_tests_properties(test-processing PROPERTIES TIMEOUT 5)
+    endif()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
