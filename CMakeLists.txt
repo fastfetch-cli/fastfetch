@@ -1689,6 +1689,13 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 endif()
 
+if(OpenBSD)
+    check_symbol_exists("getexecpath" "unistd.h" HAVE_GETEXECPATH)
+    if(HAVE_GETEXECPATH)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_GETEXECPATH=1)
+    endif()
+endif()
+
 if(HAVE_PIPE2)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PIPE2)
 endif()

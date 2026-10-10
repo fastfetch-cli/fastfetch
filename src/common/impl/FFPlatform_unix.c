@@ -64,7 +64,11 @@ static void getExePath(FFPlatform* platform) {
         exePathLen--; // remove terminating NUL
     }
 #elif defined(__OpenBSD__)
-    // OpenBSD doesn't have a reliable way to get the executable path.
+#if FF_HAVE_GETEXECPATH
+    // https://man.openbsd.org/getexecpath.3
+    size_t exePathLen = getexecpath(exePath, sizeof(exePath)) == 0 ? strlen(exePath) : 0;
+#else
+    // OpenBSD (before 8.0) doesn't have a reliable way to get the executable path.
     // Current implementation uses argv[0], which can be easily spoofed.
     // See #2195
     size_t exePathLen = 0;
@@ -165,6 +169,7 @@ static void getExePath(FFPlatform* platform) {
             }
         }
     }
+#endif
 #elif defined(__sun)
     ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
     if (exePathLen > 0) {
