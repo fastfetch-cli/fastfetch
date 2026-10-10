@@ -108,6 +108,7 @@ cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "ENABLE_IMA
 cmake_dependent_option(ENABLE_SIXEL "Enable sixel logo output via the embedded libsixel encoder (Windows, macOS and Android; replaces ImageMagick's SIXEL coder)" ON "ENABLE_IMAGE_LOGO;WIN32 OR APPLE OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGE_LOGO;ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7 OR WIN32 OR APPLE OR ANDROID" OFF)
 
+option(COMPATIBILITY_FORCE_DRM_DISABLE "Force disable GPU DRM detection (for embedded)" OFF)
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -600,6 +601,7 @@ if(LINUX)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/kmod_linux.c
+        src/common/keenetic/version.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -776,6 +778,7 @@ elseif(FreeBSD)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/kmod_bsd.c
+        src/common/keenetic/version.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
@@ -1379,6 +1382,7 @@ elseif(GNU)
         src/common/impl/FFPlatform_unix.c
         src/common/impl/binary_linux.c
         src/common/impl/kmod_nosupport.c
+        src/common/keenetic/version.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
@@ -1620,6 +1624,10 @@ elseif(DragonFly AND EXISTS "/usr/local/bin/objdump")
         message(STATUS "Found DF ${CMAKE_MATCH_1}")
         target_compile_definitions(libfastfetch PUBLIC FF_DF_VERSION="${CMAKE_MATCH_1}")
     endif()
+endif()
+
+if(COMPATIBILITY_FORCE_DRM_DISABLE)
+    target_compile_definitions(libfastfetch PUBLIC COMPATIBILITY_FORCE_DRM_OFF=1)
 endif()
 
 if(LINUX)
