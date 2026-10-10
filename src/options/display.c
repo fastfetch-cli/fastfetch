@@ -1060,6 +1060,7 @@ static const char* optionGetLanguageString(uint32_t offset) {
         case offsetof(FFModuleDisplayName, cs): return "cs";
         case offsetof(FFModuleDisplayName, de): return "de";
         case offsetof(FFModuleDisplayName, es): return "es";
+        case offsetof(FFModuleDisplayName, fi): return "fi";
         case offsetof(FFModuleDisplayName, fr): return "fr";
         case offsetof(FFModuleDisplayName, gl): return "gl";
         case offsetof(FFModuleDisplayName, he): return "he";
