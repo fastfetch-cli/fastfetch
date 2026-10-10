@@ -108,6 +108,11 @@ uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir) {
         struct linux_dirent64* entry = (struct linux_dirent64*) bytes;
 
         while (remaining >= nameOffset + 1) {
+            if (entry->d_reclen < nameOffset + 1 || entry->d_reclen > remaining) {
+                remaining = 0;
+                break;
+            }
+
             bool ok = false;
             if (entry->d_name[0] != '.') {
                 if (__builtin_expect(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK, true)) {
