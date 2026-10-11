@@ -34,6 +34,7 @@ Bugfixes:
 * Fixed a non-existent command being reported as a generic child process error on Windows instead of `command not found`. (Command, Windows)
 
 Logos:
+* Added ArmadaOS logo (#2641)
 * Added filled Artix logo (#2631)
 * Renamed PostmarketOS to nura (#2626)
 
