@@ -20,6 +20,7 @@ Features:
 * Performance improvements & internal cleanups
 * Added Finnish language support. (General)
 * Added pkgsrc package detection on macOS. (#2627, Packages, Apple)
+* Added an ALSA fallback to Sound on Linux, so a machine that runs no sound server reports its output device and volume instead of an error. (Sound, Linux)
 
 Bugfixes:
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
