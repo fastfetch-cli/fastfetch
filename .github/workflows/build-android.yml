@@ -63,7 +63,7 @@ jobs:
       # field is mandatory (pkgconf treats a .pc without one as not found), hence the sed.
       - name: install freetype headers
         run: |
-          sudo apt-get install -y --no-install-recommends libfreetype-dev
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends libfreetype-dev
           test -f /usr/include/freetype2/ft2build.h
           VERSION=$(awk '/^#define FREETYPE_(MAJOR|MINOR|PATCH)/ {printf "%s%s", sep, $3; sep="."}' /usr/include/freetype2/freetype/freetype.h)
           test -n "${VERSION}"
