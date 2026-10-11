@@ -44,12 +44,11 @@ static inline const char* ffZlibLoad([[maybe_unused]] FFZlibGroup group) {
         // that a given translation unit may not call at all. Silenced for the include only: the
         // pragma is popped right after, so the rest of the file -- and the rest of the translation
         // unit that includes this header -- still reports unused functions.
-        #pragma GCC diagnostic push
+
+        // Note: `#pragma GCC diagnostic push` is intentionally omitted here.
         #pragma GCC diagnostic ignored "-Wunused-function"
 
         #include <zlib.h>
-
-        #pragma GCC diagnostic pop
 
         #include "common/library.h"
 
