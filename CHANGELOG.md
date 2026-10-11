@@ -14,6 +14,8 @@ Features:
 * Added Sound detection on Android. (Sound, Android)
 * Added display detection on Android over binder, which needs neither a child process nor a permission. (Display, Android)
 * Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
+* Added media detection on Android when fastfetch runs as an app UID. (Media, Android)
+    * Requires `Notification access` permission
 * Performance improvements & internal cleanups
 * Added Finnish language support. (General)
 * Added pkgsrc package detection on macOS. (#2627, Packages, Apple)

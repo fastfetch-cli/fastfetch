@@ -1,4 +1,5 @@
 #include "common/android/dex.h"
+#include "common/android/zip.h"
 #include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
@@ -53,43 +54,6 @@
 // both and the walk does not have to tell them apart.
 #define FF_DEX_OP_FIELD_FIRST 0x52
 #define FF_DEX_OP_FIELD_LAST 0x5F
-
-// The zip local file header, from APPNOTE.TXT 4.3.7. Only the two length fields are read from it:
-// the payload starts right behind them, and the local extra field is allowed to differ from the
-// central one, so the offset cannot be computed from the directory alone.
-#define FF_ZIP_LOCAL_HEADER_SIZE 30
-#define FF_ZIP_OFF_NAME_LENGTH 26
-#define FF_ZIP_OFF_EXTRA_LENGTH 28
-
-// The central directory. This is what makes an entry reachable without walking everything in front
-// of it, and that matters here: framework.jar is 52 MB and its classes2.dex starts 9.6 MB in, so
-// looking for a local header by scanning the file costs a pass over everything before it -- once per
-// lookup. Measured on the test device, where the sound module resolves seven codes, that was the
-// difference between 30 ms and 2 seconds.
-#define FF_ZIP_CENTRAL_MAGIC "PK\x01\x02"
-#define FF_ZIP_CENTRAL_SIZE 46
-#define FF_ZIP_OFF_CENTRAL_METHOD 10
-#define FF_ZIP_OFF_CENTRAL_COMPRESSED_SIZE 20
-#define FF_ZIP_OFF_CENTRAL_UNCOMPRESSED_SIZE 24
-#define FF_ZIP_OFF_CENTRAL_NAME_LENGTH 28
-#define FF_ZIP_OFF_CENTRAL_EXTRA_LENGTH 30
-#define FF_ZIP_OFF_CENTRAL_COMMENT_LENGTH 32
-#define FF_ZIP_OFF_CENTRAL_LOCAL_OFFSET 42
-
-// The end of central directory record, which points at the directory. It is the last thing in the
-// file, behind a comment of at most 64 KiB, so it is searched for backwards over that much.
-#define FF_ZIP_EOCD_MAGIC "PK\x05\x06"
-#define FF_ZIP_EOCD_SIZE 22
-#define FF_ZIP_EOCD_MAX_COMMENT 0xffffu
-#define FF_ZIP_OFF_EOCD_DIRECTORY_SIZE 12
-#define FF_ZIP_OFF_EOCD_DIRECTORY 16
-
-// A size or offset of 0xFFFFFFFF means the real one is in a zip64 extra field. AOSP's framework jars
-// are orders of magnitude below that, and carrying the extra field reader for them is not worth it.
-#define FF_ZIP_ZIP64_SENTINEL 0xffffffffu
-
-#define FF_ZIP_METHOD_STORED 0
-#define FF_ZIP_METHOD_DEFLATED 8
 
 #define FF_DEX_ENTRY "classes.dex"
 // How many `classesN.dex` entries a jar is walked for. A jar that spreads its classes over more
@@ -879,96 +843,20 @@ static const char* dexMapJar(const char* jarPath, FFDexMapping* mapping) {
     return nullptr;
 }
 
-// Locates an entry through the jar's central directory.
-//
-// The sizes and the compression method are read from the directory rather than from the entry's own
-// local header, which is the more reliable of the two: a local header is allowed to leave its sizes
-// at zero and put them in a data descriptor behind the payload, and an archive writer is free to
-// choose that. Only the local header's two length fields are used, because they are what says where
-// the payload begins -- the local extra field does not have to match the central one.
+// Locates `classesN.dex` in the jar's central directory. The walk that finds an entry is the same
+// one the app label reader needs for an APK's resource table, so it lives in common/android/zip.h
+// and this is the dex-specific half of the question: which name to ask for.
 static const char* findDexEntry(const uint8_t* jar, size_t jarSize, const char* entry, const uint8_t** data, size_t* dataSize, uint32_t* uncompressedSize, uint16_t* method) {
-    const size_t entryLength = strlen(entry);
-    if (jarSize < FF_ZIP_EOCD_SIZE) {
-        return "The jar is too small to be a zip";
+    FFAndroidZipEntry found = {};
+    const char* error = ffAndroidZipFindEntry(jar, jarSize, entry, &found);
+    if (error != nullptr) {
+        return error;
     }
-
-    // The record is the last thing in the file, so it is searched for backwards -- over at most the
-    // 64 KiB a trailing comment can take, not over the whole archive.
-    const size_t newest = jarSize - FF_ZIP_EOCD_SIZE;
-    const size_t oldest = jarSize > FF_ZIP_EOCD_MAX_COMMENT + FF_ZIP_EOCD_SIZE
-        ? jarSize - FF_ZIP_EOCD_MAX_COMMENT - FF_ZIP_EOCD_SIZE
-        : 0;
-    size_t eocd = SIZE_MAX;
-    for (size_t i = newest;; --i) {
-        if (memcmp(jar + i, FF_ZIP_EOCD_MAGIC, sizeof(FF_ZIP_EOCD_MAGIC) - 1) == 0) {
-            eocd = i;
-            break;
-        }
-        if (i == oldest) {
-            // The walk stops here rather than at zero: a `size_t` countdown that has to reach zero
-            // before it stops would wrap and read the whole file backwards, which is the very scan
-            // this is here to avoid.
-            break;
-        }
-    }
-    if (eocd == SIZE_MAX) {
-        FF_DEBUG("No end-of-central-directory record in the last %zu bytes of a %zu byte jar",
-            newest - oldest + FF_ZIP_EOCD_SIZE, jarSize);
-        return "The jar has no zip directory";
-    }
-
-    const uint32_t directorySize = dexU32(jar + eocd + FF_ZIP_OFF_EOCD_DIRECTORY_SIZE);
-    const uint32_t directoryOffset = dexU32(jar + eocd + FF_ZIP_OFF_EOCD_DIRECTORY);
-    if (directoryOffset > jarSize || directorySize > jarSize - directoryOffset) {
-        return "The zip directory is out of range";
-    }
-
-    const size_t directoryEnd = (size_t) directoryOffset + directorySize;
-    for (size_t offset = directoryOffset; offset + FF_ZIP_CENTRAL_SIZE <= directoryEnd;) {
-        if (memcmp(jar + offset, FF_ZIP_CENTRAL_MAGIC, sizeof(FF_ZIP_CENTRAL_MAGIC) - 1) != 0) {
-            return "A zip directory entry is malformed";
-        }
-        const uint16_t nameLength = dexU16(jar + offset + FF_ZIP_OFF_CENTRAL_NAME_LENGTH);
-        const uint16_t extraLength = dexU16(jar + offset + FF_ZIP_OFF_CENTRAL_EXTRA_LENGTH);
-        const uint16_t commentLength = dexU16(jar + offset + FF_ZIP_OFF_CENTRAL_COMMENT_LENGTH);
-        const size_t entrySize = FF_ZIP_CENTRAL_SIZE + (size_t) nameLength + (size_t) extraLength + (size_t) commentLength;
-        if (entrySize > directoryEnd - offset) {
-            FF_DEBUG("A zip entry claims %zu bytes but only %zu remain in the directory",
-                entrySize, (size_t) (directoryEnd - offset));
-            return "A zip directory entry runs past the directory";
-        }
-
-        if (nameLength == entryLength && memcmp(jar + offset + FF_ZIP_CENTRAL_SIZE, entry, entryLength) == 0) {
-            const uint32_t compressedSize = dexU32(jar + offset + FF_ZIP_OFF_CENTRAL_COMPRESSED_SIZE);
-            const uint32_t uncompressed = dexU32(jar + offset + FF_ZIP_OFF_CENTRAL_UNCOMPRESSED_SIZE);
-            const uint32_t localOffset = dexU32(jar + offset + FF_ZIP_OFF_CENTRAL_LOCAL_OFFSET);
-            if (compressedSize == FF_ZIP_ZIP64_SENTINEL || uncompressed == FF_ZIP_ZIP64_SENTINEL || localOffset == FF_ZIP_ZIP64_SENTINEL) {
-                FF_DEBUG("The dex entry is zip64: compressed=%u, uncompressed=%u, localOffset=%u",
-                    compressedSize, uncompressed, localOffset);
-                return "A dex entry is stored as zip64, which is not supported";
-            }
-            if (localOffset > jarSize || FF_ZIP_LOCAL_HEADER_SIZE > jarSize - localOffset) {
-                return "A zip local header is out of range";
-            }
-
-            const uint16_t localNameLength = dexU16(jar + localOffset + FF_ZIP_OFF_NAME_LENGTH);
-            const uint16_t localExtraLength = dexU16(jar + localOffset + FF_ZIP_OFF_EXTRA_LENGTH);
-            const size_t headerSize = FF_ZIP_LOCAL_HEADER_SIZE + (size_t) localNameLength + (size_t) localExtraLength;
-            if (headerSize > jarSize - localOffset || compressedSize > jarSize - localOffset - headerSize) {
-                return "The zip entry bounds are out of range";
-            }
-
-            *method = dexU16(jar + offset + FF_ZIP_OFF_CENTRAL_METHOD);
-            *uncompressedSize = uncompressed;
-            *data = jar + localOffset + headerSize;
-            *dataSize = compressedSize;
-            return nullptr;
-        }
-
-        offset += entrySize;
-    }
-    FF_DEBUG("No entry in the %zu byte jar is named %s", jarSize, entry);
-    return "The jar has no usable dex entry";
+    *data = found.payload;
+    *dataSize = found.payloadSize;
+    *uncompressedSize = found.uncompressedSize;
+    *method = found.method;
+    return nullptr;
 }
 
 // Fallback for a jar whose entry is STORED but whose header has no sizes: the dex magic is then a

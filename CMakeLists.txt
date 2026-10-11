@@ -678,9 +678,11 @@ if(LINUX)
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/android/applabel.c
         src/common/android/binder.c
         src/common/android/dex.c
         src/common/android/package.c
+        src/common/android/zip.c
         src/common/impl/dbus.c
         src/common/impl/io_unix.c
         src/common/impl/netif_linux.c
