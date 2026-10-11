@@ -16,6 +16,7 @@ Features:
 * Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
 * Added media detection on Android when fastfetch runs as an app UID. (Media, Android)
     * Requires `Notification access` permission
+* Added app display-name detection on Android, so the media module names the player the way the app names itself instead of by its package name, and the terminal module reports the label Termux is installed under. (Media, Terminal, Android)
 * Performance improvements & internal cleanups
 * Added Finnish language support. (General)
 * Added pkgsrc package detection on macOS. (#2627, Packages, Apple)
