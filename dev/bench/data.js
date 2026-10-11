@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1791701676963,
+  "lastUpdate": 1791705162957,
   "repoUrl": "https://github.com/fastfetch-cli/fastfetch",
   "entries": {
     "Fastfetch": [
@@ -195227,6 +195227,2250 @@ window.BENCHMARK_DATA = {
           {
             "name": "fastfetch windows amd64 total process time",
             "value": 2350,
+            "unit": "ms"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zhangsongcui3371@sina.com",
+            "name": "Carter Li",
+            "username": "CarterLi"
+          },
+          "committer": {
+            "email": "zhangsongcui3371@sina.com",
+            "name": "Carter Li",
+            "username": "CarterLi"
+          },
+          "distinct": true,
+          "id": "3453de61f82e4cdd746cf60534e943a842e6b199",
+          "message": "CI (Android): tries to fix building",
+          "timestamp": "2026-10-11T11:37:48+08:00",
+          "tree_id": "66c3c492f45e59a1a44ab0f0ed3c72005f5f2871",
+          "url": "https://github.com/fastfetch-cli/fastfetch/commit/3453de61f82e4cdd746cf60534e943a842e6b199"
+        },
+        "date": 1791705161644,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "fastfetch linux aarch64 module Title",
+            "value": 0.003703000023961067,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Separator",
+            "value": 0.00024800002574920654,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module OS",
+            "value": 0.032709999941289425,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Host",
+            "value": 0.04094900004565716,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module BIOS",
+            "value": 0.02087099989876151,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Bootmgr",
+            "value": 0.30286800023168325,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Board",
+            "value": 0.017815000377595425,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Chassis",
+            "value": 0.016565999947488308,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Kernel",
+            "value": 0.00139999995008111,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module InitSystem",
+            "value": 0.27483000000938773,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Uptime",
+            "value": 0.03630100004374981,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Loadavg",
+            "value": 0.009360000025480986,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Processes",
+            "value": 0.6536759999580681,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Packages",
+            "value": 4.087133999913931,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Shell",
+            "value": 0.14839799981564283,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Editor",
+            "value": 0.0018719998188316822,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Display",
+            "value": 1.3982819998636842,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Brightness",
+            "value": 0.15021400013938546,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Monitor",
+            "value": 0.006191999651491642,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module LM",
+            "value": 1.267554999794811,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module DE",
+            "value": 0.0012639998458325863,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module WM",
+            "value": 0.0014159996062517166,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module WMTheme",
+            "value": 0.0013439999893307686,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Theme",
+            "value": 1.1546339998021722,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Icons",
+            "value": 0.001816000323742628,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Font",
+            "value": 0.0021600001491606236,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Cursor",
+            "value": 0.01860700035467744,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Wallpaper",
+            "value": 0.0007759998552501202,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Terminal",
+            "value": 0.042660999577492476,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module TerminalFont",
+            "value": 0.002830999903380871,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module TerminalSize",
+            "value": 0.008551999926567078,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module TerminalTheme",
+            "value": 0.001711999997496605,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module CPU",
+            "value": 0.14045399986207485,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module CPUCache",
+            "value": 0.3528409996069968,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module CPUUsage",
+            "value": 170.1476479996927,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module GPU",
+            "value": 29.371840000152588,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Codec",
+            "value": 0.9743910003453493,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Memory",
+            "value": 0.025910000316798687,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module PhysicalMemory",
+            "value": 0.014534999616444111,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Swap",
+            "value": 0.01584699982777238,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Disk",
+            "value": 0.14420600002631545,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Btrfs",
+            "value": 0.004576000384986401,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Zpool",
+            "value": 0.118304000236094,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Battery",
+            "value": 0.007615999784320593,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module PowerAdapter",
+            "value": 0.0038710003718733788,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Player",
+            "value": 0.00028799986466765404,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Media",
+            "value": 0.6258459999226034,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module PublicIp",
+            "value": 0.05833999998867512,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module LocalIp",
+            "value": 0.12104799970984459,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module DNS",
+            "value": 0.022559000179171562,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Wifi",
+            "value": 0.04997200006619096,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module DateTime",
+            "value": 0.0063599999994039536,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Locale",
+            "value": 0.001087999902665615,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Vulkan",
+            "value": 0.0013039996847510338,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module OpenGL",
+            "value": 7.874735999852419,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module OpenCL",
+            "value": 0.001191999763250351,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Users",
+            "value": 0.07161899982020259,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Bluetooth",
+            "value": 0.004639999940991402,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module BluetoothRadio",
+            "value": 0.001999999862164259,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Sound",
+            "value": 0.022174000274389982,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Camera",
+            "value": 0.0044559999369084835,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Gamepad",
+            "value": 0.040628999937325716,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Mouse",
+            "value": 0.018054999876767397,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Keyboard",
+            "value": 0.0261739999987185,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module TPM",
+            "value": 0.004784000106155872,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module NetIO",
+            "value": 28.19531000033021,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module DiskIO",
+            "value": 0.08315399987623096,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module PhysicalDisk",
+            "value": 0.14335900032892823,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Weather",
+            "value": 58.96132700005546,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Top",
+            "value": 1.6554169999435544,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Version",
+            "value": 0.0016960003413259983,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Logo",
+            "value": 0.0018480001017451286,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Break",
+            "value": 0.001304000150412321,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 module Colors",
+            "value": 0.0006639999337494373,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux aarch64 total process time",
+            "value": 330,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Title",
+            "value": 0.0032160000409930944,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Separator",
+            "value": 0.0006020000437274575,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module OS",
+            "value": 0.037609999999403954,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Host",
+            "value": 0.08267399994656444,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module BIOS",
+            "value": 0.04379199992399663,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Bootmgr",
+            "value": 0.9230909999459982,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Board",
+            "value": 0.04238900006748736,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Chassis",
+            "value": 0.03683899994939566,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Kernel",
+            "value": 0.0011019998928532004,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module InitSystem",
+            "value": 0.42664600000716746,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Uptime",
+            "value": 0.03619699995033443,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Loadavg",
+            "value": 0.011502000037580729,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Processes",
+            "value": 1.4784470000304282,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Packages",
+            "value": 8.214547000010498,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Shell",
+            "value": 0.17394400003831834,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Editor",
+            "value": 0.006832999992184341,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Display",
+            "value": 2.5619570000562817,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Brightness",
+            "value": 0.4055069999303669,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Monitor",
+            "value": 0.0015829999465495348,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module LM",
+            "value": 1.621696999995038,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module DE",
+            "value": 0.000952000031247735,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module WM",
+            "value": 0.0011320000048726797,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module WMTheme",
+            "value": 0.0011919999960809946,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Theme",
+            "value": 1.6261020000092685,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Icons",
+            "value": 0.001243000035174191,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Font",
+            "value": 0.0015830000629648566,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Cursor",
+            "value": 0.028051999979652464,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Wallpaper",
+            "value": 0.0007319999858736992,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Terminal",
+            "value": 0.04461300000548363,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module TerminalFont",
+            "value": 0.0021539999870583415,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module TerminalSize",
+            "value": 0.012584000010974705,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module TerminalTheme",
+            "value": 0.004267999902367592,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module CPU",
+            "value": 0.18316100002266467,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module CPUCache",
+            "value": 0.9350730000296608,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module CPUUsage",
+            "value": 165.15278900007252,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module GPU",
+            "value": 30.40074700000696,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Codec",
+            "value": 1.7749499999918044,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Memory",
+            "value": 0.033974000019952655,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module PhysicalMemory",
+            "value": 0.017632999923080206,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Swap",
+            "value": 0.01750199997331947,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Disk",
+            "value": 0.1690559999551624,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Btrfs",
+            "value": 0.006050999974831939,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Zpool",
+            "value": 0.2511580000864342,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Battery",
+            "value": 0.011120999930426478,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module PowerAdapter",
+            "value": 0.008165999897755682,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Player",
+            "value": 0.0003100000321865082,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Media",
+            "value": 0.8601239999989048,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module PublicIp",
+            "value": 0.06745600001886487,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module LocalIp",
+            "value": 0.6449230000143871,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module DNS",
+            "value": 0.02775200002361089,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Wifi",
+            "value": 0.0974709999281913,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module DateTime",
+            "value": 0.006623000022955239,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Locale",
+            "value": 0.001181999919936061,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Vulkan",
+            "value": 0.0012129999231547117,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module OpenGL",
+            "value": 10.880607999977656,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module OpenCL",
+            "value": 0.0026160000124946237,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Users",
+            "value": 0.08879499998874962,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Bluetooth",
+            "value": 0.005499999970197678,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module BluetoothRadio",
+            "value": 0.0038880000356584787,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Sound",
+            "value": 0.023723999969661236,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Camera",
+            "value": 0.0062420000322163105,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Gamepad",
+            "value": 0.06722500000614673,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Mouse",
+            "value": 0.03882300003897399,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Keyboard",
+            "value": 0.03510500001721084,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module TPM",
+            "value": 0.008154999930411577,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module NetIO",
+            "value": 16.44910099997651,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module DiskIO",
+            "value": 0.1899439999833703,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module PhysicalDisk",
+            "value": 0.3298650000942871,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Weather",
+            "value": 22.96843699994497,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Top",
+            "value": 3.6733199999434873,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Version",
+            "value": 0.0012529999949038029,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Logo",
+            "value": 0.0018339999951422215,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Break",
+            "value": 0.0007919999770820141,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 module Colors",
+            "value": 0.0008610000368207693,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch linux amd64 total process time",
+            "value": 290,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Title",
+            "value": 0.0020000000367872417,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Separator",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module OS",
+            "value": 0.17499999998835847,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Host",
+            "value": 0.08699999999953434,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module BIOS",
+            "value": 0.03399999998509884,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Bootmgr",
+            "value": 0.027000000001862645,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Board",
+            "value": 0.01900000002933666,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Chassis",
+            "value": 0.03499999997438863,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Kernel",
+            "value": 0.0010000000474974513,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module InitSystem",
+            "value": 4.890999999945052,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Uptime",
+            "value": 0.21899999998277053,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Loadavg",
+            "value": 0.006999999983236194,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Processes",
+            "value": 0.896999999997206,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Packages",
+            "value": 0.13600000005681068,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Shell",
+            "value": 2.5479999999515712,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Editor",
+            "value": 0.0040000000153668225,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Display",
+            "value": 7.776000000012573,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Brightness",
+            "value": 0.026000000012572855,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Monitor",
+            "value": 0.002999999967869371,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module LM",
+            "value": 0.14200000005075708,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module DE",
+            "value": 0.002999999967869371,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module WM",
+            "value": 0.25800000003073364,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module WMTheme",
+            "value": 0.24399999994784594,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Theme",
+            "value": 0.003000000026077032,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Icons",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Font",
+            "value": 3.2179999999934807,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Cursor",
+            "value": 0.5370000000111759,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Wallpaper",
+            "value": 0.1830000000190921,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Terminal",
+            "value": 0.10999999998603016,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module TerminalFont",
+            "value": 0.005999999993946403,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module TerminalSize",
+            "value": 0.05400000000372529,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module TerminalTheme",
+            "value": 0.015000000013969839,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module CPU",
+            "value": 0.10599999997066334,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module CPUCache",
+            "value": 0.015000000013969839,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module CPUUsage",
+            "value": 326.4739999999874,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module GPU",
+            "value": 6.326000000000931,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Codec",
+            "value": 14.351999999955297,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Memory",
+            "value": 0.012999999977182597,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module PhysicalMemory",
+            "value": 210.4560000000056,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Swap",
+            "value": 0.007999999972525984,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Disk",
+            "value": 0.25300000002607703,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Btrfs",
+            "value": 0.001999999978579581,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Zpool",
+            "value": 1.4330000000190921,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Battery",
+            "value": 0.03299999999580905,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module PowerAdapter",
+            "value": 0.2089999999734573,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Player",
+            "value": 0.0010000000474974513,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Media",
+            "value": 3.419999999983702,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module PublicIp",
+            "value": 0.0789999999688007,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module LocalIp",
+            "value": 0.11100000003352761,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module DNS",
+            "value": 0.4409999999916181,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Wifi",
+            "value": 3.267999999981839,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module DateTime",
+            "value": 0.010000000009313226,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Locale",
+            "value": 0.003000000026077032,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module OpenGL",
+            "value": 2.00099999998929,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module OpenCL",
+            "value": 0.21100000001024455,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Users",
+            "value": 0.0789999999688007,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Sound",
+            "value": 35.92399999999907,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Camera",
+            "value": 27.102000000013504,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Gamepad",
+            "value": 0.11700000002747402,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Mouse",
+            "value": 2.430999999982305,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Keyboard",
+            "value": 1.0830000000423752,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module TPM",
+            "value": 0.001999999978579581,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module NetIO",
+            "value": 0.012999999977182597,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module DiskIO",
+            "value": 0.46000000002095476,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module PhysicalDisk",
+            "value": 0.6300000000046566,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Weather",
+            "value": 0.0659999999916181,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Top",
+            "value": 1.0229999999864958,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Version",
+            "value": 0.0020000000367872417,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Logo",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Break",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 module Colors",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos aarch64 total process time",
+            "value": 670,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Title",
+            "value": 0.009999999776482582,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Separator",
+            "value": 0.0010000001639127731,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module OS",
+            "value": 0.3719999995082617,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Host",
+            "value": 0.15200000070035458,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module BIOS",
+            "value": 0.023000000044703484,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Bootmgr",
+            "value": 0.07699999958276749,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Board",
+            "value": 0.006999999284744263,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Chassis",
+            "value": 0.006000000983476639,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Kernel",
+            "value": 0.003999998793005943,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module InitSystem",
+            "value": 8.665000000968575,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Uptime",
+            "value": 0.48099999874830246,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Loadavg",
+            "value": 0.013000000268220901,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Processes",
+            "value": 1.767000000923872,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Packages",
+            "value": 0.5530000012367964,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Shell",
+            "value": 0.2819999996572733,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Editor",
+            "value": 0.006999999284744263,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Display",
+            "value": 18.009000001475215,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Brightness",
+            "value": 2.8450000006705523,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Monitor",
+            "value": 0.0040000006556510925,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module LM",
+            "value": 0.20299999974668026,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module DE",
+            "value": 0.003999998793005943,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module WM",
+            "value": 0.5070000011473894,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module WMTheme",
+            "value": 0.3709999993443489,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Theme",
+            "value": 0.006000000983476639,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Icons",
+            "value": 0.000999998301267624,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Font",
+            "value": 5.397000001743436,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Cursor",
+            "value": 0.6480000000447035,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Wallpaper",
+            "value": 0.23799999989569187,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Terminal",
+            "value": 0.16300000064074993,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module TerminalFont",
+            "value": 0.026000000536441803,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module TerminalSize",
+            "value": 0.05700000002980232,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module TerminalTheme",
+            "value": 0.014999998733401299,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module CPU",
+            "value": 6.58500000089407,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module CPUCache",
+            "value": 0.04299999959766865,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module CPUUsage",
+            "value": 234.48300000093877,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module GPU",
+            "value": 11.2989999987185,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Codec",
+            "value": 11.678000001236796,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Memory",
+            "value": 0.024000000208616257,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module PhysicalMemory",
+            "value": 0.02800000086426735,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Swap",
+            "value": 0.02199999988079071,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Disk",
+            "value": 0.12700000032782555,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Btrfs",
+            "value": 0.0020000003278255463,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Zpool",
+            "value": 2.041999999433756,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Battery",
+            "value": 0.05900000035762787,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module PowerAdapter",
+            "value": 0.4550000000745058,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Player",
+            "value": 0.000999998301267624,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Media",
+            "value": 10.834000000730157,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module PublicIp",
+            "value": 0.10899999924004078,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module LocalIp",
+            "value": 0.142000000923872,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module DNS",
+            "value": 0.7359999995678663,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Wifi",
+            "value": 4.597000000998378,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module DateTime",
+            "value": 0.012999998405575752,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Locale",
+            "value": 0.0040000006556510925,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module OpenGL",
+            "value": 6.368999999016523,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module OpenCL",
+            "value": 0.963000001385808,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Users",
+            "value": 0.10999999940395355,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Sound",
+            "value": 94.33799999952316,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Camera",
+            "value": 52.540000000968575,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Gamepad",
+            "value": 0.21600000001490116,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Mouse",
+            "value": 7.505000000819564,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Keyboard",
+            "value": 3.1520000007003546,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module TPM",
+            "value": 0.04899999871850014,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module NetIO",
+            "value": 0.020000001415610313,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module DiskIO",
+            "value": 0.5169999990612268,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module PhysicalDisk",
+            "value": 0.6899999994784594,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Weather",
+            "value": 0.12299999967217445,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Top",
+            "value": 1.9230000004172325,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Version",
+            "value": 0.013000000268220901,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Logo",
+            "value": 0.0059999991208314896,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Break",
+            "value": 0.0010000001639127731,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 module Colors",
+            "value": 0.0030000004917383194,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch macos amd64 total process time",
+            "value": 520,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Title",
+            "value": 0.027800000039860606,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Separator",
+            "value": 0.0023999999975785613,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module OS",
+            "value": 1.5178000000305474,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Host",
+            "value": 0.06339999998454005,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module BIOS",
+            "value": 0.0102999999653548,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Bootmgr",
+            "value": 0.46640000003390014,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Board",
+            "value": 0.008400000049732625,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Chassis",
+            "value": 0.007499999948777258,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Kernel",
+            "value": 0.025399999925866723,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module InitSystem",
+            "value": 0.4235000000335276,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Uptime",
+            "value": 0.09739999996963888,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Loadavg",
+            "value": 0.0022999999346211553,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Processes",
+            "value": 1.1175999999977648,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Packages",
+            "value": 0.4045000000623986,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Shell",
+            "value": 0.25470000004861504,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Editor",
+            "value": 0.020200000028125942,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Display",
+            "value": 0.3503999999957159,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Brightness",
+            "value": 0.2614999999059364,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Monitor",
+            "value": 0.005200000014156103,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module LM",
+            "value": 0.18819999997504056,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module DE",
+            "value": 0.0033000000985339284,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module WM",
+            "value": 0.2937999999849126,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module WMTheme",
+            "value": 0.054299999959766865,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Theme",
+            "value": 0.005799999926239252,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Icons",
+            "value": 0.009799999999813735,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Font",
+            "value": 0.02529999997932464,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Cursor",
+            "value": 0.018800000078044832,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Wallpaper",
+            "value": 0.011199999949894845,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Terminal",
+            "value": 0.3094000000273809,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module TerminalFont",
+            "value": 0.013299999991431832,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module TerminalSize",
+            "value": 1007.1356999999844,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module TerminalTheme",
+            "value": 1011.9743000000017,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module CPU",
+            "value": 0.16280000004917383,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module CPUCache",
+            "value": 0.016100000008009374,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module CPUUsage",
+            "value": 0.060200000065378845,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module GPU",
+            "value": 2.071200000005774,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Codec",
+            "value": 162.06539999996312,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Memory",
+            "value": 0.01069999998435378,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module PhysicalMemory",
+            "value": 0.016300000017508864,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Swap",
+            "value": 0.007199999992735684,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Disk",
+            "value": 0.1287000000011176,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Btrfs",
+            "value": 0.002099999925121665,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Zpool",
+            "value": 0.35390000010374933,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Battery",
+            "value": 0.11309999995864928,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module PowerAdapter",
+            "value": 0.0017999999690800905,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Player",
+            "value": 0.000800000037997961,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Media",
+            "value": 6.528999999980442,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module PublicIp",
+            "value": 0.1342000000877306,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module LocalIp",
+            "value": 0.26119999994989485,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module DNS",
+            "value": 0.08039999997708946,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Wifi",
+            "value": 1.3288000000175089,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module DateTime",
+            "value": 0.00930000003427267,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Locale",
+            "value": 0.021000000066123903,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Vulkan",
+            "value": 6.465999999898486,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module OpenGL",
+            "value": 57.79709999996703,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module OpenCL",
+            "value": 1.5733999999938533,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Users",
+            "value": 2.8717000000178814,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Bluetooth",
+            "value": 1.900400000042282,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module BluetoothRadio",
+            "value": 0.9216999999480322,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Sound",
+            "value": 2.121599999954924,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Camera",
+            "value": 2.0337999999755993,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Gamepad",
+            "value": 0.022499999962747097,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Mouse",
+            "value": 0.38409999990835786,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Keyboard",
+            "value": 0.3430999999400228,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module TPM",
+            "value": 0.48639999993611127,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module NetIO",
+            "value": 0.142299999948591,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module DiskIO",
+            "value": 0.06689999997615814,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module PhysicalDisk",
+            "value": 33.59779999998864,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Weather",
+            "value": 0.1493000000482425,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Top",
+            "value": 1.5700000000651926,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Version",
+            "value": 0.0030999999726191163,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Logo",
+            "value": 0.015099999960511923,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Break",
+            "value": 0.0017000000225380063,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 module Colors",
+            "value": 0.0026000000070780516,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows aarch64 total process time",
+            "value": 2540,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Title",
+            "value": 0.018299999996088445,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Separator",
+            "value": 0.0007999999797903001,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module OS",
+            "value": 1.2119999999995343,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Host",
+            "value": 0.055099999997764826,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module BIOS",
+            "value": 0.0087000000057742,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Bootmgr",
+            "value": 0.5548999999882653,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Board",
+            "value": 0.0062000000034458935,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Chassis",
+            "value": 0.0068999999784864485,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Kernel",
+            "value": 0.004799999995157123,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module InitSystem",
+            "value": 1.021100000012666,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Uptime",
+            "value": 0.2987999999895692,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Loadavg",
+            "value": 0.004200000024866313,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Processes",
+            "value": 0.5390999999945052,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Packages",
+            "value": 0.2641999999759719,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Shell",
+            "value": 0.24089999997522682,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Editor",
+            "value": 0.01980000000912696,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Display",
+            "value": 0.24330000003101304,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Brightness",
+            "value": 0.21450000000186265,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Monitor",
+            "value": 0.0034000000450760126,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module LM",
+            "value": 0.13300000003073364,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module DE",
+            "value": 0.002899999963119626,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module WM",
+            "value": 0.7033000000519678,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module WMTheme",
+            "value": 0.03859999997075647,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Theme",
+            "value": 0.0040000000153668225,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Icons",
+            "value": 0.00849999999627471,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Font",
+            "value": 0.01620000001275912,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Cursor",
+            "value": 0.014899999951012433,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Wallpaper",
+            "value": 0.00770000001648441,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Terminal",
+            "value": 0.25780000002123415,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module TerminalFont",
+            "value": 0.015299999970011413,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module TerminalSize",
+            "value": 1001.9176999999909,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module TerminalTheme",
+            "value": 1000.6889000000083,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module CPU",
+            "value": 0.1822999999858439,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module CPUCache",
+            "value": 0.013299999991431832,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module CPUUsage",
+            "value": 0.16229999996721745,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module GPU",
+            "value": 1.5656000000308268,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Codec",
+            "value": 27.416800000006333,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Memory",
+            "value": 0.03620000003138557,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module PhysicalMemory",
+            "value": 0.019899999955669045,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Swap",
+            "value": 0.0069000000366941094,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Disk",
+            "value": 0.10550000000512227,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Btrfs",
+            "value": 0.0018999999738298357,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Zpool",
+            "value": 0.24780000001192093,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Battery",
+            "value": 0.07970000000204891,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module PowerAdapter",
+            "value": 0.0009999999892897904,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Player",
+            "value": 0.0005999999702908099,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Media",
+            "value": 4.336700000043493,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module PublicIp",
+            "value": 0.11070000001927838,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module LocalIp",
+            "value": 0.2774999999674037,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module DNS",
+            "value": 0.06380000000353903,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Wifi",
+            "value": 1.0317999999970198,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module DateTime",
+            "value": 0.006099999998696148,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Locale",
+            "value": 0.01579999999376014,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Vulkan",
+            "value": 4.836700000043493,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module OpenGL",
+            "value": 54.15599999995902,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module OpenCL",
+            "value": 0.9596000000019558,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Users",
+            "value": 1.7244000000064261,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Bluetooth",
+            "value": 1.2353000000002794,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module BluetoothRadio",
+            "value": 0.5652000000118278,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Sound",
+            "value": 1.405399999988731,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Camera",
+            "value": 1.5145999999949709,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Gamepad",
+            "value": 0.00930000003427267,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Mouse",
+            "value": 0.4897999999811873,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Keyboard",
+            "value": 0.2748000000137836,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module TPM",
+            "value": 0.3150000000023283,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module NetIO",
+            "value": 0.11719999997876585,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module DiskIO",
+            "value": 0.05579999997280538,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module PhysicalDisk",
+            "value": 44.63330000004498,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Weather",
+            "value": 0.10310000000754371,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Top",
+            "value": 1.4630999999935739,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Version",
+            "value": 0.0017000000225380063,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Logo",
+            "value": 0.005999999993946403,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Break",
+            "value": 0.0011999999987892807,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 module Colors",
+            "value": 0.0039000000106170774,
+            "unit": "ms"
+          },
+          {
+            "name": "fastfetch windows amd64 total process time",
+            "value": 2330,
             "unit": "ms"
           }
         ]
