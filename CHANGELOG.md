@@ -33,6 +33,7 @@ Bugfixes:
 * Fixed MAC address reporting `02:00:00:00:00:00` on macOS 27. (LocalIP, Apple)
 * Fixed assertion failure when percentage exceeds 100. (Percent)
 * Fixed a non-existent command being reported as a generic child process error on Windows instead of `command not found`. (Command, Windows)
+* Fixed Android display detection on devices running Android 17. (Display, Android)
 
 Logos:
 * Added filled Artix logo (#2631)
