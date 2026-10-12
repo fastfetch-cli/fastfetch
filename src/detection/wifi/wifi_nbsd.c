@@ -1,6 +1,10 @@
 #include "wifi.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
+
+#include <errno.h>
+#include <string.h>
 
 #define COMPAT_FREEBSD_NET80211 1
 #include <sys/ioctl.h>
@@ -21,11 +25,13 @@
 const char* ffDetectWifi(FFlist* result) {
     struct if_nameindex* infs = if_nameindex();
     if (!infs) {
+        FF_DEBUG("if_nameindex() failed: %s", strerror(errno));
         return "if_nameindex() failed";
     }
 
     FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
+        FF_DEBUG("socket(AF_INET, SOCK_DGRAM) failed: %s", strerror(errno));
         if_freenameindex(infs);
         return "socket() failed";
     }

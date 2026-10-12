@@ -52,6 +52,7 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -102,6 +103,7 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         .cs = "Verze",
         .de = "Version",
         .es = "Versión",
+        .fi = "Versio",
         .fr = "Version",
         .gl = "Versión",
         .he = "גרסה",

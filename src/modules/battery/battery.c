@@ -214,6 +214,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -306,6 +307,7 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         .cs = "Baterie",
         .de = "Akku",
         .es = "Batería",
+        .fi = "Akku",
         .fr = "Batterie",
         .gl = "Batería",
         .he = "סוללה",

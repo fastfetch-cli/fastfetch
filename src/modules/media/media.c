@@ -205,6 +205,7 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -261,6 +262,7 @@ FFModuleBaseInfo ffMediaModuleInfo = {
         .cs = "Média",
         .de = "Medien",
         .es = "Multimedia",
+        .fi = "Multimedia",
         .fr = "Médias",
         .gl = "Multimedia",
         .he = "מדיה",

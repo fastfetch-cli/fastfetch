@@ -99,21 +99,25 @@ static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t 
             if (start) {
                 FF_DEBUG("Found PCI device entry for 0x%04x:0x%04x", vendor, device);
                 start += len;
-                end = memchr(start, '\n', (uint32_t) (end - start));
-                if (!end) {
-                    end = content->chars + content->length;
-                }
-
-                char* closingBracket = end - 1;
-                if (*closingBracket == ']') {
-                    char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
-                    if (openingBracket) {
-                        openingBracket++;
-                        ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                if (start < end) {
+                    end = memchr(start, '\n', (uint32_t) (end - start));
+                    if (!end) {
+                        end = content->chars + content->length;
                     }
-                }
-                if (!gpu->name.length) {
-                    ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
+
+                    char* closingBracket = end - 1;
+                    if (*closingBracket == ']') {
+                        char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
+                        if (openingBracket) {
+                            openingBracket++;
+                            ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                        }
+                    }
+                    if (!gpu->name.length) {
+                        ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
+                    }
+                } else {
+                    FF_DEBUG("PCI device entry for 0x%04x:0x%04x is incomplete", vendor, device);
                 }
             } else {
                 FF_DEBUG("PCI device entry 0x%04x:0x%04x was not found in pci.ids", vendor, device);

@@ -1,4 +1,7 @@
 #include "swap.h"
+#include "common/debug.h"
+#include <errno.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/swap.h>
 #include <limits.h>
@@ -17,6 +20,7 @@ const char* ffDetectSwap(FFlist* result) {
 
     int size = swapctl(SC_LIST, table);
     if (size < 0) {
+        FF_DEBUG("swapctl() failed: %s", strerror(errno));
         return "swapctl() failed";
     }
 

@@ -171,6 +171,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -272,6 +273,7 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         .cs = "Fyzický disk",
         .de = "Physische Festplatte",
         .es = "Disco físico",
+        .fi = "Fyysinen Levy",
         .fr = "Disque physique",
         .gl = "Disco físico",
         .he = "דיסק פיזי",

@@ -152,6 +152,7 @@ void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_va
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -209,6 +210,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         .cs = "Bluetooth rádio",
         .de = "Bluetooth-Adapter",
         .es = "Adaptador Bluetooth",
+        .fi = "Bluetooth-adapteri",
         .fr = "Adaptateur Bluetooth",
         .gl = "Adaptador Bluetooth",
         .he = "רדיו בלוטות'",
@@ -219,7 +221,7 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         .pl = "Adapter Bluetooth",
         .pt = "Adaptador Bluetooth",
         .ru = "Bluetooth-адаптер",
-        .tr = "Bluetooth Radyosu",
+        .tr = "Bluetooth Adaptörü",
         .uk = "Радіомодуль Bluetooth",
         .vi = "Radio Bluetooth",
         .zh_CN = "蓝牙适配器",

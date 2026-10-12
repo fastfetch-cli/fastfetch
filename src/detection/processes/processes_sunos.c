@@ -1,5 +1,6 @@
 #include "processes.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -8,6 +9,7 @@
 const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/proc");
     if (dir == nullptr) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 

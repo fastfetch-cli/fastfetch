@@ -169,10 +169,10 @@ static void detectDeepinTerminal(FFTerminalFontResult* terminalFont) {
 
     FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreateA(64);
     ffSearchUserConfigFile(&instance.state.platform.configDirs, "deepin/deepin-terminal/config.conf", &profile);
-    FILE* file = fopen(profile.chars, "r");
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(profile.chars, "r");
 
     if (file) {
-        char* line = nullptr;
+        FF_AUTO_FREE char* line = nullptr;
         size_t len = 0;
 
         for (int count = 0; getline(&line, &len, file) != -1 && count < 2;) {
@@ -188,9 +188,6 @@ static void detectDeepinTerminal(FFTerminalFontResult* terminalFont) {
                 ++count;
             }
         }
-
-        free(line);
-        fclose(file);
     }
 
     if (fontName.length == 0) {

@@ -332,6 +332,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -435,6 +436,8 @@ void ffInitDiskOptions(FFDiskOptions* options) {
     ffStrbufInit(&options->folders);
 #if _WIN32 || __APPLE__ || __ANDROID__
     ffStrbufInit(&options->hideFolders);
+#elif __HAIKU__
+    ffStrbufInitS(&options->hideFolders, "/esp"); // /boot on haiku is the system volume
 #else
     ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
 #endif
@@ -460,6 +463,7 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         .cs = "Disk",
         .de = "Festplatte",
         .es = "Disco",
+        .fi = "Levy",
         .fr = "Disque",
         .gl = "Disco",
         .he = "דיסק",

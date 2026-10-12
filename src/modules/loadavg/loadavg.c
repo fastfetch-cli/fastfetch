@@ -116,6 +116,7 @@ void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -164,6 +165,7 @@ FFModuleBaseInfo ffLoadavgModuleInfo = {
         .cs = "Průměrná zátěž",
         .de = "Systemlast",
         .es = "Promedio de carga",
+        .fi = "Kuormituksen Keskiarvo",
         .fr = "Charge moyenne",
         .gl = "Carga media",
         .he = "עומס ממוצע",

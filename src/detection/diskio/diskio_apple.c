@@ -1,4 +1,5 @@
 #include "diskio.h"
+#include "common/debug.h"
 #include "common/apple/cf_helpers.h"
 
 #include <IOKit/IOKitLib.h>
@@ -11,6 +12,7 @@
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = 0;
     if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOBlockStorageDriverClass), &iterator) != KERN_SUCCESS) {
+        FF_DEBUG("IOServiceGetMatchingServices() failed");
         return "IOServiceGetMatchingServices() failed";
     }
 

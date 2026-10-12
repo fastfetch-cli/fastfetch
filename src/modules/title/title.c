@@ -128,6 +128,7 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -184,6 +185,7 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         .cs = "Titulek",
         .de = "Titel",
         .es = "Título",
+        .fi = "Otsikko",
         .fr = "Titre",
         .gl = "Título",
         .he = "כותרת",

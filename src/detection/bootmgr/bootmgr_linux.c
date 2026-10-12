@@ -1,4 +1,5 @@
 #include "bootmgr.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "efi_helper.h"
 
@@ -11,6 +12,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
     alignas(uint16_t) uint8_t buffer[2048];
 
     if (ffReadFileData(FF_EFIVARS_PATH_PREFIX "BootCurrent-" FF_EFI_GLOBAL_GUID, sizeof(buffer), buffer) != 6) {
+        FF_DEBUG("Failed to read efivar: BootCurrent");
         return "Failed to read efivar: BootCurrent";
     }
 
@@ -20,6 +22,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result) {
 
     ssize_t size = ffReadFileData((const char*) buffer, sizeof(buffer), buffer);
     if (size < 5 + (int) sizeof(FFEfiLoadOption) || size == (ssize_t) sizeof(buffer)) {
+        FF_DEBUG("Failed to read efivar: Boot####");
         return "Failed to read efivar: Boot####";
     }
 

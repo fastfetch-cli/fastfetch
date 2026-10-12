@@ -15,6 +15,10 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             continue;
         }
 
+        if (!ffStrSet(fs.device_name)) {
+            continue;
+        }
+
         node_ref node(fs.dev, fs.root);
         BDirectory dir(&node);
         BPath path(&dir);

@@ -1,4 +1,5 @@
 #include "bluetoothradio.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/io.h"
 #include "common/windows/unicode.h"
@@ -64,16 +65,20 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         &hRadio);
     if (!hFind) {
         if (GetLastError() == ERROR_NO_MORE_ITEMS) {
+            FF_DEBUG("No Bluetooth radios found or service disabled");
             return "No Bluetooth radios found or service disabled";
         } else {
+            FF_DEBUG("BluetoothFindFirstRadio() failed: %s", ffDebugWin32Error(GetLastError()));
             return "BluetoothFindFirstRadio() failed";
         }
     }
 
     do {
+        FF_AUTO_CLOSE_FD HANDLE hCurrent = hRadio;
+
         BTH_LOCAL_RADIO_INFO blri;
         DWORD returned;
-        if (!DeviceIoControl(hRadio, IOCTL_BTH_GET_LOCAL_INFO, nullptr, 0, &blri, sizeof(blri), &returned, nullptr)) {
+        if (!DeviceIoControl(hCurrent, IOCTL_BTH_GET_LOCAL_INFO, nullptr, 0, &blri, sizeof(blri), &returned, nullptr)) {
             continue;
         }
 
@@ -87,10 +92,8 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
         device->lmpSubversion = blri.radioInfo.lmpSubversion;
         ffStrbufInitStatic(&device->vendor, ffBluetoothRadioGetVendor(blri.radioInfo.mfg));
         device->enabled = true;
-        device->connectable = ffBluetoothIsConnectable(hRadio);
-        device->discoverable = ffBluetoothIsDiscoverable(hRadio);
-
-        NtClose(hRadio);
+        device->connectable = ffBluetoothIsConnectable(hCurrent);
+        device->discoverable = ffBluetoothIsDiscoverable(hCurrent);
     } while (ffBluetoothFindNextRadio(hFind, &hRadio));
 
     ffBluetoothFindRadioClose(hFind);

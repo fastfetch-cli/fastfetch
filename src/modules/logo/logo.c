@@ -87,6 +87,7 @@ FFModuleBaseInfo ffLogoModuleInfo = {
         .cs = "Logo",
         .de = "Logo",
         .es = "Logo",
+        .fi = "Logo",
         .fr = "Logo",
         .gl = "Logo",
         .he = "לוגו",

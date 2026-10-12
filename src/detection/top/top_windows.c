@@ -1,5 +1,6 @@
 #include "top.h"
 
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/windows/unicode.h"
 
@@ -24,6 +25,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
         } else if (status == STATUS_INFO_LENGTH_MISMATCH && attempts < 4) {
             size += sizeof(SYSTEM_PROCESS_INFORMATION) * 5;
         } else {
+            FF_DEBUG("NtQuerySystemInformation(SystemProcessInformation) failed: %s", ffDebugNtStatus(status));
             return "NtQuerySystemInformation(SystemProcessInformation) failed";
         }
     }

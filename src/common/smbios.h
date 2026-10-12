@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/FFstrbuf.h"
+#include "fastfetch.h"
 
 // Not `pure`: it trims the trailing spaces of `value` before reporting whether it is set
 [[gnu::nonnull(1), nodiscard]] bool ffIsSmbiosValueSet(FFstrbuf* value);

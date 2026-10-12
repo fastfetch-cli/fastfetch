@@ -180,6 +180,17 @@ int main(void) {
         VERIFY_BAR(14, config, "[ ■--------- ]");
         VERIFY_BAR(15, config, "[ ■■-------- ]");
 
+        // A value above 100 saturates the bar. That is reachable from real data: the load average is
+        // normalized against the number of cores, so it exceeds 100% as soon as the load does.
+        VERIFY_BAR(101, config, "[ ■■■■■■■■■■ ]");
+        VERIFY_BAR(150, config, "[ ■■■■■■■■■■ ]");
+
+        // Narrowing to `uint8_t` before clamping would wrap around here and silently render 4 blocks
+        VERIFY_BAR(2600, config, "[ ■■■■■■■■■■ ]");
+
+        // A negative value fills nothing
+        VERIFY_BAR(-60, config, "[ ---------- ]");
+
         options->barWidth = 4;
         VERIFY_BAR(0, config, "[ ---- ]");
         VERIFY_BAR(25, config, "[ ■--- ]");

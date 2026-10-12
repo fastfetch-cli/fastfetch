@@ -6,6 +6,8 @@
 #include "common/io.h"
 #include "detection/displayserver/displayserver.h"
 
+#include <errno.h>
+#include <string.h>
 #include <unistd.h>
 
 // Android keeps the wallpaper as a file per user, in a directory no app can enter:
@@ -124,13 +126,14 @@ static const char* getWallpaperFile(FFBinder* binder, uint32_t handle, const cha
     char path[64];
     const int pathLength = snprintf(path, sizeof(path), "/proc/self/fd/%d", (int) fd);
     if (pathLength <= 0 || (size_t) pathLength >= sizeof(path)) {
+        FF_DEBUG("Failed to build the /proc path of the wallpaper descriptor");
         return "Failed to build the /proc path of the wallpaper descriptor";
     }
 
     char target[512];
     const ssize_t length = readlink(path, target, sizeof(target) - 1);
     if (length <= 0) {
-        FF_DEBUG("readlink(%s) failed", path);
+        FF_DEBUG("readlink(%s) failed: %s", path, strerror(errno));
         return "Failed to resolve the wallpaper path";
     }
     target[length] = '\0';
@@ -155,6 +158,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
 
     char package[FF_WALLPAPER_ANDROID_PACKAGE_SIZE];
     if (!ffAndroidGetOwnPackage(package, sizeof(package))) {
+        FF_DEBUG("Cannot determine the package name of this process");
         return "Cannot determine the package name of this process";
     }
 
@@ -170,6 +174,7 @@ const char* ffDetectWallpaper(FFstrbuf* result) {
         return error;
     }
     if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The wallpaper service does not declare getWallpaper");
         return "The wallpaper service does not declare getWallpaper";
     }
 

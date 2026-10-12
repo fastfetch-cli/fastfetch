@@ -1,4 +1,5 @@
 #include "wm.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 #include "common/io.h"
 #include "common/library.h"
@@ -208,6 +209,7 @@ fallback:
             } else if (status == STATUS_INFO_LENGTH_MISMATCH && attempts < 4) {
                 size += sizeof(SYSTEM_PROCESS_INFORMATION) * 5;
             } else {
+                FF_DEBUG("NtQuerySystemInformation(SystemProcessInformation) failed: %s", ffDebugNtStatus(status));
                 return "NtQuerySystemInformation(SystemProcessInformation) failed";
             }
         }
@@ -228,6 +230,7 @@ fallback:
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     if (!wmName) {
+        FF_DEBUG("No WM detected");
         return "No WM detected";
     }
 
@@ -238,5 +241,6 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_
 
         return nullptr;
     }
+    FF_DEBUG("Not supported on this platform");
     return "Not supported on this platform";
 }

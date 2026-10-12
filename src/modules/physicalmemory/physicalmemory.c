@@ -105,6 +105,7 @@ void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_va
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_bool(doc, module, "showEmptySlots", options->showEmptySlots);
@@ -165,6 +166,7 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         .cs = "Fyzická paměť",
         .de = "Physischer Speicher",
         .es = "Memoria física",
+        .fi = "Fyysinen Muisti",
         .fr = "Mémoire physique",
         .gl = "Memoria física",
         .he = "זיכרון פיזי",

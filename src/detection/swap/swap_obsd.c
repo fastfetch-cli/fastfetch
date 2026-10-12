@@ -1,7 +1,10 @@
 #include "swap.h"
+#include "common/debug.h"
 #include "common/FFlist.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/swap.h>
 #include <sys/param.h>
@@ -10,6 +13,7 @@
 const char* ffDetectSwap(FFlist* result) {
     int nswap = swapctl(SWAP_NSWAP, 0, 0);
     if (nswap < 0) {
+        FF_DEBUG("swapctl(SWAP_NSWAP) failed: %s", strerror(errno));
         return "swapctl(SWAP_NSWAP) failed";
     }
     if (nswap == 0) {
@@ -19,6 +23,7 @@ const char* ffDetectSwap(FFlist* result) {
     FF_AUTO_FREE struct swapent* swdev = malloc((uint32_t) nswap * sizeof(*swdev));
 
     if (swapctl(SWAP_STATS, swdev, nswap) < 0) {
+        FF_DEBUG("swapctl(SWAP_STATS) failed: %s", strerror(errno));
         return "swapctl(SWAP_STATS) failed";
     }
 

@@ -587,10 +587,6 @@ clang-format -i src/modules/foo/*.c src/modules/foo/*.h
 | Module options | `FF<Name>Options` | `FFCPUOptions` |
 | Detection results | `FF<Name>Result` | `FFCPUResult` |
 
-### Spelling
-
-CI runs codespell (`.codespellrc`). Known false positives are listed in `ignore-words-list` (`iterm`, `compiletime`, and various non-English distro words). Add new words there rather than changing the code.
-
 ### Compiler warnings
 
 The build enables `-Wall -Wextra -Wconversion` plus several `-Werror`s:
@@ -684,7 +680,7 @@ cmake --build build
 cd build && ctest --output-on-failure
 ```
 
-Coverage focuses on the core data structures and the formatting engine in `common/`. The `detection/` layer has no automated tests, because it depends on the state of a running system; it is instead covered by the CI matrix — 20 workflows under `.github/workflows/` spanning Linux (including musl, loong64, armv7l, i686), macOS, Windows, FreeBSD, NetBSD, OpenBSD, DragonFly, Solaris, OmniOS and Haiku, plus spellcheck and benchmark jobs.
+Coverage focuses on the core data structures and the formatting engine in `common/`. The `detection/` layer has no automated tests, because it depends on the state of a running system; it is instead covered by the CI matrix — 20 workflows under `.github/workflows/` spanning Linux (including musl, loong64, armv7l, i686), Android, macOS, Windows, FreeBSD, NetBSD, OpenBSD, DragonFly, Solaris, OmniOS and Haiku, plus a benchmark job. The Android job is the one that does not run what it builds: it cross-compiles for arm64-v8a, armeabi-v7a and x86_64 with the NDK at API 24 and inspects the result instead, because CI has no device or emulator. Its dynamic-symbol checks are what keep the weak references the platform branch depends on from turning into load failures on older devices.
 
 **If you modify `common/FFstrbuf.h`, `common/format.h` or `common/color.h`, extend the corresponding test.**
 
@@ -707,7 +703,6 @@ Coverage focuses on the core data structures and the formatting engine in `commo
 
 ```sh
 clang-format -i <changed files>                  # format
-codespell                                        # spelling
 cmake -B build -DBUILD_TESTS=On && cmake --build build -j
 cd build && ctest --output-on-failure            # tests
 ./build/fastfetch --format json                  # verify JSON output is well-formed

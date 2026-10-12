@@ -51,6 +51,7 @@ bool ffPrintPowerAdapter(FFPowerAdapterOptions* options) {
     return true;
 }
 
+[[gnu::cold]]
 void ffGeneratePowerAdapterJsonConfig(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -116,6 +117,7 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         .cs = "Napájecí adaptér",
         .de = "Netzteil",
         .es = "Adaptador de corriente",
+        .fi = "Virta-adapteri",
         .fr = "Adaptateur secteur",
         .gl = "Adaptador de corrente",
         .he = "מתאם מתח",

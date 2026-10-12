@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 
 #include <libdevinfo.h>
@@ -46,6 +47,7 @@ static int walkDevTree(di_node_t node, [[maybe_unused]] di_minor_t minor, FFlist
 const char* ffDetectGPUImpl([[maybe_unused]] const FFGPUOptions* options, FFlist* gpus) {
     di_node_t rootNode = di_init("/", DINFOCPYALL);
     if (rootNode == DI_NODE_NIL) {
+        FF_DEBUG("di_init() failed");
         return "di_init() failed";
     }
     di_walk_minor(rootNode, DDI_NT_DISPLAY, DI_WALK_CLDFIRST, gpus, (void*) walkDevTree);

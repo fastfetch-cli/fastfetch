@@ -1,7 +1,10 @@
 #include "processes.h"
 
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 
@@ -10,12 +13,14 @@ const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResu
     size_t length = 0;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed";
     }
 
     FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
     request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
     if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, procs) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, procs) failed";
     }
 

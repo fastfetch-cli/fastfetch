@@ -89,6 +89,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -115,6 +116,7 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         .cs = "Přehrávač médií",
         .de = "Medienplayer",
         .es = "Reproductor multimedia",
+        .fi = "Mediasoitin",
         .fr = "Lecteur multimédia",
         .gl = "Reprodutor multimedia",
         .he = "נגן מדיה",

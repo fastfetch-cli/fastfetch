@@ -1,9 +1,14 @@
 #include "memory.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
+
+#include <errno.h>
+#include <string.h>
 
 const char* ffDetectMemory(FFMemoryResult* ram) {
     size_t length = sizeof(ram->bytesTotal);
     if (sysctl((int[]) { CTL_HW, HW_PHYSMEM }, 2, &ram->bytesTotal, &length, nullptr, 0)) {
+        FF_DEBUG("sysctl(hw.physmem) failed: %s", strerror(errno));
         return "Failed to read hw.physmem";
     }
 

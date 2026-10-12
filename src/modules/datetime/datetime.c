@@ -132,6 +132,7 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -158,6 +159,7 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         .cs = "Datum a čas",
         .de = "Datum & Uhrzeit",
         .es = "Fecha y hora",
+        .fi = "Päivämäärä ja kellonaika",
         .fr = "Date et heure",
         .gl = "Data e hora",
         .he = "תאריך ושעה",

@@ -58,6 +58,7 @@ void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* modul
     }
 }
 
+[[gnu::cold]]
 void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -109,6 +110,7 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         .cs = "Init systém",
         .de = "Init-System",
         .es = "Sistema de inicio",
+        .fi = "Init-järjestelmä",
         .fr = "Système d'init",
         .gl = "Sistema de inicio",
         .he = "מערכת אתחול",

@@ -60,8 +60,7 @@
                         snprintf(path, sizeof(path), "/dev/i2c-%d", cache->devices[i]);
                         FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
                         if (fd < 0) {
-                            int error = errno;
-                            FF_DEBUG("Brightness DDC/CI: cached bus %d is unavailable (errno=%d: %s)", cache->devices[i], error, strerror(error));
+                            FF_DEBUG("Brightness DDC/CI: cached bus %d is unavailable (errno=%d: %s)", cache->devices[i], errno, strerror(errno));
                             valid = false;
                             break;
                         }
@@ -119,8 +118,7 @@
 
         int ioctlResult = ioctl(fd, I2C_RDWR, &data);
         if (ioctlResult != 1) {
-            int error = errno;
-            FF_DEBUG("Brightness DDC/CI: write request failed (fd=%d, result=%d, errno=%d: %s)", fd, ioctlResult, error, strerror(error));
+            FF_DEBUG("Brightness DDC/CI: write request failed (fd=%d, result=%d, errno=%d: %s)", fd, ioctlResult, errno, strerror(errno));
             return false;
         }
 
@@ -131,8 +129,7 @@
         msg.buf = response;
         ioctlResult = ioctl(fd, I2C_RDWR, &data);
         if (ioctlResult != 1) {
-            int error = errno;
-            FF_DEBUG("Brightness DDC/CI: read response failed (fd=%d, result=%d, errno=%d: %s)", fd, ioctlResult, error, strerror(error));
+            FF_DEBUG("Brightness DDC/CI: read response failed (fd=%d, result=%d, errno=%d: %s)", fd, ioctlResult, errno, strerror(errno));
             return false;
         }
 
@@ -209,8 +206,7 @@
 
             FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
             if (fd < 0) {
-                int error = errno;
-                FF_DEBUG("Brightness DDC/CI: failed to open cached bus %d (errno=%d: %s)", device, error, strerror(error));
+                FF_DEBUG("Brightness DDC/CI: failed to open cached bus %d (errno=%d: %s)", device, errno, strerror(errno));
                 continue;
             }
 
@@ -284,6 +280,7 @@ static const char* detectWithBacklight(FFlist* result) {
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(backlightDirPath);
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(\"%s\") failed: %s", backlightDirPath, strerror(errno));
         return "Failed to open `/sys/class/backlight/`";
     }
 

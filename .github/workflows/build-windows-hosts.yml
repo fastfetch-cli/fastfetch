@@ -45,11 +45,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: setup-msys2
-        uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: ${{ inputs.msystem }}
           update: true
-          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-jq mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-quickjs-ng mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
+          install: git mingw-w64-clang-${{ inputs.msys-arch }}-7zip mingw-w64-clang-${{ inputs.msys-arch }}-cmake mingw-w64-clang-${{ inputs.msys-arch }}-clang mingw-w64-clang-${{ inputs.msys-arch }}-jq mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-loader mingw-w64-clang-${{ inputs.msys-arch }}-vulkan-headers mingw-w64-clang-${{ inputs.msys-arch }}-opencl-icd mingw-w64-clang-${{ inputs.msys-arch }}-opencl-headers mingw-w64-clang-${{ inputs.msys-arch }}-cppwinrt mingw-w64-clang-${{ inputs.msys-arch }}-imagemagick mingw-w64-clang-${{ inputs.msys-arch }}-chafa mingw-w64-clang-${{ inputs.msys-arch }}-lua mingw-w64-clang-${{ inputs.msys-arch }}-directx-headers
 
       - name: print msys version
         run: uname -a
@@ -61,7 +61,7 @@ jobs:
         run: cmake --build . --verbose -j4
 
       - name: copy necessary dlls
-        run: cp /${{ inputs.msystem-lower }}/bin/{lua55,libqjs-0}.dll .
+        run: cp /${{ inputs.msystem-lower }}/bin/lua55.dll .
 
       - name: list features
         run: ./fastfetch --list-features

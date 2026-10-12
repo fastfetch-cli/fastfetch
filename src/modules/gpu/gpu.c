@@ -286,6 +286,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -493,6 +494,7 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         .cs = "GPU",
         .de = "GPU",
         .es = "GPU",
+        .fi = "Grafiikkasuoritin",
         .fr = "GPU",
         .gl = "GPU",
         .he = "מעבד גרפי",

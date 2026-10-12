@@ -141,6 +141,7 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 
@@ -191,6 +192,7 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         .cs = "Odkládací prostor",
         .de = "Swap",
         .es = "Swap",
+        .fi = "Swap",
         .fr = "Swap",
         .gl = "Swap",
         .he = "זיכרון החלפה",

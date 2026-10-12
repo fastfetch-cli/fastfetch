@@ -1,5 +1,6 @@
 #include "netio.h"
 
+#include "common/debug.h"
 #include "common/netif.h"
 #include "common/windows/unicode.h"
 
@@ -54,7 +55,9 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
     // address at all, and those cannot be told apart from real adapters by any MIB_IF_ROW2 field.
     // GetUnicastIpAddressTable() costs about 72 us, GetIfTable2() about 860 us.
     PMIB_UNICASTIPADDRESS_TABLE addressTable = nullptr;
-    if (!NETIO_SUCCESS(GetUnicastIpAddressTable(AF_UNSPEC, &addressTable))) {
+    DWORD ret = GetUnicastIpAddressTable(AF_UNSPEC, &addressTable);
+    if (!NETIO_SUCCESS(ret)) {
+        FF_DEBUG("GetUnicastIpAddressTable() failed: %s", ffDebugWin32Error(ret));
         return "GetUnicastIpAddressTable() failed";
     }
 

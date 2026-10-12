@@ -134,6 +134,7 @@ void ffOptionsDestroyGeneral(FFOptionsGeneral* options) {
     ffStrbufDestroy(&options->playerName);
 }
 
+[[gnu::cold]]
 void ffOptionsGenerateGeneralJsonConfig(FFdata* data, FFOptionsGeneral* options) {
     yyjson_mut_doc* doc = data->resultDoc;
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "general");

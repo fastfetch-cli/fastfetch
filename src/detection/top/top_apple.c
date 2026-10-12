@@ -1,13 +1,16 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <errno.h>
+#include <string.h>
 #include <sys/sysctl.h>
 #include <libproc.h>
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     int npids = proc_listallpids(nullptr, 0);
     if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(nullptr, 0) failed: %s", strerror(errno));
         return "proc_listallpids(nullptr, 0) failed";
     }
     // `proc_listallpids` returns the number of pids, but it wants the size of the buffer in bytes:
@@ -15,10 +18,12 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     const int pidCapacity = npids + npids / 8 + 1;
     FF_AUTO_FREE pid_t* pids = malloc((size_t) pidCapacity * sizeof(pid_t));
     if (pids == nullptr) {
+        FF_DEBUG("malloc(%zu) for %d pids failed", (size_t) pidCapacity * sizeof(pid_t), pidCapacity);
         return "malloc() failed";
     }
     npids = proc_listallpids(pids, pidCapacity * (int) sizeof(pid_t));
     if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(pids, %d) failed: %s", pidCapacity * (int) sizeof(pid_t), strerror(errno));
         return "proc_listallpids(pids, bufferSize) failed";
     }
 

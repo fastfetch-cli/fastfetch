@@ -1,4 +1,5 @@
 #include "wallpaper.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/settings.h"
 #include "detection/displayserver/displayserver.h"
@@ -39,16 +40,19 @@ static const char* detectCosmicComp(FFstrbuf* result) {
 
     FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
     if (!ffReadFileBuffer(path.chars, &output)) {
+        FF_DEBUG("Failed to read \"%s\"", path.chars);
         return "Failed to read COSMIC wallpaper config";
     }
 
     const char* sourceStart = strstr(output.chars, "source:");
     if (sourceStart == nullptr) {
+        FF_DEBUG("The COSMIC wallpaper config does not contain \"source:\"");
         return "COSMIC wallpaper config doesn't contain source";
     }
 
     const char* pathStart = strstr(sourceStart, "Path(");
     if (pathStart == nullptr) {
+        FF_DEBUG("The COSMIC wallpaper source does not contain \"Path(\"");
         return "COSMIC wallpaper source is not a Path value";
     }
 
@@ -58,6 +62,7 @@ static const char* detectCosmicComp(FFstrbuf* result) {
     }
 
     if (*pathStart != '\'' && *pathStart != '"') {
+        FF_DEBUG("The COSMIC wallpaper Path does not start with a quote");
         return "COSMIC wallpaper Path format is invalid";
     }
 
@@ -65,6 +70,7 @@ static const char* detectCosmicComp(FFstrbuf* result) {
     ++pathStart;
     const char* pathEnd = strchr(pathStart, quote);
     if (pathEnd == nullptr || pathEnd == pathStart) {
+        FF_DEBUG("The COSMIC wallpaper path is empty");
         return "COSMIC wallpaper path is empty";
     }
 
@@ -99,6 +105,7 @@ ffDetectWallpaper
     }
 
     if (!wallpaper) {
+        FF_DEBUG("Neither GTK nor Qt reported a wallpaper path");
         return "Failed to detect the current wallpaper path";
     }
 

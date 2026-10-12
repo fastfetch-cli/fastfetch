@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "detection/cpuusage/cpuusage.h"
 
 #include <kstat.h>
@@ -14,6 +15,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
+        FF_DEBUG("kstat_open() failed");
         return "kstat_open() failed";
     }
 

@@ -1,8 +1,10 @@
 #include "gpu.h"
 #include "gpu_driver_specific.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 
+#include <string.h>
 #include <sys/pciio.h>
 #include <fcntl.h>
 #if __has_include(<dev/pci/pcireg.h>)
@@ -14,6 +16,7 @@
 static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
     FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(\"/dev/pci\") failed: %s", strerror(errno));
         return "open(\"/dev/pci\", O_RDONLY | O_CLOEXEC, 0) failed";
     }
 
@@ -31,10 +34,12 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus) {
     };
 
     if (ioctl(fd, PCIOCGETCONF, &pcio) < 0) {
+        FF_DEBUG("ioctl(PCIOCGETCONF) failed: %s", strerror(errno));
         return "ioctl(fd, PCIOCGETCONF, &pc) failed";
     }
 
     if (pcio.status == PCI_GETCONF_ERROR) {
+        FF_DEBUG("ioctl(fd, PCIOCGETCONF, &pc) returned error");
         return "ioctl(fd, PCIOCGETCONF, &pc) returned error";
     }
 

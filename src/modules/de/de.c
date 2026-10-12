@@ -51,6 +51,7 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -90,6 +91,7 @@ FFModuleBaseInfo ffDEModuleInfo = {
         .cs = "Pracovní prostředí",
         .de = "Desktop-Umgebung",
         .es = "Entorno de escritorio",
+        .fi = "Työpöytäympäristö",
         .fr = "Environnement de Bureau",
         .gl = "Contorno do Escritorio",
         .he = "סביבת שולחן עבודה",

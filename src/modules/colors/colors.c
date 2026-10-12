@@ -236,6 +236,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -313,6 +314,7 @@ FFModuleBaseInfo ffColorsModuleInfo = {
         .cs = "Barvy",
         .de = "Farben",
         .es = "Colores",
+        .fi = "Värit",
         .fr = "Couleurs",
         .gl = "Cores",
         .he = "צבעים",

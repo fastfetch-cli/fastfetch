@@ -143,6 +143,7 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -223,6 +224,7 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         .cs = "Wi-Fi",
         .de = "WLAN",
         .es = "Wi-Fi",
+        .fi = "Wi-Fi",
         .fr = "Wi-Fi",
         .gl = "Wi-Fi",
         .he = "Wi-Fi",

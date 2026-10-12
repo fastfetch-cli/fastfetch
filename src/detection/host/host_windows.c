@@ -1,4 +1,5 @@
 #include "host.h"
+#include "common/debug.h"
 #include "common/endian.h"
 #include "common/smbios.h"
 
@@ -32,11 +33,13 @@ static_assert(offsetof(FFSmbiosSystemInfo, Family) == 0x1A,
 const char* ffDetectHost(FFHostResult* host) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("System information: failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_INFO];
     if (!data) {
+        FF_DEBUG("System information: section is not found in SMBIOS data");
         return "System information is not found in SMBIOS data";
     }
 
