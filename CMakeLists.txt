@@ -2473,6 +2473,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-gpu-pci
+        tests/gpu_pci.c
+    )
+    target_link_libraries(fastfetch-test-gpu-pci
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
@@ -2492,6 +2499,7 @@ if (BUILD_TESTS)
     add_test(NAME test-temps COMMAND fastfetch-test-temps)
     add_test(NAME test-endian COMMAND fastfetch-test-endian)
     add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
+    add_test(NAME test-gpu-pci COMMAND fastfetch-test-gpu-pci)
 endif()
 
 ##################
