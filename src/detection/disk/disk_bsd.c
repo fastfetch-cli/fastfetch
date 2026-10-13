@@ -188,9 +188,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         FFDisk* disk = FF_LIST_ADD(FFDisk, *disks);
 
         disk->bytesTotal = (uint64_t) fs->f_blocks * (uint64_t) fs->f_bsize;
-        disk->bytesFree = (uint64_t) fs->f_bfree * (uint64_t) fs->f_bsize;
-        disk->bytesAvailable = (uint64_t) fs->f_bavail * (uint64_t) fs->f_bsize;
-        disk->bytesUsed = 0; // To be filled in ./disk.c
+        disk->bytesFree = (uint64_t) (options->calcType == FF_DISK_CALC_TYPE_FREE ? fs->f_bfree : fs->f_bavail) * (uint64_t) fs->f_bsize;
 
         disk->filesTotal = (uint32_t) fs->f_files;
         disk->filesUsed = (uint32_t) fs->f_files - (uint32_t) fs->f_ffree;

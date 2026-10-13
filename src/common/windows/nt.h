@@ -719,6 +719,10 @@ static inline bool ffIsSystemBasicProcessInfoAvailable() { // Includes HandleCou
     return SharedUserData->NtBuildNumber >= 26200; // MSDN says it was added in 26100.4770; ntdoc says 25H2
 }
 
+static inline bool ffIsFileFsFullSizeInformationExAvailable() {
+    return SharedUserData->NtBuildNumber >= 17763; // Windows 10 October 2018 Update (1809, REDSTONE5)
+}
+
 NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
     _In_ HANDLE ProcessHandle,
     _In_ ACCESS_MASK DesiredAccess,
@@ -1419,3 +1423,23 @@ NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
 
 NTSYSAPI NTSTATUS NTAPI RtlAcquirePebLock(VOID);
 NTSYSAPI NTSTATUS NTAPI RtlReleasePebLock(VOID);
+
+typedef struct _FILE_FS_FULL_SIZE_INFORMATION_EX {
+    ULONGLONG ActualTotalAllocationUnits;
+    ULONGLONG ActualAvailableAllocationUnits;
+    ULONGLONG ActualPoolUnavailableAllocationUnits;
+    ULONGLONG CallerTotalAllocationUnits;
+    ULONGLONG CallerAvailableAllocationUnits;
+    ULONGLONG CallerPoolUnavailableAllocationUnits;
+    ULONGLONG UsedAllocationUnits;
+    ULONGLONG TotalReservedAllocationUnits;
+    ULONGLONG VolumeStorageReserveAllocationUnits;
+    ULONGLONG AvailableCommittedAllocationUnits;
+    ULONGLONG PoolAvailableAllocationUnits;
+    ULONG     SectorsPerAllocationUnit;
+    ULONG     BytesPerSector;
+} FILE_FS_FULL_SIZE_INFORMATION_EX, *PFILE_FS_FULL_SIZE_INFORMATION_EX;
+
+enum {
+    FileFsFullSizeInformationEx = 14
+};

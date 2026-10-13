@@ -277,7 +277,7 @@
 
 
         "batteryFormat": {
-            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {name}: Battery model name *\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
+            "description": "Output format for the `Battery` module. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name *\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufacture date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
@@ -325,7 +325,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count\n    13. {code-name}: CPU code name (x86 only)\n    14. {technology}: CPU technology (x86 only)",
+            "description": "Output format for the `CPU` module. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: CPU microarchitecture\n    12. {numa-nodes}: NUMA node count",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -353,7 +353,7 @@
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem *\n    10. {name}: Label / name *\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter *\n    21. {mount-from}: Mount from (device path) *\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
+            "description": "Output format for the `Disk` module. See Wiki for formatting syntax\n    1. {size-used}: Size used (formatted)\n    2. {size-total}: Size total (formatted)\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem *\n    10. {name}: Label / name *\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter *\n    21. {mount-from}: Mount from (device path) *\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free (formatted)\n    26. {bytes-used}: Size used (in bytes)\n    27. {bytes-total}: Size total (in bytes)",
             "type": "string"
         },
         "diskioFormat": {
@@ -465,7 +465,7 @@
             "type": "string"
         },
         "poweradapterFormat": {
-            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model-name}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
+            "description": "Output format for the `PowerAdapter` module. See Wiki for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model-name}: Power adapter model name\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
             "type": "string"
         },
         "processesFormat": {
@@ -2716,7 +2716,7 @@
                                     },
                                     "useAvailable": {
                                         "type": "boolean",
-                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes\nMay be required for macOS to display correct results",
+                                        "description": "Use f_bavail instead of f_bfree to calculate used bytes\nMay be required for macOS to display correct results\nOn Windows, set to true to make fastfetch honors the quota settings",
                                         "default": false
                                     },
                                     "percent": {
