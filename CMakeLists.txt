@@ -2561,7 +2561,12 @@ install(
 
 set(CPACK_GENERATOR "TGZ;ZIP")
 if(APPLE)
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
+    if(CMAKE_OSX_ARCHITECTURES MATCHES ";") # multiple architectures, e.g. arm64;x86_64
+        set(_FF_CPACK_ARCH universal)
+    else()
+        set(_FF_CPACK_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+    endif()
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${_FF_CPACK_ARCH}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-musl-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
 else()
