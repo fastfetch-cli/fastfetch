@@ -1,10 +1,15 @@
 #include "terminalshell.h"
 #include "common/FFcache.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/parsing.h"
 #include "common/processing.h"
 #include "common/thread.h"
 #include "common/strutil.h"
+
+#ifdef __ANDROID__
+    #include "common/android/applabel.h"
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -324,8 +329,18 @@ static void setTerminalInfoDetails(FFTerminalResult* result) {
 
 #if defined(__ANDROID__)
 
-    else if (ffStrbufEqualS(&result->processName, "com.termux"))
+    else if (ffStrbufEqualS(&result->processName, "com.termux")) {
+        // The app is installed under a label rather than under its package name, and the label is
+        // what every screen the user sees calls it -- "Termux:Launcher" on the test device, not
+        // "Termux". The package name is the fallback for a build whose label cannot be read, which
+        // includes an app whose label is a literal string in its manifest rather than a resource
+        // reference; see common/android/applabel.h for what that read costs and when it fails.
         ffStrbufInitStatic(&result->prettyName, "Termux");
+        const char* labelError = ffAndroidGetAppLabel("com.termux", &result->prettyName);
+        if (labelError != nullptr) {
+            FF_DEBUG("The label of com.termux could not be resolved: %s", labelError);
+        }
+    }
 
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__GNU__)
 

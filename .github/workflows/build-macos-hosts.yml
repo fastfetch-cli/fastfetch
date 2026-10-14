@@ -29,7 +29,13 @@ jobs:
       - name: install required packages with MacPorts # Homebrew dropped Intel support
         if: inputs.arch == 'amd64'
         run: |
-          curl -fsSL https://github.com/macports/macports-base/releases/download/v2.12.6/MacPorts-2.12.6-15-Sequoia.pkg -o "$RUNNER_TEMP/MacPorts.pkg"
+          # resolve the latest MacPorts release; "15-Sequoia" must keep matching the runner image (macos-15-intel, set in ci.yml)
+          macports_tag=$(curl -fsSL -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/macports/macports-base/releases/latest \
+            | sed -n 's/^[[:space:]]*"tag_name": "\(v[0-9][^"]*\)".*/\1/p')
+          macports_version=${macports_tag#v}
+          echo "Installing MacPorts $macports_version"
+          curl -fsSL "https://github.com/macports/macports-base/releases/download/${macports_tag}/MacPorts-${macports_version}-15-Sequoia.pkg" -o "$RUNNER_TEMP/MacPorts.pkg"
           sudo installer -pkg "$RUNNER_TEMP/MacPorts.pkg" -target /
           echo /opt/local/bin >> "$GITHUB_PATH"
           echo /opt/local/sbin >> "$GITHUB_PATH"

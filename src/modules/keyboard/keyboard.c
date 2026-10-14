@@ -92,6 +92,7 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -161,6 +162,7 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
         .cs = "Klávesnice",
         .de = "Tastatur",
         .es = "Teclado",
+        .fi = "Näppäimistö",
         .fr = "Clavier",
         .gl = "Teclado",
         .he = "מקלדת",

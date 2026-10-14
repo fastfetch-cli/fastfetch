@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/mallocHelper.h"
 
@@ -82,6 +83,7 @@ const char* ffDetectWifi(FFlist* result) {
 
     FF_AUTO_FREE void* bufferMemory = malloc(MAX_BUF_LEN);
     if (!bufferMemory) {
+        FF_DEBUG("malloc(MAX_BUF_LEN) failed");
         return "malloc() failed";
     }
     wldp_t* buffer = (wldp_t*) bufferMemory;
@@ -182,8 +184,8 @@ const char* ffDetectWifi(FFlist* result) {
             }
         }
 
-        wl_encryption_t encryption;
-        wl_authmode_t authMode;
+        wl_encryption_t encryption = 0;
+        wl_authmode_t authMode = 0;
         bool haveEncryption = getWifiValue(fd, WL_ENCRYPTION, &encryption, sizeof(encryption), buffer);
         bool haveAuthMode = getWifiValue(fd, WL_AUTH_MODE, &authMode, sizeof(authMode), buffer);
         if (haveEncryption) {

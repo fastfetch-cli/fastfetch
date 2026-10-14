@@ -1,5 +1,6 @@
 extern "C" {
 #include "media.h"
+#include "common/debug.h"
 #include "common/time.h"
 #include "common/windows/unicode.h"
 #include "common/windows/com.h"
@@ -410,6 +411,7 @@ static const char* getMedia(FFMediaResult* result, bool saveCover) {
 #else
 static const char* getMedia(FFMediaResult* media, bool saveCover) {
     FF_UNUSED(media, saveCover);
+    FF_DEBUG("Fastfetch is not compiled with WinRT support");
     return "Fastfetch is not compiled with WinRT support";
 }
 #endif // FF_HAVE_WINRT

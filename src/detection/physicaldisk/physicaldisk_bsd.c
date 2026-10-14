@@ -2,6 +2,7 @@
 
 #if __has_include(<libgeom.h>)
 
+    #include "common/debug.h"
     #include "common/strutil.h"
 
     #include <devstat.h>
@@ -14,10 +15,12 @@
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     struct gmesh geomTree;
     if (geom_gettree(&geomTree) < 0) {
+        FF_DEBUG("geom_gettree() failed");
         return "geom_gettree() failed";
     }
 
     if (geom_stats_open() < 0) {
+        FF_DEBUG("geom_stats_open() failed");
         return "geom_stats_open() failed";
     }
 

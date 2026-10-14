@@ -376,6 +376,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -528,6 +529,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         .cs = "Balíčky",
         .de = "Pakete",
         .es = "Paquetes",
+        .fi = "Ohjelmistopaketit",
         .fr = "Paquets",
         .gl = "Paquetes",
         .he = "חבילות",

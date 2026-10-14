@@ -1,8 +1,11 @@
 #include "uptime.h"
+#include "common/debug.h"
 #include "common/time.h"
 #include "common/io.h"
 
+#include <errno.h>
 #include <inttypes.h>
+#include <string.h>
 
 const char* ffDetectUptime(FFUptimeResult* result) {
 #ifndef __ANDROID__ // cat: /proc/uptime: Permission denied
@@ -26,6 +29,7 @@ const char* ffDetectUptime(FFUptimeResult* result) {
 #ifndef __GNU__
     struct timespec uptime;
     if (clock_gettime(CLOCK_BOOTTIME, &uptime) != 0) {
+        FF_DEBUG("clock_gettime(CLOCK_BOOTTIME) failed: %s", strerror(errno));
         return "clock_gettime(CLOCK_BOOTTIME) failed";
     }
 
@@ -33,6 +37,7 @@ const char* ffDetectUptime(FFUptimeResult* result) {
     result->bootTime = ffTimeGetNow() - result->uptime;
     return nullptr;
 #else
+    FF_DEBUG("read(/proc/uptime) failed");
     return "read(/proc/uptime) failed";
 #endif
 }

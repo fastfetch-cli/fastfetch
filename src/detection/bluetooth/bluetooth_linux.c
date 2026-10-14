@@ -1,4 +1,5 @@
 #include "bluetooth.h"
+#include "common/debug.h"
 #include "common/percent.h"
 #include "common/strutil.h"
 
@@ -304,11 +305,13 @@ static const char* detectBluetooth(FFBluetoothOptions* options, FFlist* devices,
 
     DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", nullptr, nullptr);
     if (!managedObjects) {
+        FF_DEBUG("Failed to call GetManagedObjects");
         return "Failed to call GetManagedObjects";
     }
 
     DBusMessageIter rootIter;
     if (!dbus.lib->ffdbus_message_iter_init(managedObjects, &rootIter)) {
+        FF_DEBUG("Failed to get root iterator of GetManagedObjects");
         dbus.lib->ffdbus_message_unref(managedObjects);
         return "Failed to get root iterator of GetManagedObjects";
     }
@@ -351,6 +354,7 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
     return detectBluetooth(options, devices, connectedCount);
 #else
     FF_UNUSED(options, devices);
+    FF_DEBUG("Fastfetch was compiled without DBus support");
     return "Fastfetch was compiled without DBus support";
 #endif
 }

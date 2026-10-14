@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "common/debug.h"
 
 #include <camera/NdkCameraManager.h>
 #include <camera/NdkCameraMetadata.h>
@@ -11,7 +12,7 @@
 
 // Records the largest size the camera can stream in the given pixel format. The stream configurations
 // are a flat array of (format, width, height, isInput) quads; a negative format matches any of them.
-static void ffCameraMaxStreamSize(const ACameraMetadata* metadata, int32_t format, uint32_t* width, uint32_t* height) {
+static void getMaxStreamSize(const ACameraMetadata* metadata, int32_t format, uint32_t* width, uint32_t* height) {
     ACameraMetadata_const_entry entry;
     if (ACameraMetadata_getConstEntry(metadata, ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS, &entry) != ACAMERA_OK) {
         return;
@@ -48,11 +49,13 @@ const char* ffDetectCamera(FFlist* result) {
     // API 24, so linking it unconditionally in CMakeLists.txt is fine on every supported device.
     ACameraManager* manager = ACameraManager_create();
     if (!manager) {
+        FF_DEBUG("ACameraManager_create() failed");
         return "ACameraManager_create() failed";
     }
 
     ACameraIdList* idList = nullptr;
     if (ACameraManager_getCameraIdList(manager, &idList) != ACAMERA_OK || !idList) {
+        FF_DEBUG("ACameraManager_getCameraIdList() failed");
         ACameraManager_delete(manager);
         return "ACameraManager_getCameraIdList() failed";
     }
@@ -91,11 +94,11 @@ const char* ffDetectCamera(FFlist* result) {
         }
 
         camera->width = camera->height = 0;
-        ffCameraMaxStreamSize(metadata, FF_ANDROID_PIXEL_FORMAT_JPEG, &camera->width, &camera->height);
+        getMaxStreamSize(metadata, FF_ANDROID_PIXEL_FORMAT_JPEG, &camera->width, &camera->height);
         if (camera->width == 0) {
             // Not every camera HAL lists a JPEG format. The largest size of any output format is the
             // same resolution on those devices.
-            ffCameraMaxStreamSize(metadata, -1, &camera->width, &camera->height);
+            getMaxStreamSize(metadata, -1, &camera->width, &camera->height);
         }
 
         ACameraMetadata_free(metadata);

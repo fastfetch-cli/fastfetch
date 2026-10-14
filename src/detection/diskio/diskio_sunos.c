@@ -1,4 +1,5 @@
 #include "diskio.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 #include <kstat.h>
 
@@ -12,6 +13,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options) {
     [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (!kc) {
+        FF_DEBUG("kstat_open() failed");
         return "kstat_open() failed";
     }
 

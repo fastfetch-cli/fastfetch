@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <IOKit/IOKitLib.h>
@@ -20,6 +21,7 @@ static void enumSet(IOHIDDeviceRef value, FFlist* results) {
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */) {
     FF_CFTYPE_AUTO_RELEASE IOHIDManagerRef manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
     if (IOHIDManagerOpen(manager, kIOHIDOptionsTypeNone) != kIOReturnSuccess) {
+        FF_DEBUG("IOHIDManagerOpen() failed");
         return "IOHIDManagerOpen() failed";
     }
 

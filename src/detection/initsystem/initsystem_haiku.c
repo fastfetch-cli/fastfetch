@@ -1,4 +1,5 @@
 #include "initsystem.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 #include "common/haiku/version.h"
 #include "common/io.h"
@@ -11,6 +12,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
     // so we can't query be_roster for it.
     const char* path = "/boot/system/servers/launch_daemon";
     if (!ffPathExists(path, FF_PATHTYPE_FILE)) {
+        FF_DEBUG("%s does not exist", path);
         return "launch_daemon is not found";
     }
 

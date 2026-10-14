@@ -1,11 +1,14 @@
 #include "swap.h"
+#include "common/debug.h"
 
 #include <OS.h>
 #include <driver_settings.h>
 
 const char* ffDetectSwap(FFlist* result) {
     system_info info;
-    if (get_system_info(&info) != B_OK) {
+    status_t status = get_system_info(&info);
+    if (status != B_OK) {
+        FF_DEBUG("get_system_info() failed: %d", (int) status);
         return "Error getting system info";
     }
 

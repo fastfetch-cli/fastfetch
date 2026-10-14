@@ -44,6 +44,7 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -82,6 +83,7 @@ FFModuleBaseInfo ffTerminalSizeModuleInfo = {
         .cs = "Velikost terminálu",
         .de = "Terminalgröße",
         .es = "Tamaño del terminal",
+        .fi = "Terminaalin Koko",
         .fr = "Taille du terminal",
         .gl = "Tamaño do terminal",
         .he = "גודל טרמינל",

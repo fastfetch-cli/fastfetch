@@ -125,6 +125,7 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDiskIOJsonConfig(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -185,6 +186,7 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         .cs = "Diskové I/O",
         .de = "Festplatten I/O",
         .es = "E/S del disco",
+        .fi = "Levyn I/O",
         .fr = "Entrée/Sortie disque",
         .gl = "E/S do disco",
         .he = "קלט/פלט דיסק",

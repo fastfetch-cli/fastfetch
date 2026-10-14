@@ -314,6 +314,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -444,6 +445,7 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         .cs = "Místní IP",
         .de = "Lokale IP",
         .es = "IP local",
+        .fi = "Paikallinen IP",
         .fr = "IP locale",
         .gl = "IP local",
         .he = "IP מקומי",

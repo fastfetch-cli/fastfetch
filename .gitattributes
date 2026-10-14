@@ -1,2 +1,15 @@
+# Normalise text files to LF in the repository and check them out with LF, so a CRLF
+# never enters an object and never shows up as a whole-file diff on Windows.
+* text=auto eol=lf
+
+# The vendored AMD Display Library SDK ships with CRLF endings of its own. Leaving it
+# alone keeps `Dep (3rdparty): upgrades display-library` from carrying a 7000-line
+# whitespace diff, and a re-vendor will not fight the rule above.
+src/3rdparty/display-library/** -text
+
+# The logo fixtures store the exact bytes fastfetch prints, ANSI escapes included.
+# They are demo data rather than text, and are not read by any test.
+*.fflogo -text
+
 *.h linguist-language=c
 *.c linguist-language=c

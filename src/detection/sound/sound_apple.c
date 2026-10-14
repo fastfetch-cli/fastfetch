@@ -1,5 +1,6 @@
 #include "sound.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 
 #include <CoreAudio/CoreAudio.h>
 #include <AvailabilityMacros.h>
@@ -11,7 +12,9 @@
 const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FFSoundDevice */) {
     AudioDeviceID mainDeviceId;
     UInt32 dataSize = sizeof(mainDeviceId);
-    if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &mainDeviceId) != kAudioHardwareNoError) {
+    OSStatus defaultOutputStatus = AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &mainDeviceId);
+    if (defaultOutputStatus != kAudioHardwareNoError) {
+        FF_DEBUG("AudioObjectGetPropertyData(kAudioHardwarePropertyDefaultOutputDevice) failed: OSStatus %d", (int) defaultOutputStatus);
         return "AudioObjectGetPropertyData(kAudioHardwarePropertyDefaultOutputDevice) failed";
     }
 
@@ -21,7 +24,9 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
         dataSize = sizeof(mainDeviceId);
     } else {
         dataSize = sizeof(deviceIds);
-        if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &deviceIds) != kAudioHardwareNoError) {
+        OSStatus deviceListStatus = AudioObjectGetPropertyData(kAudioObjectSystemObject, &(AudioObjectPropertyAddress) { kAudioHardwarePropertyDevices, kAudioObjectPropertyScopeOutput, kAudioObjectPropertyElementMain }, 0, nullptr, &dataSize, &deviceIds);
+        if (deviceListStatus != kAudioHardwareNoError) {
+            FF_DEBUG("AudioObjectGetPropertyData(kAudioHardwarePropertyDevices) failed: OSStatus %d", (int) deviceListStatus);
             return "AudioObjectGetPropertyData(kAudioHardwarePropertyDevices) failed";
         }
     }

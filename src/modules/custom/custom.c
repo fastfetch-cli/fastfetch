@@ -9,6 +9,7 @@ bool ffPrintCustom(FFCustomOptions* options) {
     return true;
 }
 
+[[gnu::cold]]
 void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -17,7 +18,7 @@ bool ffGenerateCustomJsonResult(FFCustomOptions* options, yyjson_mut_doc* doc, y
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
 
     // This module's output *is* its format string, so the JSON result is that string rendered —
-    // for a `qjs:`/`lua:` format that means the script's output, not the script. `ffPrintCustom()`
+    // for a `lua:` format that means the script's output, not the script. `ffPrintCustom()`
     // gets the same value through `ffPrintFormat()`. Without this the module had no JSON result at
     // all, so a script consuming `--format json` could not read a custom line's value.
     if (!ffParseFormatString(&result, &options->moduleArgs.outputFormat, 0, (FFformatarg[]) {})) {
@@ -62,6 +63,7 @@ FFModuleBaseInfo ffCustomModuleInfo = {
         .cs = "Vlastní",
         .de = "Benutzerdefiniert",
         .es = "Personalizado",
+        .fi = "Mukautettu",
         .fr = "Personnalisé",
         .gl = "Personalizado",
         .he = "מותאם אישית",

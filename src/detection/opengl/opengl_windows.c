@@ -1,4 +1,5 @@
 #include "opengl.h"
+#include "common/debug.h"
 #include "common/library.h"
 #include "common/printing.h"
 #include "common/windows/nt.h"
@@ -17,11 +18,13 @@ void ffOpenGLHandleResult(FFOpenGLResult* result, typeof(&glGetString) ffglGetSt
 
 static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HDC hdc, HGLRC context) {
     if (wglData->ffwglMakeCurrent(hdc, context) == FALSE) {
+        FF_DEBUG("wglMakeCurrent() failed: %s", ffDebugWin32Error(GetLastError()));
         return "wglMakeCurrent() failed";
     }
     ffOpenGLHandleResult(result, wglData->ffglGetString);
     ffStrbufSetStatic(&result->library, "WGL 1.0");
     if (wglData->ffwglMakeCurrent(nullptr, nullptr) == FALSE) {
+        FF_DEBUG("wglMakeCurrent(nullptr, nullptr) failed: %s", ffDebugWin32Error(GetLastError()));
         return "wglMakeCurrent(nullptr, nullptr) failed";
     }
     return nullptr;
@@ -31,6 +34,7 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
     HDC hdc = GetDC(hWnd);
 
     if (hdc == nullptr) {
+        FF_DEBUG("GetDC() failed: %s", ffDebugWin32Error(GetLastError()));
         return "GetDC() failed";
     }
 
@@ -45,17 +49,20 @@ static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result
     };
     int pixelFormat = ChoosePixelFormat(hdc, &pfd);
     if (pixelFormat == 0) {
+        FF_DEBUG("ChoosePixelFormat() failed: %s", ffDebugWin32Error(GetLastError()));
         ReleaseDC(hWnd, hdc);
         return "ChoosePixelFormat() failed";
     }
 
     if (SetPixelFormat(hdc, pixelFormat, &pfd) == FALSE) {
+        FF_DEBUG("SetPixelFormat() failed: %s", ffDebugWin32Error(GetLastError()));
         ReleaseDC(hWnd, hdc);
         return "SetPixelFormat() failed";
     }
 
     HGLRC context = wglData->ffwglCreateContext(hdc);
     if (context == nullptr) {
+        FF_DEBUG("wglCreateContext() failed: %s", ffDebugWin32Error(GetLastError()));
         ReleaseDC(hWnd, hdc);
         return "wglCreateContext() failed";
     }
@@ -88,11 +95,13 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result) {
         .style = CS_OWNDC,
     };
     if (!RegisterClassW(&wc)) {
+        FF_DEBUG("RegisterClassW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "RegisterClassW() failed";
     }
 
     HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, nullptr, nullptr, hInstance, nullptr);
     if (!hWnd) {
+        FF_DEBUG("CreateWindowW() failed: %s", ffDebugWin32Error(GetLastError()));
         return "CreateWindowW() failed";
     }
 
@@ -112,9 +121,11 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result) {
         const char* ffOpenGLDetectByEGL(FFOpenGLResult * result);
         return ffOpenGLDetectByEGL(result);
 #else
+        FF_DEBUG("fastfetch was compiled without egl support");
         return "fastfetch was compiled without egl support";
 #endif
     } else {
+        FF_DEBUG("Unsupported OpenGL library");
         return "Unsupported OpenGL library";
     }
 }

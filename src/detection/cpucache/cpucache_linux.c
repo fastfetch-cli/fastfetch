@@ -1,11 +1,16 @@
 #include "cpucache.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
+
+#include <errno.h>
+#include <string.h>
 
 static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, FFstrbuf* buffer, FFstrbuf* added) {
     uint32_t baseLen = path->length;
     ffStrbufAppendS(path, "/level");
     if (!ffReadFileBuffer(path->chars, buffer)) {
+        FF_DEBUG("Failed to read \"%s\"", path->chars);
         return "ffReadFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/level\") == nullptr";
     }
 
@@ -17,6 +22,7 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
     ffStrbufSubstrBefore(path, baseLen);
     ffStrbufAppendS(path, "/size");
     if (!ffReadFileBuffer(path->chars, buffer)) {
+        FF_DEBUG("Failed to read \"%s\"", path->chars);
         return "ffReadFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/size\") == nullptr";
     }
 
@@ -28,6 +34,7 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
     ffStrbufSubstrBefore(path, baseLen);
     ffStrbufAppendS(path, "/type");
     if (!ffReadFileBuffer(path->chars, buffer)) {
+        FF_DEBUG("Failed to read \"%s\"", path->chars);
         return "ffReadFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/type\") == nullptr";
     }
     ffStrbufTrimRightSpace(buffer);
@@ -47,6 +54,7 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
             cacheType = FF_CPU_CACHE_TYPE_TRACE;
             break;
         default:
+            FF_DEBUG("Unknown cache type \"%c\"", buffer->chars[0]);
             return "unknown cache type";
     }
 
@@ -62,6 +70,7 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
     ffStrbufClear(buffer);
     ffStrbufAppendC(buffer, '[');
     if (!ffAppendFileBuffer(path->chars, buffer)) {
+        FF_DEBUG("Failed to read \"%s\"", path->chars);
         return "ffAppendFileBuffer(\"/sys/devices/system/cpu/cpuX/cache/indexX/shared_cpu_list\") == nullptr";
     }
     ffStrbufTrimRightSpace(buffer);
@@ -82,6 +91,7 @@ static const char* parseCpuCache(FFstrbuf* path, FFCPUCacheResult* result, FFstr
     uint32_t baseLen = path->length;
     FF_AUTO_CLOSE_DIR DIR* pathCacheDir = opendir(path->chars);
     if (!pathCacheDir) {
+        FF_DEBUG("opendir(\"%s\") failed: %s", path->chars, strerror(errno));
         return "opendir(\"/sys/devices/system/cpu/cpuX/cache/\") == nullptr";
     }
 
@@ -108,6 +118,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
     uint32_t baseLen = path.length;
     FF_AUTO_CLOSE_DIR DIR* pathCpuDir = opendir(path.chars);
     if (!pathCpuDir) {
+        FF_DEBUG("opendir(\"%s\") failed: %s", path.chars, strerror(errno));
         return "opendir(\"/sys/devices/system/cpu/\") == nullptr";
     }
 

@@ -1,4 +1,5 @@
 #include "chassis.h"
+#include "common/debug.h"
 #include "detection/host/host.h"
 
 const char* ffDetectChassis(FFChassisResult* result) {
@@ -11,7 +12,9 @@ const char* ffDetectChassis(FFChassisResult* result) {
         .uuid = ffStrbufCreate(),
         .vendor = ffStrbufCreate(),
     };
-    if (ffDetectHost(&host) != nullptr) {
+    const char* hostError = ffDetectHost(&host);
+    if (hostError != nullptr) {
+        FF_DEBUG("ffDetectHost() failed: %s", hostError);
         return "Failed to detect host";
     }
 

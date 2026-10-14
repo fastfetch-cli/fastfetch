@@ -1,4 +1,5 @@
 #include "brightness.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <dev/wscons/wsconsio.h>
@@ -15,6 +16,7 @@ const char* ffDetectBrightness([[maybe_unused]] FFBrightnessOptions* options, FF
 
         if (devfd < 0) {
             if (errno == EACCES && i == '0') {
+                FF_DEBUG("open(%s) failed: %s", path, strerror(errno));
                 return "Permission denied when opening tty device";
             }
             if (errno == ENOENT) {

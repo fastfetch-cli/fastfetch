@@ -278,6 +278,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -439,6 +440,7 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         .cs = "Displej",
         .de = "Anzeige",
         .es = "Pantalla",
+        .fi = "Näyttö",
         .fr = "Écran",
         .gl = "Pantalla",
         .he = "תצוגה",

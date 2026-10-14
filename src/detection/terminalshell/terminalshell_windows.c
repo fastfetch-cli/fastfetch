@@ -4,6 +4,7 @@
 #include "common/processing.h"
 #include "common/thread.h"
 #include "common/mallocHelper.h"
+#include "common/windows/folders.h"
 #include "common/windows/registry.h"
 #include "common/windows/unicode.h"
 #include "common/windows/version.h"
@@ -16,7 +17,6 @@
 #include <tlhelp32.h>
 #include <ntstatus.h>
 #include <winternl.h>
-#include <shlobj.h>
 
 static uint32_t getShellInfo(FFShellResult* result, uint32_t pid) {
     uint32_t ppid = 0;
@@ -182,12 +182,7 @@ static bool detectDefaultTerminal(FFTerminalResult* result) {
                     ffStrbufSetS(&result->processName, "WindowsTerminal.exe");
                     ffStrbufSetS(&result->prettyName, "WindowsTerminal");
 
-                    PWSTR programFiles = nullptr;
-                    if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramFiles, KF_FLAG_DEFAULT, nullptr, &programFiles))) {
-                        ffStrbufSetWS(&result->exe, programFiles);
-                        CoTaskMemFree(programFiles);
-                        programFiles = nullptr;
-
+                    if (ffGetKnownFolderPath(FF_KNOWN_FOLDER_PROGRAM_FILES, &result->exe)) {
                         ffStrbufAppendS(&result->exe, "\\WindowsApps\\");
                         ffStrbufAppend(&result->exe, &path);
                         ffStrbufAppendS(&result->exe, "\\WindowsTerminal.exe");

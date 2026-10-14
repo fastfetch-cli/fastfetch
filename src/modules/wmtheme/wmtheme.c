@@ -35,6 +35,7 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateWMThemeJsonConfig(FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -67,6 +68,7 @@ FFModuleBaseInfo ffWMThemeModuleInfo = {
         .cs = "Motiv správce oken",
         .de = "Fenstermanager-Thema",
         .es = "Tema del gestor de ventanas",
+        .fi = "Ikkunointijärjestelmän Teema",
         .fr = "Thème du gestionnaire de fenêtres",
         .gl = "Tema do xestor de xanelas",
         .he = "ערכת נושא של מנהל חלונות",

@@ -1,4 +1,5 @@
 #include "disk.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/time.h"
 #include "common/windows/unicode.h"
@@ -12,7 +13,9 @@
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
     PROCESS_DEVICEMAP_INFORMATION_EX info = {};
     ULONG size = 0;
-    if (!NT_SUCCESS(NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size))) {
+    NTSTATUS status = NtQueryInformationProcess(NtCurrentProcess(), ProcessDeviceMap, &info, sizeof(info), &size);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("NtQueryInformationProcess(ProcessDeviceMap) failed: %s", ffDebugNtStatus(status));
         return "NtQueryInformationProcess(ProcessDeviceMap) failed";
     }
 
@@ -72,8 +75,6 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         disk->filesTotal = 0;
         disk->bytesTotal = 0;
         disk->bytesFree = 0;
-        disk->bytesUsed = 0; // To be filled in ./disk.c
-        disk->bytesAvailable = 0;
         disk->createTime = 0;
         ffStrbufInit(&disk->filesystem);
         ffStrbufInit(&disk->name);
@@ -115,12 +116,21 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
             }
         }
 
-        FILE_FS_FULL_SIZE_INFORMATION fsFullSize;
-        if (NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, &fsFullSize, sizeof(fsFullSize), FileFsFullSizeInformation))) {
-            uint64_t units = fsFullSize.BytesPerSector * fsFullSize.SectorsPerAllocationUnit;
-            disk->bytesTotal = (uint64_t) fsFullSize.TotalAllocationUnits.QuadPart * units;
-            disk->bytesFree = (uint64_t) fsFullSize.ActualAvailableAllocationUnits.QuadPart * units;
-            disk->bytesAvailable = (uint64_t) fsFullSize.CallerAvailableAllocationUnits.QuadPart * units;
+        if (options->calcType == FF_DISK_CALC_TYPE_AVAILABLE || !ffIsFileFsFullSizeInformationExAvailable()) {
+            FILE_FS_FULL_SIZE_INFORMATION fsFullSize;
+            if (NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, &fsFullSize, sizeof(fsFullSize), FileFsFullSizeInformation))) {
+                uint64_t units = fsFullSize.BytesPerSector * fsFullSize.SectorsPerAllocationUnit;
+                disk->bytesTotal = (uint64_t) fsFullSize.TotalAllocationUnits.QuadPart * units;
+                disk->bytesFree = (uint64_t) fsFullSize.CallerAvailableAllocationUnits.QuadPart * units;
+            }
+        } else {
+            FILE_FS_FULL_SIZE_INFORMATION_EX fsFullSizeEx;
+            if (NT_SUCCESS(NtQueryVolumeInformationFile(handle, &iosb, &fsFullSizeEx, sizeof(fsFullSizeEx), FileFsFullSizeInformationEx))) {
+                // Space info without considering the quota setting
+                uint64_t units = fsFullSizeEx.BytesPerSector * fsFullSizeEx.SectorsPerAllocationUnit;
+                disk->bytesTotal = (uint64_t) fsFullSizeEx.ActualTotalAllocationUnits * units;
+                disk->bytesFree = (uint64_t) fsFullSizeEx.ActualAvailableAllocationUnits * units;
+            }
         }
     }
 

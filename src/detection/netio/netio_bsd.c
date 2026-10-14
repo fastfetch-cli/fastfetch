@@ -1,8 +1,10 @@
 #include "netio.h"
 
+#include "common/debug.h"
 #include "common/netif.h"
 #include "common/mallocHelper.h"
 
+#include <errno.h>
 #include <net/if.h>
 #include <net/if_dl.h>
 #include <net/if_types.h>
@@ -15,11 +17,13 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
 
     size_t bufSize = 0;
     if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, (options->defaultRouteOnly ? (int) defaultRouteIfIndex : 0) }, 6, nullptr, &bufSize, 0, 0) < 0) {
+        FF_DEBUG("sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, ifIndex }, 6, nullptr, &bufSize, 0, 0) failed: %s", strerror(errno));
         return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, ifIndex }, 6, nullptr, &bufSize, 0, 0) failed";
     }
 
     FF_AUTO_FREE struct if_msghdr* buf = (struct if_msghdr*) malloc(bufSize);
     if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, (options->defaultRouteOnly ? (int) defaultRouteIfIndex : 0) }, 6, buf, &bufSize, 0, 0) < 0) {
+        FF_DEBUG("sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, ifIndex }, 6, buf, &bufSize, 0, 0) failed: %s", strerror(errno));
         return "sysctl({ CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, ifIndex }, 6, buf, &bufSize, 0, 0) failed";
     }
 

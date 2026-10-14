@@ -151,6 +151,7 @@ void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateCPUCacheJsonConfig(FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -231,6 +232,7 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
         .cs = "Mezipaměť CPU",
         .de = "CPU-Cache",
         .es = "Caché de la CPU",
+        .fi = "Suorittimen Välimuisti",
         .fr = "Cache CPU",
         .gl = "Caché da CPU",
         .he = "מטמון מעבד",

@@ -62,6 +62,7 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -118,6 +119,7 @@ FFModuleBaseInfo ffChassisModuleInfo = {
         .cs = "Skříň",
         .de = "Gehäuse",
         .es = "Chasis",
+        .fi = "Alusta",
         .fr = "Châssis",
         .gl = "Chasis",
         .he = "מארז",

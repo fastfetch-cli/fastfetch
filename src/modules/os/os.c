@@ -117,6 +117,7 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -181,6 +182,7 @@ FFModuleBaseInfo ffOSModuleInfo = {
         .cs = "OS",
         .de = "Betriebssystem",
         .es = "Sistema operativo",
+        .fi = "Käyttöjärjestelmä",
         .fr = "Système d'exploitation",
         .gl = "Sistema operativo",
         .he = "מערכת הפעלה",

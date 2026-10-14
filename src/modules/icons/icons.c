@@ -56,6 +56,7 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateIconsJsonConfig(FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -102,6 +103,7 @@ FFModuleBaseInfo ffIconsModuleInfo = {
         .cs = "Ikony",
         .de = "Symbole",
         .es = "Iconos",
+        .fi = "Kuvakkeet",
         .fr = "Icônes",
         .gl = "Iconas",
         .he = "סמלים",

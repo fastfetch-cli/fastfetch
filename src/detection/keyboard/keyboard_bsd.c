@@ -1,6 +1,8 @@
 #include "keyboard.h"
+#include "common/debug.h"
 #include "common/io.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <usbhid.h>
@@ -15,6 +17,7 @@
 static const char* detectByIoctl(FFlist* devices) {
     keyboard_info_t kbdInfo;
     if (ioctl(STDIN_FILENO, KDGKBINFO, &kbdInfo) != 0) {
+        FF_DEBUG("ioctl(KDGKBINFO) failed: %s", strerror(errno));
         return "ioctl(KDGKBINFO) failed";
     }
 

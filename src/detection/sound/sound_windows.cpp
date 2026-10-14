@@ -1,5 +1,6 @@
 extern "C" {
 #include "sound.h"
+#include "common/debug.h"
 #include "common/windows/com.h"
 }
 #include "common/windows/unicode.hpp"
@@ -21,17 +22,23 @@ static void ffCoTaskMemFreeWrapper(void* pptr) {
 
 static const char* detectSoundDevice(FFlist* devices /* List of FFSoundDevice */, IMMDevice* immDevice, LPWSTR mainDeviceId) {
     FF_COTASK_AUTO_FREE LPWSTR immDeviceId = nullptr;
-    if (FAILED(immDevice->GetId(&immDeviceId))) {
+    HRESULT hr = immDevice->GetId(&immDeviceId);
+    if (FAILED(hr)) {
+        FF_DEBUG("immDevice->GetId() failed: %s", ffDebugHResult(hr));
         return "immDevice->GetId() failed";
     }
 
     FF_AUTO_RELEASE_COM_OBJECT IPropertyStore* immPropStore = nullptr;
-    if (FAILED(immDevice->OpenPropertyStore(STGM_READ, &immPropStore))) {
+    hr = immDevice->OpenPropertyStore(STGM_READ, &immPropStore);
+    if (FAILED(hr)) {
+        FF_DEBUG("immDevice->OpenPropertyStore() failed: %s", ffDebugHResult(hr));
         return "immDevice->OpenPropertyStore() failed";
     }
 
     DWORD immState;
-    if (FAILED(immDevice->GetState(&immState))) {
+    hr = immDevice->GetState(&immState);
+    if (FAILED(hr)) {
+        FF_DEBUG("immDevice->GetState() failed: %s", ffDebugHResult(hr));
         return "immDevice->GetState() failed";
     }
 
@@ -76,7 +83,9 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
 
     FF_AUTO_RELEASE_COM_OBJECT IMMDeviceEnumerator*  pEnum = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pEnum)))) {
+    HRESULT hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pEnum));
+    if (FAILED(hr)) {
+        FF_DEBUG("CoCreateInstance(CLSID_MMDeviceEnumerator) failed: %s", ffDebugHResult(hr));
         return "CoCreateInstance(CLSID_MMDeviceEnumerator) failed";
     }
 
@@ -85,7 +94,9 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
     {
         FF_AUTO_RELEASE_COM_OBJECT IMMDevice* pDefaultDevice = nullptr;
 
-        if (FAILED(pEnum->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDefaultDevice))) {
+        HRESULT hrDefault = pEnum->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDefaultDevice);
+        if (FAILED(hrDefault)) {
+            FF_DEBUG("GetDefaultAudioEndpoint() failed: %s", ffDebugHResult(hrDefault));
             return "GetDefaultAudioEndpoint() failed";
         }
 
@@ -93,19 +104,25 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices /* List of FF
             return detectSoundDevice(devices, pDefaultDevice, nullptr);
         }
 
-        if (FAILED(pDefaultDevice->GetId(&mainDeviceId))) {
+        hrDefault = pDefaultDevice->GetId(&mainDeviceId);
+        if (FAILED(hrDefault)) {
+            FF_DEBUG("pDefaultDevice->GetId() failed: %s", ffDebugHResult(hrDefault));
             return "pDefaultDevice->GetId() failed";
         }
     }
 
     FF_AUTO_RELEASE_COM_OBJECT IMMDeviceCollection* pDevices = nullptr;
 
-    if (FAILED(pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | (options->soundType & FF_SOUND_TYPE_ACTIVE ? 0 : DEVICE_STATE_DISABLED), &pDevices))) {
+    hr = pEnum->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | (options->soundType & FF_SOUND_TYPE_ACTIVE ? 0 : DEVICE_STATE_DISABLED), &pDevices);
+    if (FAILED(hr)) {
+        FF_DEBUG("EnumAudioEndpoints() failed: %s", ffDebugHResult(hr));
         return "EnumAudioEndpoints() failed";
     }
 
     uint32_t deviceCount;
-    if (FAILED(pDevices->GetCount(&deviceCount))) {
+    hr = pDevices->GetCount(&deviceCount);
+    if (FAILED(hr)) {
+        FF_DEBUG("pDevices->GetCount() failed: %s", ffDebugHResult(hr));
         return "pDevices->GetCount() failed";
     }
 

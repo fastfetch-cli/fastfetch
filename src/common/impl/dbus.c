@@ -2,6 +2,7 @@
 
 #ifdef FF_HAVE_DBUS
 
+    #include "common/debug.h"
     #include "common/thread.h"
     #include "common/strutil.h"
 
@@ -39,11 +40,13 @@ static const FFDBusLibrary* loadLib(void) {
 const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data) {
     data->lib = loadLib();
     if (data->lib == nullptr) {
+        FF_DEBUG("libdbus-1 could not be loaded");
         return "Failed to load DBus library";
     }
 
     data->connection = data->lib->ffdbus_bus_get(busType, nullptr);
     if (data->connection == nullptr) {
+        FF_DEBUG("dbus_bus_get(busType=%d) returned no connection", (int) busType);
         return "Failed to connect to DBus";
     }
 

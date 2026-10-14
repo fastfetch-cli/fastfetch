@@ -140,6 +140,7 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -212,6 +213,7 @@ FFModuleBaseInfo ffNetIOModuleInfo = {
         .cs = "Síťové I/O",
         .de = "Netzwerk I/O",
         .es = "E/S de la red",
+        .fi = "Verkon I/O",
         .fr = "E/S réseau",
         .gl = "E/S da rede",
         .he = "קלט/פלט רשת",

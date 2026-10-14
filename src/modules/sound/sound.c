@@ -127,6 +127,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -206,6 +207,7 @@ FFModuleBaseInfo ffSoundModuleInfo = {
         .cs = "Zvuk",
         .de = "Sound",
         .es = "Sonido",
+        .fi = "Ääni",
         .fr = "Son",
         .gl = "Son",
         .he = "קול",

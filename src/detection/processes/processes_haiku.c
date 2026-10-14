@@ -1,10 +1,13 @@
 #include "processes.h"
+#include "common/debug.h"
 
 #include <OS.h>
 
 const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
     system_info info;
-    if (get_system_info(&info) != B_OK) {
+    status_t status = get_system_info(&info);
+    if (status != B_OK) {
+        FF_DEBUG("Error getting system info: %d", (int) status);
         return "Error getting system info";
     }
 

@@ -35,7 +35,7 @@ jobs:
           sudo pkgin -y install clang cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick libva libvdpau
 
       - name: CMake configuration
-        run: CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} .
+        run: CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
 
       - name: CMake build
         run: cmake --build . --target package --verbose -j4

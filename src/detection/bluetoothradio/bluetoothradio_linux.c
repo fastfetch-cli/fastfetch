@@ -1,4 +1,5 @@
 #include "bluetoothradio.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 
 #ifdef FF_HAVE_DBUS
@@ -36,6 +37,7 @@ array [
 
 static const char* detectBluetoothProperty(FFBluetoothRadioResult* device, FFDBusData* dbus, DBusMessageIter* iter) {
     if (dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY) {
+        FF_DEBUG("Expected dict entry");
         return "Expected dict entry";
     }
 
@@ -43,6 +45,7 @@ static const char* detectBluetoothProperty(FFBluetoothRadioResult* device, FFDBu
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
     if (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING) {
+        FF_DEBUG("Expected dict entry key to be a string");
         return "Expected dict entry key to be a string";
     }
 
@@ -82,17 +85,20 @@ static const char* detectBluetoothRoot(FFBluetoothRadioResult* device, const cha
 
     DBusMessage* properties = ffDBusGetMethodReply(dbus, "org.bluez", objPath, "org.freedesktop.DBus.Properties", "GetAll", "org.bluez.Adapter1", nullptr);
     if (!properties) {
+        FF_DEBUG("Failed to call org.freedesktop.DBus.Properties.GetAll");
         return "Failed to call org.freedesktop.DBus.Properties.GetAll";
     }
 
     DBusMessageIter rootIter;
     if (!dbus->lib->ffdbus_message_iter_init(properties, &rootIter)) {
         dbus->lib->ffdbus_message_unref(properties);
+        FF_DEBUG("Failed to get root iterator of org.freedesktop.DBus.Properties.GetAll");
         return "Failed to get root iterator of org.freedesktop.DBus.Properties.GetAll";
     }
 
     if (dbus->lib->ffdbus_message_iter_get_arg_type(&rootIter) != DBUS_TYPE_ARRAY) {
         dbus->lib->ffdbus_message_unref(properties);
+        FF_DEBUG("Expected array");
         return "Expected array";
     }
 
@@ -110,6 +116,7 @@ static const char* detectBluetoothRoot(FFBluetoothRadioResult* device, const cha
 static const char* detectBluetooth(FFlist* devices) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
     if (dirp == nullptr) {
+        FF_DEBUG("opendir(\"/sys/class/bluetooth\") failed: %s", strerror(errno));
         return "Failed to open /sys/class/bluetooth";
     }
 
@@ -148,6 +155,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
     return detectBluetooth(devices);
 #else
     FF_UNUSED(devices)
+    FF_DEBUG("Fastfetch was compiled without DBus support");
     return "Fastfetch was compiled without DBus support";
 #endif
 }

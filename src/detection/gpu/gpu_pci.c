@@ -60,62 +60,78 @@ static const FFstrbuf* loadPciIds() {
     return &pciids;
 }
 
-static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu) {
+void ffGPUParsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu) {
     FF_DEBUG("Searching pci.ids for vendor=0x%04x device=0x%04x subclass=0x%02x", vendor, device, subclass);
     if (content->length) {
+        const char* const fileEnd = content->chars + content->length;
         char buffer[32];
 
         // Search for vendor
         uint32_t len = (uint32_t) snprintf(buffer, ARRAY_SIZE(buffer), "\n%04x  ", vendor);
-        char* start = (char*) memmem(content->chars, content->length, buffer, len);
-        char* end = content->chars + content->length;
+        const char* start = memmem(content->chars, content->length, buffer, len);
         if (start) {
             FF_DEBUG("Found PCI vendor entry for 0x%04x", vendor);
             start += len;
-            end = memchr(start, '\n', (uint32_t) (end - start));
-            if (!end) {
-                end = content->chars + content->length;
+            const char* vendorEnd = memchr(start, '\n', (size_t) (fileEnd - start));
+            if (!vendorEnd) {
+                vendorEnd = fileEnd;
             }
             if (!gpu->vendor.length) {
-                ffStrbufSetNS(&gpu->vendor, (uint32_t) (end - start), start);
+                ffStrbufSetNS(&gpu->vendor, (uint32_t) (vendorEnd - start), start);
             }
 
-            start = end;     // point to '\n' of vendor
-            end = start + 1; // point to start of devices
-            // find the start of next vendor
-            while (end[0] == '\t' || end[0] == '#') {
-                end = strchr(end, '\n');
-                if (!end) {
-                    end = content->chars + content->length;
-                    break;
-                } else {
-                    end++;
-                }
-            }
+            // Search for device. Device lines are `\tXXXX  name`; their ids only
+            // grow inside a vendor block, so one linear walk over the block is
+            // enough: compare in place and stop either at the line starting the
+            // next vendor, or -- because the ids are sorted -- right after the
+            // first id greater than the one we are looking for. Doing the compare
+            // here also removes the need to know where the block ends, so no
+            // length is ever derived from a pointer that may have run past it.
+            // pci.ids only asks contributors to keep the entries sorted, and it
+            // is strictly lowercase hex, so the byte comparison below matches the
+            // numeric order. A block that is not sorted (only reachable via
+            // FF_CUSTOM_PCI_IDS_PATH) makes us give up early and fall back to the
+            // synthesized name below.
+            char deviceId[8];
+            snprintf(deviceId, ARRAY_SIZE(deviceId), "%04x", device);
+            [[maybe_unused]] bool found = false;
+            for (const char* p = vendorEnd < fileEnd ? vendorEnd + 1 : fileEnd;
+                 p < fileEnd && (*p == '\t' || *p == '#');) {
+                if (*p == '\t' && fileEnd - p >= 7) {
+                    int order = memcmp(p + 1, deviceId, 4);
+                    if (order > 0) {
+                        break;
+                    }
+                    if (order == 0 && p[5] == ' ' && p[6] == ' ') {
+                        FF_DEBUG("Found PCI device entry for 0x%04x:0x%04x", vendor, device);
+                        start = p + 7;
+                        const char* end = memchr(start, '\n', (size_t) (fileEnd - start));
+                        if (!end) {
+                            end = fileEnd;
+                        }
 
-            // Search for device
-            len = (uint32_t) snprintf(buffer, ARRAY_SIZE(buffer), "\n\t%04x  ", device);
-            start = memmem(start, (size_t) (end - start), buffer, len);
-            if (start) {
-                FF_DEBUG("Found PCI device entry for 0x%04x:0x%04x", vendor, device);
-                start += len;
-                end = memchr(start, '\n', (uint32_t) (end - start));
-                if (!end) {
-                    end = content->chars + content->length;
-                }
-
-                char* closingBracket = end - 1;
-                if (*closingBracket == ']') {
-                    char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
-                    if (openingBracket) {
-                        openingBracket++;
-                        ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                        const char* closingBracket = end - 1;
+                        if (*closingBracket == ']') {
+                            const char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
+                            if (openingBracket) {
+                                openingBracket++;
+                                ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                            }
+                        }
+                        if (!gpu->name.length) {
+                            ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
+                        }
+                        found = true;
+                        break;
                     }
                 }
-                if (!gpu->name.length) {
-                    ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
+                p = memchr(p, '\n', (size_t) (fileEnd - p));
+                if (!p) {
+                    break;
                 }
-            } else {
+                p++;
+            }
+            if (!found) {
                 FF_DEBUG("PCI device entry 0x%04x:0x%04x was not found in pci.ids", vendor, device);
             }
         } else {
@@ -231,7 +247,7 @@ void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, 
         return;
     }
 #endif
-    parsePciIdsFile(loadPciIds(), subclass, vendor, device, gpu);
+    ffGPUParsePciIdsFile(loadPciIds(), subclass, vendor, device, gpu);
     FF_DEBUG("Resolved PCI GPU name from pci.ids: vendor='%s', name='%s'", gpu->vendor.chars, gpu->name.chars);
 }
 

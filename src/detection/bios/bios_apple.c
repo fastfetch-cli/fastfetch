@@ -1,5 +1,6 @@
 #include "bios.h"
 #include "common/apple/cf_helpers.h"
+#include "common/debug.h"
 
 #include <IOKit/IOKitLib.h>
 
@@ -10,11 +11,13 @@ const char* ffDetectBios(FFBiosResult* bios) {
     // For Intel
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t deviceRom = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/rom");
     if (!deviceRom) {
+        FF_DEBUG("IODeviceTree:/rom not found");
         return "IODeviceTree:/rom not found";
     }
 
     FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef deviceRomProps = nullptr;
     if (IORegistryEntryCreateCFProperties(deviceRom, &deviceRomProps, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess) {
+        FF_DEBUG("IORegistryEntryCreateCFProperties(deviceRom) failed");
         return "IORegistryEntryCreateCFProperties(deviceRom) failed";
     }
 
@@ -28,6 +31,7 @@ const char* ffDetectBios(FFBiosResult* bios) {
     // For arm64
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t device = IORegistryEntryFromPath(MACH_PORT_NULL, "IODeviceTree:/");
     if (!device) {
+        FF_DEBUG("IODeviceTree:/ not found");
         return "IODeviceTree:/ not found";
     }
 

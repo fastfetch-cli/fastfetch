@@ -84,6 +84,7 @@ void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -142,6 +143,7 @@ FFModuleBaseInfo ffDNSModuleInfo = {
         .cs = "DNS",
         .de = "DNS",
         .es = "DNS",
+        .fi = "DNS",
         .fr = "DNS",
         .gl = "DNS",
         .he = "DNS",

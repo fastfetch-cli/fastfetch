@@ -36,7 +36,7 @@ jobs:
           sudo pkg install -y llvm cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl egl opencl ocl-icd v4l_compat chafa libelf lua54 libva libvdpau
 
       - name: CMake configuration
-        run: env CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} .
+        run: env CC=clang cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
 
       - name: CMake build
         run: cmake --build . --target package --verbose -j4

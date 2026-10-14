@@ -2,6 +2,7 @@
 #include "common/processing.h"
 #include "common/strutil.h"
 #include "common/path.h"
+#include "common/windows/folders.h"
 #include "common/windows/unicode.h"
 #include "common/windows/registry.h"
 #include "common/mallocHelper.h"
@@ -11,7 +12,6 @@
 #include <windows.h>
 #include "common/windows/nt.h"
 #include <ntstatus.h>
-#include <shlobj.h>
 
 static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t* ignore) {
     FF_AUTO_CLOSE_FD HANDLE dfd = CreateFileA(searchPath, FILE_LIST_DIRECTORY | SYNCHRONIZE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
@@ -120,11 +120,9 @@ static void detectScoop(FFPackagesResult* result) {
             ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "global_path"));
         }
         if (scoopPath.length == 0) {
-            PWSTR pPath = nullptr;
-            if (SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_ProgramData, KF_FLAG_DEFAULT, nullptr, &pPath))) {
-                ffStrbufSetWS(&scoopPath, pPath);
-                CoTaskMemFree(pPath);
-            }
+            // Leaving `scoopPath` empty when the lookup fails makes `getNumElements` report 0, which
+            // is what the shell API failing used to do as well.
+            ffGetKnownFolderPath(FF_KNOWN_FOLDER_PROGRAM_DATA, &scoopPath);
             ffStrbufAppendS(&scoopPath, "/scoop");
         }
         ffStrbufAppendS(&scoopPath, "/apps/");

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21.0) # C_STANDARD C17 and C23
 
 project(fastfetch
-    VERSION 2.69.0
+    VERSION 2.70.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -60,6 +60,7 @@ endif()
 
 include(CheckIncludeFile)
 include(CheckFunctionExists)
+include(CheckSymbolExists)
 
 if(LINUX)
     CHECK_INCLUDE_FILE("linux/version.h" HAVE_LINUX_VERSION_H)
@@ -92,8 +93,6 @@ cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD O
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
-cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
@@ -123,7 +122,6 @@ option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" 
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 option(ENABLE_LUA "Enable lua scripting for format strings" ON)
-option(ENABLE_QUICKJS "Enable quickjs scripting for format strings" OFF)
 option(ENABLE_LIBZFS "Enable libzfs" ON)
 option(ENABLE_WCWIDTH "Detect wide-width characters with wcwidth when calculating logo and separator width. Disable for a smaller and slightly faster build, but logos containing CJK/emoji may be measured too narrow and render incorrectly. Such usecases are uncommon." ON)
 set(DEFAULT_STRUCTURE "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Swap:Disk:LocalIp:Battery:PowerAdapter:Locale:Break:Colors" CACHE STRING "Default module structure for detection")
@@ -283,6 +281,22 @@ if(ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
 endif()
 
+# Release and MinSizeRel drop the symbol table and the unwind metadata; Debug and RelWithDebInfo keep
+# both, so those stay fully debuggable. CMake does not strip MinSizeRel on its own.
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    if(NOT APPLE) # ld: warning: -s is obsolete
+        # The symbol table is dead weight: 437 KB (16%) of a MinGW build, 91 KB (3%) of a GCC build.
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-s")
+    endif()
+
+    # Drops .eh_frame / .eh_frame_hdr on ELF (74 KB) and .pdata / .xdata on PE (26 KB). Every C++
+    # translation unit here is built with -fno-exceptions -fno-rtti and no source file contains a
+    # single try / catch, so no exception can ever unwind through these frames. The only loss is
+    # backtrace() / gdb / perf / crash-dump stack walking in a release binary.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-asynchronous-unwind-tables")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-asynchronous-unwind-tables")
+endif()
+
 #######################
 # Target FS structure #
 #######################
@@ -440,7 +454,29 @@ fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
+    # `mediaremoted` serves now-playing data only to clients whose bundle id starts
+    # with "com.apple.": -[MRDMediaRemoteClient isAllowedAccessToDataFromPlayerPath:]
+    # accepts the 0x200 entitlement bit either for the private
+    # com.apple.mediaremote.now-playing-read-access entitlement or for that prefix,
+    # and it derives the client's identity from the code signature / XPC audit token
+    # rather than from the process's own NSBundle. Both the embedded
+    # CFBundleIdentifier and the ad-hoc signing identifier below therefore have to
+    # carry the prefix; keep them in sync through these variables.
+    set(FASTFETCH_BUNDLE_ID "com.apple.fastfetch")
+    set(FLASHFETCH_BUNDLE_ID "com.apple.flashfetch")
+    # configure_file() inputs are not configure dependencies on their own, so
+    # without this an edit to Info.plist.in never even regenerates Info.plist.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/common/apple/Info.plist.in")
+    # Each executable gets its own plist: the file is embedded with -sectcreate and read
+    # back by the system as the bundle id, so two targets sharing one would leave one of
+    # them advertising an identifier that its code signature does not match.
+    set(BUNDLE_ID "${FASTFETCH_BUNDLE_ID}")
     configure_file(src/common/apple/Info.plist.in Info.plist @ONLY)
+    if(BUILD_FLASHFETCH)
+        set(BUNDLE_ID "${FLASHFETCH_BUNDLE_ID}")
+        configure_file(src/common/apple/Info.plist.in Info.plist.flashfetch @ONLY)
+    endif()
+    unset(BUNDLE_ID)
 endif()
 
 ####################
@@ -463,6 +499,7 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 
 set(LIBFASTFETCH_SRC
     src/common/impl/commandoption.c
+    src/common/impl/debug.c
     src/common/impl/duration.c
     src/common/impl/font.c
     src/common/impl/format.c
@@ -492,6 +529,7 @@ set(LIBFASTFETCH_SRC
     src/common/impl/FFPlatform.c
     src/common/impl/smbios.c
     src/common/impl/strutil.c
+    src/common/impl/zlib.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
@@ -640,9 +678,11 @@ if(LINUX)
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/android/applabel.c
         src/common/android/binder.c
         src/common/android/dex.c
         src/common/android/package.c
+        src/common/android/zip.c
         src/common/impl/dbus.c
         src/common/impl/io_unix.c
         src/common/impl/netif_linux.c
@@ -707,6 +747,7 @@ elseif(ANDROID)
         src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
+        src/detection/sound/sound_android.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -1035,6 +1076,7 @@ elseif(APPLE)
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
+        src/detection/localip/localip_apple.c
         src/detection/gamepad/gamepad_apple.m
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
@@ -1094,10 +1136,10 @@ elseif(WIN32)
         src/common/impl/processing_windows.c
         src/common/impl/FFPlatform_windows.c
         src/common/impl/binary_windows.c
-        src/common/impl/debug_windows.c
         src/common/impl/kmod_windows.c
         src/common/windows/getline.c
         src/common/windows/com.c
+        src/common/windows/folders.c
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
@@ -1533,11 +1575,15 @@ if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/opt/local/lib")
 endif()
 
+# Termux installs the libraries fastfetch dlopens -- freetype among them -- under TARGET_DIR_ROOT, which
+# is not on the Android linker's default search path (DT_RUNPATH, LD_LIBRARY_PATH and the default
+# namespace). Termux's own clang injects -rpath=$PREFIX/lib into every binary it links, so a build made
+# inside Termux finds them; a plain NDK build, which is what the CI does, does not.
 if(ANDROID)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib64 -Wl,-rpath,/system/lib64")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${TARGET_DIR_ROOT}/lib -Wl,-rpath,/vendor/lib64 -Wl,-rpath,/system/lib64")
     else()
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib -Wl,-rpath,/system/lib")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${TARGET_DIR_ROOT}/lib -Wl,-rpath,/vendor/lib -Wl,-rpath,/system/lib")
     endif()
 endif()
 
@@ -1645,6 +1691,13 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     unset(CMAKE_REQUIRED_DEFINITIONS)
 endif()
 
+if(OpenBSD)
+    check_symbol_exists("getexecpath" "unistd.h" HAVE_GETEXECPATH)
+    if(HAVE_GETEXECPATH)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_GETEXECPATH=1)
+    endif()
+endif()
+
 if(HAVE_PIPE2)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PIPE2)
 endif()
@@ -1720,9 +1773,18 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME) # [CMAKE_TARGET_NAME]
                     endif()
                 endif()
             else()
-                set(${VARNAME}_INCLUDE_DIRS ${${CMAKE_NAME}_INCLUDE_DIRS})
-                set(${VARNAME}_LIBRARIES ${${CMAKE_NAME}_LIBRARIES})
-                set(${VARNAME}_CFLAGS_OTHER ${${CMAKE_NAME}_CFLAGS_OTHER})
+                # find_package modules disagree on how they name their result variables. Newer ones
+                # export <PackageName>_* (FindVulkan sets Vulkan_INCLUDE_DIRS), but older ones only
+                # set the upper-case form: FindFreetype sets FREETYPE_INCLUDE_DIRS and
+                # FREETYPE_LIBRARIES and has no Freetype_INCLUDE_DIRS at all. Assigning
+                # unconditionally would therefore wipe the include path the module had just
+                # provided, and the package would be "found" with nothing to compile against.
+                # Fill in only the gaps.
+                foreach(_FF_SUFFIX INCLUDE_DIRS LIBRARIES CFLAGS_OTHER)
+                    if(NOT DEFINED ${VARNAME}_${_FF_SUFFIX} OR "${${VARNAME}_${_FF_SUFFIX}}" STREQUAL "")
+                        set(${VARNAME}_${_FF_SUFFIX} ${${CMAKE_NAME}_${_FF_SUFFIX}})
+                    endif()
+                endforeach()
             endif()
         endif()
     endif()
@@ -1841,26 +1903,15 @@ ff_lib_enable(OPENCL
     "OpenCL"
     "OpenCL"
 )
+# `Freetype` is the module CMake ships (Modules/FindFreetype.cmake); there is no FindFreeType2, so
+# this name never resolved and only pkg-config could ever turn freetype on.
 ff_lib_enable(FREETYPE
     "freetype2"
-    "FreeType2"
-)
-ff_lib_enable(PULSE
-    "libpulse"
-    "Pulse"
-)
-ff_lib_enable(DDCUTIL
-    "ddcutil"
-    "Ddcutil"
+    "Freetype"
 )
 ff_lib_enable(ELF
     "libelf"
     "libelf"
-)
-ff_lib_enable(QUICKJS
-    "qjs"
-    "qjs"
-    "qjs"
 )
 if(ENABLE_LUA)
     # Lua is a special case since its CMake config does not follow the usual pattern
@@ -1954,10 +2005,10 @@ elseif(APPLE)
         PRIVATE "-framework SystemConfiguration"
         PRIVATE "-framework VideoToolbox"
 
-        PRIVATE "-weak_framework CoreDisplay"
         PRIVATE "-F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices"
         PRIVATE "-weak_framework MediaRemote"
+        PRIVATE "-weak_framework SkyLight"
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
@@ -2155,7 +2206,17 @@ if(NOT WIN32)
         endif()
     endif()
     if(NOT ENABLE_WORDEXP)
-        message(STATUS "wordexp.h not found or disabled, glob used instead")
+        # wordexp.h is not the only thing that can be missing. bionic declares glob() and globfree()
+        # only from API 28, so an NDK build aimed at 24 has neither and a fallback that assumed glob
+        # would have nothing to call. The symbol is what has to be checked, not the header: <glob.h>
+        # is present at every level, it just declares nothing below 28.
+        check_symbol_exists("glob" "glob.h" HAVE_GLOB)
+        if(HAVE_GLOB)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_GLOB=1)
+            message(STATUS "wordexp.h not found or disabled, glob used instead")
+        else()
+            message(STATUS "neither wordexp.h nor glob.h is usable, config paths will not be expanded")
+        endif()
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
@@ -2214,12 +2275,30 @@ set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
+    # version.rc embeds manifest.xml (RT_MANIFEST) and logo.ico (ICON) as *resource
+    # references*, not as #includes, so the resource compiler never reports them and
+    # CMake would keep a stale .res when only the manifest or the icon changes. Both
+    # are plain files rather than generated ones, so declare them by hand; the source
+    # file property is per-path, which is why flashfetch below needs no repeat.
+    set_property(SOURCE src/common/windows/version.rc APPEND PROPERTY OBJECT_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/manifest.xml"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/logo.ico"
+    )
     target_sources(fastfetch
         PRIVATE src/common/windows/version.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+    )
+    # `LINKER:` options are handed to ld verbatim and are not registered as build
+    # dependencies, so without this ninja never relinks when Info.plist changes.
+    set_property(TARGET fastfetch APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Info.plist")
+    # ld derives the ad-hoc code-signing identifier from the output file name and
+    # ignores the embedded CFBundleIdentifier, so set it explicitly.
+    add_custom_command(TARGET fastfetch POST_BUILD
+        COMMAND codesign --force --sign - --identifier "${FASTFETCH_BUNDLE_ID}" "$<TARGET_FILE:fastfetch>"
+        VERBATIM
     )
 endif()
 
@@ -2246,8 +2325,15 @@ if (BUILD_FLASHFETCH)
             PRIVATE src/common/windows/version.rc
         )
     elseif(APPLE)
+        # flashfetch embeds its own plist so that its CFBundleIdentifier matches the
+        # identifier it is signed with below (see the APPLE block near the top).
         target_link_options(flashfetch
-            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist.flashfetch
+        )
+        set_property(TARGET flashfetch APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/Info.plist.flashfetch")
+        add_custom_command(TARGET flashfetch POST_BUILD
+            COMMAND codesign --force --sign - --identifier "${FLASHFETCH_BUNDLE_ID}" "$<TARGET_FILE:flashfetch>"
+            VERBATIM
         )
     endif()
 
@@ -2274,15 +2360,6 @@ if (BUILD_TESTS)
     target_link_libraries(fastfetch-test-logo
         PRIVATE libfastfetch
     )
-
-    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_executable(fastfetch-test-cpu
-            tests/cpu.c
-        )
-        target_link_libraries(fastfetch-test-cpu
-            PRIVATE libfastfetch
-        )
-    endif()
 
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
@@ -2396,10 +2473,14 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-gpu-pci
+        tests/gpu_pci.c
+    )
+    target_link_libraries(fastfetch-test-gpu-pci
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
-    if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        add_test(NAME test-cpu COMMAND fastfetch-test-cpu)
-    endif()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
@@ -2418,6 +2499,7 @@ if (BUILD_TESTS)
     add_test(NAME test-temps COMMAND fastfetch-test-temps)
     add_test(NAME test-endian COMMAND fastfetch-test-endian)
     add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
+    add_test(NAME test-gpu-pci COMMAND fastfetch-test-gpu-pci)
 endif()
 
 ##################

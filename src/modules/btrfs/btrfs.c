@@ -141,6 +141,7 @@ void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBtrfsJsonConfig(FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -210,6 +211,7 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
         .cs = "BTRFS",
         .de = "BTRFS",
         .es = "BTRFS",
+        .fi = "BTRFS",
         .fr = "BTRFS",
         .gl = "BTRFS",
         .he = "BTRFS",

@@ -174,6 +174,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_str(doc, module, "type", "top");
@@ -271,6 +272,7 @@ FFModuleBaseInfo ffTopModuleInfo = {
         .cs = "Nejvytíženější procesy",
         .de = "Top-Prozesse",
         .es = "Procesos principales",
+        .fi = "Raskaimmat Prosessit",
         .fr = "Processus principaux",
         .gl = "Procesos principais",
         .he = "התהליכים המובילים",
@@ -281,7 +283,7 @@ FFModuleBaseInfo ffTopModuleInfo = {
         .pl = "Najaktywniejsze procesy",
         .pt = "Processos principais",
         .ru = "Топ процессов",
-        .tr = "En yoğun işlemler",
+        .tr = "En Yoğun Süreçler",
         .uk = "Найактивніші процеси",
         .vi = "Tiến trình hàng đầu",
         .zh_CN = "进程排行",

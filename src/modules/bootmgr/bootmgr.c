@@ -63,6 +63,7 @@ void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBootmgrJsonConfig(FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -111,6 +112,7 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
         .cs = "Správce spouštění",
         .de = "Boot-Manager",
         .es = "Gestor de arranque",
+        .fi = "Käynnistyslataaja",
         .fr = "Gestionnaire de démarrage",
         .gl = "Xestor de arranque",
         .he = "מנהל אתחול",

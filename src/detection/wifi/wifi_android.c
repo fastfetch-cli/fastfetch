@@ -109,17 +109,18 @@
 // more accurate -- pays nothing for it.
 //
 // Three things about the call are positional rather than negotiated, and all three were measured
-// on an Android 16 device and an Android 11 device:
+// across the Android 11, 13, 16 and 17 devices:
 //
 //   * The transaction code is a build-time constant of the `.aidl` (`getConnectionInfo` is 29 on
-//     Android 11 and 41 on Android 16) -- see common/android/dex.h.
+//     Android 11, 36 on Android 13 and 41 on Android 16 and 17) -- see common/android/dex.h.
 //   * The reply layout drifts, and not only by release. Android 12 dropped the duplicate length word
-//     that Android 11 and 10 wrote in front of the SSID octets, and the Android 16 device fills an
-//     int between the transmit and the receive speed that the Android 11 device leaves out -- while
-//     AOSP's own Android 16 writes the head exactly the Android 11 way, so that one int is a vendor
-//     addition rather than a release difference. Frequency is the only channel centre in the head, so
-//     it is located by value, with the whole result validated before it is used. A wrong guess shows
-//     up as a rejected layout, not as a plausible wrong number.
+//     that Android 11 and 10 wrote in front of the SSID octets, and the Android 17 device writes a
+//     word of its own between the link speed and the transmit speed that the Android 11 and 13
+//     devices leave out -- a vendor addition rather than a release difference, since AOSP's own
+//     Android 16 writes the head the Android 11 way. Frequency is the only channel centre in the
+//     head, so it is located by value, with the whole result validated before it is used, and the
+//     two direction specific speeds are read as its neighbours. A wrong guess shows up as a
+//     rejected layout, not as a plausible wrong number.
 //   * The tail of the parcel, which holds the Wi-Fi standard, is not laid out the same way by every
 //     vendor: the Android 11 device carries three words there that AOSP's own Android 11
 //     does not. It is located by shape for that reason.
@@ -171,13 +172,14 @@ typedef enum FFWifiAndroidRadioState : int32_t
 } FFWifiAndroidRadioState;
 
 // An AIDL reply opens with the exception code and, for a Parcelable return, a non-null marker;
-// WifiInfo itself then starts at 8. The network id, the RSSI and the link speed have held those
-// offsets from Android 9 to 16, and the transmit speed joined them in Android 10 without moving
-// since, so all four are read at fixed offsets. Everything after them is located by shape.
+// WifiInfo itself then starts at 8. The network id, the RSSI and the link speed are the first three
+// fields `writeToParcel` writes, so nothing a release or a vendor adds behind them can move them --
+// they have held those offsets from Android 9 to 17 and are read there. The two direction specific
+// speeds sit behind them but are located from the frequency instead, because a vendor does write a
+// word of its own in front of that pair: see the note at FF_WIFI_ANDROID_FREQ_TX_LINK_SPEED.
 #define FF_WIFI_ANDROID_OFF_NET_ID 8
 #define FF_WIFI_ANDROID_OFF_RSSI 12
 #define FF_WIFI_ANDROID_OFF_LINK_SPEED 16
-#define FF_WIFI_ANDROID_OFF_TX_LINK_SPEED 20
 
 // A `WifiInfo` with no connection to describe carries the sentinels for the two fields that are
 // always at a fixed offset: -1 for a network id it does not have and -127 for a signal it cannot
@@ -206,11 +208,15 @@ typedef enum FFWifiAndroidRadioState : int32_t
 #define FF_WIFI_ANDROID_FREQ_SSID_BASE_NO_IP 0x08
 #define FF_WIFI_ANDROID_SSID_LENGTH 0x04
 
-// The receive speed is the word in front of Frequency; the transmit speed is the word after the link
-// speed. The Android 16 device writes one extra word between those two that AOSP does not -- it repeats the
-// transmit speed -- so the receive speed can only be reached from Frequency, and Frequency cannot be
-// reached by stepping over the two link speeds. Both were checked against `cmd wifi status` at the
-// same moment: 131/219 on the Android 16 device, 86/-1 on the Android 11 device.
+// The transmit speed and the receive speed are the two words in front of Frequency, in that order:
+// `mTxLinkSpeed, mRxLinkSpeed, mFrequency` are written back to back by every head this file has
+// been checked against, from Android 11 through 17. The pair is read from Frequency rather than
+// stepped to from the link speed, because the Android 17 device writes a word of its own between
+// the link speed and the transmit speed: its dex names that word `mCurrentLinkSpeed`, so the word
+// after the link speed is not the transmit speed there and the pair sits one word further along.
+// Both were checked against `cmd wifi status` at the same moment: 131/219 on the Android 16 device,
+// 86/-1 on the Android 11 device.
+#define FF_WIFI_ANDROID_FREQ_TX_LINK_SPEED 0x08
 #define FF_WIFI_ANDROID_FREQ_RX_LINK_SPEED 0x04
 #define FF_WIFI_ANDROID_SSID 0x08        // Android 12 and later
 #define FF_WIFI_ANDROID_SSID_LEGACY 0x0c // Android 11 and older
@@ -643,7 +649,7 @@ static void debugDumpReply(const uint8_t* data, size_t size) {
 #endif
 
 static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiAndroidConnection* connection) {
-    if (size < FF_WIFI_ANDROID_OFF_TX_LINK_SPEED + 4) {
+    if (size < FF_WIFI_ANDROID_FREQ_SCAN_FROM + 4) {
         FF_DEBUG("The reply is %zu bytes, too short to hold a WifiInfo", size);
         return "The reply is too short to hold a WifiInfo";
     }
@@ -666,12 +672,11 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
         FF_DEBUG("The reply is %zu bytes and carries no WifiInfo", size);
         return nullptr;
     }
-    FF_DEBUG("Reply is %zu bytes: netId %d, rssi %d, link speed %d, tx link speed %d",
+    FF_DEBUG("Reply is %zu bytes: netId %d, rssi %d, link speed %d",
         size,
         ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_NET_ID),
         ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_RSSI),
-        ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_LINK_SPEED),
-        ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_TX_LINK_SPEED));
+        ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_LINK_SPEED));
 
     // The two orders WifiSsid has written its length in: once before the octets on Android 11 and
     // older, not at all on Android 12 and later, which leaves the octets one word earlier. The one
@@ -755,7 +760,7 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
         connection->frequency = frequency;
         connection->rssi = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_RSSI);
         connection->linkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_LINK_SPEED);
-        connection->txLinkSpeed = ffBinderReadI32(data, size, FF_WIFI_ANDROID_OFF_TX_LINK_SPEED);
+        connection->txLinkSpeed = ffBinderReadI32(data, size, base - FF_WIFI_ANDROID_FREQ_TX_LINK_SPEED);
         connection->rxLinkSpeed = ffBinderReadI32(data, size, base - FF_WIFI_ANDROID_FREQ_RX_LINK_SPEED);
 
         findStrings(data, size, stringsFrom, connection);
@@ -777,9 +782,9 @@ static const char* parseConnectionInfo(const uint8_t* data, size_t size, FFWifiA
         if (!findSecurityType(data, size, connection)) {
             FF_DEBUG("No security type could be located in this reply, so the field stays empty");
         }
-        FF_DEBUG("Standard %d (%s), rx link speed %d, connected %s",
-            connection->standard, wifiStandardName(connection->standard) ?: "unknown", connection->rxLinkSpeed,
-            connection->connected ? "yes" : "no");
+        FF_DEBUG("Standard %d (%s), tx link speed %d, rx link speed %d, connected %s",
+            connection->standard, wifiStandardName(connection->standard) ?: "unknown", connection->txLinkSpeed,
+            connection->rxLinkSpeed, connection->connected ? "yes" : "no");
         return nullptr;
     }
 
@@ -827,14 +832,45 @@ static const char* wifiName(const char* value, bool withheld) {
     return withheld ? FF_WIFI_ANDROID_REDACTED : "";
 }
 
-// Calls a method of the service that takes no arguments and answers with an int. The transaction
-// code comes out of the jar the same way `getConnectionInfo`'s does, so a release that does not
-// declare the method answers UNKNOWN_TRANSACTION instead of a number that means something else.
-static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* transactionField, int32_t* result) {
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_WIFI_ANDROID_JAR, FF_WIFI_ANDROID_STUB, transactionField, &transaction);
+// Every transaction code this module sends, resolved from the device's own jar in one walk. They are
+// asked for together because the walk is dominated by the dex's type table and both codes sit in the
+// same class of the same entry -- see common/android/dex.h.
+typedef struct FFWifiAndroidCodes {
+    int32_t getConnectionInfo;
+    int32_t getWifiEnabledState;
+} FFWifiAndroidCodes;
+
+// Resolves both codes and reports the one outcome the module cannot work around: a jar that does not
+// declare `getConnectionInfo` has no connection to report. The radio state is a refinement -- the
+// module already carries on when the service will not answer it -- so it is allowed to come back as
+// the sentinel, and what that costs is decided where it is used rather than here.
+static const char* resolveCodes(FFWifiAndroidCodes* codes) {
+    const FFDexStaticIntRequest requests[] = {
+        { FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_CONNECTION_INFO, &codes->getConnectionInfo },
+        { FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &codes->getWifiEnabledState },
+    };
+
+    const char* error = ffDexStaticInts(FF_WIFI_ANDROID_JAR, requests, ARRAY_SIZE(requests));
     if (error != nullptr) {
+        FF_DEBUG("Reading the transaction codes from \"%s\" failed: %s", FF_WIFI_ANDROID_JAR, error);
         return error;
+    }
+    if (codes->getConnectionInfo == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The Wifi service does not declare getConnectionInfo");
+        return "The Wifi service does not declare getConnectionInfo";
+    }
+    return nullptr;
+}
+
+// Calls a method of the service that takes no arguments and answers with an int. `transaction` comes
+// out of the jar, and the sentinel the reader leaves for a code it could not find is caught here: a
+// release that does not declare the method is a message rather than a number that means something
+// else. `transactionField` is carried only to name the method in the debug output, which a release
+// build compiles out -- hence the attribute.
+static const char* callIntMethod(FFBinder* binder, uint32_t handle, [[maybe_unused]] const char* transactionField, int32_t transaction, int32_t* result) {
+    if (transaction == FF_DEX_STATIC_INT_UNRESOLVED) {
+        FF_DEBUG("The Wifi service does not declare that method");
+        return "The Wifi service does not declare that method";
     }
 
     uint8_t parcelBuffer[256];
@@ -843,7 +879,7 @@ static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* 
 
     uint8_t replyBuffer[64];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
+    const char* error = ffBinderTransact(binder, handle, (uint32_t) transaction, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -877,13 +913,15 @@ static const char* callIntMethod(FFBinder* binder, uint32_t handle, const char* 
 static const char* detectWithBinder(FFlist* result) {
     char package[FF_WIFI_ANDROID_PACKAGE_SIZE];
     if (!ffAndroidGetOwnPackage(package, sizeof(package))) {
+        FF_DEBUG("Cannot determine the package name of this process");
         return "Cannot determine the package name of this process";
     }
 
-    int32_t transaction = 0;
-    const char* error = ffDexStaticInt(FF_WIFI_ANDROID_JAR, FF_WIFI_ANDROID_STUB, FF_WIFI_ANDROID_GET_CONNECTION_INFO, &transaction);
+    // Resolved before the binder is opened, so that a jar which does not declare the method says so
+    // rather than the module failing later with a message about the transport.
+    FFWifiAndroidCodes codes = {};
+    const char* error = resolveCodes(&codes);
     if (error != nullptr) {
-        FF_DEBUG("Reading the transaction code from \"%s\" failed: %s", FF_WIFI_ANDROID_JAR, error);
         return error;
     }
 
@@ -901,7 +939,7 @@ static const char* detectWithBinder(FFlist* result) {
         return error;
     }
     FF_DEBUG("The \"%s\" service is handle %u, %s is transaction %d",
-        FF_WIFI_ANDROID_SERVICE, service.handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, transaction);
+        FF_WIFI_ANDROID_SERVICE, service.handle, FF_WIFI_ANDROID_GET_CONNECTION_INFO, codes.getConnectionInfo);
 
     uint8_t parcelBuffer[FF_WIFI_ANDROID_PARCEL_SIZE];
     FFBinderParcel parcel = ffBinderParcelCreate(parcelBuffer, sizeof(parcelBuffer));
@@ -912,7 +950,7 @@ static const char* detectWithBinder(FFlist* result) {
 
     uint8_t replyBuffer[FF_WIFI_ANDROID_REPLY_SIZE];
     FFBinderReply reply = ffBinderReplyCreate(replyBuffer, sizeof(replyBuffer));
-    error = ffBinderTransact(&binder, service.handle, (uint32_t) transaction, 0, &parcel, &reply);
+    error = ffBinderTransact(&binder, service.handle, (uint32_t) codes.getConnectionInfo, 0, &parcel, &reply);
     if (error != nullptr) {
         return error;
     }
@@ -939,7 +977,7 @@ static const char* detectWithBinder(FFlist* result) {
         // that is up. WIFI_STATE_DISABLING is a radio that is still up, so only the one value means
         // down, and WIFI_STATE_UNKNOWN is the service declining to say.
         int32_t state = 0;
-        const char* stateError = callIntMethod(&binder, service.handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, &state);
+        const char* stateError = callIntMethod(&binder, service.handle, FF_WIFI_ANDROID_GET_WIFI_ENABLED_STATE, codes.getWifiEnabledState, &state);
         if (stateError == nullptr && state != FF_WIFI_ANDROID_WIFI_STATE_UNKNOWN) {
             connection.up = state != FF_WIFI_ANDROID_WIFI_STATE_DISABLED;
             connection.upKnown = true;
@@ -953,6 +991,7 @@ static const char* detectWithBinder(FFlist* result) {
     // Nothing was found to report on at all. That is a device without a Wi-Fi interface rather than
     // one with a Wi-Fi that is off, which has a state to print by now.
     if (!connection.upKnown && !connection.connected) {
+        FF_DEBUG("No Wi-Fi interface is present");
         return "No Wi-Fi interface is present";
     }
 

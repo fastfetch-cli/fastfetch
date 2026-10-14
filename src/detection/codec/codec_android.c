@@ -1,6 +1,7 @@
 #include "codec.h"
 
 #include "common/android/api.h"
+#include "common/debug.h"
 #include "common/strutil.h"
 #include <media/NdkMediaCodec.h>
 
@@ -99,5 +100,6 @@ const char* ffDetectCodecNative(FFCodecOptions* options, FFlist* result /*list o
     // Reading the codec name is the only way to tell a hardware codec from a software one. Without
     // it there is nothing to report, and listing the codecs as if they were accelerated would be a
     // guess, so say why instead.
+    FF_DEBUG("AMediaCodec_getName() requires Android 9 (API 28)");
     return "AMediaCodec_getName() requires Android 9 (API 28)";
 }

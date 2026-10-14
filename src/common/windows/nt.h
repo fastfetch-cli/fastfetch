@@ -171,9 +171,6 @@ NTSTATUS NTAPI NtQuerySystemEnvironmentValueEx(
     _Out_opt_ PULONG Attributes // EFI_VARIABLE_*
 );
 
-NTSTATUS NTAPI RtlGUIDFromString(IN PCUNICODE_STRING GuidString, OUT GUID* Guid);
-NTSTATUS NTAPI RtlStringFromGUIDEx(IN const GUID* Guid, OUT PUNICODE_STRING GuidString, IN BOOLEAN AllocateGuidString);
-
 typedef struct _SYSTEM_SECUREBOOT_INFORMATION {
     BOOLEAN SecureBootEnabled;
     BOOLEAN SecureBootCapable;
@@ -720,6 +717,10 @@ static inline bool ffIsWindows11OrGreater() {
 static inline bool ffIsSystemBasicProcessInfoAvailable() { // Includes HandleCountInformation, which was added together
     // https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation#systembasicprocessinformation
     return SharedUserData->NtBuildNumber >= 26200; // MSDN says it was added in 26100.4770; ntdoc says 25H2
+}
+
+static inline bool ffIsFileFsFullSizeInformationExAvailable() {
+    return SharedUserData->NtBuildNumber >= 17763; // Windows 10 October 2018 Update (1809, REDSTONE5)
 }
 
 NTSYSAPI NTSTATUS NTAPI NtOpenProcessToken(
@@ -1422,3 +1423,23 @@ NTSYSAPI NTSTATUS NTAPI NtTerminateProcess(
 
 NTSYSAPI NTSTATUS NTAPI RtlAcquirePebLock(VOID);
 NTSYSAPI NTSTATUS NTAPI RtlReleasePebLock(VOID);
+
+typedef struct _FILE_FS_FULL_SIZE_INFORMATION_EX {
+    ULONGLONG ActualTotalAllocationUnits;
+    ULONGLONG ActualAvailableAllocationUnits;
+    ULONGLONG ActualPoolUnavailableAllocationUnits;
+    ULONGLONG CallerTotalAllocationUnits;
+    ULONGLONG CallerAvailableAllocationUnits;
+    ULONGLONG CallerPoolUnavailableAllocationUnits;
+    ULONGLONG UsedAllocationUnits;
+    ULONGLONG TotalReservedAllocationUnits;
+    ULONGLONG VolumeStorageReserveAllocationUnits;
+    ULONGLONG AvailableCommittedAllocationUnits;
+    ULONGLONG PoolAvailableAllocationUnits;
+    ULONG     SectorsPerAllocationUnit;
+    ULONG     BytesPerSector;
+} FILE_FS_FULL_SIZE_INFORMATION_EX, *PFILE_FS_FULL_SIZE_INFORMATION_EX;
+
+enum {
+    FileFsFullSizeInformationEx = 14
+};

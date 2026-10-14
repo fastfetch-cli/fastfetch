@@ -144,6 +144,7 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -190,6 +191,7 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         .cs = "Využití CPU",
         .de = "CPU-Auslastung",
         .es = "Uso de la CPU",
+        .fi = "Suorittimen Käyttö",
         .fr = "Utilisation du CPU",
         .gl = "Uso da CPU",
         .he = "שימוש במעבד",

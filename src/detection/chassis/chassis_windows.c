@@ -1,4 +1,5 @@
 #include "chassis.h"
+#include "common/debug.h"
 #include "common/smbios.h"
 
 // 7.4
@@ -32,11 +33,13 @@ static_assert(offsetof(FFSmbiosSystemEnclosure, ContainedElements) == 0x15,
 const char* ffDetectChassis(FFChassisResult* result) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("System enclosure: failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
     if (!data) {
+        FF_DEBUG("System enclosure: section is not found in SMBIOS data");
         return "System enclosure is not found in SMBIOS data";
     }
 

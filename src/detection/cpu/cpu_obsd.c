@@ -1,7 +1,9 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 #include "common/strutil.h"
 
+#include <string.h>
 #include <errno.h>
 #include <sys/time.h>
 #include <sys/sensors.h>
@@ -19,6 +21,7 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
             if (errno == ENXIO) {
                 continue;
             }
+            FF_DEBUG("sysctl(sensordev) failed: %s", strerror(errno));
             return "sysctl(sensordev) failed";
         }
 
@@ -37,6 +40,7 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
             size_t slen = sizeof(struct sensor);
             if (sysctl(mib, 5, &sensor, &slen, nullptr, 0) < 0) {
                 if (errno != ENOENT) {
+                    FF_DEBUG("sysctl(sensor) failed: %s", strerror(errno));
                     return "sysctl(sensor) failed";
                 }
                 continue;
@@ -50,11 +54,14 @@ static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu) 
         }
     }
 
+    FF_DEBUG("No sensor for CPU temp found");
     return "No sensor for CPU temp found";
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
-    if (ffSysctlGetString(CTL_HW, HW_MODEL, &cpu->name)) {
+    const char* error = ffSysctlGetString(CTL_HW, HW_MODEL, &cpu->name);
+    if (error) {
+        FF_DEBUG("sysctl(hw.model) failed: %s", error);
         return "sysctl(hw.model) failed";
     }
 

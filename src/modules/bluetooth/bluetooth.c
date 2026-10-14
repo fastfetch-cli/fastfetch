@@ -143,6 +143,7 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
     }
 }
 
+[[gnu::cold]]
 void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -229,6 +230,7 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         .cs = "Bluetooth",
         .de = "Bluetooth",
         .es = "Bluetooth",
+        .fi = "Bluetooth",
         .fr = "Bluetooth",
         .gl = "Bluetooth",
         .he = "בלוטות'",

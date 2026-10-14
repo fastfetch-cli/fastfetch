@@ -1,23 +1,28 @@
 #include "fastfetch.h"
 #include "battery.h"
+#include "common/debug.h"
 #include "common/io.h"
 
 #include <private/device/power_managment.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <string.h>
 
 const char* parseBattery(int dfd, const char* battId, FFlist* results) {
     FF_AUTO_CLOSE_FD int fd = openat(dfd, battId, O_RDWR);
     if (fd < 0) {
+        FF_DEBUG("openat(%s) failed: %s", battId, strerror(errno));
         return "openat() failed";
     }
 
     acpi_battery_info basic = {};
     if (ioctl(fd, GET_BATTERY_INFO, &basic, sizeof(basic)) != 0) {
+        FF_DEBUG("ioctl(GET_BATTERY_INFO) failed");
         return "ioctl(GET_BATTERY_INFO) failed";
     }
     acpi_extended_battery_info extended = {};
     if (ioctl(fd, GET_EXTENDED_BATTERY_INFO, &extended, sizeof(extended)) != 0) {
+        FF_DEBUG("ioctl(GET_EXTENDED_BATTERY_INFO) failed");
         return "ioctl(GET_EXTENDED_BATTERY_INFO) failed";
     }
 
@@ -56,6 +61,7 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results) {
 const char* ffDetectBattery([[maybe_unused]] FFBatteryOptions* options, FFlist* results) {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/power/acpi_battery/");
     if (!dir) {
+        FF_DEBUG("opendir(\"/dev/power/acpi_battery/\") failed: %s", strerror(errno));
         return "opendir(/dev/power/acpi_battery) failed";
     }
 

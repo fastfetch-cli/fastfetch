@@ -128,6 +128,7 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -201,6 +202,7 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         .cs = "Gamepad",
         .de = "Gamepad",
         .es = "Gamepad",
+        .fi = "Peliohjain",
         .fr = "Manette",
         .gl = "Gamepad",
         .he = "משטח משחק",
