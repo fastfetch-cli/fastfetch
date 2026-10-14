@@ -51,7 +51,7 @@ jobs:
         run: |
           real_seconds=$(awk '$1 == "real" { print $2 }' fastfetch.time)
           jq -e 'type == "array"' fastfetch.json > /dev/null
-          jq --arg platform "macos" --arg arch "universal" --argjson real_seconds "$real_seconds" '
+          jq --arg platform "macos" --arg arch "aarch64" --argjson real_seconds "$real_seconds" '
             map(select(.stat | type == "number") | {
               name: ("fastfetch " + $platform + " " + $arch + " module " + .type),
               unit: "ms",
