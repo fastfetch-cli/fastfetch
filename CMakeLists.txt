@@ -656,6 +656,7 @@ if(LINUX)
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_nix.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/processes/processes_linux.c
         src/detection/gtk_qt/qt.c
@@ -745,6 +746,7 @@ elseif(ANDROID)
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_nix.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
         src/detection/sound/sound_android.c
@@ -928,6 +930,7 @@ elseif(NetBSD)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_nbsd.c
         src/detection/packages/packages_nbsd.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_nbsd.c
         src/detection/gtk_qt/qt.c
@@ -1086,6 +1089,7 @@ elseif(APPLE)
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
         src/detection/packages/packages_nix.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/processes/processes_apple.c
         src/detection/sound/sound_apple.c
@@ -1273,6 +1277,7 @@ elseif(SunOS)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c
         src/detection/packages/packages_sunos.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_sunos.c
         src/detection/gtk_qt/qt.c
@@ -1429,6 +1434,7 @@ elseif(GNU)
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
         src/detection/packages/packages_nix.c
+        src/detection/packages/packages_pkgsrc.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_gnu.c
         src/detection/gtk_qt/qt.c
