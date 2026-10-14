@@ -62,4 +62,3 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options) 
         result->nixUser = ffPackagesGetNix(&baseDir, "/.nix-profile");
     }
 }
-
