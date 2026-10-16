@@ -1,6 +1,33 @@
 #include "gpu.h"
 
-#if FF_HAVE_DRM || __has_include(<drm/drm.h>)
+#if COMPATIBILITY_FORCE_DRM_OFF
+    #if FF_HAVE_DRM || __has_include(<drm/drm.h>)
+const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd) {
+    FF_UNUSED(gpu, fd);
+    return "Fastfetch is not compiled with GPU DRM support";
+}
+
+const char* ffDrmDetectXe(FFGPUResult* gpu, int fd) {
+    FF_UNUSED(gpu, fd);
+    return "Fastfetch is not compiled with GPU DRM support";
+}
+
+const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
+    FF_UNUSED(options, gpu, renderPath);
+    return "Fastfetch is not compiled with GPU DRM support";
+}
+
+const char* ffDrmDetectI915(FFGPUResult* gpu, int fd) {
+    FF_UNUSED(gpu, fd);
+    return "Fastfetch is not compiled with GPU DRM support";
+}
+
+const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath) {
+    FF_UNUSED(options, gpu, renderPath);
+    return "Fastfetch is not compiled with GPU DRM support";
+}
+    #endif
+#elif FF_HAVE_DRM || __has_include(<drm/drm.h>)
     #include <fcntl.h>
     #include <sys/ioctl.h>
 
