@@ -86,9 +86,9 @@ static const FFlogo T[] = {
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_TINYCORE
-    // Tiny Core
+    // TinyCore
     {
-        .names = { "Tiny Core Linux", "TinyCore", "Tiny Core", "MicroCore" },
+        .names = { "TinyCore" },
         .lines = FASTFETCH_DATATEXT_LOGO_TINYCORE,
         .colors = {
             FF_COLOR_FG_BLUE,
