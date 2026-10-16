@@ -165,6 +165,31 @@ static const FFlogo V[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VYLEN
+    // Vylen Linux
+    {
+        .names = { "Vylen" },
+        .lines = FASTFETCH_DATATEXT_LOGO_VYLEN,
+        .colors = {
+            FF_COLOR_FG_GREEN
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VYLEN_SMALL
+    // Vylen Linux small
+    {
+        .names = { "Vylen_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_VYLEN_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    #endif
     // LAST
     {},
 };
