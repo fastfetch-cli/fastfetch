@@ -85,6 +85,17 @@ static const FFlogo T[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_TINYCORE
+    // Tiny Core
+    {
+        .names = { "Tiny Core Linux", "TinyCore", "Tiny Core", "MicroCore" },
+        .lines = FASTFETCH_DATATEXT_LOGO_TINYCORE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_LIGHT_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_TORIZONCORE
     // Torizon OS
     {
