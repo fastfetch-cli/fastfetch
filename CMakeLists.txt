@@ -623,6 +623,7 @@ if(LINUX)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
         src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
@@ -712,6 +713,7 @@ elseif(ANDROID)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -800,6 +802,7 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -898,6 +901,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -983,6 +987,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1243,6 +1248,7 @@ elseif(SunOS)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1402,6 +1408,7 @@ elseif(GNU)
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wmde.c
