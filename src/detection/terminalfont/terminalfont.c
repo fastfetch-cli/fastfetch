@@ -236,7 +236,7 @@ static void detectGhostty(FFTerminalFontResult* terminalFont, [[maybe_unused]] c
     }
 }
 
-[[maybe_unused]] static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
+[[maybe_unused]] static bool queryKittyFont(FFTerminalFontResult* result) {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
@@ -262,35 +262,85 @@ static void detectGhostty(FFTerminalFontResult* terminalFont, [[maybe_unused]] c
                 ffStrbufAppendC(&fontSize, (char) value);
             }
         }
+        ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
+        return true;
+    }
+
+    return false;
+}
+
+[[maybe_unused]] static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
+    if (queryKittyFont(result)) {
+        return true;
+    }
+
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    if (!ffProcessAppendStdOut(&buf, (char* const[]){
+                                         exe->chars,
+                                         "+kitten",
+                                         "query-terminal",
+                                         nullptr,
+                                     })) {
+        ffParsePropLines(buf.chars, "font_family: ", &fontName);
+        ffParsePropLines(buf.chars, "font_size: ", &fontSize);
     } else {
-        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-        if (!ffProcessAppendStdOut(&buf, (char* const[]){
-                                             exe->chars,
-                                             "+kitten",
-                                             "query-terminal",
-                                             nullptr,
-                                         })) {
-            ffParsePropLines(buf.chars, "font_family: ", &fontName);
-            ffParsePropLines(buf.chars, "font_size: ", &fontSize);
-        } else {
-            FFpropquery fontQuery[] = {
-                { "font_family ", &fontName },
-                { "font_size ", &fontSize },
-            };
+        FFpropquery fontQuery[] = {
+            { "font_family ", &fontName },
+            { "font_size ", &fontSize },
+        };
 
-            ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
+        ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
 
-            if (fontName.length == 0) {
-                ffStrbufSetS(&fontName, "monospace");
-            }
-            if (fontSize.length == 0) {
-                ffStrbufSetS(&fontSize, "11.0");
-            }
+        if (fontName.length == 0) {
+            ffStrbufSetS(&fontName, "monospace");
+        }
+        if (fontSize.length == 0) {
+            ffStrbufSetS(&fontSize, "11.0");
         }
     }
 
     ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
 
+    return true;
+}
+
+[[maybe_unused]] static bool detectBitty(const FFstrbuf* exe, FFTerminalFontResult* result) {
+#ifndef _WIN32
+    // Bitty answers the kitty font query directly on the PTY. Keep the
+    // command-line probe as a fallback for multiplexers/PTY wrappers that
+    // swallow the DCS response.
+    if (queryKittyFont(result)) {
+        return true;
+    }
+#endif
+
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buf, (char* const[]){
+                                         exe->chars,
+                                         "+show-font",
+                                         nullptr,
+                                     })) {
+        ffStrbufAppendS(&result->error, "`bitty +show-font` failed");
+        return false;
+    }
+
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+    ffParsePropLines(buf.chars, "font_family: ", &fontName);
+    ffParsePropLines(buf.chars, "font_size: ", &fontSize);
+
+    if (fontName.length == 0) {
+        ffStrbufAppendS(&result->error, "`bitty +show-font` reported no font family");
+        return false;
+    }
+    if (fontSize.length == 0) {
+        ffStrbufSetS(&fontSize, "12");
+    }
+
+    ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
     return true;
 }
 
@@ -414,6 +464,8 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
         detectGhostty(terminalFont, "Muxy/ghostty.conf", "muxy/ghostty.conf");
     } else if (ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio")) {
         detectRio(terminalFont);
+    } else if (ffStrbufIgnCaseEqualS(&terminal->processName, "bitty")) {
+        detectBitty(&terminal->exe, terminalFont);
     }
 #ifndef _WIN32
     else if (ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/pts/")) {
