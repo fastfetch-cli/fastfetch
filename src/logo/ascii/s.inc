@@ -536,6 +536,19 @@ static const FFlogo S[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SATELLAOS
+    // SatellaOS
+    {
+        .names = { "satellaos", "SatellaOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SATELLAOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     // LAST
     {},
 };
