@@ -1,14 +1,7 @@
-name: Reusable macOS Hosts
+name: Reusable macOS Universal
 
 on:
   workflow_call:
-    inputs:
-      arch:
-        required: true
-        type: string
-      runs-on:
-        required: true
-        type: string
 
 permissions:
   contents: read
@@ -18,7 +11,7 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: macos-latest
     steps:
       - name: checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,33 +19,19 @@ jobs:
       - name: uname -a
         run: uname -a
 
-      - name: install required packages with MacPorts # Homebrew dropped Intel support
-        if: inputs.arch == 'amd64'
-        run: |
-          curl -fsSL https://github.com/macports/macports-base/releases/download/v2.12.6/MacPorts-2.12.6-15-Sequoia.pkg -o "$RUNNER_TEMP/MacPorts.pkg"
-          sudo installer -pkg "$RUNNER_TEMP/MacPorts.pkg" -target /
-          echo /opt/local/bin >> "$GITHUB_PATH"
-          echo /opt/local/sbin >> "$GITHUB_PATH"
-          export PATH=/opt/local/bin:/opt/local/sbin:$PATH
-          sudo port selfupdate
-          sudo port install vulkan-loader vulkan-headers MoltenVK ImageMagick7 chafa lua quickjs-ng jq
-
       - name: install required packages with Homebrew
-        if: inputs.arch == 'aarch64'
         run: |
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew update
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa lua quickjs-ng jq
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk chafa lua jq
 
       - name: configure project
-        run: |
-          if [ "${{ inputs.arch }}" = "amd64" ]; then
-            export CMAKE_PREFIX_PATH=/opt/local
-            export PKG_CONFIG_PATH=/opt/local/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-          fi
-          cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
+
+      - name: verify universal binary
+        run: lipo -archs fastfetch
 
       - name: list features
         run: ./fastfetch --list-features
@@ -72,7 +51,7 @@ jobs:
         run: |
           real_seconds=$(awk '$1 == "real" { print $2 }' fastfetch.time)
           jq -e 'type == "array"' fastfetch.json > /dev/null
-          jq --arg platform "macos" --arg arch "${{ inputs.arch }}" --argjson real_seconds "$real_seconds" '
+          jq --arg platform "macos" --arg arch "aarch64" --argjson real_seconds "$real_seconds" '
             map(select(.stat | type == "number") | {
               name: ("fastfetch " + $platform + " " + $arch + " module " + .type),
               unit: "ms",
@@ -97,11 +76,11 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: fastfetch-macos-${{ inputs.arch }}
+          name: fastfetch-macos-universal
           path: ./fastfetch-*.*
 
       - name: upload benchmark data
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: benchmark-macos-${{ inputs.arch }}
+          name: benchmark-macos-universal
           path: benchmark.json

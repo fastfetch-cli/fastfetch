@@ -623,6 +623,7 @@ if(LINUX)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
         src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
@@ -712,6 +713,7 @@ elseif(ANDROID)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -800,6 +802,7 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -898,6 +901,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -983,6 +987,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1243,6 +1248,7 @@ elseif(SunOS)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1402,6 +1408,7 @@ elseif(GNU)
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wmde.c
@@ -2473,6 +2480,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-gpu-pci
+        tests/gpu_pci.c
+    )
+    target_link_libraries(fastfetch-test-gpu-pci
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
@@ -2492,6 +2506,7 @@ if (BUILD_TESTS)
     add_test(NAME test-temps COMMAND fastfetch-test-temps)
     add_test(NAME test-endian COMMAND fastfetch-test-endian)
     add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
+    add_test(NAME test-gpu-pci COMMAND fastfetch-test-gpu-pci)
 endif()
 
 ##################
@@ -2553,7 +2568,12 @@ install(
 
 set(CPACK_GENERATOR "TGZ;ZIP")
 if(APPLE)
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
+    if(CMAKE_OSX_ARCHITECTURES MATCHES ";") # multiple architectures, e.g. arm64;x86_64
+        set(_FF_CPACK_ARCH universal)
+    else()
+        set(_FF_CPACK_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+    endif()
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${_FF_CPACK_ARCH}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-musl-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
 else()

@@ -9,6 +9,10 @@ Changes:
     * It defaults to `"both"`, so a command that logs to stderr now has that output captured instead of discarded.
     * Set it to `"stdout"` or `"stderr"` to restore the old single-stream behavior. (Command)
 * The Shell module now reports the shell from the password database (`/etc/passwd`) instead of the `$SHELL` environment variable, which may differ when the login shell was changed after the session started. (Title)
+* The Disk custom format no longer provides `{size-available}`. `{size-free}` now reports whichever of the two the `disk.useAvailable` option selects, and the raw byte counts are available as `{bytes-used}` and `{bytes-total}`. (Disk)
+    * This also means `{size-free}` now changes with `disk.useAvailable`; it used to always report the file system's free size.
+* The Disk JSON output no longer includes `bytes.available` and `bytes.used`. (Disk)
+    * `bytes.free` and `bytes.total` are unchanged; the used size can be derived as `total - free`.
 
 Features:
 * Added Sound detection on Android. (Sound, Android)
@@ -34,6 +38,8 @@ Bugfixes:
 * Fixed assertion failure when percentage exceeds 100. (Percent)
 * Fixed a non-existent command being reported as a generic child process error on Windows instead of `command not found`. (Command, Windows)
 * Fixed Android display detection on devices running Android 17. (Display, Android)
+* Fixed Windows volumes with a per-user quota (such as network shares) reporting a wrong total size and a wrapped-around used size, because the total size was quota-limited while the free size was not. (#2651, Disk, Windows)
+    * On Windows 10 1809 (build 17763) and later, the whole volume's capacity and free space are now reported by default. Set `disk.useAvailable` to `true` to keep reporting the space that is available to the current user, quota included.
 
 Logos:
 * Added filled Artix logo (#2631)

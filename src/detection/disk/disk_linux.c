@@ -249,16 +249,14 @@ static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* 
 
 #endif
 
-static void detectStats(FFDisk* disk) {
+static void detectStats(FFDiskOptions* options, FFDisk* disk) {
     struct statvfs fs;
     if (statvfs(disk->mountpoint.chars, &fs) != 0) {
         memset(&fs, 0, sizeof(fs)); // Set all values to 0, so our values get initialized to 0 too
     }
 
     disk->bytesTotal = fs.f_blocks * (uint64_t) fs.f_frsize;
-    disk->bytesFree = fs.f_bfree * (uint64_t) fs.f_frsize;
-    disk->bytesAvailable = fs.f_bavail * (uint64_t) fs.f_frsize;
-    disk->bytesUsed = 0; // To be filled in ./disk.c
+    disk->bytesFree = (options->calcType == FF_DISK_CALC_TYPE_FREE ? fs.f_bfree : fs.f_bavail) * (uint64_t) fs.f_frsize;
 
     if (fs.f_files >= fs.f_ffree) {
         disk->filesTotal = (uint32_t) fs.f_files;
@@ -330,7 +328,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks) {
         detectType(disks, disk, device);
 
         // Detects stats
-        detectStats(disk);
+        detectStats(options, disk);
     }
 
     endmntent(mountsFile);

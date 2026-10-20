@@ -59,13 +59,14 @@
     .legend-item.is-hidden .legend-swatch { opacity: .35; }
     .chart-tooltip { position: fixed; z-index: 1000; pointer-events: none; width: min(90vw, 900px); max-height: calc(100vh - 24px); overflow: hidden; padding: .7rem .85rem; border: 1px solid var(--border); border-radius: .6rem; background: var(--card); color: var(--text); box-shadow: 0 10px 30px #0f172a33; font-size: .8rem; opacity: 0; transition: opacity .1s ease; }
     .chart-tooltip-title { margin-bottom: .35rem; font-weight: 700; white-space: normal; overflow-wrap: anywhere; }
+    .chart-tooltip-message { margin-bottom: .35rem; color: var(--muted); font-weight: 400; white-space: pre-wrap; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
     .chart-tooltip-body { max-height: calc(100vh - 76px); overflow: auto; columns: 220px auto; column-gap: 1.5rem; }
     .chart-tooltip-row { display: flex; align-items: center; gap: .45rem; break-inside: avoid; white-space: nowrap; }
     .chart-tooltip-swatch { width: .55rem; height: .55rem; border-radius: 50%; flex: 0 0 auto; }
     .empty { padding: 2rem 0; color: var(--muted); }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
+  <script src="https://unpkg.com/chart.js@latest/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header>
@@ -73,11 +74,11 @@
       <h1>Fastfetch Benchmark</h1>
       <button id="theme-toggle" class="theme-toggle" type="button"></button>
     </div>
-    <p class="intro">Performance history grouped by CPU family. Each chart contains all modules and total process time for one operating system and architecture. Module curves are available from the legend and hidden by default.</p>
+    <p class="intro">Performance history grouped by CPU family. Each chart contains all modules and the total process time for one operating system and architecture. All metric series are shown by default except total process time, module Weather, and module PublicIp — toggle any series from the legend below the chart.</p>
     <p class="links"><a href="data.js">Download raw benchmark data</a></p>
   </header>
   <nav id="tabs" class="tabs" aria-label="CPU architecture"></nav>
-  <main id="panels"></main>
+  <main id="panels"><p class="empty">Loading charts…</p></main>
   <script>
     (() => {
       const benchmarkData = window.BENCHMARK_DATA || {};
@@ -103,11 +104,12 @@
       }
 
       function entryMetadata(entry) {
-        const raw = entry.commit && entry.commit.timestamp || entry.date;
+        const raw = entry.commit?.timestamp ?? entry.date;
         const date = new Date(raw);
         return {
-          date: Number.isNaN(date.valueOf()) ? String(entry.date || '') : date.toISOString(),
-          sha: entry.commit && entry.commit.id ? entry.commit.id : 'unknown'
+          date: Number.isNaN(date.valueOf()) ? String(entry.date ?? '') : date.toISOString(),
+          sha: entry.commit?.id ?? 'unknown',
+          message: entry.commit?.message?.trim() ?? ''
         };
       }
 
@@ -131,6 +133,8 @@
         '#2563eb', '#dc2626', '#16a34a', '#9333ea', '#ea580c', '#0891b2',
         '#db2777', '#65a30d', '#4f46e5', '#ca8a04', '#0f766e', '#be123c'
       ];
+      // Series hidden on first render; every other metric is shown by default.
+      const hiddenByDefault = new Set(['total process time', 'module Weather', 'module PublicIp']);
       const tabs = document.getElementById('tabs');
       const panels = document.getElementById('panels');
       const root = document.documentElement;
@@ -138,6 +142,13 @@
       const savedTheme = localStorage.getItem('fastfetch-benchmark-theme');
       let theme = savedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       const chartsByInstance = [];
+
+      if (!window.Chart) {
+        tabs.hidden = true;
+        panels.innerHTML = '<p class="empty">Failed to load Chart.js.</p>';
+        return;
+      }
+      panels.replaceChildren();
 
       function chartColors() {
         const styles = getComputedStyle(root);
@@ -167,6 +178,12 @@
         const row = chart._benchmarkRows[tooltip.dataPoints[0].dataIndex];
         title.textContent = `${new Date(row.date).toLocaleString()} · ${row.sha}`;
         tooltipElement.appendChild(title);
+        if (row.message) {
+          const message = document.createElement('div');
+          message.className = 'chart-tooltip-message';
+          message.textContent = row.message;
+          tooltipElement.appendChild(message);
+        }
         const bodyElement = document.createElement('div');
         bodyElement.className = 'chart-tooltip-body';
         for (const body of [...tooltip.dataPoints].sort((a, b) => b.parsed.y - a.parsed.y)) {
@@ -229,7 +246,9 @@
         families.get(family).push({ key, rows });
       }
 
-      const familyOrder = ['Intel', 'ARM', 'Other'];
+      // 'Other' is intentionally not rendered: it only catches stray series (e.g. the retired
+      // 'macos universal' records) that should not show up as their own tab
+      const familyOrder = ['Intel', 'ARM'];
       const availableFamilies = familyOrder.filter(family => families.has(family));
 
       for (const [index, family] of availableFamilies.entries()) {
@@ -311,7 +330,7 @@
                 pointRadius: 3,
                 tension: 0.2,
                 spanGaps: true,
-                hidden: metric !== 'total process time'
+                hidden: hiddenByDefault.has(metric)
               }))
             },
             options: {
@@ -373,7 +392,7 @@
             chart.update();
           });
           addLegendAction('Reset', () => {
-            metrics.forEach((metric, metricIndex) => chart.setDatasetVisibility(metricIndex, metric === 'total process time'));
+            metrics.forEach((metric, metricIndex) => chart.setDatasetVisibility(metricIndex, !hiddenByDefault.has(metric)));
             refreshLegend();
             chart.update();
           });
@@ -395,7 +414,7 @@
         }
       }
 
-      if (!groups.size) {
+      if (!availableFamilies.length) {
         tabs.hidden = true;
         panels.innerHTML = '<p class="empty">No benchmark data available.</p>';
       }

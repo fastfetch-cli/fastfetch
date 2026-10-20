@@ -545,9 +545,17 @@ static bool readerScalar(FFDisplayAndroidReader* reader, const char* type, FFDis
     }
     if (ffStrEquals(type, "[I") || ffStrEquals(type, "[F")) {
         const int32_t count = readerI32(reader);
-        if (reader->failed || count < 0 || count > 1024) {
+        if (reader->failed || count > 1024) {
             reader->failed = true;
             return false;
+        }
+        // A negative count is a null array and carries no elements: `writeIntArray(null)` and
+        // `writeFloatArray(null)` both write a bare -1 where the count would be. Android 11 has one
+        // of these in the record -- `DeviceProductInfo.mRelativeAddress` is an `[I` there and is null
+        // on the built-in display. `readerSkipArray` spells the same rule for the arrays it steps
+        // over, and a null is a value everywhere else in this walk too.
+        if (count < 0) {
+            return true;
         }
         value->count = count;
         return readerSkip(reader, (size_t) count * (ffStrEquals(type, "[I") ? sizeof(int32_t) : sizeof(float)));
