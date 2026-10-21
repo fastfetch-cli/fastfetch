@@ -1,6 +1,9 @@
 #include "gpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 
+#include <errno.h>
+#include <string.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -31,6 +34,7 @@ const char* detectByPci([[maybe_unused]] const FFGPUOptions* options, FFlist* gp
     char pciDevPath[] = "/dev/pci0";
     FF_AUTO_CLOSE_FD int pcifd = open(pciDevPath, O_RDONLY | O_CLOEXEC);
     if (pcifd < 0) {
+        FF_DEBUG("open(\"%s\", O_RDONLY | O_CLOEXEC) failed: %s", pciDevPath, strerror(errno));
         return "open(\"/dev/pci0\", O_RDONLY | O_CLOEXEC) failed";
     }
 

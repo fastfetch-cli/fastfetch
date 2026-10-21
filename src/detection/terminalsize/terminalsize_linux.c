@@ -9,7 +9,9 @@
     #include <sys/termios.h>
 #endif
 
-bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
+bool ffDetectTerminalSize(FFTerminalSizeResult* result, bool fastOnly) {
+    *result = (FFTerminalSizeResult){};
+
     struct winsize winsize = {};
     static int ttyfd = STDOUT_FILENO;
     if (!isatty(ttyfd)) {
@@ -18,21 +20,20 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result) {
 
     ioctl(ttyfd, TIOCGWINSZ, &winsize);
 
-    if (winsize.ws_row == 0 || winsize.ws_col == 0) {
-        ffGetTerminalResponse("\e[18t", 2, "\e[8;%hu;%hut", &winsize.ws_row, &winsize.ws_col);
-    }
+    if (!fastOnly) {
+        if (winsize.ws_row == 0 || winsize.ws_col == 0) {
+            ffGetTerminalResponse("\e[18t", 2, "\e[8;%hu;%hut", &winsize.ws_row, &winsize.ws_col);
+        }
 
-    if (winsize.ws_ypixel == 0 || winsize.ws_xpixel == 0) {
-        ffGetTerminalResponse("\e[14t", 2, "\e[4;%hu;%hut", &winsize.ws_ypixel, &winsize.ws_xpixel);
-    }
-
-    if (winsize.ws_row == 0 && winsize.ws_col == 0) {
-        return false;
+        if (winsize.ws_ypixel == 0 || winsize.ws_xpixel == 0) {
+            ffGetTerminalResponse("\e[14t", 2, "\e[4;%hu;%hut", &winsize.ws_ypixel, &winsize.ws_xpixel);
+        }
     }
 
     result->rows = winsize.ws_row;
     result->columns = winsize.ws_col;
     result->width = winsize.ws_xpixel;
     result->height = winsize.ws_ypixel;
-    return true;
+
+    return result->rows > 0 && result->columns > 0;
 }

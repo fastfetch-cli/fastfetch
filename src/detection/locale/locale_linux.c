@@ -1,4 +1,5 @@
 #include "detection/locale/locale.h"
+#include "common/debug.h"
 
 #include <locale.h>
 
@@ -18,5 +19,6 @@ const char* ffDetectLocale(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("LC_ALL, LANG and setlocale(LC_TIME, nullptr) are all empty");
     return "Failed to detect locale";
 }

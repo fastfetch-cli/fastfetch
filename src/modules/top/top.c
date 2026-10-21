@@ -11,7 +11,12 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), total == 1 ? 0 : (uint8_t) (index + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
-        ffStrbufAppendF(&output, "%s (%u)", process->name.chars, process->pid);
+        if (process->name.length == 0) {
+            ffStrbufAppendS(&output, "<unknown>");
+        } else {
+            ffStrbufAppend(&output, &process->name);
+        }
+        ffStrbufAppendF(&output, " (%u)", process->pid);
         if ((options->showTypes & FF_TOP_TYPE_CPU) && (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)) {
             ffStrbufAppendS(&output, " - CPU ");
             ffPercentAppendNum(&output, process->cpuPercent, options->percent, false, &options->moduleArgs);
@@ -28,6 +33,9 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
                 ffSizeAppendNum(process->bytesWritten, &output);
                 ffStrbufAppendS(&output, "/s");
             }
+            if (options->showTypes & FF_TOP_TYPE_THREADS) {
+                ffStrbufAppendF(&output, " - THR %u", process->threads);
+            }
         }
         ffStrbufPutTo(&output, stdout);
     } else {
@@ -43,18 +51,19 @@ static void printTopResult(FFTopOptions* options, uint32_t index, uint32_t total
         FF_STRBUF_AUTO_DESTROY diskWriteFormatted = ffStrbufCreate();
         ffSizeAppendNum(process->bytesWritten, &diskWriteFormatted);
         ffStrbufAppendS(&diskWriteFormatted, "/s");
-        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Top), (uint8_t) index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                                                                                                                                   FF_ARG(process->name, "name"),
-                                                                                                                                   FF_ARG(process->pid, "pid"),
-                                                                                                                                   FF_ARG(process->cpuPercent, "cpu"),
-                                                                                                                                   FF_ARG(process->memBytes, "mem"),
-                                                                                                                                   FF_ARG(process->bytesRead, "disk-read"),
-                                                                                                                                   FF_ARG(process->bytesWritten, "disk-write"),
-                                                                                                                                   FF_ARG(cpuFormatted, "cpu-percentage"),
-                                                                                                                                   FF_ARG(memFormatted, "mem-formatted"),
-                                                                                                                                   FF_ARG(diskReadFormatted, "disk-read-formatted"),
-                                                                                                                                   FF_ARG(diskWriteFormatted, "disk-write-formatted"),
-                                                                                                                               }));
+        FF_PRINT_FORMAT_CHECKED(FF_MODULE_GET_DISPLAY_NAME(Top), total == 1 ? 0 : (uint8_t) (index + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+                                                                                                                                                          FF_ARG(process->name, "name"),
+                                                                                                                                                          FF_ARG(process->pid, "pid"),
+                                                                                                                                                          FF_ARG(process->cpuPercent, "cpu"),
+                                                                                                                                                          FF_ARG(process->memBytes, "mem"),
+                                                                                                                                                          FF_ARG(process->bytesRead, "disk-read"),
+                                                                                                                                                          FF_ARG(process->bytesWritten, "disk-write"),
+                                                                                                                                                          FF_ARG(process->threads, "threads"),
+                                                                                                                                                          FF_ARG(cpuFormatted, "cpu-percentage"),
+                                                                                                                                                          FF_ARG(memFormatted, "mem-formatted"),
+                                                                                                                                                          FF_ARG(diskReadFormatted, "disk-read-formatted"),
+                                                                                                                                                          FF_ARG(diskWriteFormatted, "disk-write-formatted"),
+                                                                                                                                                      }));
     }
 }
 
@@ -73,11 +82,12 @@ bool ffPrintTop(FFTopOptions* options) {
     } else {
         ffPrintLogoAndKey(FF_MODULE_GET_DISPLAY_NAME(Top), 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_LIST_FOR_EACH (FFTopProcessResult, process, results) {
-            ffStrbufWriteTo(&process->name, stdout);
             if ((void*) process != results.data) {
                 putchar(' ');
             }
+            ffStrbufWriteTo(&process->name, stdout);
         }
+        putchar('\n');
     }
 
     FF_LIST_FOR_EACH (FFTopProcessResult, item, results) {
@@ -100,6 +110,8 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
                                                                        { "memory", FF_TOP_TYPE_MEMORY },
                                                                        { "disk-read", FF_TOP_TYPE_DISK_READ },
                                                                        { "disk-write", FF_TOP_TYPE_DISK_WRITE },
+                                                                       { "start-time", FF_TOP_TYPE_START_TIME },
+                                                                       { "threads", FF_TOP_TYPE_THREADS },
                                                                        {},
                                                                    });
             if (error) {
@@ -119,6 +131,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
                                                                                 { "cpu", FF_TOP_TYPE_CPU },
                                                                                 { "memory", FF_TOP_TYPE_MEMORY },
                                                                                 { "disk", FF_TOP_TYPE_DISK },
+                                                                                { "threads", FF_TOP_TYPE_THREADS },
                                                                                 {},
                                                                             });
                     if (error == nullptr) {
@@ -136,6 +149,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
                                                                            { "cpu", FF_TOP_TYPE_CPU },
                                                                            { "memory", FF_TOP_TYPE_MEMORY },
                                                                            { "disk", FF_TOP_TYPE_DISK },
+                                                                           { "threads", FF_TOP_TYPE_THREADS },
                                                                            {},
                                                                        });
                 if (error == nullptr) {
@@ -160,6 +174,7 @@ void ffParseTopJsonObject(FFTopOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
     yyjson_mut_obj_add_str(doc, module, "type", "top");
@@ -173,6 +188,9 @@ void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
     if (options->showTypes & FF_TOP_TYPE_DISK) {
         yyjson_mut_arr_add_str(doc, showTypes, "disk");
     }
+    if (options->showTypes & FF_TOP_TYPE_THREADS) {
+        yyjson_mut_arr_add_str(doc, showTypes, "threads");
+    }
     yyjson_mut_obj_add_val(doc, module, "showTypes", showTypes);
     if (options->sort == FF_TOP_TYPE_CPU) {
         yyjson_mut_obj_add_str(doc, module, "sort", "cpu");
@@ -182,6 +200,10 @@ void ffGenerateTopJsonConfig(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_str(doc, module, "sort", "disk-read");
     } else if (options->sort == FF_TOP_TYPE_DISK_WRITE) {
         yyjson_mut_obj_add_str(doc, module, "sort", "disk-write");
+    } else if (options->sort == FF_TOP_TYPE_START_TIME) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "start-time");
+    } else if (options->sort == FF_TOP_TYPE_THREADS) {
+        yyjson_mut_obj_add_str(doc, module, "sort", "threads");
     }
     yyjson_mut_obj_add_uint(doc, module, "processes", options->nProcesses);
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
@@ -211,6 +233,9 @@ bool ffGenerateTopJsonResult(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
             yyjson_mut_obj_add_uint(doc, item, "bytesRead", process->bytesRead);
             yyjson_mut_obj_add_uint(doc, item, "bytesWritten", process->bytesWritten);
         }
+        if (options->showTypes & FF_TOP_TYPE_THREADS) {
+            yyjson_mut_obj_add_uint(doc, item, "threads", process->threads);
+        }
         yyjson_mut_obj_add_uint(doc, item, "startTime", process->startTime);
     }
 
@@ -223,9 +248,13 @@ bool ffGenerateTopJsonResult(FFTopOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffInitTopOptions(FFTopOptions* options) {
     ffOptionInitModuleArg(&options->moduleArgs, "󰍛");
     options->sort = FF_TOP_TYPE_CPU;
-    options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
+    options->showTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY
+#if !__GNU__ && !__HAIKU__
+        | FF_TOP_TYPE_DISK
+#endif
+        ;
     options->nProcesses = 5;
-    options->waitTime = 500;
+    options->waitTime = 250;
     options->compact = false;
     options->percent = (FFPercentageModuleConfig){ 50, 80, 0 };
 }
@@ -243,6 +272,7 @@ FFModuleBaseInfo ffTopModuleInfo = {
         .cs = "Nejvytíženější procesy",
         .de = "Top-Prozesse",
         .es = "Procesos principales",
+        .fi = "Raskaimmat Prosessit",
         .fr = "Processus principaux",
         .gl = "Procesos principais",
         .he = "התהליכים המובילים",
@@ -253,7 +283,7 @@ FFModuleBaseInfo ffTopModuleInfo = {
         .pl = "Najaktywniejsze procesy",
         .pt = "Processos principais",
         .ru = "Топ процессов",
-        .tr = "En yoğun işlemler",
+        .tr = "En Yoğun Süreçler",
         .uk = "Найактивніші процеси",
         .vi = "Tiến trình hàng đầu",
         .zh_CN = "进程排行",
@@ -267,16 +297,16 @@ FFModuleBaseInfo ffTopModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateTopJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]){
         { "Process name", "name" },
-        { "Executable path", "path" },
         { "Process ID", "pid" },
         { "CPU usage", "cpu" },
         { "Memory usage (RSS) in bytes", "mem" },
         { "Disk read bytes per second (0 if unsupported)", "disk-read" },
         { "Disk write bytes per second (0 if unsupported)", "disk-write" },
+        { "Number of threads", "threads" },
         { "CPU usage percentage", "cpu-percentage" },
         { "Memory usage (RSS) formatted", "mem-formatted" },
         { "Disk read formatted", "disk-read-formatted" },
         { "Disk write formatted", "disk-write-formatted" },
     })),
-    .defaultOrder = 36,
+    .defaultOrder = 37,
 };

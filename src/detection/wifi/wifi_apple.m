@@ -1,4 +1,5 @@
 #include "wifi.h"
+#include "common/percent.h"
 #include "common/processing.h"
 #include "common/strutil.h"
 #include "common/apple/cf_helpers.h"
@@ -6,11 +7,6 @@
 #import <CoreWLAN/CoreWLAN.h>
 #import <IOKit/IOKitLib.h>
 #import <IOKit/kext/KextManager.h>
-
-static inline double rssiToSignalQuality(int rssi) {
-    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0
-                                                      : (rssi + 100) * 2);
-}
 
 @interface CWNetworkProfile ()
 @property (readonly, retain, nullable) NSArray<NSDictionary*>* bssidList;
@@ -101,7 +97,7 @@ const char* ffDetectWifi(FFlist* result) {
                 }
                 break;
         }
-        item->conn.signalQuality = rssiToSignalQuality((int) inf.rssiValue);
+        item->conn.signalQuality = ffRssiToSignalQuality((int) inf.rssiValue);
         item->conn.txRate = inf.transmitRate;
 
         switch (inf.security) {

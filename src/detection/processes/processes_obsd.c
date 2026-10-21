@@ -1,15 +1,38 @@
 #include "processes.h"
 
+#include "common/debug.h"
+#include "common/mallocHelper.h"
+
+#include <errno.h>
+#include <string.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
-#include <kvm.h>
 
-const char* ffDetectProcesses(uint32_t* result) {
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    const void* ret = kvm_getprocs(kd, KERN_PROC_ALL, 0, 1, result);
-    kvm_close(kd);
-    if (!ret) {
-        return "kvm_getprocs() failed";
+const char* ffDetectProcesses(const FFProcessesOptions* options, FFProcessesResult* result) {
+    int request[] = { CTL_KERN, KERN_PROC, (options->countKprocs ? KERN_PROC_KTHREAD : KERN_PROC_ALL) | KERN_PROC_SHOW_THREADS, 0, (int) sizeof(struct kinfo_proc), 0 };
+    size_t length = 0;
+
+    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed: %s", strerror(errno));
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, nullptr) failed";
     }
+
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    request[5] = (int) (length / sizeof(struct kinfo_proc)); // count must be non-zero for data fetch
+    if (sysctl(request, ARRAY_SIZE(request), procs, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, procs) failed: %s", strerror(errno));
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}, procs) failed";
+    }
+
+    int count = (int) (length / sizeof(struct kinfo_proc));
+    for (int i = 0; i < count; ++i) {
+        const struct kinfo_proc* proc = &procs[i];
+
+        ++result->threads;
+        if (proc->p_tid == -1) {
+            ++result->processes;
+        }
+    }
+
     return nullptr;
 }

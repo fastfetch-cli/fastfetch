@@ -1,4 +1,6 @@
 #include "physicalmemory.h"
+#include "common/debug.h"
+#include "common/endian.h"
 #include "common/smbios.h"
 
 // 7.18
@@ -67,11 +69,13 @@ static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
 const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* result) {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable) {
+        FF_DEBUG("Failed to get SMBIOS data");
         return "Failed to get SMBIOS data";
     }
 
     const FFSmbiosMemoryDevice* data = (const FFSmbiosMemoryDevice*) (*smbiosTable)[FF_SMBIOS_TYPE_MEMORY_DEVICE];
     if (!data) {
+        FF_DEBUG("Memory device is not found in SMBIOS data");
         return "Memory device is not found in SMBIOS data";
     }
 
@@ -82,7 +86,8 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
         }
 
         const char* strings = (const char*) data + data->Header.Length;
-        bool installed = data->Size != 0;
+        uint16_t size = FF_READ_LE(data->Size);
+        bool installed = size != 0;
 
         if (!installed && !options->showEmptySlots) {
             continue;
@@ -101,19 +106,21 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
         device->installed = installed;
         device->ecc = false;
 
-        if (installed && data->TotalWidth != 0xFFFF && data->DataWidth != 0xFFFF) {
-            device->ecc = data->TotalWidth > data->DataWidth;
+        uint16_t totalWidth = FF_READ_LE(data->TotalWidth);
+        uint16_t dataWidth = FF_READ_LE(data->DataWidth);
+        if (installed && totalWidth != 0xFFFF && dataWidth != 0xFFFF) {
+            device->ecc = totalWidth > dataWidth;
         }
 
-        if (installed && data->Size != 0xFFFF) {
-            if (data->Size == 0x7FFF) {
-                device->size = (data->ExtendedSize & ~(1ULL << 31)) * 1024ULL * 1024ULL;
-            } else if (data->Size & (1 << 15)) {
+        if (installed && size != 0xFFFF) {
+            if (size == 0x7FFF) {
+                device->size = (FF_READ_LE(data->ExtendedSize) & ~(1ULL << 31)) * 1024ULL * 1024ULL;
+            } else if (size & (1 << 15)) {
                 // in kB
-                device->size = (data->Size & ~(1ULL << 15)) * 1024ULL;
+                device->size = (size & ~(1ULL << 15)) * 1024ULL;
             } else {
                 // in MB
-                device->size = data->Size * 1024ULL * 1024ULL;
+                device->size = size * 1024ULL * 1024ULL;
             }
         }
 
@@ -206,8 +213,9 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
 
         if (installed && data->Header.Length > offsetof(FFSmbiosMemoryDevice, Speed)) // 2.3+
         {
-            if (data->Speed) {
-                device->maxSpeed = data->Speed == 0xFFFF ? data->ExtendedSpeed : data->Speed;
+            uint16_t speed = FF_READ_LE(data->Speed);
+            if (speed) {
+                device->maxSpeed = speed == 0xFFFF ? FF_READ_LE(data->ExtendedSpeed) : speed;
             }
 
             ffStrbufSetStatic(&device->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
@@ -223,10 +231,11 @@ const char* ffDetectPhysicalMemory(FFPhysicalMemoryOptions* options, FFlist* res
 
         if (installed && data->Header.Length > offsetof(FFSmbiosMemoryDevice, ConfiguredMemorySpeed)) // 2.7+
         {
-            if (data->ConfiguredMemorySpeed) {
-                device->runningSpeed = data->ConfiguredMemorySpeed == 0xFFFF
-                    ? data->ExtendedConfiguredSpeed
-                    : data->ConfiguredMemorySpeed;
+            uint16_t configuredSpeed = FF_READ_LE(data->ConfiguredMemorySpeed);
+            if (configuredSpeed) {
+                device->runningSpeed = configuredSpeed == 0xFFFF
+                    ? FF_READ_LE(data->ExtendedConfiguredSpeed)
+                    : configuredSpeed;
             }
         }
     }

@@ -1,4 +1,5 @@
 #include "common/path.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/arrutil.h"
 
@@ -6,6 +7,7 @@
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
     char* path = getenv("PATH");
     if (!path) {
+        FF_DEBUG("The PATH environment variable is not set");
         return "$PATH not set";
     }
 
@@ -50,6 +52,7 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
         return nullptr;
     }
     ffStrbufClear(result);
+    FF_DEBUG("%s is not executable in any of the %s entries", name, "PATH");
     return "Executable not found";
 }
 #else
@@ -62,6 +65,7 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result) {
     char buffer[MAX_PATH + 1];
     DWORD length = SearchPathA(nullptr, name, ".exe", sizeof(buffer), buffer, nullptr);
     if (length == 0) {
+        FF_DEBUG("SearchPathA(%s) failed: %s", name, ffDebugWin32Error(GetLastError()));
         ffStrbufClear(result);
         return "Executable not found";
     }

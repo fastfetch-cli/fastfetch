@@ -15,7 +15,6 @@
 
 [[gnu::always_inline, gnu::nonnull(1)]]
 static inline void ffWrapFree(const void* pPtr) {
-    assert(pPtr);
     if (*(void**) pPtr) {
         free(*(void**) pPtr);
     }
@@ -24,8 +23,8 @@ static inline void ffWrapFree(const void* pPtr) {
 #define FF_AUTO_FREE [[gnu::cleanup(ffWrapFree)]]
 
 // ptr MUST be a malloc'ed pointer
+[[gnu::nonnull(1), nodiscard]]
 static inline size_t ffMallocUsableSize(const void* ptr) {
-    assert(ptr);
 #if FF_HAVE_MALLOC_USABLE_SIZE
     return malloc_usable_size((void*) ptr);
 #elif FF_HAVE_MALLOC_SIZE

@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: set up QEMU for loong64
-        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
       - name: build in loong64 container
         run: |
@@ -37,13 +37,13 @@ jobs:
                 libdconf-dev libdbus-1-dev libmagickcore-dev \
                 libsqlite3-dev librpm-dev \
                 libegl-dev libglx-dev ocl-icd-opencl-dev \
-                libpulse-dev libdrm-dev \
+                libdrm-dev \
                 libelf-dev libefl-all-dev \
                 liblua5.4-dev \
                 libvdpau-dev libva-dev \
                 rpm
 
-              cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+              cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
               cmake --build . --target package --verbose -j$(nproc)
               ./fastfetch --list-features
               time ./fastfetch -c presets/ci.jsonc --stat false

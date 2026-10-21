@@ -63,6 +63,7 @@ bool ffPrintOS(FFOSOptions* options) {
                                                                            FF_ARG(instance.state.platform.sysinfo.name, "sysname"),
                                                                            FF_ARG(os->name, "name"),
                                                                            FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                           FF_ARG(FF_MODULE_GET_DISPLAY_NAME(OS), "module-name"),
                                                                        }));
     }
 
@@ -116,6 +117,7 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -180,6 +182,7 @@ FFModuleBaseInfo ffOSModuleInfo = {
         .cs = "OS",
         .de = "Betriebssystem",
         .es = "Sistema operativo",
+        .fi = "Käyttöjärjestelmä",
         .fr = "Système d'exploitation",
         .gl = "Sistema operativo",
         .he = "מערכת הפעלה",
@@ -203,8 +206,8 @@ FFModuleBaseInfo ffOSModuleInfo = {
     .generateJsonResult = (void*) ffGenerateOSJsonResult,
     .generateJsonConfig = (void*) ffGenerateOSJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Name of the kernel", "sysname" },
-        { "Name of the OS", "name" },
+        { "Name of the kernel *", "sysname" },
+        { "Name of the OS *", "name" },
         { "Pretty name of the OS, if available", "pretty-name" },
         { "ID of the OS", "id" },
         { "ID like of the OS", "id-like" },
@@ -215,6 +218,7 @@ FFModuleBaseInfo ffOSModuleInfo = {
         { "Version codename of the OS", "codename" },
         { "Build ID of the OS", "build-id" },
         { "Architecture of the OS", "arch" },
+        { "Release of the kernel", "kernel-release" },
     })),
     .defaultOrder = 3,
 };

@@ -1,4 +1,5 @@
 #include "displayserver.h"
+#include "common/FFcache.h"
 
 FFDisplayResult* ffdsAppendDisplay(
     FFDisplayServerResult* result,
@@ -50,18 +51,45 @@ FFDisplayResult* ffdsAppendDisplay(
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
-const FFDisplayServerResult* ffConnectDisplayServer() {
-    static FFDisplayServerResult result;
-    static bool initialized = false;
-    if (!initialized) {
-        initialized = true;
-        ffStrbufInit(&result.wmProcessName);
-        ffStrbufInit(&result.wmPrettyName);
-        ffStrbufInit(&result.wmProtocolName);
-        ffStrbufInit(&result.deProcessName);
-        ffStrbufInit(&result.dePrettyName);
-        ffListInit(&result.displays);
-        ffConnectDisplayServerImpl(&result);
+static FFDisplayServerResult result;
+
+static void initDisplayServerResult(void* storage) {
+    FFDisplayServerResult* ds = storage;
+
+    ffStrbufInit(&ds->wmProcessName);
+    ffStrbufInit(&ds->wmPrettyName);
+    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufInit(&ds->deProcessName);
+    ffStrbufInit(&ds->dePrettyName);
+    ffListInit(&ds->displays);
+
+    ffConnectDisplayServerImpl(ds);
+}
+
+static void destroyDisplayServerResult(void* storage) {
+    FFDisplayServerResult* ds = storage;
+
+    ffStrbufDestroy(&ds->wmProcessName);
+    ffStrbufDestroy(&ds->wmPrettyName);
+    ffStrbufDestroy(&ds->wmProtocolName);
+    ffStrbufDestroy(&ds->deProcessName);
+    ffStrbufDestroy(&ds->dePrettyName);
+
+    // Every display owns its name and serial, which are lost if the list is dropped as a whole
+    FF_LIST_FOR_EACH (FFDisplayResult, display, ds->displays) {
+        ffStrbufDestroy(&display->name);
+        ffStrbufDestroy(&display->serial);
     }
-    return &result;
+    ffListDestroy(&ds->displays);
+}
+
+static FFcacheEntry ffCacheEntryDisplayServer = {
+    .name = "displayServer",
+    .storage = &result,
+    .init = initDisplayServerResult,
+    .destroy = destroyDisplayServerResult,
+};
+
+const FFDisplayServerResult* ffConnectDisplayServer() {
+    return ffCacheGet(&ffCacheEntryDisplayServer);
 }

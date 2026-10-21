@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: run VM
-        uses: vmactions/solaris-vm@315163f088b66e55bbcc45928bd224d4973b2312 # v1.3.8
+        uses: vmactions/solaris-vm@87d3c436511cef802cd1637f86f73b1a97715c8c # v1.4.1
         with:
           usesh: true
           envs: 'CMAKE_BUILD_TYPE'
@@ -28,7 +28,7 @@ jobs:
 
           run: |
             export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -GNinja -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .
             cmake --build . --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false

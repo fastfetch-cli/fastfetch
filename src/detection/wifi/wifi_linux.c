@@ -1,6 +1,8 @@
 #include "wifi.h"
+#include "common/endian.h"
 #include "common/io.h"
 #include "common/debug.h"
+#include "common/percent.h"
 #include "common/strutil.h"
 
 #include <sys/time.h>
@@ -11,12 +13,11 @@
 #include <linux/wireless.h>
 #include <unistd.h>
 
-#if !__BIG_ENDIAN__
-    #include <linux/genetlink.h>
-    #include <linux/nl80211.h>
+#include <linux/genetlink.h>
+#include <linux/nl80211.h>
 
-    // Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
-    #pragma GCC diagnostic ignored "-Wsign-conversion"
+// Silence warning of `NLA_HDRLEN` and `NLA_ALIGN`
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 
 typedef struct FFWifiNlContext {
     int sockFd;
@@ -34,11 +35,6 @@ typedef struct FFWifiSecurityFlags {
     bool owe : 1;
     bool eap : 1;
 } FFWifiSecurityFlags;
-
-static inline double rssiToSignalQuality(int rssi) {
-    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0
-                                                      : (rssi + 100) * 2);
-}
 
 static inline uint32_t ffWifiGetNetlinkPortId(int sockFd) {
     struct sockaddr_nl addr = {};
@@ -308,19 +304,19 @@ static uint16_t ffWifiChannelWidthToMhz(uint32_t width) {
             return 80;
         case NL80211_CHAN_WIDTH_160:
             return 160;
-        case NL80211_CHAN_WIDTH_5:
+        case 6 /* NL80211_CHAN_WIDTH_5 */:
             return 5;
-        case NL80211_CHAN_WIDTH_10:
+        case 7 /* NL80211_CHAN_WIDTH_10 */:
             return 10;
-        case NL80211_CHAN_WIDTH_1:
+        case 8 /* NL80211_CHAN_WIDTH_1 */:
             return 1;
-        case NL80211_CHAN_WIDTH_2:
+        case 9 /* NL80211_CHAN_WIDTH_2 */:
             return 2;
-        case NL80211_CHAN_WIDTH_4:
+        case 10 /* NL80211_CHAN_WIDTH_4 */:
             return 4;
-        case NL80211_CHAN_WIDTH_8:
+        case 11 /* NL80211_CHAN_WIDTH_8 */:
             return 8;
-        case NL80211_CHAN_WIDTH_16:
+        case 12 /* NL80211_CHAN_WIDTH_16 */:
             return 16;
         case 13 /* NL80211_CHAN_WIDTH_320 */:
             return 320;
@@ -459,7 +455,7 @@ static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags*
     if (pos + 2 > len) { // pairwise cipher suite count field length
         return;
     }
-    uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
+    uint16_t pairwiseCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip pairwise cipher suite count field
 
     size_t pairwiseLen = (size_t) pairwiseCount * 4; // each suite selector is 4 bytes
@@ -471,7 +467,7 @@ static void ffWifiParseRsnIe(const uint8_t* ie, size_t len, FFWifiSecurityFlags*
     if (pos + 2 > len) { // AKM suite count field length
         return;
     }
-    uint16_t akmCount = *(uint16_t*) (ie + pos);
+    uint16_t akmCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip AKM suite count field
 
     for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
@@ -528,13 +524,13 @@ static void ffWifiParseWpaVendorIe(const uint8_t* ie, size_t len, FFWifiSecurity
     if (pos + 2 > len) { // unicast cipher suite count field length
         return;
     }
-    uint16_t pairwiseCount = *(uint16_t*) (ie + pos);
+    uint16_t pairwiseCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2 + (size_t) pairwiseCount * 4; // count field(2) + N unicast suite selectors(4 each)
 
     if (pos + 2 > len) { // AKM suite count field length
         return;
     }
-    uint16_t akmCount = *(uint16_t*) (ie + pos);
+    uint16_t akmCount = FF_READ_LE(*(const uint16_t*) (ie + pos));
     pos += 2; // skip AKM suite count field
 
     for (uint16_t i = 0; i < akmCount && pos + 4 <= len; ++i, pos += 4) { // each AKM suite selector is 4 bytes
@@ -605,7 +601,7 @@ static void ffWifiParseBssAttr(const struct nlattr* bssAttr, FFWifiResult* item)
             item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
         } else if (type == NL80211_BSS_SIGNAL_MBM && payload >= sizeof(int32_t)) {
             int rssi = *(int32_t*) ffWifiNlAttrData(attr) / 100; // mBm (100 * dBm) => dBm
-            item->conn.signalQuality = rssiToSignalQuality(rssi);
+            item->conn.signalQuality = ffRssiToSignalQuality(rssi);
         } else if (type == NL80211_BSS_CAPABILITY && payload >= sizeof(uint16_t)) {
             uint16_t capability = *(uint16_t*) ffWifiNlAttrData(attr);
             sec.privacy = (capability & (1u << 4u)) != 0; // IEEE 802.11 capability bit 4: privacy
@@ -717,7 +713,7 @@ static void ffWifiParseStationInfo(const struct nlattr* staInfoAttr, FFWifiResul
 
         if (type == NL80211_STA_INFO_SIGNAL && payload >= sizeof(uint8_t) && item->conn.signalQuality == -DBL_MAX) {
             int rssi = (int8_t) *(const uint8_t*) ffWifiNlAttrData(attr);
-            item->conn.signalQuality = rssiToSignalQuality(rssi);
+            item->conn.signalQuality = ffRssiToSignalQuality(rssi);
         } else if (type == NL80211_STA_INFO_TX_BITRATE && (item->conn.txRate == -DBL_MAX || item->conn.channelWidth == 0)) {
             double tx = ffWifiParseBitrateFromRateInfo(attr, &item->conn.protocol, &item->conn.channelWidth);
             if (tx != -DBL_MAX) {
@@ -845,8 +841,6 @@ static const char* detectWithNetlink(FFWifiNlContext* ctx, FFWifiResult* item, u
     FF_DEBUG("Netlink wifi detection completed");
     return nullptr;
 }
-#endif
-
 typedef struct FFWifiIcContext {
     int sockFd;
 } FFWifiIcContext;
@@ -1049,9 +1043,7 @@ const char* ffDetectWifi(FFlist* result) {
         return "if_nameindex() failed";
     }
 
-#if !__BIG_ENDIAN__
     FFWifiNlContext nl = { .sockFd = -1 };
-#endif
     FFWifiIcContext ic = { .sockFd = -1 };
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -1090,9 +1082,7 @@ const char* ffDetectWifi(FFlist* result) {
         if (operstate == 'u') {
             ffStrbufSetStatic(&item->inf.status, "up");
 
-#if !__BIG_ENDIAN__
             detectWithNetlink(&nl, item, i->if_index);
-#endif
             detectWithIoctl(&ic, item, i->if_name);
         } else {
             ffStrbufSetStatic(&item->conn.status, "disconnected");
@@ -1116,11 +1106,9 @@ const char* ffDetectWifi(FFlist* result) {
     }
 
     if_freenameindex(infs);
-#if !__BIG_ENDIAN__
     if (nl.sockFd >= 0) {
         close(nl.sockFd);
     }
-#endif
     if (ic.sockFd >= 0) {
         close(ic.sockFd);
     }

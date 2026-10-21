@@ -213,6 +213,41 @@ static const FFlogo N[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NURA
+    // Nura
+    {
+        .names = { "Nura" },
+        .lines = FASTFETCH_DATATEXT_LOGO_NURA,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NURA2
+    // Nura2
+    {
+        .names = { "Nura2" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_NURA2,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NURA_SMALL
+    // NuraSmall
+    {
+        .names = { "Nura_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_NURA_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_NUROS
     // NurOS
     {

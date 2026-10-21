@@ -10,10 +10,10 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc) {
 }
 
 const char* ffDetectMemory(FFMemoryResult* ram) {
-    uint64_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
-    ram->bytesTotal = (uint64_t) sysconf(_SC_PHYS_PAGES) * pageSize;
-    ram->bytesUsed = ram->bytesTotal - (uint64_t) sysconf(_SC_AVPHYS_PAGES) * pageSize;
+    ram->bytesTotal = (uint64_t) sysconf(_SC_PHYS_PAGES) << pageSizeShift;
+    ram->bytesUsed = ram->bytesTotal - ((uint64_t) sysconf(_SC_AVPHYS_PAGES) << pageSizeShift);
 
     [[gnu::cleanup(kstatFreeWrap)]] kstat_ctl_t* kc = kstat_open();
     if (kc != nullptr) {

@@ -33,6 +33,7 @@ bool ffPrintMonitor(FFMonitorOptions* options) {
                                                                                FF_ARG(moduleIndex, "index"),
                                                                                FF_ARG(display->name, "name"),
                                                                                FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                               FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Monitor), "module-name"),
                                                                            }));
         }
 
@@ -86,6 +87,7 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -112,6 +114,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
         .cs = "Monitor",
         .de = "Monitor",
         .es = "Monitor",
+        .fi = "Monitori",
         .fr = "Moniteur",
         .gl = "Monitor",
         .he = "צג",
@@ -135,7 +138,7 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
     .generateJsonResult = (void*) ffGenerateMonitorJsonResult,
     .generateJsonConfig = (void*) ffGenerateMonitorJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Display name", "name" },
+        { "Display name *", "name" },
         { "Native resolution width in pixels", "width" },
         { "Native resolution height in pixels", "height" },
         { "Physical width in millimeters", "physical-width" },

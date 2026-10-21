@@ -8,6 +8,7 @@
 #include "common/debug.h"
 
 const char* ffDetectWMPlugin([[maybe_unused]] FFstrbuf* pluginName) {
+    FF_DEBUG("Not supported on this platform");
     return "Not supported on this platform";
 }
 
@@ -120,6 +121,7 @@ static const char* getSway(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("sway", &path);
     if (error) {
+        FF_DEBUG("Failed to find sway executable: %s", error);
         return "Failed to find sway executable path";
     }
 
@@ -133,6 +135,7 @@ static const char* getSway(FFstrbuf* result) {
         return extractSwayVersion(buffer.chars, buffer.length, result) ? "Failed to parse sway version output" : nullptr;
     }
 
+    FF_DEBUG("Failed to run command `sway --version`");
     return "Failed to run command `sway --version`";
 }
 
@@ -140,6 +143,7 @@ static const char* getLabwc(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("labwc", &path);
     if (error) {
+        FF_DEBUG("Failed to find labwc executable: %s", error);
         return "Failed to find labwc executable path";
     }
 
@@ -154,6 +158,7 @@ static const char* getLabwc(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `labwc --version`");
     return "Failed to run command `labwc --version`";
 }
 
@@ -165,13 +170,27 @@ static const char* getNiri(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `niri --version`");
     return "Failed to run command `niri --version`";
+}
+
+static const char* getUmbriel(FFstrbuf* result) {
+    if (ffProcessAppendStdOut(result, (char* const[]) { "umbriel", "--version", nullptr }) == nullptr) { // umbriel 0.1.0 (7a448abe550e)
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeLastC(result, '(');
+        ffStrbufTrimRightSpace(result);
+        return nullptr;
+    }
+
+    FF_DEBUG("Failed to run command `umbriel --version`");
+    return "Failed to run command `umbriel --version`";
 }
 
 static const char* getWeston(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("weston", &path);
     if (error) {
+        FF_DEBUG("Failed to find weston executable: %s", error);
         return "Failed to find weston executable path";
     }
 
@@ -181,12 +200,14 @@ static const char* getWeston(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `weston --version`");
     return "Failed to run command `weston --version`";
 }
 
     #ifdef __linux__
 static const char* getWslg(FFstrbuf* result) {
     if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result)) {
+        FF_DEBUG("Failed to read /mnt/wslg/versions.txt");
         return "Failed to read /mnt/wslg/versions.txt";
     }
 
@@ -200,6 +221,7 @@ static const char* getWslg(FFstrbuf* result) {
         ffStrbufTrimLeft(result, ' ');
     } else {
         ffStrbufClear(result);
+        FF_DEBUG("Failed to parse WSLg version from /mnt/wslg/versions.txt");
         return "Failed to parse WSLg version from /mnt/wslg/versions.txt";
     }
 
@@ -224,6 +246,7 @@ static const char* getI3(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("i3", &path);
     if (error) {
+        FF_DEBUG("Failed to find i3 executable: %s", error);
         return "Failed to find i3 executable path";
     }
 
@@ -238,6 +261,7 @@ static const char* getI3(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `i3 --version`");
     return "Failed to run command `i3 --version`";
 }
 
@@ -245,6 +269,7 @@ static const char* getCtwm(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("ctwm", &path);
     if (error) {
+        FF_DEBUG("Failed to find ctwm executable: %s", error);
         return "Failed to find ctwm executable path";
     }
 
@@ -259,6 +284,7 @@ static const char* getCtwm(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `ctwm --version`");
     return "Failed to run command `ctwm --version`";
 }
 
@@ -266,6 +292,7 @@ static const char* getFvwm(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("fvwm", &path);
     if (error) {
+        FF_DEBUG("Failed to find fvwm executable: %s", error);
         return "Failed to find fvwm executable path";
     }
 
@@ -280,6 +307,7 @@ static const char* getFvwm(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `fvwm -version`");
     return "Failed to run command `fvwm -version`";
 }
 
@@ -287,6 +315,7 @@ static const char* getOpenbox(FFstrbuf* result) {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("openbox", &path);
     if (error) {
+        FF_DEBUG("Failed to find openbox executable: %s", error);
         return "Failed to find openbox executable path";
     }
 
@@ -301,11 +330,13 @@ static const char* getOpenbox(FFstrbuf* result) {
         return nullptr;
     }
 
+    FF_DEBUG("Failed to run command `openbox --version`");
     return "Failed to run command `openbox --version`";
 }
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_unused]] FFWMOptions* options) {
     if (!wmName) {
+        FF_DEBUG("No WM detected");
         return "No WM detected";
     }
 
@@ -325,6 +356,10 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_
 
     if (ffStrbufEqualS(wmName, "niri")) {
         return getNiri(result);
+    }
+
+    if (ffStrbufEqualS(wmName, "umbriel")) {
+        return getUmbriel(result);
     }
 
     if (ffStrbufEqualS(wmName, "weston")) {
@@ -355,5 +390,6 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, [[maybe_
         return getOpenbox(result);
     }
 
+    FF_DEBUG("Unsupported WM: %s", wmName->chars);
     return "Unsupported WM";
 }

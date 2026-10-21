@@ -4,28 +4,24 @@
 
 static FFlist first;
 static double startTick;
-static FFTopTypes preparedShowTypes = FF_TOP_TYPE_CPU | FF_TOP_TYPE_MEMORY | FF_TOP_TYPE_DISK;
+static FFTopTypes preparedTypes;
 
 void ffPrepareTopProcesses(FFTopTypes showTypes) {
+    if (startTick != 0) {
+        return; // Already prepared
+    }
+
     if ((showTypes & (FF_TOP_TYPE_CPU | FF_TOP_TYPE_DISK)) == 0) {
         return; // Memory usage is instantaneous; no baseline snapshot is needed
     }
 
-    if (startTick != 0 && preparedShowTypes == showTypes) {
-        return; // Already prepared
-    }
-
-    if (startTick != 0) {
-        // The set of requested types changed; discard the stale baseline
-        FF_LIST_FOR_EACH (FFTopProcessSnapshot, item, first) {
-            ffStrbufDestroy(&item->name);
-        }
-        ffListDestroy(&first);
-    }
-
+    // Within one module `showTypes` cannot change between this call and `ffDetectTopProcesses`:
+    // `ffPrepareCommandOption` and `parseStructureCommand` both build the options through
+    // `initStructureModuleOptions`, which merges the module object from the JSON config, so the
+    // baseline always matches what the second snapshot collects.
+    preparedTypes = showTypes;
     ffListInit(&first);
     startTick = ffTimeGetTick();
-    preparedShowTypes = showTypes;
     ffTopGetProcessSnapshot(&first, showTypes);
 }
 
@@ -53,6 +49,18 @@ static int compareDiskWriteResults(const FFTopProcessResult* a, const FFTopProce
     if (a->bytesWritten > b->bytesWritten) return -1;
     return (int) (a->pid - b->pid);
 }
+
+static int compareStartTimeResults(const FFTopProcessResult* a, const FFTopProcessResult* b) {
+    if (a->startTime < b->startTime) return 1;
+    if (a->startTime > b->startTime) return -1;
+    return (int) (a->pid - b->pid);
+}
+
+static int compareThreadsResults(const FFTopProcessResult* a, const FFTopProcessResult* b) {
+    if (a->threads < b->threads) return 1;
+    if (a->threads > b->threads) return -1;
+    return (int) (a->pid - b->pid);
+}
 // clang-format on
 
 const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
@@ -61,8 +69,15 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
         return nullptr;
     }
 
-    // Memory usage is instantaneous; when neither CPU time nor disk IO counters
-    // are requested, a single snapshot suffices and no sampling wait is needed.
+    // A baseline collected for a different set of counters is answered here rather than in
+    // ffPrepareTopProcesses, which has no way to report an error to the caller. The module that
+    // triggered the mismatch is the one that sees it; see ffPrepareTopProcesses.
+    if (options->showTypes != preparedTypes && (options->showTypes & (FF_TOP_TYPE_CPU | FF_TOP_TYPE_DISK)) != 0) {
+        return "`top` modules with different `showTypes` cannot share a run";
+    }
+
+    // Memory usage and thread count are instantaneous; when neither CPU time nor disk IO
+    // counters are requested, a single snapshot suffices and no sampling wait is needed.
     const bool sampleOnce = (options->showTypes & (FF_TOP_TYPE_CPU | FF_TOP_TYPE_DISK)) == 0;
 
     if (sampleOnce) {
@@ -86,10 +101,11 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
             item->bytesWritten = 0;
             item->cpuPercent = 0;
             item->startTime = snap->startTime;
+            item->threads = snap->threads;
             ffStrbufInitMove(&item->name, &snap->name);
         }
     } else {
-        if (startTick == 0 || preparedShowTypes != options->showTypes) {
+        if (startTick == 0) {
             ffPrepareTopProcesses(options->showTypes);
         }
 
@@ -135,6 +151,7 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
             item->bytesWritten = (newItem->bytesWritten - oldItem->bytesWritten) * 1000u / (uint64_t) elapsed;
             item->cpuPercent = (double) (newItem->cpuTime - oldItem->cpuTime) / elapsed * 100.0;
             item->startTime = newItem->startTime;
+            item->threads = newItem->threads;
             ffStrbufInitMove(&item->name, &oldItem->name);
         }
 
@@ -147,6 +164,8 @@ const char* ffDetectTopProcesses(FFTopOptions* options, FFlist* result) {
     const void* compare = options->sort == FF_TOP_TYPE_DISK_WRITE ? (void*) compareDiskWriteResults
         : options->sort == FF_TOP_TYPE_DISK_READ                  ? (void*) compareDiskReadResults
         : options->sort == FF_TOP_TYPE_MEMORY                     ? (void*) compareMemoryResults
+        : options->sort == FF_TOP_TYPE_START_TIME                 ? (void*) compareStartTimeResults
+        : options->sort == FF_TOP_TYPE_THREADS                    ? (void*) compareThreadsResults
                                                                   : (void*) compareCpuResults;
     ffListSort(result, sizeof(FFTopProcessResult), (void*) compare);
     if (result->length > options->nProcesses) {

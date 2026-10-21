@@ -2,4 +2,4 @@
 
 #include "fastfetch.h"
 
-void ffDurationAppendNum(uint64_t totalSeconds, FFstrbuf* result);
+[[gnu::nonnull(2)]] void ffDurationAppendNum(uint64_t totalSeconds, FFstrbuf* result);

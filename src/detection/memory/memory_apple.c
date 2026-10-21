@@ -1,6 +1,7 @@
 #include "memory.h"
 #include "common/debug.h"
 
+#include <errno.h>
 #include <string.h>
 #include <mach/mach.h>
 #include <sys/sysctl.h>
@@ -11,10 +12,12 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
 
 #if FF_APPLE_MEMSIZE_USABLE
     if (sysctlbyname("hw.memsize_usable", &ram->bytesTotal, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctlbyname(\"hw.memsize_usable\") failed: %s", strerror(errno));
         return "Failed to read hw.memsize_usable";
     }
 #else
     if (sysctl((int[]) { CTL_HW, HW_MEMSIZE }, 2, &ram->bytesTotal, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl(HW_MEMSIZE) failed: %s", strerror(errno));
         return "Failed to read hw.memsize";
     }
 #endif
@@ -22,6 +25,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
     mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
     vm_statistics64_data_t vmstat;
     if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t) (&vmstat), &count) != KERN_SUCCESS) {
+        FF_DEBUG("host_statistics64() failed");
         return "Failed to read host_statistics64";
     }
 
@@ -29,7 +33,7 @@ const char* ffDetectMemory(FFMemoryResult* ram) {
 
     uint64_t pagesFree = vmstat.free_count - vmstat.speculative_count;
     uint64_t pagesFileBacked = vmstat.external_page_count; // Cached files
-    ram->bytesUsed = ram->bytesTotal - (pagesFree + pagesFileBacked) * instance.state.platform.sysinfo.pageSize;
+    ram->bytesUsed = ram->bytesTotal - ((pagesFree + pagesFileBacked) << instance.state.platform.sysinfo.pageSizeShift);
 
     return nullptr;
 }

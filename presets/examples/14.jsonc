@@ -12,7 +12,7 @@
     },
     "modules": [
         {
-            // draw borders first to make colors of left and right border consistant
+            // draw borders first to make colors of left and right border consistent
             "key": " user",
             "type": "title",
             "format": "{user-name}",

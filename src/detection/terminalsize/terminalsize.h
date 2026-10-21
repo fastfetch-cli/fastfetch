@@ -10,4 +10,5 @@ typedef struct FFTerminalSizeResult {
     uint16_t height;
 } FFTerminalSizeResult;
 
-bool ffDetectTerminalSize(FFTerminalSizeResult* result);
+// `fastOnly` avoids terminal query/response sequences and is intended for startup layout decisions.
+bool ffDetectTerminalSize(FFTerminalSizeResult* result, bool fastOnly);

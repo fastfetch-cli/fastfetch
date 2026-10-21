@@ -1,4 +1,5 @@
 #include "physicaldisk.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/properties.h"
 #include "common/strutil.h"
@@ -34,7 +35,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
         if (fileSize > 0) {
             blkSize[fileSize] = 0;
-            size = (uint64_t) strtoul(blkSize, nullptr, 10) * 512;
+            size = (uint64_t) strtoull(blkSize, nullptr, 10) * 512;
         }
     }
 
@@ -178,6 +179,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* sysBlockDirp = opendir("/sys/block/");
     if (sysBlockDirp == nullptr) {
+        FF_DEBUG("opendir(\"/sys/block/\") failed: %s", strerror(errno));
         return "opendir(\"/sys/block/\") == nullptr";
     }
 

@@ -1,5 +1,6 @@
 extern "C" {
 #include "mouse.h"
+#include "common/debug.h"
 }
 
 #include <interface/Input.h>
@@ -8,7 +9,9 @@ extern "C" {
 const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */) {
     BList list;
 
-    if (get_input_devices(&list) != B_OK) {
+    status_t inputDevicesStatus = get_input_devices(&list);
+    if (inputDevicesStatus != B_OK) {
+        FF_DEBUG("get_input_devices() failed: status_t 0x%08x", (uint32_t) inputDevicesStatus);
         return "get_input_devices() failed";
     }
 

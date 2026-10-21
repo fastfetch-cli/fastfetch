@@ -355,6 +355,10 @@ bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* err
     ULONG bufSize = (ULONG) sizeof(buffer);
     KEY_BASIC_INFORMATION* keyInfo = (KEY_BASIC_INFORMATION*) buffer;
 
+    // Every failure mode fails NT_SUCCESS, and the read below depends on that: on a too-small buffer
+    // the kernel returns STATUS_BUFFER_OVERFLOW, writes the *full* NameLength but copies only part of
+    // the name (measured), so treating that status as success would read past what was written.
+    // The longest name the CM accepts, 255 characters, still fits: 255 * 2 + 16 <= sizeof(buffer).
     if (!NT_SUCCESS(NtEnumerateKey(hKey, index, KeyBasicInformation, keyInfo, bufSize, &bufSize))) {
         FF_DEBUG("NtEnumerateKey(hKey=%p, index=%u) failed", hKey, (unsigned) index);
         if (error) {
@@ -367,22 +371,26 @@ bool ffRegGetSubKey(HANDLE hKey, uint32_t index, FFstrbuf* result, FFstrbuf* err
     return true;
 }
 
-bool ffRegGetNSubKeys(HANDLE hKey, uint32_t* result, FFstrbuf* error) {
+// Reads the counters the key object already caches. KeyFullInformation would return the same numbers
+// but also marshals the key's class string out; measured per query on the ARP and MSIX keys:
+// 837 ns vs 895 ns (interleaved, 200k queries each). The open dominates the total -- 22.10 us vs
+// 22.40 us for open + query -- so this is a small win, not a big one.
+//
+// The kernel writes exactly sizeof(KEY_CACHED_INFORMATION) bytes and rejects a smaller buffer with
+// STATUS_BUFFER_TOO_SMALL without writing anything, so pass a whole KEY_CACHED_INFORMATION.
+bool ffRegQueryKey(HANDLE hKey, KEY_CACHED_INFORMATION* result, FFstrbuf* error) {
     assert(hKey);
     assert(result);
 
-    alignas(KEY_FULL_INFORMATION) uint8_t buffer[sizeof(KEY_FULL_INFORMATION) + MAX_PATH * sizeof(wchar_t)];
-    ULONG bufSize = sizeof(buffer);
-    KEY_FULL_INFORMATION* keyInfo = (KEY_FULL_INFORMATION*) buffer;
+    ULONG bufSize = (ULONG) sizeof(*result);
 
-    if (!NT_SUCCESS(NtQueryKey(hKey, KeyFullInformation, keyInfo, bufSize, &bufSize))) {
-        FF_DEBUG("NtQueryKey(hKey=%p, KeyFullInformation) failed", hKey);
+    if (!NT_SUCCESS(NtQueryKey(hKey, KeyCachedInformation, result, bufSize, &bufSize))) {
+        FF_DEBUG("NtQueryKey(hKey=%p, KeyCachedInformation) failed", hKey);
         if (error) {
-            ffStrbufAppendF(error, "NtQueryKey(hKey=%p, KeyFullInformation, keyInfo) failed", hKey);
+            ffStrbufAppendF(error, "NtQueryKey(hKey=%p, KeyCachedInformation, keyInfo) failed", hKey);
         }
         return false;
     }
 
-    *result = (uint32_t) keyInfo->SubKeys;
     return true;
 }

@@ -16,7 +16,8 @@
 const char* detectTermux(FFTerminalFontResult* terminalFont) {
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
     // SharedPreferences XML: <string name="fontsize">14</string>, in px
-    if (ffParsePropFile(FF_TERMUX_PREF_PATH, "<string name=\"fontsize\">", &fontSize)) {
+    ffParsePropFile(FF_TERMUX_PREF_PATH, "<string name=\"fontsize\">", &fontSize);
+    if (fontSize.length > 0) {
         ffStrbufAppendS(&fontSize, "px");
     }
 

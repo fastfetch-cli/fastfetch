@@ -124,7 +124,7 @@ const char* detectByOpenGL(FFlist* gpus) {
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-        gpu->dedicated = gpu->shared = (FFGPUMemory) { 0, 0 };
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = 0;
         gpu->pcieSpeed = FF_GPU_PCIE_SPEED_UNSET;
 

@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "common/processing.h"
 #include "common/io.h"
 #include "common/strutil.h"
@@ -28,7 +29,6 @@
 #elif defined(__OpenBSD__)
     #include <sys/param.h>
     #include <sys/sysctl.h>
-    #include <kvm.h>
 #elif defined(__NetBSD__)
     #include <sys/types.h>
     #include <sys/sysctl.h>
@@ -43,28 +43,39 @@ extern char** environ;
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static inline int ffPipe2(int* fds, int flags) {
+static inline int ffPipe2(int* readEnd, int* writeEnd, int flags) {
+    int fds[2];
 #ifndef FF_HAVE_PIPE2
     if (pipe(fds) == -1) {
         return -1;
     }
     fcntl(fds[0], F_SETFL, fcntl(fds[0], F_GETFL) | flags);
     fcntl(fds[1], F_SETFL, fcntl(fds[1], F_GETFL) | flags);
-    return 0;
 #else
-    return pipe2(fds, flags);
+    if (pipe2(fds, flags) == -1) {
+        return -1;
+    }
 #endif
+    *readEnd = fds[0];
+    *writeEnd = fds[1];
+    return 0;
 }
 
 // Not thread-safe
-const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle) {
-    int pipes[2];
-    if (ffPipe2(pipes, O_CLOEXEC) == -1) {
+const char* ffProcessSpawn(char* const argv[], FFProcessOutputType useOutput, FFNativeFD stdinFd, FFProcessHandle* outHandle) {
+    FF_AUTO_CLOSE_FD int pipeRead = -1;
+    FF_AUTO_CLOSE_FD int pipeWrite = -1;
+    if (ffPipe2(&pipeRead, &pipeWrite, O_CLOEXEC) == -1) {
+        FF_DEBUG("pipe() failed: %s", strerror(errno));
         return "pipe() failed";
     }
 
     pid_t childPid = -1;
     int nullFile = ffGetNullFD();
+    // Each stream is wired to the pipe when its bit is set and to the null device otherwise, so an
+    // unselected stream can neither mix into the captured text nor fill the pipe and block the child.
+    int stdoutFd = (useOutput & FF_PROCESS_OUTPUT_STDOUT_BIT) ? pipeWrite : nullFile;
+    int stderrFd = (useOutput & FF_PROCESS_OUTPUT_STDERR_BIT) ? pipeWrite : nullFile;
 
 #if !(__ANDROID__ || __OpenBSD__)
 
@@ -76,8 +87,11 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
 
     posix_spawn_file_actions_t file_actions;
     posix_spawn_file_actions_init(&file_actions);
-    posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-    posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, stdoutFd, STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, stderrFd, STDERR_FILENO);
+    if (ffIsValidNativeFD(stdinFd)) {
+        posix_spawn_file_actions_adddup2(&file_actions, stdinFd, STDIN_FILENO);
+    }
 
     static char* oldLang = nullptr;
     static int langIndex = -1;
@@ -121,8 +135,7 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     posix_spawn_file_actions_destroy(&file_actions);
 
     if (ret != 0) {
-        close(pipes[0]);
-        close(pipes[1]);
+        FF_DEBUG("posix_spawnp() failed: %s", strerror(ret));
         if (ret == ENOENT) {
             return "command not found";
         }
@@ -134,15 +147,17 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
     // https://github.com/termux/termux-packages/issues/25369
     childPid = fork();
     if (childPid == -1) {
-        close(pipes[0]);
-        close(pipes[1]);
+        FF_DEBUG("fork() failed: %s", strerror(errno));
         return "fork() failed";
     }
 
     if (childPid == 0) {
         // Child process
-        dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-        dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        dup2(stdoutFd, STDOUT_FILENO);
+        dup2(stderrFd, STDERR_FILENO);
+        if (ffIsValidNativeFD(stdinFd)) {
+            dup2(stdinFd, STDIN_FILENO);
+        }
         putenv("LANG=C.UTF-8");
         execvp(argv[0], argv);
         _exit(127);
@@ -150,9 +165,9 @@ const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* 
 
 #endif
 
-    close(pipes[1]);
     outHandle->pid = childPid;
-    outHandle->pipeRead = pipes[0];
+    outHandle->pipeRead = pipeRead;
+    pipeRead = -1; // ownership moved into outHandle, which ffProcessReadOutput() lets go
     return nullptr;
 }
 
@@ -172,6 +187,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
             struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
             int pollret = poll(&pollfd, 1, timeout);
             if (pollret == 0) {
+                FF_DEBUG("poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)");
                 kill(childPid, SIGTERM);
                 waitpid(childPid, nullptr, 0);
                 return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
@@ -194,6 +210,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
                     return "child process exited abnormally";
                 }
                 if (WEXITSTATUS(stat_loc) == 127) {
+                    FF_DEBUG("command not found");
                     return "command not found";
                 }
                 // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
@@ -205,6 +222,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer) {
         }
     }
 
+    FF_DEBUG("read(childPipeFd, str, FF_PIPE_BUFSIZ) failed: %s", strerror(errno));
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
 
@@ -423,12 +441,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
 #elif defined(__OpenBSD__)
 
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
-    if (proc) {
-        char** argv = kvm_getargv(kd, proc, 0);
-        if (argv) {
+    char argvBuf[ARG_MAX];
+    size_t argvSize = sizeof(argvBuf);
+    int argvMib[] = { CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_ARGV };
+    if (sysctl(argvMib, ARRAY_SIZE(argvMib), argvBuf, &argvSize, nullptr, 0) == 0) {
+        // The buffer is filled with an array of char pointers followed by the strings themselves
+        char** argv = (char**) argvBuf;
+        if (argv[0] && (char*) argv[0] >= argvBuf && (char*) argv[0] < argvBuf + argvSize) {
             const char* arg0 = argv[0];
             if (arg0[0] == '-') {
                 arg0++;
@@ -436,7 +455,6 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             ffStrbufSetS(exe, arg0);
         }
     }
-    kvm_close(kd);
 
 #elif defined(__HAIKU__)
 
@@ -470,6 +488,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
 const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, int32_t* tty) {
     if (pid <= 0) {
+        FF_DEBUG("Invalid pid");
         return "Invalid pid";
     }
 
@@ -484,6 +503,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         char buf[PROC_FILE_BUFFSIZ];
         ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
         if (nRead <= 8) {
+            FF_DEBUG("ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed");
             return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
         }
         buf[nRead] = '\0'; // pid (comm) state ppid pgrp session tty
@@ -494,16 +514,19 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             // comm in `/proc/pid/stat` is not encoded, and may contain ' ', ')' or even `\n`
             const char* start = memchr(buf, '(', (size_t) nRead);
             if (!start) {
+                FF_DEBUG("memchr(stat, '(') failed");
                 return "memchr(stat, '(') failed";
             }
             start++;
             const char* end = memrchr(start, ')', (size_t) nRead - (size_t) (start - buf));
             if (!end) {
+                FF_DEBUG("memrchr(stat, ')') failed");
                 return "memrchr(stat, ')') failed";
             }
             ffStrbufSetNS(name, (uint32_t) (end - start), start);
             ffStrbufTrimRightSpace(name);
             if (name->chars[0] == '\0') {
+                FF_DEBUG("process name is empty");
                 return "process name is empty";
             }
             pState = end + 2; // skip ") "
@@ -515,6 +538,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         {
             int ppid_, tty_;
             if (sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2) {
+                FF_DEBUG("sscanf(stat) failed");
                 return "sscanf(stat) failed";
             }
 
@@ -531,6 +555,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int) pid);
         ssize_t nRead = ffReadFileBuffer(procFilePath, name);
         if (nRead <= 0) {
+            FF_DEBUG("ffReadFileBuffer(/proc/pid/comm, name) failed");
             return "ffReadFileBuffer(/proc/pid/comm, name) failed";
         }
         ffStrbufTrimRightSpace(name);
@@ -543,6 +568,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     size_t size = sizeof(proc);
     if (sysctl(
             (int[]) { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid }, 4, &proc, &size, nullptr, 0)) {
+        FF_DEBUG("sysctl(KERN_PROC_PID) failed: %s", strerror(errno));
         return "sysctl(KERN_PROC_PID) failed";
     }
 
@@ -569,6 +595,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     size_t size = sizeof(proc);
     if (sysctl(
             (int[]) { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid }, 4, &proc, &size, nullptr, 0)) {
+        FF_DEBUG("sysctl(KERN_PROC_PID) failed: %s", strerror(errno));
         return "sysctl(KERN_PROC_PID) failed";
     }
 
@@ -595,6 +622,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     size_t size = sizeof(proc);
     if (sysctl(
             (int[]) { CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid, sizeof(proc), 1 }, 6, &proc, &size, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl(KERN_PROC_PID) failed: %s", strerror(errno));
         return "sysctl(KERN_PROC_PID) failed";
     }
 
@@ -620,6 +648,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     snprintf(path, sizeof(path), "/proc/%d/psinfo", (int) pid);
     psinfo_t proc;
     if (ffReadFileData(path, sizeof(proc), &proc) != sizeof(proc)) {
+        FF_DEBUG("ffReadFileData(psinfo) failed");
         return "ffReadFileData(psinfo) failed";
     }
 
@@ -633,21 +662,20 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
 #elif defined(__OpenBSD__)
 
-    kvm_t* kd = kvm_open(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-    int count = 0;
-    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
-    if (proc) {
-        ffStrbufSetS(name, proc->p_comm);
+    struct kinfo_proc proc;
+    size_t size = sizeof(proc);
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, pid, (int) sizeof(struct kinfo_proc), 1 };
+    if (sysctl(mib, ARRAY_SIZE(mib), &proc, &size, nullptr, 0) == 0) {
+        ffStrbufSetS(name, proc.p_comm);
         if (ppid) {
-            *ppid = proc->p_ppid;
+            *ppid = proc.p_ppid;
         }
         if (tty) {
-            *tty = (int) proc->p_tdev;
+            *tty = (int) proc.p_tdev;
         }
-    }
-    kvm_close(kd);
-    if (!proc) {
-        return "kvm_getprocs() failed";
+    } else {
+        FF_DEBUG("sysctl(KERN_PROC_PID) failed: %s", strerror(errno));
+        return "sysctl(KERN_PROC_PID) failed";
     }
 
 #elif defined(__HAIKU__)
@@ -664,6 +692,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
 #else
 
+    FF_DEBUG("Unsupported platform");
     return "Unsupported platform";
 
 #endif

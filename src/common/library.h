@@ -21,8 +21,7 @@ int dlclose(void* handle);
         #define FF_LIBRARY_EXTENSION ".so"
     #endif
 
-static inline void ffLibraryUnload(void** handle) {
-    assert(handle);
+[[gnu::nonnull(1)]] static inline void ffLibraryUnload(void** handle) {
     if (*handle) {
         dlclose(*handle);
     }
@@ -66,8 +65,8 @@ static inline void ffLibraryUnload(void** handle) {
     #define FF_LIBRARY_LOAD_SYMBOL_PTR(library, varName, symbolName, returnValue) \
         FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName)->ff##symbolName, symbolName, returnValue);
 
-void* ffLibraryLoadSingle(const char* path, int maxVersion);
-void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
+[[gnu::nonnull(1), nodiscard]] void* ffLibraryLoadSingle(const char* path, int maxVersion);
+[[gnu::nonnull(1), nodiscard]] void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
 
 #else
 
@@ -109,10 +108,10 @@ void* ffLibraryLoadMulti(const char* path, int maxVersion, ...);
 #endif
 
 #if _WIN32
-void* ffLibraryGetModule(const wchar_t* libraryFileName);
+[[gnu::nonnull(1), nodiscard]] void* ffLibraryGetModule(const wchar_t* libraryFileName);
 #endif
 
 // Return false to stop iterating, true to continue
 typedef bool (*FFLibraryIterateCallback)(const char* name, void* userData);
 // Iterate over all loaded dynamic libraries. Returns true on success, false on failure.
-bool ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData);
+[[nodiscard]] bool ffLibraryIterateDynamicLibs(FFLibraryIterateCallback callback, void* userData);

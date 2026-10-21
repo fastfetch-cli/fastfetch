@@ -1,38 +1,34 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
+
+#include <errno.h>
+#include <string.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/sysctl.h>
 #include <sys/user.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, [[maybe_unused]] FFTopTypes showTypes) {
     int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_PROC };
     size_t length;
 
     if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}, nullptr) failed: %s", strerror(errno));
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
 
     // The process table may change between the two sysctl calls; retry with a larger buffer.
-    FF_AUTO_FREE struct kinfo_proc* processes = nullptr;
-    for (int attempts = 0;; ++attempts) {
-        length += length / 8 + sizeof(struct kinfo_proc);
-        struct kinfo_proc* newProcesses = (struct kinfo_proc*) realloc(processes, length);
-        if (!newProcesses) {
-            return "realloc(struct kinfo_proc[]) failed";
-        }
-        processes = newProcesses;
-        if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) == 0) {
-            break;
-        }
-        if ((errno != ENOMEM && errno != EINVAL) || attempts >= 4) {
-            return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
-        }
+    length += length / 8 + sizeof(struct kinfo_proc);
+    FF_AUTO_FREE struct kinfo_proc* processes = malloc(length);
+    if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) != 0) {
+        FF_DEBUG("sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}, processes) failed: %s", strerror(errno));
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
     }
     uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
 
-    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    const uint32_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
 
     for (uint32_t i = 0; i < count; ++i) {
         const struct kinfo_proc* proc = &processes[i];
@@ -54,13 +50,14 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             (uint64_t) proc->ki_rusage.ru_stime.tv_usec / 1000;
         item->cpuTime = userMs + sysMs;
 
-        item->memBytes = (uint64_t) proc->ki_rssize * (uint64_t) pageSize;
+        item->memBytes = (uint64_t) proc->ki_rssize << pageSizeShift;
 
         item->startTime = (uint64_t) proc->ki_start.tv_sec * 1000 +
             (uint64_t) proc->ki_start.tv_usec / 1000;
 
         item->bytesRead = (uint64_t) proc->ki_rusage.ru_inblock * DEV_BSIZE;
         item->bytesWritten = (uint64_t) proc->ki_rusage.ru_oublock * DEV_BSIZE;
+        item->threads = (uint32_t) proc->ki_numthreads;
     }
 
     return NULL;

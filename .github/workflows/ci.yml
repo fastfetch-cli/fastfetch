@@ -5,13 +5,7 @@ on:
   - pull_request
 
 jobs:
-  spellcheck:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/build-spellcheck.yml
-
   no-features-test:
-    needs: spellcheck
     name: No-features-test
     permissions:
       contents: read
@@ -78,22 +72,27 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-musl-amd64.yml
 
-  macos-hosts:
+  android:
     needs: no-features-test
-    name: macOS-${{ matrix.arch }}
+    name: Android-${{ matrix.abi }}
     permissions:
       contents: read
     strategy:
       matrix:
-        include:
-          - arch: amd64
-            runs-on: macos-15-intel
-          - arch: aarch64
-            runs-on: macos-latest
-    uses: ./.github/workflows/build-macos-hosts.yml
+        abi:
+          - arm64-v8a
+          - armeabi-v7a
+          - x86_64
+    uses: ./.github/workflows/build-android.yml
     with:
-      arch: ${{ matrix.arch }}
-      runs-on: ${{ matrix.runs-on }}
+      abi: ${{ matrix.abi }}
+
+  macos-hosts:
+    needs: no-features-test
+    name: macOS-universal
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-macos-hosts.yml
 
   omnios-amd64:
     needs: no-features-test
@@ -138,7 +137,6 @@ jobs:
     uses: ./.github/workflows/build-dragonfly-amd64.yml
 
   haiku-amd64:
-    if: false # Disabled because the Haiku build is currently broken
     needs: no-features-test
     name: Haiku-amd64
     permissions:
@@ -197,6 +195,7 @@ jobs:
       - linux-loong64
       - linux-vms
       - musl-amd64
+      - android
       - macos-hosts
       - freebsd-amd64
       - openbsd-amd64
@@ -204,7 +203,7 @@ jobs:
       - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
-      # - haiku-amd64
+      - haiku-amd64
       - windows-hosts
     permissions:
       contents: write

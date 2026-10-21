@@ -11,13 +11,14 @@
         #define FF_THREAD_MUTEX_INITIALIZER SRWLOCK_INIT
 typedef SRWLOCK FFThreadMutex;
 typedef HANDLE FFThreadType;
-static inline void ffThreadMutexLock(FFThreadMutex* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexLock(FFThreadMutex* mutex) {
     AcquireSRWLockExclusive(mutex);
 }
-static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) {
     ReleaseSRWLockExclusive(mutex);
 }
-static inline FFThreadType ffThreadCreate(unsigned(__stdcall* func)(void*), void* data) {
+// `data` is the thread argument and may be null; `func` may not
+[[gnu::nonnull(1)]] static inline FFThreadType ffThreadCreate(unsigned(__stdcall* func)(void*), void* data) {
     return (FFThreadType) _beginthreadex(nullptr, 0, func, data, 0, nullptr);
 }
         #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType)        \
@@ -56,23 +57,24 @@ typedef pthread_t FFThreadType;
             #include <os/lock.h>
             #define FF_THREAD_MUTEX_INITIALIZER OS_UNFAIR_LOCK_INIT
 typedef os_unfair_lock FFThreadMutex;
-static inline void ffThreadMutexLock(os_unfair_lock* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexLock(os_unfair_lock* mutex) {
     os_unfair_lock_lock(mutex);
 }
-static inline void ffThreadMutexUnlock(os_unfair_lock* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexUnlock(os_unfair_lock* mutex) {
     os_unfair_lock_unlock(mutex);
 }
         #else
             #define FF_THREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 typedef pthread_mutex_t FFThreadMutex;
-static inline void ffThreadMutexLock(FFThreadMutex* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexLock(FFThreadMutex* mutex) {
     pthread_mutex_lock(mutex);
 }
-static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) {
+[[gnu::nonnull(1)]] static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) {
     pthread_mutex_unlock(mutex);
 }
         #endif
-static inline FFThreadType ffThreadCreate(void* (*func)(void*), void* data) {
+// `data` is the thread argument and may be null; `func` may not
+[[gnu::nonnull(1)]] static inline FFThreadType ffThreadCreate(void* (*func)(void*), void* data) {
     FFThreadType newThread = 0;
     pthread_create(&newThread, nullptr, func, data);
     return newThread;
@@ -115,6 +117,7 @@ static inline uintptr_t ffThreadGetCurrentId() {
 #else // FF_HAVE_THREADS
     #define FF_THREAD_MUTEX_INITIALIZER 0
 typedef char FFThreadMutex;
+// The stubs deliberately ignore their argument, so no `nonnull` here
 static inline void ffThreadMutexLock([[maybe_unused]] FFThreadMutex* mutex) {}
 static inline void ffThreadMutexUnlock([[maybe_unused]] FFThreadMutex* mutex) {}
     #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType)

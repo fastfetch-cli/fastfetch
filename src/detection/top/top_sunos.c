@@ -1,15 +1,19 @@
 #include "top.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <procfs.h>
 #include <sys/param.h> // DEV_BSIZE
 
 const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/proc");
     if (!dirp) {
+        FF_DEBUG("opendir(\"/proc\") failed: %s", strerror(errno));
         return "opendir(\"/proc\") failed";
     }
 
@@ -26,15 +30,21 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
             continue;
         }
 
+        pstatus_t status;
+        if (ffReadFileDataRelative(subfd, "status", sizeof(status), &status) != (ssize_t) sizeof(status) ||
+            status.pr_flags & PR_ISSYS) {
+            continue; // The process may have exited, no permission or is a kernel process
+        }
+
         // The data model of the returned structure depends on the data model of
         // the calling process, not of the observed process.
         psinfo_t psinfo;
         if (ffReadFileDataRelative(subfd, "psinfo", sizeof(psinfo), &psinfo) != (ssize_t) sizeof(psinfo)) {
-            continue; // The process may have exited
+            continue;
         }
 
-        // pr_nlwp is zero for system processes and zombies
-        if (psinfo.pr_nlwp == 0 || psinfo.pr_lwp.pr_sname == 'Z') {
+        // zombies
+        if (psinfo.pr_lwp.pr_sname == 'Z') {
             continue;
         }
 
@@ -54,6 +64,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
 
         item->bytesRead = 0;
         item->bytesWritten = 0;
+        item->threads = (uint32_t) psinfo.pr_nlwp;
         if (showTypes & FF_TOP_TYPE_DISK) {
             prusage_t usage;
             if (ffReadFileDataRelative(subfd, "usage", sizeof(usage), &usage) == (ssize_t) sizeof(usage)) {

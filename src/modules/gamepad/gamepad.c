@@ -88,11 +88,13 @@ bool ffPrintGamepad(FFGamepadOptions* options) {
             FFGamepadDevice* device = *pdevice;
             printDevice(options, device, filtered.length > 1 ? ++index : 0);
         }
+    }
 
-        FF_LIST_FOR_EACH (FFGamepadDevice, device, result) {
-            ffStrbufDestroy(&device->serial);
-            ffStrbufDestroy(&device->name);
-        }
+    // `filtered` only holds borrowed pointers, so the strings of all devices — including the ignored
+    // ones — have to be released here, not in the printing branch
+    FF_LIST_FOR_EACH (FFGamepadDevice, device, result) {
+        ffStrbufDestroy(&device->serial);
+        ffStrbufDestroy(&device->name);
     }
 
     return ret;
@@ -126,6 +128,7 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -153,6 +156,8 @@ bool ffGenerateGamepadJsonResult([[maybe_unused]] FFGamepadOptions* options, yyj
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &device->serial);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &device->name);
+        // 0 means "the device does not report a battery level", not "empty battery"
+        yyjson_mut_obj_add_uint(doc, obj, "battery", device->battery);
 
         bool ignored = false;
         FF_LIST_FOR_EACH (FFstrbuf, ignore, options->ignores) {
@@ -197,6 +202,7 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         .cs = "Gamepad",
         .de = "Gamepad",
         .es = "Gamepad",
+        .fi = "Peliohjain",
         .fr = "Manette",
         .gl = "Gamepad",
         .he = "משטח משחק",
@@ -225,5 +231,5 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         { "Battery percentage num", "battery-percentage" },
         { "Battery percentage bar", "battery-percentage-bar" },
     })),
-    .defaultOrder = 62,
+    .defaultOrder = 63,
 };

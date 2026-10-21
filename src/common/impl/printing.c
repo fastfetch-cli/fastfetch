@@ -3,7 +3,7 @@
 #include "common/textModifier.h"
 #include "logo/logo.h"
 
-void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType) {
+void ffPrintLogoAndKey(const char* moduleName, uint32_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType) {
     ffLogoPrintLine();
 
     // This is used by --set-keyless, in this case we want neither the module name nor the separator
@@ -40,13 +40,14 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                 fputs(moduleName, stdout);
 
                 if (moduleIndex > 0) {
-                    printf(" %hhu", moduleIndex);
+                    printf(" %u", moduleIndex);
                 }
             } else {
                 FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
                 FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, ((FFformatarg[]) {
                                                                            FF_ARG(moduleIndex, "index"),
                                                                            FF_ARG(moduleArgs->keyIcon, "icon"),
+                                                                           FF_ARG(moduleName, "module-name"),
                                                                        }));
                 ffStrbufWriteTo(&key, stdout);
             }
@@ -81,7 +82,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     }
 }
 
-bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments) {
+bool ffPrintFormat(const char* moduleName, uint32_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments) {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     bool success;
     if (__builtin_expect(moduleArgs != nullptr, 1)) {
@@ -101,7 +102,7 @@ bool ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
     return success;
 }
 
-void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...) {
+void ffPrintError(const char* moduleName, uint32_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...) {
     if (!instance.config.display.showErrors) {
         return;
     }

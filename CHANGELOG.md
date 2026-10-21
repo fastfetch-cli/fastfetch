@@ -1,4 +1,118 @@
-# Unreleased
+# 2.70.0
+
+Changes:
+* LocalIP flags on Windows now describe the interface itself — its operational status, its media connection state and its type, for example `ETHERNET_CSMACD`, `IEEE80211` or `SOFTWARE_LOOPBACK` — instead of the `IP_ADAPTER_*` bits.
+    * Interfaces that carry no unicast address are no longer reported, since both the addresses and the interface properties are now enumerated from the unicast address table. (LocalIP, Windows)
+* libpulse and libddcutil are no longer used on Linux. Package managers should remove them from their fastfetch package.
+* QuickJS format scripting has been removed (deprecated in v2.69.0). Migrate scripts to Lua if necessary. (General)
+* The Command module option `useStdErr` has been replaced with `useOutput`, which selects which of the command's output streams to capture: `"stdout"`, `"stderr"` or `"both"`.
+    * It defaults to `"both"`, so a command that logs to stderr now has that output captured instead of discarded.
+    * Set it to `"stdout"` or `"stderr"` to restore the old single-stream behavior. (Command)
+* The Shell module now reports the shell from the password database (`/etc/passwd`) instead of the `$SHELL` environment variable, which may differ when the login shell was changed after the session started. (Title)
+* The Disk custom format no longer provides `{size-available}`. `{size-free}` now reports whichever of the two the `disk.useAvailable` option selects, and the raw byte counts are available as `{bytes-used}` and `{bytes-total}`. (Disk)
+    * This also means `{size-free}` now changes with `disk.useAvailable`; it used to always report the file system's free size.
+* The Disk JSON output no longer includes `bytes.available` and `bytes.used`. (Disk)
+    * `bytes.free` and `bytes.total` are unchanged; the used size can be derived as `total - free`.
+
+Features:
+* Added Sound detection on Android. (Sound, Android)
+* Added display detection on Android over binder, which needs neither a child process nor a permission. (Display, Android)
+* Added battery temperature, remaining time and charger type (AC / USB / wireless) detection on Android. (Battery, Android)
+* Added media detection on Android when fastfetch runs as an app UID. (Media, Android)
+    * Requires `Notification access` permission
+* Added app display-name detection on Android, so the media module names the player the way the app names itself instead of by its package name, and the terminal module reports the label Termux is installed under. (Media, Terminal, Android)
+* Performance improvements & internal cleanups
+* Added Finnish language support. (General)
+* Added pkgsrc package detection on macOS. (#2627, Packages, Apple)
+* Added an ALSA fallback to Sound on Linux, so a machine that runs no sound server reports its output device and volume instead of an error. (Sound, Linux)
+
+Bugfixes:
+* Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
+* Fixed external monitors detected via DDC/CI being randomly reported as built-in on Linux. (#2615, Brightness, Linux)
+* Fixed the Vulkan driver name being concatenated with the name of a previously enumerated device on multi-GPU systems. (#2619, Vulkan)
+* Fixed the foot terminal font size not being parsed when written as `Font Name-size`, e.g. `Berkeley Mono-12`. (#2624, TerminalFont, Linux)
+* Fixed `/boot` being hidden by default on Haiku, where it is the system volume. (Disk, Haiku)
+* Improved Snapdragon X1/X2 model name detection on Linux. (#2625, CPU, Linux)
+* Fixed the Android build failing with `GL/gl.h` not found, because the NDK ships the EGL headers that turned OpenGL detection on but not the desktop GL headers it includes. (OpenGL, Android)
+* Fixed MAC address reporting `02:00:00:00:00:00` on macOS 27. (LocalIP, Apple)
+* Fixed assertion failure when percentage exceeds 100. (Percent)
+* Fixed a non-existent command being reported as a generic child process error on Windows instead of `command not found`. (Command, Windows)
+* Fixed Android display detection on devices running Android 17. (Display, Android)
+* Fixed Windows volumes with a per-user quota (such as network shares) reporting a wrong total size and a wrapped-around used size, because the total size was quota-limited while the free size was not. (#2651, Disk, Windows)
+    * On Windows 10 1809 (build 17763) and later, the whole volume's capacity and free space are now reported by default. Set `disk.useAvailable` to `true` to keep reporting the space that is available to the current user, quota included.
+
+Logos:
+* Added filled Artix logo (#2631)
+* Renamed PostmarketOS to nura (#2626)
+
+# 2.69.0
+
+Changes:
+* ImageMagick 6 is deprecated and will be removed in a future release. It remains available for older Debian and Ubuntu releases; upgrade to ImageMagick 7 when possible.
+* The experimental QuickJS format scripting is deprecated, disabled by default, and planned for removal in the next release. Re-enable it with `cmake -DENABLE_QUICKJS=ON`, or migrate scripts to Lua. (General)
+* Replaced `--logo-recache` and `logo.recache` with `--logo-cache` and `logo.cache`. Use `true` to reuse or create valid cache entries, `false` to disable caching, or `regen` to force regeneration. (Logo)
+* Modules selected with `--structure` now honor their options from the JSON config.
+
+Features:
+* Added `logo.position: "auto"` and `--logo-position auto` to place wide logos above module output when the terminal has less than 32 columns available for text. (Logo)
+    * The position can also be selected in interactive `--gen-config`. 
+    * For now, the default position is `left` for compatibility with previous releases. This may change to `auto` in future releases.
+* Improved Bluetooth detection support:
+    * Added Bluetooth Low Energy detection on Windows and macOS.
+    * Report device type (LE or classic) and signal quality, if available.
+    * Added Bluetooth Core 6.0–6.3 version reporting. (BluetoothRadio)
+* Improved image log support:
+    * Image logos on Windows, macOS, and Android now use native image processing libraries instead of ImageMagick. 
+        * For package managers: ImageMagick dependencies can be removed on macOS, Windows and Android as they are no longer used for image logos.
+        * Windows Terminal supports sixel logos out of the box
+    * Changes to a source image now correctly invalidate its cache. (Logo)
+    * Added GIF and APNG support to `--kitty` image protocol. Set `logo.animationFrame` to `0` to play animations in compatible kitty terminals; positive or negative values select a still frame. Android animation requires Android 12 (API 31); terminals without kitty graphics protocol support report an error and fall back to the built-in logo instead. (Logo)
+    * Added cmake option `-DENABLE_IMAGE_LOGO=<BOOL>` (default `ON`) to disable image logos and reduce binary size. `raw` logos remain available. (Logo)
+* Improved Linux support:
+    * Added RakuOS rum overlay package counting (`{rum}`) and CRUX package detection (`{crux}`). (Packages)
+    * Added CPU name and frequency detection on SPARC. (CPU)
+    * Improved COSMIC version detection and added Umbriel version detection. (DE / WM)
+* Improved Android support:
+    * Expanded ROM detection to HarmonyOS, Flyme, OneUI, LineageOS, and many other ROMs. (DE)
+    * Improved camera detection; Android 7 (API 24) or later is required. (Camera)
+    * Battery level and charging state are now available to apps; detailed battery information requires root or ADB. (Battery)
+    * Added display mode, physical size, rotation, and HDR information. App-based detection requires Android 13 (API 33); root or ADB can also detect displays on older versions. (Display)
+    * Added Wi-Fi interface, connection, standard, and security information. Android 11 (API 30) or later is required. Termux:API is needed for the Wi-Fi permission, and location permission is needed to reveal SSID and BSSID; without location permission the two names appear as `<redacted>`. (Wifi)
+    * Added Wallpaper detection, which effectively reports `/data/system/users/0/wallpaper`. (Wallpaper)
+    * Added Media detection, root/ADB only. (Media / Player)
+* Improved macOS support:
+    * Improved process-name detection in Top. (Top)
+    * Improved wallpaper detection on macOS Sonoma and later. (#2559, Wallpaper)
+* Improved Windows support:
+    * `winget` now counts packages from configured sources, excludes Microsoft Store apps, and caches results. It remains disabled by default. (Packages)
+    * Player names now match the names shown by Windows (for example, Chrome is reported as Google Chrome). (Player)
+* Added battery-level detection for more controllers on Windows and macOS. (Gamepad)
+* Improved macOS controller name detection (macOS, Gamepad)
+    * macOS controller names now match the system; configs that filter by name may need updating.
+    * Requires macOS 11 or later.
+* Improved the built-in HTTP client used by PublicIP and Weather; it now supports custom ports and chunked responses. (PublicIP / Weather)
+* Reduced the default `waitTime` for DiskIO, NetIO, and Top from 500 ms to 250 ms. (DiskIO / NetIO / Top)
+* Added `general.preload.lua` for loading shared Lua helpers before modules run. It requires a Lua-enabled build and starts the Lua interpreter whenever configured. (General)
+    * Lua format scripting is now considered stable.
+
+Bugfixes:
+* Fixed Snapdragon X2 series model detection on Linux. (#2611, CPU / Linux)
+* Fixed image logo caching, padding, and positioning issues, including an iTerm display bug. (Logo)
+* Fixed several Windows issues, including Windows Terminal font detection, redirected `--gen-config` output, and gamepad battery reporting for DualShock 4 and Switch controllers. (#2573, TerminalFont; Gamepad; General)
+* Fixed formatting and display issues, including ANSI-aware truncation, date/time formatting, and bright key/title colors. (Format / DateTime / Display)
+* Fixed `--dynamic-interval` retries and stale results across multiple rounds. (PublicIP / Weather / Display / Monitor / WM / DE / Media / Player / Shell / Terminal)
+* Fixed invalid numeric and color options that could cause hangs or excessive output. (Separator / CPUUsage / NetIO / DiskIO / LoadAvg / Colors)
+* Fixed JSON output and config validation across several modules, including GPU, Btrfs, Gamepad, Packages, and Custom. (General)
+* Fixed GPU memory and device-type reporting, GNOME Classic and Trinity version detection, and default-route family names. (GPU / DE / LocalIP)
+* Fixed module output and filtering issues affecting editor failures, sound status, command selection, and ignored keyboard/gamepad devices. (Editor / Sound / Command / Keyboard / Gamepad)
+* Fixed package counting with read-only databases and corrected other package detection and JSON output issues. (Packages)
+* Fixed Base64 encoding, big-endian handling, and 64-bit value truncation on 32-bit platforms. (General)
+
+Logos:
+* Added ALT Atomic
+* Removed Zerene
+
+# 2.68.1
 
 Changes:
 * The DE / WM / LM modules now reports the full name "Desktop Environment" / "Window Manager" / "Login Manager" instead of the abbreviations.
@@ -11,6 +125,7 @@ Features:
 * Added module key localization support. (General)
     * Added a new option `--key-language <?lang>` (`display.key.language: "<?lang>"` in JSON config). When left empty, it defaults to the system locale.
     * See `fastfetch -h key-language` for all supported languages.
+    * Exposed in custom key format as `{module-name}`.
 * Improved Wi-Fi module
     * Added Wifi channel width detection, exposed via `{channel-width}` in custom format (reports 0 when not supported).
     * Improved Wifi channel frequency accuracy and fortified detection on Windows, macOS.
@@ -21,6 +136,7 @@ Features:
 * Improved fish completion scripts to print enum descriptions. (Completion)
 * Enabled Wayland support on Android. (DisplayServer, Android)
 * Added DE detection support for ASUS Zenfone. (DE, Android)
+* Added new ARM SoCs (CPU, Linux / Android)
 
 Bugfixes:
 * Fixed I/O rate calculation precision in DiskIO and NetIO, and prevented division by zero. (DiskIO / NetIO)
@@ -28,9 +144,12 @@ Bugfixes:
 * Fixed memory usage detection support on x86-32 FreeBSD (Memory, FreeBSD)
     * Note: Although 32-bit systems are still supported, they are deprecated and barely tested. Users are encouraged to upgrade to 64-bit systems.
 * Some internal cleanups and optimizations.
+* Attempted to fix potential issues on big-endian systems
+    * Not tested due to lack of access to big-endian hardware.
 
 Logos:
 * Added macOS_old
+* Added Omarchy, Omarchy2
 
 # 2.67.1
 
@@ -3313,7 +3432,7 @@ Features:
 * Enhance `--percent-type` to allow hiding other texts (#387)
 * Add Wifi module support for Linux
 * Detect scaled resolutions (Windows, macOS)
-* Optimise font module printing (Windows)
+* Optimize font module printing (Windows)
 * Detect pacman package count inside MSYS2 environment (Windows)
 * Add Wifi / Battery module support for Android
 * Disk name support for Linux

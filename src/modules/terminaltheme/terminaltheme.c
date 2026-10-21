@@ -53,6 +53,7 @@ void ffParseTerminalThemeJsonObject(FFTerminalThemeOptions* options, yyjson_val*
     }
 }
 
+[[gnu::cold]]
 void ffGenerateTerminalThemeJsonConfig(FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -99,6 +100,7 @@ FFModuleBaseInfo ffTerminalThemeModuleInfo = {
         .cs = "Motiv terminálu",
         .de = "Terminalthema",
         .es = "Tema del terminal",
+        .fi = "Terminaalin Teema",
         .fr = "Thème du terminal",
         .gl = "Tema do terminal",
         .he = "ערכת נושא של טרמינל",

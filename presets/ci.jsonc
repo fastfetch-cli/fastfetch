@@ -21,7 +21,6 @@
         "uptime",
         "loadavg",
         "processes",
-        "top",
         "packages",
         "shell",
         "editor",
@@ -102,17 +101,18 @@
         "gamepad",
         "mouse",
         "keyboard",
-        {
-            "type": "weather",
-            "timeout": 1000
-        },
+        "tpm",
         "netio",
         "diskio",
         {
             "type": "physicaldisk",
             "temp": true
         },
-        "tpm",
+        {
+            "type": "weather",
+            "timeout": 1000
+        },
+        "top",
         "version",
         "logo",
         "break",

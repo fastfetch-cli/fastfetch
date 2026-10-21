@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ps.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
     struct ps_context* context = nullptr;
     if (ps_context_create(getproc(), &context) != 0) {
         return "ps_context_create(getproc()) failed";
@@ -24,7 +24,7 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
 
     // Flags that cannot be fetched for some process are simply left unset;
     // each field must be checked before use.
-    if (proc_stat_list_set_flags(list, PSTAT_ARGS | PSTAT_STATE | PSTAT_TASK_BASIC) != 0) {
+    if (proc_stat_list_set_flags(list, PSTAT_ARGS | PSTAT_STATE | PSTAT_TASK_BASIC | ((showTypes & FF_TOP_TYPE_THREADS) ? PSTAT_NUM_THREADS : 0)) != 0) {
         error = "proc_stat_list_set_flags() failed";
         goto done;
     }
@@ -36,6 +36,11 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             continue;
         }
         if (proc_stat_state(stat) & PSTAT_STATE_P_ZOMBIE) {
+            continue;
+        }
+
+        uint32_t pid = (uint32_t) proc_stat_pid(stat);
+        if (pid == 2) { // Kernel Task
             continue;
         }
 
@@ -51,20 +56,30 @@ const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
             ffStrbufAppendS(&item->name, "(unknown)");
         }
 
-        item->pid = (uint32_t) proc_stat_pid(stat);
+        item->pid = pid;
+        item->cpuTime = 0;
+        item->memBytes = 0;
+        item->startTime = 0;
+        item->threads = 0;
+
+        if (showTypes & FF_TOP_TYPE_THREADS) {
+            if (proc_stat_has(stat, PSTAT_NUM_THREADS)) {
+                item->threads = (uint32_t) proc_stat_num_threads(stat);
+            }
+        }
 
         if (proc_stat_has(stat, PSTAT_TASK_BASIC)) {
             const task_basic_info_t info = proc_stat_task_basic_info(stat);
-            item->cpuTime = (uint64_t) info->user_time.seconds * 1000 +
-                (uint64_t) info->user_time.microseconds / 1000 +
-                (uint64_t) info->system_time.seconds * 1000 +
-                (uint64_t) info->system_time.microseconds / 1000;
+            item->cpuTime = (uint64_t) info->user_time64.seconds * 1000 +
+                (uint64_t) info->user_time64.nanoseconds / 1000000 +
+                (uint64_t) info->system_time64.seconds * 1000 +
+                (uint64_t) info->system_time64.nanoseconds / 1000000;
             item->memBytes = (uint64_t) info->resident_size;
+            item->startTime = (uint64_t) info->creation_time64.seconds * 1000 +
+                (uint64_t) info->creation_time64.nanoseconds / 1000000;
         }
 
-        // Neither process start times nor storage io counters are exposed by
-        // the Hurd; leave them zeroed.
-        item->startTime = 0;
+        // Storage io counters aren't exposed by kernel; leave them zeroed.
         item->bytesRead = 0;
         item->bytesWritten = 0;
     }

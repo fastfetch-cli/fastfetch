@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/sysctl.h"
 #include "common/io.h"
 
@@ -8,6 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <string.h>
 
 static void freePropDict(prop_dictionary_t* pdict) {
     assert(pdict != nullptr);
@@ -20,11 +23,13 @@ static void freePropDict(prop_dictionary_t* pdict) {
 static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
+        FF_DEBUG("open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed: %s", strerror(errno));
         return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
     }
 
     [[gnu::cleanup(freePropDict)]] prop_dictionary_t root = nullptr;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0) {
+        FF_DEBUG("prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed: %s", strerror(errno));
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
     }
 
@@ -33,6 +38,7 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
     if (options->tempSensor.length > 0) {
         array = prop_dictionary_get(root, options->tempSensor.chars);
         if (!array) {
+            FF_DEBUG("No temp data found in specified sensor");
             return "No temp data found in specified sensor";
         }
     } else {
@@ -47,21 +53,25 @@ static const char* detectCpuTemp(const FFCPUOptions* options, double* current) {
             array = prop_dictionary_get(root, "acpitz0"); // Thermal Zones
         }
         if (!array) {
+            FF_DEBUG("No temp data found in root dictionary");
             return "No temp data found in root dictionary";
         }
     }
 
     if (prop_array_count(array) != 2) {
+        FF_DEBUG("Unexpected `xtemp0` data");
         return "Unexpected `xtemp0` data";
     }
 
     prop_dictionary_t dict = prop_array_get(array, 0);
     if (prop_object_type(dict) != PROP_TYPE_DICTIONARY) {
+        FF_DEBUG("Unexpected `xtemp0[0]`");
         return "Unexpected `xtemp0[0]`";
     }
 
     int temp = 0; // in µK
     if (!prop_dictionary_get_int(dict, "cur-value", &temp)) {
+        FF_DEBUG("Failed to get temperature");
         return "Failed to get temperature";
     }
 

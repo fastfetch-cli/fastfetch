@@ -15,13 +15,20 @@ static const char* spawnProcess(FFCommandOptions* options, FFProcessHandle* hand
         return "No command text specified";
     }
 
+#if _WIN32
+    if (ffStrbufEqualS(&options->shell, "cmd.exe") && ffStrbufEqualS(&options->param, "/d/c")) {
+        ffStrbufAppendS(&options->text, " & exit %^errorlevel%"); // Necessary to propagate 9009 from CMD
+    }
+#endif
+
     return ffProcessSpawn(options->param.length ? (char* const[]) {
                                                       options->shell.chars,
                                                       options->param.chars,
                                                       options->text.chars,
                                                       nullptr }
                                                 : (char* const[]) { options->shell.chars, options->text.chars, nullptr },
-        options->useStdErr,
+        options->useOutput,
+        FF_PROCESS_INHERIT_STDIN,
         handle);
 }
 
@@ -41,7 +48,13 @@ const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result) {
     if (!options->parallel) {
         bundle.error = spawnProcess(options, &bundle.handle);
     } else if (!FF_LIST_SHIFT(commandQueue, &bundle)) {
-        return "[BUG] command queue is empty";
+        // The module was printed without having been prepared first, so there is no process to collect.
+        // That is the expected outcome for a module gated on `condition.succeeded`: whether it is
+        // printed at all is only known in the print pass, so the prepare pass skips it (see
+        // `printJsonConfig`). In every other case the queue and the printed modules must line up.
+        return "Module was not prepared, so it cannot run in parallel. Modules gated on "
+               "`condition.succeeded` are never prepared, which is the expected cause; "
+               "anything else is a bug in fastfetch, please report it";
     }
 
     if (bundle.error) {

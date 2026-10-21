@@ -1,56 +1,68 @@
 #include "top.h"
+#include "common/debug.h"
 #include "common/mallocHelper.h"
 
 #include <errno.h>
+#include <string.h>
 #include <sys/sysctl.h>
 #include <libproc.h>
 
-const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes) {
-    int request[] = { CTL_KERN, KERN_PROC, KERN_PROC_ALL };
-    size_t length;
-
-    if (sysctl(request, ARRAY_SIZE(request), nullptr, &length, nullptr, 0) != 0) {
-        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}) failed";
+const char* ffTopGetProcessSnapshot(FFlist* snapshots, FFTopTypes showTypes) {
+    int npids = proc_listallpids(nullptr, 0);
+    if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(nullptr, 0) failed: %s", strerror(errno));
+        return "proc_listallpids(nullptr, 0) failed";
+    }
+    // `proc_listallpids` returns the number of pids, but it wants the size of the buffer in bytes:
+    // passing the count back would only let the kernel fill a quarter of it.
+    const int pidCapacity = npids + npids / 8 + 1;
+    FF_AUTO_FREE pid_t* pids = malloc((size_t) pidCapacity * sizeof(pid_t));
+    if (pids == nullptr) {
+        FF_DEBUG("malloc(%zu) for %d pids failed", (size_t) pidCapacity * sizeof(pid_t), pidCapacity);
+        return "malloc() failed";
+    }
+    npids = proc_listallpids(pids, pidCapacity * (int) sizeof(pid_t));
+    if (npids <= 0) {
+        FF_DEBUG("proc_listallpids(pids, %d) failed: %s", pidCapacity * (int) sizeof(pid_t), strerror(errno));
+        return "proc_listallpids(pids, bufferSize) failed";
     }
 
-    // The process table may change between the two sysctl calls; retry with a larger buffer.
-    FF_AUTO_FREE struct kinfo_proc* processes = nullptr;
-    for (int attempts = 0;; ++attempts) {
-        length += length / 8 + sizeof(struct kinfo_proc);
-        struct kinfo_proc* newProcesses = (struct kinfo_proc*) realloc(processes, length);
-        if (!newProcesses) {
-            return "realloc(struct kinfo_proc[]) failed";
-        }
-        processes = newProcesses;
-        if (sysctl(request, ARRAY_SIZE(request), processes, &length, nullptr, 0) == 0) {
-            break;
-        }
-        if ((errno != ENOMEM && errno != EINVAL) || attempts >= 4) {
-            return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_ALL}) failed";
-        }
-    }
-    uint32_t count = (uint32_t) (length / sizeof(struct kinfo_proc));
+    uint32_t count = (uint32_t) npids;
 
     for (uint32_t i = 0; i < count; ++i) {
-        const struct kinfo_proc* proc = &processes[i];
-        pid_t pid = proc->kp_proc.p_pid;
-        if (pid <= 0) {
+        pid_t pid = pids[i];
+
+        struct proc_taskallinfo proc;
+        if (proc_pidinfo(pid, PROC_PIDTASKALLINFO, 0, &proc, sizeof(proc)) != sizeof(proc)) {
             continue;
         }
 
-        struct rusage_info_v2 rusage;
-        if (proc_pid_rusage(pid, RUSAGE_INFO_V2, (rusage_info_t*) &rusage) != 0) {
-            continue; // The process may have exited
+        if (proc.pbsd.pbi_flags & PROC_FLAG_SYSTEM) {
+            continue;
         }
 
         FFTopProcessSnapshot* item = FF_LIST_ADD(FFTopProcessSnapshot, *snapshots);
-        ffStrbufInitS(&item->name, proc->kp_proc.p_comm);
+        ffStrbufInitS(&item->name, proc.pbsd.pbi_name);
+        if (item->name.length == 0) {
+            ffStrbufInitS(&item->name, proc.pbsd.pbi_comm);
+        }
         item->pid = (uint32_t) pid;
-        item->cpuTime = (rusage.ri_user_time + rusage.ri_system_time) / 1000000u; // ns -> ms
-        item->memBytes = rusage.ri_resident_size;
-        item->bytesRead = rusage.ri_diskio_bytesread;
-        item->bytesWritten = rusage.ri_diskio_byteswritten;
-        item->startTime = rusage.ri_proc_start_abstime;
+        item->cpuTime = (proc.ptinfo.pti_total_user + proc.ptinfo.pti_total_system) / 1000000u; // ns -> ms
+        item->memBytes = proc.ptinfo.pti_resident_size;
+        item->startTime = proc.pbsd.pbi_start_tvsec * 1000u + proc.pbsd.pbi_start_tvusec / 1000u; // convert to ms
+        item->threads = (uint32_t) proc.ptinfo.pti_threadnum;
+
+        // FF_LIST_ADD does not zero the element, and top.c subtracts both counters for every
+        // process it samples, whether or not they were collected.
+        item->bytesRead = 0;
+        item->bytesWritten = 0;
+        if (showTypes & FF_TOP_TYPE_DISK) {
+            struct rusage_info_v2 rusage;
+            if (proc_pid_rusage(pid, RUSAGE_INFO_V2, (rusage_info_t*) &rusage) == 0) {
+                item->bytesRead = rusage.ri_diskio_bytesread;
+                item->bytesWritten = rusage.ri_diskio_byteswritten;
+            }
+        }
     }
 
     return nullptr;

@@ -1,4 +1,5 @@
 #include "sound.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/strutil.h"
 
@@ -17,10 +18,12 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
         char mixerp[12];
         ssize_t plen = readlink("/dev/audio", mixerp, ARRAY_SIZE(mixerp));
         if (plen < 6) {
+            FF_DEBUG("readlink(/dev/audio) failed");
             return "readlink(/dev/audio) failed";
         }
         defaultDev = mixerp[plen - 1] - '0';
         if (defaultDev < 0 || defaultDev > 9) {
+            FF_DEBUG("Invalid mixer device");
             return "Invalid mixer device";
         }
     }
@@ -46,6 +49,7 @@ const char* ffDetectSound(FFSoundOptions* options, FFlist* devices) {
 
         if (idev == 0) {
             if (ioctl(fd, SNDCTL_SYSINFO, &info) != 0) {
+                FF_DEBUG("ioctl(SNDCTL_SYSINFO) failed: %s", strerror(errno));
                 return "ioctl(SNDCTL_SYSINFO) failed";
             }
             if (ffAppendFDBuffer(fd, &sndstat)) {

@@ -18,10 +18,10 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Start VM
-        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641 # v1.6.0
         with:
           operating_system: haiku
-          version: 'r1beta5'
+          version: 'r1beta6'
           shell: bash
           cpu_count: 4
 
@@ -29,7 +29,6 @@ jobs:
         run: uname -a
 
       - name: Install dependencies
-        shell: cpa.sh {0} --reboot
         run: pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake llvm22_clang ninja pkgconfig python3.10 lua || pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake llvm22_clang ninja pkgconfig python3.10 lua
 
       - name: CMake configuration

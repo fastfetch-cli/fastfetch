@@ -1,19 +1,30 @@
 #include "memory.h"
+#include "common/debug.h"
 
-#include <windows.h>
+#include "common/windows/nt.h"
 
 const char* ffDetectMemory(FFMemoryResult* ram) {
-    MEMORYSTATUSEX statex = {
-        .dwLength = sizeof(statex),
-    };
-    // GlobalMemoryStatusEx() internally uses
-    // NtQuerySystemInformation(SystemBasicPerformanceInformation) in Win 7, and
-    // NtQuerySystemInformation(SystemMemoryUsageInformation) in Win 10
-    if (!GlobalMemoryStatusEx(&statex)) {
-        return "GlobalMemoryStatusEx() failed";
+    // Note: GlobalMemoryStatusEx() internally uses SystemMemoryUsageInformation in Win 10
+
+    SYSTEM_BASIC_PERFORMANCE_INFORMATION sbpi;
+    NTSTATUS status = NtQuerySystemInformation(SystemBasicPerformanceInformation, &sbpi, sizeof(sbpi), NULL);
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("Failed to query memory information: %s", ffDebugNtStatus(status));
+        return "Failed to query memory information";
     }
 
-    ram->bytesTotal = statex.ullTotalPhys;
-    ram->bytesUsed = statex.ullTotalPhys - statex.ullAvailPhys;
+    uint64_t phyPages =
+    #if _WIN64
+        SharedUserData->FullNumberOfPhysicalPages;
+    if (__builtin_expect(phyPages == 0, false)) { // Not supported on Windows 8.1
+        phyPages = SharedUserData->NumberOfPhysicalPages; // ULONG, maximum 16 TB
+    }
+    #else
+        SharedUserData->NumberOfPhysicalPages;
+    #endif
+
+    uint64_t pageSizeShift = instance.state.platform.sysinfo.pageSizeShift;
+    ram->bytesTotal = phyPages << pageSizeShift;
+    ram->bytesUsed = (phyPages - sbpi.AvailablePages) << pageSizeShift;
     return nullptr;
 }

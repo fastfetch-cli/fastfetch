@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
@@ -8,6 +9,7 @@
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -214,9 +216,15 @@ static void detectQualcomm(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 8975:
+            name = "8 Elite Extreme Gen 6";
+            break;
+        case 8950:
+            name = "8 Elite Gen 6";
+            break;
         case 8845:
             name = "8 Gen 5";
-            break; // ?
+            break;
         case 8850:
             name = "8 Elite Gen 5";
             break;
@@ -237,6 +245,9 @@ static void detectQualcomm(FFCPUResult* cpu) {
             break;
         case 8475:
             name = "8+ Gen 1";
+            break;
+        case 8425:
+            name = "8+ Gen 1 4G";
             break;
         case 8450:
             name = "8 Gen 1";
@@ -271,11 +282,17 @@ static void detectQualcomm(FFCPUResult* cpu) {
         case 6475:
             name = "6 Gen 3";
             break;
+        case 6225:
+            name = "6s 4G Gen 2";
+            break;
         case 6115:
-            name = "6s Gen 1";
+            name = "6s 4G Gen 1";
             break;
         case 6450:
             name = "6 Gen 1";
+            break;
+        case 4850:
+            name = "4 Gen 5";
             break;
         case 4635:
             name = "4s Gen 2";
@@ -305,6 +322,9 @@ static void detectMediaTek(FFCPUResult* cpu) {
 
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
+        case 6995:
+            name = "9600 Pro";
+            break;
         case 6993:
             name = "9500";
             break;
@@ -357,6 +377,9 @@ static void detectExynos(FFCPUResult* cpu) {
     const char* name = nullptr;
 
     switch (code) {
+        case 9975:
+            name = "2700";
+            break;
         case 9965:
             name = "2600";
             break;
@@ -374,6 +397,9 @@ static void detectExynos(FFCPUResult* cpu) {
             name = "2100";
             break;
 
+        case 8865:
+            name = "1680";
+            break;
         case 8855:
             name = "1580";
             break;
@@ -595,6 +621,9 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
 #elif __sh__
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
+#elif __sparc__ || __sparc
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "Cpu0ClkTck :", cpuMHz)) ||
 #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -679,6 +708,73 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     return true;
 }
 
+bool ffCPUQualcommSnapdragonToName(FFstrbuf* name, char* compatibles) {
+    // While this also would be 555 below split it out as it's only seen on the devkit
+    for (char* p = compatibles; *p; p += strlen(p) + 1) {
+        if (strstr(p, "x1e001de") != nullptr) {
+            ffStrbufSetS(name, "Qualcomm Snapdragon X Elite X1E-00-1DE");
+            return true;
+        }
+    }
+
+    // https://github.com/tianocore/edk2-platforms/blob/9c2cdde/Silicon/Qualcomm/Common/QualcommCommonSiliconPkg/Include/ChipInfoDefs.h
+    char content[16];
+    ssize_t length = ffReadFileData("/sys/devices/soc0/soc_id", ARRAY_SIZE(content), content);
+    if (length < 1) {
+        return false;
+    }
+    if (content[length - 1] != '\n') {
+        return false; // must end with \n
+    }
+
+    unsigned long long soc_id = strtoull(content, nullptr, 10);
+    const char* soc = nullptr;
+    switch (soc_id) {
+        // glymur
+        case 662:
+            soc = "X2 Elite Extreme X2E-94/96-100";
+            break;
+        case 698:
+            soc = "X2 Elite X2E-88/90-100";
+            break;
+        // mahua
+        case 699:
+            soc = "X2 Elite X2E-80/84-100";
+            break;
+        case 693:
+            soc = "X2 Elite X2E-78-100";
+            break;
+        case 728:
+            soc = "X2 Plus X2P-64-100";
+            break;
+        // kalambo
+        case 719:
+            soc = "X2 Plus X2P-42-100";
+            break;
+        // hamoa
+        case 555:
+            soc = "X Elite X1E-78/80/84-100";
+            break;
+        case 615:
+            soc = "X Plus X1P-64/66-100";
+            break;
+        case 616:
+            soc = "X X1-26-101";
+            break;
+        // purwa
+        case 635:
+            soc = "X X1-26-100 / X Plus X1P-42/46-100";
+            break;
+    }
+    if (soc) {
+        ffStrbufSetS(name, "Qualcomm Snapdragon ");
+        ffStrbufAppendS(name, soc);
+        return true;
+    }
+
+    return false;
+}
+
 #if __i386__ || __x86_64__
 
 [[maybe_unused]] static uint16_t getPackageCount(FFstrbuf* cpuinfo) {
@@ -688,7 +784,7 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:")))) {
         p += strlen("\nphysical id\t:");
         char* pend;
-        unsigned long long id = strtoul(p, &pend, 10);
+        unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false)) { // Do 129-socket boards exist?
             high |= 1ULL << (id - 64);
         } else {
@@ -737,11 +833,13 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options) {
 static const char* detectPhysicalCores(FFCPUResult* cpu) {
     int dfd = open("/sys/devices/system/cpu/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (dfd < 0) {
+        FF_DEBUG("open(/sys/devices/system/cpu/) failed: %s", strerror(errno));
         return "open(\"/sys/devices/system/cpu/\") failed";
     }
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
     if (!dir) {
+        FF_DEBUG("fdopendir(/sys/devices/system/cpu/) failed: %s", strerror(errno));
         close(dfd);
         return "fdopendir(dfd) failed";
     }
@@ -914,22 +1012,19 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
     }
     #endif
     else if (ffStrEquals(vendor, "qcom")) {
-        // https://elixir.bootlin.com/linux/v6.11/source/arch/arm64/boot/dts/qcom
-        if (ffStrStartsWith(model, "x")) {
-            ffStrbufSetS(&cpu->name, "Qualcomm Snapdragon X Elite ");
-            for (const char* p = model + 1; *p; ++p) {
-                ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+        // https://elixir.bootlin.com/linux/latest/source/arch/arm64/boot/dts/qcom
+        if (!ffCPUQualcommSnapdragonToName(&cpu->name, content)) {
+            if (ffStrStartsWith(model, "sc")) {
+                const char* code = model + 2;
+                uint32_t deviceId = (uint32_t) strtoul(code, nullptr, 10);
+                ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
+                if (!cpu->name.length) {
+                    ffStrbufAppendS(&cpu->name, "Qualcomm Snapdragon SC");
+                    ffStrbufAppendS(&cpu->name, code);
+                }
+            } else {
+                ffStrbufSetS(&cpu->name, model);
             }
-        } else if (ffStrStartsWith(model, "sc")) {
-            const char* code = model + 2;
-            uint32_t deviceId = (uint32_t) strtoul(code, nullptr, 10);
-            ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
-            if (!cpu->name.length) {
-                ffStrbufAppendS(&cpu->name, "Qualcomm Snapdragon SC");
-                ffStrbufAppendS(&cpu->name, code);
-            }
-        } else {
-            ffStrbufSetS(&cpu->name, model);
         }
 
         ffStrbufSetStatic(&cpu->vendor, "Qualcomm");
@@ -1040,6 +1135,10 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         if (cpu->name.length) {
             ffStrbufPrependS(&cpu->name, "Machine ");
         }
+    #elif __sparc__ || __sparc
+        // Cpu0ClkTck is in Hz, printed as "%016lx" by sparc64 and "%ld" by sparc32. A 32-bit userland can run
+        // on a 64-bit kernel, so take the base from the width of the value rather than from our own bitness.
+        cpu->frequencyBase = (uint32_t) (strtoull(cpuMHz.chars, nullptr, cpuMHz.length == 16 ? 16 : 10) / 1000000);
     #endif
     }
 

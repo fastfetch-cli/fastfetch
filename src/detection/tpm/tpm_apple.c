@@ -1,4 +1,5 @@
 #include "tpm.h"
+#include "common/debug.h"
 
 #ifndef __aarch64__
     #include "common/apple/cf_helpers.h"
@@ -26,5 +27,6 @@ const char* ffDetectTPM(FFTPMResult* result) {
 
 #endif
 
+    FF_DEBUG("Neither Apple T2 nor Apple Silicon Security was reported by IOKit");
     return "No Apple Security hardware detected";
 }

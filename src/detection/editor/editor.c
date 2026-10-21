@@ -32,17 +32,33 @@ static bool extractNanoVersionFromBinary(const char* str, [[maybe_unused]] uint3
     return false;
 }
 
+// The message is printed to the user verbatim, so it has to name the variable that was wrong:
+// `"Executable not found"` from `ffFindExecutableInPath()` doesn't say what was searched for.
+static const char* notAnExecutable(bool isVisual) {
+    return isVisual ? "$VISUAL does not point to an executable" : "$EDITOR does not point to an executable";
+}
+
 const char* ffDetectEditor(FFEditorResult* result) {
+    bool isVisual = true;
     ffStrbufSetS(&result->name, getenv("VISUAL"));
-    if (result->name.length) {
-        result->type = "Visual";
-    } else {
+    if (!result->name.length) {
+        isVisual = false;
         ffStrbufSetS(&result->name, getenv("EDITOR"));
-        if (result->name.length) {
-            result->type = "Editor";
-        } else {
-            return "$VISUAL or $EDITOR not set";
-        }
+    }
+
+    if (!result->name.length) {
+        return "$VISUAL or $EDITOR not set";
+    }
+    result->type = isVisual ? "Visual" : "Editor";
+
+    // `$VISUAL`/`$EDITOR` hold a shell command line rather than a bare name, so they routinely
+    // carry arguments: `EDITOR="code -w"`, `EDITOR="vim -f"`. Only the first word names the
+    // program. The whole string used to be handed to `ffFindExecutableInPath()`, which could never
+    // match it, and the module then printed the unparsed value as if it had been resolved.
+    ffStrbufSubstrBefore(&result->name, (uint32_t) strcspn(result->name.chars, " \t\n\v\f\r"));
+
+    if (result->name.length == 0) {
+        return notAnExecutable(isVisual);
     }
 
     if (ffIsAbsolutePath(result->name.chars)) {
@@ -50,14 +66,19 @@ const char* ffDetectEditor(FFEditorResult* result) {
     } else {
         const char* error = ffFindExecutableInPath(result->name.chars, &result->path);
         if (error) {
-            return nullptr;
+            // Reporting success here is what made `EDITOR="code -w"` print the raw value: the module
+            // reads `nullptr` as "detection succeeded" and then falls back to printing `name`.
+            return notAnExecutable(isVisual);
         }
     }
 
     {
         char buf[PATH_MAX + 1];
         if (!realpath(result->path.chars, buf)) {
-            return nullptr;
+            // An absolute `$VISUAL`/`$EDITOR` is copied into `path` before it is verified, so a path
+            // that does not exist has to be reported here instead of being handed to the caller as
+            // if it had been checked.
+            return notAnExecutable(isVisual);
         }
 
         // WIN32: Should we handle scoop shim exe here?
@@ -77,11 +98,13 @@ const char* ffDetectEditor(FFEditorResult* result) {
 #endif
         );
         if (index == result->path.length) {
-            return nullptr;
+            // `realpath()` always yields an absolute path, so neither of these two is reachable in
+            // practice. They used to `return nullptr`, which the module read as a success.
+            return "Failed to determine the executable name";
         }
         ffStrbufSetS(&result->exe, &result->path.chars[index + 1]);
         if (!result->exe.length) {
-            return nullptr;
+            return "Failed to determine the executable name";
         }
 
 #ifdef _WIN32
@@ -92,6 +115,7 @@ const char* ffDetectEditor(FFEditorResult* result) {
     }
 
     if (!instance.config.general.detectVersion) {
+        // Not an error: the editor was found, version probing was just turned off.
         return nullptr;
     }
 

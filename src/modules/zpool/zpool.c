@@ -22,6 +22,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
                                                                               FF_ARG(result->name, "name"),
                                                                               FF_ARG(result->guid, "guid"),
                                                                               FF_ARG(options->moduleArgs.keyIcon, "icon"),
+                                                                              FF_ARG(FF_MODULE_GET_DISPLAY_NAME(Zpool), "module-name"),
                                                                           }));
     }
 
@@ -142,6 +143,7 @@ void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
@@ -200,6 +202,7 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         .cs = "Zpool",
         .de = "Zpool",
         .es = "Zpool",
+        .fi = "Zpool",
         .fr = "Zpool",
         .gl = "Zpool",
         .he = "Zpool",
@@ -223,8 +226,8 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,
     .generateJsonConfig = (void*) ffGenerateZpoolJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        { "Zpool name", "name" },
-        { "Zpool guid", "guid" },
+        { "Zpool name *", "name" },
+        { "Zpool guid *", "guid" },
         { "Zpool state", "state" },
         { "Size used", "size-used" },
         { "Size allocated", "size-allocated" },
@@ -237,5 +240,5 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         { "Fragmentation percentage bar", "frag-percentage-bar" },
         { "Is read-only", "is-readonly" },
     })),
-    .defaultOrder = 43,
+    .defaultOrder = 44,
 };

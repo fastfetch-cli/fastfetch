@@ -7,7 +7,9 @@ typedef struct FFBluetoothResult {
     FFstrbuf name;
     FFstrbuf address;
     FFstrbuf type;
-    uint8_t battery; // 0-100%
+    FFBluetoothDeviceType deviceType;
+    uint8_t battery;       // 0-100%
+    double signalQuality;  // 0-100%, -DBL_MAX if unknown
     bool connected;
 } FFBluetoothResult;
 

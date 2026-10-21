@@ -13,3 +13,7 @@ fastfetch.kdev4
 *.user.*
 *.swp
 *.log
+/*.zh.md
+/.work*
+/doc/*.md
+/fastfetch.wiki

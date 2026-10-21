@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/debug.h"
 #include "detection/cpuusage/cpuusage.h"
 
 #include <mach/processor_info.h>
@@ -11,9 +12,11 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes) {
     mach_msg_type_number_t numCpuInfo;
 
     if (host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &numCPUs, &cpuInfo, &numCpuInfo) != KERN_SUCCESS) {
+        FF_DEBUG("host_processor_info() failed");
         return "host_processor_info() failed";
     }
     if (numCPUs * CPU_STATE_MAX != numCpuInfo) {
+        FF_DEBUG("Unexpected host_processor_info() result");
         return "Unexpected host_processor_info() result";
     }
 

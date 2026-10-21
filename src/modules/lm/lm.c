@@ -58,6 +58,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module) {
     }
 }
 
+[[gnu::cold]]
 void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
@@ -111,6 +112,7 @@ FFModuleBaseInfo ffLMModuleInfo = {
         .cs = "Správce přihlášení",
         .de = "Anmeldemanager",
         .es = "Gestor de inicio de sesión",
+        .fi = "Sisäänkirjautumishallinta",
         .fr = "Gestionnaire de connexion",
         .gl = "Xestor de inicio de sesión",
         .he = "מנהל התחברות",
@@ -121,7 +123,7 @@ FFModuleBaseInfo ffLMModuleInfo = {
         .pl = "Menedżer logowania",
         .pt = "Gerenciador de login",
         .ru = "Менеджер входа",
-        .tr = "Oturum Açma Yöneticisi",
+        .tr = "Giriş Yöneticisi",
         .uk = "Менеджер входу",
         .vi = "Trình quản lý đăng nhập",
         .zh_CN = "登录管理器",

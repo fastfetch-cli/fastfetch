@@ -1,5 +1,6 @@
 #include "netio.h"
 
+#include "common/debug.h"
 #include "common/io.h"
 #include "common/netif.h"
 #include "common/strutil.h"
@@ -58,6 +59,7 @@ static void getData(FFstrbuf* buffer, const char* ifName, bool isDefaultRoute, i
 const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/net");
     if (!dirp) {
+        FF_DEBUG("opendir(\"/sys/class/net\") failed: %s", strerror(errno));
         return "opendir(\"/sys/class/net\") == nullptr";
     }
 

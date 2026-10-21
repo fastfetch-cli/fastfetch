@@ -169,10 +169,10 @@ static void detectDeepinTerminal(FFTerminalFontResult* terminalFont) {
 
     FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreateA(64);
     ffSearchUserConfigFile(&instance.state.platform.configDirs, "deepin/deepin-terminal/config.conf", &profile);
-    FILE* file = fopen(profile.chars, "r");
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(profile.chars, "r");
 
     if (file) {
-        char* line = nullptr;
+        FF_AUTO_FREE char* line = nullptr;
         size_t len = 0;
 
         for (int count = 0; getline(&line, &len, file) != -1 && count < 2;) {
@@ -188,9 +188,6 @@ static void detectDeepinTerminal(FFTerminalFontResult* terminalFont) {
                 ++count;
             }
         }
-
-        free(line);
-        fclose(file);
     }
 
     if (fontName.length == 0) {
@@ -211,27 +208,17 @@ static void detectFootTerminal(FFTerminalFontResult* terminalFont) {
         return;
     }
 
-    // Sarasa Term SC Nerd:size=8
-    uint32_t colon = ffStrbufFirstIndexC(&font, ':');
-    if (colon == font.length) {
-        ffFontInitValues(&terminalFont->font, font.chars, "8");
-        return;
-    }
-    uint32_t equal = ffStrbufNextIndexS(&font, colon, "size=");
-    font.chars[colon] = '\0';
-    if (equal == font.length) {
-        ffFontInitValues(&terminalFont->font, font.chars, "8");
-        return;
-    }
-    uint32_t size = equal + (uint32_t) strlen("size=");
-    uint32_t comma = ffStrbufNextIndexC(&font, size, ',');
-    if (comma < font.length) {
+    // foot splits the font list on commas to specify fallback fonts.
+    // Each entry is a fontconfig pattern, e.g. "Berkeley Mono-12" or "Sarasa Term SC Nerd:size=8".
+    uint32_t comma = ffStrbufFirstIndexC(&font, ',');
+    if (comma != font.length) {
+        if (comma + 1 < font.length) {
+            ffFontInitXft(&terminalFont->fallback, &font.chars[comma + 1]);
+        }
         font.chars[comma] = '\0';
+        ffStrbufRecalculateLength(&font);
     }
-    ffFontInitValues(&terminalFont->font, font.chars, &font.chars[size]);
-    if (comma < font.length) {
-        ffFontInitValues(&terminalFont->fallback, &font.chars[comma + 1], nullptr);
-    }
+    ffFontInitXft(&terminalFont->font, font.chars);
 }
 
 static void detectQTerminal(FFTerminalFontResult* terminalFont) {
@@ -312,21 +299,8 @@ static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult*
         }
     }
 
-    // JetBrainsMono Nerd Font Mono:pixelsize=12:antialias=true:autohint=true
-
-    uint32_t index = ffStrbufFirstIndexC(&font, ':');
-    if (index != font.length) {
-        uint32_t sIndex = ffStrbufNextIndexS(&font, index + 1, "size=");
-        if (sIndex != font.length) {
-            sIndex += (uint32_t) strlen("size=");
-            uint32_t sIndexEnd = ffStrbufNextIndexC(&font, sIndex, ':');
-            ffStrbufSetNS(&size, sIndexEnd - sIndex, font.chars + sIndex);
-        }
-        ffStrbufSubstrBefore(&font, index);
-    } else {
-        ffStrbufClear(&size);
-    }
-    ffFontInitValues(&terminalFont->font, font.chars, size.chars);
+    // e.g. "JetBrainsMono Nerd Font Mono:pixelsize=12:antialias=true:autohint=true"
+    ffFontInitXft(&terminalFont->font, font.chars);
 }
 
 static void detectWarp(FFTerminalFontResult* terminalFont) {
