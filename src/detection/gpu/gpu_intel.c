@@ -72,6 +72,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, nullptr) != CTL_RESULT_SUCCESS) {
         return "ctlEnumerateDevices(nullptr) failed";
     }
+
     if (deviceCount == 0) {
         return "No Intel graphics adapter found";
     }
