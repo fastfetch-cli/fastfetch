@@ -552,6 +552,9 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
                         if (end < 0) {
                             end = (int32_t) tempString.length + end;
                         }
+                        if (end < 0) {
+                            end = 0;
+                        }
                         if ((uint32_t) end > tempString.length) {
                             end = (int32_t) tempString.length;
                         }

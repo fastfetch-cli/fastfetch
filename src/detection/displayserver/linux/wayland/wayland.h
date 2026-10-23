@@ -37,6 +37,7 @@ typedef struct WaylandData {
     WaylandProtocolType protocolType;
     struct wl_proxy* zxdgOutputManager;
     struct wl_proxy* wpColorManager;
+    bool useMutter; // gnome-shell: read the display configuration from org.gnome.Mutter.DisplayConfig instead of guessing it
 } WaylandData;
 
 typedef struct WaylandDisplay {
@@ -91,5 +92,10 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
 const char* ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 const char* ffWaylandHandleWpColor(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
+
+    #if defined(FF_HAVE_DBUS) && defined(__linux__)
+bool ffdsMutterAvailable(void);
+bool ffdsConnectMutter(FFDisplayServerResult* result);
+    #endif
 
 #endif
