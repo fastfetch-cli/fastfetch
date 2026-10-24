@@ -101,6 +101,21 @@ static const FFlogo K[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KEENETIC_OS
+    // Keenetic OS
+    {
+        .names = { "Keenetic OS", "keenetic", "keeneticos", "keenetic_os", "KeeneticOS", "Keenetic" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KEENETIC_OS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_BG_WHITE,
+            FF_COLOR_MODE_RESET
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_KIBAOS
     // KibaOS
     {
