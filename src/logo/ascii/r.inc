@@ -292,6 +292,18 @@ static const FFlogo R[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_RUXT
+    // RuxtLinux
+    {
+        .names = { "Ruxt Linux", "ruxt" },
+        .lines = FASTFETCH_DATATEXT_LOGO_RUXT,
+        .colors = {
+            FF_COLOR_FG_RGB "138;43;226",
+        },
+        .colorKeys = FF_COLOR_FG_RGB "138;43;226",
+        .colorTitle = FF_COLOR_FG_RGB "138;43;226",
+    },
+    #endif
     // LAST
     {},
 };
