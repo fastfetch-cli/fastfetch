@@ -42,6 +42,7 @@ Bugfixes:
     * On Windows 10 1809 (build 17763) and later, the whole volume's capacity and free space are now reported by default. Set `disk.useAvailable` to `true` to keep reporting the space that is available to the current user, quota included.
 
 Logos:
+* Added ArmadaOS logo (#2641)
 * Added filled Artix logo (#2631)
 * Renamed PostmarketOS to nura (#2626)
 
