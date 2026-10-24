@@ -1,3 +1,8 @@
+# Unreleased
+
+Bugfixes:
+* Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
+
 # 2.70.0
 
 Changes:
