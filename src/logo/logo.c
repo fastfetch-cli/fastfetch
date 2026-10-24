@@ -143,10 +143,13 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
                 if (doColorReplacement && *data == '$') {
                     ++data;
 
-                    if (*data == '$' || *data == '\0') {
+                    // `$$` is an escaped dollar; a `$` ending a line or the logo is a plain one
+                    if (*data == '$' || *data == '\0' || *data == '\n' || *data == '\r') {
                         ffStrbufAppendC(&line, '$');
                         ++lineWidth;
-                        ++data;
+                        if (*data == '$') {
+                            ++data;
+                        }
                         continue;
                     }
 

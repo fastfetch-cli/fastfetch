@@ -1,5 +1,6 @@
 #include "logo/logo.h"
 #include "common/textModifier.h"
+#include "fastfetch.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +55,15 @@ int main(void) {
     VERIFY(strcmp(ffLogoPositionToString(FF_LOGO_POSITION_LEFT), "left") == 0);
     VERIFY(strcmp(ffLogoPositionToString(FF_LOGO_POSITION_TOP), "top") == 0);
     VERIFY(strcmp(ffLogoPositionToString(FF_LOGO_POSITION_RIGHT), "right") == 0);
+
+    // A `$` ending a line or the logo is a plain dollar: it keeps the line break and the terminator.
+    instance.config.display.pipe = true;
+    ffLogoPrintChars("ab$\ncd", true);
+    VERIFY(instance.state.logoHeight == 1 && instance.state.logoWidth == 3);
+    ffLogoPrintChars("ab$", true);
+    VERIFY(instance.state.logoHeight == 0 && instance.state.logoWidth == 3);
+    ffLogoPrintChars("a$1b$$c", true);
+    VERIFY(instance.state.logoWidth == 4);
 
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
     return 0;
