@@ -1,3 +1,8 @@
+# Unreleased
+
+Bugfixes:
+* Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
+
 # 2.70.0
 
 Changes:
@@ -27,7 +32,6 @@ Features:
 * Added an ALSA fallback to Sound on Linux, so a machine that runs no sound server reports its output device and volume instead of an error. (Sound, Linux)
 
 Bugfixes:
-* Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
 * Fixed `--config`/`-c` bash completion offering one candidate per word instead of one candidate per file for paths containing spaces. (Completion, Bash)
 * Fixed external monitors detected via DDC/CI being randomly reported as built-in on Linux. (#2615, Brightness, Linux)
 * Fixed the Vulkan driver name being concatenated with the name of a previously enumerated device on multi-GPU systems. (#2619, Vulkan)
