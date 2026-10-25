@@ -40,6 +40,20 @@ static void getKDE(FFstrbuf* result, [[maybe_unused]] FFDEOptions* options) {
     }
 }
 
+static void getSonicDE(FFstrbuf* result) {
+    ffParsePropFile(FF_PATH_PKG_BASE "/share/xsessions/sonicde.desktop", "X-KDE-PluginInfo-Version =", result);
+    if (result->length == 0) {
+        ffParsePropFileData("xsessions/sonicde.desktop", "X-KDE-PluginInfo-Version =", result);
+    }
+    if (result->length == 0) {
+        if (ffProcessAppendStdOut(result, (char* const[]) { "sonicshell", "--version", nullptr }) == nullptr) {
+            ffStrbufSubstrAfterLastC(result, ' ');
+        } else {
+            ffStrbufClear(result);
+        }
+    }
+}
+
 static const char* getGnomeByDbus([[maybe_unused]] FFstrbuf* result) {
 #ifdef FF_HAVE_DBUS
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
@@ -257,7 +271,9 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         return "Disabled by config";
     }
 
-    if (ffStrbufEqualS(deName, FF_DE_PRETTY_PLASMA)) {
+    if (ffStrbufEqualS(deName, FF_DE_PRETTY_SONICDE)) {
+        getSonicDE(result);
+    } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_PLASMA)) {
         getKDE(result, options);
     } else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME)) {
         getGnome(result, options);

@@ -95,7 +95,9 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         return;
     }
 
-    if (
+    if (ffStrEqualsIgnCase(name, "SonicWin") || ffStrEqualsIgnCase(name, "sonic-win")) {
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SONICWIN);
+    } else if (
         ffStrEqualsIgnCase(name, "kwin") ||
         ffStrStartsWithIgnCase(name, "kwin_") ||
         ffStrEndsWithIgnCase(name, "-kwin_wayland") ||
@@ -178,9 +180,27 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
     }
 }
 
+static bool hasDesktopToken(const char* desktops, const char* token) {
+    size_t length = strlen(token);
+    for (const char* desktop = desktops; desktop && *desktop;) {
+        const char* end = strchr(desktop, ':');
+        size_t desktopLength = end ? (size_t) (end - desktop) : strlen(desktop);
+        if (desktopLength == length && strncasecmp(desktop, token, length) == 0) {
+            return true;
+        }
+        desktop = end ? end + 1 : nullptr;
+    }
+    return false;
+}
+
 static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name) {
     if (!ffStrSet(name)) {
         return;
+    }
+
+    if (hasDesktopToken(name, "SonicDE") || ffStrEqualsIgnCase(name, "sonicshell")) {
+        ffStrbufSetStatic(&result->deProcessName, "sonicshell");
+        ffStrbufSetStatic(&result->dePrettyName, FF_DE_PRETTY_SONICDE);
     }
 
     else if (
