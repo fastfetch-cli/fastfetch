@@ -1,5 +1,8 @@
 # Unreleased
 
+Features:
+* Added logo for SpaceOS 9. (Logo (Builtin))
+
 Bugfixes:
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
 
