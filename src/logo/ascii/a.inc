@@ -756,6 +756,18 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_RED,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AYOS
+    // AyOS
+    {
+        .names = { "AyOS", "ayos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_AYOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ASAHI
     // Asahi
     {
