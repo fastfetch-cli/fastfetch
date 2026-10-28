@@ -3,6 +3,17 @@
 #include "common/color.h"
 
 static const FFlogo Z[] = {
+    #ifdef FASTFETCH_DATATEXT_LOGO_ZELIXOS
+    // ZelixOS
+    {
+        .names = { "ZelixOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZELIXOS,
+         .colors = {
+            FF_COLOR_FG_256 "254",
+            FF_COLOR_FG_256 "244",
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ZORIN
     // Zorin
     {
