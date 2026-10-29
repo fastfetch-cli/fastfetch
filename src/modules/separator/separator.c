@@ -32,9 +32,10 @@ bool ffPrintSeparator(FFSeparatorOptions* options) {
         } else {
             uint32_t wcsLength = ffUtf8StrWidth(options->string.chars, options->string.length);
 
-            int remaining = (int) titleLength;
+            // An empty string can't fill the line: there is nothing to repeat
+            int remaining = wcsLength > 0 ? (int) titleLength : 0;
             // Write the whole separator as often as it fits fully into titleLength
-            for (; remaining >= (int) wcsLength; remaining -= (int) wcsLength) {
+            for (; wcsLength > 0 && remaining >= (int) wcsLength; remaining -= (int) wcsLength) {
                 ffStrbufWriteTo(&options->string, stdout);
             }
 

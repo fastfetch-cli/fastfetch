@@ -3,6 +3,7 @@
 Bugfixes:
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
 * Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
+* Fixed an infinite loop when the separator string is empty. (#2689, Separator)
 
 # 2.70.0
 
