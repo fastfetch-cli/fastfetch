@@ -52,15 +52,15 @@ const char* ffDetectWifi(FFlist* result) {
 
         if (inf.ssid) { // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        } else if (networkProfile.ssid) {
-            ffStrbufSetStatic(&item->conn.ssid, inf.configuration.networkProfiles.firstObject.ssid.UTF8String);
+        } else if (networkProfile.ssid) { // Dead in macOS 27.2
+            ffStrbufSetStatic(&item->conn.ssid, networkProfile.ssid.UTF8String);
         } else {
-            ffStrbufSetStatic(&item->conn.ssid, "<redacted>"); // https://developer.apple.com/forums/thread/732431
+            ffStrbufSetStatic(&item->conn.ssid, "<redacted>");
         }
 
         if (inf.bssid) {
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
-        } else if (networkProfile.bssidList) {
+        } else if (networkProfile.bssidList) { // Dead in macOS 27.2
             ffStrbufSetStatic(&item->conn.bssid, [networkProfile.bssidList.firstObject[@"BSSID"] UTF8String]);
         } else {
             ffStrbufSetStatic(&item->conn.bssid, "<redacted>");
