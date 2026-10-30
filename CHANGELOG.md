@@ -1,6 +1,7 @@
 # Unreleased
 
 Bugfixes:
+* Fixed AMD GPU name detection in amdgpu.ids when PCI device ID or revision ID has leading zeros. (GPU, Linux)
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
 * Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
 

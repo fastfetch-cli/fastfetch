@@ -272,7 +272,7 @@ static bool loadAmdGpuIdsInc(uint16_t deviceId, uint8_t revision, FFGPUResult* g
 
 static void parseAmdGpuIdsFile(uint16_t deviceId, uint8_t revision, FFGPUResult* gpu) {
     char query[32];
-    snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+    snprintf(query, ARRAY_SIZE(query), "%04X,\t%02X,", (unsigned) deviceId, (unsigned) revision);
 #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
     FF_DEBUG("Searching AMD GPU IDs at custom path '%s' for device=0x%04x revision=0x%02x", FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), deviceId, revision);
     ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
