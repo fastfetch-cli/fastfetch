@@ -4142,7 +4142,8 @@
                                     "string": {
                                         "description": "String to print for the separator line",
                                         "type": "string",
-                                        "default": "-"
+                                        "default": "-",
+                                        "minLength": 1
                                     },
                                     "outputColor": {
                                         "description": "Color of the separator line",
