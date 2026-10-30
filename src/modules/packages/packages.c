@@ -600,7 +600,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         { "Number of snap packages", "snap" },
         { "Number of soar packages", "soar" },
         { "Number of sorcery packages", "sorcery" },
-        { "Number of winget packages", "winget" },
+        { "Number of winget packages (in standard builds, disabled by default and configurable in the Packages module)", "winget" },
         { "Number of xbps packages", "xbps" },
 
         { "Total number of all brew packages", "brew-all" },

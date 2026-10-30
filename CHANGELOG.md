@@ -1,6 +1,7 @@
 # Unreleased
 
 Bugfixes:
+* Clarified that WinGet package detection is disabled by default in standard builds. (Packages, Windows)
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
 * Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
 
