@@ -456,6 +456,43 @@ static uint32_t getPacmanPackages(FFstrbuf* baseDir) {
     return getNumElements(baseDir, dbPath.chars, true);
 }
 
+static uint32_t getKuzpkgPackages(FFstrbuf* baseDir) {
+    FF_STRBUF_AUTO_DESTROY dbPath = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY rootDir = ffStrbufCreate();
+
+    // Get path to kuzpkg.conf
+    uint32_t baseDirLen = baseDir->length;
+    ffStrbufAppendS(baseDir, "/etc/kuzpkg.conf");
+
+    bool confFound = ffParsePropFileValues(baseDir->chars, 2, (FFpropquery[]) {
+                                                                  { "DBPath =", &dbPath },
+                                                                  { "RootDir =", &rootDir },
+                                                              });
+
+    ffStrbufSubstrBefore(baseDir, baseDirLen);
+
+    if (confFound) {
+        if (dbPath.length > 0) {
+            // If DBPath is specified, use it
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "local");
+        } else if (rootDir.length > 0) {
+            // Otherwise, use RootDir
+            ffStrbufDestroy(&dbPath);
+            ffStrbufInitMove(&dbPath, &rootDir);
+            ffStrbufEnsureEndsWithC(&dbPath, '/');
+            ffStrbufAppendS(&dbPath, "var/lib/kuzpkg/local");
+        }
+    }
+
+    // Default Kuzpkg database location
+    if (dbPath.length == 0) {
+        ffStrbufSetStatic(&dbPath, "/var/lib/kuzpkg/local");
+    }
+
+    return getNumElements(baseDir, dbPath.chars, true);
+}
+
 static uint32_t getEmergePackagesImpl(FFstrbuf* baseDir) {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
     if (dirp == nullptr)
@@ -507,6 +544,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (FF_PACKAGES_IS_ENABLED(options, KISS)) {
         packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);
+    }
+    if (FF_PACKAGES_IS_ENABLED(options, KUZPKG)) {
+        packageCounts->kuzpkg += getKuzpkgPackages(baseDir);
     }
     if (FF_PACKAGES_IS_ENABLED(options, NIX)) {
         packageCounts->nixDefault += ffPackagesGetNix(baseDir, "/nix/var/nix/profiles/default");
