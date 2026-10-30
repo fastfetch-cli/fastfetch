@@ -201,6 +201,19 @@ static const FFlogo D[] = {
         .colorTitle = FF_COLOR_FG_LIGHT_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DARKIAN
+    // Darkian
+    {
+        .names = { "Darkian" },
+        .lines = FASTFETCH_DATATEXT_LOGO_DARKIAN,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    #endif
     // LAST
     {},
 };
