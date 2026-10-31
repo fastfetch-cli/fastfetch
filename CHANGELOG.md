@@ -1,9 +1,18 @@
 # Unreleased
 
+Features:
+* Added display detection through the `org.gnome.Mutter.DisplayConfig` D-Bus interface on GNOME and Cinnamon Wayland sessions, which reports the primary monitor and the raw EDID directly instead of matching the `wl_output` name against the DRM connectors. A D-Bus enabled build is required. (Display, Linux)
+
 Bugfixes:
+* Rejected an empty `separator.string` in the JSON config with an error message. (#2689, Separator)
+* Fixed fastfetch blocking forever when the terminal answered a terminal query only partially, for example with just one of the two OSC 10/11 color replies. (Logo / Terminal / TerminalTheme, Unix / Windows)
+* Fixed a `$` ending a logo line or the logo itself being parsed as the start of a color code instead of a plain dollar sign. (#2666, Logo)
 * Fixed AMD GPU name detection in amdgpu.ids when PCI device ID or revision ID has leading zeros. (GPU, Linux)
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
 * Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
+
+Logos:
+* Added Tiny Core Linux (#2655)
 
 # 2.70.0
 
