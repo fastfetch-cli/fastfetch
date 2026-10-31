@@ -343,6 +343,51 @@ static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape
     return true;
 }
 
+// Returns the index of the `}` of the `{<marker>}` that closes the conditional we are in, or the
+// length of the format string if there is none. `i` is the index of the `}` that ends the opening
+// placeholder. The part to skip may hold conditionals of its own, which have to be passed over.
+// Like in `parseFormatString`, only a conditional with a valid argument opens a block.
+static uint32_t findConditionalEnd(const FFstrbuf* formatstr, uint32_t i, char marker, uint32_t numArgs, const FFformatarg* arguments) {
+    FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
+    uint32_t depth = 0;
+
+    for (++i; i < formatstr->length; ++i) {
+        if (formatstr->chars[i] != '{') {
+            continue;
+        }
+
+        ++i;
+        if (i >= formatstr->length) {
+            break;
+        }
+
+        // double {{ evaluates to a single { and doesn't start a placeholder
+        if (formatstr->chars[i] == '{') {
+            continue;
+        }
+
+        uint32_t iEnd = ffStrbufNextIndexC(formatstr, i, '}');
+        if (formatstr->chars[i] == marker) {
+            if (iEnd - i == 1) {
+                if (depth == 0) {
+                    return iEnd;
+                }
+                --depth;
+            } else {
+                ffStrbufClear(&placeholderValue);
+                ffStrbufAppendNS(&placeholderValue, iEnd - i - 1, &formatstr->chars[i + 1]);
+                uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
+                if (index >= 1 && index <= numArgs) {
+                    ++depth;
+                }
+            }
+        }
+        i = iEnd;
+    }
+
+    return formatstr->length;
+}
+
 static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
     uint32_t argCounter = 0;
 
@@ -440,7 +485,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" - 1 because the loop will increment it again directly after continue
+            i = findConditionalEnd(formatstr, i, '?', numArgs, arguments);
             continue;
         }
 
@@ -463,7 +508,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" - 1 because the loop will increment it again directly after continue
+            i = findConditionalEnd(formatstr, i, '/', numArgs, arguments);
             continue;
         }
 
