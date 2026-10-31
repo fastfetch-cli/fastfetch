@@ -1,5 +1,8 @@
 # Unreleased
 
+Features:
+* Added logo for SpaceOS 9. (Logo (Builtin))
+
 Bugfixes:
 * Fixed AMD GPU name detection in amdgpu.ids when PCI device ID or revision ID has leading zeros. (GPU, Linux)
 * Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
