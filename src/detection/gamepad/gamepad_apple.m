@@ -161,7 +161,7 @@ typedef struct FFFindGamepadContext {
     FFlist* devices;
     uint32_t gameControllerCount;
 } FFFindGamepadContext;
-
+#ifdef MAC_OS_X_VERSION_11_0
 // The GameController framework's own devices, and how many of them there were. `set` is the IOKit
 // side, used only to borrow the serial -- see `findHIDDeviceForController()`.
 static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
@@ -224,7 +224,7 @@ static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
     }
     return 0;
 }
-
+#endif
 // Whether the framework would claim any of these devices. Unlike the list itself this is a local
 // predicate on the HID descriptor, not a daemon round trip, so it is the right thing to ask *before*
 // paying for the wait above. Measured on this machine: 0.3 ms warm, 0.9 ms as the very first
@@ -233,6 +233,7 @@ static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
 // ~14 ms above is only ever paid by a pad Apple actually claims. A Logitech pad, or any pad outside
 // Apple's whitelist, fails this and skips the wait entirely instead of sitting through a timeout for
 // a list that will never contain it.
+#ifdef MAC_OS_X_VERSION_11_0
 static bool anyDeviceIsClaimedByGameController(NSSet* set) {
     if (@available(macOS 11.0, *)) {
         for (id value in set) {
@@ -243,7 +244,8 @@ static bool anyDeviceIsClaimedByGameController(NSSet* set) {
     }
     return false;
 }
-
+#endif
+#ifdef MAC_OS_X_VERSION_11_0
 static void enumSet(IOHIDDeviceRef value, FFFindGamepadContext* ctx) {
     // A device the framework owns is already in the list under its own name; see the note at the
     // top for why this is conditional on the framework having contributed anything at all.
@@ -275,8 +277,9 @@ static void enumSet(IOHIDDeviceRef value, FFFindGamepadContext* ctx) {
     CFStringRef serialNumber = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDSerialNumberKey));
     ffCfStrGetString(serialNumber, &device->serial);
 }
-
+#endif
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
+#ifdef MAC_OS_X_VERSION_11_0
     FF_CFTYPE_AUTO_RELEASE IOHIDManagerRef manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
     if (IOHIDManagerOpen(manager, kIOHIDOptionsTypeNone) != kIOReturnSuccess) {
         return "IOHIDManagerOpen() failed";
@@ -315,4 +318,8 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */) {
     IOHIDManagerClose(manager, kIOHIDOptionsTypeNone);
 
     return nullptr;
+#else
+    FF_UNUSED(devices);
+    return "No support for old MacOS version";
+#endif
 }
