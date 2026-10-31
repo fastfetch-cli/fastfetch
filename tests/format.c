@@ -200,6 +200,22 @@ int main(void) {
         VERIFY("output({1~4})", "\e[?25l12345", "output(\e[?25l5)");
     }
 
+    {
+        // numbers that don't fit in 32 bits must not wrap around to a valid value
+        VERIFY("output({4294967296})", "x", "output({4294967296})");
+        VERIFY("output({4294967297})", "x", "output({4294967297})");
+        VERIFY("output({99999999999999999999})", "x", "output({99999999999999999999})");
+        VERIFY("output({1~4294967297})", "12345 67890", "output()");
+        VERIFY("output({1~-4294967297})", "12345 67890", "output()");
+        VERIFY("output({1~0,4294967296})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1:4294967297})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1:-4294967296})", "12345 67890", "output(12345 67890)");
+
+        // the length is negated for the ellipsis, which overflows for the smallest int32
+        VERIFY("output({1:-2147483648})", "12345 67890", "output(12345 67890)");
+        VERIFY("output({1:-2147483647})", "12345 67890", "output(12345 67890)");
+    }
+
 #ifndef _WIN32 // Windows doesn't have setenv
     {
         ffListInit(&instance.config.display.constants);
@@ -216,6 +232,10 @@ int main(void) {
         VERIFY("output({$FF_INVAL})", "", "output({$FF_INVAL})");
         VERIFY("output({$9}{$0}${-9})", "", "output({$9}{$0}${-9})");
         VERIFY("output({$1NO})", "", "output({$1NO})");
+
+        // numbers that don't fit in 32 bits must not wrap around to a valid index
+        VERIFY("output({$4294967297})", "", "output({$4294967297})");
+        VERIFY("output({$-4294967297})", "", "output({$-4294967297})");
         ffListDestroy(&instance.config.display.constants);
     }
 #endif

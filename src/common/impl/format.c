@@ -63,6 +63,13 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg) {
     }
 }
 
+// strtol() to an int32_t. Values that don't fit are clamped instead of wrapping around,
+// so that e.g. 4294967297 can't turn into 1.
+static int32_t strToInt32(const char* str, char** pEnd) {
+    long long value = strtoll(str, pEnd, 10);
+    return value > INT32_MAX ? INT32_MAX : value < INT32_MIN ? INT32_MIN : (int32_t) value;
+}
+
 /**
  * @brief parses a string to a uint32_t
  *
@@ -79,14 +86,14 @@ static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs,
 
     if (firstChar >= '0' && firstChar <= '9') {
         char* pEnd = nullptr;
-        uint32_t result = (uint32_t) strtoul(placeholderValue, &pEnd, 10);
+        unsigned long result = strtoul(placeholderValue, &pEnd, 10);
         if (result > numArgs) {
             return UINT32_MAX;
         }
         if (*pEnd != '\0') {
             return UINT32_MAX;
         }
-        return result;
+        return (uint32_t) result;
     } else if (ffCharIsEnglishAlphabet(firstChar)) {
         for (uint32_t i = 0; i < numArgs; ++i) {
             const FFformatarg* arg = &arguments[i];
@@ -525,7 +532,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
         // test for constant or env var, if so evaluate it
         if (firstChar == '$') {
             char* pend = nullptr;
-            int32_t indexSigned = (int32_t) strtol(placeholderValue.chars + 1, &pend, 10);
+            int32_t indexSigned = strToInt32(placeholderValue.chars + 1, &pend);
             if (pend == placeholderValue.chars + 1) {
                 // treat placeholder as an environment variable
                 char* envValue = getenv(placeholderValue.chars + 1);
@@ -584,7 +591,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             skipAnsiEscape(&tempString, buffer, &trailingEscape);
 
             char* pEnd = nullptr;
-            int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
+            int32_t start = strToInt32(pSep + 1, &pEnd);
             if (start < 0) {
                 start = (int32_t) tempString.length + start;
             }
@@ -592,7 +599,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
                 if (*pEnd == '\0') {
                     ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
                 } else if (*pEnd == ',') {
-                    int32_t end = (int32_t) strtol(pEnd + 1, &pEnd, 10);
+                    int32_t end = strToInt32(pEnd + 1, &pEnd);
                     if (!*pEnd) {
                         if (end < 0) {
                             end = (int32_t) tempString.length + end;
@@ -618,7 +625,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
         } else {
             char* pEnd = nullptr;
-            int32_t truncLength = (int32_t) strtol(pSep + 1, &pEnd, 10);
+            int32_t truncLength = strToInt32(pSep + 1, &pEnd);
             if (*pEnd != '\0') {
                 *pSep = cSep;
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
@@ -628,7 +635,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             bool ellipsis = false;
             if (truncLength < 0) {
                 ellipsis = true;
-                truncLength = -truncLength;
+                truncLength = truncLength == INT32_MIN ? INT32_MAX : -truncLength;
             }
 
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
