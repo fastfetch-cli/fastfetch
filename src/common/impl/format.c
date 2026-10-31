@@ -592,15 +592,22 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
 
             char* pEnd = nullptr;
             int32_t start = strToInt32(pSep + 1, &pEnd);
-            if (start < 0) {
-                start = (int32_t) tempString.length + start;
+            bool hasEnd = *pEnd == ',';
+            int32_t end = 0;
+            if (hasEnd) {
+                end = strToInt32(pEnd + 1, &pEnd);
             }
-            if (start >= 0 && (uint32_t) start < tempString.length) {
-                if (*pEnd == '\0') {
-                    ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
-                } else if (*pEnd == ',') {
-                    int32_t end = strToInt32(pEnd + 1, &pEnd);
-                    if (!*pEnd) {
+
+            // Check the whole range before using it, so that a valid range that lies
+            // outside of the string gives an empty result instead of an invalid placeholder
+            if (!*pEnd) {
+                if (start < 0) {
+                    start = (int32_t) tempString.length + start;
+                }
+                if (start >= 0 && (uint32_t) start < tempString.length) {
+                    if (!hasEnd) {
+                        ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
+                    } else {
                         if (end < 0) {
                             end = (int32_t) tempString.length + end;
                         }
