@@ -77,7 +77,7 @@ static bool detectPlasmaFromFile(const char* filename, FFQtResult* result) {
     return true;
 }
 
-static void detectPlasma(FFQtResult* result) {
+static void detectDesktopQt(FFQtResult* result, const char* layoutFile) {
     bool foundAFile = false;
 
     // We need to do this because we use multiple threads on configDirs
@@ -91,10 +91,11 @@ static void detectPlasma(FFQtResult* result) {
             foundAFile = true;
         }
 
-        ffStrbufSet(&baseDir, configDir);
-        ffStrbufAppendS(&baseDir, "plasma-org.kde.plasma.desktop-appletsrc");
-
-        ffParsePropFile(baseDir.chars, "Image=", &result->wallpaper);
+        if (layoutFile) {
+            ffStrbufSet(&baseDir, configDir);
+            ffStrbufAppendS(&baseDir, layoutFile);
+            ffParsePropFile(baseDir.chars, "Image=", &result->wallpaper);
+        }
 
         if (allValuesSet(result)) {
             return;
@@ -184,7 +185,9 @@ static void initQtResult(void* storage) {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
     if (ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA)) {
-        detectPlasma(qt);
+        detectDesktopQt(qt, "plasma-org.kde.plasma.desktop-appletsrc");
+    } else if (ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_SONICDE)) {
+        detectDesktopQt(qt, "sonic-org.sonicde.desktop-appletsrc");
     } else if (ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT)) {
         detectLXQt(qt);
     } else {
