@@ -71,6 +71,16 @@ static const FFlogo N[] = {
         },
     },
     #endif
+　　#ifdef FASTFETCH_DATATEXT_LOGO_NAGISINNRALINUX
+　　// NagisinnraLinux
+　　{
+    　　.names = { "nagisinnralinux", "NagisinnraLinux" },
+    　　.lines = FASTFETCH_DATATEXT_LOGO_NAGISINNRALINUX,
+    　　.colors = {
+        　　FF_COLOR_FG_WHITE,
+       },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_NITRUX
     // Nitrux
     {
