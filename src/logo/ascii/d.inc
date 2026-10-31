@@ -69,6 +69,19 @@ static const FFlogo D[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_DEEPIN_SMALL
+    // DeepinSmall
+    {
+        .names = { "Deepin_small" },
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_DEEPIN_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_DESAOS
     // DesaOS
     {
