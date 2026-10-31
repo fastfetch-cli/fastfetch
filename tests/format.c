@@ -17,6 +17,19 @@ static void verify(const char* format, const char* arg, const char* expected, in
 
 #define VERIFY(format, argument, expected) verify((format), (argument), (expected), __LINE__)
 
+static void verify2(const char* format, const char* arg1, const char* arg2, const char* expected, int lineNo) {
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY formatter = ffStrbufCreateStatic(format);
+    const FFformatarg arguments[] = { { .type = FF_ARG_TYPE_STRING, arg1 }, { .type = FF_ARG_TYPE_STRING, arg2 } };
+    ffParseFormatString(&result, &formatter, 2, arguments);
+    if (!ffStrbufEqualS(&result, expected)) {
+        fprintf(stderr, FASTFETCH_TEXT_MODIFIER_ERROR "[%d] %s: expected \"%s\", got \"%s\"\n" FASTFETCH_TEXT_MODIFIER_RESET, lineNo, format, expected, result.chars);
+        exit(1);
+    }
+}
+
+#define VERIFY2(format, argument1, argument2, expected) verify2((format), (argument1), (argument2), (expected), __LINE__)
+
 int main(void) {
     instance.config.display.pipe = true;
 
@@ -121,6 +134,28 @@ int main(void) {
         VERIFY("output({1:20}{1<20}{1>20})", "12345 67890", "output(12345 6789012345 67890                  12345 67890)");
         VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "12345 67890", "output(OK)");
         VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "", "output(NOT OK)");
+    }
+
+    {
+        // a skipped conditional may hold conditionals of its own
+        VERIFY2("{?1}A{?2}B{?}C{?}D", "x", "x", "ABCD");
+        VERIFY2("{?1}A{?2}B{?}C{?}D", "x", "", "ACD");
+        VERIFY2("{?1}A{?2}B{?}C{?}D", "", "x", "D");
+        VERIFY2("{?1}A{?2}B{?}C{?}D", "", "", "D");
+        VERIFY2("{/1}A{/2}B{/}C{/}D", "", "", "ABCD");
+        VERIFY2("{/1}A{/2}B{/}C{/}D", "", "x", "ACD");
+        VERIFY2("{/1}A{/2}B{/}C{/}D", "x", "", "D");
+        VERIFY2("{/1}A{/2}B{/}C{/}D", "x", "x", "D");
+        VERIFY2("{?1}A{?1}B{?1}C{?}D{?}E{?}F", "", "", "F");
+        VERIFY2("{?1}{/2}A{/}B{?}C", "", "", "C");
+
+        // a conditional with an invalid argument does not open a block
+        VERIFY2("{?1}A{?3}B{?}C", "", "x", "C");
+        VERIFY2("{?1}A{?3}B{?}C{?}D", "", "x", "C{?}D");
+
+        // an escaped brace does not start a placeholder
+        VERIFY2("{?1}{{?}}A{?}B", "", "", "B");
+        VERIFY2("{?1}{{?2}A{?}B", "", "x", "B");
     }
 
     {
