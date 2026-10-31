@@ -287,6 +287,7 @@ static FFBluetoothResult* findByName(FFlist* devices, const char* name) {
     }
     return found;
 }
+
 static const char* detectLe(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */, NSDictionary<NSString*, NSString*>* classicAddressByIdentifier) {
 #ifdef MAC_OS_X_VERSION_10_15
     CBManagerAuthorization authorization = CBCentralManager.authorization;
@@ -377,6 +378,7 @@ static const char* detectLe(FFBluetoothOptions* options, FFlist* devices /* FFBl
             target->signalQuality = ffRssiToSignalQuality(rssi.intValue);
         }
     }
+
     return nullptr;
 #else
     return nullptr;
