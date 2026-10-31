@@ -12,6 +12,7 @@ Bugfixes:
 * Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
 * Fixed a skipped `{?}` / `{/}` conditional in a format string ending at the `{?}` / `{/}` of a conditional nested in it. (General)
 * Fixed numbers in format strings that don't fit in 32 bits wrapping around to a valid argument index, constant index, substring index or length, e.g. `{4294967297}` being read as `{1}`, and a signed integer overflow for `{1:-2147483648}`. (General)
+* Fixed substring formatting printing the placeholder as is, instead of nothing, when the start index is outside of the string and an end index is given. (General)
 
 Logos:
 * Added Tiny Core Linux (#2655)

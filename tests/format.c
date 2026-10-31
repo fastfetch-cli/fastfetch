@@ -113,6 +113,10 @@ int main(void) {
         VERIFY("output({1~-5,-3})", "12345 67890", "output(67)");
         VERIFY("output({1~-0,10})", "12345 67890", "output(12345 6789)");
         VERIFY("output({1~-3,-5})", "12345 67890", "output()");
+        VERIFY("output({1~11,12})", "12345 67890", "output()");  // Same as {1~11}
+        VERIFY("output({1~20,30})", "12345 67890", "output()");  // Same as {1~20}
+        VERIFY("output({1~-50,3})", "12345 67890", "output()");  // Same as {1~-50}
+        VERIFY("output({1~-50,-1})", "12345 67890", "output()"); // Same as {1~-50}
         VERIFY("output({1~})", "12345 67890", "output(12345 67890)");   // Same as {1~0}
         VERIFY("output({1~-0})", "12345 67890", "output(12345 67890)"); // Same as {1~0}
         VERIFY("output({1~,-1})", "12345 67890", "output(12345 6789)"); // Same as {1~0,-1}
