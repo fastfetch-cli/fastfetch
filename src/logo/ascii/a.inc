@@ -615,6 +615,17 @@ static const FFlogo A[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_ARMADA
+    // ArmadaOS
+    {
+        .names = { "Armada" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ARMADA,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_ARMBIAN
     // Armbian
     {
