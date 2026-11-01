@@ -4,6 +4,7 @@ Features:
 * Added display detection through the `org.gnome.Mutter.DisplayConfig` D-Bus interface on GNOME and Cinnamon Wayland sessions, which reports the primary monitor and the raw EDID directly instead of matching the `wl_output` name against the DRM connectors. A D-Bus enabled build is required. (Display, Linux)
 
 Bugfixes:
+* Fixed shell detection when launched via mise. (#2686, Shell)
 * Rejected an empty `separator.string` in the JSON config with an error message. (#2689, Separator)
 * Fixed fastfetch blocking forever when the terminal answered a terminal query only partially, for example with just one of the two OSC 10/11 color replies. (Logo / Terminal / TerminalTheme, Unix / Windows)
 * Fixed a `$` ending a logo line or the logo itself being parsed as the start of a color code instead of a plain dollar sign. (#2666, Logo)
