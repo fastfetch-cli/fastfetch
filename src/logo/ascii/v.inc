@@ -86,6 +86,17 @@ static const FFlogo V[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VISNUX
+    // Visnux
+    {
+        .names = { "Visnux" },
+        .lines = FASTFETCH_DATATEXT_LOGO_VISNUX,
+        .colors = {
+            FF_COLOR_FG_LIGHT_GREEN,
+            FF_COLOR_FG_RGB "65;45;15",
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_VNUX
     // Vnux
     {
