@@ -18,6 +18,7 @@ Bugfixes:
     * It is now decoded from the AArch64 ID registers in the registry, matching the Linux detection.
 
 Logos:
+* Added SpaceOS 9 (#2692)
 * Added Tiny Core Linux (#2655)
 
 # 2.70.0

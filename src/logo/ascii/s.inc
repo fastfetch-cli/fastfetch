@@ -383,6 +383,18 @@ static const FFlogo S[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SPACEOS9
+    // SpaceOS 9
+    {
+        .names = { "spaceos9" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SPACEOS9,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_256 "135",
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_SPARKY
     // Sparky
     {
