@@ -564,6 +564,8 @@ set(LIBFASTFETCH_SRC
     src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/logo.c
+    src/logo/spin/render.c
+    src/logo/spin/spin.c
     src/modules/modules.c
     src/options/display.c
     src/options/logo.c
@@ -2368,6 +2370,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-spin
+        tests/spin.c
+    )
+    target_link_libraries(fastfetch-test-spin
+        PRIVATE libfastfetch
+    )
+
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2490,6 +2499,7 @@ if (BUILD_TESTS)
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
+    add_test(NAME test-spin COMMAND fastfetch-test-spin)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)

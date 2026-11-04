@@ -653,6 +653,10 @@
                                     "description": "Image file rendered as a raw binary string"
                                 },
                                 {
+                                    "const": "spin",
+                                    "description": "Built-in logo (or a text file) drawn as a 3D slab, turning one step per `--watch` refresh"
+                                },
+                                {
                                     "const": "none",
                                     "description": "Disable logo printing"
                                 }
@@ -661,7 +665,49 @@
                         },
                         "source": {
                             "type": "string",
-                            "description": "Path to the logo source file"
+                            "description": "Path to the logo source file. For the spin logo: `auto` (the detected OS), any built-in logo name, or a text file in fastfetch logo syntax"
+                        },
+                        "spin": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "Options of the spin logo (`logo.type: spin`)",
+                            "properties": {
+                                "speed": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "How fast the logo turns. 0 means not set for either key; `perRound` wins over `perFrame` when both are given",
+                                    "properties": {
+                                        "perFrame": {
+                                            "type": "number",
+                                            "description": "Degrees per drawn frame; a revolution takes 360 / perFrame frames, negative turns the other way. 0 means not set, and 10 is used when neither speed is set",
+                                            "minimum": -360,
+                                            "maximum": 360,
+                                            "default": 0
+                                        },
+                                        "perRound": {
+                                            "type": "number",
+                                            "description": "Seconds one revolution takes, measured on the clock, negative turns the other way",
+                                            "minimum": -3600,
+                                            "maximum": 3600,
+                                            "default": 0
+                                        }
+                                    }
+                                },
+                                "tilt": {
+                                    "type": "number",
+                                    "description": "Camera tilt in degrees",
+                                    "minimum": -80,
+                                    "maximum": 80,
+                                    "default": 0
+                                },
+                                "angle": {
+                                    "type": "number",
+                                    "description": "Rotation of the first frame in degrees; 360 is the same as 0. Without `--watch` this is the only frame drawn",
+                                    "minimum": 0,
+                                    "maximum": 360,
+                                    "default": 0
+                                }
+                            }
                         },
                         "color": {
                             "type": "object",
