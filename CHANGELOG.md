@@ -1,10 +1,14 @@
 # Unreleased
 
 Features:
-* Added display detection through the `org.gnome.Mutter.DisplayConfig` D-Bus interface on GNOME and Cinnamon Wayland sessions, which reports the primary monitor and the raw EDID directly instead of matching the `wl_output` name against the DRM connectors. A D-Bus enabled build is required. (Display, Linux)
+* Added a `spin` logo type (`--logo-type spin`), which animates the built-in logo or a text file as a 3D slab that rotates. (Logo)
+    * This logo type requires `--watch <s>`/`--dynamic-interval <ms>` being set to enable animation. For example: `fastfetch --logo-type spin --watch 1` will animate the logo every second.
+    * `--logo-spin-speed-per-frame` sets the degrees per drawn frame (default 10); `--logo-spin-speed-per-round` sets the seconds one revolution takes and wins when both are given. Both accept a negative value to turn the other way.
+    * `--logo-spin-angle` picks the frame to start from, and is the only frame drawn without `--watch`.
+* Optimised display detection on GNOME and Cinnamon Wayland sessions. (Display, Linux)
 
 Bugfixes:
-* Fixed shell detection when launched via mise. (#2686, Shell)
+* Don't detect mise and atuin as shells. (#2686, Shell)
 * Rejected an empty `separator.string` in the JSON config with an error message. (#2689, Separator)
 * Fixed fastfetch blocking forever when the terminal answered a terminal query only partially, for example with just one of the two OSC 10/11 color replies. (Logo / Terminal / TerminalTheme, Unix / Windows)
 * Fixed a `$` ending a logo line or the logo itself being parsed as the start of a color code instead of a plain dollar sign. (#2666, Logo)
@@ -19,6 +23,8 @@ Bugfixes:
 
 Logos:
 * Added Tiny Core Linux (#2655)
+* Added ArmadaOS (#2649)
+* Added AstrOS (#2582)
 
 # 2.70.0
 
