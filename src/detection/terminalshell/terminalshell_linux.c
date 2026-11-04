@@ -61,6 +61,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid) {
                 ffStrbufEqualS(&result->processName, "flashfetch") ||
                 ffStrbufEqualS(&result->processName, "mise") ||
                 ffStrbufEqualS(&result->processName, "mise-shim") ||
+                ffStrbufEqualS(&result->processName, "atuin") ||
                 ffStrbufEqualS(&result->processName, "proot") ||
                 ffStrbufEqualS(&result->processName, "script") ||
 #ifdef __linux__
