@@ -175,27 +175,6 @@ typedef struct FFAndroidLabelPool {
     return true;
 }
 
-[[gnu::nonnull(1)]] static void appendCodePoint(FFstrbuf* result, uint32_t code) {
-    char encoded[4] = {};
-    uint32_t length = 0;
-    if (code < 0x80) {
-        encoded[length++] = (char) code;
-    } else if (code < 0x800) {
-        encoded[length++] = (char) (0xC0 | (code >> 6));
-        encoded[length++] = (char) (0x80 | (code & 0x3F));
-    } else if (code < 0x10000) {
-        encoded[length++] = (char) (0xE0 | (code >> 12));
-        encoded[length++] = (char) (0x80 | ((code >> 6) & 0x3F));
-        encoded[length++] = (char) (0x80 | (code & 0x3F));
-    } else {
-        encoded[length++] = (char) (0xF0 | (code >> 18));
-        encoded[length++] = (char) (0x80 | ((code >> 12) & 0x3F));
-        encoded[length++] = (char) (0x80 | ((code >> 6) & 0x3F));
-        encoded[length++] = (char) (0x80 | (code & 0x3F));
-    }
-    ffStrbufAppendNS(result, length, encoded);
-}
-
 // One string out of a pool.
 //
 // The two lengths in front of a UTF-8 string are a *character* count and a *byte* count, and they
@@ -250,7 +229,7 @@ typedef struct FFAndroidLabelPool {
                 i++;
             }
         }
-        appendCodePoint(result, code);
+        ffStrbufAppendUtf32CodePoint(result, code);
     }
     return true;
 }
