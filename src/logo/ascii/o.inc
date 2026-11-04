@@ -223,6 +223,18 @@ static const FFlogo O[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP_MICRO
+    // OpenSuseLeapMicro
+    {
+        .names = { "opensuse-leap-micro" },
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP_MICRO,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP_OLD
     // OpenSuseLeapOld
     {

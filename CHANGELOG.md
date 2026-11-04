@@ -25,6 +25,7 @@ Logos:
 * Added Tiny Core Linux (#2655)
 * Added ArmadaOS (#2649)
 * Added AstrOS (#2582)
+* Added openSUSE Leap Micro (#2703)
 
 # 2.70.0
 
