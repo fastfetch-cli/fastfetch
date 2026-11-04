@@ -21,7 +21,7 @@ jobs:
         uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3 # v1.7.0
         with:
           operating_system: openbsd
-          version: '7.9'
+          version: '8.0'
           shell: bash
           cpu_count: 4
 
@@ -32,7 +32,7 @@ jobs:
       - name: Update and install dependencies
         run: |
           sudo pkg_add -u
-          sudo pkg_add -r llvm-21.1.8p4 cmake git wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa lua-5.4.8p0 # pkg-config is preinstalled
+          sudo pkg_add -r llvm-22.1.8p10 cmake git wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 imagemagick chafa lua-5.4.8p2 # pkg-config is preinstalled
 
       - name: CMake configuration
         run: CC=clang-21 cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_BUILD_TYPE=${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }} -DCMAKE_C_FLAGS="-fno-pie" -DCMAKE_EXE_LINKER_FLAGS="-no-pie" .

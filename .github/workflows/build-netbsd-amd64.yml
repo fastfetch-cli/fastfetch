@@ -21,7 +21,7 @@ jobs:
         uses: cross-platform-actions/action@82668f1fbd89d9c99487604f822cbf6716f124d3 # v1.7.0
         with:
           operating_system: netbsd
-          version: '10.1'
+          version: '11.0'
           shell: bash
           cpu_count: 4
 
