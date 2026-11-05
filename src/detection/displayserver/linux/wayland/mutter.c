@@ -387,7 +387,8 @@ bool ffdsMutterAvailable(void) {
 }
 
 // Enrich the displays detected from wl_output with the authoritative data reported by Mutter / Muffin.
-// Returns true if the display configuration could be retrieved from D-Bus.
+// Returns true when the D-Bus connection is up and DisplayConfig could be queried. The caller treats
+// that as authoritative and skips monitors.xml, even if the reply names no primary monitor.
 bool ffdsConnectMutter(FFDisplayServerResult* result) {
     FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
     const char* error = ffDBusLoadData(DBUS_BUS_SESSION, &dbus);

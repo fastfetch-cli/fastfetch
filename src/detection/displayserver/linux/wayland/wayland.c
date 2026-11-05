@@ -317,16 +317,18 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
-    bool primaryDetected = false;
+    bool displayConfigRead = false;
     #if defined(FF_HAVE_DBUS) && defined(__linux__)
     if (data.useMutter) {
-        // Mutter / Muffin reports the primary monitor and the raw EDID directly
-        primaryDetected = ffdsConnectMutter(result);
+        // A working D-Bus connection with a reachable DisplayConfig is authoritative.
+        // Don't second-guess it with monitors.xml even when the reply names no primary
+        // monitor (e.g. connector names that happen to match no wl_output).
+        displayConfigRead = ffdsConnectMutter(result);
     }
     #endif
 
     // Fallback for compositors that do not expose the monitor configuration, or when it could not be read
-    if (!primaryDetected) {
+    if (!displayConfigRead) {
         const char* fileName = ffStrbufEqualS(&result->wmProcessName, "gnome-shell")
             ? "monitors.xml"
             : ffStrbufEqualS(&result->wmProcessName, "cinnamon")
