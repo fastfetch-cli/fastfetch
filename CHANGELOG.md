@@ -26,6 +26,7 @@ Logos:
 * Added ArmadaOS (#2649)
 * Added AstrOS (#2582)
 * Added openSUSE Leap Micro (#2703)
+* Added Uranium (#2709)
 
 # 2.70.0
 
