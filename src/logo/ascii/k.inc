@@ -234,6 +234,18 @@ static const FFlogo K[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KYON
+    // Kyon Linux
+    {
+        .names = { "kyonlinux", "kyon" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KYON,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+        },
+            .colorKeys = FF_COLOR_FG_CYAN,
+            .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    #endif
     // LAST
     {},
 };
