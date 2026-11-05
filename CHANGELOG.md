@@ -1,4 +1,4 @@
-# Unreleased
+# 2.71.0
 
 Features:
 * Added a `spin` logo type (`--logo-type spin`), which animates the built-in logo or a text file as a 3D slab that rotates. (Logo)
