@@ -165,6 +165,7 @@ typedef struct FFFindGamepadContext {
 // The GameController framework's own devices, and how many of them there were. `set` is the IOKit
 // side, used only to borrow the serial -- see `findHIDDeviceForController()`.
 static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
+#ifdef MAC_OS_VERSION_11_0
     if (@available(macOS 11.0, *)) {
         // See the note at the top: the list stays empty until the run loop has been pumped once, and
         // the timeout only bounds the case where the framework has nothing to report at all. The
@@ -222,6 +223,8 @@ static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
         }
         return count;
     }
+#endif
+
     return 0;
 }
 
@@ -234,6 +237,7 @@ static uint32_t findGameControllerDevices(FFlist* devices, NSSet* set) {
 // Apple's whitelist, fails this and skips the wait entirely instead of sitting through a timeout for
 // a list that will never contain it.
 static bool anyDeviceIsClaimedByGameController(NSSet* set) {
+#ifdef MAC_OS_VERSION_11_0
     if (@available(macOS 11.0, *)) {
         for (id value in set) {
             if ([GCController supportsHIDDevice: (__bridge IOHIDDeviceRef) value]) {
@@ -241,12 +245,15 @@ static bool anyDeviceIsClaimedByGameController(NSSet* set) {
             }
         }
     }
+#endif
+
     return false;
 }
 
 static void enumSet(IOHIDDeviceRef value, FFFindGamepadContext* ctx) {
     // A device the framework owns is already in the list under its own name; see the note at the
     // top for why this is conditional on the framework having contributed anything at all.
+#ifdef MAC_OS_VERSION_11_0
     if (ctx->gameControllerCount > 0) {
         if (@available(macOS 11.0, *)) {
             if ([GCController supportsHIDDevice:value]) {
@@ -254,6 +261,7 @@ static void enumSet(IOHIDDeviceRef value, FFFindGamepadContext* ctx) {
             }
         }
     }
+#endif
 
     FFGamepadDevice* device = FF_LIST_ADD(FFGamepadDevice, *ctx->devices);
     ffStrbufInit(&device->serial);
