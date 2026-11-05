@@ -123,7 +123,19 @@ static const FFlogo K[] = {
             FF_COLOR_FG_BLUE,
         },
         .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,#ifdef FASTFETCH_DATATEXT_LOGO_KAIRO
+    // Kairo Linux
+    {
+        .names = { "kairo", "Kairo Linux" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KAIRO,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    #endif
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_KISS
@@ -232,6 +244,18 @@ static const FFlogo K[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #ifdef FASTFETCH_DATATEXT_LOGO_KAIRO
+    // Kairo Linux
+    {
+        .names = { "kairo", "Kairo Linux" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KAIRO,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
     // LAST

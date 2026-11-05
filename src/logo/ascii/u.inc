@@ -263,6 +263,19 @@ static const FFlogo U[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_UNRAID
+    // Unraid
+    {
+        .names = { "Unraid OS", "unraid-os", "unraid" },
+        .lines = FASTFETCH_DATATEXT_LOGO_UNRAID,
+        .colors = {
+            FF_COLOR_FG_LIGHT_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_RED,
+        .colorTitle = FF_COLOR_FG_LIGHT_RED,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_UOS
     // UOS
     {

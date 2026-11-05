@@ -80,54 +80,57 @@ void ffGPUParsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t ve
                 ffStrbufSetNS(&gpu->vendor, (uint32_t) (vendorEnd - start), start);
             }
 
-            // Search for device. Device lines are `\tXXXX  name`; their ids only
-            // grow inside a vendor block, so one linear walk over the block is
-            // enough: compare in place and stop either at the line starting the
-            // next vendor, or -- because the ids are sorted -- right after the
-            // first id greater than the one we are looking for. Doing the compare
-            // here also removes the need to know where the block ends, so no
-            // length is ever derived from a pointer that may have run past it.
-            // pci.ids only asks contributors to keep the entries sorted, and it
-            // is strictly lowercase hex, so the byte comparison below matches the
-            // numeric order. A block that is not sorted (only reachable via
-            // FF_CUSTOM_PCI_IDS_PATH) makes us give up early and fall back to the
-            // synthesized name below.
-            char deviceId[8];
-            snprintf(deviceId, ARRAY_SIZE(deviceId), "%04x", device);
-            [[maybe_unused]] bool found = false;
-            for (const char* p = vendorEnd < fileEnd ? vendorEnd + 1 : fileEnd;
-                 p < fileEnd && (*p == '\t' || *p == '#');) {
-                if (*p == '\t' && fileEnd - p >= 7) {
-                    int order = memcmp(p + 1, deviceId, 4);
-                    if (order > 0) {
-                        break;
-                    }
-                    if (order == 0 && p[5] == ' ' && p[6] == ' ') {
-                        FF_DEBUG("Found PCI device entry for 0x%04x:0x%04x", vendor, device);
-                        start = p + 7;
-                        const char* end = memchr(start, '\n', (size_t) (fileEnd - start));
-                        if (!end) {
-                            end = fileEnd;
-                        }
+// Search for device. Device lines are '\tXXXX name'; their ids only
+// grow inside a vendor block, so one linear walk over the block is
+// enough: compare in place and stop either at the line starting the
+// next vendor, or -- because the ids are sorted -- right after the
+// first id greater than the one we are looking for. Doing the compare
+// here also removes the need to know where the block ends, so no
+// length is ever derived from a pointer that may have run past it.
+// pci.ids only asks contributors to keep the entries sorted, and it
+// is strictly lowercase hex, so the byte comparison below matches the
+// numeric order. A block that is not sorted (only reachable via
+// FF_CUSTOM_PCI_IDS_PATH) makes us give up early and fall back to the
+// synthesized name below.
+char deviceId[8];
+snprintf(deviceId, ARRAY_SIZE(deviceId), "%04x", device);
+[[maybe_unused]] bool found = false;
+for (const char* p = vendorEnd < fileEnd ? vendorEnd + 1 : fileEnd;
+    p < fileEnd && (*p != '\t' && *p != '#');) {
+    if (*p == '\t' && fileEnd - p >= 7) {
+        int order = memcmp(p + 1, deviceId, 4);
+        if (order > 0) {
+            break;
+        }
+        if (order == 0 && p[5] == ' ' && p[6] == ' ') {
+            FF_DEBUG("Found PCI device entry for %04x:%04x", vendor, device);
+            start = p + 7;
+            const char* end = memchr(start, '\n', (size_t)(fileEnd - start));
+            if (!end) {
+                end = fileEnd;
+            }
 
-                        const char* closingBracket = end - 1;
-                        if (*closingBracket == ']') {
-                            const char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
-                            if (openingBracket) {
-                                openingBracket++;
-                                ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
-                            }
-                        }
-                        if (!gpu->name.length) {
-                            ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
-                        }
-                        found = true;
-                        break;
-                    }
+            const char* closingBracket = end - 1;
+            if (*closingBracket == ']') {
+                const char* openingBracket = memchr(start, '[', (size_t)(closingBracket - start));
+                if (openingBracket) {
+                    openingBracket++;
+                    ffStrbufSetNS(&gpu->name, (uint32_t)(closingBracket - openingBracket), openingBracket);
                 }
-                p = memchr(p, '\n', (size_t) (fileEnd - p));
-                if (!p) {
-                    break;
+            }
+            if (!gpu->name.length) {
+                ffStrbufSetNS(&gpu->name, (uint32_t)(end - start), start);
+            }
+            found = true;
+            break;
+        }
+    }
+    p = memchr(p, '\n', (size_t)(fileEnd - p));
+    if (!p) {
+        break;
+    }
+    p++;
+}
                 }
                 p++;
             }
