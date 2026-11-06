@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: run VM
-        uses: vmactions/solaris-vm@87d3c436511cef802cd1637f86f73b1a97715c8c # v1.4.1
+        uses: vmactions/solaris-vm@1c166978f5a2c1f87f1c9d4d8dd85ae3d1eff6f7 # v1.4.2
         with:
           usesh: true
           envs: 'CMAKE_BUILD_TYPE'
@@ -40,7 +40,7 @@ jobs:
             cpack -V
 
       - name: upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fastfetch-solaris-amd64
           path: ./fastfetch-*.*

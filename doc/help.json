@@ -203,8 +203,45 @@
                     "iterm": "Image file, rendered using the iTerm graphics protocol",
                     "chafa": "Image file, printed as ASCII art using libchafa",
                     "raw": "Image file, printed as raw binary string",
+                    "spin": "Built-in logo (or a text file) drawn as a 3D slab; it turns one step per refresh with `--watch`",
                     "none": "Disable logo printing"
                 }
+            }
+        },
+        {
+            "long": "logo-spin-speed-per-frame",
+            "desc": "Set how far the spin logo turns per drawn frame, in degrees",
+            "remark": "Only used by `--logo-type spin`. One revolution takes 360 divided by this value frames, so `--watch` sets the pace; negative turns the other way. 0 means not set, and the default is 10",
+            "arg": {
+                "type": "num",
+                "default": 10
+            }
+        },
+        {
+            "long": "logo-spin-speed-per-round",
+            "desc": "Set how many seconds one revolution of the spin logo takes",
+            "remark": "Only used by `--logo-type spin`. Read from the clock, so a slow refresh turns further instead of slowing the logo down; negative turns the other way. 0 means not set, and this wins over `--logo-spin-speed-per-frame` when both are given",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "logo-spin-tilt",
+            "desc": "Set the camera tilt of the spin logo, in degrees",
+            "remark": "Only used by `--logo-type spin`",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "logo-spin-angle",
+            "desc": "Set the rotation of the first spin logo frame, in degrees",
+            "remark": "Only used by `--logo-type spin`. Without `--watch` the logo is drawn at this angle and stays there. 360 is the same as 0",
+            "arg": {
+                "type": "num",
+                "default": 0
             }
         },
         {

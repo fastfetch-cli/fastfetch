@@ -213,10 +213,6 @@ Alternatively, you may try using `fastfetch --gpu-driver-specific`, which will m
 
 Try `export XAUTHORITY=$HOME/.Xauthority`
 
-### Q: Fastfetch cannot detect my awesome 3rd-party macOS window manager!
-
-Try `fastfetch --wm-detect-plugin`. See also [#984](https://github.com/fastfetch-cli/fastfetch/issues/984)
-
 ### Q: How can I change the colors of my ASCII logo?
 
 Try `fastfetch --logo-color-[1-9] <color>`, where `[1-9]` is the index of color placeholders.

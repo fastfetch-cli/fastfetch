@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21.0) # C_STANDARD C17 and C23
 
 project(fastfetch
-    VERSION 2.70.0
+    VERSION 2.71.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -564,6 +564,8 @@ set(LIBFASTFETCH_SRC
     src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/logo.c
+    src/logo/spin/render.c
+    src/logo/spin/spin.c
     src/modules/modules.c
     src/options/display.c
     src/options/logo.c
@@ -623,6 +625,7 @@ if(LINUX)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
         src/detection/displayserver/linux/wayland/wp-color-management-v1-protocol.c
@@ -712,6 +715,7 @@ elseif(ANDROID)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -800,6 +804,7 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -898,6 +903,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -983,6 +989,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1243,6 +1250,7 @@ elseif(SunOS)
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/wayland/global-output.c
         src/detection/displayserver/linux/wayland/kde-output.c
         src/detection/displayserver/linux/wayland/wl-output-protocol.c
@@ -1402,6 +1410,7 @@ elseif(GNU)
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/mutter.c
         src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wmde.c
@@ -2361,6 +2370,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-spin
+        tests/spin.c
+    )
+    target_link_libraries(fastfetch-test-spin
+        PRIVATE libfastfetch
+    )
+
     add_executable(fastfetch-test-strbuf
         tests/strbuf.c
     )
@@ -2483,6 +2499,7 @@ if (BUILD_TESTS)
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
+    add_test(NAME test-spin COMMAND fastfetch-test-spin)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)

@@ -149,6 +149,32 @@ void restoreTerm(void) {
     tcsetattr(ftty, TCSAFLUSH, &oldTerm);
 }
 
+static const char* waitForTerminalResponse(void) {
+#ifndef __APPLE__
+    const int pollResult = poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS);
+    if (pollResult <= 0) {
+        FF_DEBUG("poll(/dev/tty) returned %d after %d ms: %s",
+            pollResult, FF_IO_TERM_RESP_WAIT_MS, pollResult == 0 ? "timed out" : strerror(errno));
+        return "poll(/dev/tty) timeout or failed";
+    }
+#else
+    {
+        // On macOS, poll(/dev/tty) always returns immediately
+        // See also https://nathancraddock.com/blog/macos-dev-tty-polling/
+        fd_set rd;
+        FD_ZERO(&rd);
+        FD_SET(ftty, &rd);
+        const int selectResult = select(ftty + 1, &rd, nullptr, nullptr, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 });
+        if (selectResult <= 0) {
+            FF_DEBUG("select(/dev/tty) returned %d after %d ms: %s",
+                selectResult, FF_IO_TERM_RESP_WAIT_MS, selectResult == 0 ? "timed out" : strerror(errno));
+            return "select(/dev/tty) timeout or failed";
+        }
+    }
+#endif
+    return nullptr;
+}
+
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...) {
     if (ftty < 0) {
         ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
@@ -174,28 +200,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     ffWriteFDData(ftty, strlen(request), request);
 
 // Give the terminal some time to respond
-#ifndef __APPLE__
-    const int pollResult = poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS);
-    if (pollResult <= 0) {
-        FF_DEBUG("poll(/dev/tty) returned %d after %d ms: %s",
-            pollResult, FF_IO_TERM_RESP_WAIT_MS, pollResult == 0 ? "timed out" : strerror(errno));
-        return "poll(/dev/tty) timeout or failed";
+    const char* error = waitForTerminalResponse();
+    if (error) {
+        return error;
     }
-#else
-    {
-        // On macOS, poll(/dev/tty) always returns immediately
-        // See also https://nathancraddock.com/blog/macos-dev-tty-polling/
-        fd_set rd;
-        FD_ZERO(&rd);
-        FD_SET(ftty, &rd);
-        const int selectResult = select(ftty + 1, &rd, nullptr, nullptr, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 });
-        if (selectResult <= 0) {
-            FF_DEBUG("select(/dev/tty) returned %d after %d ms: %s",
-                selectResult, FF_IO_TERM_RESP_WAIT_MS, selectResult == 0 ? "timed out" : strerror(errno));
-            return "select(/dev/tty) timeout or failed";
-        }
-    }
-#endif
 
     char buffer[1024];
     size_t bytesRead = 0;
@@ -204,6 +212,13 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     va_start(args, format);
 
     while (true) {
+        // The response may arrive in several chunks; a terminal that sends an incomplete
+        // response would otherwise block `read` forever
+        if (bytesRead > 0 && (error = waitForTerminalResponse())) {
+            va_end(args);
+            return error;
+        }
+
         ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
 
         if (nRead <= 0) {

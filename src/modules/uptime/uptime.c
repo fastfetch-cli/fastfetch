@@ -60,7 +60,7 @@ void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, y
 }
 
 bool ffGenerateUptimeJsonResult([[maybe_unused]] FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module) {
-    FFUptimeResult result;
+    FFUptimeResult result = {};
     const char* error = ffDetectUptime(&result);
 
     if (error) {

@@ -414,6 +414,35 @@ void ffListFilesRecursively(const char* path, bool pretty) {
     listFilesRecursively(folder.length, &folder, 0, nullptr, pretty);
 }
 
+static const char* waitForTerminalResponse(HANDLE hInput) {
+    while (true) {
+        NTSTATUS status = NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 });
+        if (status != STATUS_WAIT_0) {
+            FF_DEBUG("NtWaitForSingleObject() failed or timeout: %s", ffDebugNtStatus(status));
+            return "NtWaitForSingleObject() failed or timeout";
+        }
+
+        // Ignore all unexpected input events
+        INPUT_RECORD record;
+        DWORD len = 0;
+        if (!PeekConsoleInputW(hInput, &record, 1, &len)) {
+            return nullptr;
+        }
+
+        // Key-up events carry no input for `ReadFile`; leaving one in the buffer would make the
+        // wait return while the next `ReadFile` still blocks
+        if (
+            record.EventType == KEY_EVENT &&
+            record.Event.KeyEvent.bKeyDown &&
+            record.Event.KeyEvent.uChar.UnicodeChar != L'\r' &&
+            record.Event.KeyEvent.uChar.UnicodeChar != L'\n') {
+            return nullptr;
+        }
+
+        ReadConsoleInputW(hInput, &record, 1, &len);
+    }
+}
+
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...) {
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     FF_AUTO_CLOSE_FD HANDLE hConin = INVALID_HANDLE_VALUE;
@@ -440,29 +469,10 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         WriteFile(hOutput, request, (DWORD) strlen(request), &bytes, nullptr);
     }
 
-    while (true) {
-        NTSTATUS status = NtWaitForSingleObject(hInput, FALSE, &(LARGE_INTEGER) { .QuadPart = (int64_t) FF_IO_TERM_RESP_WAIT_MS * -10000 });
-        if (status != STATUS_WAIT_0) {
-            FF_DEBUG("NtWaitForSingleObject() failed or timeout: %s", ffDebugNtStatus(status));
-            SetConsoleMode(hInput, inputMode);
-            return "NtWaitForSingleObject() failed or timeout";
-        }
-
-        // Ignore all unexpected input events
-        INPUT_RECORD record;
-        DWORD len = 0;
-        if (!PeekConsoleInputW(hInput, &record, 1, &len)) {
-            break;
-        }
-
-        if (
-            record.EventType == KEY_EVENT &&
-            record.Event.KeyEvent.uChar.UnicodeChar != L'\r' &&
-            record.Event.KeyEvent.uChar.UnicodeChar != L'\n') {
-            break;
-        } else {
-            ReadConsoleInputW(hInput, &record, 1, &len);
-        }
+    const char* error = waitForTerminalResponse(hInput);
+    if (error) {
+        SetConsoleMode(hInput, inputMode);
+        return error;
     }
 
     va_list args;
@@ -472,6 +482,16 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     uint32_t bytesRead = 0;
 
     while (true) {
+        // The response may arrive in several chunks; a terminal that sends an incomplete
+        // response would otherwise block `ReadFile` forever
+        if (bytesRead > 0 && (error = waitForTerminalResponse(hInput))) {
+            va_end(args);
+            if (hasInputMode) {
+                SetConsoleMode(hInput, inputMode);
+            }
+            return error;
+        }
+
         DWORD bytes = 0;
         BOOL readOk = ReadFile(hInput, buffer + bytesRead, (DWORD) (sizeof(buffer) - 1 - bytesRead), &bytes, nullptr);
         if (!readOk || bytes == 0) {

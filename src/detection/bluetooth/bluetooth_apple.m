@@ -289,6 +289,7 @@ static FFBluetoothResult* findByName(FFlist* devices, const char* name) {
 }
 
 static const char* detectLe(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */, NSDictionary<NSString*, NSString*>* classicAddressByIdentifier) {
+#ifdef MAC_OS_X_VERSION_10_15
     CBManagerAuthorization authorization = CBCentralManager.authorization;
     if (authorization == CBManagerAuthorizationDenied || authorization == CBManagerAuthorizationRestricted) {
         return nullptr; // The user said no. `NotDetermined` is left to the manager below, which asks.
@@ -377,6 +378,7 @@ static const char* detectLe(FFBluetoothOptions* options, FFlist* devices /* FFBl
             target->signalQuality = ffRssiToSignalQuality(rssi.intValue);
         }
     }
+#endif
 
     return nullptr;
 }

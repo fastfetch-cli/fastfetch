@@ -23,6 +23,22 @@ static bool logoTypeIsImage(FFLogoType type) {
 }
 #endif
 
+// The numeric `--logo-spin-*` options: a plain number with a range, so a typo is
+// rejected instead of producing a nonsensical frame.
+static float logoParseFloat(const char* key, const char* value, float min, float max) {
+    if (value == nullptr) {
+        fprintf(stderr, "Error: usage: %s <number>\n", key);
+        exit(477);
+    }
+    char* end = nullptr;
+    double parsed = strtod(value, &end);
+    if (end == value || *end != '\0' || parsed < min || parsed > max) {
+        fprintf(stderr, "Error: %s must be a number between %g and %g\n", key, min, max);
+        exit(477);
+    }
+    return (float) parsed;
+}
+
 // --sixel, --kitty, --kitty-direct, --kitty-icat and --iterm. They keep a branch of their own in
 // every build so that the error a build without image logos gives names the flag that was used,
 // rather than it being rejected as an unknown option. --chafa is not among them: it is gated on
@@ -70,6 +86,10 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->cache = FF_LOGO_CACHE_ON;
     options->position = FF_LOGO_POSITION_LEFT;
     options->animationFrame = FF_LOGO_ANIMATION_FRAME_FIRST;
+    options->spin.speedPerFrame = 0.0f; // 0: not set, see `ffSpinTick`
+    options->spin.speedPerRound = 0.0f; // 0: not set, see `ffSpinTick`
+    options->spin.tilt = 0.0f;
+    options->spin.angle = 0.0f;
 
 #if FF_HAVE_CHAFA
     options->chafaFgOnly = false;
@@ -118,6 +138,7 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                            { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
                                                                            { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
                                                                            { "raw", FF_LOGO_TYPE_IMAGE_RAW },
+                                                                           { "spin", FF_LOGO_TYPE_SPIN },
                                                                            { "none", FF_LOGO_TYPE_NONE },
                                                                            {},
                                                                        });
@@ -184,6 +205,14 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
                                                                                });
         } else if (ffStrEqualsIgnCase(subKey, "animation-frame")) {
             options->animationFrame = ffOptionParseInt32(key, value);
+        } else if (ffStrEqualsIgnCase(subKey, "spin-speed-per-frame")) {
+            options->spin.speedPerFrame = logoParseFloat(key, value, -360.0f, 360.0f);
+        } else if (ffStrEqualsIgnCase(subKey, "spin-speed-per-round")) {
+            options->spin.speedPerRound = logoParseFloat(key, value, -3600.0f, 3600.0f);
+        } else if (ffStrEqualsIgnCase(subKey, "spin-tilt")) {
+            options->spin.tilt = logoParseFloat(key, value, -80.0f, 80.0f);
+        } else if (ffStrEqualsIgnCase(subKey, "spin-angle")) {
+            options->spin.angle = logoParseFloat(key, value, 0.0f, 360.0f);
         } else {
             return false;
         }
@@ -323,6 +352,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                                                                        { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
                                                                        { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
                                                                        { "raw", FF_LOGO_TYPE_IMAGE_RAW },
+                                                                       { "spin", FF_LOGO_TYPE_SPIN },
                                                                        { "none", FF_LOGO_TYPE_NONE },
                                                                        {},
                                                                    });
@@ -435,6 +465,50 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 return "Property 'logo.animationFrame' must be an integer";
             }
             options->animationFrame = (int32_t) yyjson_get_sint(val);
+            continue;
+        } else if (unsafe_yyjson_equals_str(key, "spin")) {
+            if (!yyjson_is_obj(val)) {
+                return "Property 'logo.spin' must be an object";
+            }
+
+            yyjson_val *spinKey, *spinVal;
+            size_t spinIdx, spinMax;
+            yyjson_obj_foreach (val, spinIdx, spinMax, spinKey, spinVal) {
+                if (unsafe_yyjson_equals_str(spinKey, "speed")) {
+                    if (!yyjson_is_obj(spinVal)) {
+                        return "Property 'logo.spin.speed' must be an object";
+                    }
+                    yyjson_val *speedKey, *speedVal;
+                    size_t speedIdx, speedMax;
+                    yyjson_obj_foreach (spinVal, speedIdx, speedMax, speedKey, speedVal) {
+                        if (unsafe_yyjson_equals_str(speedKey, "perFrame")) {
+                            if (!yyjson_is_num(speedVal) || yyjson_get_num(speedVal) < -360 || yyjson_get_num(speedVal) > 360) {
+                                return "Property 'logo.spin.speed.perFrame' must be a number between -360 and 360";
+                            }
+                            options->spin.speedPerFrame = (float) yyjson_get_num(speedVal);
+                        } else if (unsafe_yyjson_equals_str(speedKey, "perRound")) {
+                            if (!yyjson_is_num(speedVal) || yyjson_get_num(speedVal) < -3600 || yyjson_get_num(speedVal) > 3600) {
+                                return "Property 'logo.spin.speed.perRound' must be a number between -3600 and 3600";
+                            }
+                            options->spin.speedPerRound = (float) yyjson_get_num(speedVal);
+                        } else {
+                            return "Unknown logo.spin.speed key";
+                        }
+                    }
+                } else if (unsafe_yyjson_equals_str(spinKey, "tilt")) {
+                    if (!yyjson_is_num(spinVal) || yyjson_get_num(spinVal) < -80 || yyjson_get_num(spinVal) > 80) {
+                        return "Property 'logo.spin.tilt' must be a number between -80 and 80";
+                    }
+                    options->spin.tilt = (float) yyjson_get_num(spinVal);
+                } else if (unsafe_yyjson_equals_str(spinKey, "angle")) {
+                    if (!yyjson_is_num(spinVal) || yyjson_get_num(spinVal) < 0 || yyjson_get_num(spinVal) > 360) {
+                        return "Property 'logo.spin.angle' must be a number between 0 and 360";
+                    }
+                    options->spin.angle = (float) yyjson_get_num(spinVal);
+                } else {
+                    return "Unknown logo.spin key";
+                }
+            }
             continue;
         } else if (unsafe_yyjson_equals_str(key, "chafa")) {
 #if FF_HAVE_CHAFA
@@ -568,12 +642,26 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_IMAGE_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "raw");
             break;
+        case FF_LOGO_TYPE_SPIN:
+            yyjson_mut_obj_add_str(doc, obj, "type", "spin");
+            break;
         default:
             yyjson_mut_obj_add_str(doc, obj, "type", "auto");
             break;
     }
 
     yyjson_mut_obj_add_str(doc, obj, "source", options->source.chars);
+
+    if (options->type == FF_LOGO_TYPE_SPIN) {
+        yyjson_mut_val* spin = yyjson_mut_obj(doc);
+        yyjson_mut_val* speed = yyjson_mut_obj(doc);
+        yyjson_mut_obj_add_real(doc, speed, "perFrame", options->spin.speedPerFrame);
+        yyjson_mut_obj_add_real(doc, speed, "perRound", options->spin.speedPerRound);
+        yyjson_mut_obj_add_val(doc, spin, "speed", speed);
+        yyjson_mut_obj_add_real(doc, spin, "tilt", options->spin.tilt);
+        yyjson_mut_obj_add_real(doc, spin, "angle", options->spin.angle);
+        yyjson_mut_obj_add_val(doc, obj, "spin", spin);
+    }
 
     {
         yyjson_mut_val* color = yyjson_mut_obj(doc);

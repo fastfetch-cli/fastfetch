@@ -1,3 +1,32 @@
+# 2.71.0
+
+Features:
+* Added a `spin` logo type (`--logo-type spin`), which animates the built-in logo or a text file as a 3D slab that rotates. (Logo)
+    * This logo type requires `--watch <s>`/`--dynamic-interval <ms>` being set to enable animation. For example: `fastfetch --logo-type spin --watch 1` will animate the logo every second.
+    * `--logo-spin-speed-per-frame` sets the degrees per drawn frame (default 10); `--logo-spin-speed-per-round` sets the seconds one revolution takes and wins when both are given. Both accept a negative value to turn the other way.
+    * `--logo-spin-angle` picks the frame to start from, and is the only frame drawn without `--watch`.
+* Optimised display detection on GNOME and Cinnamon Wayland sessions. (Display, Linux)
+
+Bugfixes:
+* Don't detect mise and atuin as shells. (#2686, Shell)
+* Rejected an empty `separator.string` in the JSON config with an error message. (#2689, Separator)
+* Fixed fastfetch blocking forever when the terminal answered a terminal query only partially, for example with just one of the two OSC 10/11 color replies. (Logo / Terminal / TerminalTheme, Unix / Windows)
+* Fixed a `$` ending a logo line or the logo itself being parsed as the start of a color code instead of a plain dollar sign. (#2666, Logo)
+* Fixed AMD GPU name detection in amdgpu.ids when PCI device ID or revision ID has leading zeros. (GPU, Linux)
+* Improved uptime detection on SunOS via kstat. (#2674, Uptime, SunOS)
+* Fixed substring formatting returning the remaining string when a negative end index is before the start of the string. (General)
+* Fixed a skipped `{?}` / `{/}` conditional in a format string ending at the `{?}` / `{/}` of a conditional nested in it. (General)
+* Fixed numbers in format strings that don't fit in 32 bits wrapping around to a valid argument index, constant index, substring index or length, e.g. `{4294967297}` being read as `{1}`, and a signed integer overflow for `{1:-2147483648}`. (General)
+* Fixed substring formatting printing the placeholder as is, instead of nothing, when the start index is outside of the string and an end index is given. (General)
+* Fixed the CPU micro-architecture level (`march`) being under-reported on Windows on ARM when `IsProcessorFeaturePresent` does not expose a feature the CPU implements. (CPU, Windows)
+    * It is now decoded from the AArch64 ID registers in the registry, matching the Linux detection.
+
+Logos:
+* Added Tiny Core Linux (#2655)
+* Added ArmadaOS (#2649)
+* Added AstrOS (#2582)
+* Added openSUSE Leap Micro (#2703)
+
 # 2.70.0
 
 Changes:
@@ -42,6 +71,7 @@ Bugfixes:
     * On Windows 10 1809 (build 17763) and later, the whole volume's capacity and free space are now reported by default. Set `disk.useAvailable` to `true` to keep reporting the space that is available to the current user, quota included.
 
 Logos:
+* Added ArmadaOS logo (#2641)
 * Added filled Artix logo (#2631)
 * Renamed PostmarketOS to nura (#2626)
 

@@ -106,7 +106,7 @@ jobs:
       - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
         id: upload-unsigned-artifact
         name: upload artifacts for signing
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: |
@@ -134,14 +134,14 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ inputs.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload true artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fastfetch-windows-${{ inputs.arch }}
           path: ./fastfetch-windows-${{ inputs.arch }}.*
           overwrite: true
 
       - name: upload benchmark data
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: benchmark-windows-${{ inputs.arch }}
           path: benchmark.json

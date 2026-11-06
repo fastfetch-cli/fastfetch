@@ -2,6 +2,7 @@
 #include "common/ffdata.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
+#include "logo/spin/spin.h"
 #include "common/FFcache.h"
 #include "common/commandoption.h"
 #include "common/genconfig.h"
@@ -754,6 +755,12 @@ static void parseConfigFiles(FFdata* data) {
     }
 }
 
+// `-30`, `-.5`: a negative number is the value of the previous option, not the
+// name of the next one (`--logo-spin-tilt -30`).
+static bool isNegativeNumber(const char* str) {
+    return str[0] == '-' && (isdigit((unsigned char) str[1]) || (str[1] == '.' && isdigit((unsigned char) str[2])));
+}
+
 static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(FFdata* data, char* key, char* value)) {
     for (int i = 1; i < argc; i++) {
         const char* key = argv[i];
@@ -768,6 +775,7 @@ static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(F
 
         if (i == argc - 1 || (argv[i + 1][0] == '-' && argv[i + 1][1] != '\0' &&    // `-` is used as an alias for `/dev/stdin`
                                  !ffStrEqualsIgnCase(argv[i], "--separator-string") // Separator string can start with a -
+                                 && !isNegativeNumber(argv[i + 1]) // A negative number is a value
                                  )) {
             parser(data, argv[i], nullptr);
         } else {
@@ -817,6 +825,12 @@ static void run(FFdata* data) {
             fputs("\e[H", stdout); // Move cursor to the top left corner to overwrite the previous output
             instance.state.keysHeight = 0; // Reset keysHeight so `ffLogoPrintRemaining` will recalculate it
             ffCacheInvalidateAll(); // Drop the detection results cached for the previous round, so that this round re-detects them
+            // `--logo-type spin`: one rotation step per refresh, so the logo turns in sync with
+            // the modules instead of owning a timer of its own. A still logo, or any other logo
+            // type, costs a single `false` here.
+            if (ffSpinTick()) {
+                ffLogoPrint();
+            }
         } else {
             break;
         }
