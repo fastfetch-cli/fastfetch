@@ -1,3 +1,8 @@
+# Unreleased
+
+Bugfixes:
+* Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
+
 # 2.71.0
 
 Features:
