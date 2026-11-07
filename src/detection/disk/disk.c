@@ -22,8 +22,6 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks) {
     FF_LIST_FOR_EACH (FFDisk, disk, *disks) {
         if (disk->bytesTotal == 0) {
             disk->type |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
-        } else {
-            disk->bytesUsed = disk->bytesTotal - (options->calcType == FF_DISK_CALC_TYPE_FREE ? disk->bytesFree : disk->bytesAvailable);
         }
     }
 

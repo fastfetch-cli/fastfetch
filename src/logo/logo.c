@@ -8,6 +8,7 @@
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/terminalsize/terminalsize.h"
+#include "logo/spin/spin.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -143,10 +144,13 @@ static void logoLineCacheBuild(FFLogoLineCacheState* cache, const char* data, bo
                 if (doColorReplacement && *data == '$') {
                     ++data;
 
-                    if (*data == '$' || *data == '\0') {
+                    // `$$` is an escaped dollar; a `$` ending a line or the logo is a plain one
+                    if (*data == '$' || *data == '\0' || *data == '\n' || *data == '\r') {
                         ffStrbufAppendC(&line, '$');
                         ++lineWidth;
-                        ++data;
+                        if (*data == '$') {
+                            ++data;
+                        }
                         continue;
                     }
 
@@ -321,7 +325,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement) {
     logoLineCacheClear(cache);
 }
 
-static void logoApplyColors(const FFlogo* logo, bool replacement) {
+void ffLogoApplyColors(const FFlogo* logo, bool replacement) {
     if (instance.config.display.colorTitle.length == 0) {
         ffStrbufSetStatic(&instance.config.display.colorTitle, logo->colorTitle ?: logo->colors[0]);
     }
@@ -436,14 +440,14 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size) {
 }
 
 static void logoPrintStruct(const FFlogo* logo) {
-    logoApplyColors(logo, true);
+    ffLogoApplyColors(logo, true);
 
     ffLogoPrintChars(logo->lines, true);
 }
 
 static void logoPrintNone(void) {
     if (!instance.config.display.pipe) {
-        logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
+        ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     }
     instance.state.logoHeight = 0;
     instance.state.logoWidth = 0;
@@ -481,7 +485,7 @@ static bool logoPrintData(bool doColorReplacement, FFstrbuf* source) {
         return false;
     }
 
-    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
+    ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     ffLogoPrintChars(source->chars, doColorReplacement);
     return true;
 }
@@ -545,7 +549,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw) {
         return false;
     }
 
-    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
+    ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     if (raw) {
         return ffLogoPrintCharsRaw(content.chars, content.length, instance.config.display.showErrors);
     }
@@ -560,7 +564,7 @@ static bool logoPrintImageIfExists(FFLogoType logo, bool printError) {
         return false;
     }
 
-    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
+    ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     return true;
 }
 #endif
@@ -648,6 +652,11 @@ void ffLogoPrint(void) {
 
     if (options->type == FF_LOGO_TYPE_NONE) {
         logoPrintNone();
+        return;
+    }
+
+    if (options->type == FF_LOGO_TYPE_SPIN) {
+        ffSpinLogoPrint();
         return;
     }
 

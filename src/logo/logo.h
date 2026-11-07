@@ -38,6 +38,8 @@ void ffLogoBuiltinListAutocompletion(void);
 void ffLogoPrintDetected(FFLogoSize size);
 const FFlogo* ffLogoGetBuiltinForName(const FFstrbuf* name, FFLogoSize size);
 const FFlogo* ffLogoGetBuiltinDetected(FFLogoSize size);
+// Fills the `logo.color.N` slots that the user did not set from `logo`.
+void ffLogoApplyColors(const FFlogo* logo, bool replacement);
 
 // builtin.c
 extern const FFlogo* ffLogoBuiltins[];

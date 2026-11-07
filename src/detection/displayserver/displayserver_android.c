@@ -6,6 +6,7 @@
 #include "common/debug.h"
 #include "common/settings.h"
 #include "common/strutil.h"
+#include "common/processing.h"
 #include "linux/displayserver_linux.h"
 
 #include <math.h>
@@ -18,17 +19,20 @@
 // process -- that fork was all of what this module cost: it took 16.0-26.5 ms on the test device,
 // where `cmd display get-displays` itself takes 9.2 ms and a bare fork 8.6 ms. `cmd` does not exist
 // before Android 13 either, and `dumpsys` is behind android.permission.DUMP, so on Android 11 and 12
-// an app UID had no display at all. Both are gone: `display` is the service they sat on,
+// an app UID had no display at all. `dumpsys` is gone: `display` is the service it sat on,
 // android.hardware.display.IDisplayManager, it lives in system_server, an app UID may call it, and
 // one `getDisplayInfo(0)` answers the whole `DisplayInfo` the dump prints, field for field. With the
 // fork gone the module took 2.8-3.2 ms where `cmd` took 16.0-26.5 ms, and Android 11 -- the release
 // `cmd` could not serve at all -- has been read this way on a device. What is left is dominated by
 // the dex read below, not by the transaction.
 //
+// `cmd display get-displays` stays behind the walk as a fallback, for the case where it is the dex
+// read that fails rather than the transaction -- see the `cmd` section below the walk.
+//
 // What it costs is the parse. The reply is a Java Parcelable and its field set moves with every
-// release and every vendor fork -- `DisplayInfo` writes 34 fields on Android 11, 42 on 13 and 57 on
-// 16 -- so neither a fixed offset nor a sequence written against one release survives. The sequence
-// is read out of the device's own `framework.jar` instead, from the `iget` order of
+// release and every vendor fork -- `DisplayInfo` writes 34 fields on Android 11, 42 on 13, 57 on 16
+// and 57 on 17 -- so neither a fixed offset nor a sequence written against one release survives. The
+// sequence is read out of the device's own `framework.jar` instead, from the `iget` order of
 // `DisplayInfo.writeToParcel`, and the walk below follows it: a field the release does not write is
 // simply not in the sequence, which is what makes every one of them optional by construction. See
 // common/android/dex.h for how the sequence is recovered and what it does not say.
@@ -37,9 +41,22 @@
 // both a `Ljava/lang/String;` on the wire and are not the same length. The type descriptor settles
 // the primitives and both array shapes, a handful of names settle the rest, and every nested
 // Parcelable is anchored on its class name. A layout this does not recognise fails the route rather
-// than answering. There is no second route behind this one any more, so a build whose layout is not
-// one this parser reads reports no display at all, rather than a plausible number out of the middle of
-// a different field.
+// than answering, which is what the `cmd` fallback behind it is for: a build whose layout is not one
+// this parser reads reports nothing rather than a plausible number out of the middle of a different
+// field, and `cmd` still has the record in text.
+//
+// Android 17 moved three of the things this parse hangs on, and all three are read the same way -- out
+// of the running build's own jar, so nothing here is a table written against a release:
+//
+//  * `address` arrived as a `DisplayAddress$StablePhysical` where every release up to 16 sent a
+//    `DisplayAddress$Physical`, and the new class writes the port beside the id -- two fields where
+//    the old one writes one. Both sequences are read and the class name on the wire picks between
+//    them, so Android 11 to 17 are all read by the walk below.
+//  * `frameRateVelocityMapping` is new and is a `writeTypedList`, a count and then one body per
+//    element, each behind the marker the typed writes use and with no class name anywhere. The
+//    element's own sequence says how long it is.
+//  * `DeviceProductInfo.mEdidStructureMetadata` is new and is a `writeTypedObject`: the same marker
+//    and the same absent class name, one body behind it.
 
 #define FF_DISPLAY_ANDROID_SERVICE "display"
 #define FF_DISPLAY_ANDROID_DESCRIPTOR "android.hardware.display.IDisplayManager"
@@ -51,17 +68,22 @@
 
 #define FF_DISPLAY_ANDROID_CLASS_INFO "Landroid/view/DisplayInfo;"
 #define FF_DISPLAY_ANDROID_CLASS_ADDRESS "Landroid/view/DisplayAddress$Physical;"
+#define FF_DISPLAY_ANDROID_CLASS_STABLE_ADDRESS "Landroid/view/DisplayAddress$StablePhysical;"
 #define FF_DISPLAY_ANDROID_CLASS_PRODUCT_INFO "Landroid/hardware/display/DeviceProductInfo;"
+#define FF_DISPLAY_ANDROID_CLASS_EDID_STRUCTURE "Landroid/hardware/display/DeviceProductInfo$EdidStructureMetadata;"
 #define FF_DISPLAY_ANDROID_CLASS_MANUFACTURE_DATE "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;"
 #define FF_DISPLAY_ANDROID_CLASS_HDR_CAPABILITIES "Landroid/view/Display$HdrCapabilities;"
 #define FF_DISPLAY_ANDROID_CLASS_MODE "Landroid/view/Display$Mode;"
 #define FF_DISPLAY_ANDROID_CLASS_FRAME_RATE_CATEGORY_RATE "Landroid/view/FrameRateCategoryRate;"
+#define FF_DISPLAY_ANDROID_CLASS_VELOCITY_POINT "Landroid/view/FrameRateVelocityPoint;"
 #define FF_DISPLAY_ANDROID_CLASS_CUTOUT "Landroid/view/DisplayCutout;"
 
 // The Java class names `writeParcelable` writes in front of each nested body, which is the anchor the
 // walk hangs on. It writes the *runtime* class, so the abstract `DisplayAddress` a `DisplayInfo`
-// declares arrives as its `$Physical` subclass.
+// declares arrives as whichever subclass the framework put there -- its `$Physical` up to Android 16
+// and its `$StablePhysical` from 17 on, which is why one field needs two names.
 #define FF_DISPLAY_ANDROID_NAME_ADDRESS "android.view.DisplayAddress$Physical"
+#define FF_DISPLAY_ANDROID_NAME_STABLE_ADDRESS "android.view.DisplayAddress$StablePhysical"
 #define FF_DISPLAY_ANDROID_NAME_PRODUCT_INFO "android.hardware.display.DeviceProductInfo"
 #define FF_DISPLAY_ANDROID_NAME_MANUFACTURE_DATE "android.hardware.display.DeviceProductInfo$ManufactureDate"
 #define FF_DISPLAY_ANDROID_NAME_HDR_CAPABILITIES "android.view.Display$HdrCapabilities"
@@ -113,8 +135,12 @@ typedef struct FFDisplayAndroidLayout {
     uint32_t displayInfoCount;
     FFDexParcelField address[FF_DISPLAY_ANDROID_NESTED_FIELDS];
     uint32_t addressCount;
+    FFDexParcelField stableAddress[FF_DISPLAY_ANDROID_NESTED_FIELDS];
+    uint32_t stableAddressCount;
     FFDexParcelField productInfo[FF_DISPLAY_ANDROID_NESTED_FIELDS];
     uint32_t productInfoCount;
+    FFDexParcelField edidStructureMetadata[FF_DISPLAY_ANDROID_NESTED_FIELDS];
+    uint32_t edidStructureMetadataCount;
     FFDexParcelField manufactureDate[FF_DISPLAY_ANDROID_NESTED_FIELDS];
     uint32_t manufactureDateCount;
     FFDexParcelField hdrCapabilities[FF_DISPLAY_ANDROID_NESTED_FIELDS];
@@ -123,6 +149,8 @@ typedef struct FFDisplayAndroidLayout {
     uint32_t modeCount;
     FFDexParcelField frameRateCategoryRate[FF_DISPLAY_ANDROID_NESTED_FIELDS];
     uint32_t frameRateCategoryRateCount;
+    FFDexParcelField velocityPoint[FF_DISPLAY_ANDROID_NESTED_FIELDS];
+    uint32_t velocityPointCount;
 
     // `DisplayCutout` is the one class whose body is not field-driven -- `writeCutoutToParcel` reads
     // everything through compiler-synthesised accessors, so there is no `iget` to walk. What says how
@@ -135,15 +163,18 @@ typedef struct FFDisplayAndroidLayout {
 // `jarPath` -- in one lookup, because the walk behind it is what a lookup costs and the class data it
 // reads along the way already holds everything asked for here.
 //
-// Every sequence but `FrameRateCategoryRate` is required: a class the jar does not declare leaves an
-// empty sequence, and a walk without one has nothing to follow. `FrameRateCategoryRate` arrived in
-// Android 15, so a jar that does not declare it is answering rather than failing -- the field is
-// simply not in the sequence behind it, and the walk never asks.
+// A class the jar does not declare leaves an empty sequence, and that is an answer rather than a
+// failure for every class a release added part way through: `FrameRateCategoryRate` arrived in
+// Android 15 and `StablePhysical`, `EdidStructureMetadata` and `FrameRateVelocityPoint` in 17, and a
+// jar that does not declare one of them does not write the field either, so the walk never asks.
+// What *is* required is the sequences a record cannot be walked without: `DisplayInfo` itself, a
+// `DisplayAddress` -- either of the two shapes, since which one a build sends is what the name on the
+// wire says -- a `DeviceProductInfo` and its date, the HDR capabilities and a mode.
 //
-// A jar that cannot be read at all fails too, and with nothing behind this route that leaves the
-// module with no display to report. Which is the point of the dex being the source: a build this
-// parser cannot read declines to answer, rather than reporting a plausible number read out of the
-// middle of a different field.
+// A jar that cannot be read at all fails too, which is one of the two cases the `cmd` fallback
+// behind this route exists for. Which is the point of the dex being the source: a build this parser
+// cannot read declines to answer, rather than reporting a plausible number read out of the middle of
+// a different field.
 static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layout) {
     const FFDexParcelRequest requests[] = {
         {
@@ -161,11 +192,29 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
             .count = &layout->addressCount,
         },
         {
+            // Android 17's shape of the same field. A build that does not declare the class leaves the
+            // sequence empty, which is how the walk knows the field can only be the older one.
+            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_STABLE_ADDRESS,
+            .methodName = "writeToParcel",
+            .fields = layout->stableAddress,
+            .capacity = FF_DISPLAY_ANDROID_NESTED_FIELDS,
+            .count = &layout->stableAddressCount,
+        },
+        {
             .classDescriptor = FF_DISPLAY_ANDROID_CLASS_PRODUCT_INFO,
             .methodName = "writeToParcel",
             .fields = layout->productInfo,
             .capacity = FF_DISPLAY_ANDROID_NESTED_FIELDS,
             .count = &layout->productInfoCount,
+        },
+        {
+            // Android 17's addition to `DeviceProductInfo`. Same as above: an empty sequence means the
+            // release does not carry the field, and it is not in the product info walk either.
+            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_EDID_STRUCTURE,
+            .methodName = "writeToParcel",
+            .fields = layout->edidStructureMetadata,
+            .capacity = FF_DISPLAY_ANDROID_NESTED_FIELDS,
+            .count = &layout->edidStructureMetadataCount,
         },
         {
             .classDescriptor = FF_DISPLAY_ANDROID_CLASS_MANUFACTURE_DATE,
@@ -196,6 +245,15 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
             .count = &layout->frameRateCategoryRateCount,
         },
         {
+            // Android 17's `frameRateVelocityMapping` is a list of these, and this is the sequence that
+            // says how long one element is.
+            .classDescriptor = FF_DISPLAY_ANDROID_CLASS_VELOCITY_POINT,
+            .methodName = "writeToParcel",
+            .fields = layout->velocityPoint,
+            .capacity = FF_DISPLAY_ANDROID_NESTED_FIELDS,
+            .count = &layout->velocityPointCount,
+        },
+        {
             // The one class whose body is not field-driven. `writeCutoutToParcel` reads everything
             // through compiler-synthesised accessors, so there is no `iget` to walk and no class name
             // on the wire either -- what says how long its body is, is which fields the class
@@ -214,15 +272,18 @@ static bool displayLayoutLoad(const char* jarPath, FFDisplayAndroidLayout* layou
         FF_DEBUG("Reading the display layout out of %s failed: %s", jarPath, error);
         return false;
     }
-    if (layout->displayInfoCount == 0 || layout->addressCount == 0 || layout->productInfoCount == 0
-        || layout->manufactureDateCount == 0 || layout->hdrCapabilitiesCount == 0 || layout->modeCount == 0) {
+    if (layout->displayInfoCount == 0 || (layout->addressCount == 0 && layout->stableAddressCount == 0)
+        || layout->productInfoCount == 0 || layout->manufactureDateCount == 0 || layout->hdrCapabilitiesCount == 0
+        || layout->modeCount == 0) {
         FF_DEBUG("The classes a display is made of are not all declared in %s", jarPath);
         return false;
     }
 
     FF_DEBUG(
-        "Display layout: %u fields in DisplayInfo, %u in a mode, cutout path parser info %s, side overrides %s",
+        "Display layout: %u fields in DisplayInfo, %u in a mode, address %s, product info %u + edid %u, velocity point %u, cutout path parser info %s, side overrides %s",
         layout->displayInfoCount, layout->modeCount,
+        layout->addressCount > 0 ? (layout->stableAddressCount > 0 ? "physical and stable" : "physical") : "stable",
+        layout->productInfoCount, layout->edidStructureMetadataCount, layout->velocityPointCount,
         layout->cutoutFields[FF_DISPLAY_ANDROID_CUTOUT_PATH_PARSER_INFO] ? "yes" : "no",
         layout->cutoutFields[FF_DISPLAY_ANDROID_CUTOUT_SIDE_OVERRIDES] ? "yes" : "no"
     );
@@ -484,9 +545,17 @@ static bool readerScalar(FFDisplayAndroidReader* reader, const char* type, FFDis
     }
     if (ffStrEquals(type, "[I") || ffStrEquals(type, "[F")) {
         const int32_t count = readerI32(reader);
-        if (reader->failed || count < 0 || count > 1024) {
+        if (reader->failed || count > 1024) {
             reader->failed = true;
             return false;
+        }
+        // A negative count is a null array and carries no elements: `writeIntArray(null)` and
+        // `writeFloatArray(null)` both write a bare -1 where the count would be. Android 11 has one
+        // of these in the record -- `DeviceProductInfo.mRelativeAddress` is an `[I` there and is null
+        // on the built-in display. `readerSkipArray` spells the same rule for the arrays it steps
+        // over, and a null is a value everywhere else in this walk too.
+        if (count < 0) {
+            return true;
         }
         value->count = count;
         return readerSkip(reader, (size_t) count * (ffStrEquals(type, "[I") ? sizeof(int32_t) : sizeof(float)));
@@ -495,11 +564,14 @@ static bool readerScalar(FFDisplayAndroidReader* reader, const char* type, FFDis
     return false;
 }
 
-// The class name in front of a nested body, checked against the class the field is expected to carry.
-// `writeParcelable` writes the runtime class, so the abstract `DisplayAddress` a `DisplayInfo`
-// declares arrives as its `$Physical` subclass; a null field is a single -1 where the class name
-// would be, which is a value and not a failure.
-static bool readerParcelableHead(FFDisplayAndroidReader* reader, const char* expected, bool* present) {
+// The class name in front of a nested body, when which class it is decides how long the body is.
+// `writeParcelable` writes the runtime class, so a field declared an abstract type arrives as
+// whichever subclass the framework put there: `DisplayInfo.address` is a `DisplayAddress`, whose body
+// is one field on `$Physical` and two on the `$StablePhysical` Android 17 added. The name is read
+// first and the index of the one it matched is reported, so the caller walks the sequence that
+// belongs to it -- and a name that matches none of them fails, because there is nothing else that
+// says where the body ends.
+static bool readerParcelableHeadAny(FFDisplayAndroidReader* reader, const char* const* names, uint32_t nameCount, uint32_t* index, bool* present) {
     const int32_t length = readerI32(reader);
     if (reader->failed) {
         return false;
@@ -510,7 +582,21 @@ static bool readerParcelableHead(FFDisplayAndroidReader* reader, const char* exp
     }
     reader->offset -= sizeof(int32_t);
     *present = true;
-    return readerClassName(reader, expected);
+    for (uint32_t i = 0; i < nameCount; ++i) {
+        if (readerClassNameAt(reader, reader->offset, names[i])) {
+            *index = i;
+            return readerClassName(reader, names[i]);
+        }
+    }
+    reader->failed = true;
+    return false;
+}
+
+// The same head for the fields that carry one class only. A null field is a single -1 where the class
+// name would be, which is a value and not a failure.
+static bool readerParcelableHead(FFDisplayAndroidReader* reader, const char* expected, bool* present) {
+    uint32_t index = 0;
+    return readerParcelableHeadAny(reader, &expected, 1, &index, present);
 }
 
 // A `Rect` written by `writeTypedObject` or by `writeTypedArray`: the non-null marker the typed write
@@ -521,6 +607,58 @@ static bool readerRect(FFDisplayAndroidReader* reader) {
         return false;
     }
     return marker < 0 || readerSkip(reader, 4 * sizeof(int32_t));
+}
+
+// A nested Parcelable written by `writeTypedObject`, walked out of the sequence the jar gives for its
+// own class. What is on the wire is a marker and the body, with no class name in front of it -- the
+// reader is handed the `Creator` to build the value with, so the parcel does not have to carry one,
+// and that is the whole difference between this and `writeParcelable`. The device's own
+// `Parcel.writeTypedObject` writes a zero marker for a null and a one before every body, so anything
+// else is a field read at the wrong place rather than a value.
+static bool readerTypedObject(FFDisplayAndroidReader* reader, const FFDexParcelField* fields, uint32_t count) {
+    const int32_t marker = readerI32(reader);
+    if (reader->failed) {
+        return false;
+    }
+    if (marker == 0) {
+        return true;
+    }
+    if (marker != 1) {
+        reader->failed = true;
+        return false;
+    }
+    for (uint32_t i = 0; i < count; ++i) {
+        FFDisplayAndroidScalar value = {};
+        if (!readerScalar(reader, fields[i].type, &value)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// A `writeTypedList`: a count and then one `writeTypedObject` per element, all of them the same class,
+// which is why one sequence answers the whole list. A count of -1 is a null list and carries none.
+static bool readerTypedObjectList(FFDisplayAndroidReader* reader, const FFDexParcelField* fields, uint32_t count) {
+    const int32_t size = readerI32(reader);
+    if (reader->failed) {
+        return false;
+    }
+    if (size < 0) {
+        return true;
+    }
+    // A non-empty list whose elements this parser has no sequence for is a failure rather than an empty
+    // walk: the elements are still on the wire, and stepping over none of them would put every field
+    // behind the list at the wrong place, which is worse than reporting nothing.
+    if (size > 64 || (size > 0 && count == 0)) {
+        reader->failed = true;
+        return false;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        if (!readerTypedObject(reader, fields, count)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // `writeValue(mManufactureDate)`, the only Parcelable a `writeValue` carries here, and the one place
@@ -599,11 +737,13 @@ static bool readerManufactureDate(FFDisplayAndroidReader* reader, const FFDispla
 // used, but it sits in front of `name`, the density and the rotation, so it has to be walked whether
 // or not its values are wanted -- and it is null on some displays.
 //
-// Three of its six fields are handed to `writeValue`, which frames them by their runtime type rather
-// than by their declared one: `mProductId` is declared a `String` and goes through `writeValue` where
+// Three of its fields are handed to `writeValue`, which frames them by their runtime type rather than
+// by their declared one: `mProductId` is declared a `String` and goes through `writeValue` where
 // `mName` next to it goes through `writeString`, so those are named rather than dispatched by type.
-// The sixth is `mRelativeAddress`, an int array, on Android 11 and `mConnectionToSinkType`, an int,
-// on 13 and later; the descriptor settles that one, which is what makes the two read the same code.
+// The connection type is `mRelativeAddress`, an int array, on Android 11 and `mConnectionToSinkType`,
+// an int, on 13 and later; the descriptor settles that one, which is what makes the two read the same
+// code. Android 17 added `mVideoInputType`, an int, which the descriptor settles the same way, and
+// `mEdidStructureMetadata`, a `writeTypedObject` -- six fields up to 16, eight from 17 on.
 static bool readerDeviceProductInfo(FFDisplayAndroidReader* reader, const FFDisplayAndroidLayout* layout, uint16_t* year, uint16_t* week) {
     bool present = false;
     if (!readerParcelableHead(reader, FF_DISPLAY_ANDROID_NAME_PRODUCT_INFO, &present)) {
@@ -627,6 +767,13 @@ static bool readerDeviceProductInfo(FFDisplayAndroidReader* reader, const FFDisp
             if (!readerManufactureDate(reader, layout, year, week)) {
                 return false;
             }
+        } else if (ffStrEquals(field->name, "mEdidStructureMetadata")) {
+            // Android 17. Named rather than left to the descriptor for the same reason the fields above
+            // are: `writeTypedObject` and `writeParcelable` are both a `L...;` on the wire and are not
+            // the same length, and this one is the typed write -- a marker, the body, no class name.
+            if (!readerTypedObject(reader, layout->edidStructureMetadata, layout->edidStructureMetadataCount)) {
+                return false;
+            }
         } else {
             FFDisplayAndroidScalar value = {};
             if (!readerScalar(reader, field->type, &value)) {
@@ -637,21 +784,30 @@ static bool readerDeviceProductInfo(FFDisplayAndroidReader* reader, const FFDisp
     return true;
 }
 
-// `address`, which is null on some displays and a `DisplayAddress$Physical` on others. Its body is
-// one `long` on every release seen -- the older sources describe a `long` plus an `int`, and that
-// shape has not turned up on any of the three jars -- and it is walked out of the jar's own sequence
-// rather than assumed, so a release that changes it is read rather than misread.
+// `address`, which is null on some displays and a `DisplayAddress` on others: its `$Physical` up to
+// Android 16, whose body is one `long`, and its `$StablePhysical` from 17 on, whose body is that
+// `long` and the port beside it. Which one is on the wire is what the class name says, and either
+// sequence comes out of the jar rather than being assumed, so a release that changes either body is
+// read rather than misread.
 static bool readerDisplayAddress(FFDisplayAndroidReader* reader, const FFDisplayAndroidLayout* layout) {
+    static const char* const names[] = {
+        FF_DISPLAY_ANDROID_NAME_ADDRESS,
+        FF_DISPLAY_ANDROID_NAME_STABLE_ADDRESS,
+    };
     bool present = false;
-    if (!readerParcelableHead(reader, FF_DISPLAY_ANDROID_NAME_ADDRESS, &present)) {
+    uint32_t index = 0;
+    if (!readerParcelableHeadAny(reader, names, ARRAY_SIZE(names), &index, &present)) {
         return false;
     }
     if (!present) {
         return true;
     }
-    for (uint32_t i = 0; i < layout->addressCount; ++i) {
+    const bool stable = index != 0;
+    const FFDexParcelField* fields = stable ? layout->stableAddress : layout->address;
+    const uint32_t count = stable ? layout->stableAddressCount : layout->addressCount;
+    for (uint32_t i = 0; i < count; ++i) {
         FFDisplayAndroidScalar value = {};
-        if (!readerScalar(reader, layout->address[i].type, &value)) {
+        if (!readerScalar(reader, fields[i].type, &value)) {
             return false;
         }
     }
@@ -873,12 +1029,16 @@ static uint64_t displayUniqueId(const char* uniqueId) {
 // One field of the `DisplayInfo` write sequence. The name says which value the field carries; the
 // type descriptor says how it is framed, and settles that for every primitive and both array shapes.
 //
-// Four things the descriptor does not settle, and each is named:
+// Six things the descriptor does not settle, and each is named:
 //
+//  * `address`, whose runtime class decides how long its body is. See readerDisplayAddress.
 //  * `displayCutout`, which has no write sequence to follow at all. See readerDisplayCutout.
+//  * `deviceProductInfo`, whose `mEdidStructureMetadata` is a typed write inside a named write.
 //  * `frameRateCategoryRate`, a Parcelable whose values this module does not use.
-//  * `supportedModes` and `appsSupportedModes`, arrays of Parcelables written by a loop rather than
-//    by a `write*Array`, so the shape behind them is `Display$Mode`'s own.
+//  * `frameRateVelocityMapping`, a `writeTypedList` -- a count and then a body per element, all of
+//    them the class the jar's own sequence was read for. Android 17 added it in place of the
+//    `appsSupportedModes` that 16 wrote, which was an array of Parcelables written by a loop rather
+//    than by a `write*Array`, and which `supportedModes` is still the shape of.
 //  * The `String` fields. `DisplayInfo` writes its own through `writeString8` -- a byte count and
 //    UTF-8 -- while `DeviceProductInfo` writes its through `writeString`, which is a code-unit count
 //    and UTF-16; the descriptor is `Ljava/lang/String;` either way. Within one class the framing is
@@ -908,6 +1068,9 @@ static bool displayInfoField(FFDisplayAndroidReader* reader, const FFDexParcelFi
     }
     if (ffStrEquals(name, "frameRateCategoryRate")) {
         return readerSkippedParcelable(reader, FF_DISPLAY_ANDROID_NAME_FRAME_RATE_CATEGORY_RATE, layout->frameRateCategoryRate, layout->frameRateCategoryRateCount);
+    }
+    if (ffStrEquals(name, "frameRateVelocityMapping")) {
+        return readerTypedObjectList(reader, layout->velocityPoint, layout->velocityPointCount);
     }
     if (ffStrEquals(name, "supportedModes") || ffStrEquals(name, "appsSupportedModes")) {
         // The two ids the list is resolved against are written in front of it on every release seen.
@@ -967,6 +1130,35 @@ static bool displayInfoField(FFDisplayAndroidReader* reader, const FFDexParcelFi
     return true;
 }
 
+// How much of a reply a failure prints. A record is 2404 bytes on the test device and most of it is
+// the two mode lists, so this covers one whole reply -- and the cap is there only so that a reply
+// which is not one cannot fill the log.
+#define FF_DISPLAY_ANDROID_DEBUG_DUMP_SIZE 4096
+
+#ifndef NDEBUG
+// The reply is read by shape, so a reply that fails leaves nothing behind to diagnose it with: the
+// bytes are the only evidence. Each line carries the text beside the bytes, because what the walk
+// hangs on is the class name in front of a nested body -- UTF-16, and the one thing that a length
+// read out of the middle of a different field cannot be told from without looking at it.
+static void debugDumpReply(const uint8_t* data, size_t size) {
+    const size_t limit = size < FF_DISPLAY_ANDROID_DEBUG_DUMP_SIZE ? size : FF_DISPLAY_ANDROID_DEBUG_DUMP_SIZE;
+    for (size_t offset = 0; offset < limit; offset += 16) {
+        char hex[16 * 3 + 1];
+        char text[16 + 1];
+        size_t used = 0;
+        for (size_t i = 0; i < 16 && offset + i < limit; ++i) {
+            used += (size_t) snprintf(hex + used, sizeof(hex) - used, "%02x ", data[offset + i]);
+            text[i] = data[offset + i] >= 32 && data[offset + i] < 127 ? (char) data[offset + i] : '.';
+            text[i + 1] = '\0';
+        }
+        FF_DEBUG("  +0x%04zx  %-47s | %s", offset, hex, text);
+    }
+}
+    #define FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size) debugDumpReply(data, size)
+#else
+    #define FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size) ((void) 0)
+#endif
+
 // One `getDisplayInfo` reply: the exception code the stub writes, the non-null marker
 // `writeTypedObject` writes in front of the Parcelable, and the record itself -- walked in the order
 // the device's own `DisplayInfo.writeToParcel` writes it, out of the sequence `displayLayoutLoad`
@@ -981,6 +1173,7 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
     }
     if (readerI32(&reader) != 1) {
         FF_DEBUG("getDisplayInfo answered no display");
+        FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size);
         return false;
     }
 
@@ -1012,7 +1205,14 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
     for (uint32_t i = 0; i < layout->displayInfoCount; ++i) {
         const FFDexParcelField* field = &layout->displayInfo[i];
         if (!displayInfoField(&reader, field, layout, &walk)) {
-            FF_DEBUG("getDisplayInfo(%u) answered a %s this parser does not recognise", info->displayId, field->name);
+            // Which field, out of how many, what the jar says it is and how far the walk got before it
+            // gave up -- followed by the reply itself, which is what says whether the layout moved or
+            // this parser is reading a shape it was not written for.
+            FF_DEBUG(
+                "getDisplayInfo(%u) answered a %s (%s) this parser does not recognise -- field %u of %u, cursor at %zu of %zu",
+                info->displayId, field->name, field->type, i + 1, layout->displayInfoCount, reader.offset, reader.size
+            );
+            FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size);
             return false;
         }
         if (ffStrEquals(field->name, "uniqueId")) {
@@ -1022,6 +1222,7 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
     }
     if (!complete) {
         FF_DEBUG("getDisplayInfo(%u) answered a record with no uniqueId", info->displayId);
+        FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size);
         return false;
     }
 
@@ -1042,6 +1243,7 @@ static bool displayInfoParse(const uint8_t* data, size_t size, const FFDisplayAn
             info->displayId, info->type, info->width, info->height, info->rotation, info->modeId, info->density,
             info->physicalXDpi, info->physicalYDpi
         );
+        FF_DISPLAY_ANDROID_DEBUG_DUMP(data, size);
         return false;
     }
 
@@ -1076,6 +1278,20 @@ static FFDisplayType displayType(int32_t type) {
 // do HDR at all. `isForceSdr` is the framework having turned every capability of this display off and
 // `persist.sys.hdr_mode` is the vendor's switch, so `Supported` and `Enabled` stay two different
 // questions: the list is what the panel can do, those two are whether anything is asking for it.
+//
+// A non-empty list does not mean the display does HDR. The list is the answer of the vendor's composer
+// HAL, which SurfaceFlinger and DisplayManagerService pass through unchanged, and it is wrong on the
+// test device (vivo PD2505, Android 17): `dumpsys display` reports `mSupportedHdrTypes=[1, 2, 3]` --
+// Dolby Vision, HDR10 and HLG -- for a Samsung U32J59x that does not do HDR at all, and the same
+// three types hang off every one of its forty-odd modes, down to `640x480@60`, which is a VESA DMT
+// mode and not a CTA-861 one. An answer derived per mode from the sink's EDID HDR Static Metadata
+// block would not look like that, and no Samsung monitor claims Dolby Vision. Nothing on the device
+// contradicts it either: SurfaceFlinger dumps every mode of that display as `hdrOutputType=INVALID`
+// where the built-in panel's are `SYSTEM`, its only color mode is `ColorMode::NATIVE`, and `cmd
+// display get-reported-hdr-types 4` repeats the same `[1, 2, 3]`. The raw EDID would settle it and is
+// out of reach: `/sys/class/drm/card0-DP-1/edid` exists but is denied by SELinux, and `adb root` is
+// refused on a retail build. So the list is reported as it arrives -- it is the only answer the
+// platform gives, and there is nothing here to cross check it against.
 static FFDisplayHdrStatus displayHdrStatus(const FFDisplayAndroidInfo* info) {
     if (info->hdrTypeCount <= 0) {
         return FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
@@ -1088,8 +1304,8 @@ static FFDisplayHdrStatus displayHdrStatus(const FFDisplayAndroidInfo* info) {
 }
 
 // Reads every enabled display over binder. Returns false without appending anything when the service,
-// the transaction or the layout is not what this parser was written for. There is no route behind
-// this one, so that is also how the module ends up reporting no display.
+// the transaction or the layout is not what this parser was written for, which is also what hands the
+// module over to the `cmd` fallback.
 static bool detectWithBinder(FFDisplayServerResult* ds) {
     // The write sequence first. It is what the whole parse is made of, and a build whose jar cannot be
     // read has nothing to walk -- so failing here costs one file open rather than a round trip to a
@@ -1146,6 +1362,7 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
     const int32_t count = ffBinderReadI32(reply.data, reply.size, sizeof(int32_t));
     if (count <= 0 || count > FF_DISPLAY_ANDROID_MAX_DISPLAYS) {
         FF_DEBUG("getDisplayIds answered %d displays", count);
+        FF_DISPLAY_ANDROID_DEBUG_DUMP(reply.data, reply.size);
         return false;
     }
 
@@ -1154,6 +1371,7 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
         displayIds[i] = ffBinderReadI32(reply.data, reply.size, (size_t) (2 + i) * sizeof(int32_t));
         if (displayIds[i] < 0) {
             FF_DEBUG("getDisplayIds answered display id %d", displayIds[i]);
+            FF_DISPLAY_ANDROID_DEBUG_DUMP(reply.data, reply.size);
             return false;
         }
     }
@@ -1233,6 +1451,306 @@ static bool detectWithBinder(FFDisplayServerResult* ds) {
         display->hdrStatus = displayHdrStatus(info);
     }
     return ds->displays.length > 0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The `cmd` fallback
+// ---------------------------------------------------------------------------------------------
+//
+// The route behind the walk, for a build whose `framework.jar` can not be read at all or whose parcel
+// layout is not one the walk knows. `cmd display get-displays` prints the `DisplayInfo` of every
+// display as text, one record per line, so the same fields are there to read with no dex and no
+// parcel -- at the price of a fork, which is what the walk above exists to avoid.
+//
+// It needs no permission, which is what makes it usable for an app UID, but the subcommand was only
+// added to `DisplayManagerShellCommand` in Android 13: Android 11 and 12 answer `Unknown command:
+// get-displays` on stdout with exit code 255 and this route reports nothing. Those two releases are
+// read by the walk instead, so the fallback only has to cover 13 and newer.
+//
+// The record layout has changed across releases, and every difference is accepted rather than version
+// checked:
+//
+//  * The mode list is printed as `modes [...]` up to Android 14 and as `supportedModes [...]` from
+//    Android 15 on, which also prints `appsSupportedModes [...]` right behind it. Both spellings are
+//    searched for.
+//  * `renderFrameRate` is printed from Android 15 on. Before that the active mode's fps is the only
+//    refresh rate the dump carries. The active mode's fps is preferred even where it exists, see
+//    the comment on `refreshRate` below.
+//  * `displayGroupId` is printed from Android 12 on, the physical dpi behind `density` from
+//    Android 11 on, and `isForceSdr` from Android 15 on.
+//
+// A record is one line and the `DisplayInfo{` inside it is what gets parsed, so the `Display id 0: `
+// prefix the command prints in front of each record is stepped over by the same search that finds it.
+// `marker` and `platformApi` are the two things a second command would differ in; only `cmd` is wired
+// up, `dumpsys display` prints the same records behind `mBaseDisplayInfo=` and is not a route here.
+static bool detectWithCommand(FFDisplayServerResult* ds, char* const argv[], const char* marker, const char* platformApi) {
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    FFProcessHandle handle;
+    // `cmd` forwards its stdin to the service over binder, and the kernel rejects the whole
+    // transaction when that fd is a terminal, which it is whenever fastfetch runs in a terminal.
+    // Detaching the child from our stdin is only needed here, so the low level API is called instead
+    // of `ffProcessAppendStdOut`.
+    if (ffProcessSpawn(argv, FF_PROCESS_OUTPUT_STDOUT_BIT, ffGetNullFD(), &handle) != nullptr) {
+        return false; // `/system/bin/cmd` is not there before Android 13
+    }
+
+    if (ffProcessReadOutput(&handle, &buf) != nullptr || buf.length == 0) {
+        return false;
+    }
+    ffStrbufTrimRightSpace(&buf);
+
+    uint32_t index = 0;
+    while ((index = ffStrbufNextIndexS(&buf, index, marker)) < buf.length) {
+        index += strlen(marker);
+
+        uint32_t nextIndex = ffStrbufNextIndexC(&buf, index, '\n');
+        buf.chars[nextIndex] = '\0';
+        const char* info = buf.chars + index;
+
+        // 0: DisplayInfo{"Builtin display", displayId 0, ..., real 1440 x 3168, ..., mode 2,
+        //    renderFrameRate 60.000004, ..., defaultMode 4, ..., supportedModes [{id=2,
+        //    width=1440, height=3168, fps=60.000004, ...}], ..., hdrCapabilities
+        //    HdrCapabilities{mSupportedHdrTypes=[1, 2, 3, 4], ...}, isForceSdr false, ...,
+        //    rotation 0, ..., type INTERNAL, uniqueId "local:4630946557703207059", ...,
+        //    density 560 (560.0 x 560.0) dpi, ..., deviceProductInfo DeviceProductInfo{...,
+        //    manufactureDate=ManufactureDate{week=27, year=2006}, ...}, ...}
+        const char* field = strstr(info, "DisplayInfo{\"");
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateA(64);
+        if (field) {
+            field += strlen("DisplayInfo{\"");
+            const char* nameEnd = strchr(field, '"');
+            if (nameEnd) {
+                ffStrbufAppendNS(&name, (uint32_t) (nameEnd - field), field);
+            }
+        }
+
+        // `real` is the size the display currently uses, which is smaller than the panel's when the
+        // framework emulates a smaller display size
+        unsigned width = 0, height = 0;
+        if ((field = strstr(info, ", real ")) && sscanf(field, ", real %u x %u", &width, &height) < 2) {
+            width = height = 0;
+        }
+
+        // `renderFrameRate` is printed from Android 15 on. It is documented as "a divisor of the
+        // active mode refresh rate", so it is the rate the display is currently *rendering* at and
+        // can be lower than the mode it is set to. It is therefore only used for a record whose
+        // mode list can not be read, where a possibly divided rate still beats none.
+        double renderFrameRate = 0;
+        if ((field = strstr(info, ", renderFrameRate ")) && sscanf(field, ", renderFrameRate %lf", &renderFrameRate) < 1) {
+            renderFrameRate = 0;
+        }
+
+        unsigned activeMode = 0, defaultMode = 0;
+        if ((field = strstr(info, ", mode ")) && sscanf(field, ", mode %u", &activeMode) < 1) {
+            activeMode = 0;
+        }
+        if ((field = strstr(info, ", defaultMode ")) && sscanf(field, ", defaultMode %u", &defaultMode) < 1) {
+            defaultMode = 0;
+        }
+
+        // The modes are listed with their resolution in the natural orientation, which is also how
+        // the preferred values are reported on the other platforms. `defaultMode` is the mode the
+        // display itself prefers, so it carries the panel's native resolution.
+        //
+        // One entry is a `{...}`, and the three fields are searched for inside it rather than matched
+        // as a single prefix: Android 15 prints `parentModeId`, `sfModeId` and `flags` between `id`
+        // and `width`, where `sscanf("{id=%u, width=%u, ...")` stops after the id and reports one
+        // conversion -- measured on the test device, that is a preferred resolution of 0 x 0 and a
+        // rate that falls back to `renderFrameRate`. Everything up to the entry's own closing brace
+        // belongs to it, so a field past that brace is the next entry's and ends the walk.
+        uint32_t preferredWidth = 0, preferredHeight = 0;
+        double preferredRefreshRate = 0, activeModeRefreshRate = 0;
+        field = strstr(info, ", supportedModes [");
+        if (field == nullptr) {
+            field = strstr(info, ", modes ["); // Android 14 and older
+        }
+        while (field && (field = strstr(field, "{id="))) {
+            // {id=2, ..., width=1440, height=3168, fps=60.000004, ...
+            const char* end = strchr(field, '}');
+            const char* modeWidthField = strstr(field, ", width=");
+            const char* modeHeightField = strstr(field, ", height=");
+            const char* modeFpsField = strstr(field, ", fps=");
+            unsigned id = 0, modeWidth = 0, modeHeight = 0;
+            double fps = 0;
+            if (end == nullptr || modeWidthField == nullptr || modeWidthField > end ||
+                modeHeightField == nullptr || modeHeightField > end ||
+                modeFpsField == nullptr || modeFpsField > end) {
+                break; // Not a mode entry this parser can read
+            }
+            if (sscanf(field, "{id=%u", &id) < 1 ||
+                sscanf(modeWidthField, ", width=%u", &modeWidth) < 1 ||
+                sscanf(modeHeightField, ", height=%u", &modeHeight) < 1 ||
+                sscanf(modeFpsField, ", fps=%lf", &fps) < 1) {
+                break;
+            }
+            if (id == activeMode) {
+                activeModeRefreshRate = fps;
+            }
+            if (id == defaultMode) {
+                preferredWidth = modeWidth;
+                preferredHeight = modeHeight;
+                preferredRefreshRate = fps;
+            }
+            if (activeModeRefreshRate > 0 && preferredWidth > 0) {
+                break; // Both are in, and the same list is printed a second time from Android 15 on
+            }
+            ++field;
+        }
+
+        // The nominal rate of the active mode, which is what `Display.getRefreshRate()` reports
+        // (`refreshRateOverride` if it is set, the mode's own rate otherwise) and what every other
+        // platform reports. `renderFrameRate` is deliberately not preferred: it is a render
+        // cadence that follows the content rather than a property of the display, and it does not
+        // exist before Android 15, so using it would make the reported rate change with the
+        // Android version as well as with what is on screen.
+        double refreshRate = activeModeRefreshRate;
+        if (refreshRate <= 0) {
+            refreshRate = renderFrameRate;
+        }
+
+        unsigned rotation = 0;
+        if ((field = strstr(info, ", rotation ")) && sscanf(field, ", rotation %u", &rotation) < 1) {
+            rotation = 0;
+        }
+
+        FFDisplayType type = FF_DISPLAY_TYPE_UNKNOWN;
+        if ((field = strstr(info, ", type "))) {
+            field += strlen(", type ");
+            if (ffStrStartsWith(field, "INTERNAL")) {
+                type = FF_DISPLAY_TYPE_BUILTIN;
+            } else if (ffStrStartsWith(field, "EXTERNAL") || ffStrStartsWith(field, "WIFI")) {
+                // A WIFI display is a wireless sink, which is as external as a wired one
+                type = FF_DISPLAY_TYPE_EXTERNAL;
+            }
+        }
+
+        unsigned density = 0;
+        double physicalXDpi = 0, physicalYDpi = 0;
+        if ((field = strstr(info, ", density "))) {
+            // `density 640 (501.0411 x 509.28604) dpi`, the physical dpi is only printed since
+            // Android 11
+            if (sscanf(field, ", density %u (%lf x %lf) dpi", &density, &physicalXDpi, &physicalYDpi) < 1) {
+                density = 0;
+            }
+        }
+
+        // The physical dpi describes the panel itself and does not change with the logical display
+        // size, so the physical size has to be derived from the native resolution
+        uint32_t physicalWidth = 0, physicalHeight = 0;
+        if (physicalXDpi > 0) {
+            physicalWidth = (uint32_t) ((preferredWidth ? preferredWidth : width) * 25.4 / physicalXDpi + 0.5);
+        }
+        if (physicalYDpi > 0) {
+            physicalHeight = (uint32_t) ((preferredHeight ? preferredHeight : height) * 25.4 / physicalYDpi + 0.5);
+        }
+
+        // `uniqueId` identifies the display across reboots, e.g. `local:4630946557703207059` on a
+        // physical display and `virtual:...` on a virtual one
+        uint64_t id = 0;
+        if ((field = strstr(info, ", uniqueId \""))) {
+            field += strlen(", uniqueId \"");
+            const char* uniqueIdEnd = strchr(field, '"');
+            const char* digits = uniqueIdEnd ? memchr(field, ':', (size_t) (uniqueIdEnd - field)) : nullptr;
+            id = (uint64_t) strtoull(digits ? digits + 1 : field, nullptr, 10);
+        }
+
+        uint16_t manufactureYear = 0, manufactureWeek = 0;
+        if ((field = strstr(info, ", deviceProductInfo "))) {
+            // `manufactureDate=ManufactureDate{week=27, year=2006}`, either field may be `null`
+            const char* date = strstr(field, "manufactureDate=ManufactureDate{");
+            unsigned year = 0, week = 0;
+            if (date && sscanf(date + strlen("manufactureDate=ManufactureDate{"), "week=%u, year=%u", &week, &year) == 2) {
+                manufactureYear = (uint16_t) year;
+                manufactureWeek = (uint16_t) week;
+            } else if ((field = strstr(field, ", modelYear=")) && sscanf(field, ", modelYear=%u", &year) == 1) {
+                // A display reports either the date of manufacture or the model year
+                manufactureYear = (uint16_t) year;
+            }
+        }
+
+        // `displayId` sits inside the record, not in front of it: the id in the prefix the command
+        // prints is what the marker search stepped over, and the field itself is what this reads
+        unsigned displayId = 0;
+        if ((field = strstr(info, ", displayId ")) && sscanf(field, ", displayId %u", &displayId) < 1) {
+            displayId = 0;
+        }
+        bool primary = displayId == 0; // Display 0 is the default one
+
+        // Android counts density in dpi with 160 as the 1x baseline, fastfetch uses 96
+        FFDisplayResult* display = ffdsAppendDisplay(ds,
+            width,
+            height,
+            refreshRate,
+            density * 96 / 160,
+            preferredWidth,
+            preferredHeight,
+            preferredRefreshRate,
+            rotation,
+            &name,
+            type,
+            primary,
+            id,
+            physicalWidth,
+            physicalHeight,
+            platformApi);
+        if (display) {
+            display->manufactureYear = manufactureYear;
+            display->manufactureWeek = manufactureWeek;
+
+            // Reported for every display, not only for the built-in one: `hdrCapabilities` is a
+            // field of the `DisplayInfo` record itself, so it describes that display and nothing
+            // else, and the other platforms report HDR per display too (EDID on Linux, the
+            // advanced color info per target on Windows). An external display or a wireless sink
+            // carries the field as well.
+            //
+            // `hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[1, 2, 3, 4], ...}` is printed
+            // since Android 11, where an empty list means that the display can not do HDR at all.
+            // The two fallbacks below it are device wide vendor properties, which is the price of
+            // answering for a record that does not print the field.
+            //
+            // This is the same field and the same vendor answer the walk above reads, so the same
+            // caveat applies: a non-HDR display can arrive with a non-empty list, see
+            // displayHdrStatus.
+            FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+            field = strstr(info, "hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[");
+            if (field) {
+                field += strlen("hdrCapabilities HdrCapabilities{mSupportedHdrTypes=[");
+                display->hdrStatus = *field == ']' ? FF_DISPLAY_HDR_STATUS_UNSUPPORTED : FF_DISPLAY_HDR_STATUS_SUPPORTED;
+            } else if (ffSettingsGetAndroidProperty("ro.surface_flinger.has_HDR_display", &buffer)) {
+                display->hdrStatus = ffStrbufIgnCaseEqualS(&buffer, "true") ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+            } else {
+                display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+            }
+
+            if (display->hdrStatus == FF_DISPLAY_HDR_STATUS_SUPPORTED) {
+                // `persist.sys.hdr_mode` is non-zero while HDR is turned on, and `isForceSdr
+                // true` means that the framework disabled every HDR capability of this display.
+                // Note that `ffSettingsGetAndroidProperty` appends, so the value needs its own
+                // buffer.
+                FF_STRBUF_AUTO_DESTROY hdrMode = ffStrbufCreate();
+                if (ffSettingsGetAndroidProperty("persist.sys.hdr_mode", &hdrMode) &&
+                    ffStrbufToUInt(&hdrMode, 0) > 0 &&
+                    !strstr(info, ", isForceSdr true")) {
+                    display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+                }
+            }
+        }
+
+        // The last display of the dump is not followed by a newline, so the loop must not step
+        // past the end of the buffer (`ffStrbufNextIndexC` returns the length when it finds none)
+        index = nextIndex < buf.length ? nextIndex + 1 : buf.length;
+    }
+
+    // A command that produced no `DisplayInfo` record has to be reported as a failure, so that the
+    // caller can tell "this build answers differently" from "this build answered nothing"
+    return ds->displays.length > 0;
+}
+
+static bool detectWithCmd(FFDisplayServerResult* ds) {
+    return detectWithCommand(ds,
+        (char*[]) { "/system/bin/cmd", "display", "get-displays", nullptr },
+        "Display id ",
+        "cmd");
 }
 
 // Several vendors embed the UI name and its version in `ro.build.display.id` without any
@@ -1576,7 +2094,12 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds) {
     ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
     ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
-    detectWithBinder(ds);
+    // Binder comes first: it needs no permission, no child process, and it is the only route that
+    // answers for an app UID on Android 12 and older, where `cmd display get-displays` does not exist.
+    // `cmd` is behind it for the case the dex read is what fails, see detectWithCommand.
+    if (!detectWithBinder(ds)) {
+        detectWithCmd(ds);
+    }
 
     detectDE(ds);
 }

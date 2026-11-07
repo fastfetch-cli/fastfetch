@@ -411,81 +411,246 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
         #undef HAS_CAP
 }
     #elif _WIN32
-        #include <processthreadsapi.h>
+        #include "common/windows/registry.h"
 
-        // Missing from winnt.h of MinGW-w64
-        #define PF_ARM_LSE2_AVAILABLE 62
-        #define PF_RESERVED_FEATURE 63
-        #define PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE 64
-        #define PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE 65
-        #define PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE 66
-        #define PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE 67
-        #define PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE 68
-        #define PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE 69
-        #define PF_ARM_SME_INSTRUCTIONS_AVAILABLE 70
-        #define PF_ARM_SME2_INSTRUCTIONS_AVAILABLE 71
-        #define PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE 72
-        #define PF_ARM_SME2_2_INSTRUCTIONS_AVAILABLE 73
-        #define PF_ARM_SME_AES_INSTRUCTIONS_AVAILABLE 74
-        #define PF_ARM_SME_SBITPERM_INSTRUCTIONS_AVAILABLE 75
-        #define PF_ARM_SME_SF8MM4_INSTRUCTIONS_AVAILABLE 76
-        #define PF_ARM_SME_SF8MM8_INSTRUCTIONS_AVAILABLE 77
-        #define PF_ARM_SME_SF8DP2_INSTRUCTIONS_AVAILABLE 78
-        #define PF_ARM_SME_SF8DP4_INSTRUCTIONS_AVAILABLE 79
-        #define PF_ARM_SME_SF8FMA_INSTRUCTIONS_AVAILABLE 80
-        #define PF_ARM_SME_F8F32_INSTRUCTIONS_AVAILABLE 81
-        #define PF_ARM_SME_F8F16_INSTRUCTIONS_AVAILABLE 82
-        #define PF_ARM_SME_F16F16_INSTRUCTIONS_AVAILABLE 83
-        #define PF_ARM_SME_B16B16_INSTRUCTIONS_AVAILABLE 84
-        #define PF_ARM_SME_F64F64_INSTRUCTIONS_AVAILABLE 85
-        #define PF_ARM_SME_I16I64_INSTRUCTIONS_AVAILABLE 86
-        #define PF_ARM_SME_LUTv2_INSTRUCTIONS_AVAILABLE 87
-        #define PF_ARM_SME_FA64_INSTRUCTIONS_AVAILABLE 88
+// Windows exposes the AArch64 ID registers in the registry, as values named
+// "CP xxxx" under HARDWARE\DESCRIPTION\System\CentralProcessor\0. Each value is
+// the 64-bit content of one ID register; decode the same fields that the Linux
+// HWCAP based detection below is built from.
+//
+// Where "xxxx" comes from
+// -----------------------
+// The four hex digits encode the AArch64 system register name S3_0_C0_CRm_op2
+// (all ID registers live in CRn = C0 and use op0 = 3):
+//
+//     xxxx = 0x4000 + (CRm << 3) + op2
+//
+// e.g. ID_AA64PFR0_EL1 = S3_0_C0_C4_0 -> 0x4000 + (4 << 3) + 0 = 0x4020,
+//      ID_AA64ISAR1_EL1 = S3_0_C0_C6_1 -> 0x4000 + (6 << 3) + 1 = 0x4031.
+// The full list is in the ARM Architecture Reference Manual, chapter "AArch64
+// System Register Encoding". Linux has the same encodings in sysreg.h as
+// SYS_ID_AA64*_EL1; Windows just prints the encoding instead of the name.
+//
+// Where the offsets / minimums come from
+// --------------------------------------
+// Every field offset below is the LSB of that field in the ARM ARM description
+// of the ID register (also SYS_ID_AA64*_EL1_*_SHIFT in Linux sysreg.h).
+// Every minimum is the lowest field value that guarantees the corresponding
+// instruction/feature (the field value tables in the ARM ARM, mirrored by the
+// cpufeature.c checks that set the matching HWCAP/HWCAP2 bit):
+//
+//     value 0b0000  baseline value; usually "not implemented", but for fields
+//                   that describe an always-present form it names that form
+//                   (FP/AdvSIMD: implemented; SVEver: SVE; SMEver: SME)
+//     value 0b0001  first extension level for most fields; SVEver 1 is SVE2
+//     value 0b0010  second level; ATOMIC, LRCPC, DPB, FlagM, PFR1.SME, CSSC
+//                   and SMFR0.SMEver use >= 2 for their newer form
+//     value 0b1111  reserved "not implemented" marker; a field holding 0xF
+//                   must never be treated as supporting the feature.
+//
+// armField() therefore requires both "field != 0xF" and
+// "field >= minimum". minimum == 0 is used only where the mere presence of an
+// implemented field is enough (PFR0.FP and PFR0.AdvSIMD for the ARMv8-A
+// baseline). A register can be missing on some Windows builds/CPUs; a missing
+// register makes all of its features false and thus lowers the reported
+// version instead of reporting a wrong higher one.
+//
+// Not every field is a 4-bit value: ID_AA64FPFR0_EL1 (ARMv9.5 FP8) only
+// defines individual feature bits, so those checks use armBit().
+//
+// To add a new instruction/feature in the future
+// ----------------------------------------------
+// 1. Find the ID register and field that advertises it in the ARM ARM (and in
+//    the matching Linux HWCAP/HWCAP2 definition).
+// 2. If that register is not read yet, add an FF_ARM_REG_* entry before
+//    FF_ARM_REG_COUNT and its "CP xxxx" name in armRegisterNames[]; the xxxx is
+//    computed with the formula above. Registers are read automatically because
+//    armReadRegisters() loops over the whole table.
+// 3. Add a bool using armField(regs, present, FF_ARM_REG_..., offset, minimum)
+//    or armBit(regs, present, FF_ARM_REG_..., bit). Put the register/field name
+//    and the Linux HWCAP bit it mirrors in a comment.
+// 4. Insert the condition into the correct version's place in the if/else if
+//    chain below, keeping the order identical to the Linux implementation so
+//    both platforms report the same march. A newly required feature belongs to
+//    the version that introduced it; a feature that only raises the baseline
+//    is an extra `else if` above the older checks.
+// 5. Rebuild and check with `fastfetch -s cpu --format json`; compare against
+//    Linux on the same machine when possible.
+
+typedef enum FFCPUArmRegister {
+    FF_ARM_REG_PFR0,
+    FF_ARM_REG_PFR1,
+    FF_ARM_REG_ZFR0,
+    FF_ARM_REG_SMFR0,
+    FF_ARM_REG_FPFR0,
+    FF_ARM_REG_ISAR0,
+    FF_ARM_REG_ISAR1,
+    FF_ARM_REG_ISAR2,
+    FF_ARM_REG_ISAR3,
+    FF_ARM_REG_MMFR1,
+    FF_ARM_REG_COUNT,
+} FFCPUArmRegister;
+
+static const wchar_t* const armRegisterNames[FF_ARM_REG_COUNT] = {
+    [FF_ARM_REG_PFR0] = L"CP 4020",  // ID_AA64PFR0_EL1
+    [FF_ARM_REG_PFR1] = L"CP 4021",  // ID_AA64PFR1_EL1
+    [FF_ARM_REG_ZFR0] = L"CP 4024",  // ID_AA64ZFR0_EL1
+    [FF_ARM_REG_SMFR0] = L"CP 4025", // ID_AA64SMFR0_EL1
+    [FF_ARM_REG_FPFR0] = L"CP 4027", // ID_AA64FPFR0_EL1
+    [FF_ARM_REG_ISAR0] = L"CP 4030", // ID_AA64ISAR0_EL1
+    [FF_ARM_REG_ISAR1] = L"CP 4031", // ID_AA64ISAR1_EL1
+    [FF_ARM_REG_ISAR2] = L"CP 4032", // ID_AA64ISAR2_EL1
+    [FF_ARM_REG_ISAR3] = L"CP 4033", // ID_AA64ISAR3_EL1
+    [FF_ARM_REG_MMFR1] = L"CP 4039", // ID_AA64MMFR1_EL1
+};
+
+static bool armReadRegisters(uint64_t regs[FF_ARM_REG_COUNT], bool present[FF_ARM_REG_COUNT]) {
+    FF_AUTO_CLOSE_FD HANDLE hKey = nullptr;
+    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, nullptr)) {
+        return false;
+    }
+
+    bool anyData = false;
+    for (uint32_t i = 0; i < FF_ARM_REG_COUNT; ++i) {
+        uint64_t value = 0;
+        if (ffRegReadUint64(hKey, armRegisterNames[i], &value, nullptr)) {
+            regs[i] = value;
+            present[i] = true;
+            anyData = true;
+        }
+    }
+    return anyData;
+}
+
+// Same rule as the Linux implementation: a 4-bit field is present when it is
+// neither 0xF (not implemented) nor below the value required by the feature.
+// `minimum` is the ARM ARM field value that first guarantees the feature; see
+// the magic number explanation above.
+static bool armField(
+    const uint64_t regs[FF_ARM_REG_COUNT],
+    const bool present[FF_ARM_REG_COUNT],
+    FFCPUArmRegister reg,
+    uint8_t offset,
+    uint8_t minimum) {
+    if (!present[reg]) {
+        return false;
+    }
+
+    uint8_t value = (uint8_t) ((regs[reg] >> offset) & 0xF);
+    return value != 0xF && value >= minimum;
+}
+
+// Single-bit feature fields (currently only ID_AA64FPFR0_EL1). Prefer
+// armField() for the normal 4-bit ID fields.
+static bool armBit(
+    const uint64_t regs[FF_ARM_REG_COUNT],
+    const bool present[FF_ARM_REG_COUNT],
+    FFCPUArmRegister reg,
+    uint8_t bit) {
+    return present[reg] && ((regs[reg] >> bit) & 1) != 0;
+}
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu) {
+    uint64_t regs[FF_ARM_REG_COUNT] = {};
+    bool present[FF_ARM_REG_COUNT] = {};
+
+    if (!armReadRegisters(regs, present)) {
+        return;
+    }
+
+    // ID_AA64ISAR1_EL1.APA [7:4] describes QARMA5 address authentication,
+    // while API [11:8] describes the implementation-defined variant. They are
+    // mutually exclusive but share the same encoding. Normalize API into the
+    // APA slot so both implementations are detected (Apple Silicon reports
+    // APA = 0 and API = 2).
+    uint64_t isar1 = regs[FF_ARM_REG_ISAR1];
+    uint8_t apa = (uint8_t) ((isar1 >> 4) & 0xF);
+    uint8_t api = (uint8_t) ((isar1 >> 8) & 0xF);
+    if (apa == 0 && api != 0) {
+        isar1 = (isar1 & ~(UINT64_C(0xF) << 4)) | ((uint64_t) api << 4);
+        regs[FF_ARM_REG_ISAR1] = isar1;
+    }
+
+    cpu->march = "unknown";
+
     // ARMv8-A
-    bool has_vfp = IsProcessorFeaturePresent(PF_ARM_VFP_32_REGISTERS_AVAILABLE);   // Implies basic FP support
-    bool has_neon = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE); // NEON (ASIMD)
+    bool has_fp = armField(regs, present, FF_ARM_REG_PFR0, 16, 0);    // PFR0.FP[19:16] implemented -> HWCAP_FP
+    bool has_asimd = armField(regs, present, FF_ARM_REG_PFR0, 20, 0); // PFR0.AdvSIMD[23:20] implemented -> HWCAP_ASIMD
 
     // ARMv8.1-A
-    bool has_atomics = IsProcessorFeaturePresent(PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE); // LSE atomics
-    bool has_crc32 = IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);     // CRC32
+    bool has_atomics = armField(regs, present, FF_ARM_REG_ISAR0, 20, 2);  // ISAR0.ATOMIC[23:20] >= 2 -> HWCAP_ATOMICS
+    bool has_crc32 = armField(regs, present, FF_ARM_REG_ISAR0, 16, 1);    // ISAR0.CRC32[19:16] >= 1 -> HWCAP_CRC32
+    bool has_asimdrdm = armField(regs, present, FF_ARM_REG_ISAR0, 28, 1); // ISAR0.RDM[31:28] >= 1 -> HWCAP_ASIMDRDM
 
     // ARMv8.2-A
-    bool has_fp16 = IsProcessorFeaturePresent(PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE); // Half-precision FP
+    bool has_fphp = armField(regs, present, FF_ARM_REG_PFR0, 16, 1);  // PFR0.FP[19:16] >= 1 -> HWCAP_FPHP
+    bool has_dcpop = armField(regs, present, FF_ARM_REG_ISAR1, 0, 1); // ISAR1.DPB[3:0] >= 1 -> HWCAP_DCPOP
 
     // ARMv8.3-A
-    bool has_lrcpc = IsProcessorFeaturePresent(PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE); // LDAPR/LR with RCPC semantics
-    bool has_jscvt = IsProcessorFeaturePresent(PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE); // FJCVTZS
+    bool has_paca = armField(regs, present, FF_ARM_REG_ISAR1, 4, 1)    // ISAR1.APA[7:4] >= 1 -> HWCAP_PACA
+        || armField(regs, present, FF_ARM_REG_ISAR2, 12, 1);           // ISAR2.APA3[15:12] >= 1 (newer encoding)
+    bool has_lrcpc = armField(regs, present, FF_ARM_REG_ISAR1, 20, 1); // ISAR1.LRCPC[23:20] >= 1 -> HWCAP_LRCPC
+    bool has_fcma = armField(regs, present, FF_ARM_REG_ISAR1, 16, 1);  // ISAR1.FCMA[19:16] >= 1 -> HWCAP_FCMA
+    bool has_jscvt = armField(regs, present, FF_ARM_REG_ISAR1, 12, 1); // ISAR1.JSCVT[15:12] >= 1 -> HWCAP_JSCVT
 
     // ARMv8.4-A
-    // My CPU (Apple M1 Pro in VM) does support LSE2, but Windows doesn't detect it for some reason
-    bool has_lse2 = IsProcessorFeaturePresent(PF_ARM_LSE2_AVAILABLE);              // Large System Extensions version 2, optional from v8.2
-    bool has_dp = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE); // DotProd, optional from v8.1 (*)
+    bool has_dit = armField(regs, present, FF_ARM_REG_PFR0, 48, 1);     // PFR0.DIT[51:48] >= 1 -> HWCAP_DIT
+    bool has_flagm = armField(regs, present, FF_ARM_REG_ISAR0, 52, 1);  // ISAR0.FlagM[55:52] >= 1 -> HWCAP_FLAGM
+    bool has_ilrcpc = armField(regs, present, FF_ARM_REG_ISAR1, 20, 2); // ISAR1.LRCPC[23:20] >= 2 -> HWCAP_ILRCPC
+
+    // ARMv8.5-A
+    bool has_bti = armField(regs, present, FF_ARM_REG_PFR1, 0, 1);      // PFR1.BT[3:0] >= 1 -> HWCAP2_BTI
+    bool has_sb = armField(regs, present, FF_ARM_REG_ISAR1, 36, 1);     // ISAR1.SB[39:36] >= 1 -> HWCAP_SB
+    bool has_dcpodp = armField(regs, present, FF_ARM_REG_ISAR1, 0, 2);  // ISAR1.DPB[3:0] >= 2 -> HWCAP2_DCPODP
+    bool has_flagm2 = armField(regs, present, FF_ARM_REG_ISAR0, 52, 2); // ISAR0.FlagM[55:52] >= 2 -> HWCAP2_FLAGM2
+    bool has_frint = armField(regs, present, FF_ARM_REG_ISAR1, 32, 1);  // ISAR1.FRINTTS[35:32] >= 1 -> HWCAP2_FRINT
 
     // ARMv9.0-A
-    bool has_sve2 = IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE); // SVE2
+    bool has_sve2 = armField(regs, present, FF_ARM_REG_ZFR0, 0, 1); // ZFR0.SVEver[3:0] >= 1 (1 = SVE2) -> HWCAP2_SVE2
 
     // ARMv9.1-A
     // ARMv8.6-A
-    bool has_bf16 = IsProcessorFeaturePresent(PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE); // BF16, optional from v8.2
-    bool has_i8mm = IsProcessorFeaturePresent(PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE); // Int8 matrix multiply, optional from v8.2
+    // BF16/I8MM are shared by both version sequences, so the same booleans are
+    // tested in both branches of the chain below.
+    bool has_bf16 = armField(regs, present, FF_ARM_REG_ISAR1, 44, 1); // ISAR1.BF16[47:44] >= 1 -> HWCAP2_BF16
+    bool has_i8mm = armField(regs, present, FF_ARM_REG_ISAR1, 52, 1); // ISAR1.I8MM[55:52] >= 1 -> HWCAP2_I8MM
 
     // ARMv8.7-A
-    bool has_ebf16 = IsProcessorFeaturePresent(PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE); // Extended BFloat16 behaviors, optional from v8.2
+    bool has_afp = armField(regs, present, FF_ARM_REG_MMFR1, 44, 1); // MMFR1.AFP[47:44] >= 1 -> HWCAP2_AFP
 
     // ARMv9.2-A
-    bool has_sme = IsProcessorFeaturePresent(PF_ARM_SME_INSTRUCTIONS_AVAILABLE); // SME
+    bool has_sme = armField(regs, present, FF_ARM_REG_PFR1, 24, 1); // PFR1.SME[27:24] >= 1 -> HWCAP2_SME
 
     // ARMv9.3-A
-    bool has_sme2 = IsProcessorFeaturePresent(PF_ARM_SME2_INSTRUCTIONS_AVAILABLE); // SME2
+    bool has_sme2 = armField(regs, present, FF_ARM_REG_PFR1, 24, 2); // PFR1.SME[27:24] >= 2 -> HWCAP2_SME2
+
+    // ARMv8.8-A
+    bool has_mops = armField(regs, present, FF_ARM_REG_ISAR2, 16, 1); // ISAR2.MOPS[19:16] >= 1 -> HWCAP2_MOPS
+
+    // ARMv8.9-A
+    bool has_cssc = armField(regs, present, FF_ARM_REG_ISAR2, 52, 1); // ISAR2.CSSC[55:52] >= 1 -> HWCAP2_CSSC
 
     // ARMv9.4-A
-    bool has_sme2p1 = IsProcessorFeaturePresent(PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE); // SME2.1
+    bool has_sme2p1 = armField(regs, present, FF_ARM_REG_SMFR0, 56, 2); // SMFR0.SMEver[59:56] >= 2 -> HWCAP2_SME2P1
 
+    // ARMv9.5-A
+    bool has_f8e4m3 = armBit(regs, present, FF_ARM_REG_FPFR0, 1); // FPFR0.F8E4M3[1] -> HWCAP2_F8E4M3
+    bool has_f8e5m2 = armBit(regs, present, FF_ARM_REG_FPFR0, 0); // FPFR0.F8E5M2[0] -> HWCAP2_F8E5M2
+
+    // ARMv9.6-A
+    bool has_cmpbr = armField(regs, present, FF_ARM_REG_ISAR2, 52, 2);  // ISAR2.CSSC[55:52] >= 2 -> HWCAP_CMPBR
+    bool has_fprcvt = armField(regs, present, FF_ARM_REG_ISAR3, 28, 1); // ISAR3.FPRCVT[31:28] >= 1 -> HWCAP_FPRCVT
+
+    // The version chain (both the ARMv9/ARMv8 split and the order of the
+    // checks) must stay identical to the Linux implementation above, otherwise
+    // the same CPU reports a different march depending on the OS.
     if (has_sve2 || has_sme) {
-        // ARMv9 family
-        if (has_sme2p1) {
+        // ARMv9
+        if (has_cmpbr && has_fprcvt) {
+            cpu->march = "ARMv9.6-A";
+        } else if (has_f8e5m2 && has_f8e4m3) {
+            cpu->march = "ARMv9.5-A";
+        } else if (has_sme2p1) {
             cpu->march = "ARMv9.4-A";
         } else if (has_sme2) {
             cpu->march = "ARMv9.3-A";
@@ -497,20 +662,26 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu) {
             cpu->march = "ARMv9.0-A";
         }
     } else {
-        // ARMv8 family
-        if (has_ebf16) {
+        // ARMv8
+        if (has_cssc) {
+            cpu->march = "ARMv8.9-A";
+        } else if (has_mops) {
+            cpu->march = "ARMv8.8-A";
+        } else if (has_afp) {
             cpu->march = "ARMv8.7-A";
         } else if (has_i8mm && has_bf16) {
             cpu->march = "ARMv8.6-A";
-        } else if (has_dp && has_lse2) {
+        } else if (has_bti && has_sb && has_dcpodp && has_flagm2 && has_frint) {
+            cpu->march = "ARMv8.5-A";
+        } else if (has_dit && has_flagm && has_ilrcpc) {
             cpu->march = "ARMv8.4-A";
-        } else if (has_lrcpc && has_jscvt) {
+        } else if (has_paca && has_lrcpc && has_fcma && has_jscvt) {
             cpu->march = "ARMv8.3-A";
-        } else if (has_fp16) {
+        } else if (has_fphp && has_dcpop) {
             cpu->march = "ARMv8.2-A";
-        } else if (has_atomics && has_crc32) {
+        } else if (has_atomics && has_crc32 && has_asimdrdm) {
             cpu->march = "ARMv8.1-A";
-        } else if (has_neon && has_vfp) {
+        } else if (has_asimd && has_fp) {
             cpu->march = "ARMv8-A";
         }
     }

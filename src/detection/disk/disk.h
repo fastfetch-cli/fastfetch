@@ -16,9 +16,7 @@ typedef struct FFDisk {
     FFstrbuf name;
     FFDiskVolumeType type;
 
-    uint64_t bytesUsed;
     uint64_t bytesFree;
-    uint64_t bytesAvailable;
     uint64_t bytesTotal;
 
     uint32_t filesUsed;

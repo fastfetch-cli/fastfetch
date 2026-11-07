@@ -21,8 +21,16 @@ typedef enum FFLogoType: uint8_t {
     FF_LOGO_TYPE_IMAGE_ITERM,        // image file, printed as iterm graphics protocol
     FF_LOGO_TYPE_IMAGE_CHAFA,        // image file, printed as ascii art using libchafa
     FF_LOGO_TYPE_IMAGE_RAW,          // image file, printed as raw binary string
+    FF_LOGO_TYPE_SPIN,               // builtin logo (or a text file) drawn as a 3D slab, one turn step per `--watch` refresh
     FF_LOGO_TYPE_NONE,               // `--logo none`, but still applies colors to the system information output (unless `--pipe` is set)
 } FFLogoType;
+
+typedef struct FFOptionsLogoSpin {
+    float speedPerFrame; // degrees the logo turns per drawn frame; negative turns the other way, 0: not set
+    float speedPerRound; // seconds one revolution takes; negative turns the other way, 0: not set (wins over speedPerFrame)
+    float tilt;          // camera tilt in degrees
+    float angle;         // rotation of the first frame in degrees; drawn as is without `--watch`
+} FFOptionsLogoSpin;
 
 typedef enum FFLogoPosition: uint8_t {
     FF_LOGO_POSITION_LEFT,
@@ -47,6 +55,7 @@ typedef struct FFOptionsLogo {
     FFstrbuf source;
     FFLogoType type;
     FFLogoPosition position;
+    FFOptionsLogoSpin spin;
     FFstrbuf colors[FASTFETCH_LOGO_MAX_COLORS];
     uint32_t width;
     uint32_t height;

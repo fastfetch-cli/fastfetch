@@ -80,6 +80,8 @@ typedef struct FFGpuDriverPciBusId {
 } FFGpuDriverPciBusId;
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__HAIKU__) || defined(__GNU__)
+#define FF_GPU_HAS_PCI_IDS 1
+void ffGPUParsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu);
 

@@ -113,7 +113,7 @@ static bool readHidReport(HANDLE hHidFile, uint8_t* buffer, uint32_t length, DWO
             // than by handle (CancelIo would take every other read on the same handle with it), and the
             // cancellation is waited for before returning.
             CancelIoEx(hHidFile, &overlapped);
-            GetOverlappedResult(hHidFile, &overlapped, &read, TRUE);
+            GetOverlappedResultEx(hHidFile, &overlapped, &read, INFINITE, FALSE);
             return false;
         }
     }

@@ -157,7 +157,7 @@ void ffWaylandOutputNameListener(void* data, [[maybe_unused]] void* output, cons
 
     display->type = ffdsGetDisplayType(name);
     #if __linux__
-    if (!display->edidName.length) {
+    if (!display->edidName.length && !display->parent->useMutter) {
         matchDrmConnector(name, display);
     }
     #endif
@@ -282,6 +282,14 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
+    #if defined(FF_HAVE_DBUS) && defined(__linux__)
+    // gnome-shell (Mutter) and cinnamon (Muffin) expose the monitor configuration via D-Bus,
+    // including the raw EDID. Prefer it over matching the wl_output name against the DRM connectors.
+    data.useMutter =
+        (ffStrbufEqualS(&result->wmProcessName, "gnome-shell") || ffStrbufEqualS(&result->wmProcessName, "cinnamon")) &&
+        ffdsMutterAvailable();
+    #endif
+
     struct wl_proxy* registry = ffwl_proxy_marshal_constructor((struct wl_proxy*) data.display, WL_DISPLAY_GET_REGISTRY, &wl_registry_interface, nullptr);
     if (registry == nullptr) {
         ffwl_display_disconnect(data.display);
@@ -309,7 +317,18 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
-    {
+    bool displayConfigRead = false;
+    #if defined(FF_HAVE_DBUS) && defined(__linux__)
+    if (data.useMutter) {
+        // A working D-Bus connection with a reachable DisplayConfig is authoritative.
+        // Don't second-guess it with monitors.xml even when the reply names no primary
+        // monitor (e.g. connector names that happen to match no wl_output).
+        displayConfigRead = ffdsConnectMutter(result);
+    }
+    #endif
+
+    // Fallback for compositors that do not expose the monitor configuration, or when it could not be read
+    if (!displayConfigRead) {
         const char* fileName = ffStrbufEqualS(&result->wmProcessName, "gnome-shell")
             ? "monitors.xml"
             : ffStrbufEqualS(&result->wmProcessName, "cinnamon")

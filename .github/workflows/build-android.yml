@@ -63,7 +63,7 @@ jobs:
       # field is mandatory (pkgconf treats a .pc without one as not found), hence the sed.
       - name: install freetype headers
         run: |
-          sudo apt-get install -y --no-install-recommends libfreetype-dev
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends libfreetype-dev
           test -f /usr/include/freetype2/ft2build.h
           VERSION=$(awk '/^#define FREETYPE_(MAJOR|MINOR|PATCH)/ {printf "%s%s", sep, $3; sep="."}' /usr/include/freetype2/freetype/freetype.h)
           test -n "${VERSION}"
@@ -157,7 +157,7 @@ jobs:
           ls -l fastfetch
 
       - name: upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: fastfetch-android-${{ inputs.abi }}
           path: ./fastfetch-*.*

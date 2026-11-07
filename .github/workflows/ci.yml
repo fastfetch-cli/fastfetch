@@ -89,20 +89,10 @@ jobs:
 
   macos-hosts:
     needs: no-features-test
-    name: macOS-${{ matrix.arch }}
+    name: macOS-universal
     permissions:
       contents: read
-    strategy:
-      matrix:
-        include:
-          - arch: amd64
-            runs-on: macos-15-intel
-          - arch: aarch64
-            runs-on: macos-latest
     uses: ./.github/workflows/build-macos-hosts.yml
-    with:
-      arch: ${{ matrix.arch }}
-      runs-on: ${{ matrix.runs-on }}
 
   omnios-amd64:
     needs: no-features-test

@@ -14,7 +14,17 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-// PulseAudio's native protocol ("protocol-native").
+// Linux sound comes from one of two places: the sound server a desktop runs, and the hardware
+// underneath it.
+//
+// The server is PulseAudio -- PipeWire speaks its protocol too -- and it is asked first, because
+// it is the only one of the two that knows what the desktop's volume is: the mixer the card
+// exposes and the slider on screen are not the same thing. When no server answers, the cards are
+// read from ALSA instead; that part lives in its own section at the end of this file.
+//
+// ---------------------------------------------------------------------------
+// the server: PulseAudio's native protocol ("protocol-native")
+// ---------------------------------------------------------------------------
 //
 // Instead of linking or dlopen-ing libpulse, fastfetch talks to the daemon
 // directly: the daemon speaks a small length prefixed binary protocol on its
@@ -1087,18 +1097,519 @@ static const char* fetchSinkList(FFSoundPulseConn* conn, const FFSoundOptions* o
 }
 
 // ---------------------------------------------------------------------------
+// the hardware: ALSA
+// ---------------------------------------------------------------------------
 
-// Android compiles this file next to sound_android.c, which owns ffDetectSound and calls this one
-// only while the display server is not SurfaceFlinger -- a Termux:X11 or Wayland session runs a real
-// desktop on top of the device, and PulseAudio is the sound of that desktop. So the entry point has
-// to step aside there. Same arrangement as wallpaper_linux.c and terminalfont_linux.c.
-const char*
-#ifdef __ANDROID__
-ffDetectSoundLinux
-#else
-ffDetectSound
+// A machine that runs no sound server still has ALSA, and this is what answers for it: the cards
+// are enumerated from /proc and their volumes read from the control device of each card.
+//
+// Nothing is linked and nothing is loaded. The values are behind four ioctls of the kernel's own
+// control interface, and both the structs and the request numbers are the kernel's uapi, which
+// every libc ships as <sound/asound.h>. The request numbers are `_IOWR`-style, so they carry the
+// size of the struct they pass -- a layout that does not match the kernel's is refused as an
+// unknown ioctl instead of being read as garbage.
+//
+// Android is left out: it has no ALSA of the kind this reads ( /dev/snd and /proc/asound are
+// closed to an app's SELinux domain ) and a session that does have a desktop on top of the device
+// is running a sound server, which is the branch below. A libc that does not carry the header says
+// so here, and the fallback is simply not compiled in -- the same shape as the other optional
+// backends in this tree.
+#if defined(__linux__) && !defined(__ANDROID__) && __has_include(<sound/asound.h>)
+    #define FF_SOUND_ALSA 1
 #endif
-    (FFSoundOptions* options, FFlist* devices) {
+
+#ifdef FF_SOUND_ALSA
+
+    #include <fcntl.h>
+    #include <stdio.h>
+    // <sys/ioctl.h> before <sound/asound.h>, in this order: the uapi header spells its request
+    // numbers with _IOR and _IOWR and does not define either of them itself.
+    #include <sys/ioctl.h>
+    #include <sound/asound.h>
+
+// What a mixer control *is* is written down nowhere in the control interface. The kernel describes
+// a control with a type (integer, boolean, ...) and an access bitmask, and that bitmask has no
+// volume and no switch bit at all -- the uapi header defines READ, WRITE, VOLATILE, TLV_*, INACTIVE,
+// LOCK, OWNER and USER, and nothing else. What carries it is the control's name, which a driver
+// builds by appending a suffix to the name of what is being controlled:
+//
+//     "Master Playback Volume"   the output volume of the control named "Master"
+//     "Capture Volume"           the input volume of a control that has no name of its own
+//
+// So the suffix is what is matched, on one condition: it has to be the whole of the name or the
+// start of a word in it. Without that, "Capture Volume" would end in " Volume" and be read as the
+// directionless " Volume" -- which is the volume of a card that has only one direction, and so an
+// output.
+//
+// The set of suffixes is the one libasound's simple mixer layer carries; the entries sit one after
+// another in that library's .rodata. The order below is the order they have to be tried in, the
+// longest first, or "Master Playback Volume" would be taken for a " Volume".
+//
+// One deliberate difference from libasound: it reads "Capture Volume" as a directionless volume,
+// which is why a desktop mixer shows a "Capture" slider. This module reports output devices, and a
+// capture gain is not one of them -- so a card that carries nothing else has no output to report.
+typedef struct FFSoundAlsaSuffix {
+    const char* suffix;
+    bool isSwitch; // ... the suffix names a switch rather than a volume
+    bool playback; // ... and one of the output direction
+} FFSoundAlsaSuffix;
+
+static const FFSoundAlsaSuffix FF_SOUND_ALSA_SUFFIXES[] = {
+    { "Playback Volume", false, true },
+    { "Playback Switch", true, true },
+    { "Playback Enum", false, false },
+    { "Playback Route", false, false },
+    { "Capture Volume", false, false },
+    { "Capture Switch", false, false },
+    { "Capture Enum", false, false },
+    { "Capture Route", false, false },
+    { "Volume", false, true },
+    { "Switch", true, true },
+    { "Enum", false, false },
+    { "Route", false, false },
+};
+
+// Which control is "the volume" of a card. A desktop mixer shows one slider per output and the name
+// on it is one of these. A card that has none of them -- a USB interface, a virtual card -- still
+// has exactly one playback volume, and there the first one the kernel enumerates is taken. This list
+// exists so that the choice does not have to come out of that order, which is the order the driver
+// registered its controls in and not a ranking at all.
+static const char* const FF_SOUND_ALSA_MAIN_CONTROLS[] = { "Master", "Master Mono", "PCM", "Speaker", "Headphone", "Headphones", "Front" };
+
+enum {
+    // Ids asked for per ELEM_LIST call. The list is walked in batches rather than copied in one go,
+    // so that nothing has to be sized after a number the card reports; 64 ids is 4 KiB of stack, and
+    // the far side of the ioctl is a table lookup either way.
+    FF_SOUND_ALSA_ID_BATCH = 64,
+    FF_SOUND_ALSA_PRIORITY_NONE = UINT32_MAX,
+};
+
+// Whether the control name is that of a playback volume or switch, and how much of it the suffix
+// takes up. Both suffixes that are accepted end in the same six character tail -- "Volume" or
+// "Switch" -- which is the only thing that pairs a card's volume with its mute; nothing else in the
+// control interface says the two belong together.
+static bool stripAlsaNameSuffix(const char* name, uint32_t length, bool* isSwitch, uint32_t* baseLength) {
+    for (size_t index = 0; index < ARRAY_SIZE(FF_SOUND_ALSA_SUFFIXES); index++) {
+        const FFSoundAlsaSuffix* suffix = &FF_SOUND_ALSA_SUFFIXES[index];
+        const uint32_t suffixLength = (uint32_t) strlen(suffix->suffix);
+        if (length < suffixLength || memcmp(name + length - suffixLength, suffix->suffix, suffixLength) != 0) {
+            continue;
+        }
+
+        // A suffix is a word of the name: either all of it, or preceded by a space. Anything else
+        // is a coincidence of letters -- "Capture Volume" ends in " Volume" and is not one.
+        if (length > suffixLength && name[length - suffixLength - 1] != ' ') {
+            continue;
+        }
+
+        if (!suffix->playback) {
+            return false; // a capture or a routing control is not the card's output
+        }
+
+        // The space that separated the base name from the suffix belongs to neither, and a name
+        // that is nothing but the suffix has no base name at all.
+        uint32_t base = length - suffixLength;
+        while (base > 0 && name[base - 1] == ' ') {
+            base--;
+        }
+
+        *isSwitch = suffix->isSwitch;
+        *baseLength = base;
+        return true;
+    }
+
+    return false;
+}
+
+// The rank of a control's base name, or FF_SOUND_ALSA_PRIORITY_NONE when the list does not know it.
+static uint32_t getAlsaControlPriority(const char* name, uint32_t baseLength) {
+    for (size_t index = 0; index < ARRAY_SIZE(FF_SOUND_ALSA_MAIN_CONTROLS); index++) {
+        if (strlen(FF_SOUND_ALSA_MAIN_CONTROLS[index]) == baseLength && memcmp(name, FF_SOUND_ALSA_MAIN_CONTROLS[index], baseLength) == 0) {
+            return (uint32_t) index;
+        }
+    }
+
+    return FF_SOUND_ALSA_PRIORITY_NONE;
+}
+
+// Walks the controls of one card. ELEM_LIST holds no state -- every call carries the offset it wants
+// and the buffer to fill -- so a second walk of the same card is simply a second one of these.
+typedef struct FFSoundAlsaControls {
+    int fd;
+    uint32_t offset;
+    uint32_t index;
+    uint32_t batch;
+    bool done;
+    struct snd_ctl_elem_id ids[FF_SOUND_ALSA_ID_BATCH];
+} FFSoundAlsaControls;
+
+// The next mixer control of the card, or nullptr at the end. A list that cannot be read ends the
+// walk rather than failing it: what to do about "this card says nothing" belongs to the caller, and
+// everything below treats it exactly like a card that has no volume control. The other interfaces a
+// card carries (PCM, timer, raw MIDI) are skipped here so that no caller has to know about them.
+static const struct snd_ctl_elem_id* nextAlsaControl(FFSoundAlsaControls* controls) {
+    for (;;) {
+        if (controls->index < controls->batch) {
+            const struct snd_ctl_elem_id* id = &controls->ids[controls->index++];
+            if (id->iface != SNDRV_CTL_ELEM_IFACE_MIXER) {
+                continue;
+            }
+
+            return id;
+        }
+
+        if (controls->done) {
+            return nullptr;
+        }
+
+        struct snd_ctl_elem_list list = {
+            .offset = controls->offset,
+            .space = FF_SOUND_ALSA_ID_BATCH,
+            .pids = controls->ids,
+        };
+
+        if (ioctl(controls->fd, SNDRV_CTL_IOCTL_ELEM_LIST, &list) < 0) {
+            FF_DEBUG("Listing the controls of an ALSA card failed: %s", strerror(errno));
+            controls->done = true;
+            return nullptr;
+        }
+
+        controls->offset += list.used;
+        controls->index = 0;
+        controls->batch = list.used;
+
+        if (list.used == 0) {
+            controls->done = true;
+            return nullptr;
+        }
+    }
+}
+
+// A card's volume control and its name without the suffix -- which is what a desktop mixer puts on
+// the slider, "Master" rather than "Master Playback Volume".
+typedef struct FFSoundAlsaVolume {
+    struct snd_ctl_elem_id id;
+    char base[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
+    uint32_t baseLength;
+} FFSoundAlsaVolume;
+
+static bool findAlsaVolume(FFSoundAlsaControls* controls, FFSoundAlsaVolume* volume) {
+    uint32_t priority = FF_SOUND_ALSA_PRIORITY_NONE;
+    bool found = false;
+
+    const struct snd_ctl_elem_id* id = nullptr;
+    while ((id = nextAlsaControl(controls)) != nullptr) {
+        // The name is an array of SNDRV_CTL_ELEM_ID_NAME_MAXLEN bytes with the terminator inside
+        // it, so its length is bounded rather than taken on trust.
+        const uint32_t length = (uint32_t) strnlen((const char*) id->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+        bool isSwitch = false;
+        uint32_t baseLength = 0;
+        if (!stripAlsaNameSuffix((const char*) id->name, length, &isSwitch, &baseLength) || isSwitch) {
+            continue;
+        }
+
+        const uint32_t candidate = getAlsaControlPriority((const char*) id->name, baseLength);
+        if (found && candidate >= priority) {
+            continue; // a control the list knows beats one it does not, and the first of a rank wins
+        }
+
+        volume->id = *id;
+        volume->baseLength = baseLength;
+        memcpy(volume->base, id->name, baseLength);
+        volume->base[baseLength] = '\0';
+        priority = candidate;
+        found = true;
+    }
+
+    return found;
+}
+
+// The switch that belongs to the volume control: same base name, same index, same device. It takes
+// a second walk because which base name wins is only known once the first walk is over. A card with
+// no switch at all leaves the caller with "not muted", which is the answer a control without a mute
+// state deserves.
+static bool findAlsaSwitch(FFSoundAlsaControls* controls, const FFSoundAlsaVolume* volume, struct snd_ctl_elem_id* result) {
+    const struct snd_ctl_elem_id* id = nullptr;
+    while ((id = nextAlsaControl(controls)) != nullptr) {
+        if (id->index != volume->id.index || id->device != volume->id.device || id->subdevice != volume->id.subdevice) {
+            continue;
+        }
+
+        const uint32_t length = (uint32_t) strnlen((const char*) id->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+        bool isSwitch = false;
+        uint32_t baseLength = 0;
+        if (!stripAlsaNameSuffix((const char*) id->name, length, &isSwitch, &baseLength) || !isSwitch) {
+            continue;
+        }
+
+        if (baseLength != volume->baseLength || memcmp(id->name, volume->base, baseLength) != 0) {
+            continue;
+        }
+
+        *result = *id;
+        return true;
+    }
+
+    return false;
+}
+
+// The output of a card that has no volume control: any playback switch, the first one the kernel
+// enumerates. HDMI and DP cards are typically this shape, with an "IEC958 Playback Switch" and no
+// volume to go with it, so the switch is the only thing that says the card plays anything at all.
+// Returns whether the card has a playback switch, so a caller can tell "no output" from "a switch".
+static bool findAlsaPlaybackSwitch(FFSoundAlsaControls* controls, FFSoundAlsaVolume* output) {
+    const struct snd_ctl_elem_id* id = nullptr;
+    while ((id = nextAlsaControl(controls)) != nullptr) {
+        const uint32_t length = (uint32_t) strnlen((const char*) id->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+        bool isSwitch = false;
+        uint32_t baseLength = 0;
+        if (!stripAlsaNameSuffix((const char*) id->name, length, &isSwitch, &baseLength) || !isSwitch) {
+            continue;
+        }
+
+        output->id = *id;
+        output->baseLength = baseLength;
+        memcpy(output->base, id->name, baseLength);
+        output->base[baseLength] = '\0';
+        return true;
+    }
+
+    return false;
+}
+
+// One value of a control, and the range that control's own scale puts it in. A switch is a boolean
+// and shares the same union; a few DSP cards use the 64 bit integer type.
+typedef struct FFSoundAlsaValue {
+    long long value;
+    long long minimum;
+    long long maximum;
+} FFSoundAlsaValue;
+
+static bool readAlsaValue(int fd, const struct snd_ctl_elem_id* id, FFSoundAlsaValue* result) {
+    struct snd_ctl_elem_info info = { .id = *id };
+    if (ioctl(fd, SNDRV_CTL_IOCTL_ELEM_INFO, &info) < 0) {
+        FF_DEBUG("Reading the type of an ALSA control failed: %s", strerror(errno));
+        return false;
+    }
+
+    struct snd_ctl_elem_value value = { .id = *id };
+    if (ioctl(fd, SNDRV_CTL_IOCTL_ELEM_READ, &value) < 0) {
+        FF_DEBUG("Reading the value of an ALSA control failed: %s", strerror(errno));
+        return false;
+    }
+
+    // Only the first channel is read, the way the PulseAudio backend reports the first channel of a
+    // sink's volume. A card whose channels disagree is left to the mixer to sort out.
+    if (info.type == SNDRV_CTL_ELEM_TYPE_INTEGER64) {
+        result->value = value.value.integer64.value[0];
+        result->minimum = info.value.integer64.min;
+        result->maximum = info.value.integer64.max;
+        return true;
+    }
+
+    if (info.type != SNDRV_CTL_ELEM_TYPE_INTEGER && info.type != SNDRV_CTL_ELEM_TYPE_BOOLEAN) {
+        FF_DEBUG("An ALSA control carries the value type %u, which is not a volume", (unsigned) info.type);
+        return false;
+    }
+
+    result->value = value.value.integer.value[0];
+    result->minimum = info.value.integer.min;
+    result->maximum = info.value.integer.max;
+    return true;
+}
+
+// The control's own scale as a percentage, which is the number `amixer` prints as `[n%]`. A range
+// that is empty or inverted says nothing at all, and is reported as unknown rather than as 0% --
+// 0% is a state a control is really in, and it is the muted one.
+static uint8_t getAlsaPercent(const FFSoundAlsaValue* value) {
+    if (value->maximum <= value->minimum) {
+        return FF_SOUND_VOLUME_UNKNOWN;
+    }
+
+    if (value->value <= value->minimum) {
+        return 0;
+    }
+
+    if (value->value >= value->maximum) {
+        return 100;
+    }
+
+    return (uint8_t) (((value->value - value->minimum) * 100 + (value->maximum - value->minimum) / 2) / (value->maximum - value->minimum));
+}
+
+// Appends the output of one card. Returns whether the card has an output to report at all, which is
+// not the same as whether a device was appended: `options` filters what is kept, while the main
+// device of a machine is the first card that has an output whatever the filter then does with it.
+//
+// A card whose control device cannot be opened is reported without a volume rather than dropped.
+// The devices are root:audio behind an ACL for the seat, so a session over ssh can name a card it
+// may not read, and the name comes from /proc/asound/cards, which is world readable.
+//
+// The reported name is the card's own name from /proc/asound/cards followed by the control's base
+// name -- "HDA Intel PCH Master" rather than a bare "Master" -- so the list says which card each
+// volume belongs to. A card that *can* be read and has no playback control at all is dropped
+// instead, because that is a card with nothing to play through. An HDMI or DP card often has no
+// volume control but does have an "IEC958 Playback Switch"; the switch alone is still an output, so
+// such a card is reported, with no percentage to go with it.
+static bool appendAlsaCard(uint32_t card, const FFstrbuf* cardName, bool main, const FFSoundOptions* options, FFlist* devices) {
+    // "/dev/snd/controlC", at most ten digits of the card index, and the terminator.
+    char path[sizeof("/dev/snd/controlC") + 11];
+    snprintf(path, sizeof(path), "/dev/snd/controlC%u", card);
+
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateCopy(cardName);
+    // A card whose control device cannot be opened is not a card without an output, so it still
+    // gets a device -- without a percentage.
+    uint8_t volume = FF_SOUND_VOLUME_UNKNOWN;
+    bool found = false;
+    bool active = true;
+
+    const int fd = open(path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) {
+        // Only read access is asked for: a volume is being read, never written, and read permission
+        // is the smaller of the two things to need.
+        FF_DEBUG("Opening \"%s\" failed: %s", path, strerror(errno));
+        found = true;
+    } else {
+        FFSoundAlsaControls controls = { .fd = fd };
+        FFSoundAlsaVolume control = {};
+
+        if (findAlsaVolume(&controls, &control)) {
+            found = true;
+            // A control whose name is nothing but the suffix -- a codec that has one volume and no
+            // name for it registers "Playback Volume" -- leaves the card's own name in place, which
+            // is the only thing left to call the device.
+            if (control.baseLength > 0) {
+                ffStrbufAppendC(&name, ' ');
+                ffStrbufAppendNS(&name, control.baseLength, control.base);
+            }
+
+            FFSoundAlsaValue value = {};
+            if (readAlsaValue(fd, &control.id, &value)) {
+                volume = getAlsaPercent(&value);
+            }
+
+            FFSoundAlsaControls switches = { .fd = fd };
+            struct snd_ctl_elem_id switchId = {};
+            FFSoundAlsaValue switchValue = {};
+            if (findAlsaSwitch(&switches, &control, &switchId) && readAlsaValue(fd, &switchId, &switchValue)) {
+                active = switchValue.value != 0;
+                if (!active) {
+                    // A muted control is reported as 0% rather than as the value it still holds,
+                    // which is what the PulseAudio backend does with a muted sink.
+                    volume = 0;
+                }
+            }
+        } else {
+            // No volume control: an HDMI or DP card is usually this shape, its only output control
+            // an "IEC958 Playback Switch". The switch alone is still an output to play through, so
+            // the card is reported -- without a percentage, because there is no volume to read.
+            FFSoundAlsaControls switches = { .fd = fd };
+            FFSoundAlsaVolume switchControl = {};
+            if (findAlsaPlaybackSwitch(&switches, &switchControl)) {
+                found = true;
+                if (switchControl.baseLength > 0) {
+                    ffStrbufAppendC(&name, ' ');
+                    ffStrbufAppendNS(&name, switchControl.baseLength, switchControl.base);
+                }
+
+                FFSoundAlsaValue switchValue = {};
+                if (readAlsaValue(fd, &switchControl.id, &switchValue)) {
+                    active = switchValue.value != 0;
+                    if (!active) {
+                        volume = 0;
+                    }
+                }
+            }
+        }
+
+        close(fd);
+    }
+
+    if (!found) {
+        FF_DEBUG("Card %u has no playback control", card);
+        return false;
+    }
+
+    const FFSoundType type = (FFSoundType) ((main ? FF_SOUND_TYPE_MAIN : FF_SOUND_TYPE_NONE) | (active ? FF_SOUND_TYPE_ACTIVE : FF_SOUND_TYPE_NONE));
+    if ((options->soundType & FF_SOUND_TYPE_MAIN) && !(type & FF_SOUND_TYPE_MAIN)) {
+        return true;
+    }
+
+    if ((options->soundType & FF_SOUND_TYPE_ACTIVE) && !(type & FF_SOUND_TYPE_ACTIVE)) {
+        return true;
+    }
+
+    FFSoundDevice* device = FF_LIST_ADD(FFSoundDevice, *devices);
+    // "hw:0" is how the card is named everywhere else -- `amixer -c 0`, and the name after a colon
+    // in every ALSA configuration -- so it is what identifies the device here.
+    ffStrbufInitF(&device->identifier, "hw:%u", card);
+    ffStrbufInitMove(&device->name, &name);
+    ffStrbufInitStatic(&device->platformApi, "ALSA");
+    device->volume = volume;
+    device->type = type;
+    FF_DEBUG("Reporting \"%s\" (hw:%u) at %u%%%s", device->name.chars, card, device->volume, active ? "" : ", muted");
+    return true;
+}
+
+static const char* detectAlsa(FFSoundOptions* options, FFlist* devices) {
+    FF_STRBUF_AUTO_DESTROY cards = ffStrbufCreate();
+    if (!ffReadFileBuffer("/proc/asound/cards", &cards)) {
+        FF_DEBUG("Reading \"/proc/asound/cards\" failed: %s", strerror(errno));
+        return "Failed to read the ALSA card list";
+    }
+
+    bool main = true; // the machine's main output is the first card that has one
+    bool output = false;
+
+    for (const char* line = cards.chars; *line;) {
+        const char* newline = strchr(line, '\n');
+        const uint32_t length = newline ? (uint32_t) (newline - line) : (uint32_t) strlen(line);
+        FF_STRBUF_AUTO_DESTROY record = ffStrbufCreateNS(length, line);
+        line = newline ? newline + 1 : line + length;
+
+        //      0 [PCH            ]: HDA-Intel - HDA Intel PCH
+        //                            HDA Intel PCH at 0xdf240000 irq 125
+        //
+        // One line per card, with the index in the first column, and the card's long name on the
+        // line below -- which does not start with a digit, and is what this skips. The name that is
+        // reported is the one behind the dash: the driver's name for the card, without the
+        // "HDA-Intel - " in front of it.
+        char* indexEnd = nullptr;
+        const long number = strtol(record.chars, &indexEnd, 10);
+        if (indexEnd == record.chars || number < 0) {
+            continue;
+        }
+
+        const char* close = strchr(indexEnd, ']');
+        const char* dash = close ? strstr(close, " - ") : nullptr;
+        if (dash == nullptr) {
+            FF_DEBUG("The ALSA card list line \"%s\" is not in the expected form", record.chars);
+            continue;
+        }
+
+        FF_STRBUF_AUTO_DESTROY cardName = ffStrbufCreateS(dash + strlen(" - "));
+        ffStrbufTrimRightSpace(&cardName);
+
+        if (appendAlsaCard((uint32_t) number, &cardName, main, options, devices)) {
+            main = false;
+            output = true;
+        }
+    }
+
+    if (!output) {
+        return "No ALSA card with a playback control was found";
+    }
+
+    return nullptr;
+}
+
+#endif // FF_SOUND_ALSA
+
+// ---------------------------------------------------------------------------
+// the server
+// ---------------------------------------------------------------------------
+
+static const char* detectPulseAudio(FFSoundOptions* options, FFlist* devices) {
     FF_STRBUF_AUTO_DESTROY defaultSocketPath = ffStrbufCreate();
     getDefaultSocketPath(&defaultSocketPath);
     FF_DEBUG("Default pulseaudio socket path: %s", defaultSocketPath.chars);
@@ -1175,4 +1686,42 @@ ffDetectSound
     }
 
     return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+
+// Android compiles this file next to sound_android.c, which owns ffDetectSound and calls this one
+// only while the display server is not SurfaceFlinger -- a Termux:X11 or Wayland session runs a real
+// desktop on top of the device, and PulseAudio is the sound of that desktop. So the entry point has
+// to step aside there. Same arrangement as wallpaper_linux.c and terminalfont_linux.c.
+const char*
+#ifdef __ANDROID__
+ffDetectSoundLinux
+#else
+ffDetectSound
+#endif
+    (FFSoundOptions* options, FFlist* devices) {
+    const char* error = detectPulseAudio(options, devices);
+    if (error == nullptr) {
+        return nullptr;
+    }
+
+#ifdef FF_SOUND_ALSA
+    // No server answered. A machine that runs none still has the hardware, and that is what is
+    // asked here -- but only ever after the server, never instead of it: on a machine that runs
+    // one, the server's answer is the desktop's, and the mixer behind it is not the same number.
+    FF_DEBUG("PulseAudio is not answering (%s), so the ALSA cards are read instead", error);
+
+    const uint32_t detected = devices->length;
+    const char* alsaError = detectAlsa(options, devices);
+    if (alsaError == nullptr || devices->length > detected) {
+        // ALSA answered. Its list may still be empty after the filter, which is the same answer
+        // the server path gives when nothing matches, and not a failure.
+        return nullptr;
+    }
+
+    FF_DEBUG("Reading the ALSA cards failed as well: %s", alsaError);
+#endif
+
+    return error;
 }

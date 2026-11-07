@@ -63,6 +63,13 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg) {
     }
 }
 
+// strtol() to an int32_t. Values that don't fit are clamped instead of wrapping around,
+// so that e.g. 4294967297 can't turn into 1.
+static int32_t strToInt32(const char* str, char** pEnd) {
+    long long value = strtoll(str, pEnd, 10);
+    return value > INT32_MAX ? INT32_MAX : value < INT32_MIN ? INT32_MIN : (int32_t) value;
+}
+
 /**
  * @brief parses a string to a uint32_t
  *
@@ -79,14 +86,14 @@ static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs,
 
     if (firstChar >= '0' && firstChar <= '9') {
         char* pEnd = nullptr;
-        uint32_t result = (uint32_t) strtoul(placeholderValue, &pEnd, 10);
+        unsigned long result = strtoul(placeholderValue, &pEnd, 10);
         if (result > numArgs) {
             return UINT32_MAX;
         }
         if (*pEnd != '\0') {
             return UINT32_MAX;
         }
-        return result;
+        return (uint32_t) result;
     } else if (ffCharIsEnglishAlphabet(firstChar)) {
         for (uint32_t i = 0; i < numArgs; ++i) {
             const FFformatarg* arg = &arguments[i];
@@ -343,6 +350,51 @@ static bool skipAnsiEscape(FFstrbuf* in, FFstrbuf* out, FFstrbuf* trailingEscape
     return true;
 }
 
+// Returns the index of the `}` of the `{<marker>}` that closes the conditional we are in, or the
+// length of the format string if there is none. `i` is the index of the `}` that ends the opening
+// placeholder. The part to skip may hold conditionals of its own, which have to be passed over.
+// Like in `parseFormatString`, only a conditional with a valid argument opens a block.
+static uint32_t findConditionalEnd(const FFstrbuf* formatstr, uint32_t i, char marker, uint32_t numArgs, const FFformatarg* arguments) {
+    FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
+    uint32_t depth = 0;
+
+    for (++i; i < formatstr->length; ++i) {
+        if (formatstr->chars[i] != '{') {
+            continue;
+        }
+
+        ++i;
+        if (i >= formatstr->length) {
+            break;
+        }
+
+        // double {{ evaluates to a single { and doesn't start a placeholder
+        if (formatstr->chars[i] == '{') {
+            continue;
+        }
+
+        uint32_t iEnd = ffStrbufNextIndexC(formatstr, i, '}');
+        if (formatstr->chars[i] == marker) {
+            if (iEnd - i == 1) {
+                if (depth == 0) {
+                    return iEnd;
+                }
+                --depth;
+            } else {
+                ffStrbufClear(&placeholderValue);
+                ffStrbufAppendNS(&placeholderValue, iEnd - i - 1, &formatstr->chars[i + 1]);
+                uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
+                if (index >= 1 && index <= numArgs) {
+                    ++depth;
+                }
+            }
+        }
+        i = iEnd;
+    }
+
+    return formatstr->length;
+}
+
 static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments) {
     uint32_t argCounter = 0;
 
@@ -440,7 +492,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" - 1 because the loop will increment it again directly after continue
+            i = findConditionalEnd(formatstr, i, '?', numArgs, arguments);
             continue;
         }
 
@@ -463,7 +515,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" - 1 because the loop will increment it again directly after continue
+            i = findConditionalEnd(formatstr, i, '/', numArgs, arguments);
             continue;
         }
 
@@ -480,7 +532,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
         // test for constant or env var, if so evaluate it
         if (firstChar == '$') {
             char* pend = nullptr;
-            int32_t indexSigned = (int32_t) strtol(placeholderValue.chars + 1, &pend, 10);
+            int32_t indexSigned = strToInt32(placeholderValue.chars + 1, &pend);
             if (pend == placeholderValue.chars + 1) {
                 // treat placeholder as an environment variable
                 char* envValue = getenv(placeholderValue.chars + 1);
@@ -539,20 +591,27 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             skipAnsiEscape(&tempString, buffer, &trailingEscape);
 
             char* pEnd = nullptr;
-            int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
-            if (start < 0) {
-                start = (int32_t) tempString.length + start;
+            int32_t start = strToInt32(pSep + 1, &pEnd);
+            bool hasEnd = *pEnd == ',';
+            int32_t end = 0;
+            if (hasEnd) {
+                end = strToInt32(pEnd + 1, &pEnd);
             }
-            if (start >= 0 && (uint32_t) start < tempString.length) {
-                if (*pEnd == '\0') {
-                    ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
-                } else if (*pEnd == ',') {
-                    int32_t end = (int32_t) strtol(pEnd + 1, &pEnd, 10);
-                    if (!*pEnd) {
+
+            // Check the whole range before using it, so that a valid range that lies
+            // outside of the string gives an empty result instead of an invalid placeholder
+            if (!*pEnd) {
+                if (start < 0) {
+                    start = (int32_t) tempString.length + start;
+                }
+                if (start >= 0 && (uint32_t) start < tempString.length) {
+                    if (!hasEnd) {
+                        ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
+                    } else {
                         if (end < 0) {
                             end = (int32_t) tempString.length + end;
                         }
-                        if ((uint32_t) end > tempString.length) {
+                        if (end >= 0 && (uint32_t) end > tempString.length) {
                             end = (int32_t) tempString.length;
                         }
                         if (end > start) {
@@ -573,7 +632,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             }
         } else {
             char* pEnd = nullptr;
-            int32_t truncLength = (int32_t) strtol(pSep + 1, &pEnd, 10);
+            int32_t truncLength = strToInt32(pSep + 1, &pEnd);
             if (*pEnd != '\0') {
                 *pSep = cSep;
                 appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
@@ -583,7 +642,7 @@ static bool parseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint3
             bool ellipsis = false;
             if (truncLength < 0) {
                 ellipsis = true;
-                truncLength = -truncLength;
+                truncLength = truncLength == INT32_MIN ? INT32_MAX : -truncLength;
             }
 
             FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();

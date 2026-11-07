@@ -13,6 +13,7 @@
         #define LUALIB_API LUA_API
         #define LUAMOD_API LUA_API
 
+        // Note: `#pragma GCC diagnostic push` is intentionally omitted here.
         #pragma GCC diagnostic ignored "-Wunused-function"
     #endif
 
