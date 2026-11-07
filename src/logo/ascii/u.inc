@@ -275,6 +275,17 @@ static const FFlogo U[] = {
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_URANIUM
+    // Uranium
+    {
+        .names = { "Uranium" },
+        .lines = FASTFETCH_DATATEXT_LOGO_URANIUM,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLACK,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_URUKOS
     // UrukOS
     {
