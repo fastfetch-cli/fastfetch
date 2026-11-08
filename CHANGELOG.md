@@ -1,5 +1,8 @@
 # Unreleased
 
+Changes:
+* Improved PCI GPU name resolution by checking udev's hardware database and the NVIDIA driver's procfs before falling back to pci.ids. (GPU, Linux)
+
 Bugfixes:
 * Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
 
