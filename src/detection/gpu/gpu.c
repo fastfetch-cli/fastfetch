@@ -341,7 +341,7 @@ bool ffGPUDetectTypeByVendorAndName(FFGPUResult* gpu) {
     } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) {
         // 0000:00:02.0 is reserved for Intel integrated graphics
         gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-    } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_VMWARE || gpu->vendor.chars == FF_GPU_VENDOR_NAME_PARALLELS) {
+    } else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_VMWARE || gpu->vendor.chars == FF_GPU_VENDOR_NAME_PARALLELS || gpu->vendor.chars == FF_GPU_VENDOR_NAME_REDHAT) {
         // Virtualized GPUs
         gpu->type = FF_GPU_TYPE_INTEGRATED;
     }
