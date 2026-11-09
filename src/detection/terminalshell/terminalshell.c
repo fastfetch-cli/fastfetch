@@ -414,7 +414,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version) 
     if (ffStrEqualsIgnCase(exeName, "fish")) {
         return getShellVersionFish(exe, version);
     }
-    if (ffStrEqualsIgnCase(exeName, "pwsh")) {
+    if (ffStrEqualsIgnCase(exeName, "pwsh") || ffStrEqualsIgnCase(exeName, "pwsh-preview")) {
         return getShellVersionPwsh(exe, version);
     }
     if (ffStrEqualsIgnCase(exeName, "csh") || ffStrEqualsIgnCase(exeName, "tcsh")) {
