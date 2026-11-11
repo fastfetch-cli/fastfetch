@@ -323,7 +323,7 @@ void ffStrbufTrimLeftSpace(FFstrbuf* strbuf) {
     }
 
     uint32_t index = 0;
-    while (index < strbuf->length && isspace(strbuf->chars[index])) {
+    while (index < strbuf->length && isspace((unsigned char)strbuf->chars[index])) {
         ++index;
     }
 

@@ -26,6 +26,8 @@ int main(void) {
         VERIFY(ffStrSet("a"));
         VERIFY(ffStrSet(" a"));
         VERIFY(ffStrSet("a "));
+        VERIFY(ffStrSet("\x80"));
+        VERIFY(ffStrSet("\xff"));
     }
 
     {
