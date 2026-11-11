@@ -39,8 +39,10 @@ const char* ffDetectInitSystem(FFInitSystemResult* result) {
         // In some old system, /sbin/init is a symlink
         char buf[PATH_MAX];
         if (realpath(result->exe.chars, buf)) {
+            char baseBuf[PATH_MAX];
+            ffStrCopy(baseBuf, buf, sizeof(baseBuf));
+            ffStrbufSetS(&result->name, basename(baseBuf));
             ffStrbufSetS(&result->exe, buf);
-            ffStrbufSetS(&result->name, basename(result->exe.chars));
         }
     }
 
