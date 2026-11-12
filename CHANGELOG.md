@@ -30,6 +30,7 @@ Bugfixes:
     * It is now decoded from the AArch64 ID registers in the registry, matching the Linux detection.
 
 Logos:
+* Added SpaceOS 9 (#2692)
 * Added Tiny Core Linux (#2655)
 * Added ArmadaOS (#2649)
 * Added AstrOS (#2582)
