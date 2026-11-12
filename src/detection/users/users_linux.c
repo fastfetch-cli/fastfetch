@@ -15,6 +15,7 @@
     #define utmpx utmp
     #define setutxent setutent
     #define getutxent getutent
+    #define endutxent endutent
 #endif
 #if __linux__ || __GNU__
     #include <netinet/in.h>
