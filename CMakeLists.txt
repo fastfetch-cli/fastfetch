@@ -1927,6 +1927,20 @@ ff_lib_enable(ELF
     "libelf"
     "libelf"
 )
+# xcb-randr and xrandr only list libxcb and libX11 in Requires.private, but
+# fastfetch calls into them directly, so link them explicitly.
+if(NOT BINARY_LINK_TYPE STREQUAL "dlopen" AND PKG_CONFIG_FOUND)
+    if(XCB_RANDR_FOUND)
+        pkg_check_modules(XCB QUIET xcb)
+        target_link_directories(libfastfetch PRIVATE ${XCB_LIBRARY_DIRS})
+        target_link_libraries(libfastfetch PRIVATE ${XCB_LIBRARIES})
+    endif()
+    if(XRANDR_FOUND OR GLX_FOUND OR VAX11_FOUND)
+        pkg_check_modules(X11 QUIET x11)
+        target_link_directories(libfastfetch PRIVATE ${X11_LIBRARY_DIRS})
+        target_link_libraries(libfastfetch PRIVATE ${X11_LIBRARIES})
+    endif()
+endif()
 if(ENABLE_LUA)
     # Lua is a special case since its CMake config does not follow the usual pattern
     find_package(Lua QUIET)
