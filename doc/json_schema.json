@@ -665,7 +665,7 @@
                         },
                         "source": {
                             "type": "string",
-                            "description": "Path to the logo source file. For the spin logo: `auto` (the detected OS), any built-in logo name, or a text file in fastfetch logo syntax"
+                            "description": "Path to the logo source file. Environment variables (`%VAR%` on Windows, `$VAR` or `${VAR}`) and glob patterns (`*`, `?`, `[...]`) are expanded. If several files match a glob, one is selected randomly. For the spin logo: `auto` (the detected OS), any built-in logo name, or a text file in fastfetch logo syntax"
                         },
                         "spin": {
                             "type": "object",

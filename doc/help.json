@@ -176,7 +176,7 @@
             "short": "l",
             "long": "logo",
             "desc": "Set the logo source. Use \"none\" to disable logo output",
-            "remark": "Use either a built-in logo name or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "remark": "Use either a built-in logo name or a path to an image file. Environment variables and glob patterns are expanded; if several files match a glob, one is selected randomly. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
             }

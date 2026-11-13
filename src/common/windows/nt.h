@@ -778,6 +778,9 @@ NTSYSAPI NTSTATUS NTAPI RtlUTF8ToUnicodeN(
     _In_reads_bytes_(UTF8StringByteCount) PCCH UTF8StringSource,
     _In_ ULONG UTF8StringByteCount);
 
+NTSYSAPI WCHAR NTAPI RtlUpcaseUnicodeChar(
+    _In_ WCHAR SourceCharacter);
+
 #define RTL_MAX_DRIVE_LETTERS 32
 typedef struct _RTL_DRIVE_LETTER_CURDIR {
     USHORT Flags;
