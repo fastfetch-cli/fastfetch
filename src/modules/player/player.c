@@ -49,7 +49,7 @@ bool ffPrintPlayer(FFPlayerOptions* options) {
 
     // If we don't have subdomains, it is usually more pretty to capitalize the first letter.
     if (playerPrettyIsCustom && ffStrbufFirstIndexC(&playerPretty, '.') == playerPretty.length) {
-        playerPretty.chars[0] = (char) toupper(playerPretty.chars[0]);
+        playerPretty.chars[0] = (char) toupper((unsigned char) playerPretty.chars[0]);
     }
 
     if (playerPrettyIsCustom) {
