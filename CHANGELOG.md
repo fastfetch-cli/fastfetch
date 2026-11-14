@@ -5,6 +5,8 @@ Changes:
 
 Bugfixes:
 * Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
+* Fixed feature detection and linking failing with `BINARY_LINK_TYPE=dynamic` when linking with LLD, which does not support `--copy-dt-needed-entries`. (CMake)
+* Fixed building when `utmpx.h` is unavailable. (Users, Linux)
 
 # 2.71.0
 
