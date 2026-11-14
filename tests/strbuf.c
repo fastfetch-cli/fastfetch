@@ -397,6 +397,14 @@ int main(void) {
     VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
     ffStrbufDestroy(&strbuf);
 
+    // ffStrbufUpperCase & ffStrbufLowerCase
+    ffStrbufInitS(&strbuf, "Hello, World! \x80\xff");
+    ffStrbufUpperCase(&strbuf);
+    VERIFY(ffStrbufEqualS(&strbuf, "HELLO, WORLD! \x80\xff"));
+    ffStrbufLowerCase(&strbuf);
+    VERIFY(ffStrbufEqualS(&strbuf, "hello, world! \x80\xff"));
+    ffStrbufDestroy(&strbuf);
+
     // ffStrbufEnsureFixedLengthFree / empty buffer
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);

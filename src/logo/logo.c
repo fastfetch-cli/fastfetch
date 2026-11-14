@@ -366,11 +366,11 @@ static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small) {
 }
 
 static const FFlogo* logoGetBuiltin(const FFstrbuf* name, FFLogoSize size) {
-    if (name->length == 0 || !isalpha(name->chars[0])) {
+    if (name->length == 0 || !isalpha((unsigned char) name->chars[0])) {
         return nullptr;
     }
 
-    for (const FFlogo* logo = ffLogoBuiltins[toupper(name->chars[0]) - 'A']; *logo->names; ++logo) {
+    for (const FFlogo* logo = ffLogoBuiltins[toupper((unsigned char) name->chars[0]) - 'A']; *logo->names; ++logo) {
         switch (size) {
             // Never use alternate logos
             case FF_LOGO_SIZE_NORMAL:
