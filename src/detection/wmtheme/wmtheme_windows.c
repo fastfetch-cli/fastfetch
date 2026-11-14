@@ -117,8 +117,8 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
             if (ffRegReadStrbuf(hKey, L"CurrentTheme", &theme, nullptr)) {
                 ffStrbufSubstrBeforeLastC(&theme, '.');
                 ffStrbufSubstrAfterLastC(&theme, '\\');
-                if (isalpha(theme.chars[0])) {
-                    theme.chars[0] = (char) toupper(theme.chars[0]);
+                if (isalpha((unsigned char) theme.chars[0])) {
+                    theme.chars[0] = (char) toupper((unsigned char) theme.chars[0]);
                 }
 
                 ffStrbufAppend(themeOrError, &theme);

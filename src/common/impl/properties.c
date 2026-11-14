@@ -34,7 +34,7 @@ bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buff
         }
 
         // Line doesn't match start, skip it
-        if (tolower(**line) != tolower(*start) || **line == '\0') {
+        if (tolower((unsigned char) **line) != tolower((unsigned char) *start) || **line == '\0') {
             return false;
         }
 
