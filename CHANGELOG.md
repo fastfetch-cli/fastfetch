@@ -1,5 +1,8 @@
 # Unreleased
 
+Features:
+* Added `--logo-fallback` / `logo.fallback` option to specify a fallback logo when the primary logo fails to print. (Logo)
+
 Changes:
 * Improved PCI GPU name resolution by checking udev's hardware database and the NVIDIA driver's procfs before falling back to pci.ids. (GPU, Linux)
 

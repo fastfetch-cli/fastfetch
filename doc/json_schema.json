@@ -930,6 +930,10 @@
                                     ]
                                 }
                             }
+                        },
+                        "fallback": {
+                            "description": "Fallback logo configuration used if the primary logo fails to print",
+                            "$ref": "#/properties/logo"
                         }
                     }
                 }

@@ -446,6 +446,7 @@ static void logoPrintStruct(const FFlogo* logo) {
 }
 
 static void logoPrintNone(void) {
+    logoLineCacheClear(&instance.state.logoLineCache);
     if (!instance.config.display.pipe) {
         ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     }
@@ -492,6 +493,10 @@ static bool logoPrintData(bool doColorReplacement, FFstrbuf* source) {
 
 static bool updateLogoPath(void) {
     FFOptionsLogo* options = &instance.config.logo;
+
+    if (options->source.length == 0) {
+        return false;
+    }
 
     if (ffPathExists(options->source.chars, FF_PATHTYPE_FILE)) {
         return true;
@@ -549,11 +554,15 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw) {
         return false;
     }
 
-    ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     if (raw) {
-        return ffLogoPrintCharsRaw(content.chars, content.length, instance.config.display.showErrors);
+        if (!ffLogoPrintCharsRaw(content.chars, content.length, instance.config.display.showErrors)) {
+            return false;
+        }
+        ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
+        return true;
     }
 
+    ffLogoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     ffLogoPrintChars(content.chars, doColorReplacement);
     return true;
 }
@@ -647,23 +656,22 @@ static bool logoTryKnownType(void) {
 #endif
 }
 
-void ffLogoPrint(void) {
+static bool logoTryPrint(void) {
     const FFOptionsLogo* options = &instance.config.logo;
 
     if (options->type == FF_LOGO_TYPE_NONE) {
         logoPrintNone();
-        return;
+        return true;
     }
 
     if (options->type == FF_LOGO_TYPE_SPIN) {
-        ffSpinLogoPrint();
-        return;
+        return ffSpinLogoPrint();
     }
 
     // If the source is not set, we can directly print the detected logo.
     if (options->source.length == 0) {
         ffLogoPrintDetected(options->type == FF_LOGO_TYPE_SMALL ? FF_LOGO_SIZE_SMALL : FF_LOGO_SIZE_NORMAL);
-        return;
+        return true;
     }
 
     // If the source and source type is set to something else than auto, always print with the set type.
@@ -676,21 +684,21 @@ void ffLogoPrint(void) {
                 }
             }
 
-            ffLogoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+            return false;
         }
-        return;
+        return true;
     }
 
     // If source matches the name of a builtin logo, print it and return.
     if (logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_UNKNOWN)) {
-        return;
+        return true;
     }
 
     // Make sure the logo path is set correctly.
     if (updateLogoPath()) {
         if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw")) {
             if (logoPrintFileIfExists(false, true)) {
-                return;
+                return true;
             }
         }
 
@@ -703,7 +711,7 @@ void ffLogoPrint(void) {
             bool supportsIterm2 = ffStrbufEqualS(&terminal->prettyName, "iTerm");
 
             if (supportsIterm2 && logoPrintImageIfExists(FF_LOGO_TYPE_IMAGE_ITERM, false)) {
-                return;
+                return true;
             }
 
             // Terminal emulators that support kitty graphics protocol.
@@ -725,14 +733,14 @@ void ffLogoPrint(void) {
 
             // Try to load the logo as an image. If it succeeds, print it and return.
             if (logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false)) {
-                return;
+                return true;
             }
         }
 #endif
 
         // Try to load the logo as a file. If it succeeds, print it and return.
         if (logoPrintFileIfExists(true, false)) {
-            return;
+            return true;
         }
     } else {
         if (instance.config.display.showErrors) {
@@ -740,7 +748,16 @@ void ffLogoPrint(void) {
         }
     }
 
-    ffLogoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+    return false;
+}
+
+void ffLogoPrint(void) {
+    while (!logoTryPrint()) {
+        if (!ffOptionsActivateLogoFallback(&instance.config.logo)) {
+            ffLogoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+            break;
+        }
+    }
 }
 
 void ffLogoPrintLine(void) {

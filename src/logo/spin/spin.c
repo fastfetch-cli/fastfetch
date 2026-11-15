@@ -53,22 +53,20 @@ static bool spinLoadFile(const FFstrbuf* source, FFstrbuf* text) {
     return ffAppendFileBuffer(source->chars, text) && text->length > 0;
 }
 
-void ffSpinLogoPrint(void) {
+static void spinRestoreEmptyDisplayColors(bool hadColorKeys, bool hadColorTitle) {
+    if (!hadColorKeys) {
+        ffStrbufClear(&instance.config.display.colorKeys);
+    }
+    if (!hadColorTitle) {
+        ffStrbufClear(&instance.config.display.colorTitle);
+    }
+}
+
+bool ffSpinLogoPrint(void) {
     FFOptionsLogo* options = &instance.config.logo;
     FFLogoSpinState* state = &instance.state.logoSpin;
     instance.state.logoWidth = 0;
     instance.state.logoHeight = 0;
-
-    if (!state->started) {
-        // The first frame starts where `logo.spin.angle` says, and every
-        // `--watch` refresh turns it by one step.
-        state->started = true;
-        state->degrees = fmodf(options->spin.angle, 360.0f);
-        if (state->degrees < 0.0f) {
-            state->degrees += 360.0f;
-        }
-    }
-    const float spinAngle = state->degrees * (float) M_PI / 180.0f;
 
     // The source is the detected OS (`auto`), a builtin logo name, or a file
     // in fastfetch's logo syntax, like the other text logo types.
@@ -81,7 +79,22 @@ void ffSpinLogoPrint(void) {
         if (instance.config.display.showErrors) {
             fprintf(stderr, "Logo (spin): no builtin logo or readable file named %s\n", options->source.chars);
         }
+        return false;
     }
+
+    float degrees = state->degrees;
+    if (!state->started) {
+        // The first frame starts where `logo.spin.angle` says, and every
+        // `--watch` refresh turns it by one step.
+        degrees = fmodf(options->spin.angle, 360.0f);
+        if (degrees < 0.0f) {
+            degrees += 360.0f;
+        }
+    }
+    const float spinAngle = degrees * (float) M_PI / 180.0f;
+
+    const bool hadColorKeys = instance.config.display.colorKeys.length > 0;
+    const bool hadColorTitle = instance.config.display.colorTitle.length > 0;
 
     // `logo.color.N` on top of the logo's own colors; a file logo borrows the
     // detected logo's palette, as the other text logo types do.
@@ -89,8 +102,9 @@ void ffSpinLogoPrint(void) {
 
     FFSpinArt art = {};
     if (!ffSpinArtParse(&art, logo ? logo->lines : fileText.chars, options->colors, FASTFETCH_LOGO_MAX_COLORS)) {
+        spinRestoreEmptyDisplayColors(hadColorKeys, hadColorTitle);
         ffSpinArtDestroy(&art); // parse may have allocated before it gave up
-        return;
+        return false;
     }
 
     const float tilt = options->spin.tilt * (float) M_PI / 180.0f;
@@ -107,8 +121,9 @@ void ffSpinLogoPrint(void) {
 
     FFSpinFrame frame = {};
     if (!ffSpinFrameInit(&frame, width, height)) {
+        spinRestoreEmptyDisplayColors(hadColorKeys, hadColorTitle);
         ffSpinArtDestroy(&art);
-        return;
+        return false;
     }
 
     if (spinAngle == 0.0f && tilt == 0.0f) {
@@ -142,10 +157,13 @@ void ffSpinLogoPrint(void) {
     ffSpinFrameDestroy(&frame);
     ffSpinArtDestroy(&art);
 
+    state->started = true;
+    state->degrees = degrees;
     state->printed = true;
     state->printedWidth = width;
     state->printedHeight = height;
     state->lastDrawMs = ffTimeGetTick(); // start measuring the next step from now
+    return true;
 }
 
 bool ffSpinTick(void) {

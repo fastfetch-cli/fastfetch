@@ -98,6 +98,30 @@ void ffOptionsInitLogo(FFOptionsLogo* options) {
     options->chafaColorSpace = UINT32_MAX;
     options->chafaDitherMode = UINT32_MAX;
 #endif
+    options->fallback = nullptr;
+}
+
+static void logoSetTypeNone(FFOptionsLogo* options) {
+    options->type = FF_LOGO_TYPE_NONE;
+    options->paddingTop = 0;
+    options->paddingBottom = 0;
+    options->paddingRight = 0;
+    options->paddingLeft = 0;
+}
+
+static void logoParseSourceFlag(FFOptionsLogo* options, const char* key, const char* value) {
+    if (value == nullptr) {
+        fprintf(stderr, "Error: usage: %s <none|small|logo-source>\n", key);
+        exit(477);
+    }
+    // this is usually wanted when disabling logo
+    if (ffStrEqualsIgnCase(value, "none")) {
+        logoSetTypeNone(options);
+    } else if (ffStrEqualsIgnCase(value, "small")) {
+        options->type = FF_LOGO_TYPE_SMALL;
+    } else {
+        ffOptionParseString(key, value, &options->source);
+    }
 }
 
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value) {
@@ -109,18 +133,15 @@ bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, cons
     if (subKey) {
         if (subKey[0] == '\0') {
         logoType:
-            if (value == nullptr) {
-                fprintf(stderr, "Error: usage: %s <none|small|logo-source>\n", key);
-                exit(477);
-            }
-            // this is usually wanted when disabling logo
-            if (ffStrEqualsIgnCase(value, "none")) {
-                options->type = FF_LOGO_TYPE_NONE;
-            } else if (ffStrEqualsIgnCase(value, "small")) {
-                options->type = FF_LOGO_TYPE_SMALL;
+            logoParseSourceFlag(options, key, value);
+        } else if (ffStrEqualsIgnCase(subKey, "fallback")) {
+            if (!options->fallback) {
+                options->fallback = malloc(sizeof(FFOptionsLogo));
             } else {
-                ffOptionParseString(key, value, &options->source);
+                ffOptionsDestroyLogo(options->fallback);
             }
+            ffOptionsInitLogo(options->fallback);
+            logoParseSourceFlag(options->fallback, key, value);
         } else if (ffStrEqualsIgnCase(subKey, "type")) {
             options->type = (FFLogoType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                                                                            { "auto", FF_LOGO_TYPE_AUTO },
@@ -305,30 +326,50 @@ void ffOptionsDestroyLogo(FFOptionsLogo* options) {
     for (uint8_t i = 0; i < (uint8_t) FASTFETCH_LOGO_MAX_COLORS; ++i) {
         ffStrbufDestroy(&options->colors[i]);
     }
+    if (options->fallback) {
+        ffOptionsDestroyLogo(options->fallback);
+        free(options->fallback);
+        options->fallback = nullptr;
+    }
 }
 
-const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey) {
-    yyjson_val* object = yyjson_obj_get(root, "logo");
-    if (!object) {
-        return nullptr;
+bool ffOptionsActivateLogoFallback(FFOptionsLogo* options) {
+    if (!options->fallback) {
+        return false;
     }
+    FFOptionsLogo* next = options->fallback;
+    options->fallback = nullptr;
+    ffOptionsDestroyLogo(options);
+    *options = *next;
+    free(next);
+    return true;
+}
+
+enum { FF_LOGO_MAX_FALLBACK_DEPTH = 16 };
+
+static const char* parseLogoJsonValue(FFOptionsLogo* options, yyjson_val* object, yyjson_val** pkey, uint32_t depth) {
     if (yyjson_is_null(object)) {
-        options->type = FF_LOGO_TYPE_NONE;
-        options->paddingTop = 0;
-        options->paddingBottom = 0;
-        options->paddingRight = 0;
-        options->paddingLeft = 0;
+        logoSetTypeNone(options);
         return nullptr;
     }
 
     if (yyjson_is_str(object)) {
-        ffStrbufSetJsonVal(&options->source, object);
+        const char* str = unsafe_yyjson_get_str(object);
+        if (ffStrEqualsIgnCase(str, "none")) {
+            logoSetTypeNone(options);
+        } else if (ffStrEqualsIgnCase(str, "small")) {
+            options->type = FF_LOGO_TYPE_SMALL;
+        } else {
+            ffStrbufSetJsonVal(&options->source, object);
+        }
         return nullptr;
     }
 
     if (!yyjson_is_obj(object)) {
-        return "Property 'logo' must be an object";
+        return depth > 0 ? "Fallback logo must be a string, null, or an object" : "Property 'logo' must be an object";
     }
+
+    const bool hasFallback = yyjson_obj_get(object, "fallback") != nullptr;
 
     yyjson_val *key, *val;
     size_t idx, max;
@@ -361,7 +402,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 return error;
             }
 #if !FF_HAVE_IMAGE_LOGO
-            if (logoTypeIsImage((FFLogoType) value)) {
+            if (!hasFallback && logoTypeIsImage((FFLogoType) value)) {
                 return "Image logo types are not supported because Fastfetch was built without image logo support";
             }
 #endif
@@ -579,8 +620,29 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             continue;
 #else
-            return "Chafa options are not supported because Fastfetch was built without Chafa support";
+            if (!hasFallback) {
+                return "Chafa options are not supported because Fastfetch was built without Chafa support";
+            }
+            if (!yyjson_is_obj(val)) {
+                return "Logo chafa options must be an object";
+            }
+            continue;
 #endif
+        } else if (unsafe_yyjson_equals_str(key, "fallback")) {
+            if (depth >= FF_LOGO_MAX_FALLBACK_DEPTH) {
+                return "Logo fallback nesting is too deep";
+            }
+            if (!options->fallback) {
+                options->fallback = malloc(sizeof(FFOptionsLogo));
+            } else {
+                ffOptionsDestroyLogo(options->fallback);
+            }
+            ffOptionsInitLogo(options->fallback);
+            const char* error = parseLogoJsonValue(options->fallback, val, pkey, depth + 1);
+            if (error) {
+                return error;
+            }
+            continue;
         } else {
             return "Unknown logo key";
         }
@@ -589,15 +651,25 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     return nullptr;
 }
 
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey) {
+    yyjson_val* object = yyjson_obj_get(root, "logo");
+    if (!object) {
+        return nullptr;
+    }
+    return parseLogoJsonValue(options, object, pkey, 0);
+}
+
 [[gnu::cold]]
-void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
-    yyjson_mut_doc* doc = data->resultDoc;
+static yyjson_mut_val* generateLogoJsonValue(yyjson_mut_doc* doc, FFOptionsLogo* options) {
+    if (options->type == FF_LOGO_TYPE_NONE) {
+        return yyjson_mut_null(doc);
+    }
+
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
 
     switch (options->type) {
         case FF_LOGO_TYPE_NONE:
-            yyjson_mut_obj_add_null(doc, doc->root, "logo");
-            return;
+            return obj;
         case FF_LOGO_TYPE_BUILTIN:
             yyjson_mut_obj_add_str(doc, obj, "type", "builtin");
             break;
@@ -619,7 +691,6 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_COMMAND_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
             break;
-#if FF_HAVE_IMAGE_LOGO
         case FF_LOGO_TYPE_IMAGE_SIXEL:
             yyjson_mut_obj_add_str(doc, obj, "type", "sixel");
             break;
@@ -638,7 +709,6 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
         case FF_LOGO_TYPE_IMAGE_CHAFA:
             yyjson_mut_obj_add_str(doc, obj, "type", "chafa");
             break;
-#endif
         case FF_LOGO_TYPE_IMAGE_RAW:
             yyjson_mut_obj_add_str(doc, obj, "type", "raw");
             break;
@@ -748,5 +818,14 @@ void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
     }
 #endif
 
-    yyjson_mut_obj_add_val(doc, doc->root, "logo", obj);
+    if (options->fallback) {
+        yyjson_mut_obj_add_val(doc, obj, "fallback", generateLogoJsonValue(doc, options->fallback));
+    }
+
+    return obj;
+}
+
+[[gnu::cold]]
+void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options) {
+    yyjson_mut_obj_add_val(data->resultDoc, data->resultDoc->root, "logo", generateLogoJsonValue(data->resultDoc, options));
 }

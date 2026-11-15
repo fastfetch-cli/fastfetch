@@ -78,11 +78,13 @@ typedef struct FFOptionsLogo {
     uint32_t chafaColorSpace;
     uint32_t chafaDitherMode;
 #endif
+    struct FFOptionsLogo* fallback;
 } FFOptionsLogo;
 
 const char* ffLogoPositionToString(FFLogoPosition position);
 void ffOptionsInitLogo(FFOptionsLogo* options);
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
 void ffOptionsDestroyLogo(FFOptionsLogo* options);
+bool ffOptionsActivateLogoFallback(FFOptionsLogo* options);
 const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root, yyjson_val** pkey);
 void ffOptionsGenerateLogoJsonConfig(FFdata* data, FFOptionsLogo* options);

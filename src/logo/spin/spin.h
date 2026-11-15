@@ -8,7 +8,7 @@
 // loop calls `ffSpinTick` once per refresh, which is what makes it turn.
 
 // Draws the current frame. Called from `ffLogoPrint`.
-void ffSpinLogoPrint(void);
+bool ffSpinLogoPrint(void);
 
 // Advances the rotation by one `--watch` refresh and returns true when the logo
 // has to be drawn again, so a still logo or any other logo type costs a single
