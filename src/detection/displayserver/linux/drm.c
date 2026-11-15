@@ -60,7 +60,9 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         ffStrbufAppendS(&drmDir, "/modes");
 
         char modes[32];
-        if (ffReadFileData(drmDir.chars, ARRAY_SIZE(modes), modes) >= 3) {
+        ssize_t modesLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(modes) - 1, modes);
+        if (modesLength >= 3) {
+            modes[modesLength] = '\0'; // sscanf requires a NUL-terminated string
             // This is actually preferred resolution
             sscanf(modes, "%ux%u", &width, &height);
             ffStrbufAppendS(&name, plainName);
