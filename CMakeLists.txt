@@ -2497,6 +2497,13 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-edid
+        tests/edid.c
+    )
+    target_link_libraries(fastfetch-test-edid
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
@@ -2518,6 +2525,9 @@ if (BUILD_TESTS)
     add_test(NAME test-endian COMMAND fastfetch-test-endian)
     add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
     add_test(NAME test-gpu-pci COMMAND fastfetch-test-gpu-pci)
+    add_test(NAME test-edid COMMAND fastfetch-test-edid)
+    # A regression in the EDID parser can turn the scan into an infinite loop.
+    set_tests_properties(test-edid PROPERTIES TIMEOUT 30)
 endif()
 
 ##################
