@@ -74,6 +74,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         uint8_t edidData[1024];
         ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
         if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
+            ffStrbufClear(&name);
             ffEdidGetName(edidData, &name);
             ffEdidGetPreferredResolutionAndRefreshRate(edidData, &preferredWidth, &preferredHeight, &preferredRefreshRate);
             ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
