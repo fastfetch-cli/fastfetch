@@ -48,9 +48,6 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         double preferredRefreshRate = 0;
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
-        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
-        ffStrbufAppendS(&drmDir, "/edid");
-
         const char* plainName = entry->d_name;
         if (ffStrStartsWith(plainName, "card")) {
             const char* tmp = strchr(plainName + strlen("card"), '-');
@@ -68,6 +65,9 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
             sscanf(modes, "%ux%u", &width, &height);
             ffStrbufAppendS(&name, plainName);
         }
+
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+        ffStrbufAppendS(&drmDir, "/edid");
 
         uint8_t edidData[1024];
         ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
