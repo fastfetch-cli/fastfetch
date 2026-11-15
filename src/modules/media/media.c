@@ -7,7 +7,7 @@
 #include <ctype.h>
 
 static inline bool shouldIgnoreChar(char c) {
-    return isblank(c) || c == '-' || c == '.';
+    return isblank((unsigned char) c) || c == '-' || c == '.';
 }
 
 static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist) {
@@ -31,7 +31,7 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist) {
             return false;
         }
 
-        if (tolower(song->chars[songIndex]) != tolower(artist->chars[artistIndex])) {
+        if (tolower((unsigned char) song->chars[songIndex]) != tolower((unsigned char) artist->chars[artistIndex])) {
             return false;
         }
 

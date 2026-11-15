@@ -28,7 +28,7 @@ static inline bool ffStrSet(const char* str) {
         return false;
     }
 
-    while (isspace(*str)) {
+    while (isspace((unsigned char)*str)) {
         str++;
     }
 

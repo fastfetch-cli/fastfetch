@@ -48,9 +48,6 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         double preferredRefreshRate = 0;
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
-        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
-        ffStrbufAppendS(&drmDir, "/edid");
-
         const char* plainName = entry->d_name;
         if (ffStrStartsWith(plainName, "card")) {
             const char* tmp = strchr(plainName + strlen("card"), '-');
@@ -63,15 +60,21 @@ static const char* drmParseSysfs(FFDisplayServerResult* result) {
         ffStrbufAppendS(&drmDir, "/modes");
 
         char modes[32];
-        if (ffReadFileData(drmDir.chars, ARRAY_SIZE(modes), modes) >= 3) {
+        ssize_t modesLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(modes) - 1, modes);
+        if (modesLength >= 3) {
+            modes[modesLength] = '\0'; // sscanf requires a NUL-terminated string
             // This is actually preferred resolution
             sscanf(modes, "%ux%u", &width, &height);
             ffStrbufAppendS(&name, plainName);
         }
 
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+        ffStrbufAppendS(&drmDir, "/edid");
+
         uint8_t edidData[1024];
         ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
         if (edidLength > 0 && ffEdidIsValid(edidData, (uint32_t) edidLength)) {
+            ffStrbufClear(&name);
             ffEdidGetName(edidData, &name);
             ffEdidGetPreferredResolutionAndRefreshRate(edidData, &preferredWidth, &preferredHeight, &preferredRefreshRate);
             ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);

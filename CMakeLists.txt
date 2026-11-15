@@ -1148,6 +1148,7 @@ elseif(WIN32)
         src/common/windows/getline.c
         src/common/windows/com.c
         src/common/windows/folders.c
+        src/common/windows/glob.c
         src/common/windows/registry.c
         src/common/windows/unicode.c
         src/common/windows/variant.cpp
@@ -2371,6 +2372,15 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    if (WIN32)
+        add_executable(fastfetch-test-glob
+            tests/glob.c
+        )
+        target_link_libraries(fastfetch-test-glob
+            PRIVATE libfastfetch
+        )
+    endif()
+
     add_executable(fastfetch-test-spin
         tests/spin.c
     )
@@ -2497,9 +2507,19 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-edid
+        tests/edid.c
+    )
+    target_link_libraries(fastfetch-test-edid
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-cache COMMAND fastfetch-test-cache)
     add_test(NAME test-logo COMMAND fastfetch-test-logo)
+    if (WIN32)
+        add_test(NAME test-glob COMMAND fastfetch-test-glob)
+    endif()
     add_test(NAME test-spin COMMAND fastfetch-test-spin)
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
@@ -2518,6 +2538,9 @@ if (BUILD_TESTS)
     add_test(NAME test-endian COMMAND fastfetch-test-endian)
     add_test(NAME test-endian-bigendian COMMAND fastfetch-test-endian-bigendian)
     add_test(NAME test-gpu-pci COMMAND fastfetch-test-gpu-pci)
+    add_test(NAME test-edid COMMAND fastfetch-test-edid)
+    # A regression in the EDID parser can turn the scan into an infinite loop.
+    set_tests_properties(test-edid PROPERTIES TIMEOUT 30)
 endif()
 
 ##################

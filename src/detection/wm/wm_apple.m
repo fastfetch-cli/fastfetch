@@ -71,7 +71,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName) {
         }
 
         ffStrbufAppendS(pluginName, comm);
-        pluginName->chars[0] = (char) toupper(pluginName->chars[0]);
+        pluginName->chars[0] = (char) toupper((unsigned char) pluginName->chars[0]);
         break;
     }
 

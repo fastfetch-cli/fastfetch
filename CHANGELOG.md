@@ -1,5 +1,8 @@
 # Unreleased
 
+Features:
+* Added glob and environment variable expansion to logo sources on Windows. `%VAR%`, `$VAR` and `${VAR}` are supported, and a glob matching several files picks one randomly. (#2718, Logo, Windows)
+
 Changes:
 * Improved PCI GPU name resolution by checking udev's hardware database and the NVIDIA driver's procfs before falling back to pci.ids. (GPU, Linux)
 

@@ -122,10 +122,12 @@ bool ffEdidGetSerial(const uint8_t edid[128], FFstrbuf* result) {
 }
 
 bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length) {
-    if (length <= 128) {
+    if (length < 256) {
         return false;
     }
-    for (const uint8_t* cta = &edid[128]; cta < &edid[length]; cta += 128) {
+    // Only complete 128-byte extension blocks may be inspected.
+    for (uint32_t base = 128; base <= length - 128; base += 128) {
+        const uint8_t* cta = edid + base;
         // https://en.wikipedia.org/wiki/Extended_Display_Identification_Data#CTA_EDID_Timing_Extension_Block
         if (cta[0] != 0x02 /* CTA EDID */) {
             continue;
@@ -137,7 +139,9 @@ bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length) {
         if (offset <= 4) {
             continue;
         }
-        for (uint8_t i = 4; i < offset;) {
+        // Byte 2 is an offset inside this block; byte 127 is the checksum.
+        const uint32_t end = offset > 127 ? 127 : offset;
+        for (uint32_t i = 4; i + 1 < end;) {
             uint8_t blkLen = cta[i] & 0x1f;
             if (blkLen > 0) {
                 uint8_t blkTag = (cta[i] & 0xe0) >> 5;
@@ -148,7 +152,7 @@ bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length) {
                     }
                 }
             }
-            i += (uint8_t) (blkLen + 1);
+            i += (uint32_t) blkLen + 1;
         }
     }
     return false;
