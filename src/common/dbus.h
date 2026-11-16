@@ -10,6 +10,9 @@ typedef struct FFDBusLibrary {
     FF_LIBRARY_SYMBOL(dbus_bus_get)
     FF_LIBRARY_SYMBOL(dbus_message_new_method_call)
     FF_LIBRARY_SYMBOL(dbus_message_append_args)
+    FF_LIBRARY_SYMBOL(dbus_message_iter_init_append)
+    FF_LIBRARY_SYMBOL(dbus_message_iter_open_container)
+    FF_LIBRARY_SYMBOL(dbus_message_iter_close_container)
     FF_LIBRARY_SYMBOL(dbus_message_iter_init)
     FF_LIBRARY_SYMBOL(dbus_message_iter_get_arg_type)
     FF_LIBRARY_SYMBOL(dbus_message_iter_get_basic)
@@ -31,6 +34,7 @@ bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result);
 bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result);
 bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint64_t* result);
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg1, const char* arg2);
+DBusMessage* ffDBusGetMethodReplyEmptyDict(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method);
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property);
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int64_t* result);
