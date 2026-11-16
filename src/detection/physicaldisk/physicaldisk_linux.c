@@ -9,6 +9,156 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifdef FF_HAVE_DBUS
+    #include "common/dbus.h"
+
+    #define FF_UDISKS_BUS "org.freedesktop.UDisks2"
+    #define FF_UDISKS_NVME_CONTROLLER "org.freedesktop.UDisks2.NVMe.Controller"
+
+static bool hasUDisks(FFDBusData* dbus) {
+    DBusMessage* reply = ffDBusGetMethodReply(dbus, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameHasOwner", FF_UDISKS_BUS, nullptr);
+    if (reply == nullptr) {
+        return false;
+    }
+
+    bool result = false;
+    DBusMessageIter iter;
+    if (dbus->lib->ffdbus_message_iter_init(reply, &iter)) {
+        ffDBusGetBool(dbus, &iter, &result);
+    }
+    dbus->lib->ffdbus_message_unref(reply);
+    return result;
+}
+
+static FFPhysicalDiskWarning parseCriticalWarning(FFDBusData* dbus, DBusMessage* reply) {
+    DBusMessageIter iter;
+    if (!dbus->lib->ffdbus_message_iter_init(reply, &iter) || dbus->lib->ffdbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
+        return FF_PHYSICALDISK_WARNING_UNSET;
+    }
+
+    DBusMessageIter arrayIter;
+    dbus->lib->ffdbus_message_iter_recurse(&iter, &arrayIter);
+    if (dbus->lib->ffdbus_message_iter_get_arg_type(&arrayIter) != DBUS_TYPE_ARRAY) {
+        return FF_PHYSICALDISK_WARNING_UNSET;
+    }
+
+    FFPhysicalDiskWarning result = FF_PHYSICALDISK_WARNING_NONE;
+    DBusMessageIter stringIter;
+    dbus->lib->ffdbus_message_iter_recurse(&arrayIter, &stringIter);
+    while (dbus->lib->ffdbus_message_iter_get_arg_type(&stringIter) == DBUS_TYPE_STRING) {
+        const char* value;
+        dbus->lib->ffdbus_message_iter_get_basic(&stringIter, &value);
+
+        if (ffStrEquals(value, "spare")) {
+            result |= FF_PHYSICALDISK_WARNING_SPARE;
+        } else if (ffStrEquals(value, "temperature")) {
+            result |= FF_PHYSICALDISK_WARNING_TEMPERATURE;
+        } else if (ffStrEquals(value, "degraded")) {
+            result |= FF_PHYSICALDISK_WARNING_RELIABILITY;
+        } else if (ffStrEquals(value, "readonly")) {
+            result |= FF_PHYSICALDISK_WARNING_READONLY;
+        } else if (ffStrEquals(value, "volatile_mem")) {
+            result |= FF_PHYSICALDISK_WARNING_BACKUP;
+        } else if (ffStrEquals(value, "pmr_readonly")) {
+            result |= FF_PHYSICALDISK_WARNING_PMR_READONLY;
+        }
+
+        dbus->lib->ffdbus_message_iter_next(&stringIter);
+    }
+    return result;
+}
+
+static void parseSmartAttributes(FFDBusData* dbus, DBusMessage* reply, FFPhysicalDiskResult* device) {
+    DBusMessageIter iter;
+    if (!dbus->lib->ffdbus_message_iter_init(reply, &iter) || dbus->lib->ffdbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_ARRAY) {
+        return;
+    }
+
+    DBusMessageIter dictIter;
+    dbus->lib->ffdbus_message_iter_recurse(&iter, &dictIter);
+    while (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) == DBUS_TYPE_DICT_ENTRY) {
+        DBusMessageIter entryIter;
+        dbus->lib->ffdbus_message_iter_recurse(&dictIter, &entryIter);
+        if (dbus->lib->ffdbus_message_iter_get_arg_type(&entryIter) != DBUS_TYPE_STRING) {
+            return;
+        }
+
+        const char* key;
+        dbus->lib->ffdbus_message_iter_get_basic(&entryIter, &key);
+        dbus->lib->ffdbus_message_iter_next(&entryIter);
+
+        uint64_t value;
+        if (ffStrEquals(key, "percent_used")) {
+            if (ffDBusGetUint(dbus, &entryIter, &value)) {
+                device->percentUsed = (uint8_t) (value > 254 ? 254 : value);
+            }
+        } else if (ffStrEquals(key, "avail_spare")) {
+            if (ffDBusGetUint(dbus, &entryIter, &value)) {
+                device->availableSpare = (uint8_t) (value > 100 ? 100 : value);
+            }
+        }
+
+        dbus->lib->ffdbus_message_iter_next(&dictIter);
+    }
+}
+
+static void detectNvmeHealth(FFDBusData* dbus, const char* devName, FFPhysicalDiskResult* device) {
+    char blockPath[128];
+    snprintf(blockPath, ARRAY_SIZE(blockPath), "/org/freedesktop/UDisks2/block_devices/%s", devName);
+
+    FF_STRBUF_AUTO_DESTROY drivePath = ffStrbufCreate();
+    if (!ffDBusGetPropertyString(dbus, FF_UDISKS_BUS, blockPath, "org.freedesktop.UDisks2.Block", "Drive", &drivePath) || drivePath.length <= 1) {
+        FF_DEBUG("Failed to get udisks drive of %s", devName);
+        return;
+    }
+
+    uint64_t smartUpdated = 0;
+    if (!ffDBusGetPropertyUint(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartUpdated", &smartUpdated)) {
+        FF_DEBUG("%s has no NVMe controller interface", drivePath.chars);
+        return;
+    }
+    if (smartUpdated == 0) {
+        FF_DEBUG("udisks has not collected SMART data of %s yet", drivePath.chars);
+        return;
+    }
+
+    DBusMessage* reply = ffDBusGetProperty(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartCriticalWarning");
+    if (reply == nullptr) {
+        FF_DEBUG("Failed to get SmartCriticalWarning of %s", drivePath.chars);
+        return;
+    }
+    device->criticalWarning = parseCriticalWarning(dbus, reply);
+    dbus->lib->ffdbus_message_unref(reply);
+
+    reply = ffDBusGetMethodReplyEmptyDict(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartGetAttributes");
+    if (reply == nullptr) {
+        FF_DEBUG("SmartGetAttributes failed for %s", drivePath.chars);
+        return;
+    }
+    parseSmartAttributes(dbus, reply, device);
+    dbus->lib->ffdbus_message_unref(reply);
+}
+
+static void detectHealth(FFlist* result) {
+    FF_DBUS_AUTO_DESTROY_DATA FFDBusData dbus = {};
+    const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
+    if (error) {
+        FF_DEBUG("%s", error);
+        return;
+    }
+    if (!hasUDisks(&dbus)) {
+        FF_DEBUG("udisks2 is not running");
+        return;
+    }
+
+    FF_LIST_FOR_EACH (FFPhysicalDiskResult, device, *result) {
+        if (ffStrbufStartsWithS(&device->devPath, "/dev/nvme")) {
+            detectNvmeHealth(&dbus, device->devPath.chars + strlen("/dev/"), device);
+        }
+    }
+}
+#endif
+
 static double detectNvmeTemp(int devfd) {
     char pathHwmon[] = "hwmon$/temp1_input";
 
@@ -202,6 +352,12 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             parsePhysicalDisk(dfd, devName, options, result);
         }
     }
+
+#ifdef FF_HAVE_DBUS
+    if (options->health) {
+        detectHealth(result);
+    }
+#endif
 
     return nullptr;
 }
