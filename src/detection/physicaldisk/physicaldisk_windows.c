@@ -214,6 +214,9 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
     device->type = type;
     device->size = size;
     device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+    device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+    device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+    device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
 
     ffStrbufSetWS(&device->devPath, szDevice);
 

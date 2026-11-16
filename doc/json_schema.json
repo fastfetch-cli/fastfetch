@@ -453,7 +453,7 @@
             "type": "string"
         },
         "physicaldiskFormat": {
-            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name *\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path *\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
+            "description": "Output format for the `PhysicalDisk` module. See Wiki for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name *\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path *\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)\n    11. {health}: Device health, 100 - percentage used (formatted)\n    12. {percent-used}: Percentage of rated endurance used\n    13. {available-spare}: Remaining spare capacity\n    14. {critical-warning}: Critical warnings",
             "type": "string"
         },
         "physicalmemoryFormat": {
@@ -3966,6 +3966,14 @@
                                     },
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
+                                    },
+                                    "health": {
+                                        "description": "Whether to detect and display drive health (NVMe wear / SMART status), if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

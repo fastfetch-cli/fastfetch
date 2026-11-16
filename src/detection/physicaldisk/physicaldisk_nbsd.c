@@ -220,6 +220,9 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         device->type = type;
         device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+        device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
         FF_DEBUG("Added disk entry: name='%s', devPath='%s', interconnect='%s', size=%llu",
             device->name.chars,
             device->devPath.chars,

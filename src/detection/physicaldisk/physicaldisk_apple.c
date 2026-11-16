@@ -144,6 +144,9 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         device->type = type;
         device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+        device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
 
         if (entryMedia != IO_OBJECT_NULL) {
             FF_CFTYPE_AUTO_RELEASE CFBooleanRef removable = IORegistryEntryCreateCFProperty(entryMedia, CFSTR(kIOMediaRemovableKey), nullptr, kNilOptions);

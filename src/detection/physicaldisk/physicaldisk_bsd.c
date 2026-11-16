@@ -90,6 +90,9 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         ffStrbufInitMove(&device->name, &name);
         device->size = size;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+        device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+        device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
 
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK) {
             case DEVSTAT_TYPE_IF_SCSI:
