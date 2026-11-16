@@ -71,6 +71,9 @@ static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFl
             ffStrbufInit(&device->revision);
             ffStrbufInitS(&device->interconnect, diskType);
             device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+            device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+            device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+            device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
             device->type = type |
                 (geometry.read_only ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE) |
                 (geometry.removable ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/option.h"
+#include "common/percent.h"
 
 typedef enum FFPhysicalDiskType: uint8_t {
     FF_PHYSICALDISK_TYPE_NONE = 0,
@@ -27,6 +28,8 @@ typedef struct FFPhysicalDiskOptions {
     FFPhysicalDiskType hideType;
     bool temp;
     FFColorRangeConfig tempConfig;
+    bool health;
+    FFPercentageModuleConfig percent;
 } FFPhysicalDiskOptions;
 
 static_assert(sizeof(FFPhysicalDiskOptions) <= FF_OPTION_MAX_SIZE, "FFPhysicalDiskOptions size exceeds maximum allowed size");

@@ -107,6 +107,9 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
     device->type = type;
     device->size = size;
     device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+    device->percentUsed = FF_PHYSICALDISK_PERCENT_UNSET;
+    device->availableSpare = FF_PHYSICALDISK_PERCENT_UNSET;
+    device->criticalWarning = FF_PHYSICALDISK_WARNING_UNSET;
 
     bool isVirtio = false;
     if (devfd > 0) {
