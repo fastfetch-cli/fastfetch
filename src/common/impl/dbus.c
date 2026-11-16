@@ -11,6 +11,9 @@ static bool loadLibSymbols(FFDBusLibrary* lib) {
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_bus_get, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_new_method_call, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_append_args, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init_append, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_open_container, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_close_container, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_get_arg_type, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_get_basic, false)
@@ -267,6 +270,27 @@ DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const c
         } else {
             dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg1, DBUS_TYPE_INVALID);
         }
+    }
+
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, nullptr);
+
+    dbus->lib->ffdbus_message_unref(message);
+
+    return reply;
+}
+
+DBusMessage* ffDBusGetMethodReplyEmptyDict(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method) {
+    DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, interface, method);
+    if (message == nullptr) {
+        return nullptr;
+    }
+
+    DBusMessageIter iter, dictIter;
+    dbus->lib->ffdbus_message_iter_init_append(message, &iter);
+    if (!dbus->lib->ffdbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY, "{sv}", &dictIter) ||
+        !dbus->lib->ffdbus_message_iter_close_container(&iter, &dictIter)) {
+        dbus->lib->ffdbus_message_unref(message);
+        return nullptr;
     }
 
     DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, nullptr);
