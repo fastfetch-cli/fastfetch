@@ -13,6 +13,7 @@ typedef enum FFPhysicalDiskWarning: uint8_t {
     FF_PHYSICALDISK_WARNING_READONLY = 1 << 3,
     FF_PHYSICALDISK_WARNING_BACKUP = 1 << 4,
     FF_PHYSICALDISK_WARNING_PMR_READONLY = 1 << 5,
+    FF_PHYSICALDISK_WARNING_FAILING = 1 << 6,
     FF_PHYSICALDISK_WARNING_UNSET = UINT8_MAX,
 } FFPhysicalDiskWarning;
 static_assert(sizeof(FFPhysicalDiskWarning) == sizeof(uint8_t), "");

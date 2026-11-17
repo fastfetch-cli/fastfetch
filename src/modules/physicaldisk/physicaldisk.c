@@ -17,6 +17,7 @@ static const char* const warningNames[] = {
     "read-only",
     "backup failed",
     "pmr read-only",
+    "failing",
 };
 
 static inline double getHealth(const FFPhysicalDiskResult* dev) {
