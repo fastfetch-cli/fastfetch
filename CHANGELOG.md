@@ -2,7 +2,7 @@
 
 Features:
 * Added glob and environment variable expansion to logo sources on Windows. `%VAR%`, `$VAR` and `${VAR}` are supported, and a glob matching several files picks one randomly. (#2718, Logo, Windows)
-* Added opt-in drive health detection for NVMe disks via udisks2, which doesn't require root. (#2726, PhysicalDisk, Linux)
+* Added opt-in drive health detection for NVMe disks, via udisks2 on Linux (no root required) and NVMe SMART on macOS. (#2726, PhysicalDisk, Linux / macOS)
     * Enable it with `"health": true`. The default output appends `Health <100 - percentage used>%` and any critical warnings.
     * New format args: `{health}`, `{percent-used}`, `{available-spare}` and `{critical-warning}`.
 
