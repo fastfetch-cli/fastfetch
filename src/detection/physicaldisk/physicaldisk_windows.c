@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <winioctl.h>
 #include <cfgmgr32.h>
+#include <nvme.h>
 
 static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* szDevice, FFlist* result, FFPhysicalDiskOptions* options) {
     FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -300,6 +301,41 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
                     nullptr) &&
                 retSize == sizeof(stdd)) {
                 device->temperature = stdd.TemperatureInfo[0].Temperature;
+            }
+        }
+
+        if (options->health && sdd && sdd->BusType == BusTypeNvme) {
+            alignas(STORAGE_PROPERTY_QUERY) uint8_t buffer[offsetof(STORAGE_PROPERTY_QUERY, AdditionalParameters) + sizeof(STORAGE_PROTOCOL_SPECIFIC_DATA) + sizeof(NVME_HEALTH_INFO_LOG)] = {};
+            STORAGE_PROPERTY_QUERY* query = (STORAGE_PROPERTY_QUERY*) buffer;
+            query->PropertyId = StorageDeviceProtocolSpecificProperty;
+            query->QueryType = PropertyStandardQuery;
+            *(STORAGE_PROTOCOL_SPECIFIC_DATA*) query->AdditionalParameters = (STORAGE_PROTOCOL_SPECIFIC_DATA) {
+                .ProtocolType = ProtocolTypeNvme,
+                .DataType = NVMeDataTypeLogPage,
+                .ProtocolDataRequestValue = NVME_LOG_PAGE_HEALTH_INFO,
+                .ProtocolDataOffset = sizeof(STORAGE_PROTOCOL_SPECIFIC_DATA),
+                .ProtocolDataLength = sizeof(NVME_HEALTH_INFO_LOG),
+            };
+            if (DeviceIoControl(
+                    hDevice,
+                    IOCTL_STORAGE_QUERY_PROPERTY,
+                    buffer,
+                    sizeof(buffer),
+                    buffer,
+                    sizeof(buffer),
+                    &retSize,
+                    nullptr)) {
+                const STORAGE_PROTOCOL_DATA_DESCRIPTOR* spdd = (const STORAGE_PROTOCOL_DATA_DESCRIPTOR*) buffer;
+                if (spdd->ProtocolSpecificData.ProtocolDataOffset == sizeof(STORAGE_PROTOCOL_SPECIFIC_DATA) &&
+                    spdd->ProtocolSpecificData.ProtocolDataLength >= sizeof(NVME_HEALTH_INFO_LOG) &&
+                    retSize == sizeof(buffer)) {
+                    const NVME_HEALTH_INFO_LOG* log = (const NVME_HEALTH_INFO_LOG*) ((const uint8_t*) &spdd->ProtocolSpecificData + sizeof(STORAGE_PROTOCOL_SPECIFIC_DATA));
+                    device->percentUsed = (uint8_t) (log->PercentageUsed > 254 ? 254 : log->PercentageUsed);
+                    device->availableSpare = (uint8_t) (log->AvailableSpare > 100 ? 100 : log->AvailableSpare);
+                    device->criticalWarning = (FFPhysicalDiskWarning) (log->CriticalWarning.AsUchar & 0x3F);
+                }
+            } else {
+                FF_DEBUG("Failed to query NVMe health log: %s", ffDebugWin32Error(GetLastError()));
             }
         }
     }
