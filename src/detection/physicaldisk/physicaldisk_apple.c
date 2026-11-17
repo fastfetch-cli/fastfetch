@@ -21,7 +21,7 @@ static inline void wrapIoDestroyPlugInInterface(IOCFPlugInInterface*** pluginInf
 }
 #endif
 
-static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
+static const char* detectNvmeSmart(io_service_t entryPhysical, FFPhysicalDiskResult* device, FFPhysicalDiskOptions* options) {
 #ifdef MAC_OS_X_VERSION_10_15
     [[gnu::cleanup(wrapIoDestroyPlugInInterface)]] IOCFPlugInInterface** pluginInf = nullptr;
     int32_t score;
@@ -39,7 +39,14 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
     NVMeSMARTData smartData;
     const char* error = nullptr;
     if ((*smartInf)->SMARTReadData(smartInf, &smartData) == kIOReturnSuccess) {
-        *temp = smartData.TEMPERATURE - 273;
+        if (options->temp) {
+            device->temperature = smartData.TEMPERATURE - 273;
+        }
+        if (options->health) {
+            device->percentUsed = (uint8_t) (smartData.PERCENTAGE_USED > 254 ? 254 : smartData.PERCENTAGE_USED);
+            device->availableSpare = (uint8_t) (smartData.AVAILABLE_SPARE > 100 ? 100 : smartData.AVAILABLE_SPARE);
+            device->criticalWarning = (FFPhysicalDiskWarning) (smartData.CRITICAL_WARNING & 0x3F);
+        }
     } else {
         error = "SMARTReadData() failed";
     }
@@ -47,7 +54,7 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp) {
     (*pluginInf)->Release(smartInf);
     return error;
 #else
-    FF_DEBUG("SSD temperature detection needs macOS 10.15 or newer");
+    FF_DEBUG("NVMe SMART detection needs macOS 10.15 or newer");
     return "No support for old MacOS version";
 #endif
 }
@@ -186,10 +193,10 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
 
 #ifdef MAC_OS_X_VERSION_10_15
-        if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) && options->temp) {
+        if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) && (options->temp || options->health)) {
             FF_CFTYPE_AUTO_RELEASE CFBooleanRef nvmeSMARTCapable = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyNVMeSMARTCapableKey), nullptr, kNilOptions);
             if (nvmeSMARTCapable && CFBooleanGetValue(nvmeSMARTCapable)) {
-                detectSsdTemp(entryPhysical, &device->temperature);
+                detectNvmeSmart(entryPhysical, device, options);
             }
         }
 #endif
