@@ -939,6 +939,16 @@ static const FFlogo A[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_AYOS
+    // AyOS
+    {
+        .names = { "ayos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_AYOS,
+        .colors = {
+                FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_AZOS
     // Azos
     {
