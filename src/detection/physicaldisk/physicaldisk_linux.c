@@ -14,6 +14,7 @@
 
     #define FF_UDISKS_BUS "org.freedesktop.UDisks2"
     #define FF_UDISKS_NVME_CONTROLLER "org.freedesktop.UDisks2.NVMe.Controller"
+    #define FF_UDISKS_DRIVE_ATA "org.freedesktop.UDisks2.Drive.Ata"
 
 static bool hasUDisks(FFDBusData* dbus) {
     DBusMessage* reply = ffDBusGetMethodReply(dbus, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "NameHasOwner", FF_UDISKS_BUS, nullptr);
@@ -80,7 +81,7 @@ static void parseSmartAttributes(FFDBusData* dbus, DBusMessage* reply, FFPhysica
         DBusMessageIter entryIter;
         dbus->lib->ffdbus_message_iter_recurse(&dictIter, &entryIter);
         if (dbus->lib->ffdbus_message_iter_get_arg_type(&entryIter) != DBUS_TYPE_STRING) {
-            return;
+            break;
         }
 
         const char* key;
@@ -102,41 +103,79 @@ static void parseSmartAttributes(FFDBusData* dbus, DBusMessage* reply, FFPhysica
     }
 }
 
-static void detectNvmeHealth(FFDBusData* dbus, const char* devName, FFPhysicalDiskResult* device) {
-    char blockPath[128];
-    snprintf(blockPath, ARRAY_SIZE(blockPath), "/org/freedesktop/UDisks2/block_devices/%s", devName);
-
-    FF_STRBUF_AUTO_DESTROY drivePath = ffStrbufCreate();
-    if (!ffDBusGetPropertyString(dbus, FF_UDISKS_BUS, blockPath, "org.freedesktop.UDisks2.Block", "Drive", &drivePath) || drivePath.length <= 1) {
-        FF_DEBUG("Failed to get udisks drive of %s", devName);
-        return;
-    }
-
+static void detectNvmeHealth(FFDBusData* dbus, const char* drivePath, FFPhysicalDiskResult* device) {
     uint64_t smartUpdated = 0;
-    if (!ffDBusGetPropertyUint(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartUpdated", &smartUpdated)) {
-        FF_DEBUG("%s has no NVMe controller interface", drivePath.chars);
+    if (!ffDBusGetPropertyUint(dbus, FF_UDISKS_BUS, drivePath, FF_UDISKS_NVME_CONTROLLER, "SmartUpdated", &smartUpdated)) {
+        FF_DEBUG("%s has no NVMe controller interface", drivePath);
         return;
     }
     if (smartUpdated == 0) {
-        FF_DEBUG("udisks has not collected SMART data of %s yet", drivePath.chars);
+        FF_DEBUG("udisks has not collected SMART data of %s yet", drivePath);
         return;
     }
 
-    DBusMessage* reply = ffDBusGetProperty(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartCriticalWarning");
+    DBusMessage* reply = ffDBusGetProperty(dbus, FF_UDISKS_BUS, drivePath, FF_UDISKS_NVME_CONTROLLER, "SmartCriticalWarning");
     if (reply == nullptr) {
-        FF_DEBUG("Failed to get SmartCriticalWarning of %s", drivePath.chars);
+        FF_DEBUG("Failed to get SmartCriticalWarning of %s", drivePath);
         return;
     }
     device->criticalWarning = parseCriticalWarning(dbus, reply);
     dbus->lib->ffdbus_message_unref(reply);
 
-    reply = ffDBusGetMethodReplyEmptyDict(dbus, FF_UDISKS_BUS, drivePath.chars, FF_UDISKS_NVME_CONTROLLER, "SmartGetAttributes");
+    reply = ffDBusGetMethodReplyEmptyDict(dbus, FF_UDISKS_BUS, drivePath, FF_UDISKS_NVME_CONTROLLER, "SmartGetAttributes");
     if (reply == nullptr) {
-        FF_DEBUG("SmartGetAttributes failed for %s", drivePath.chars);
+        FF_DEBUG("SmartGetAttributes failed for %s", drivePath);
         return;
     }
     parseSmartAttributes(dbus, reply, device);
     dbus->lib->ffdbus_message_unref(reply);
+}
+
+static void detectAtaHealth(FFDBusData* dbus, const char* drivePath, FFPhysicalDiskResult* device) {
+    DBusMessage* reply = ffDBusGetAllProperties(dbus, FF_UDISKS_BUS, drivePath, FF_UDISKS_DRIVE_ATA);
+    if (reply == nullptr) {
+        FF_DEBUG("%s has no ATA interface", drivePath);
+        return;
+    }
+
+    bool smartFailing = false;
+    uint64_t smartUpdated = 0;
+    DBusMessageIter iter;
+    if (dbus->lib->ffdbus_message_iter_init(reply, &iter) && dbus->lib->ffdbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_ARRAY) {
+        DBusMessageIter dictIter;
+        dbus->lib->ffdbus_message_iter_recurse(&iter, &dictIter);
+        while (dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) == DBUS_TYPE_DICT_ENTRY) {
+            DBusMessageIter entryIter;
+            dbus->lib->ffdbus_message_iter_recurse(&dictIter, &entryIter);
+            if (dbus->lib->ffdbus_message_iter_get_arg_type(&entryIter) != DBUS_TYPE_STRING) {
+                break;
+            }
+
+            const char* key;
+            dbus->lib->ffdbus_message_iter_get_basic(&entryIter, &key);
+            dbus->lib->ffdbus_message_iter_next(&entryIter);
+
+            if (ffStrEquals(key, "SmartUpdated")) {
+                ffDBusGetUint(dbus, &entryIter, &smartUpdated);
+            } else if (ffStrEquals(key, "SmartFailing")) {
+                ffDBusGetBool(dbus, &entryIter, &smartFailing);
+            }
+
+            dbus->lib->ffdbus_message_iter_next(&dictIter);
+        }
+    }
+    dbus->lib->ffdbus_message_unref(reply);
+
+    if (smartUpdated == 0) {
+        FF_DEBUG("udisks has not collected SMART data of %s yet", drivePath);
+        return;
+    }
+    if (device->criticalWarning == FF_PHYSICALDISK_WARNING_UNSET) {
+        device->criticalWarning = FF_PHYSICALDISK_WARNING_NONE;
+    }
+    if (smartFailing) {
+        device->criticalWarning |= FF_PHYSICALDISK_WARNING_FAILING;
+    }
 }
 
 static void detectHealth(FFlist* result) {
@@ -152,8 +191,23 @@ static void detectHealth(FFlist* result) {
     }
 
     FF_LIST_FOR_EACH (FFPhysicalDiskResult, device, *result) {
+        if (device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) {
+            continue;
+        }
+
+        char blockPath[128];
+        snprintf(blockPath, ARRAY_SIZE(blockPath), "/org/freedesktop/UDisks2/block_devices/%s", device->devPath.chars + strlen("/dev/"));
+
+        FF_STRBUF_AUTO_DESTROY drivePath = ffStrbufCreate();
+        if (!ffDBusGetPropertyString(&dbus, FF_UDISKS_BUS, blockPath, "org.freedesktop.UDisks2.Block", "Drive", &drivePath) || drivePath.length <= 1) {
+            FF_DEBUG("Failed to get udisks drive of %s", device->devPath.chars);
+            continue;
+        }
+
         if (ffStrbufStartsWithS(&device->devPath, "/dev/nvme")) {
-            detectNvmeHealth(&dbus, device->devPath.chars + strlen("/dev/"), device);
+            detectNvmeHealth(&dbus, drivePath.chars, device);
+        } else {
+            detectAtaHealth(&dbus, drivePath.chars, device);
         }
     }
 }
