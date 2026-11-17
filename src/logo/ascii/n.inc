@@ -201,6 +201,18 @@ static const FFlogo N[] = {
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_NODORA
+    // Nodora
+    {
+        .names = { "nodora" },
+        .lines = FASTFETCH_DATATEXT_LOGO_NODORA,
+        .colors = {
+            "38;2;90;99;255",
+        },
+        .colorKeys = "38;2;90;99;255",
+        .colorTitle = "38;2;90;99;255",
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_NOMADBSD
     // NomadBSD
     {
