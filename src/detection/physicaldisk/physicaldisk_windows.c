@@ -340,6 +340,32 @@ static const char* detectPhysicalDisk(const char* physicalType, const wchar_t* s
         }
     }
 
+    if (options->health && sdd && !(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) && (sdd->BusType == BusTypeAta || sdd->BusType == BusTypeSata)) {
+        STORAGE_PREDICT_FAILURE spf = {};
+        if (DeviceIoControl(
+                hDevice,
+                IOCTL_STORAGE_PREDICT_FAILURE,
+                nullptr,
+                0,
+                &spf,
+                sizeof(spf),
+                &retSize,
+                nullptr)) {
+            if (retSize >= sizeof(spf)) {
+                if (device->criticalWarning == FF_PHYSICALDISK_WARNING_UNSET) {
+                    device->criticalWarning = FF_PHYSICALDISK_WARNING_NONE;
+                }
+                if (spf.PredictFailure) {
+                    device->criticalWarning |= FF_PHYSICALDISK_WARNING_FAILING;
+                }
+            } else {
+                FF_DEBUG("ATA failure prediction reply too short: %u bytes", (unsigned) retSize);
+            }
+        } else {
+            FF_DEBUG("Failed to query ATA failure prediction: %s", ffDebugWin32Error(GetLastError()));
+        }
+    }
+
     return nullptr;
 }
 
