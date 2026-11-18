@@ -8,18 +8,17 @@
 #include <IOKit/storage/IOBlockStorageDriver.h>
 #include <IOKit/storage/IOStorageDeviceCharacteristics.h>
 #include <IOKit/storage/IOStorageProtocolCharacteristics.h>
+#include <IOKit/storage/ata/ATASMARTLib.h>
 #ifdef MAC_OS_X_VERSION_10_15
     #include <IOKit/storage/nvme/NVMeSMARTLibExternal.h>
 #endif
 
-#ifdef MAC_OS_X_VERSION_10_15
 static inline void wrapIoDestroyPlugInInterface(IOCFPlugInInterface*** pluginInf) {
     assert(pluginInf);
     if (*pluginInf) {
         IODestroyPlugInInterface(*pluginInf);
     }
 }
-#endif
 
 static const char* detectNvmeSmart(io_service_t entryPhysical, FFPhysicalDiskResult* device, FFPhysicalDiskOptions* options) {
 #ifdef MAC_OS_X_VERSION_10_15
@@ -57,6 +56,38 @@ static const char* detectNvmeSmart(io_service_t entryPhysical, FFPhysicalDiskRes
     FF_DEBUG("NVMe SMART detection needs macOS 10.15 or newer");
     return "No support for old MacOS version";
 #endif
+}
+
+static const char* detectAtaSmart(io_service_t entryPhysical, FFPhysicalDiskResult* device) {
+    [[gnu::cleanup(wrapIoDestroyPlugInInterface)]] IOCFPlugInInterface** pluginInf = nullptr;
+    int32_t score;
+    if (IOCreatePlugInInterfaceForService(entryPhysical, kIOATASMARTUserClientTypeID, kIOCFPlugInInterfaceID, &pluginInf, &score) != kIOReturnSuccess) {
+        FF_DEBUG("IOCreatePlugInInterfaceForService(kIOATASMARTUserClientTypeID) failed");
+        return "IOCreatePlugInInterfaceForService() failed";
+    }
+
+    IOATASMARTInterface** smartInf = nullptr;
+    if ((*pluginInf)->QueryInterface(pluginInf, CFUUIDGetUUIDBytes(kIOATASMARTInterfaceID), (LPVOID) &smartInf) != kIOReturnSuccess) {
+        FF_DEBUG("QueryInterface(kIOATASMARTInterfaceID) failed");
+        return "QueryInterface() failed";
+    }
+
+    Boolean exceeded = false;
+    const char* error = nullptr;
+    if ((*smartInf)->SMARTReturnStatus(smartInf, &exceeded) == kIOReturnSuccess) {
+        if (device->criticalWarning == FF_PHYSICALDISK_WARNING_UNSET) {
+            device->criticalWarning = FF_PHYSICALDISK_WARNING_NONE;
+        }
+        if (exceeded) {
+            device->criticalWarning |= FF_PHYSICALDISK_WARNING_FAILING;
+        }
+    } else {
+        FF_DEBUG("SMARTReturnStatus() failed");
+        error = "SMARTReturnStatus() failed";
+    }
+
+    (*pluginInf)->Release(smartInf);
+    return error;
 }
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options) {
@@ -200,6 +231,13 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             }
         }
 #endif
+
+        if (!(device->type & FF_PHYSICALDISK_TYPE_VIRTUAL) && options->health) {
+            FF_CFTYPE_AUTO_RELEASE CFBooleanRef ataSMARTCapable = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertySMARTCapableKey), nullptr, kNilOptions);
+            if (ataSMARTCapable && CFBooleanGetValue(ataSMARTCapable)) {
+                detectAtaSmart(entryPhysical, device);
+            }
+        }
     }
 
     return nullptr;
