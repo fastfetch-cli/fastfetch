@@ -417,7 +417,7 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         { "Device health, 100 - percentage used (formatted)", "health" },
         { "Percentage of rated endurance used", "percent-used" },
         { "Remaining spare capacity", "available-spare" },
-        { "Critical warnings (none if healthy)", "critical-warning" },
+        { "Critical warnings (NVMe warnings or ATA SMART failing status)", "critical-warning" },
     })),
     .defaultOrder = 69,
 };
