@@ -133,22 +133,10 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
         }
 
         ffStrbufAppendS(&path, pathCpuEntry->d_name);
-
-        // The kernel removes `cpuX/cache/` when a CPU goes offline. cpu0 usually has no `online` file
-        uint32_t cpuLen = path.length;
-        ffStrbufAppendS(&path, "/online");
-        char online = '1';
-        ffReadFileData(path.chars, sizeof(online), &online);
-        ffStrbufSubstrBefore(&path, cpuLen);
-        if (online == '0') {
-            FF_DEBUG("Skipping offline CPU \"%s\"", pathCpuEntry->d_name);
-            ffStrbufSubstrBefore(&path, baseLen);
-            continue;
-        }
-
+        // Skip a CPU whose cache can't be read, e.g. an offline one: the kernel removes its `cache/`
         const char* error = parseCpuCache(&path, result, &buffer, &added);
         if (error) {
-            return error;
+            FF_DEBUG("Skipping \"%s\": %s", pathCpuEntry->d_name, error);
         }
         ffStrbufSubstrBefore(&path, baseLen);
     }
