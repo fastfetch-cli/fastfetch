@@ -208,8 +208,8 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ALTLINUX,
         .colors = {
             FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_BLACK,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RGB "0;0;0",
+            FF_COLOR_FG_RGB "255;255;255",
         },
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_YELLOW,
