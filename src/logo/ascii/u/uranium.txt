@@ -1,0 +1,19 @@
+               $1.------.
+          $1.----oooooooo----.
+       $1.--ooooo$2hhhhhhhh$1ooooo--.
+     $1.-oooss$2hMMMMMMMMMMMMh$1ssooo-.
+   $1.-oossssss$2hMMMMMMMMMMh$1ssssssoo-.
+  $1.oosssssssss$2hhMMMMMMhh$1sssssssssoo.
+ $1.osssssssssssss$2hhhhhh$1ssssssssssssso.
+ $1++ssssssssssssssssssssssssssssssss++
+ $1++sssssssssssssss$2hh$1sssssssssssssss++
+$1.+ss$2hhhhhhhhhh$1sss$2hMMh$1sss$2hhhhhhhhhh$1ss+.
+ $1++s$2hMMMMMMMMh$1ssss$2hh$1ssss$2hMMMMMMMMh$1s++
+ $1++s$2hMMMMMMMMMhh$1ssssss$2hhMMMMMMMMMh$1s++
+ $1`oss$2hMMMMMMMMhh$1ssssss$2hhMMMMMMMMh$1sso'
+  $1`oos$2hhMMMMMh$1ssssssssss$2hMMMMMhh$1soo'
+   $1`-oos$2hhMMh$1ssssssssssss$2hMMhh$1soo-'
+     $1`-ooo$2hh$1ssssssssssssss$2hh$1ooo-'
+       $1`--ooooossssssssooooo--'
+          $1`----oooooooo----'
+               $1`------'
