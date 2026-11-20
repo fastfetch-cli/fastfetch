@@ -4,6 +4,7 @@
 #include "common/io.h"
 #include "common/processing.h"
 #include "common/strutil.h"
+#include "common/keenetic/version.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -397,6 +398,15 @@ static void detectOS(FFOSResult* os) {
             ffStrbufSetS(&os->name, "HarmonyOS");
             ffStrbufSetS(&os->prettyName, "HarmonyOS");
         }
+    }
+
+    // Keenetic OS / NDMS detection
+    const FFKeeneticInfo* keen = ffDetectKeenetic();
+    if (keen->available) {
+        ffStrbufSetS(&os->id, keen->id);
+        ffStrbufSetS(&os->idLike, keen->idLike);
+        ffKeeneticFormatOSFull(&os->prettyName);
+        ffKeeneticFormatOS(&os->name);
     }
 }
 
