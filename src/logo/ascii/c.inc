@@ -496,11 +496,11 @@ static const FFlogo C[] = {
         .names = { "CuerdOS", "CuerdOS GNU/Linux" },
         .lines = FASTFETCH_DATATEXT_LOGO_CUERDOS,
         .colors = {
-            FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_LIGHT_GREEN,
         },
         .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_LIGHT_GREEN,
     },
     #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_CUTEFISHOS
