@@ -4,6 +4,7 @@
 #include "modules/display/option.h"
 
 #define FF_DE_PRETTY_PLASMA "KDE Plasma"
+#define FF_DE_PRETTY_SONICDE "SonicDE"
 #define FF_DE_PRETTY_GNOME "GNOME"
 #define FF_DE_PRETTY_GNOME_CLASSIC "GNOME Classic"
 #define FF_DE_PRETTY_XFCE4 "Xfce4"
@@ -20,6 +21,7 @@
 #define FF_DE_PRETTY_COSMIC "COSMIC"
 
 #define FF_WM_PRETTY_KWIN "KWin"
+#define FF_WM_PRETTY_SONICWIN "SonicWin"
 #define FF_WM_PRETTY_MUTTER "Mutter"
 #define FF_WM_PRETTY_MUFFIN "Muffin"
 #define FF_WM_PRETTY_MARCO "Marco"
