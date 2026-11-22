@@ -48,9 +48,11 @@ static void waylandOutputGeometryListener(void* data,
 
 static void handleXdgLogicalSize(void* data, [[maybe_unused]] struct zxdg_output_v1* _, int32_t width, [[maybe_unused]] int32_t height) {
     WaylandDisplay* display = data;
+    // The logical size is already transformed, but the mode is not swapped until ffWaylandHandleRotation()
+    int32_t modeWidth = display->transform & WL_OUTPUT_TRANSFORM_90 ? display->height : display->width;
     // Seems the values are only useful when ractional scale is enabled
-    if (width < display->width) {
-        display->dpi = (uint32_t) (display->width * 96 / width);
+    if (width < modeWidth) {
+        display->dpi = (uint32_t) (modeWidth * 96 / width);
     }
 }
 
