@@ -13,6 +13,7 @@ Changes:
 Bugfixes:
 * Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
 * Fixed CPU cache detection failing entirely when any CPU is offline. (#2736, CPUCache, Linux)
+* Fixed the scale factor of rotated monitors on Wayland, e.g. a 1920x1200 monitor rotated by 90 degrees at scale 1 being reported as `@ 1.59x`. (Display, Linux)
 
 # 2.71.0
 
