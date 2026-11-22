@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: run VM
-        uses: uraimo/run-on-arch-action@fa1f3e7de95534497266c7265950b5188355fbfb # v3.2.1
+        uses: uraimo/run-on-arch-action@9893a0f995e5148dcc313ba661820f3992cffcc1 # v3.3
         id: runcmd
         with:
           arch: ${{ inputs.arch }}
