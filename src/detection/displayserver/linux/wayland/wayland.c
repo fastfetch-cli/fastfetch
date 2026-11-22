@@ -391,7 +391,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result) {
     }
 
     // We successfully connected to wayland and detected the display.
-    // So we can set set the session type to wayland.
+    // So we can set the session type to wayland.
     // This is used as an indicator that we are running wayland by the x11 backends.
     ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
     return nullptr;
