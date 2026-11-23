@@ -15,6 +15,9 @@ Bugfixes:
 * Fixed CPU cache detection failing entirely when any CPU is offline. (#2736, CPUCache, Linux)
 * Fixed the scale factor of rotated monitors on Wayland, e.g. a 1920x1200 monitor rotated by 90 degrees at scale 1 being reported as `@ 1.59x`. (Display, Linux)
 
+Logos:
+* Added SunshineOS (#2746)
+
 # 2.71.0
 
 Features:

@@ -491,6 +491,27 @@ static const FFlogo S[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SUNSHINEOS
+    // SunshineOS
+    {
+        .names = { "sunshineos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SUNSHINEOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SUNSHINEOS_ALT
+    // SunshineOS alternate logo
+    {
+        .names = { "sunshineos_alt" },
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_SUNSHINEOS_ALT,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_SUSE
     // Suse
     {
