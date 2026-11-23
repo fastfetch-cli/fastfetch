@@ -7,9 +7,172 @@
 #include "common/smbios.h"
 
 #include <windows.h>
+#include <winioctl.h>
 #include "common/windows/perflib_.h"
 #include "common/windows/nt.h"
+#include "common/time.h"
+#include "3rdparty/pawnio/pawnio_resource.h"
 #include <wchar.h>
+
+#if defined(__x86_64__)
+
+// The signed IntelMSR module is embedded as an RCDATA resource (see pawnio.rc).
+// It comes from PawnIO.Modules 0.2.12, LGPL-2.1-or-later; its source and license text
+// are shipped in src/3rdparty/pawnio/.
+
+    #define FF_PAWNIO_DEVICE_TYPE 41394
+    #define FF_PAWNIO_IOCTL_LOAD ((DWORD) CTL_CODE(FF_PAWNIO_DEVICE_TYPE, 0x821, METHOD_BUFFERED, FILE_ANY_ACCESS))
+    #define FF_PAWNIO_IOCTL_EXECUTE ((DWORD) CTL_CODE(FF_PAWNIO_DEVICE_TYPE, 0x841, METHOD_BUFFERED, FILE_ANY_ACCESS))
+    #define FF_PAWNIO_FN_NAME_LENGTH 32
+
+enum : uint32_t {
+    MSR_IA32_THERM_STATUS = 0x0000019c,
+    MSR_IA32_TEMPERATURE_TARGET = 0x000001a2,
+    MSR_TURBO_RATIO_LIMIT = 0x000001ad,
+    MSR_IA32_PACKAGE_THERM_STATUS = 0x000001b1,
+};
+
+// Open the driver directly so we can log the exact failure reason.
+static HANDLE pawnIoOpenDevice(void) {
+    const HANDLE handle = CreateFileW(L"\\\\.\\PawnIO", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (handle != INVALID_HANDLE_VALUE) {
+        return handle;
+    }
+
+    #ifndef NDEBUG
+    const DWORD error = GetLastError();
+    if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND) {
+        FF_DEBUG("PawnIO device not found; the driver is probably not installed");
+    } else if (error == ERROR_ACCESS_DENIED) {
+        FF_DEBUG("PawnIO device access denied; elevation is required");
+    } else {
+        FF_DEBUG("Failed to open PawnIO device: %s", ffDebugWin32Error(error));
+    }
+    #endif
+    return INVALID_HANDLE_VALUE;
+}
+
+static bool pawnIoLoadModule(HANDLE handle) {
+    const HRSRC resource = FindResourceW(nullptr, MAKEINTRESOURCEW(FF_PAWNIO_INTEL_MSR_RC_ID), RT_RCDATA);
+    if (!resource) {
+        FF_DEBUG("PawnIO module resource not found: %s", ffDebugWin32Error(GetLastError()));
+        return false;
+    }
+
+    const HGLOBAL global = LoadResource(nullptr, resource);
+    if (!global) {
+        FF_DEBUG("LoadResource(PawnIO module) failed: %s", ffDebugWin32Error(GetLastError()));
+        return false;
+    }
+
+    const DWORD blobSize = SizeofResource(nullptr, resource);
+    const void* const blob = LockResource(global);
+    if (blobSize == 0 || !blob) {
+        FF_DEBUG("PawnIO module resource is empty");
+        return false;
+    }
+
+    DWORD bytesReturned = 0;
+    if (!DeviceIoControl(handle, FF_PAWNIO_IOCTL_LOAD, (void*) blob, blobSize, nullptr, 0, &bytesReturned, nullptr)) {
+        FF_DEBUG("PawnIO module load failed: %s", ffDebugWin32Error(GetLastError()));
+        return false;
+    }
+    return true;
+}
+
+static bool pawnIoExecute(HANDLE handle, const char* name, uint64_t msr, uint64_t* value) {
+    if (strlen(name) >= FF_PAWNIO_FN_NAME_LENGTH) {
+        return false;
+    }
+
+    char input[FF_PAWNIO_FN_NAME_LENGTH + sizeof(uint64_t)] = {};
+    memcpy(input, name, strlen(name));
+    memcpy(input + FF_PAWNIO_FN_NAME_LENGTH, &msr, sizeof(msr));
+
+    DWORD bytesReturned = 0;
+    if (!DeviceIoControl(handle, FF_PAWNIO_IOCTL_EXECUTE, input, sizeof(input), value, sizeof(*value), &bytesReturned, nullptr)) {
+        FF_DEBUG("PawnIO %s() failed: %s", name, ffDebugWin32Error(GetLastError()));
+        return false;
+    }
+    return bytesReturned == sizeof(*value);
+}
+
+static double pawnIoReadCoreTemp(HANDLE handle, uint16_t tjmax) {
+    KAFFINITY newMask = 0b11;
+    NTSTATUS status = NtSetInformationThread(NtCurrentThread(), ThreadAffinityMask, &newMask, sizeof(newMask));
+    if (!NT_SUCCESS(status)) {
+        FF_DEBUG("Failed to set thread affinity mask: %s", ffDebugNtError(status));
+    }
+
+    // Changing the affinity mask does not migrate an already running thread immediately.
+    ffTimeSleep(0);
+
+    uint64_t value = 0;
+    const bool success = pawnIoExecute(handle, "ioctl_read_msr", MSR_IA32_THERM_STATUS, &value);
+
+    if (!success || !(value & (UINT64_C(1) << 31))) {
+        return FF_CPU_TEMP_UNSET;
+    }
+
+    const uint32_t dts = (uint32_t) ((value >> 16) & 0x7f);
+    if (dts >= 0x7f) {
+        return FF_CPU_TEMP_UNSET;
+    }
+
+    return (double) tjmax - dts;
+}
+
+static bool detectTemperatureByPawnIo(HANDLE handle, const FFCPUResult* cpu, double* result) {
+    if (!ffStrbufEqualS(&cpu->vendor, "GenuineIntel")) {
+        return false;
+    }
+
+    uint64_t target = 0, package = 0;
+    if (!pawnIoExecute(handle, "ioctl_read_msr", MSR_IA32_TEMPERATURE_TARGET, &target) ||
+        !pawnIoExecute(handle, "ioctl_read_msr", MSR_IA32_PACKAGE_THERM_STATUS, &package)) {
+        return false;
+    }
+
+    uint16_t tjmax = (uint16_t) ((target >> 16) & 0xff);
+    if (tjmax < 40 || tjmax > 125) {
+        tjmax = 100;
+    }
+
+    double temperature = pawnIoReadCoreTemp(handle, tjmax);
+    if (temperature == FF_CPU_TEMP_UNSET && package & (UINT64_C(1) << 31)) {
+        const uint32_t dts = (uint32_t) ((package >> 16) & 0x7f);
+        if (dts < 0x7f) {
+            temperature = (double) tjmax - dts;
+        }
+    }
+
+    if (temperature == FF_CPU_TEMP_UNSET) {
+        return false;
+    }
+
+    *result = temperature;
+    FF_DEBUG("PawnIO CPU temperature: %.1f C (tjmax %u, core 0)", temperature, tjmax);
+    return true;
+}
+
+// IA32_TURBO_RATIO_LIMIT[7:0] is the 1-core P-core turbo ratio. Intel uses a 100 MHz bus clock.
+static bool detectFrequencyMaxByPawnIo(HANDLE handle, FFCPUResult* cpu) {
+    uint64_t value = 0;
+    if (!pawnIoExecute(handle, "ioctl_read_msr", MSR_TURBO_RATIO_LIMIT, &value)) {
+        return false;
+    }
+
+    const uint32_t ratio = (uint32_t) (value & 0xff);
+    if (ratio < 4 || ratio > 128) {
+        return false;
+    }
+
+    cpu->frequencyMax = ratio * 100;
+    FF_DEBUG("PawnIO CPU max frequency: %u MHz (MSR 0x1AD ratio %u)", cpu->frequencyMax, ratio);
+    return true;
+}
+
+#endif
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery) {
     if (*phQuery != nullptr) {
@@ -343,7 +506,20 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu) {
         detectMaxSpeedBySmbios(cpu);
     }
 
-    if (options->temp) {
+    bool pawnIoTemperature = false;
+#ifdef __x86_64__
+    if (ffStrbufEqualS(&cpu->vendor, "GenuineIntel")) {
+        FF_AUTO_CLOSE_FD HANDLE hPawnIo = pawnIoOpenDevice();
+        if (hPawnIo != INVALID_HANDLE_VALUE && pawnIoLoadModule(hPawnIo)) {
+            detectFrequencyMaxByPawnIo(hPawnIo, cpu);
+            if (options->temp) {
+                pawnIoTemperature = detectTemperatureByPawnIo(hPawnIo, cpu, &cpu->temperature);
+            }
+        }
+    }
+#endif
+
+    if (options->temp && !pawnIoTemperature) {
         detectThermalTemp(options, &cpu->temperature);
     }
 

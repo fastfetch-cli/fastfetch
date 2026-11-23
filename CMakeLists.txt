@@ -2295,8 +2295,12 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/manifest.xml"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/common/windows/logo.ico"
     )
+    set_property(SOURCE src/3rdparty/pawnio/pawnio.rc APPEND PROPERTY OBJECT_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/3rdparty/pawnio/IntelMSR.bin"
+    )
     target_sources(fastfetch
         PRIVATE src/common/windows/version.rc
+        PRIVATE src/3rdparty/pawnio/pawnio.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
@@ -2334,6 +2338,7 @@ if (BUILD_FLASHFETCH)
     if(WIN32)
         target_sources(flashfetch
             PRIVATE src/common/windows/version.rc
+            PRIVATE src/3rdparty/pawnio/pawnio.rc
         )
     elseif(APPLE)
         # flashfetch embeds its own plist so that its CFBundleIdentifier matches the
