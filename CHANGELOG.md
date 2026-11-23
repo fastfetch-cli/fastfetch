@@ -6,14 +6,31 @@ Features:
     * Enable it with `"health": true`. The default output appends `Health <100 - percentage used>%` and any critical warnings.
     * New format args: `{health}`, `{percent-used}`, `{available-spare}` and `{critical-warning}`.
     * ATA disks report the SMART `failing` status as a critical warning (SAS and RAID disks stay unknown). On Windows and macOS, checking them may wake a sleeping HDD.
+* Added unprivileged detection of DMI physical memory slots on Linux using udev's DMI database (`/run/udev/data/+dmi:id`, systemd 248+). (PhysicalMemory, Linux)
+    * Falls back to reading SMBIOS directly when the udev DMI database is unavailable (requires root).
+* Added version detection and a `PowerShell Preview` display name for `pwsh-preview`. (Shell, Windows)
+* Added CPU temperature detection via PawnIO on Windows. (CPU, Windows)
+    * Previously CPU temperature was read from the `\_TZ.CPUZ` thermal zone via perflib, which can be unavailable or inaccurate on some systems. The new method reads Intel MSRs directly through the PawnIO driver.
+    * Requires an x86_64 Intel CPU, the PawnIO driver installed, and administrator privileges; otherwise fastfetch falls back to the thermal zone method. Maximum frequency detection is also improved when PawnIO is available.
+    * Disclaimer: installing an 3rd-party kernel driver is generally not recommended and may pose security risks. Use it at your own risk.
 
 Changes:
 * Improved PCI GPU name resolution by checking udev's hardware database and the NVIDIA driver's procfs before falling back to pci.ids. (GPU, Linux)
+* Redhat Virtio GPUs are now reported as integrated instead of discrete. (GPU, Linux)
 
 Bugfixes:
 * Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
 * Fixed CPU cache detection failing entirely when any CPU is offline. (#2736, CPUCache, Linux)
 * Fixed the scale factor of rotated monitors on Wayland, e.g. a 1920x1200 monitor rotated by 90 degrees at scale 1 being reported as `@ 1.59x`. (Display, Linux)
+* Fixed Linux DRM display detection reading connector information from the wrong sysfs path after the EDID path was appended, and appending the EDID display name to the connector name instead of replacing it. (Display, Linux)
+* Fixed the sysfs modes buffer not being NUL-terminated before parsing on Linux. (Display, Linux)
+* Fixed out-of-bounds reads when parsing malformed CTA-861 EDID extensions. (General)
+* Fixed the init system executable path being truncated on platforms where POSIX `basename()` modifies its argument. (InitSystem, Linux)
+* Fixed undefined behavior from passing negative `char` values to ctype functions. (General)
+
+Logos:
+* Updated the CuerdOS logo and colors (#2712)
+* Removed the Turkmen Linux (`Turkish`) logo
 
 # 2.71.0
 
