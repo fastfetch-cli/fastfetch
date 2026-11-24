@@ -129,13 +129,6 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-netbsd-amd64.yml
 
-  dragonfly-amd64:
-    needs: no-features-test
-    name: DragonFly-amd64
-    permissions:
-      contents: read
-    uses: ./.github/workflows/build-dragonfly-amd64.yml
-
   haiku-amd64:
     needs: no-features-test
     name: Haiku-amd64
@@ -200,7 +193,6 @@ jobs:
       - freebsd-amd64
       - openbsd-amd64
       - netbsd-amd64
-      - dragonfly-amd64
       - solaris-amd64
       - omnios-amd64
       - haiku-amd64

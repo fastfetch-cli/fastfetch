@@ -1,4 +1,8 @@
-# Unreleased
+# 2.72.0
+
+Changes:
+* DragonFly BSD support is deprecated and will be removed in a future release.
+    * DF BSD keeps introducing broken packages and breaks fastfetch CI, making it difficult to maintain reliable support. Considering its low usage and the maintenance burden, I have decided to deprecate it.
 
 Features:
 * Added glob and environment variable expansion to logo sources on Windows. `%VAR%`, `$VAR` and `${VAR}` are supported, and a glob matching several files picks one randomly. (#2718, Logo, Windows)
