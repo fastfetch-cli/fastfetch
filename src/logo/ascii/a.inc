@@ -921,10 +921,12 @@ static const FFlogo A[] = {
         .names = { "Aurora" },
         .lines = FASTFETCH_DATATEXT_LOGO_AURORA,
         .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_MAGENTA,
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_256 "67",
+            FF_COLOR_FG_256 "61",
+            FF_COLOR_FG_256 "97",
+            FF_COLOR_FG_256 "132",
+            FF_COLOR_FG_256 "167",
+            FF_COLOR_FG_256 "216",
         },
     },
     #endif
