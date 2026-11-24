@@ -31,6 +31,7 @@ Bugfixes:
 * Fixed out-of-bounds reads when parsing malformed CTA-861 EDID extensions. (General)
 * Fixed the init system executable path being truncated on platforms where POSIX `basename()` modifies its argument. (InitSystem, Linux)
 * Fixed undefined behavior from passing negative `char` values to ctype functions. (General)
+* Fixed a crash on macOS 26 when fastfetch is built with the macOS 27 SDK, where `pipe2` is weak-linked and NULL at runtime. (Global, macOS)
 
 Logos:
 * Updated the CuerdOS logo and colors (#2712)
