@@ -29,6 +29,7 @@ Bugfixes:
 * Fixed undefined behavior from passing negative `char` values to ctype functions. (General)
 
 Logos:
+* Added VentoOS (#2742)
 * Updated the CuerdOS logo and colors (#2712)
 * Removed the Turkmen Linux (`Turkish`) logo
 

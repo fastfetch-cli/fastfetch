@@ -75,6 +75,16 @@ static const FFlogo V[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_VENTOOS
+    // VentoOS
+    {
+        .names = { "VentoOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_VENTOOS,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_VINCENTOS
     // VincentOS
     {
