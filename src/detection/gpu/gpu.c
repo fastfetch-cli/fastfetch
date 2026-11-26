@@ -77,6 +77,14 @@ const char* ffGPUGetVendorString(unsigned vendorId) {
     }
 }
 
+static void normalizeBasicDisplayAdapter(FFlist* gpus) {
+    FF_LIST_FOR_EACH (FFGPUResult, gpu, *gpus) {
+        if (ffStrbufContainS(&gpu->name, "Microsoft Basic Display Adapter")) {
+            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_MICROSOFT);
+        }
+    }
+}
+
 static bool normalizeVendorName(FFGPUResult* gpu) {
     if (ffStrbufContainS(&gpu->name, "Apple")) {
         ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
@@ -249,6 +257,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         const char* error = ffDetectGPUImpl(options, result);
         if (!error && result->length > 0) {
             FF_DEBUG("PCI/native GPU detection succeeded with %u GPU(s)", result->length);
+            normalizeBasicDisplayAdapter(result);
             return nullptr;
         }
 
@@ -263,6 +272,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
             FF_DEBUG("Vulkan detection succeeded with %u GPU(s)", vulkan->gpus.length);
             ffListDestroy(result);
             ffListInitMove(result, &vulkan->gpus);
+            normalizeBasicDisplayAdapter(result);
 
 #ifdef __ANDROID__
             double ffGPUDetectTempFromTZ(void);
@@ -286,6 +296,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
             FF_DEBUG("OpenCL detection succeeded with %u GPU(s)", opencl->gpus.length);
             ffListDestroy(result);
             ffListInitMove(result, &opencl->gpus);
+            normalizeBasicDisplayAdapter(result);
             return nullptr;
         }
 
@@ -299,6 +310,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         const char* error = detectByEglext(result);
         if (!error && result->length > 0) {
             FF_DEBUG("EGL_EXT GPU detection succeeded with %u GPU(s)", result->length);
+            normalizeBasicDisplayAdapter(result);
             return nullptr;
         }
 
@@ -314,6 +326,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result) {
         const char* error = detectByOpenGL(result);
         if (error == nullptr) {
             FF_DEBUG("OpenGL fallback succeeded with %u GPU(s)", result->length);
+            normalizeBasicDisplayAdapter(result);
             return nullptr;
         }
 
