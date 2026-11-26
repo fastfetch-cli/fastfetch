@@ -294,7 +294,8 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError) {
         return false;
     }
 
-    if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN)) {
+    if (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN) ||
+        ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_SONICWIN)) {
         return detectWMThemeFromConfigFile("kwinrc", "theme =", "Breeze", themeOrError);
     }
 
