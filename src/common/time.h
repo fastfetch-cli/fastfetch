@@ -58,7 +58,8 @@ static inline bool ffTimeSleep(uint32_t msec) {
     interval.QuadPart = -(int64_t) msec * 10000; // Relative time in 100-nanosecond intervals
     return NT_SUCCESS(NtDelayExecution(TRUE, &interval));
 #else
-    return nanosleep(&(struct timespec) { msec / 1000, (long) (msec % 1000) * 1000000 }, nullptr) == 0;
+    struct timespec interval = { msec / 1000, (long) (msec % 1000) * 1000000 };
+    return nanosleep(&interval, nullptr) == 0;
 #endif
 }
 

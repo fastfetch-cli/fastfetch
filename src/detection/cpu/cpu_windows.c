@@ -101,7 +101,7 @@ static double pawnIoReadCoreTemp(HANDLE handle, uint16_t tjmax) {
     KAFFINITY newMask = 0b11;
     NTSTATUS status = NtSetInformationThread(NtCurrentThread(), ThreadAffinityMask, &newMask, sizeof(newMask));
     if (!NT_SUCCESS(status)) {
-        FF_DEBUG("Failed to set thread affinity mask: %s", ffDebugNtError(status));
+        FF_DEBUG("Failed to set thread affinity mask: %s", ffDebugNtStatus(status));
     }
 
     // Changing the affinity mask does not migrate an already running thread immediately.

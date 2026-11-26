@@ -43,13 +43,6 @@ jobs:
       contents: read
     uses: ./.github/workflows/build-linux-armv7l.yml
 
-  linux-loong64:
-    needs: no-features-test
-    name: Linux-loong64
-    permissions:
-      contents: read
-    uses: ./.github/workflows/build-linux-loong64.yml
-
   linux-vms:
     needs: no-features-test
     name: Linux-${{ matrix.arch }}
@@ -185,7 +178,6 @@ jobs:
       - linux-hosts
       - linux-i686
       - linux-armv7l
-      - linux-loong64
       - linux-vms
       - musl-amd64
       - android
