@@ -383,6 +383,14 @@ static void detectOS(FFOSResult* os) {
 
     parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
 
+#if defined(__FreeBSD__)
+    // Ports may set TARGET_DIR_ETC to /usr/local/etc, while FreeBSD's base
+    // system provides /etc/os-release. Keep the configured path's precedence.
+    if (os->id.length == 0 && os->name.length == 0 && os->prettyName.length == 0) {
+        parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/etc/os-release", os);
+    }
+#endif
+
     if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0) {
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     }
