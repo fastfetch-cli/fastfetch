@@ -36,6 +36,9 @@ Logos:
 * Updated the CuerdOS logo and colors (#2712)
 * Removed the Turkmen Linux (`Turkish`) logo
 
+Logos:
+* Added SunshineOS (#2746)
+
 # 2.71.0
 
 Features:
