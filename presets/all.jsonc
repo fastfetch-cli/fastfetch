@@ -104,7 +104,8 @@
         "diskio",
         {
             "type": "physicaldisk",
-            "temp": true
+            "temp": true,
+            "health": true
         },
         {
           "type": "weather",

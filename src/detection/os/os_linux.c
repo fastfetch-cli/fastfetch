@@ -403,7 +403,6 @@ static void detectOS(FFOSResult* os) {
 void ffDetectOSImpl(FFOSResult* os) {
     detectOS(os);
 
-#if __linux__ || __GNU__
     if (ffStrbufEqualS(&os->id, "ubuntu")) {
         if (!getUbuntuFlavour(os)) {
             if (!ffStrbufEndsWithS(&os->prettyName, " (development branch)")) {
@@ -426,5 +425,4 @@ void ffDetectOSImpl(FFOSResult* os) {
     } else if (ffStrbufEqualS(&os->id, "astra")) {
         detectAstraVersion(os);
     }
-#endif
 }

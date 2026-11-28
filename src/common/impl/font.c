@@ -91,7 +91,7 @@ void ffFontInitQt(FFfont* font, const char* data) {
         goto exit;
     }
     data++;
-    if (isalpha(*data)) {
+    if (isalpha((unsigned char) *data)) {
         do {
             FFstrbuf* style = FF_LIST_ADD(FFstrbuf, font->styles);
             ffStrbufInit(style);

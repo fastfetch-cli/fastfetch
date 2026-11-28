@@ -243,7 +243,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module) {
         else if (ffStrEqualsIgnCase(flag, #name)) {             \
             options->disabled |= FF_PACKAGES_FLAG_##name##_BIT; \
         }
-                    switch (toupper(flag[0])) {
+                    switch (toupper((unsigned char) flag[0])) {
                         case 'A':
                             if (false)
                                 ;

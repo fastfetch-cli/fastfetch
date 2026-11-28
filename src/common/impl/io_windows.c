@@ -3,6 +3,7 @@
 #include "common/io.h"
 #include "common/strutil.h"
 #include "common/time.h"
+#include "common/windows/glob.h"
 #include "common/windows/nt.h"
 #include "common/windows/unicode.h"
 
@@ -284,28 +285,14 @@ HANDLE openat(HANDLE dfd, const char* fileName, int oflag) {
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out) {
-    if (in[0] == '~') {
-        if ((in[1] == '/' || in[1] == '\\' || in[1] == '\0') && !ffStrContainsC(in, '%')) {
-            ffStrbufSet(out, &instance.state.platform.homeDir);
-            ffStrbufAppendS(out, in + 1);
-            return true;
-        }
+    if (in[0] == '~' && (in[1] == '/' || in[1] == '\\' || in[1] == '\0')) {
+        FF_STRBUF_AUTO_DESTROY expanded = ffStrbufCreate();
+        ffStrbufSet(&expanded, &instance.state.platform.homeDir);
+        ffStrbufAppendS(&expanded, in + 1);
+        return ffGlobWindows(expanded.chars, out);
     }
 
-    wchar_t pathInW[MAX_PATH], pathOutW[MAX_PATH];
-    ULONG len = (ULONG) strlen(in);
-    if (!NT_SUCCESS(RtlUTF8ToUnicodeN(pathInW, (ULONG) sizeof(pathInW), &len, in, len))) {
-        return false;
-    }
-    len /= sizeof(wchar_t); // convert from bytes to characters
-
-    SIZE_T outLen; // in characters, including null terminator
-    if (!NT_SUCCESS(RtlExpandEnvironmentStrings(nullptr, pathInW, len, pathOutW, ARRAY_SIZE(pathOutW), &outLen))) {
-        return false;
-    }
-
-    ffStrbufSetNWS(out, (uint32_t) outLen - 1, pathOutW);
-    return true;
+    return ffGlobWindows(in, out);
 }
 
 bool ffSuppressIO(bool suppress) {

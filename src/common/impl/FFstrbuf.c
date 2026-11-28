@@ -323,7 +323,7 @@ void ffStrbufTrimLeftSpace(FFstrbuf* strbuf) {
     }
 
     uint32_t index = 0;
-    while (index < strbuf->length && isspace(strbuf->chars[index])) {
+    while (index < strbuf->length && isspace((unsigned char)strbuf->chars[index])) {
         ++index;
     }
 
@@ -609,13 +609,13 @@ void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision, bool
 
 void ffStrbufUpperCase(FFstrbuf* strbuf) {
     for (uint32_t i = 0; i < strbuf->length; ++i) {
-        strbuf->chars[i] = (char) toupper(strbuf->chars[i]);
+        strbuf->chars[i] = (char) toupper((unsigned char) strbuf->chars[i]);
     }
 }
 
 void ffStrbufLowerCase(FFstrbuf* strbuf) {
     for (uint32_t i = 0; i < strbuf->length; ++i) {
-        strbuf->chars[i] = (char) tolower(strbuf->chars[i]);
+        strbuf->chars[i] = (char) tolower((unsigned char) strbuf->chars[i]);
     }
 }
 

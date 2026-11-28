@@ -33,7 +33,7 @@ const char* ffDetectChassis(FFChassisResult* result) {
             }
         } else if (ffReadFileBuffer("/sys/firmware/devicetree/base/chassis-type", &result->type) && result->type.length > 0) {
             ffStrbufTrimRight(&result->type, '\0');
-            result->type.chars[0] = (char) toupper(result->type.chars[0]);
+            result->type.chars[0] = (char) toupper((unsigned char) result->type.chars[0]);
         }
     }
     return nullptr;

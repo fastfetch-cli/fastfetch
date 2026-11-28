@@ -63,6 +63,8 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid) {
 static void setShellInfoDetails(FFShellResult* result) {
     if (ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh")) {
         ffStrbufSetS(&result->prettyName, "PowerShell");
+    } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh-preview")) {
+        ffStrbufSetS(&result->prettyName, "PowerShell Preview");
     } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "powershell")) {
         ffStrbufSetS(&result->prettyName, "Windows PowerShell");
     } else if (ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise")) {

@@ -465,7 +465,7 @@ static void detectAndroid(FFCPUResult* cpu) {
     } else if (ffStrbufIgnCaseEqualS(&cpu->vendor, "MediaTek")) { // sometimes "Mediatek"
         ffStrbufSetStatic(&cpu->vendor, "MediaTek");
     } else if (cpu->vendor.length > 0) {
-        cpu->vendor.chars[0] = (char) toupper(cpu->vendor.chars[0]);
+        cpu->vendor.chars[0] = (char) toupper((unsigned char) cpu->vendor.chars[0]);
     }
 
     if (ffStrbufEqualS(&cpu->vendor, "Qualcomm") && ffStrbufStartsWithS(&cpu->name, "SM")) {
@@ -1032,18 +1032,18 @@ static const char* detectPhysicalCores(FFCPUResult* cpu) {
         // Raspberry Pi
         ffStrbufSetStatic(&cpu->vendor, "Broadcom");
         for (const char* p = model; *p; ++p) {
-            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+            ffStrbufAppendC(&cpu->name, (char) toupper((unsigned char) *p));
         }
     } else if (ffStrEquals(vendor, "thead")) {
         // Lichee Pi?
         ffStrbufSetStatic(&cpu->vendor, "T-Head");
         for (const char* p = model; *p; ++p) {
-            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+            ffStrbufAppendC(&cpu->name, (char) toupper((unsigned char) *p));
         }
     } else {
         ffStrbufSetS(&cpu->name, model);
         ffStrbufSetS(&cpu->vendor, vendor);
-        cpu->vendor.chars[0] = (char) toupper(vendor[0]);
+        cpu->vendor.chars[0] = (char) toupper((unsigned char) vendor[0]);
     }
 }
 

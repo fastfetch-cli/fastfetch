@@ -23,6 +23,31 @@ jobs:
       - name: download artifacts
         if: inputs.ffversion != steps.get_version_release.outputs.release
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          # Only release assets; benchmark artifacts are uploaded by a separate job.
+          pattern: fastfetch-*
+
+      - name: generate checksums and release notes
+        if: inputs.ffversion != steps.get_version_release.outputs.release
+        run: |
+          # One checksum line per release asset, using the asset's file name.
+          # Sort for a stable, reproducible file.
+          for dir in fastfetch-*/; do
+            (cd "$dir" && sha256sum -- *)
+          done | sort -k2 > SHA256SUMS.txt
+
+          for dir in fastfetch-*/; do
+            (cd "$dir" && sha512sum -- *)
+          done | sort -k2 > SHA512SUMS.txt
+
+          cat SHA256SUMS.txt
+          cat SHA512SUMS.txt
+
+          cat > fastfetch-release-notes.md <<EOF
+          Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ inputs.ffversion }}/CHANGELOG.md) for details.
+
+          SHA256 and SHA512 checksums for all release assets are available in \`SHA256SUMS.txt\` and \`SHA512SUMS.txt\`.
+          EOF
 
       - name: create release
         if: inputs.ffversion != steps.get_version_release.outputs.release
@@ -31,31 +56,8 @@ jobs:
           tag: ${{ inputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-*/fastfetch-*
-          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ inputs.ffversion }}/CHANGELOG.md) for details."
-
-      - name: download source tarballs
-        if: inputs.ffversion != steps.get_version_release.outputs.release
-        run: |
-          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ inputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
-          ls fastfetch-*/*
-
-      - name: generate release notes
-        if: inputs.ffversion != steps.get_version_release.outputs.release
-        run: |
-          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ inputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
-          echo -e "\n---\n\n<details><summary>SHA256SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
-          sha256sum fastfetch-*/* >> fastfetch-release-notes.md
-          echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
-          echo -e "\n<details><summary>SHA512SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
-          sha512sum fastfetch-*/* >> fastfetch-release-notes.md
-          echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
-
-      - name: update release body
-        if: inputs.ffversion != steps.get_version_release.outputs.release
-        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
-        with:
-          tag: ${{ inputs.ffversion }}
-          commit: ${{ github.sha }}
+          artifacts: fastfetch-*/*,SHA256SUMS.txt,SHA512SUMS.txt
           bodyFile: fastfetch-release-notes.md
-          allowUpdates: true
+          # Create a draft, upload all assets, then publish. Required for
+          # immutable releases, which automatically get a release attestation.
+          immutableCreate: true

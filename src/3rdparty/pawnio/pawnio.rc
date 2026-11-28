@@ -1,0 +1,10 @@
+#ifdef RC_INVOKED
+
+#include <winuser.h>
+#include "pawnio_resource.h"
+
+// Signed PawnIO module from namazso/PawnIO.Modules 0.2.12 (LGPL-2.1-or-later).
+// Source and full license text: src/3rdparty/pawnio/
+FF_PAWNIO_INTEL_MSR_RC_ID RCDATA "IntelMSR.bin"
+
+#endif

@@ -66,7 +66,10 @@ typedef struct _PROCESS_DEVICEMAP_INFORMATION_EX {
 } PROCESS_DEVICEMAP_INFORMATION_EX, *PPROCESS_DEVICEMAP_INFORMATION_EX;
 
 #ifndef NtCurrentProcess
-    #define NtCurrentProcess() ((HANDLE) (LONG_PTR) - 1)
+    #define NtCurrentProcess() ((HANDLE) (LONG_PTR) -1)
+#endif
+#ifndef NtCurrentThread
+    #define NtCurrentThread() ((HANDLE) (LONG_PTR) -2)
 #endif
 
 typedef struct _CURDIR {
@@ -777,6 +780,9 @@ NTSYSAPI NTSTATUS NTAPI RtlUTF8ToUnicodeN(
     _Out_opt_ PULONG UnicodeStringActualByteCount,
     _In_reads_bytes_(UTF8StringByteCount) PCCH UTF8StringSource,
     _In_ ULONG UTF8StringByteCount);
+
+NTSYSAPI WCHAR NTAPI RtlUpcaseUnicodeChar(
+    _In_ WCHAR SourceCharacter);
 
 #define RTL_MAX_DRIVE_LETTERS 32
 typedef struct _RTL_DRIVE_LETTER_CURDIR {

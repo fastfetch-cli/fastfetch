@@ -2,6 +2,29 @@
 
 #include "common/windows/nt.h"
 
+FFWStrbuf ffWStrbufCreateUtf8(const char* in) {
+    FFWStrbuf strbuf = { .chars = nullptr, .length = 0, .capacity = 0 };
+
+    ULONG inputLength = (ULONG) strlen(in) + 1;
+    ULONG size = 0;
+    (void) RtlUTF8ToUnicodeN(nullptr, 0, &size, in, inputLength);
+    if (size == 0) {
+        return strbuf;
+    }
+
+    wchar_t* result = (wchar_t*) malloc(size);
+    ULONG written = 0;
+    if (!result || !NT_SUCCESS(RtlUTF8ToUnicodeN(result, size, &written, in, inputLength))) {
+        free(result);
+        return strbuf;
+    }
+
+    strbuf.chars = result;
+    strbuf.capacity = (uint32_t) (size / sizeof(wchar_t));
+    strbuf.length = (uint32_t) wcslen(result);
+    return strbuf;
+}
+
 void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source) {
     if (!length) {
         ffStrbufClear(result);

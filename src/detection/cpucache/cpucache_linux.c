@@ -133,9 +133,10 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result) {
         }
 
         ffStrbufAppendS(&path, pathCpuEntry->d_name);
+        // Skip a CPU whose cache can't be read, e.g. an offline one: the kernel removes its `cache/`
         const char* error = parseCpuCache(&path, result, &buffer, &added);
         if (error) {
-            return error;
+            FF_DEBUG("Skipping \"%s\": %s", pathCpuEntry->d_name, error);
         }
         ffStrbufSubstrBefore(&path, baseLen);
     }

@@ -567,7 +567,7 @@ static inline bool ffStrbufInitJsonVal(FFstrbuf* strbuf, yyjson_val* jsonVal) {
 
 // Not `pure`: the caller-supplied `fn` may have side effects
 [[gnu::nonnull(1, 2), nodiscard]] static inline bool ffStrbufEndsWithFn(const FFstrbuf* strbuf, int (*const fn)(int)) {
-    return strbuf->length == 0 ? false : fn(strbuf->chars[strbuf->length - 1]);
+    return strbuf->length == 0 ? false : fn((unsigned char)strbuf->chars[strbuf->length - 1]);
 }
 
 [[gnu::nonnull(1, 2), gnu::pure, nodiscard]] static inline bool ffStrbufEndsWith(const FFstrbuf* strbuf, const FFstrbuf* end) {
