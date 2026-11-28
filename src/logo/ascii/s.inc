@@ -333,6 +333,17 @@ static const FFlogo S[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SOPLOS
+    // Soplos
+    {
+        .names = { "Soplos", "Soplos Linux", "soplos" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SOPLOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_SOURCE_MAGE
     // Source Mage
     {
@@ -523,6 +534,19 @@ static const FFlogo S[] = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
         },
+    },
+    #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_SATELLAOS
+    // SatellaOS
+    {
+        .names = { "satellaos", "SatellaOS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_SATELLAOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     #endif
     // LAST
