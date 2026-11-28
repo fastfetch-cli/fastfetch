@@ -43,6 +43,7 @@ typedef enum FFPackagesFlags: uint64_t {
     FF_PACKAGES_FLAG_INSTALLRELEASE_BIT = UINT64_C(1) << 36U,
     FF_PACKAGES_FLAG_CRUX_BIT = UINT64_C(1) << 37U,
     FF_PACKAGES_FLAG_RUM_BIT = UINT64_C(1) << 38U,
+    FF_PACKAGES_FLAG_EMERALD_BIT = UINT64_C(1) << 39U,
 } FFPackagesFlags;
 static_assert(sizeof(FFPackagesFlags) == sizeof(uint64_t), "");
 
