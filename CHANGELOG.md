@@ -23,6 +23,7 @@ Changes:
 * Redhat Virtio GPUs are now reported as integrated instead of discrete. (GPU, Linux)
 
 Bugfixes:
+* Fixed the interactive config generator saving the small logo as a logo source. (#2758, Logo)
 * Fixed libc version detection on FreeBSD without binutils installed, and on DragonFly BSD. (Libc, FreeBSD / DragonFly)
 * Fixed CPU cache detection failing entirely when any CPU is offline. (#2736, CPUCache, Linux)
 * Fixed the scale factor of rotated monitors on Wayland, e.g. a 1920x1200 monitor rotated by 90 degrees at scale 1 being reported as `@ 1.59x`. (Display, Linux)
