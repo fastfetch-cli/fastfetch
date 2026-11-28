@@ -34,6 +34,7 @@ Bugfixes:
 * Fixed OS detection failed when `TARGET_DIR_ETC` is set on FreeBSD. (OS, FreeBSD)
 
 Logos:
+* Added VentoOS (#2742)
 * Updated the CuerdOS logo and colors (#2712)
 * Removed the Turkmen Linux (`Turkish`) logo
 
