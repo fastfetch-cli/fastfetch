@@ -101,6 +101,18 @@ static const FFlogo K[] = {
         },
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_KEDI
+    // Kedi
+    {
+        .names = { "Kedi" },
+        .lines = FASTFETCH_DATATEXT_LOGO_KEDI,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    #endif
     #ifdef FASTFETCH_DATATEXT_LOGO_KIBAOS
     // KibaOS
     {
