@@ -5,6 +5,7 @@ Changes:
     * DF BSD keeps introducing broken packages and breaks fastfetch CI, making it difficult to maintain reliable support. Considering its low usage and the maintenance burden, I have decided to deprecate it.
 
 Features:
+* Added detection of Flatpkg system and user installations under the existing Flatpak counters. (#2720, Packages, FreeBSD)
 * Added glob and environment variable expansion to logo sources on Windows. `%VAR%`, `$VAR` and `${VAR}` are supported, and a glob matching several files picks one randomly. (#2718, Logo, Windows)
 * Added opt-in drive health detection for NVMe disks, via udisks2 on Linux (no root required), NVMe SMART on macOS and the NVMe health log on Windows. (#2726, PhysicalDisk, Linux / macOS / Windows)
     * Enable it with `"health": true`. The default output appends `Health <100 - percentage used>%` and any critical warnings.
