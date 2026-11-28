@@ -16,6 +16,20 @@ static const FFlogo M[] = {
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     #endif
+    #ifdef FASTFETCH_DATATEXT_LOGO_MACROMAG
+    // MacroMag OS
+    {
+        .names = { "macromag", "MacroMag", "MacroMag OS" },
+        .lines = FASTFETCH_DATATEXT_LOGO_MACROMAG,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    #endif
+
     #ifdef FASTFETCH_DATATEXT_LOGO_MACOS
     // MacOS
     {
